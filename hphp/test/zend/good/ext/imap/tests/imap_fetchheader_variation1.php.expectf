@@ -2,109 +2,101 @@
 
 -- Iteration 1 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 2 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 3 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 4 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, integer given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 5 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 6 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 7 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 8 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 9 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, double given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 10 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 11 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 12 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 13 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 14 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 15 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 16 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 17 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 18 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 19 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 20 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, string given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 21 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 22 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 23 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 24 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line %d
 
 -- Iteration 25 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, object given in %s/imap_fetchheader_variation1.php on line 96
-
--- Iteration 26 --
-
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line 96
-
--- Iteration 27 --
-
-Warning: imap_fetchheader() expects parameter 1 to be resource, null given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, object given in %s/imap_fetchheader_variation1.php on line %d
 ===DONE===

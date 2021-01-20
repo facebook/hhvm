@@ -25,9 +25,6 @@ function entrypoint_imagecolorallocate_variation4(): void {
 
   $fp = tmpfile();
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   // heredoc string
   $heredoc = <<<EOT
@@ -78,11 +75,7 @@ EOT;
         'instance of classWithToString' => new classWithToString(),
         'instance of classWithoutToString' => new classWithoutToString(),
 
-        // undefined data
-        'undefined var' => @$undefined_var,
 
-        // unset data
-        'unset var' => @$unset_var,
 
         //resource 
         "file resource" => $fp

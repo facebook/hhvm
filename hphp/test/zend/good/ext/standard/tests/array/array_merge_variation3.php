@@ -22,9 +22,6 @@ echo "*** Testing array_merge() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $arr = varray [1, 2];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -89,18 +86,8 @@ $inputs = darray[
        new classA(),
        ],
 
-       // undefined data
-/*9*/ 'undefined' => varray[
-       @$undefined_var,
-       ],
-
-       // unset data
-/*10*/ 'unset' => varray[
-       @$unset_var,
-       ],
-
        // resource variable
-/*11*/ 'resource' => varray[
+/*9*/ 'resource' => varray[
        $fp
        ],
 ];

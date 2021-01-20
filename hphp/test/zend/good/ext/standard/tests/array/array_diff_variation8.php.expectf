@@ -119,12 +119,10 @@ darray(3) {
   ["c"]=>
   string(1) "3"
 }
-darray(5) {
+darray(4) {
   [11]=>
   object(classA) (0) {
   }
-  ["unset"]=>
-  NULL
   ["resource"]=>
   resource(%d) of type (stream)
   [12]=>

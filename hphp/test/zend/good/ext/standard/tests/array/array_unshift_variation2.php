@@ -29,9 +29,6 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // different types of values to be passed to $var argument
 $vars = varray[
@@ -78,14 +75,8 @@ $vars = varray[
        // object data
 /*26*/ new classA(),
 
-       // undefined data
-       @$undefined_var,
-
-       // unset data
-       @$unset_var,
-
        // resource variable
-/*29*/ $fp
+/*27*/ $fp
 ];
 
 // loop through each element of $vars to check the functionality of array_unshift()

@@ -24,8 +24,6 @@ function always_false($input)
 echo "*** Testing array_filter() : usage variations - different false elements in 'input' ***\n";
 
 // unset variable
-$unset_var = 10;
-unset($unset_var);
 
 // empty heredoc string
 $empty_heredoc =<<<EOT
@@ -47,8 +45,6 @@ $input = varray[
   !1,
   1==2,
   $empty_heredoc,
-  @$unset_var,
-  @$undefined_var,
 ];
 
 // With default callback function

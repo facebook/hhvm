@@ -198,43 +198,7 @@ darray(3) {
   }
 }
 
--- Iteration 9: undefined data --
-darray(3) {
-  [0]=>
-  NULL
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-darray(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  NULL
-}
-
--- Iteration 10: unset data --
-darray(3) {
-  [0]=>
-  NULL
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-darray(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  NULL
-}
-
--- Iteration 11: resource data --
+-- Iteration 9: resource data --
 darray(3) {
   [0]=>
   resource(4) of type (stream)

@@ -19,9 +19,6 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : assoc. array with diff. values to \$input argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -46,8 +43,8 @@ $inputs = varray [
        darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'],
        darray[1 => "hello", "heredoc" => $heredoc, 2 => $heredoc],
 
-       // array with object, unset variable and resource variable
-/*8*/ darray[11 => new classA(), "unset" => @$unset_var, "resource" => $fp, 12 => new classA(), 13 => $fp],
+       // array with object and resource variable
+/*8*/ darray[11 => new classA(), "resource" => $fp, 12 => new classA(), 13 => $fp],
 ];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()

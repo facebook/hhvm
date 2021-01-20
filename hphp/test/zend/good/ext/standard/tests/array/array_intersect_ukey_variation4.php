@@ -32,9 +32,6 @@ $array1 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
 $array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
 $array4 = darray['green' => 5, 'cyan'   => 8];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, "r");
@@ -84,11 +81,7 @@ $inputs = darray[
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
 
-      // undefined data
-      'undefined var' => @$undefined_var,
 
-      // unset data
-      'unset var' => @$unset_var,
 
       // resource data
       'resource var' => $fp,

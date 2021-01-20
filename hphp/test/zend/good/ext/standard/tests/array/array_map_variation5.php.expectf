@@ -70,17 +70,15 @@ darray(2) {
   string(11) "Hello world"
 }
 -- Iteration 10 --
-darray(3) {
+darray(2) {
   [11]=>
   object(classA) (0) {
   }
-  ["unset"]=>
-  NULL
   ["resource"]=>
   resource(4) of type (stream)
 }
 -- Iteration 11 --
-darray(8) {
+darray(7) {
   [1]=>
   string(5) "hello"
   [2]=>
@@ -94,8 +92,6 @@ darray(8) {
   int(133)
   ["float"]=>
   float(444.432)
-  ["unset"]=>
-  NULL
   ["heredoc"]=>
   string(11) "Hello world"
 }

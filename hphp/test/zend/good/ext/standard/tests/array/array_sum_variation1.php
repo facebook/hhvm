@@ -19,9 +19,6 @@ class MyClass
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : unexpected values for 'input' ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // different scalar/non scalar values for 'input' argument
 $input_values = varray[
@@ -63,11 +60,7 @@ $input_values = varray[
          // resource data
 /*21*/   $fp = fopen(__FILE__,'r'),
 
-         // undefined data
-/*22*/   @$undefined_var,
 
-         // unset data
-/*23*/   @$unset_var,
 ];
 
 // loop through each element of the array for input

@@ -55,17 +55,7 @@ object(classA) (0) {
 varray(0) {
 }
 
--- Iteration 9: undefined data --
-NULL
-varray(0) {
-}
-
--- Iteration 10: unset data --
-NULL
-varray(0) {
-}
-
--- Iteration 11: resource data --
+-- Iteration 9: resource data --
 resource(4) of type (stream)
 varray(0) {
 }

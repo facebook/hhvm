@@ -14,9 +14,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing ksort() : usage variations ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // resource variable
 $fp = fopen(__FILE__, "r");

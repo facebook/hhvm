@@ -30,9 +30,6 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // array of unexpected values to be passed to $array argument
 $arrays = varray[
@@ -72,14 +69,10 @@ $arrays = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-       @$undefined_var,
 
-       // unset data
-       @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $arrays to test the functionality of array_unshift()

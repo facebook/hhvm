@@ -76,16 +76,4 @@ darray(1) {
   object(classA) (0) {
   }
 }
-
--- Iteration 9 --
-darray(1) {
-  [0]=>
-  NULL
-}
-
--- Iteration 10 --
-darray(1) {
-  [0]=>
-  NULL
-}
 Done

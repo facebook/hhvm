@@ -18,8 +18,6 @@ $bool = false;
 $float = 2.4;
 $array = varray["one"];
 $nullVal = null;
-$unset_var = 10;
-unset ($unset_var);
 
 $obj = new classA();
 
@@ -37,9 +35,6 @@ var_dump( array_fill_keys($array, $bool) );
 
 echo "\n-- Testing array_fill_keys() function with resource --\n";
 var_dump( array_fill_keys($array, $fp) );
-
-echo "\n-- Testing array_fill_keys() function with unset var --\n";
-var_dump( array_fill_keys($array, $unset_var) );
 
 fclose($fp);
 echo "Done";

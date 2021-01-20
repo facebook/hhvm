@@ -21,9 +21,6 @@ echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = varray[1, 2, 3];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -86,17 +83,7 @@ $inputs = darray[
        // object data
 /*8*/
 'object' => varray[
-      new classA()],
-
-       // undefined data
-/*9*/
-'undefined' => varray[
-       @$undefined_var],
-
-       // unset data
-/*10*/
-'unset' => varray[
-      @$unset_var],
+      new classA()]
 ];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc

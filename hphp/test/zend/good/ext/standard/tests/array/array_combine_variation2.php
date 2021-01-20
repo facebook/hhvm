@@ -24,9 +24,6 @@ echo "*** Testing array_combine() : Passing non-array values to \$values argumen
 // Initialize $keys array
 $keys = varray[1, 2];
 
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -74,14 +71,8 @@ $values_passed = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
-
-       // unset data
-/*23*/ @$unset_var,
-
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element within $values_passed to check the behavior of array_combine()

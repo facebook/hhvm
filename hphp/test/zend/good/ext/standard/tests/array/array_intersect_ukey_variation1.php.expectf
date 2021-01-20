@@ -2,209 +2,193 @@
 
 --int 0--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --int 1--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --int 12345--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --int -12345--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --float 10.5--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --float -10.5--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --float .5--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --lowercase null--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --lowercase true--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --empty string DQ--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --string DQ--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --string SQ--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --heredoc--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
-NULL
-
---undefined var--
-
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
-NULL
-
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
-NULL
-
---unset var--
-
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
-NULL
-
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
 --resource var--
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 100
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 
-Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line 101
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_intersect_ukey_variation1.php on line %d
 NULL
 ===DONE===

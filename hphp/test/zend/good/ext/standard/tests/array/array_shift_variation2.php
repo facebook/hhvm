@@ -19,9 +19,6 @@ class classA
 echo "*** Testing array_shift() : usage variations ***\n";
 
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -86,18 +83,8 @@ $inputs = darray[
        new classA(),
        ],
 
-       // undefined data
-/*9*/ 'undefined' => varray[
-       @$undefined_var,
-       ],
-
-       // unset data
-/*10*/ 'unset' => varray[
-       @$unset_var,
-       ],
-
        // resource variable
-/*11*/ 'resource' => varray[
+/*9*/ 'resource' => varray[
        $fp
        ],
 ];

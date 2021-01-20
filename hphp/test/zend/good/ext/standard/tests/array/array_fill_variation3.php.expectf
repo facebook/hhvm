@@ -21,14 +21,4 @@ varray(2) {
     int(10)
   }
 }
--- Iteration 4 --
-varray(2) {
-  NULL
-  NULL
-}
--- Iteration 5 --
-varray(2) {
-  NULL
-  NULL
-}
 Done

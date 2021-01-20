@@ -71,17 +71,15 @@ darray(2) {
   string(11) "Hello world"
 }
 -- Iteration 10 --
-darray(3) {
+darray(2) {
   ["Class A object"]=>
   object(classA) (0) {
   }
-  [""]=>
-  NULL
   ["Resource id #%d"]=>
   resource(%d) of type (stream)
 }
 -- Iteration 11 --
-darray(8) {
+darray(7) {
   ["hello"]=>
   string(5) "hello"
   ["Class A object"]=>
@@ -95,8 +93,6 @@ darray(8) {
   int(133)
   ["444.432"]=>
   float(444.432)
-  [""]=>
-  NULL
   ["Hello world"]=>
   string(11) "Hello world"
 }

@@ -15,10 +15,6 @@ echo "*** Testing array_diff() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $array = varray[1, 2];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //get heredoc
 $heredoc = <<<END
 This is a heredoc
@@ -77,23 +73,13 @@ $values = darray[
 "binary" => varray[
        // binary data
        b"binary",
-       (string)"binary"],
-
-/*9*/
-"undefined" => varray[
-      // undefined data
-      @$undefined_var],
-
-/*10*/
-"unset" => varray[
-      // unset data
-      @$unset_var]
+       (string)"binary"]
 ];
 
 // loop through each element of the array for arr1
 $iterator = 1;
 foreach($values as $value) {
-      echo "\n Iteration: $iterator \n";
+      echo "\n Iteration: $iterator\n";
       var_dump( array_diff($value, $array) );
       $iterator++;
 };

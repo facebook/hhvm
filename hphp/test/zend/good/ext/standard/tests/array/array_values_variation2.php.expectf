@@ -54,17 +54,7 @@ varray(1) {
   }
 }
 
--- Iteration 9: undefined data --
-varray(1) {
-  NULL
-}
-
--- Iteration 10: unset data --
-varray(1) {
-  NULL
-}
-
--- Iteration 11: resource data --
+-- Iteration 9: resource data --
 varray(1) {
   resource(4) of type (stream)
 }

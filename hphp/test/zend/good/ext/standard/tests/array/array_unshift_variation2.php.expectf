@@ -837,68 +837,6 @@ darray(7) {
 int(5)
 darray(5) {
   [0]=>
-  NULL
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [1]=>
-  int(1)
-  [2]=>
-  float(2.222)
-}
-int(7)
-darray(7) {
-  [0]=>
-  NULL
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [3]=>
-  int(1)
-  [4]=>
-  float(2.222)
-}
--- Iteration 28 --
-int(5)
-darray(5) {
-  [0]=>
-  NULL
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [1]=>
-  int(1)
-  [2]=>
-  float(2.222)
-}
-int(7)
-darray(7) {
-  [0]=>
-  NULL
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  ["f"]=>
-  string(5) "first"
-  ["s"]=>
-  string(6) "second"
-  [3]=>
-  int(1)
-  [4]=>
-  float(2.222)
-}
--- Iteration 29 --
-int(5)
-darray(5) {
-  [0]=>
   resource(4) of type (stream)
   ["f"]=>
   string(5) "first"

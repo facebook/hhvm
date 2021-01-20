@@ -24,10 +24,6 @@ echo "*** Testing array_pad() : possible values for \$pad_value argument ***\n";
 $input = varray[1, 2];
 $pad_size = 4;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -79,20 +75,14 @@ $pad_values = varray[
        $heredoc,
 
        // strings with different white spaces
-/*26*/ "\v\fHello\t world!! \rstring\n",
-       '\v\fHello\t world!! \rstring\n',
+/*26*/ "\v\fHello\t world!!\rstring\n",
+       '\v\fHello\t world!!\rstring\n',
 
        // object data
 /*28*/ new classA(),
 
-       // undefined data
-/*29*/ @$undefined_var,
-
-       // unset data
-/*30*/ @$unset_var,
-
        // resource variable
-/*31*/ $fp,
+/*29*/ $fp,
 ];
 
 // loop through each element of $pad_values to check the behavior of array_pad()

@@ -24,9 +24,6 @@ function main(): void {
   // Initialise function arguments
   $num_req = 10;
 
-  //get an unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   //get a resource variable
   $fp = fopen(__FILE__, "r");
@@ -70,11 +67,7 @@ function main(): void {
           // resource data
   /*21*/  $fp,
 
-          // undefined data
-  /*22*/  @$undefined_var,
 
-          // unset data
-  /*23*/  @$unset_var,
   ];
 
   /* loop through each element of the array to test array_rand() function

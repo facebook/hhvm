@@ -380,18 +380,18 @@ varray(4) {
 varray(4) {
   int(1)
   int(2)
-  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
+  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
 string
 "
-  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
+  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
 string
 "
 }
 varray(4) {
-  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
+  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
 string
 "
-  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
+  string(24) "%r\x0b\x0c%rHello%r\x09%r world!!
 string
 "
   int(1)
@@ -401,12 +401,12 @@ string
 varray(4) {
   int(1)
   int(2)
-  string(30) "\v\fHello\t world!! \rstring\n"
-  string(30) "\v\fHello\t world!! \rstring\n"
+  string(29) "\v\fHello\t world!!\rstring\n"
+  string(29) "\v\fHello\t world!!\rstring\n"
 }
 varray(4) {
-  string(30) "\v\fHello\t world!! \rstring\n"
-  string(30) "\v\fHello\t world!! \rstring\n"
+  string(29) "\v\fHello\t world!!\rstring\n"
+  string(29) "\v\fHello\t world!!\rstring\n"
   int(1)
   int(2)
 }
@@ -428,32 +428,6 @@ varray(4) {
   int(2)
 }
 -- Iteration 29 --
-varray(4) {
-  int(1)
-  int(2)
-  NULL
-  NULL
-}
-varray(4) {
-  NULL
-  NULL
-  int(1)
-  int(2)
-}
--- Iteration 30 --
-varray(4) {
-  int(1)
-  int(2)
-  NULL
-  NULL
-}
-varray(4) {
-  NULL
-  NULL
-  int(1)
-  int(2)
-}
--- Iteration 31 --
 varray(4) {
   int(1)
   int(2)

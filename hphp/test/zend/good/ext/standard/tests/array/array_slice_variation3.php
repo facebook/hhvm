@@ -14,9 +14,6 @@ echo "*** Testing array_slice() : usage variations ***\n";
 $input_array = darray['one' => 1, 0 => 2, 'three' => 3, 1 => 4];
 $offset = 2;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -59,11 +56,7 @@ $inputs = varray[
        'string',
        $heredoc,
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 ];
 
 // loop through each element of $inputs to check the behavior of array_slice

@@ -21,9 +21,6 @@ echo "*** Testing array_reverse() : usage variations ***\n";
 // Initialise the array
 $array = darray["a" => "green", 0 => "red", 1 => "blue", 2 => "red", 3 => "orange", 4 => "pink"];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -69,11 +66,7 @@ $preserve_keys = varray [
        // object data
        new classA(),
 
-       // undefined data
-       @$undefined_var,
 
-       // unset data
-       @$unset_var,
 
        // resource variable
 /*26*/ $fp

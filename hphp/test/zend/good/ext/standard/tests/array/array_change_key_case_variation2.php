@@ -14,9 +14,6 @@ echo "*** Testing array_change_key_case() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $array = darray ['one' => 1, 'TWO' => 2, 'Three' => 3];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -62,11 +59,7 @@ $inputs = varray[
        'CASE_UPPER',
        $heredoc,
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 ];
 
 // loop through each element of $inputs to check the behavior of array_change_key_case()

@@ -14,9 +14,6 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 // Initialise function arguments
 $size = 10;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[

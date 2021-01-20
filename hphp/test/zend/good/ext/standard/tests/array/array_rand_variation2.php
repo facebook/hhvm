@@ -24,9 +24,6 @@ function main(): void {
   // Initialise function arguments
   $input = varray[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
-  //get an unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   //array of values to iterate over
   $values = varray[
@@ -64,11 +61,7 @@ function main(): void {
           // object data
   /*20*/  new test(),
 
-          // undefined data
-  /*21*/  @$undefined_var,
 
-          // unset data
-  /*22*/  @$unset_var,
   ];
 
   // loop through each element of the array for different values for 'num_req' argument

@@ -2,209 +2,193 @@
 
 --int 0--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --int 1--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --int 12345--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --int -12345--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --float .5--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --string DQ--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --string SQ--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --heredoc--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
-NULL
-
---undefined var--
-
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
-NULL
-
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
-NULL
-
---unset var--
-
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
-NULL
-
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
 --resource--
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 91
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 
-Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line 92
+Warning: array_diff_key() expects parameter 2 to be an array or collection in %s/array_diff_key_variation2.php on line %d
 NULL
 ===DONE===

@@ -21,9 +21,6 @@ echo "*** Testing array_diff() : usage variations ***\n";
 
 $array = varray[1, 2, 3];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -75,14 +72,10 @@ $inputs = varray[
        // object data
 /*23*/ new classA(),
 
-       // undefined data
-/*24*/ @$undefined_var,
 
-       // unset data
-/*25*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp
+/*24*/ $fp
 ];
 
 // loop through each element of $inputs to check the behavior of array_diff

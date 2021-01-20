@@ -26,9 +26,6 @@ $arr2 = varray[1, 2];
 // array to be passed to optional argument
 $arr3 = darray[0 => 1, 1 => 2, "one" => 1, "two" => 2];
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -76,14 +73,10 @@ $arrays = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()

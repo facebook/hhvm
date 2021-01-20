@@ -32,8 +32,7 @@ $inputs = darray[
       'empty string DQ' => "",
       'string DQ' => "string",
       'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
-      'undefined var' => @$undefined_var,
+      'instance of classWithoutToString' => new classWithoutToString()
 ];
 
 $string = SORT_STRING;

@@ -51,12 +51,10 @@ darray(2) {
   string(11) "Hello world"
 }
 -- Iteration 8 --
-darray(3) {
+darray(2) {
   [11]=>
   object(classA) (0) {
   }
-  ["unset"]=>
-  NULL
   ["resource"]=>
   resource(4) of type (stream)
 }

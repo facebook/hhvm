@@ -24,9 +24,6 @@ function main(): void {
   $start_key = 0;
   $val = 100;
 
-  //get an unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   //array of different  values for 'num' argument
   $values = varray[
@@ -63,13 +60,7 @@ function main(): void {
             'string',
 
             // objects
-  /* 21 */  new test(),
-
-            // undefined  variable
-            @$undefined_var,
-
-            // unset variable
-  /* 24 */  @$unset_var,
+  /* 21 */  new test()
   ];
 
   // loop through each element of the array for num

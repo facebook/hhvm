@@ -30,12 +30,4 @@ darray(1) {
   ["one"]=>
   resource(4) of type (stream)
 }
-
--- Testing array_fill_keys() function with unset var --
-
-Notice: %s
-darray(1) {
-  ["one"]=>
-  NULL
-}
 Done

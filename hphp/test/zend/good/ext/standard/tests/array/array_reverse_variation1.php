@@ -14,9 +14,6 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : usage variations - unexpected values for 'array' argument ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -64,11 +61,7 @@ $arrays = varray [
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-       @$undefined_var,
 
-       // unset data
-       @$unset_var,
 
        // resource variable
 /*24*/ $fp

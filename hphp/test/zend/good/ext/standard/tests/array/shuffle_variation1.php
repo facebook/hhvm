@@ -21,9 +21,6 @@ class test {
 function main(): void {
   echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
 
-  //get an unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   //get a resource variable
   $fp = fopen(__FILE__, "r");
@@ -64,13 +61,9 @@ function main(): void {
          // object data
   /*20*/ new test(),
 
-         // undefined data
-  /*21*/ @$undefined_var,
 
-         // unset data
-  /*22*/ @$unset_var,
 
-  /*23*/ // resource data
+  /*21*/ // resource data
          $fp
   ];
 

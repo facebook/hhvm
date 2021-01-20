@@ -21,9 +21,6 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : assoc array with diff values to \$arr1 argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -54,12 +51,12 @@ $arrays = varray [
        darray[1 => "hello", "heredoc" => $heredoc],
 
        // array with object, unset variable and resource variable
-/*10*/ darray[11 => new classA(), "unset" => @$unset_var, "resource" => $fp],
+/*10*/ darray[11 => new classA(), "resource" => $fp],
 
        // array with mixed values
 /*11*/ darray[1 => 'hello', 2 => new classA(), 222 => "fruit",
              'resource' => $fp, "int" => 133, "float" => 444.432,
-             "unset" => @$unset_var, "heredoc" => $heredoc]
+             "heredoc" => $heredoc]
 ];
 
 // array to be passsed to $arr2 argument

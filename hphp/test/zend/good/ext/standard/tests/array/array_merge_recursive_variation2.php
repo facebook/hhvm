@@ -22,9 +22,6 @@ echo "*** Testing array_merge_recursive() : Passing non array values to \$arr2 a
 // initialise the first argument
 $arr1 = varray[1, varray["hello", 'world']];
 
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -69,17 +66,13 @@ $arrays = varray [
        'string',
        $heredoc,
 
-       // undefined data
-/*21*/ @$undefined_var,
 
-       // unset data
-/*22*/ @$unset_var,
 
        // resource variable
-/*23*/ $fp,
+/*21*/ $fp,
 
        // object data
-/*24*/ new A()
+/*22*/ new A()
 ];
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()

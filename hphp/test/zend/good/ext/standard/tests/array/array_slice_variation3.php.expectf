@@ -109,20 +109,4 @@ darray(0) {
 -- Iteration 21 --
 darray(0) {
 }
-
--- Iteration 22 --
-darray(2) {
-  ["three"]=>
-  int(3)
-  [0]=>
-  int(4)
-}
-
--- Iteration 23 --
-darray(2) {
-  ["three"]=>
-  int(3)
-  [0]=>
-  int(4)
-}
 Done

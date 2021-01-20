@@ -19,9 +19,6 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : Passing non array values to \$input argument ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -69,14 +66,10 @@ $inputs = varray [
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $inputs and check the behavior of array_unique()

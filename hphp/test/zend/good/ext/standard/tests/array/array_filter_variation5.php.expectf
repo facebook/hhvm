@@ -1,7 +1,7 @@
 *** Testing array_filter() : usage variations - different false elements in 'input' ***
 darray(0) {
 }
-darray(16) {
+darray(14) {
   [0]=>
   bool(false)
   [1]=>
@@ -31,10 +31,6 @@ darray(16) {
   bool(false)
   [13]=>
   string(0) ""
-  [14]=>
-  NULL
-  [15]=>
-  NULL
 }
 darray(0) {
 }

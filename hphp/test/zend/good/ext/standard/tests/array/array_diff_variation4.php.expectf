@@ -1,18 +1,18 @@
 *** Testing array_diff() : usage variations ***
 
- Iteration: 1 
+ Iteration: 1
 varray(2) {
   int(1)
   int(2)
 }
 
- Iteration: 2 
+ Iteration: 2
 darray(1) {
   [1]=>
   int(2)
 }
 
- Iteration: 3 
+ Iteration: 3
 darray(2) {
   [0]=>
   int(1)
@@ -20,7 +20,7 @@ darray(2) {
   int(2)
 }
 
- Iteration: 4 
+ Iteration: 4
 darray(2) {
   [0]=>
   int(1)
@@ -28,13 +28,13 @@ darray(2) {
   int(2)
 }
 
- Iteration: 5 
+ Iteration: 5
 darray(1) {
   [1]=>
   int(2)
 }
 
- Iteration: 6 
+ Iteration: 6
 darray(2) {
   [0]=>
   int(1)
@@ -42,7 +42,7 @@ darray(2) {
   int(2)
 }
 
- Iteration: 7 
+ Iteration: 7
 darray(2) {
   [0]=>
   int(1)
@@ -50,23 +50,7 @@ darray(2) {
   int(2)
 }
 
- Iteration: 8 
-darray(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-
- Iteration: 9 
-darray(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-
- Iteration: 10 
+ Iteration: 8
 darray(2) {
   [0]=>
   int(1)

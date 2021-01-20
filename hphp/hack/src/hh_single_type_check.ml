@@ -59,6 +59,7 @@ type mode =
 
 type options = {
   files: string list;
+  extra_builtins: string list;
   mode: mode;
   error_format: Errors.format;
   no_builtins: bool;
@@ -182,6 +183,7 @@ let comma_string_to_iset (s : string) : ISet.t =
 
 let parse_options () =
   let fn_ref = ref [] in
+  let extra_builtins = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
@@ -285,6 +287,9 @@ let parse_options () =
       ( "--root",
         Arg.String (fun s -> root := Some s),
         "Root for where to look up undefined symbols; needs --naming-table" );
+      ( "--extra-builtin",
+        Arg.String (fun f -> extra_builtins := f :: !extra_builtins),
+        " HHI file to parse and declare" );
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
         " Run the flow analysis" );
@@ -817,6 +822,7 @@ let parse_options () =
   in
   ( {
       files = fns;
+      extra_builtins = !extra_builtins;
       mode = !mode;
       no_builtins = !no_builtins;
       max_errors = !max_errors;
@@ -2042,6 +2048,7 @@ let handle_mode
 let decl_and_run_mode
     {
       files;
+      extra_builtins;
       mode;
       error_format;
       no_builtins;
@@ -2067,6 +2074,31 @@ let decl_and_run_mode
         | Ai _ -> Array.append magic_builtins Ai.magic_builtins
         | Ifc _ -> magic_builtins
         | _ -> magic_builtins
+      in
+      let extra_builtins =
+        let add_file_content map filename =
+          Relative_path.create Relative_path.Dummy filename
+          |> Multifile.file_to_file_list
+          |> List.map ~f:(fun (path, contents) ->
+                 (Filename.basename (Relative_path.suffix path), contents))
+          |> List.unordered_append map
+        in
+        extra_builtins
+        |> List.fold ~f:add_file_content ~init:[]
+        |> Array.of_list
+      in
+      let magic_builtins = Array.append magic_builtins extra_builtins in
+      (* Check that magic_builtin filenames are unique *)
+      let () =
+        let n_of_builtins = Array.length magic_builtins in
+        let n_of_unique_builtins =
+          Array.to_list magic_builtins
+          |> List.map ~f:fst
+          |> SSet.of_list
+          |> SSet.cardinal
+        in
+        if n_of_builtins <> n_of_unique_builtins then
+          die "Multiple magic builtins share the same base name.\n"
       in
       Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
           let file_path = Path.concat hhi_root file_name in

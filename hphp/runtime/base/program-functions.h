@@ -131,6 +131,8 @@ std::string get_systemlib(std::string* hhas = nullptr,
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
 
+std::vector<int> get_executable_lines(const Unit*);
+
 struct HphpSession {
   explicit HphpSession(Treadmill::SessionKind sk) {
     hphp_session_init(sk);

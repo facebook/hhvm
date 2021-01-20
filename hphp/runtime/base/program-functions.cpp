@@ -1000,7 +1000,7 @@ static bool set_execution_mode(folly::StringPiece mode) {
     return true;
   } else if (mode == "run" || mode == "debug" || mode == "translate" ||
              mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
-             mode == "getoption" || mode == "eval") {
+             mode == "getoption" || mode == "eval" || mode == "dumpcoverage") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
     RuntimeOption::ServerMode = false;
     Logger::Escape = false;
@@ -1436,6 +1436,30 @@ static void set_stack_size() {
   }
 }
 
+std::vector<int> get_executable_lines(const Unit* compiled) {
+  std::vector<int> lines;
+  auto loadedTable = LineTable{};
+  auto lineTable = SourceLocation::getLineTable(compiled);
+
+  if (!lineTable) {
+    // If it's not in the repo we have no line information to return.
+    if (compiled->repoID() == RepoIdInvalid) return lines;
+
+    // Don't do loadLineTable here to avoid storing the line table in the cache,
+    // we likely won't access it again.
+    auto& urp = Repo::get().urp();
+    urp.getUnitLineTable[compiled->repoID()].get(compiled->sn(), loadedTable);
+    lineTable = &loadedTable;
+  }
+
+  lines.reserve(lineTable->size());
+  for (auto& ent : *lineTable) lines.push_back(ent.val());
+  std::sort(lines.begin(), lines.end());
+  auto const last = std::unique(lines.begin(), lines.end());
+  lines.erase(last, lines.end());
+  return lines;
+}
+
 static int execute_program_impl(int argc, char** argv) {
   std::string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1768,7 +1792,8 @@ static int execute_program_impl(int argc, char** argv) {
   // Do this as early as possible to avoid creating temp files and spawing
   // light processes. Correct compilation still requires loading all of the
   // ini/hdf/cli options.
-  if (po.mode == "dumphhas" || po.mode == "verify") {
+  if (po.mode == "dumphhas" || po.mode == "verify" ||
+      po.mode == "dumpcoverage") {
     if (po.file.empty() && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a hack file to compile.\n";
       return 1;
@@ -1810,7 +1835,7 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_compiler_init();
 
     if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
-    else RuntimeOption::EvalVerifyOnly = true;
+    else if (po.mode != "dumpcoverage") RuntimeOption::EvalVerifyOnly = true;
     SystemLib::s_inited = true;
 
     // Ensure write to SystemLib::s_inited is visible by other threads.
@@ -1828,6 +1853,12 @@ static int execute_program_impl(int argc, char** argv) {
     if (!compiled) {
       std::cerr << "Unable to compile \"" << file << "\"\n";
       return 1;
+    }
+
+    if (po.mode == "dumpcoverage") {
+      std::cout << "[" << folly::join(", ", get_executable_lines(compiled))
+                << "]" << std::endl;
+      return 0;
     }
 
     return 0;

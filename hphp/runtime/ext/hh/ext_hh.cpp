@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/implicit-context.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -1230,6 +1231,21 @@ bool HHVM_FUNCTION(reflection_class_is_interface, TypedValue cls) {
   return isInterface(c);
 }
 
+TypedValue HHVM_FUNCTION(get_executable_lines, StringArg path) {
+  auto const file = lookupUnit(path.get(), "", nullptr, Native::s_noNativeFuncs,
+                               false);
+  if (!file) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unable to find file {}", path.get()->data())
+    );
+  }
+
+  auto const lines = get_executable_lines(file);
+  VecInit vinit{lines.size()};
+  for (auto line : lines) vinit.append(make_tv<KindOfInt64>(line));
+  return tvReturn(vinit.toVariant());
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1267,6 +1283,7 @@ static struct HHExtension final : Extension {
     X(get_implicit_context);
     X(set_implicit_context);
     X(set_implicit_context_by_index);
+    X(get_executable_lines);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

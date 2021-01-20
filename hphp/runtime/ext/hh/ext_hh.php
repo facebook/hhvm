@@ -433,6 +433,14 @@ abstract class ImplicitContext {
   }
 }
 
+/**
+ * Return a vector of lines known to be executable in $file. WARNING: there is
+ * no guarantee that these lines will be seen when running code-coverage mode.
+ * This API is purely a heuristic/best effort approximation of executable lines.
+ */
+<<__Native>>
+function get_executable_lines(string $file): mixed;
+
 } // HH
 
 namespace HH\Rx {

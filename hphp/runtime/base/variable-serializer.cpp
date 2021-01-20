@@ -1468,9 +1468,51 @@ void VariableSerializer::decNestedLevel(tv_rval tv) {
 }
 
 void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Unable to serialize reified function pointer"
-  );
+  switch (getType()) {
+    case Type::PrintR:
+    case Type::DebuggerDump:
+      m_buf->append("reifiedFunction{\n");
+      m_indent += 4;
+      indent();
+      m_buf->append("function(");
+      m_buf->append(rfunc->m_func->fullName()->data());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("[\"reified_generics\"] => ");
+      serializeArray(rfunc->m_arr);
+      m_indent -= 4;
+      indent();
+      m_buf->append("}\n");
+      break;
+
+    case Type::VarDump:
+    case Type::DebugDump:
+      indent();
+      m_buf->append("reifiedFunction{\n");
+      m_indent += 2;
+      indent();
+      m_buf->append("function(");
+      m_buf->append(rfunc->m_func->fullName()->data());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("[\"reified_generics\"]=>\n");
+      serializeArray(rfunc->m_arr);
+      m_indent -= 2;
+      indent();
+      m_buf->append("}\n");
+      break;
+    case Type::VarExport:
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::JSON:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+    case Type::PHPOutput:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified function pointer"
+      );
+      break;
+  }
 }
 
 void VariableSerializer::serializeFunc(const Func* func) {
@@ -1641,9 +1683,58 @@ void VariableSerializer::serializeClsMeth(
 }
 
 void VariableSerializer::serializeRClsMeth(RClsMethData* rclsMeth) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Unable to serialize reified class meth pointer"
-  );
+  switch (getType()) {
+    case Type::PrintR:
+    case Type::DebuggerDump:
+      m_buf->append("reifiedClassMeth{\n");
+      m_indent += 4;
+      indent();
+      m_buf->append("class(");
+      m_buf->append(rclsMeth->m_cls->name()->data(), rclsMeth->m_cls->name()->size());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("function(");
+      m_buf->append(rclsMeth->m_func->name()->data());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("[\"reified_generics\"] => ");
+      serializeArray(rclsMeth->m_arr);
+      m_indent -= 4;
+      indent();
+      m_buf->append("}\n");
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+      indent();
+      m_buf->append("reifiedClassMeth{\n");
+      m_indent += 2;
+      indent();
+      m_buf->append("class(");
+      m_buf->append(rclsMeth->m_cls->name()->data(), rclsMeth->m_cls->name()->size());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("function(");
+      m_buf->append(rclsMeth->m_func->name()->data());
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("[\"reified_generics\"]=>\n");
+      serializeArray(rclsMeth->m_arr);
+      m_indent -= 2;
+      indent();
+      m_buf->append("}\n");
+      break;
+    case Type::VarExport:
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::JSON:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+    case Type::PHPOutput:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified class meth pointer"
+      );
+      break;
+  }
 }
 
 NEVER_INLINE
@@ -1740,6 +1831,7 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfRClsMeth:
       assertx(!isArrayKey);
       serializeRClsMeth(val(tv).prclsmeth);
+      return;
 
     case KindOfLazyClass:
       assertx(!isArrayKey);

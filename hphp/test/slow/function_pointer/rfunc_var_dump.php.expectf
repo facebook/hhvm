@@ -1,0 +1,27 @@
+vec(1) {
+  reifiedFunction{
+    function(foo)
+    ["reified_generics"]=>
+    varray(1) {
+      darray(1) {
+        ["kind"]=>
+        int(1)
+      }
+    }
+  }
+}
+Vec
+(
+    [0] => reifiedFunction{
+        function(foo)
+        ["reified_generics"] => Array
+            (
+                [0] => Array
+                    (
+                        [kind] => 1
+                    )
+
+            )
+    }
+
+)

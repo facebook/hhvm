@@ -1,0 +1,29 @@
+vec(1) {
+  reifiedClassMeth{
+    class(Bar)
+    function(baz)
+    ["reified_generics"]=>
+    varray(1) {
+      darray(1) {
+        ["kind"]=>
+        int(1)
+      }
+    }
+  }
+}
+Vec
+(
+    [0] => reifiedClassMeth{
+        class(Bar)
+        function(baz)
+        ["reified_generics"] => Array
+            (
+                [0] => Array
+                    (
+                        [kind] => 1
+                    )
+
+            )
+    }
+
+)

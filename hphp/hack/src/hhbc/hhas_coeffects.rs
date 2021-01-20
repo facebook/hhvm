@@ -21,7 +21,7 @@ pub enum Ctx {
     RxLocal,
     RxShallow,
     Rx,
-    Local,
+    WriteProps,
 
     // Cipp hierarchy
     CippLocal,
@@ -41,7 +41,7 @@ impl fmt::Display for Ctx {
             RxLocal => write!(f, "{}", c::RX_LOCAL),
             RxShallow => write!(f, "{}", c::RX_SHALLOW),
             Rx => write!(f, "{}", c::RX),
-            Local => write!(f, "{}", c::LOCAL),
+            WriteProps => write!(f, "{}", c::WRITE_PROPS),
             CippLocal => write!(f, "{}", c::CIPP_LOCAL),
             CippShallow => write!(f, "{}", c::CIPP_SHALLOW),
             Cipp => write!(f, "{}", c::CIPP),
@@ -113,7 +113,7 @@ impl HhasCoeffects {
                         c::RX_LOCAL => static_coeffects.push(Ctx::RxLocal),
                         c::RX_SHALLOW => static_coeffects.push(Ctx::RxShallow),
                         c::RX => static_coeffects.push(Ctx::Rx),
-                        c::LOCAL => static_coeffects.push(Ctx::Local),
+                        c::WRITE_PROPS => static_coeffects.push(Ctx::WriteProps),
                         c::CIPP_LOCAL => static_coeffects.push(Ctx::CippLocal),
                         c::CIPP_SHALLOW => static_coeffects.push(Ctx::CippShallow),
                         c::CIPP_GLOBAL => static_coeffects.push(Ctx::CippGlobal),

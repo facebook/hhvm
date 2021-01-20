@@ -844,7 +844,7 @@ pub mod coeffects {
 
     pub const RX: &str = "rx";
 
-    pub const LOCAL: &str = "local";
+    pub const WRITE_PROPS: &str = "write_props";
 
     pub const CIPP_LOCAL: &str = "cipp_local";
 

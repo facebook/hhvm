@@ -6,8 +6,6 @@ Decls:
   class \C: { policied_props = [aPro:PUBLIC, aPub:PUBLIC, bPro:PUBLIC,
                                 bPub:PUBLIC, cPri:PUBLIC, cPro:PUBLIC,
                                 cPub:PUBLIC, tPro:PUBLIC, tPub:PUBLIC] }
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
   class \R: { policied_props = [rPri:PUBLIC, rPro:PUBLIC, rPub:PUBLIC,
                                 tPro:PUBLIC, tPub:PUBLIC] }
   class \T: { policied_props = [tPri:PUBLIC, tPro:PUBLIC, tPub:PUBLIC] }

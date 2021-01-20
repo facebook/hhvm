@@ -1,6 +1,4 @@
 === IFC analysis results for calls_basics.php
 Decls:
   class \C: { policied_props = [a:A, b:B] }
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
   

@@ -185,7 +185,9 @@ let add_super class_decl_env class_decl_acc super =
     let super_props = List.filter ~f:is_visible cd_policied_properties in
     let props = super_props @ class_decl_acc.cd_policied_properties in
     { cd_policied_properties = props }
-  | None -> fail @@ super ^ " wasn't found in the inheritance hierarchy"
+  | None ->
+    (* Must be a builtin. Assume that builtins don't have policied properties *)
+    class_decl_acc
 
 let mk_policied_prop
     {
@@ -228,13 +230,6 @@ let class_ class_decl_env class_ =
 
   (name, class_decl)
 
-let magic_class_decls =
-  SMap.of_list
-    [
-      (vec_id, { cd_policied_properties = [] });
-      (exception_id, { cd_policied_properties = [] });
-    ]
-
 let topsort_classes classes =
   (* Record the class hierarchy *)
   let dependency_table = Caml.Hashtbl.create 10 in
@@ -259,9 +254,8 @@ let topsort_classes classes =
         schedule := class_ :: !schedule
       end
     | None ->
-      (* If it's a magic builtin, then it has no dependencies, so do nothing *)
-      if not @@ SMap.mem id magic_class_decls then
-        fail @@ id ^ " is missing entity in the inheritance hierarchy"
+      (* Must be a builtin. Assume that builtins don't have policied properties *)
+      ()
   in
   List.iter ~f:process (List.map ~f:(fun c -> snd c.A.c_name) classes);
 
@@ -275,7 +269,7 @@ let collect_sigs defs =
   in
   let classes = List.filter_map ~f:pick defs |> topsort_classes in
   (* Process and accumulate class decls *)
-  let init = { de_class = magic_class_decls } in
+  let init = { de_class = SMap.empty } in
   let add_class_decl { de_class } cls =
     let (class_name, class_decl) = class_ de_class cls in
     let de_class = SMap.add class_name class_decl de_class in

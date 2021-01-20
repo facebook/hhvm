@@ -1056,7 +1056,7 @@ let parse_rage_args () =
         else if String.equal response "3" then
           ("hh monitor problem", `Verbose_hh_start)
         else if String.equal response "4" then begin
-          Extra_rage.verify_typechecker_err_src ();
+          ClientRage.verify_typechecker_err_src ();
           ("internal typecheck bug", `No_info)
         end else if String.equal response "5" then
           let () =

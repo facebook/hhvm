@@ -14,3 +14,5 @@ type env = {
 }
 
 let main _ = Exit.exit Exit_status.No_error
+
+let verify_typechecker_err_src () = ()

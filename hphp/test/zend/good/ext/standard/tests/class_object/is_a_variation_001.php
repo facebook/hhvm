@@ -10,9 +10,6 @@ echo "*** Testing is_a() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $class_name = 'stdClass';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[
@@ -48,11 +45,7 @@ $values = varray[
       "string",
       'String',
 
-      // undefined data
-      $undefined_var,
 
-      // unset data
-      $unset_var,
 ];
 
 // loop through each element of the array for object

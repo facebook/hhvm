@@ -58,9 +58,6 @@ function main(): void {
   $fp = fopen(__FILE__, "r");
   $dfp = opendir(dirname(__FILE__));
 
-  // unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   // non_scalar values, objects, arrays, resources and boolean
   $object = new foo();
@@ -108,8 +105,6 @@ function main(): void {
     0123,
     -0123,
 
-    @$unset_var,  // unset variable
-    @$undefined_var
   ];
   /* loop through the $not_floats to see working of
      is_float(), is_double() & is_real() on objects,

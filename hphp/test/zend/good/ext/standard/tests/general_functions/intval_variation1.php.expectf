@@ -82,10 +82,4 @@ int(1)
 --instance of classWithoutToString--
 Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
 int(1)
-
---undefined var--
-int(0)
-
---unset var--
-int(0)
 ===DONE===

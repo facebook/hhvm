@@ -1,10 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
-$unset_var = 10;
-unset($unset_var);
 
 $variation_array = darray[
-  'unset var' => @$unset_var,
-  'undefined var' => @$undefined_var,
   'empty string DQ' => "",
   'empty string SQ' => '',
   'uppercase NULL' => NULL,

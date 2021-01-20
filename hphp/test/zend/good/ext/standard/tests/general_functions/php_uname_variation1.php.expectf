@@ -35,8 +35,4 @@ string(%d) "%s"
 string(%d) "%s"
 -- Iterator new fooClass() --
 ERROR: string(58) "php_uname() expects parameter 1 to be string, object given"
--- Iterator undefined var --
-ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
--- Iterator unset var --
-ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
 ===DONE===

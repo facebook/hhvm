@@ -19,9 +19,6 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing closedir() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -67,11 +64,7 @@ $inputs = varray[
        // object data
 /*22*/ new classA(),
 
-       // undefined data
-/*23*/ @$undefined_var,
 
-       // unset data
-/*24*/ @$unset_var,
 ];
 
 // loop through each element of $inputs to check the behavior of closedir()

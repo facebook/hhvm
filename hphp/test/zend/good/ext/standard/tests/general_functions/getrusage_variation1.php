@@ -12,9 +12,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getrusage() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 
 // unexpected values to be passed to $stream_id argument
@@ -49,11 +46,7 @@ $inputs = varray[
        "1232456",
        "1.23E4",
 
-       // undefined data
-/*20*/ @$undefined_var,
 
-       // unset data
-/*21*/ @$unset_var,
 ];
 
 // loop through each element of $inputs to check the behavior of getrusage()

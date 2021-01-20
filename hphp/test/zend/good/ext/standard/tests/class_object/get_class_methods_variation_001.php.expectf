@@ -1,6 +1,4 @@
 *** Testing get_class_methods() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(60)
-Error: 8 - Undefined variable: unset_var, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(63)
 
 Arg value 0 
 NULL
@@ -58,15 +56,9 @@ NULL
 
 Arg value string 
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(69)
+Error: 4096 - Object of class stdClass could not be converted to string, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(62)
 
 Arg value  
 varray(0) {
 }
-
-Arg value  
-NULL
-
-Arg value  
-NULL
 Done

@@ -14,9 +14,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -58,11 +55,7 @@ $inputs =  varray [
   // resource
   $file_handle,
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var
 ];
 
 // loop through with each element of the $inputs array to test get_extension_funcs() function

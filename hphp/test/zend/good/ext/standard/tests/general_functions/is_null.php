@@ -5,14 +5,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_null() with valid null values ***\n";
 // different valid  null vlaues 
-$unset_array = varray[];
-$unset_int = 10;
-$unset_float = 10.5;
-$unset_bool = true;
-$unset_object = new stdclass;
-$unset_resource = fopen(__FILE__, "r");
-// unset them to make it null.
-unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource); 
 $null_var1 = NULL;
 $null_var2 = null;
 
@@ -21,13 +13,6 @@ $valid_nulls = varray[
   null,
   @$null_var1,
   @$null_var2,
-  @$unset_array,
-  @$unset_int,
-  @$unset_float,
-  @$unset_bool,
-  @$unset_object,
-  @$unset_resource,
-  @$undefined_var,
 ];
 /* loop to check that is_null() recognizes different 
    null values, expected output: bool(true) */

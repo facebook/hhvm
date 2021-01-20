@@ -25,9 +25,6 @@ echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 $directory = __SystemLib\hphp_test_tmppath('dir_variation2');
 @mkdir($directory);
 
-// get an unset variable
-$unset_var = stream_context_create();
-unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -79,11 +76,7 @@ $unexpected_values = varray [
        // object data
 /*26*/ new classA(),
 
-       // undefined data
-/*27*/ @$undefined_var,
 
-       // unset data
-/*28*/ @$unset_var
 ];
 
 // loop through various elements of $unexpected_values to check the behavior of dir()

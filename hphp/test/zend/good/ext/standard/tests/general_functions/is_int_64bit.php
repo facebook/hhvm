@@ -40,10 +40,7 @@ echo "\n*** Testing is_int(), is_integer() & is_long() with  non integer values 
 // resource type variable
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
-// unset variable
 
-$unset_var = 10;
-unset ($unset_var);
 
 // other types in a array 
 $not_int_types = varray [
@@ -111,9 +108,6 @@ $not_int_types = varray [
   TRUE,
   FALSE,
 
-  /* undefined and unset vars */
-  @$unset_var, 
-  @$undefined_var
 ];
 /* loop through the $not_int_types to see working of 
    is_int() on non integer types, expected output: bool(false) */

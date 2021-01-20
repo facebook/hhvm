@@ -261,26 +261,18 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
---Iteration 36--
-bool(false)
-bool(false)
-bool(false)
---Iteration 37--
-bool(false)
-bool(false)
-bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_float() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 131
+Warning: is_float() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line %d
 
-Warning: is_double() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 136
+Warning: is_double() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line %d
 
-Warning: is_real() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 141
+Warning: is_real() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line %d
 
-Warning: is_float() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 148
+Warning: is_float() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line %d
 
-Warning: is_double() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 153
+Warning: is_double() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line %d
 
-Warning: is_real() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 158
+Warning: is_real() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line %d
 Done

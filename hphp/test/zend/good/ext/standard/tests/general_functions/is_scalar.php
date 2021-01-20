@@ -90,7 +90,6 @@ $variation_array = varray[
   @$object,
   @$resource,
 
-  @$undefined_var  // undefined variable
 ];  
 
 /* loop through each element of $variation_array to see the 

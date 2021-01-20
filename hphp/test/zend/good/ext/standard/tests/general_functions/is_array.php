@@ -36,9 +36,6 @@ echo "\n*** Testing is_array() on non array types ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset variables
-$unset_array = varray[10];
-unset($unset_array);
 
 // other types in a array
 $varient_arrays = varray [
@@ -83,9 +80,6 @@ $varient_arrays = varray [
   FALSE,
   false,
 
-  /* unset/undefined arrays  */
-  @$unset_array,
-  @$undefined_array
 ];
 /* loop through the $varient_array to see working of
    is_array() on non array types, expected output bool(false) */

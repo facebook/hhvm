@@ -1,83 +1,73 @@
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(63)
-Error: 8 - Undefined variable: unset_var, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(66)
 
 Arg value 0
 
-Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 1
 
-Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 12345
 
-Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value -2345
 
-Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 10.5
 
-Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value -10.5
 
-Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 101234567000
 
-Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 1.07654321E-9
 
-Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 0.5
 
-Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 
 
-Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 
 
-Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 1
 
-Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 
 
-Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 1
 
-Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 
 
-Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 
 Arg value 
 bool(false)
 
 Arg value 
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(72)
+Error: 4096 - Object of class stdClass could not be converted to string, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(65)
 
 Arg value 
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
-
-Arg value 
-
-Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
-
-Arg value 
-
-Warning: is_subclass_of() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line %d
 Done

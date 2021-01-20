@@ -61,15 +61,6 @@ echo "\n*** Testing is_string() on non string values ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset vars
-$unset_string1 = "string";
-$unset_string2 = 'string';
-$unset_heredoc = <<<EOT
-this is heredoc string
-EOT;
-// unset the vars 
-unset($unset_string1, $unset_string2, $unset_heredoc);
-
 // other types in a array 
 $not_strings = varray [
   /* integers */
@@ -122,12 +113,6 @@ $not_strings = varray [
   varray[FALSE],
   varray[1,2,3,4],
   darray[1 => "One", "two" => 2],
-
-  /* undefined and unset vars */
-  @$unset_string1,
-  @$unset_string2,
-  @$unset_heredoc,
-  @$undefined_var 
 ];
 /* loop through the $not_strings to see working of 
    is_string() on non string types, expected output bool(false) */

@@ -111,9 +111,6 @@ echo "\n*** Testing strval() with non_scalar values ***\n";
 $fp = fopen(__FILE__, "r");
 $dfp = opendir( dirname(__FILE__) );
 
-// unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 $not_scalars = varray [
   new foo, //object
@@ -121,8 +118,6 @@ $not_scalars = varray [
   $dfp,
   NULL,  // nulls
   null,
-  @$unset_var,  // unset variable
-  @$undefined_var
 ];
 /* loop through the $not_scalars to see working of
    strval() on objects, arrays, boolean and others */

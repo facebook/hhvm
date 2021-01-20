@@ -14,9 +14,6 @@ class testClass {
 echo "*** Testing fpassthru() : usage variations ***\n";
 error_reporting(E_ALL & ~E_NOTICE);
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[
@@ -62,11 +59,7 @@ $values = varray[
       // object data
       new testClass(),
 
-      // undefined data
-      $undefined_var,
 
-      // unset data
-      $unset_var,
 ];
 
 // loop through each element of the array for fp

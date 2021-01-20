@@ -1,86 +1,80 @@
 *** Testing dir() : unexpected values for $context argument ***
 
 -- Iteration 1 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 2 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 3 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 4 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 5 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 6 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 7 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 8 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 9 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 10 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 11 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 12 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 13 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 14 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 15 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 16 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 17 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 18 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 19 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 20 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 21 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 22 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 23 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 24 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 25 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 
 -- Iteration 26 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
-
--- Iteration 27 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
-
--- Iteration 28 --
-Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line 93
+Warning: dir() expects exactly 1 parameter, 2 given in %s/dir_variation2.php on line %d
 Done

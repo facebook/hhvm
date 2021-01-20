@@ -31,9 +31,6 @@ set_error_handler(test_error_handler<>);
 // Initialise function arguments not being substituted (if any)
 $base = 10;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -90,11 +87,7 @@ $inputs = darray[
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
 
-      // undefined data
-      'undefined var' => @$undefined_var,
 
-      // unset data
-      'unset var' => @$unset_var,
 ];
 
 // loop through each element of the array for var

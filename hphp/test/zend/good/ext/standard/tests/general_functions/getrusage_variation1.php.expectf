@@ -56,10 +56,4 @@ string(59) "getrusage() expects parameter 1 to be integer, string given"
 
 -- Iteration 19 --
 string(59) "getrusage() expects parameter 1 to be integer, string given"
-
--- Iteration 20 --
-string(57) "getrusage() expects parameter 1 to be integer, null given"
-
--- Iteration 21 --
-string(57) "getrusage() expects parameter 1 to be integer, null given"
 ===DONE===

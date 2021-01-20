@@ -101,14 +101,12 @@ bool(false)
 bool(false)
 -- Iteration 17 --
 bool(false)
--- Iteration 18 --
-bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_scalar() expects exactly 1 parameter, 0 given in %s/is_scalar.php on line 107
+Warning: is_scalar() expects exactly 1 parameter, 0 given in %s/is_scalar.php on line %d
 
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line 110
+Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line %d
 
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line 111
+Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line %d
 Done

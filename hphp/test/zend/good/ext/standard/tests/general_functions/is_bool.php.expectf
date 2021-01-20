@@ -131,18 +131,10 @@ bool(false)
 bool(false)
 -- Iteration 61 --
 bool(false)
--- Iteration 62 --
-bool(false)
--- Iteration 63 --
-bool(false)
--- Iteration 64 --
-bool(false)
--- Iteration 65 --
-bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_bool() expects exactly 1 parameter, 0 given in %s/is_bool.php on line 129
+Warning: is_bool() expects exactly 1 parameter, 0 given in %s/is_bool.php on line %d
 
-Warning: is_bool() expects exactly 1 parameter, 2 given in %s/is_bool.php on line 132
+Warning: is_bool() expects exactly 1 parameter, 2 given in %s/is_bool.php on line %d
 Done

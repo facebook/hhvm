@@ -1,6 +1,4 @@
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(59)
-Error: 8 - Undefined variable: unset_var, %s(62)
 
 Arg value 0 
 bool(false)
@@ -57,11 +55,5 @@ Arg value string
 bool(false)
 
 Arg value String 
-bool(false)
-
-Arg value  
-bool(false)
-
-Arg value  
 bool(false)
 Done

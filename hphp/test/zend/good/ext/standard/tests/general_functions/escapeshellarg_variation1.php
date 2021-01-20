@@ -7,9 +7,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing escapeshellarg() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -50,11 +47,7 @@ $inputs = varray[
 /*17*/ "",
        '',
 
-       // undefined data
-/*19*/ @$undefined_var,
 
-       // unset data
-/*20*/ @$unset_var,
 
 ];
 

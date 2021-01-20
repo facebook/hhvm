@@ -1,21 +1,21 @@
 <?hh
 /* Prototype: bool is_bool ( mixed $var );
- * Description: Finds whether the given variable is a boolean  
+ * Description: Finds whether the given variable is a boolean
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_bool() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean vlaues
 $valid_bools = varray[
   TRUE,
   FALSE,
   true,
   false,
 ];
-/* loop to check that is_bool() recognizes different 
+/* loop to check that is_bool() recognizes different
    bool values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_bools as $bool_val ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($bool_val) );
 }
 
@@ -25,15 +25,8 @@ echo "\n*** Testing is_bool() on non boolean values ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset variable
-$unset_bool1 = true;
-$unset_bool2 = false;
-$unset_var = 0;
-unset ($unset_bool1);
-unset ($unset_bool2);
-unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_bool_types = varray [
   /* integers */
   0,
@@ -95,7 +88,7 @@ $not_bool_types = varray [
   /* nulls */
   null,
   NULL,
-  
+
   /* arrays */
   varray[],
   varray[0],
@@ -110,17 +103,12 @@ $not_bool_types = varray [
   varray[1,2,3,4],
   darray[1 => "One", "two" => 2],
 
-  /* unset bool vars and undefined var */
-  @$unset_bool1, 
-  @$unset_bool2, 
-  @$unset_var, 
-  @$undefined_var
 ];
-/* loop through the $not_bool_types to see working of 
+/* loop through the $not_bool_types to see working of
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_bool_types as $type ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($type) );
 }
 
@@ -128,9 +116,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 try { var_dump( is_bool() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-//arguments more than expected 
+//arguments more than expected
 try { var_dump( is_bool(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
- 
+
 echo "Done\n";
 
 // close resources

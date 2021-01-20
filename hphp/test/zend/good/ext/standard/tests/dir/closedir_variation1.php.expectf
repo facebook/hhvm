@@ -2,101 +2,91 @@
 
 -- Iteration 1 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
 
 -- Iteration 2 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
 
 -- Iteration 3 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
 
 -- Iteration 4 --
 
-Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, integer given in %s/closedir_variation1.php on line %d
 
 -- Iteration 5 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
 
 -- Iteration 6 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
 
 -- Iteration 7 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
 
 -- Iteration 8 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
 
 -- Iteration 9 --
 
-Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, double given in %s/closedir_variation1.php on line %d
 
 -- Iteration 10 --
 
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line 81
+Warning: no Directory resource supplied in %s/closedir_variation1.php on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line 81
+Warning: no Directory resource supplied in %s/closedir_variation1.php on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
 
 -- Iteration 13 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
 
 -- Iteration 14 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
 
 -- Iteration 15 --
 
-Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/closedir_variation1.php on line %d
 
 -- Iteration 16 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
 
 -- Iteration 17 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
 
 -- Iteration 18 --
 
-Warning: closedir() expects parameter 1 to be resource, %rv?%rarray given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, %rv?%rarray given in %s/closedir_variation1.php on line %d
 
 -- Iteration 19 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
 
 -- Iteration 20 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
 
 -- Iteration 21 --
 
-Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line 81
+Warning: closedir() expects parameter 1 to be resource, string given in %s/closedir_variation1.php on line %d
 
 -- Iteration 22 --
 
-Warning: closedir() expects parameter 1 to be resource, object given in %s/closedir_variation1.php on line 81
-
--- Iteration 23 --
-
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line 81
-NULL
-
--- Iteration 24 --
-
-Warning: no Directory resource supplied in %s/closedir_variation1.php on line 81
-NULL
+Warning: closedir() expects parameter 1 to be resource, object given in %s/closedir_variation1.php on line %d
 ===DONE===

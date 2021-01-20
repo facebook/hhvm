@@ -281,26 +281,18 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
---Iteration 53--
-bool(false)
-bool(false)
-bool(false)
---Iteration 54--
-bool(false)
-bool(false)
-bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_int() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 130
+Warning: is_int() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line %d
 
-Warning: is_integer() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 131
+Warning: is_integer() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line %d
 
-Warning: is_long() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 132
+Warning: is_long() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line %d
 
-Warning: is_int() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 135
+Warning: is_int() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line %d
 
-Warning: is_integer() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 136
+Warning: is_integer() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line %d
 
-Warning: is_long() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 137
+Warning: is_long() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line %d
 Done

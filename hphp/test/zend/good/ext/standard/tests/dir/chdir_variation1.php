@@ -30,9 +30,6 @@ function main(): void {
   $dir_path = __SystemLib\hphp_test_tmppath('chdir_basic');
   @mkdir($dir_path);
 
-  //get an unset variable
-  $unset_var = 10;
-  unset($unset_var);
 
   // heredoc string
   $heredoc = <<<EOT
@@ -80,14 +77,10 @@ EOT;
          // object data
   /*22*/ new classA($dir_path),
 
-         // undefined data
-  /*23*/ @$undefined_var,
 
-         // unset data
-  /*24*/ @$unset_var,
 
          // resource variable
-  /*25*/ $fp
+  /*23*/ $fp
   ];
 
   // loop through each element of $inputs to check the behavior of chdir()

@@ -13,8 +13,6 @@ echo "*** Testing php_uname() - usage variations\n";
 // Prevent notices about undefines variables
 error_reporting(E_ALL & ~E_NOTICE);
 
-$unset_var = 10;
-unset ($unset_var);
 
 $values = darray[
 
@@ -48,11 +46,7 @@ $values = darray[
           // object data
           "new fooClass()" => new fooClass(),
 
-          // undefined data
-          "undefined var" => $undefined_var,
 
-         // unset data
-         "unset var" => $unset_var,
 ];
 
 // loop through each element of the array for data

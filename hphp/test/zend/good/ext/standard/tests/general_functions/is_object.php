@@ -122,7 +122,6 @@ function main(): void {
     NULL,
     null,
     @$unset_object, // unset object
-    @$undefined_var, // undefined variable
   ];
   /* loop through the $not_objects to see working of
      is_object() on non object types, expected output: bool(false) */

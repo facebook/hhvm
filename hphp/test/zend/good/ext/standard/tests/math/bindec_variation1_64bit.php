@@ -5,9 +5,6 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing bindec() : usage variations ***\n";
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -52,14 +49,10 @@ $inputs = varray[
        'abcxyz',
        $heredoc,
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $inputs to check the behaviour of bindec()

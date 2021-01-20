@@ -42,11 +42,5 @@ Notice: %s
 int(1)
 
 -- Iteration 14 --
-int(0)
-
--- Iteration 15 --
-int(0)
-
--- Iteration 16 --
 int(%d)
 ===Done===

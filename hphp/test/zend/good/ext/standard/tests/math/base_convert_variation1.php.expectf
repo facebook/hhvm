@@ -67,11 +67,5 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 23 --
-string(1) "0"
-
--- Iteration 24 --
-string(1) "0"
-
--- Iteration 25 --
 string(%d) "%d"
 ===Done===

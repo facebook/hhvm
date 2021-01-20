@@ -72,11 +72,5 @@ Notice: %s
 float(1)
 
 -- Iteration 24 --
-float(0)
-
--- Iteration 25 --
-float(0)
-
--- Iteration 26 --
 float(%f)
 ===Done===

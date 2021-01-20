@@ -75,11 +75,5 @@ Notice: %s
 string(1) "1"
 
 -- Iteration 25 --
-string(1) "0"
-
--- Iteration 26 --
-string(1) "0"
-
--- Iteration 27 --
 string(%d) "%s"
 ===Done===

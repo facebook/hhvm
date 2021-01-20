@@ -5,9 +5,6 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing hexdec() : usage variations ***\n";
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -54,14 +51,10 @@ $inputs = varray[
        'abcxyz',
        $heredoc,
 
-       // undefined data
-/*24*/ @$undefined_var,
 
-       // unset data
-/*25*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $inputs to check the behaviour of hexdec()

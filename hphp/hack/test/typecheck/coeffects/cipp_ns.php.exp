@@ -1,0 +1,32 @@
+File "cipp_ns.php", line 16, characters 5-17:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp_ns.php", line 15, characters 18-28:
+  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
+  File "cipp_ns.php", line 9, characters 26-35:
+  But the function being called requires the capability set {AccessStaticVariable, Cipp_of<A>, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp_ns.php", line 17, characters 5-17:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp_ns.php", line 15, characters 18-28:
+  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
+  File "cipp_ns.php", line 10, characters 26-36:
+  But the function being called requires the capability set {AccessStaticVariable, Cipp_of<A>, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp_ns.php", line 18, characters 5-16:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp_ns.php", line 15, characters 18-28:
+  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
+  File "cipp_ns.php", line 12, characters 25-38:
+  But the function being called requires the capability set {AccessStaticVariable, Cipp_of<mixed>, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp_ns.php", line 19, characters 5-18:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp_ns.php", line 15, characters 18-28:
+  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
+  File "cipp_ns.php", line 13, characters 27-42:
+  But the function being called requires the capability set {AccessStaticVariable, Cipp_of<nothing>, Output, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

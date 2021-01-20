@@ -2,7 +2,7 @@ File "cipp.php", line 7, characters 3-15:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "cipp.php", line 5, characters 21-24:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Cipp, Output, WriteProperty}
-  File "cipp.php", line 11, characters 24-34:
+  File "cipp.php", line 11, characters 24-33:
   But the function being called requires the capability set {AccessStaticVariable, Cipp_of<A>, Output, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
@@ -18,7 +18,7 @@ File "cipp.php", line 19, characters 3-15:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "cipp.php", line 17, characters 28-38:
   From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
-  File "cipp.php", line 11, characters 24-34:
+  File "cipp.php", line 11, characters 24-33:
   But the function being called requires the capability set {AccessStaticVariable, Cipp_of<A>, Output, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

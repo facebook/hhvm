@@ -151,21 +151,25 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       super#on_fun_def env f
 
     method! on_fun_ env f =
-      let ctx_env = { env with namespace = contexts_ns } in
-      let f_ctxs = Option.map ~f:(super#on_contexts ctx_env) f.f_ctxs in
-      let unsafe_ctx_env = { env with namespace = unsafe_contexts_ns } in
+      let f_ctxs =
+        Option.map ~f:(self#on_contexts_ns contexts_ns env) f.f_ctxs
+      in
       let f_unsafe_ctxs =
-        Option.map ~f:(super#on_contexts unsafe_ctx_env) f.f_unsafe_ctxs
+        Option.map
+          ~f:(self#on_contexts_ns unsafe_contexts_ns env)
+          f.f_unsafe_ctxs
       in
       { (super#on_fun_ env f) with f_ctxs; f_unsafe_ctxs }
 
     method! on_method_ env m =
       let env = extend_tparams env m.m_tparams in
-      let ctx_env = { env with namespace = contexts_ns } in
-      let m_ctxs = Option.map ~f:(super#on_contexts ctx_env) m.m_ctxs in
-      let unsafe_ctx_env = { env with namespace = unsafe_contexts_ns } in
+      let m_ctxs =
+        Option.map ~f:(self#on_contexts_ns contexts_ns env) m.m_ctxs
+      in
       let m_unsafe_ctxs =
-        Option.map ~f:(super#on_contexts unsafe_ctx_env) m.m_unsafe_ctxs
+        Option.map
+          ~f:(self#on_contexts_ns unsafe_contexts_ns env)
+          m.m_unsafe_ctxs
       in
       { (super#on_method_ env m) with m_ctxs; m_unsafe_ctxs }
 
@@ -345,9 +349,28 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | _ -> super#on_hint_ env h
 
     method! on_hint_fun env hf =
-      let ctx_env = { env with namespace = contexts_ns } in
-      let hf_ctxs = Option.map ~f:(super#on_contexts ctx_env) hf.hf_ctxs in
+      let hf_ctxs =
+        Option.map ~f:(self#on_contexts_ns contexts_ns env) hf.hf_ctxs
+      in
       { (super#on_hint_fun env hf) with hf_ctxs }
+
+    (* For contexts like cipp_of<T>, the type argument needs to be elaborated
+     * in the standard namespace *)
+    method private on_contexts_ns ctx_ns env ctxs =
+      let (p, cs) = ctxs in
+      let ctx_env = { env with namespace = ctx_ns } in
+      let cs =
+        List.map
+          ~f:(fun h ->
+            match h with
+            | (p, Happly (((_, x) as ctx), hl))
+              when not (is_reserved_type_hint x) ->
+              let ctx = elaborate_type_name ctx_env ctx in
+              (p, Happly (ctx, List.map hl ~f:(self#on_hint env)))
+            | _ -> self#on_hint ctx_env h)
+          cs
+      in
+      (p, cs)
 
     method! on_shape_field_name env sfn =
       match sfn with

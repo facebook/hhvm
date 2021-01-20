@@ -424,6 +424,9 @@ Link<T,M> alloc();
 size_t allocBit();
 bool testAndSetBit(size_t bit);
 
+/*
+ * Table mapping handles to their symbols.  This excludes Profiling symbols.
+ */
 folly::Optional<Symbol> reverseLink(Handle handle);
 
 //////////////////////////////////////////////////////////////////////

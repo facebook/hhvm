@@ -94,6 +94,12 @@ RevLinkTable s_handleTable;
 
 __thread std::atomic<bool> s_hasFullInit{false};
 
+struct StoreRevLink : boost::static_visitor<bool> {
+  bool operator()(Profile) const { return false; }
+  template<typename T>
+  bool operator()(T) const { return true; }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -371,9 +377,11 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
         LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
-  s_handleTable.emplace(handle, RevLinkEntry {
-    safe_cast<uint32_t>(sizeBytes), key
-  });
+  if (boost::apply_visitor(StoreRevLink(), key)) {
+    s_handleTable.emplace(handle, RevLinkEntry {
+      safe_cast<uint32_t>(sizeBytes), key
+    });
+  }
   return handle;
 }
 

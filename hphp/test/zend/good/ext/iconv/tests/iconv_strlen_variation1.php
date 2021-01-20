@@ -21,9 +21,6 @@ echo "*** Testing iconv_strlen() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $encoding = 'utf-8';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -79,16 +76,8 @@ $inputs = darray[
 /*21*/
       'instance of class' => new classA(),
 
-       // undefined data
-/*22*/
-      'undefined var' => @$undefined_var,
-
-       // unset data
-/*23*/
-      'unset var' => @$unset_var,
-
        // resource variable
-/*24*/
+/*22*/
        'resource' => $fp
 ];
 

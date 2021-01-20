@@ -2,39 +2,39 @@
 
 -- Iteration 1 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 2 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 3 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 4 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 5 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 6 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 7 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 8 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 9 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 10 --
 int(12)
@@ -44,19 +44,19 @@ int(12)
 
 -- Iteration 12 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 13 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 14 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 15 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 16 --
 int(12)
@@ -75,15 +75,9 @@ int(12)
 
 -- Iteration 21 --
 
-Warning: iconv_strlen() expects parameter 2 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 
 -- Iteration 22 --
-int(12)
 
--- Iteration 23 --
-int(12)
-
--- Iteration 24 --
-
-Warning: iconv_strlen() expects parameter 2 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line 89
+Warning: iconv_strlen() expects parameter 2 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation2.php on line %d
 Done

@@ -118,7 +118,6 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
-  tco_enable_enum_classes: bool;
 }
 [@@deriving eq, show]
 
@@ -298,7 +297,6 @@ let default =
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = [];
-    tco_enable_enum_classes = false;
   }
 
 let make
@@ -430,7 +428,6 @@ let make
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
-    ?(tco_enable_enum_classes = default.tco_enable_enum_classes)
     () =
   {
     tco_experimental_features;
@@ -543,7 +540,6 @@ let make
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
-    tco_enable_enum_classes;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -789,5 +785,3 @@ let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
 
 let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
-
-let tco_enable_enum_classes t = t.tco_enable_enum_classes

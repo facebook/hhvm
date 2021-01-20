@@ -57,7 +57,6 @@ let visitor ctx =
         Static_method_generics_check.handler;
         Class_inherited_member_case_check.handler;
         Ifc_tast_check.handler;
-        Enum_classes_check.handler;
       ] )
 
 let program ctx = (visitor ctx)#go ctx

@@ -9,11 +9,11 @@
 
 let handler =
   object
-    inherit Tast_visitor.handler_base
+    inherit Nast_visitor.handler_base
 
     method! at_class_ env c =
-      let tcopt = Tast_env.get_tcopt env in
-      let enabled = tcopt.GlobalOptions.tco_enable_enum_classes in
+      let tcopt = Nast_check_env.get_tcopt env in
+      let enabled = tcopt.GlobalOptions.po_enable_enum_classes in
       let is_enum_class =
         match c.Aast.c_enum with
         | Some enum_ -> enum_.Aast.e_enum_class

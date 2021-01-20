@@ -762,7 +762,7 @@ let parse_options () =
         else
           [] )
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
-      ~tco_enable_enum_classes:!enable_enum_classes
+      ~po_enable_enum_classes:!enable_enum_classes
       ()
   in
   Errors.allowed_fixme_codes_strict :=

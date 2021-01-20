@@ -31,6 +31,7 @@ let visitor =
       Duplicate_xhp_attribute_check.handler;
       Attribute_nast_checks.handler;
       Trait_reuse_check.handler;
+      Enum_classes_check.handler;
     ]
 
 let stateful_visitor ctx =

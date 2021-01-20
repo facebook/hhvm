@@ -688,6 +688,13 @@ folly::Optional<TranslationResult> RegionTranslator::getCached() {
     return TranslationResult{srcRec->getTopTranslation()};
   }
   prevNumTranslations = numTrans;
+
+  // An optimize retranslation request may be in flight that will
+  // remove profiling translations from the srcRec.  Wait till
+  // getCached is called while the lease is held to check the
+  // number of translations in the srcRec is not over max
+  // capacity.
+  if (!m_lease || !(*m_lease)) return folly::none;
   // Check for potential interp anchor translation
   if (kind == TransKind::Profile) {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {

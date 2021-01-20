@@ -14,7 +14,12 @@ let handler =
     method! at_class_ env c =
       let tcopt = Tast_env.get_tcopt env in
       let enabled = tcopt.GlobalOptions.tco_enable_enum_classes in
-      let (pos, c_name) = c.Aast.c_name in
-      if (not enabled) && Tast_env.is_enum_class env c_name then
+      let is_enum_class =
+        match c.Aast.c_enum with
+        | Some enum_ -> enum_.Aast.e_enum_class
+        | None -> false
+      in
+      let pos = fst c.Aast.c_name in
+      if (not enabled) && is_enum_class then
         Errors.enum_classes_reserved_syntax pos
   end

@@ -454,6 +454,7 @@ function get_options($argv) {
     'bespoke' => '',
     'hadva' => '',
     'lazyclass' => '',
+    '*force-repo' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -805,7 +806,11 @@ function mode_cmd($options): varray<string> {
   if (!isset($options['repo'])) {
     // Set the non-repo-mode shared repo.
     // When in repo mode, we set our own central path.
-    $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+    if (isset($options['force-repo'])) {
+      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+    } else {
+      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=:memory: -vRepo.Commit=0";
+    }
   }
   $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
@@ -927,6 +932,10 @@ function hhvm_cmd_impl(
 
     if (isset($options['bespoke'])) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
+    }
+
+    if (!isset($options['repo'])) {
+      $args[] = '-vEval.StressUnitSerde=true';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

@@ -225,10 +225,11 @@ let assert_env_stmt ~pos ~at annotation_kind env_map_opt stmt =
   let mk_assert map = (pos, Aast.AssertEnv (annotation_kind, map)) in
   match env_map_opt with
   | Some env_map ->
+    let stmt = (pos, stmt) in
     let blk =
       match at with
-      | `Start -> [mk_assert env_map; (pos, stmt)]
-      | `End -> [(pos, stmt); mk_assert env_map]
+      | `Start -> [mk_assert env_map; stmt]
+      | `End -> [stmt; mk_assert env_map]
     in
     Aast.Block blk
   | None -> stmt
@@ -437,7 +438,20 @@ and fun_implicit_return env pos ret = function
 
 and block env stl =
   Typing_env.with_origin env Decl_counters.Body @@ fun env ->
-  List.map_env env stl ~f:stmt
+  (* To insert an `AssertEnv`, `stmt` might return a `Block`. We eliminate it here
+  to keep ASTs `Block`-free. *)
+  let (env, stl) =
+    List.fold ~init:(env, []) stl ~f:(fun (env, stl) st ->
+        let (env, st) = stmt env st in
+        (* Accumulate statements in reverse order *)
+        let stl =
+          match st with
+          | (_, Aast.Block stl') -> List.rev stl' @ stl
+          | _ -> st :: stl
+        in
+        (env, stl))
+  in
+  (env, List.rev stl)
 
 (* Set a local; must not be already assigned if it is a using variable *)
 and set_local ?(is_using_clause = false) env (pos, x) ty =

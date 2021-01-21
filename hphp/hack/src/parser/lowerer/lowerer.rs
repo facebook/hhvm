@@ -4951,6 +4951,23 @@ where
                             _ => Self::missing_syntax("enumerator", n, e),
                         }
                     };
+
+                let mut includes = vec![];
+
+                let mut p_enum_use = |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<()> {
+                    match &n.children {
+                        EnumUse(c) => {
+                            let mut uses = Self::could_map(Self::p_hint, &c.names, e)?;
+                            Ok(includes.append(&mut uses))
+                        }
+                        _ => Self::missing_syntax("enum_use", node, e),
+                    }
+                };
+
+                for elt in c.use_clauses.syntax_node_to_list_skip_separator() {
+                    p_enum_use(elt, env)?;
+                }
+
                 Ok(vec![ast::Def::mk_class(ast::Class_ {
                     annotation: (),
                     mode: env.file_mode(),
@@ -4972,10 +4989,9 @@ where
                     enum_: Some(ast::Enum_ {
                         base: Self::p_hint(&c.base, env)?,
                         constraint: Self::mp_optional(Self::p_tconstraint_ty, &c.type_, env)?,
-                        includes: Self::could_map(Self::p_hint, &c.includes_list, env)?,
+                        includes,
                         enum_class: false,
                     }),
-
                     doc_comment: doc_comment_opt,
                     uses: vec![],
                     use_as_alias: vec![],
@@ -4992,6 +5008,7 @@ where
                     emit_id: None,
                 })])
             }
+
             EnumClassDeclaration(c) => {
                 let name = Self::pos_name(&c.name, env)?;
                 // Adding __EnumClass

@@ -97,8 +97,12 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_file_attribute_specification(self, left_double_angle, keyword, colon, attributes, right_double_angle)
     }
 
-    fn make_enum_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, includes_keyword: Self::R, includes_list: Self::R, left_brace: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_declaration(self, attribute_spec, keyword, name, colon, base, type_, includes_keyword, includes_list, left_brace, enumerators, right_brace)
+    fn make_enum_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, type_: Self::R, left_brace: Self::R, use_clauses: Self::R, enumerators: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_declaration(self, attribute_spec, keyword, name, colon, base, type_, left_brace, use_clauses, enumerators, right_brace)
+    }
+
+    fn make_enum_use(&mut self, keyword: Self::R, names: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_use(self, keyword, names, semicolon)
     }
 
     fn make_enumerator(&mut self, name: Self::R, equal: Self::R, value: Self::R, semicolon: Self::R) -> Self::R {

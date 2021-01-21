@@ -1,0 +1,5 @@
+(10,14)-(10,14) A left brace `{` is expected here.
+(10,23)-(10,23) An equals sign `=` is expected here.
+(10,23)-(10,27) Cannot use collection initialization for non-collection class.
+(10,27)-(11,1) A semicolon `;` is expected here.
+(10,27)-(11,1) A right brace `}` is expected here.

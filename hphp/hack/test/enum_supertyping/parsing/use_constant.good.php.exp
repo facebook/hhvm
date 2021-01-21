@@ -237,7 +237,7 @@
             "kind":"token",
             "token":{
               "kind":"name",
-              "text":"E",
+              "text":"F",
               "offset":144,
               "leading_width":0,
               "width":1,
@@ -266,14 +266,14 @@
             "simple_type_specifier":{
               "kind":"token",
               "token":{
-                "kind":"int",
-                "text":"int",
+                "kind":"string",
+                "text":"string",
                 "offset":148,
                 "leading_width":0,
-                "width":3,
+                "width":6,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":151,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":154,"width":1}],
                 "line_number":8
               }
             }
@@ -284,7 +284,7 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":152,
+              "offset":155,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
@@ -300,12 +300,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":153,
+              "offset":156,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":154,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":157,"width":1}],
               "line_number":8
             }
           }
@@ -318,12 +318,12 @@
             "token":{
               "kind":"enum",
               "text":"enum",
-              "offset":155,
+              "offset":158,
               "leading_width":1,
               "width":4,
               "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":155,"width":1}],
-              "trailing":[{"kind":"whitespace","text":" ","offset":160,"width":1}],
+              "leading":[{"kind":"end_of_line","text":"\n","offset":158,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":163,"width":1}],
               "line_number":10
             }
           },
@@ -331,13 +331,13 @@
             "kind":"token",
             "token":{
               "kind":"name",
-              "text":"F",
-              "offset":161,
+              "text":"E",
+              "offset":164,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":162,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
               "line_number":10
             }
           },
@@ -346,12 +346,12 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":163,
+              "offset":166,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":164,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":167,"width":1}],
               "line_number":10
             }
           },
@@ -360,14 +360,14 @@
             "simple_type_specifier":{
               "kind":"token",
               "token":{
-                "kind":"int",
-                "text":"int",
-                "offset":165,
+                "kind":"string",
+                "text":"string",
+                "offset":168,
                 "leading_width":0,
-                "width":3,
+                "width":6,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":168,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":174,"width":1}],
                 "line_number":10
               }
             }
@@ -378,12 +378,12 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":169,
+              "offset":175,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":170,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":176,"width":1}],
               "line_number":10
             }
           },
@@ -397,12 +397,12 @@
                   "token":{
                     "kind":"use",
                     "text":"use",
-                    "offset":171,
+                    "offset":177,
                     "leading_width":2,
                     "width":3,
                     "trailing_width":1,
-                    "leading":[{"kind":"whitespace","text":"  ","offset":171,"width":2}],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":176,"width":1}],
+                    "leading":[{"kind":"whitespace","text":"  ","offset":177,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":182,"width":1}],
                     "line_number":11
                   }
                 },
@@ -417,8 +417,8 @@
                           "kind":"token",
                           "token":{
                             "kind":"name",
-                            "text":"E",
-                            "offset":177,
+                            "text":"F",
+                            "offset":183,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":0,
@@ -437,31 +437,97 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":178,
+                    "offset":184,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"end_of_line","text":"\n","offset":179,"width":1}],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":185,"width":1}],
                     "line_number":11
                   }
                 }
               }
             ]
           },
-          "enum_enumerators":{"kind":"missing"},
+          "enum_enumerators":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"enumerator",
+                "enumerator_name":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"USE",
+                    "offset":186,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":186,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":191,"width":1}],
+                    "line_number":12
+                  }
+                },
+                "enumerator_equal":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"=",
+                    "text":"=",
+                    "offset":192,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":193,"width":1}],
+                    "line_number":12
+                  }
+                },
+                "enumerator_value":{
+                  "kind":"literal",
+                  "literal_expression":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"double_quoted_string_literal",
+                      "text":"\"use\"",
+                      "offset":194,
+                      "leading_width":0,
+                      "width":5,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":12
+                    }
+                  }
+                },
+                "enumerator_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":199,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":200,"width":1}],
+                    "line_number":12
+                  }
+                }
+              }
+            ]
+          },
           "enum_right_brace":{
             "kind":"token",
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":180,
+              "offset":201,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":181,"width":1}],
-              "line_number":12
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":202,"width":1}],
+              "line_number":13
             }
           }
         },
@@ -472,19 +538,19 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":182,
+              "offset":203,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":13
+              "line_number":14
             }
           }
         }
       ]
     }
   },
-  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum E : int {}\n\nenum F : int {\n  use E;\n}\n",
-  "version":"2021-01-14-0001"
+  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum F : string {}\n\nenum E : string {\n  use F;\n  USE = \"use\";\n}\n",
+  "version":"2021-01-20-0001"
 }

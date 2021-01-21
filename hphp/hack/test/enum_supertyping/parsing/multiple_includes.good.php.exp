@@ -279,8 +279,6 @@
             }
           },
           "enum_type":{"kind":"missing"},
-          "enum_includes_keyword":{"kind":"missing"},
-          "enum_includes_list":{"kind":"missing"},
           "enum_left_brace":{
             "kind":"token",
             "token":{
@@ -295,6 +293,7 @@
               "line_number":8
             }
           },
+          "enum_use_clauses":{"kind":"missing"},
           "enum_enumerators":{"kind":"missing"},
           "enum_right_brace":{
             "kind":"token",
@@ -374,8 +373,6 @@
             }
           },
           "enum_type":{"kind":"missing"},
-          "enum_includes_keyword":{"kind":"missing"},
-          "enum_includes_list":{"kind":"missing"},
           "enum_left_brace":{
             "kind":"token",
             "token":{
@@ -390,6 +387,7 @@
               "line_number":10
             }
           },
+          "enum_use_clauses":{"kind":"missing"},
           "enum_enumerators":{"kind":"missing"},
           "enum_right_brace":{
             "kind":"token",
@@ -469,93 +467,115 @@
             }
           },
           "enum_type":{"kind":"missing"},
-          "enum_includes_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"includes",
-              "text":"includes",
-              "offset":188,
-              "leading_width":0,
-              "width":8,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":196,"width":1}],
-              "line_number":12
-            }
-          },
-          "enum_includes_list":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"E1",
-                      "offset":197,
-                      "leading_width":0,
-                      "width":2,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":12
-                    }
-                  }
-                },
-                "list_separator":{
-                  "kind":"token",
-                  "token":{
-                    "kind":",",
-                    "text":",",
-                    "offset":199,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":1,
-                    "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":200,"width":1}],
-                    "line_number":12
-                  }
-                }
-              },
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"E2",
-                      "offset":201,
-                      "leading_width":0,
-                      "width":2,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":203,"width":1}],
-                      "line_number":12
-                    }
-                  }
-                },
-                "list_separator":{"kind":"missing"}
-              }
-            ]
-          },
           "enum_left_brace":{
             "kind":"token",
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":204,
+              "offset":188,
               "leading_width":0,
               "width":1,
-              "trailing_width":0,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":189,"width":1}],
               "line_number":12
             }
+          },
+          "enum_use_clauses":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"enum_use",
+                "enum_use_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"use",
+                    "text":"use",
+                    "offset":190,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":190,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":195,"width":1}],
+                    "line_number":13
+                  }
+                },
+                "enum_use_names":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"E1",
+                            "offset":196,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":13
+                          }
+                        }
+                      },
+                      "list_separator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":",",
+                          "text":",",
+                          "offset":198,
+                          "leading_width":0,
+                          "width":1,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":199,"width":1}],
+                          "line_number":13
+                        }
+                      }
+                    },
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"E2",
+                            "offset":200,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":13
+                          }
+                        }
+                      },
+                      "list_separator":{"kind":"missing"}
+                    }
+                  ]
+                },
+                "enum_use_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":202,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":203,"width":1}],
+                    "line_number":13
+                  }
+                }
+              }
+            ]
           },
           "enum_enumerators":{"kind":"missing"},
           "enum_right_brace":{
@@ -563,13 +583,225 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":205,
+              "offset":204,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":206,"width":1}],
-              "line_number":12
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":205,"width":1}],
+              "line_number":14
+            }
+          }
+        },
+        {
+          "kind":"enum_declaration",
+          "enum_attribute_spec":{"kind":"missing"},
+          "enum_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"enum",
+              "text":"enum",
+              "offset":206,
+              "leading_width":1,
+              "width":4,
+              "trailing_width":1,
+              "leading":[{"kind":"end_of_line","text":"\n","offset":206,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":211,"width":1}],
+              "line_number":16
+            }
+          },
+          "enum_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"G",
+              "offset":212,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":213,"width":1}],
+              "line_number":16
+            }
+          },
+          "enum_colon":{
+            "kind":"token",
+            "token":{
+              "kind":":",
+              "text":":",
+              "offset":214,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":215,"width":1}],
+              "line_number":16
+            }
+          },
+          "enum_base":{
+            "kind":"simple_type_specifier",
+            "simple_type_specifier":{
+              "kind":"token",
+              "token":{
+                "kind":"int",
+                "text":"int",
+                "offset":216,
+                "leading_width":0,
+                "width":3,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"whitespace","text":" ","offset":219,"width":1}],
+                "line_number":16
+              }
+            }
+          },
+          "enum_type":{"kind":"missing"},
+          "enum_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":220,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":221,"width":1}],
+              "line_number":16
+            }
+          },
+          "enum_use_clauses":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"enum_use",
+                "enum_use_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"use",
+                    "text":"use",
+                    "offset":222,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":222,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":227,"width":1}],
+                    "line_number":17
+                  }
+                },
+                "enum_use_names":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"E1",
+                            "offset":228,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":17
+                          }
+                        }
+                      },
+                      "list_separator":{"kind":"missing"}
+                    }
+                  ]
+                },
+                "enum_use_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":230,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":231,"width":1}],
+                    "line_number":17
+                  }
+                }
+              },
+              {
+                "kind":"enum_use",
+                "enum_use_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"use",
+                    "text":"use",
+                    "offset":232,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":232,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":237,"width":1}],
+                    "line_number":18
+                  }
+                },
+                "enum_use_names":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"E2",
+                            "offset":238,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":18
+                          }
+                        }
+                      },
+                      "list_separator":{"kind":"missing"}
+                    }
+                  ]
+                },
+                "enum_use_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":240,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":241,"width":1}],
+                    "line_number":18
+                  }
+                }
+              }
+            ]
+          },
+          "enum_enumerators":{"kind":"missing"},
+          "enum_right_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"}",
+              "text":"}",
+              "offset":242,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":243,"width":1}],
+              "line_number":19
             }
           }
         },
@@ -580,19 +812,19 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":207,
+              "offset":244,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":13
+              "line_number":20
             }
           }
         }
       ]
     }
   },
-  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum E1 : int {}\n\nenum E2 : int {}\n\nenum F : int includes E1, E2 {}\n",
-  "version":"2020-10-01-0000"
+  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum E1 : int {}\n\nenum E2 : int {}\n\nenum F : int {\n  use E1, E2;\n}\n\nenum G : int {\n  use E1;\n  use E2;\n}\n",
+  "version":"2021-01-14-0001"
 }

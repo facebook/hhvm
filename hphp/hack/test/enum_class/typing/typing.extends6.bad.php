@@ -19,6 +19,7 @@ enum class E: ExBox {
    IBox B = new IBox(42);
 }
 
-enum NormalEnum : int includes E {
+enum NormalEnum : int {
+  use E;
   Z = 42;
 }

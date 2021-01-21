@@ -9,4 +9,6 @@ enum E1 : int {}
 
 enum E2 : int {}
 
-enum F : int E1, E2 {}
+enum F : int {
+  E1, E2;
+}

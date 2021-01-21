@@ -30,7 +30,8 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_variable_expression(ctx: &C, variable_expression: Self) -> Self;
     fn make_pipe_variable_expression(ctx: &C, pipe_variable_expression: Self) -> Self;
     fn make_file_attribute_specification(ctx: &C, file_attribute_specification_left_double_angle: Self, file_attribute_specification_keyword: Self, file_attribute_specification_colon: Self, file_attribute_specification_attributes: Self, file_attribute_specification_right_double_angle: Self) -> Self;
-    fn make_enum_declaration(ctx: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_includes_keyword: Self, enum_includes_list: Self, enum_left_brace: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self;
+    fn make_enum_declaration(ctx: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_use_clauses: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self;
+    fn make_enum_use(ctx: &C, enum_use_keyword: Self, enum_use_names: Self, enum_use_semicolon: Self) -> Self;
     fn make_enumerator(ctx: &C, enumerator_name: Self, enumerator_equal: Self, enumerator_value: Self, enumerator_semicolon: Self) -> Self;
     fn make_enum_class_declaration(ctx: &C, enum_class_attribute_spec: Self, enum_class_enum_keyword: Self, enum_class_class_keyword: Self, enum_class_name: Self, enum_class_colon: Self, enum_class_base: Self, enum_class_extends: Self, enum_class_extends_list: Self, enum_class_left_brace: Self, enum_class_elements: Self, enum_class_right_brace: Self) -> Self;
     fn make_enum_class_enumerator(ctx: &C, enum_class_enumerator_type: Self, enum_class_enumerator_name: Self, enum_class_enumerator_equal: Self, enum_class_enumerator_initial_value: Self, enum_class_enumerator_semicolon: Self) -> Self;

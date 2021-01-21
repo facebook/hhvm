@@ -25,7 +25,8 @@ enum class E: ExBox {
    Box<int> C = new Box(42);
 }
 
-// use `extends`, not `includes`
-enum class F: ExBox includes E {
+// use `extends`, not `use`
+enum class F: ExBox {
+  use E;
    Box<int> D = new Box(1664);
 }

@@ -9,4 +9,11 @@ enum E1 : int {}
 
 enum E2 : int {}
 
-enum F : int includes E1, E2 {}
+enum F : int {
+  use E1, E2;
+}
+
+enum G : int {
+  use E1;
+  use E2;
+}

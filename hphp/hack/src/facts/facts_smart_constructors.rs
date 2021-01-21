@@ -289,9 +289,8 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _colon: Self::R,
         _base: Self::R,
         _type: Self::R,
-        _includes: Self::R,
-        includes_list: Self::R,
         _left_brace: Self::R,
+        _use_clauses: Self::R,
         _enumerators: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
@@ -300,7 +299,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             _ => Node::EnumDecl(Box::new(EnumDeclChildren {
                 name,
                 attributes,
-                includes: includes_list,
+                includes: Node::List(vec![]), /* TODO[T83319054]: enum inclusion is not exported into facts yet */
             })),
         }
     }

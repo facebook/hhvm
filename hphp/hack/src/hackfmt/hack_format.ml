@@ -210,18 +210,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           enum_colon = colon_kw;
           enum_base = base;
           enum_type;
-          enum_includes_keyword = enum_includes_kw;
-          enum_includes_list;
           enum_left_brace = left_b;
+          enum_use_clauses;
           enum_enumerators = enumerators;
           enum_right_brace = right_b;
         } ->
-      let after_each_ancestor is_last =
-        if is_last then
-          Nothing
-        else
-          space_split ()
-      in
       Concat
         [
           t env attr;
@@ -233,39 +226,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           SplitWith Cost.Base;
           Nest [Space; t env base; Space; t env enum_type; Space];
-          when_present enum_includes_kw (fun () ->
-              Nest
-                [
-                  Space;
-                  Split;
-                  t env enum_includes_kw;
-                  WithRule
-                    ( Rule.Parental,
-                      Nest
-                        [
-                          Span
-                            [
-                              Space;
-                              ( if list_length enum_includes_list = 1 then
-                                SplitWith Cost.Base
-                              else
-                                Split );
-                              Nest
-                                [
-                                  handle_possible_list
-                                    env
-                                    ~after_each:after_each_ancestor
-                                    enum_includes_list;
-                                ];
-                            ];
-                        ] );
-                ]);
-          Space;
           braced_block_nest
             env
             left_b
             right_b
-            [handle_possible_list env enumerators];
+            [
+              handle_possible_list env enum_use_clauses;
+              handle_possible_list env enumerators;
+            ];
           Newline;
         ]
     | Syntax.Enumerator
@@ -289,6 +257,26 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Nest [value];
           t env semi;
           Newline;
+        ]
+    | Syntax.EnumUse
+        {
+          enum_use_keyword = kw;
+          enum_use_names = elements;
+          enum_use_semicolon = semi;
+        } ->
+      Concat
+        [
+          t env kw;
+          (match Syntax.syntax elements with
+          | Syntax.SyntaxList [x] -> Concat [Space; t env x]
+          | Syntax.SyntaxList _ ->
+            WithRule
+              ( Rule.Parental,
+                Nest
+                  [handle_possible_list env ~before_each:space_split elements]
+              )
+          | _ -> Concat [Space; t env elements]);
+          t env semi;
         ]
     | Syntax.RecordDeclaration
         {

@@ -2316,7 +2316,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Concurrent
             | TokenKind::If
             | TokenKind::Include
-            | TokenKind::Includes
             | TokenKind::Include_once
             | TokenKind::Instanceof
             | TokenKind::Insteadof
@@ -3865,10 +3864,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _colon: Self::R,
         extends: Self::R,
         constraint: Self::R,
-        _includes_keyword: Self::R,
-        includes: Self::R,
         _left_brace: Self::R,
-        cases: Self::R,
+        use_clauses: Self::R,
+        enumerators: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
         let id = match self.elaborate_into_current_ns(name) {
@@ -3888,7 +3886,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::EnumDeclaration),
         };
         let key = id.1;
-        let consts = self.slice(cases.iter().filter_map(|node| match node {
+        let consts = self.slice(enumerators.iter().filter_map(|node| match node {
             Node::ListItem(&(name, value)) => {
                 let id = name.as_id()?;
                 Some(
@@ -3921,7 +3919,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => None,
         };
 
-        let includes = self.slice(includes.iter().filter_map(|&node| self.node_to_ty(node)));
+        let includes = self.slice(use_clauses.iter().filter_map(|&node| self.node_to_ty(node)));
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.state.file_mode,

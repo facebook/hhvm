@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-01-14-0001",
+  "version" : "2021-01-21-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -127,8 +127,6 @@
       "token_text" : "implements" },
     { "token_kind" : "Include",
       "token_text" : "include" },
-    { "token_kind" : "Includes",
-      "token_text" : "includes" },
     { "token_kind" : "Include_once",
       "token_text" : "include_once" },
     { "token_kind" : "Inout",
@@ -525,11 +523,19 @@
         { "field_name" : "colon" },
         { "field_name" : "base" },
         { "field_name" : "type" },
-        { "field_name" : "includes_keyword" },
-        { "field_name" : "includes_list" },
         { "field_name" : "left_brace" },
+        { "field_name" : "use_clauses" },
         { "field_name" : "enumerators" },
         { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "EnumUse",
+      "type_name" : "enum_use",
+      "description" : "enum_use",
+      "prefix" : "enum_use",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "names" },
+        { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "Enumerator",
       "type_name" : "enumerator",

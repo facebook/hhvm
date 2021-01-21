@@ -5,4 +5,6 @@
   'enum_supertyping',
 )>>
 
-enum F : int includes {}
+enum F : int {
+  use;
+}

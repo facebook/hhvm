@@ -37,6 +37,7 @@ pub enum SyntaxVariant<'a, T, V> {
     PipeVariableExpression(&'a PipeVariableExpressionChildren<'a, T, V>),
     FileAttributeSpecification(&'a FileAttributeSpecificationChildren<'a, T, V>),
     EnumDeclaration(&'a EnumDeclarationChildren<'a, T, V>),
+    EnumUse(&'a EnumUseChildren<'a, T, V>),
     Enumerator(&'a EnumeratorChildren<'a, T, V>),
     EnumClassDeclaration(&'a EnumClassDeclarationChildren<'a, T, V>),
     EnumClassEnumerator(&'a EnumClassEnumeratorChildren<'a, T, V>),
@@ -264,11 +265,17 @@ pub struct EnumDeclarationChildren<'a, T, V> {
     pub colon: Syntax<'a, T, V>,
     pub base: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
-    pub includes_keyword: Syntax<'a, T, V>,
-    pub includes_list: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
+    pub use_clauses: Syntax<'a, T, V>,
     pub enumerators: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumUseChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub names: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

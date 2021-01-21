@@ -11,7 +11,7 @@
   .enum_ty <"HH\\int" extended_hint>;
 }
 
-.class {} [enum final] F (12,12) extends HH\BuiltinEnum enum_includes (E1 E2) {
+.class {} [enum final] F (12,14) extends HH\BuiltinEnum enum_includes (E1 E2) {
   .enum_ty <"HH\\int" extended_hint>;
 }
 

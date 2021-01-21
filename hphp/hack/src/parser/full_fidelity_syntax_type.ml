@@ -195,11 +195,15 @@ struct
         enum_colon: t;
         enum_base: t;
         enum_type: t;
-        enum_includes_keyword: t;
-        enum_includes_list: t;
         enum_left_brace: t;
+        enum_use_clauses: t;
         enum_enumerators: t;
         enum_right_brace: t;
+      }
+    | EnumUse of {
+        enum_use_keyword: t;
+        enum_use_names: t;
+        enum_use_semicolon: t;
       }
     | Enumerator of {
         enumerator_name: t;
@@ -1461,11 +1465,16 @@ struct
     enum_colon: Token.t value;
     enum_base: specifier value;
     enum_type: type_constraint option value;
-    enum_includes_keyword: Token.t option value;
-    enum_includes_list: specifier listesque value;
     enum_left_brace: Token.t value;
+    enum_use_clauses: enum_use listesque value;
     enum_enumerators: enumerator listesque value;
     enum_right_brace: Token.t value;
+  }
+
+  and enum_use = {
+    enum_use_keyword: Token.t value;
+    enum_use_names: specifier listesque value;
+    enum_use_semicolon: Token.t value;
   }
 
   and enumerator = {

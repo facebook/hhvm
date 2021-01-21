@@ -113,7 +113,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_declaration(_: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_includes_keyword: Self, enum_includes_list: Self, enum_left_brace: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
+    fn make_enum_declaration(_: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_use_clauses: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
             enum_attribute_spec,
             enum_keyword,
@@ -121,11 +121,20 @@ where
             enum_colon,
             enum_base,
             enum_type,
-            enum_includes_keyword,
-            enum_includes_list,
             enum_left_brace,
+            enum_use_clauses,
             enum_enumerators,
             enum_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_enum_use(_: &C, enum_use_keyword: Self, enum_use_names: Self, enum_use_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::EnumUse(Box::new(EnumUseChildren {
+            enum_use_keyword,
+            enum_use_names,
+            enum_use_semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -1944,18 +1953,24 @@ where
                 acc
             },
             SyntaxVariant::EnumDeclaration(x) => {
-                let EnumDeclarationChildren { enum_attribute_spec, enum_keyword, enum_name, enum_colon, enum_base, enum_type, enum_includes_keyword, enum_includes_list, enum_left_brace, enum_enumerators, enum_right_brace } = *x;
+                let EnumDeclarationChildren { enum_attribute_spec, enum_keyword, enum_name, enum_colon, enum_base, enum_type, enum_left_brace, enum_use_clauses, enum_enumerators, enum_right_brace } = *x;
                 let acc = f(enum_attribute_spec, acc);
                 let acc = f(enum_keyword, acc);
                 let acc = f(enum_name, acc);
                 let acc = f(enum_colon, acc);
                 let acc = f(enum_base, acc);
                 let acc = f(enum_type, acc);
-                let acc = f(enum_includes_keyword, acc);
-                let acc = f(enum_includes_list, acc);
                 let acc = f(enum_left_brace, acc);
+                let acc = f(enum_use_clauses, acc);
                 let acc = f(enum_enumerators, acc);
                 let acc = f(enum_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::EnumUse(x) => {
+                let EnumUseChildren { enum_use_keyword, enum_use_names, enum_use_semicolon } = *x;
+                let acc = f(enum_use_keyword, acc);
+                let acc = f(enum_use_names, acc);
+                let acc = f(enum_use_semicolon, acc);
                 acc
             },
             SyntaxVariant::Enumerator(x) => {
@@ -3234,6 +3249,7 @@ where
             SyntaxVariant::PipeVariableExpression {..} => SyntaxKind::PipeVariableExpression,
             SyntaxVariant::FileAttributeSpecification {..} => SyntaxKind::FileAttributeSpecification,
             SyntaxVariant::EnumDeclaration {..} => SyntaxKind::EnumDeclaration,
+            SyntaxVariant::EnumUse {..} => SyntaxKind::EnumUse,
             SyntaxVariant::Enumerator {..} => SyntaxKind::Enumerator,
             SyntaxVariant::EnumClassDeclaration {..} => SyntaxKind::EnumClassDeclaration,
             SyntaxVariant::EnumClassEnumerator {..} => SyntaxKind::EnumClassEnumerator,
@@ -3448,18 +3464,23 @@ where
                  file_attribute_specification_left_double_angle: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::EnumDeclaration, 11) => SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
+             (SyntaxKind::EnumDeclaration, 10) => SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
                  enum_right_brace: ts.pop().unwrap(),
                  enum_enumerators: ts.pop().unwrap(),
+                 enum_use_clauses: ts.pop().unwrap(),
                  enum_left_brace: ts.pop().unwrap(),
-                 enum_includes_list: ts.pop().unwrap(),
-                 enum_includes_keyword: ts.pop().unwrap(),
                  enum_type: ts.pop().unwrap(),
                  enum_base: ts.pop().unwrap(),
                  enum_colon: ts.pop().unwrap(),
                  enum_name: ts.pop().unwrap(),
                  enum_keyword: ts.pop().unwrap(),
                  enum_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EnumUse, 3) => SyntaxVariant::EnumUse(Box::new(EnumUseChildren {
+                 enum_use_semicolon: ts.pop().unwrap(),
+                 enum_use_names: ts.pop().unwrap(),
+                 enum_use_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::Enumerator, 4) => SyntaxVariant::Enumerator(Box::new(EnumeratorChildren {
@@ -4630,11 +4651,17 @@ pub struct EnumDeclarationChildren<T, V> {
     pub enum_colon: Syntax<T, V>,
     pub enum_base: Syntax<T, V>,
     pub enum_type: Syntax<T, V>,
-    pub enum_includes_keyword: Syntax<T, V>,
-    pub enum_includes_list: Syntax<T, V>,
     pub enum_left_brace: Syntax<T, V>,
+    pub enum_use_clauses: Syntax<T, V>,
     pub enum_enumerators: Syntax<T, V>,
     pub enum_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumUseChildren<T, V> {
+    pub enum_use_keyword: Syntax<T, V>,
+    pub enum_use_names: Syntax<T, V>,
+    pub enum_use_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5910,6 +5937,7 @@ pub enum SyntaxVariant<T, V> {
     PipeVariableExpression(Box<PipeVariableExpressionChildren<T, V>>),
     FileAttributeSpecification(Box<FileAttributeSpecificationChildren<T, V>>),
     EnumDeclaration(Box<EnumDeclarationChildren<T, V>>),
+    EnumUse(Box<EnumUseChildren<T, V>>),
     Enumerator(Box<EnumeratorChildren<T, V>>),
     EnumClassDeclaration(Box<EnumClassDeclarationChildren<T, V>>),
     EnumClassEnumerator(Box<EnumClassEnumeratorChildren<T, V>>),
@@ -6170,18 +6198,26 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumDeclaration(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.enum_attribute_spec),
                     1 => Some(&x.enum_keyword),
                     2 => Some(&x.enum_name),
                     3 => Some(&x.enum_colon),
                     4 => Some(&x.enum_base),
                     5 => Some(&x.enum_type),
-                    6 => Some(&x.enum_includes_keyword),
-                    7 => Some(&x.enum_includes_list),
-                    8 => Some(&x.enum_left_brace),
-                    9 => Some(&x.enum_enumerators),
-                    10 => Some(&x.enum_right_brace),
+                    6 => Some(&x.enum_left_brace),
+                    7 => Some(&x.enum_use_clauses),
+                    8 => Some(&x.enum_enumerators),
+                    9 => Some(&x.enum_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            EnumUse(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.enum_use_keyword),
+                    1 => Some(&x.enum_use_names),
+                    2 => Some(&x.enum_use_semicolon),
                         _ => None,
                     }
                 })

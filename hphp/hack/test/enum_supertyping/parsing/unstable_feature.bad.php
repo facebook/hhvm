@@ -3,4 +3,6 @@
 
 enum E : int {}
 
-enum F : int includes E {}
+enum F : int {
+  use E;
+}

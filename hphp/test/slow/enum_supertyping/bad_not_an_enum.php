@@ -7,7 +7,8 @@
 
 class C {}
 
-enum E : int includes C {
+enum E : int {
+  use C;
   A = 1;
 }
 

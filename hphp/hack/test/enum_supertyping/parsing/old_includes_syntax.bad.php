@@ -5,15 +5,6 @@
   'enum_supertyping',
 )>>
 
-enum F: int as int {
-  A = 0;
-}
+enum E : int {}
 
-enum G: int as int {
-  A = 1;
-}
-
-enum H: int {
-  use F;
-  use G;
-}
+enum F : int includes E {}

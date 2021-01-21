@@ -1490,11 +1490,9 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           enum_right_brace = validate_token x.enum_right_brace;
           enum_enumerators =
             validate_list_with validate_enumerator x.enum_enumerators;
+          enum_use_clauses =
+            validate_list_with validate_enum_use x.enum_use_clauses;
           enum_left_brace = validate_token x.enum_left_brace;
-          enum_includes_list =
-            validate_list_with validate_specifier x.enum_includes_list;
-          enum_includes_keyword =
-            validate_option_with validate_token x.enum_includes_keyword;
           enum_type = validate_option_with validate_type_constraint x.enum_type;
           enum_base = validate_specifier x.enum_base;
           enum_colon = validate_token x.enum_colon;
@@ -1523,14 +1521,37 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             enum_base = invalidate_specifier x.enum_base;
             enum_type =
               invalidate_option_with invalidate_type_constraint x.enum_type;
-            enum_includes_keyword =
-              invalidate_option_with invalidate_token x.enum_includes_keyword;
-            enum_includes_list =
-              invalidate_list_with invalidate_specifier x.enum_includes_list;
             enum_left_brace = invalidate_token x.enum_left_brace;
+            enum_use_clauses =
+              invalidate_list_with invalidate_enum_use x.enum_use_clauses;
             enum_enumerators =
               invalidate_list_with invalidate_enumerator x.enum_enumerators;
             enum_right_brace = invalidate_token x.enum_right_brace;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_enum_use : enum_use validator = function
+    | { Syntax.syntax = Syntax.EnumUse x; value = v } ->
+      ( v,
+        {
+          enum_use_semicolon = validate_token x.enum_use_semicolon;
+          enum_use_names =
+            validate_list_with validate_specifier x.enum_use_names;
+          enum_use_keyword = validate_token x.enum_use_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.EnumUse) s
+
+  and invalidate_enum_use : enum_use invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.EnumUse
+          {
+            enum_use_keyword = invalidate_token x.enum_use_keyword;
+            enum_use_names =
+              invalidate_list_with invalidate_specifier x.enum_use_names;
+            enum_use_semicolon = invalidate_token x.enum_use_semicolon;
           };
       Syntax.value = v;
     }

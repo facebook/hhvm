@@ -119,7 +119,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, includes_keyword: Self, includes_list: Self, left_brace: Self, enumerators: Self, right_brace: Self) -> Self {
+    fn make_enum_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, colon: Self, base: Self, type_: Self, left_brace: Self, use_clauses: Self, enumerators: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(ctx.get_arena().alloc(EnumDeclarationChildren {
             attribute_spec,
             keyword,
@@ -127,11 +127,20 @@ where
             colon,
             base,
             type_,
-            includes_keyword,
-            includes_list,
             left_brace,
+            use_clauses,
             enumerators,
             right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_enum_use(ctx: &C, keyword: Self, names: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::EnumUse(ctx.get_arena().alloc(EnumUseChildren {
+            keyword,
+            names,
+            semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

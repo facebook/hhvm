@@ -13,7 +13,9 @@ enum E2 : int {
   A = 2;
 }
 
-enum F : int includes E1, E2 {}
+enum F : int {
+  use E1, E2;
+}
 
 <<__EntryPoint>>
 function main() : void {

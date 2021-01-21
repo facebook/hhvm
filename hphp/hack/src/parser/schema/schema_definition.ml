@@ -162,11 +162,24 @@ let schema : schema_node list =
           ("colon", Token);
           ("base", Aggregate Specifier);
           ("type", ZeroOrOne (Just "TypeConstraint"));
-          ("includes_keyword", ZeroOrOne Token);
-          ("includes_list", ZeroOrMore (Aggregate Specifier));
           ("left_brace", Token);
+          ("use_clauses", ZeroOrMore (Just "EnumUse"));
           ("enumerators", ZeroOrMore (Just "Enumerator"));
           ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "EnumUse";
+      type_name = "enum_use";
+      func_name = "enum_use";
+      description = "enum_use";
+      prefix = "enum_use";
+      aggregates = [];
+      fields =
+        [
+          ("keyword", Token);
+          ("names", ZeroOrMore (Aggregate Specifier));
+          ("semicolon", Token);
         ];
     };
     {

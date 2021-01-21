@@ -1,6 +1,6 @@
-File "function_argument_2.bad.php", line 20, characters 12-21:
+File "function_argument_2.bad.php", line 21, characters 12-15:
 Invalid argument (Typing[4110])
-  File "function_argument_2.bad.php", line 16, characters 14-22:
-  Expected `SuperEnum`
-  File "function_argument_2.bad.php", line 8, characters 22-24:
+  File "function_argument_2.bad.php", line 17, characters 14-14:
+  Expected `G`
+  File "function_argument_2.bad.php", line 8, characters 16-18:
   But got `int`

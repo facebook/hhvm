@@ -6,8 +6,17 @@
 )>>
 
 enum A : int {}
-enum B : int  includes A {}
+
+enum B : int {
+  use A;
+}
 
 enum C : int as int {}
-enum D : int as int includes C {}
-enum E : int includes C {}
+
+enum D : int as int {
+  use C;
+}
+
+enum E : int {
+  use C;
+}

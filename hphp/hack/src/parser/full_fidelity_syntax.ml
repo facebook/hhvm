@@ -67,6 +67,7 @@ module WithToken (Token : TokenType) = struct
       | PipeVariableExpression _ -> SyntaxKind.PipeVariableExpression
       | FileAttributeSpecification _ -> SyntaxKind.FileAttributeSpecification
       | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
+      | EnumUse _ -> SyntaxKind.EnumUse
       | Enumerator _ -> SyntaxKind.Enumerator
       | EnumClassDeclaration _ -> SyntaxKind.EnumClassDeclaration
       | EnumClassEnumerator _ -> SyntaxKind.EnumClassEnumerator
@@ -272,6 +273,8 @@ module WithToken (Token : TokenType) = struct
       has_kind SyntaxKind.FileAttributeSpecification
 
     let is_enum_declaration = has_kind SyntaxKind.EnumDeclaration
+
+    let is_enum_use = has_kind SyntaxKind.EnumUse
 
     let is_enumerator = has_kind SyntaxKind.Enumerator
 
@@ -780,9 +783,8 @@ module WithToken (Token : TokenType) = struct
             enum_colon;
             enum_base;
             enum_type;
-            enum_includes_keyword;
-            enum_includes_list;
             enum_left_brace;
+            enum_use_clauses;
             enum_enumerators;
             enum_right_brace;
           } ->
@@ -792,11 +794,15 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc enum_colon in
         let acc = f acc enum_base in
         let acc = f acc enum_type in
-        let acc = f acc enum_includes_keyword in
-        let acc = f acc enum_includes_list in
         let acc = f acc enum_left_brace in
+        let acc = f acc enum_use_clauses in
         let acc = f acc enum_enumerators in
         let acc = f acc enum_right_brace in
+        acc
+      | EnumUse { enum_use_keyword; enum_use_names; enum_use_semicolon } ->
+        let acc = f acc enum_use_keyword in
+        let acc = f acc enum_use_names in
+        let acc = f acc enum_use_semicolon in
         acc
       | Enumerator
           {
@@ -2468,9 +2474,8 @@ module WithToken (Token : TokenType) = struct
             enum_colon;
             enum_base;
             enum_type;
-            enum_includes_keyword;
-            enum_includes_list;
             enum_left_brace;
+            enum_use_clauses;
             enum_enumerators;
             enum_right_brace;
           } ->
@@ -2481,12 +2486,13 @@ module WithToken (Token : TokenType) = struct
           enum_colon;
           enum_base;
           enum_type;
-          enum_includes_keyword;
-          enum_includes_list;
           enum_left_brace;
+          enum_use_clauses;
           enum_enumerators;
           enum_right_brace;
         ]
+      | EnumUse { enum_use_keyword; enum_use_names; enum_use_semicolon } ->
+        [enum_use_keyword; enum_use_names; enum_use_semicolon]
       | Enumerator
           {
             enumerator_name;
@@ -4061,9 +4067,8 @@ module WithToken (Token : TokenType) = struct
             enum_colon;
             enum_base;
             enum_type;
-            enum_includes_keyword;
-            enum_includes_list;
             enum_left_brace;
+            enum_use_clauses;
             enum_enumerators;
             enum_right_brace;
           } ->
@@ -4074,12 +4079,13 @@ module WithToken (Token : TokenType) = struct
           "enum_colon";
           "enum_base";
           "enum_type";
-          "enum_includes_keyword";
-          "enum_includes_list";
           "enum_left_brace";
+          "enum_use_clauses";
           "enum_enumerators";
           "enum_right_brace";
         ]
+      | EnumUse { enum_use_keyword; enum_use_names; enum_use_semicolon } ->
+        ["enum_use_keyword"; "enum_use_names"; "enum_use_semicolon"]
       | Enumerator
           {
             enumerator_name;
@@ -5777,9 +5783,8 @@ module WithToken (Token : TokenType) = struct
             enum_colon;
             enum_base;
             enum_type;
-            enum_includes_keyword;
-            enum_includes_list;
             enum_left_brace;
+            enum_use_clauses;
             enum_enumerators;
             enum_right_brace;
           ] ) ->
@@ -5791,12 +5796,14 @@ module WithToken (Token : TokenType) = struct
             enum_colon;
             enum_base;
             enum_type;
-            enum_includes_keyword;
-            enum_includes_list;
             enum_left_brace;
+            enum_use_clauses;
             enum_enumerators;
             enum_right_brace;
           }
+      | ( SyntaxKind.EnumUse,
+          [enum_use_keyword; enum_use_names; enum_use_semicolon] ) ->
+        EnumUse { enum_use_keyword; enum_use_names; enum_use_semicolon }
       | ( SyntaxKind.Enumerator,
           [
             enumerator_name;
@@ -7609,9 +7616,8 @@ module WithToken (Token : TokenType) = struct
           enum_colon
           enum_base
           enum_type
-          enum_includes_keyword
-          enum_includes_list
           enum_left_brace
+          enum_use_clauses
           enum_enumerators
           enum_right_brace =
         let syntax =
@@ -7623,12 +7629,18 @@ module WithToken (Token : TokenType) = struct
               enum_colon;
               enum_base;
               enum_type;
-              enum_includes_keyword;
-              enum_includes_list;
               enum_left_brace;
+              enum_use_clauses;
               enum_enumerators;
               enum_right_brace;
             }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_enum_use enum_use_keyword enum_use_names enum_use_semicolon =
+        let syntax =
+          EnumUse { enum_use_keyword; enum_use_names; enum_use_semicolon }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -9,7 +9,8 @@ enum A : int {
   V1 = 0;
 }
 
-enum B1 : int includes A {
+enum B1 : int {
+  use A;
   V2 = 1;
 }
 
@@ -17,7 +18,8 @@ enum B2 : int {
   V3 = 2;
 }
 
-enum C : int includes B1, B2 {
+enum C : int {
+  use B1, B2;
   V4 = 3;
 }
 

@@ -5,17 +5,18 @@
   'enum_supertyping',
 )>>
 
-enum SubEnum: int as int {
+enum F: int as int {
   A = 0;
 }
 
-enum SuperEnum: int includes SubEnum {
+enum G: int {
+  use F;
   B = 1;
 }
 
-function foo(SuperEnum $e) : SuperEnum { return $e; }
+function foo(G $e) : G { return $e; }
 
 <<__EntryPoint>>
 function main(): void {
-  echo foo(SubEnum::A);
+  echo foo(F::A);
 }

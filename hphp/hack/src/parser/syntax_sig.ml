@@ -69,11 +69,15 @@ module type Syntax_S = sig
         enum_colon: t;
         enum_base: t;
         enum_type: t;
-        enum_includes_keyword: t;
-        enum_includes_list: t;
         enum_left_brace: t;
+        enum_use_clauses: t;
         enum_enumerators: t;
         enum_right_brace: t;
+      }
+    | EnumUse of {
+        enum_use_keyword: t;
+        enum_use_names: t;
+        enum_use_semicolon: t;
       }
     | Enumerator of {
         enumerator_name: t;
@@ -1085,7 +1089,9 @@ module type Syntax_S = sig
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
 
   val make_enum_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_enum_use : t -> t -> t -> t
 
   val make_enumerator : t -> t -> t -> t -> t
 
@@ -1443,6 +1449,8 @@ module type Syntax_S = sig
   val is_file_attribute_specification : t -> bool
 
   val is_enum_declaration : t -> bool
+
+  val is_enum_use : t -> bool
 
   val is_enumerator : t -> bool
 

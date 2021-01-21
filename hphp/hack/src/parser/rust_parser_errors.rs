@@ -5630,10 +5630,7 @@ where
                 }
                 _ => {}
             },
-            EnumDeclaration(x) => match &x.includes_keyword.children {
-                Token(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
-                _ => {}
-            },
+            EnumUse(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
             EnumAtomExpression(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumAtom),
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);

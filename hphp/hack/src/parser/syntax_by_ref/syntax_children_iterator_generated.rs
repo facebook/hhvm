@@ -121,18 +121,26 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumDeclaration(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.keyword),
                     2 => Some(&x.name),
                     3 => Some(&x.colon),
                     4 => Some(&x.base),
                     5 => Some(&x.type_),
-                    6 => Some(&x.includes_keyword),
-                    7 => Some(&x.includes_list),
-                    8 => Some(&x.left_brace),
-                    9 => Some(&x.enumerators),
-                    10 => Some(&x.right_brace),
+                    6 => Some(&x.left_brace),
+                    7 => Some(&x.use_clauses),
+                    8 => Some(&x.enumerators),
+                    9 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            EnumUse(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.names),
+                    2 => Some(&x.semicolon),
                         _ => None,
                     }
                 })

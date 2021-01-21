@@ -189,6 +189,32 @@ where
         self.with_statement_parser(|p: &mut StatementParser<'a, S>| p.parse_compound_statement())
     }
 
+    // SPEC:
+    // enum-use:
+    //   use  enum-name-list  ;
+    //
+    // enum-name-list:
+    //   name
+    //   enum-name-list  ,  name
+    fn parse_enum_use(&mut self) -> Option<S::R> {
+        match self.peek_token_kind_with_lookahead(1) {
+            TokenKind::Equal => None,
+            _ => match self.peek_token_kind() {
+                TokenKind::Use => {
+                    let use_token = self.assert_token(TokenKind::Use);
+                    let enum_name_list = self.parse_special_type_list();
+                    let semi = self.require_semicolon();
+                    Some(S!(make_enum_use, self, use_token, enum_name_list, semi))
+                }
+                _ => None,
+            },
+        }
+    }
+
+    fn parse_enum_use_list_opt(&mut self) -> S::R {
+        self.parse_list_until_none(|x: &mut Self| x.parse_enum_use())
+    }
+
     fn parse_enumerator_list_opt(&mut self) -> S::R {
         // SPEC
         // enumerator-list:
@@ -206,14 +232,9 @@ where
     }
 
     fn parse_enum_declaration(&mut self, attrs: S::R) -> S::R {
-        // enum-name-list-nonempty:
-        //   :  enum-name enum-name-list
-        // includes-declaration-opt:
-        //   :
-        //   :  includes enum-name-list-nonempty
         // enum-declaration:
-        //   attribute-specification-opt enum  name  enum-base  type-constraint-opt  includes-declaration-opt /
-        //     {  enumerator-list-opt  }
+        //   attribute-specification-opt enum  name  enum-base  type-constraint-opt /
+        //     {  enum-use-clause-list-opt; enumerator-list-opt  }
         // enum-base:
         //   :  int
         //   :  string
@@ -229,9 +250,10 @@ where
         let base =
             self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let enum_type = self.parse_type_constraint_opt();
-        let (classish_includes, classish_includes_list) = self.parse_classish_includes_opt();
-        let (left_brace, enumerators, right_brace) =
-            self.parse_braced_list(|x: &mut Self| x.parse_enumerator_list_opt());
+        let left_brace = self.require_left_brace();
+        let use_clauses = self.parse_enum_use_list_opt();
+        let enumerators = self.parse_enumerator_list_opt();
+        let right_brace = self.require_right_brace();
         S!(
             make_enum_declaration,
             self,
@@ -241,9 +263,8 @@ where
             colon,
             base,
             enum_type,
-            classish_includes,
-            classish_includes_list,
             left_brace,
+            use_clauses,
             enumerators,
             right_brace,
         )
@@ -658,19 +679,6 @@ where
         }
     }
 
-    fn parse_classish_includes_opt(&mut self) -> (S::R, S::R) {
-        if self.peek_token_kind() != TokenKind::Includes {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            (missing1, missing2)
-        } else {
-            let includes_token = self.next_token();
-            let includes_token = S!(make_token, self, includes_token);
-            let includes_list = self.parse_special_type_list();
-            (includes_token, includes_list)
-        }
-    }
-
     fn parse_xhp_keyword(&mut self) -> (S::R, bool) {
         let xhp = self.optional_token(TokenKind::XHP);
         let is_missing = xhp.is_missing();
@@ -769,7 +777,7 @@ where
     }
 
     fn parse_special_type_list(&mut self) -> S::R {
-        // An extends / implements / includes list is a comma-separated list of types,
+        // An extends / implements / enum_use list is a comma-separated list of types,
         // but very special types; we want the types to consist of a name and an
         // optional generic type argument list.
         //

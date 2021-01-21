@@ -36,6 +36,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::PipeVariableExpression {..} => SyntaxKind::PipeVariableExpression,
             SyntaxVariant::FileAttributeSpecification {..} => SyntaxKind::FileAttributeSpecification,
             SyntaxVariant::EnumDeclaration {..} => SyntaxKind::EnumDeclaration,
+            SyntaxVariant::EnumUse {..} => SyntaxKind::EnumUse,
             SyntaxVariant::Enumerator {..} => SyntaxKind::Enumerator,
             SyntaxVariant::EnumClassDeclaration {..} => SyntaxKind::EnumClassDeclaration,
             SyntaxVariant::EnumClassEnumerator {..} => SyntaxKind::EnumClassEnumerator,

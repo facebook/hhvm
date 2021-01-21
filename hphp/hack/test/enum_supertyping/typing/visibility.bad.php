@@ -6,4 +6,7 @@
 )>>
 
 enum A : int {}
-enum B : int as int includes A {}
+
+enum B : int as int {
+  use A;
+}

@@ -32,6 +32,7 @@ type t =
   | PipeVariableExpression
   | FileAttributeSpecification
   | EnumDeclaration
+  | EnumUse
   | Enumerator
   | EnumClassDeclaration
   | EnumClassEnumerator
@@ -209,6 +210,7 @@ let to_string kind =
   | PipeVariableExpression -> "pipe_variable"
   | FileAttributeSpecification -> "file_attribute_specification"
   | EnumDeclaration -> "enum_declaration"
+  | EnumUse -> "enum_use"
   | Enumerator -> "enumerator"
   | EnumClassDeclaration -> "enum_class_declaration"
   | EnumClassEnumerator -> "enum_class_enumerator"

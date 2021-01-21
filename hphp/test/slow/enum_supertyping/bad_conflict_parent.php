@@ -9,7 +9,8 @@ enum E : int {
   A = 2;
 }
 
-enum F : int includes E {
+enum F : int {
+  use E;
   A = 1;
 }
 

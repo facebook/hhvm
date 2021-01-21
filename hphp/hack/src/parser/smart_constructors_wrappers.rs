@@ -104,8 +104,11 @@ where S: SmartConstructors<State = State>,
     fn make_file_attribute_specification(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::FileAttributeSpecification, self.s.make_file_attribute_specification(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_enum_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R) -> Self::R {
-        compose(SyntaxKind::EnumDeclaration, self.s.make_enum_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1))
+    fn make_enum_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> Self::R {
+        compose(SyntaxKind::EnumDeclaration, self.s.make_enum_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1))
+    }
+    fn make_enum_use(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::EnumUse, self.s.make_enum_use(arg0.1, arg1.1, arg2.1))
     }
     fn make_enumerator(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         compose(SyntaxKind::Enumerator, self.s.make_enumerator(arg0.1, arg1.1, arg2.1, arg3.1))

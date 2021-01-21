@@ -5,12 +5,15 @@
   'enum_supertyping',
 )>>
 
-enum SubEnum: int as int {
+enum F: int as int {
   A = 0;
 }
 
-enum SuperEnum: int includes SubEnum {
+enum G: int {
+  use F;
   B = 1;
 }
 
-function foo3() : SubEnum { return SuperEnum::A; }
+function foo3() : F {
+  return G::A;
+}

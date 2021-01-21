@@ -5,22 +5,24 @@
   'enum_supertyping',
 )>>
 
-enum SubEnumA: int as int {
+enum F: int as int {
   A = 0;
 }
 
-enum SubEnumB: int as int {
+enum G: int as int {
   B = 1;
 }
 
-enum SuperEnum: int includes SubEnumA, SubEnumB {
+enum H: int {
+  use F;
+  use G;
   C = 42;
 }
 
 <<__EntryPoint>>
 function main(): void {
-  echo SubEnumA::A . "\n";
-  echo SubEnumB::B . "\n";
-  echo SuperEnum::A . "\n";
-  echo SuperEnum::B . "\n";
+  echo F::A . "\n";
+  echo G::B . "\n";
+  echo H::A . "\n";
+  echo H::B . "\n";
 }

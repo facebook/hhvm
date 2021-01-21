@@ -70,7 +70,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let spliced_dict = dict_literal(key_value_pairs);
 
     // Make anonymous function of smart constructor calls
-    let visitor_expr = wrap_return(rewrite_expr(&e), &temp_pos.clone());
+    let visitor_expr = wrap_return(rewrite_expr(env, &e), &temp_pos);
     let visitor_body = ast::FuncBody {
         ast: vec![visitor_expr],
         annotation: (),
@@ -91,10 +91,10 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
 
     // Make anonymous function for typing purposes
     let typing_fun = if env.codegen {
-        // throw new Exception()
+        // throw new Exception("");
         Stmt::new(
             temp_pos.clone(),
-            Stmt_::Throw(Box::new(new_obj(&temp_pos, "\\Exception", vec![]))),
+            Stmt_::Throw(Box::new(new_exception(&temp_pos, ""))),
         )
     } else {
         // The original expression to be inferred
@@ -126,19 +126,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     // Add to the body of the thunk after the splice assignments
     thunk_body.push(return_stmt);
 
-    // Create the thunk
-    let thunk_func_body = ast::FuncBody {
-        ast: thunk_body,
-        annotation: (),
-    };
-    let thunk_fun_ = wrap_fun_(thunk_func_body, vec![], temp_pos.clone(), env);
-    let thunk = Expr::new(temp_pos.clone(), Expr_::mk_lfun(thunk_fun_, vec![]));
-
-    // Call the thunk
-    Expr::new(
-        temp_pos.clone(),
-        Expr_::Call(Box::new((thunk, vec![], vec![], None))),
-    )
+    immediately_invoked_lambda(env, &temp_pos, thunk_body)
 }
 
 /// Convert `foo` to `return foo;`.
@@ -484,7 +472,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
 }
 
 /// Convert expression tree expressions to method calls.
-fn rewrite_expr(e: &Expr) -> Expr {
+fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Expr {
     use aast::Expr_::*;
 
     let pos = exprpos(&e.0);
@@ -495,26 +483,26 @@ fn rewrite_expr(e: &Expr) -> Expr {
         Binop(bop) => match &**bop {
             (Bop::Eq(None), lhs, rhs) => v_meth_call(
                 "assign",
-                vec![pos, rewrite_expr(&lhs), rewrite_expr(&rhs)],
+                vec![pos, rewrite_expr(env, &lhs), rewrite_expr(env, &rhs)],
                 &e.0,
             ),
-            _ => v_meth_call(
-                "unsupportedSyntax",
-                vec![string_literal("bad binary operator")],
+            _ => throw_exception_expr(
+                env,
                 &e.0,
+                &format!("Unsupported syntax: binary operator: {:#?}", &bop.0),
             ),
         },
         // Convert ... ? ... : ... to `$v->ternary(new ExprPos(...), $v->..., $v->..., $v->...)`
         Eif(eif) => {
             let (e1, e2o, e3) = &**eif;
             let e2 = if let Some(e2) = e2o {
-                rewrite_expr(&e2)
+                rewrite_expr(env, &e2)
             } else {
                 null_literal()
             };
             v_meth_call(
                 "ternary",
-                vec![pos, rewrite_expr(&e1), e2, rewrite_expr(&e3)],
+                vec![pos, rewrite_expr(env, &e1), e2, rewrite_expr(env, &e3)],
                 &e.0,
             )
         }
@@ -531,9 +519,9 @@ fn rewrite_expr(e: &Expr) -> Expr {
                             let fn_name = string_literal(&*sid.1);
                             let desugared_args = vec![
                                 pos,
-                                rewrite_expr(&receiver),
+                                rewrite_expr(env, &receiver),
                                 fn_name,
-                                vec_literal(args.iter().map(rewrite_expr).collect()),
+                                vec_literal(args.iter().map(|e| rewrite_expr(env, e)).collect()),
                             ];
                             v_meth_call("methCall", desugared_args, &e.0)
                         }
@@ -548,8 +536,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 _ => {
                     let args = vec![
                         pos,
-                        rewrite_expr(recv),
-                        vec_literal(args.iter().map(rewrite_expr).collect()),
+                        rewrite_expr(env, recv),
+                        vec_literal(args.iter().map(|e| rewrite_expr(env, e)).collect()),
                     ];
                     v_meth_call("call", args, &e.0)
                 }
@@ -563,7 +551,7 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 .iter()
                 .map(|p| string_literal(&p.name))
                 .collect();
-            let body_stmts = rewrite_stmts(&fun_.body.ast);
+            let body_stmts = rewrite_stmts(env, &fun_.body.ast);
 
             v_meth_call(
                 "lambdaLiteral",
@@ -582,33 +570,30 @@ fn rewrite_expr(e: &Expr) -> Expr {
             };
             v_meth_call("splice", vec![pos, s, *e.clone()], &e.0)
         }
-        // Convert anything else to $v->unsupportedSyntax().
-        // Type checking should prevent us hitting these cases.
-        _ => v_meth_call(
-            "unsupportedSyntax",
-            vec![string_literal(&format!("{:#?}", &e.1))],
-            &e.0,
-        ),
+        // Convert anything else to `throw new Exception()`.
+        // We should have already produced a parse error, and an exception prevents
+        // us seeing type errors too.
+        _ => throw_exception_expr(env, &e.0, &format!("Unsupported syntax: {:#?}", &e.1)),
     }
 }
 
 /// Convert expression tree statements to method calls.
-fn rewrite_stmts(stmts: &[Stmt]) -> Vec<Expr> {
-    stmts.iter().filter_map(rewrite_stmt).collect()
+fn rewrite_stmts<TF>(env: &Env<TF>, stmts: &[Stmt]) -> Vec<Expr> {
+    stmts.iter().filter_map(|s| rewrite_stmt(env, s)).collect()
 }
 
-fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
+fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Option<Expr> {
     use aast::Stmt_::*;
 
     let pos = exprpos(&s.0);
 
     match &s.1 {
-        Expr(e) => Some(rewrite_expr(&e)),
+        Expr(e) => Some(rewrite_expr(env, &e)),
         Return(e) => match &**e {
             // Convert `return ...;` to `$v->returnStatement(new ExprPos(...), $v->...)`.
             Some(e) => Some(v_meth_call(
                 "returnStatement",
-                vec![pos, rewrite_expr(&e)],
+                vec![pos, rewrite_expr(env, &e)],
                 &s.0,
             )),
             // Convert `return;` to `$v->returnStatement(new ExprPos(...), null)`.
@@ -622,14 +607,14 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         // `$v->ifStatement(new ExprPos(...), $v->..., vec[...], vec[...])`.
         If(if_stmt) => {
             let (e, then_block, else_block) = &**if_stmt;
-            let then_stmts = rewrite_stmts(then_block);
-            let else_stmts = rewrite_stmts(else_block);
+            let then_stmts = rewrite_stmts(env, then_block);
+            let else_stmts = rewrite_stmts(env, else_block);
 
             Some(v_meth_call(
                 "ifStatement",
                 vec![
                     pos,
-                    rewrite_expr(&e),
+                    rewrite_expr(env, &e),
                     vec_literal(then_stmts),
                     vec_literal(else_stmts),
                 ],
@@ -640,11 +625,11 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         // `$v->whileStatement(new ExprPos(...), $v->..., vec[...])`.
         While(w) => {
             let (e, body) = &**w;
-            let body_stmts = rewrite_stmts(body);
+            let body_stmts = rewrite_stmts(env, body);
 
             Some(v_meth_call(
                 "whileStatement",
-                vec![pos, rewrite_expr(&e), vec_literal(body_stmts)],
+                vec![pos, rewrite_expr(env, &e), vec_literal(body_stmts)],
                 &s.0,
             ))
         }
@@ -652,14 +637,14 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         // `$v->forStatement(new ExprPos(...), vec[...], ..., vec[...], vec[...])`.
         For(w) => {
             let (init, cond, incr, body) = &**w;
-            let init_exprs = init.iter().map(rewrite_expr).collect();
+            let init_exprs = init.iter().map(|e| rewrite_expr(env, e)).collect();
             let cond_expr = match cond {
-                Some(cond) => rewrite_expr(cond),
+                Some(cond) => rewrite_expr(env, cond),
                 None => null_literal(),
             };
-            let incr_exprs = incr.iter().map(rewrite_expr).collect();
+            let incr_exprs = incr.iter().map(|e| rewrite_expr(env, e)).collect();
 
-            let body_stmts = rewrite_stmts(body);
+            let body_stmts = rewrite_stmts(env, body);
 
             Some(v_meth_call(
                 "forStatement",
@@ -678,12 +663,13 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         // Convert `continue;` to `$v->continueStatement(new ExprPos(...))`
         Continue => Some(v_meth_call("continueStatement", vec![pos], &s.0)),
         Noop => None,
-        // Convert anything else to $v->unsupportedSyntax().
-        // Type checking should prevent us hitting these cases.
-        _ => Some(v_meth_call(
-            "unsupportedSyntax",
-            vec![string_literal(&format!("{:#?}", &s.1))],
+        // Convert anything else to `throw new Exception()`.
+        // We should have already produced a parse error, and an exception prevents
+        // us seeing type errors too.
+        _ => Some(throw_exception_expr(
+            env,
             &s.0,
+            &format!("Unsupported syntax: {:#?}", &s.1),
         )),
     }
 }
@@ -898,4 +884,59 @@ fn exprpos(pos: &Pos) -> Expr {
             ],
         )
     }
+}
+
+fn new_exception(pos: &Pos, msg: &str) -> Expr {
+    Expr::new(
+        pos.clone(),
+        Expr_::New(Box::new((
+            ClassId(
+                pos.clone(),
+                ClassId_::CIexpr(Expr::new(
+                    pos.clone(),
+                    Expr_::Id(Box::new(Id(pos.clone(), "\\Exception".to_string()))),
+                )),
+            ),
+            vec![],
+            vec![string_literal(msg)],
+            None,
+            pos.clone(),
+        ))),
+    )
+}
+
+/// Build a statement `throw new Exception("msg here")`.
+fn throw_exception(pos: &Pos, msg: &str) -> Stmt {
+    Stmt::new(
+        pos.clone(),
+        Stmt_::Throw(Box::new(new_exception(&pos, msg))),
+    )
+}
+
+/// Build an expression that throws an exception.
+///
+/// ```
+/// (() ==> { throw new Exception("msg here"); })()
+/// ```
+fn throw_exception_expr<TF>(env: &Env<TF>, pos: &Pos, msg: &str) -> Expr {
+    immediately_invoked_lambda(env, pos, vec![throw_exception(pos, msg)])
+}
+
+/// Wrap `stmts` in a lambda that's immediately called.
+///
+/// ```
+/// (() ==> { foo; bar; })()
+/// ```
+fn immediately_invoked_lambda<TF>(env: &Env<TF>, pos: &Pos, stmts: Vec<Stmt>) -> Expr {
+    let func_body = ast::FuncBody {
+        ast: stmts,
+        annotation: (),
+    };
+    let fun_ = wrap_fun_(func_body, vec![], pos.clone(), env);
+    let lambda_expr = Expr::new(pos.clone(), Expr_::mk_lfun(fun_, vec![]));
+
+    Expr::new(
+        pos.clone(),
+        Expr_::Call(Box::new((lambda_expr, vec![], vec![], None))),
+    )
 }

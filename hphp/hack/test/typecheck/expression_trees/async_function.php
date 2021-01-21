@@ -153,11 +153,6 @@ class Code {
   ): Code::TAst {
     throw new Exception();
   }
-
-  // TODO: Discard unsupported syntax nodes while lowering
-  public function unsupportedSyntax(string $msg): Code::TAst {
-    throw new Exception($msg);
-  }
 }
 
 interface Spliceable<TVisitor, TResult, +TInfer> {

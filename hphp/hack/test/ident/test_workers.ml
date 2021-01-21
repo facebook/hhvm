@@ -47,6 +47,7 @@ let () =
   let workers =
     MultiWorker.make
       ?call_wrapper:None
+      ~use_worker_clones:true
       ~saved_state:()
       ~entry
       ~nbr_procs:num_workers

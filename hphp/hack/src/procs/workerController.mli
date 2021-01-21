@@ -89,6 +89,7 @@ val make :
   ?call_wrapper:
     (* See docs in WorkerController.worker for call_wrapper. *)
     call_wrapper ->
+  use_worker_clones:bool ->
   saved_state:'a ->
   entry:'a entry ->
   nbr_procs:int ->

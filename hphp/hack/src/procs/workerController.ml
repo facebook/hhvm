@@ -191,8 +191,15 @@ let wrap_request w f x metadata_in =
 
 type 'a entry_state = 'a * Gc.control * SharedMem.handle * int
 
-type 'a entry =
-  ('a entry_state * Unix.file_descr option, request, void) Daemon.entry
+(* The first bool parameter specifies whether to use worker clones
+ * or not *)
+type 'a worker_params = {
+  use_worker_clones: bool;
+  entry_state: 'a entry_state;
+  controller_fd: Unix.file_descr option;
+}
+
+type 'a entry = ('a worker_params, request, void) Daemon.entry
 
 let entry_counter = ref 0
 
@@ -204,12 +211,18 @@ let register_entry_point ~restore =
     Gc.set gc_control
   in
   let name = Printf.sprintf "subprocess_%d" !entry_counter in
-  Daemon.register_entry_point
-    name
-    ( if Sys.win32 then
-      win32_worker_main restore
-    else
-      unix_worker_main restore )
+  let worker_main =
+    match Sys.win32 with
+    | true ->
+      (fun p -> win32_worker_main restore (p.entry_state, p.controller_fd))
+    | false ->
+      (function
+      | { use_worker_clones = true; entry_state; controller_fd } ->
+        unix_worker_main restore (entry_state, controller_fd)
+      | { use_worker_clones = false; entry_state; controller_fd } ->
+        unix_worker_main_no_clone restore (entry_state, controller_fd))
+  in
+  Daemon.register_entry_point name worker_main
 
 (**************************************************************************
  * Creates a pool of workers.
@@ -245,7 +258,14 @@ let make_one ?call_wrapper controller_fd spawn id =
 
 (* Make a few workers. When workload is given to a worker (via "call" below),
  * the workload is wrapped in the calL_wrapper. *)
-let make ?call_wrapper ~saved_state ~entry ~nbr_procs ~gc_control ~heap_handle =
+let make
+    ?call_wrapper
+    ~use_worker_clones
+    ~saved_state
+    ~entry
+    ~nbr_procs
+    ~gc_control
+    ~heap_handle =
   let setup_controller_fd () =
     if use_prespawned then
       let (parent_fd, child_fd) = Unix.pipe () in
@@ -272,7 +292,7 @@ let make ?call_wrapper ~saved_state ~entry ~nbr_procs ~gc_control ~heap_handle =
         ~name
         (Daemon.null_fd (), Unix.stdout, Unix.stderr)
         entry
-        (state, child_fd)
+        { use_worker_clones; entry_state = state; controller_fd = child_fd }
     in
     Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
 
@@ -309,9 +329,9 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
   let infd = Daemon.descr_of_in_channel inc in
   let outfd = Daemon.descr_of_out_channel outc in
   let worker_failed pid_stat controller_fd =
-    (* If we have a controller fd, we read the true pid status
-     * over that channel instead of using the one returned from the
-     * Worker Master. *)
+    (* If we have a controller fd, we read the clone exit status
+     * over that channel instead of using the one of the worker
+     * process. *)
     let pid_stat =
       match controller_fd with
       | None -> snd pid_stat
@@ -350,9 +370,9 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
     match pid_stat with
     | (0, _) -> f ()
     | (_, Unix.WEXITED 0) ->
-      (* This will never actually happen. Worker Master only exits if this
-       * Controller process has exited. *)
-      failwith "Worker Master exited 0 unexpectedly"
+      (* This will never actually happen. A worker process only exits if this
+       * controller process has exited. *)
+      failwith "Worker process exited 0 unexpectedly"
     | _ -> worker_failed pid_stat w.controller_fd
   in
   (* Prepare to read the answer from the worker process. *)
@@ -424,8 +444,8 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
       end
   in
   (* And returned the 'handle'. *)
-  let handle = ref ((x, call_id), Processing job) in
-  w.handle <- Obj.magic (Some handle);
+  let handle : (a, b) handle = ref ((x, call_id), Processing job) in
+  w.handle <- Some (Obj.magic handle);
   handle
 
 (**************************************************************************

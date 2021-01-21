@@ -11,7 +11,13 @@ let entry =
 let make_workers n =
   let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
-    MultiWorker.make !pipe_path entry n GlobalConfig.gc_control handle
+    MultiWorker.make
+      use_worker_clones
+      !pipe_path
+      entry
+      n
+      GlobalConfig.gc_control
+      handle
   in
   workers
 

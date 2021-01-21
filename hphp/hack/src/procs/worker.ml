@@ -18,7 +18,7 @@ module Gc = CamlGc
  * be called at the end of the request ir order to send back the result
  * to the worker process (this is "internal business", this is not visible outside
  * this module). The clone process will provide the expected function.
- * cf 'send_result' in 'subprocess_main'.
+ * cf 'send_result' in 'read_and_process_job.
  *
  *****************************************************************************)
 
@@ -43,11 +43,17 @@ let on_clone_cancelled parent_outfd =
   Marshal_tools.to_fd_with_preamble parent_outfd "anything" |> ignore
 
 (*****************************************************************************
- * Entry point for spawned worker.
- *
+ * Process a single job in a worker (or a clone).
  *****************************************************************************)
 
-let subprocess_main ic oc =
+type job_outcome =
+  [ `Success
+  | `Error of Exit_status.t
+  | `Worker_cancelled
+  | `Controller_has_died
+  ]
+
+let read_and_process_job ic oc : job_outcome =
   (* Explicitly ensure that Folly is initialized (installs signal handlers) *)
   Folly.ensure_folly_init ();
   let start_user_time = ref 0. in
@@ -116,73 +122,86 @@ let subprocess_main ic oc =
       | _ -> ()
     end;
 
-    (* If we got so far, just let it finish "naturally" *)
-    WorkerCancel.set_on_worker_cancelled (fun () -> ());
-    let len =
-      Measure.time "worker_send_response" (fun () ->
-          Marshal_tools.to_fd_with_preamble ~flags:[Marshal.Closures] outfd data)
-    in
-    if len > 30 * 1024 * 1024 (* 30 MB *) then (
-      Hh_logger.log
-        "WARNING: you are sending quite a lot of data (%d bytes), which may have an adverse performance impact. If you are sending closures, double-check to ensure that they have not captured large
-        values in their environment."
-        len;
-      Printf.eprintf
-        "%s"
-        (Caml.Printexc.raw_backtrace_to_string
-           (Caml.Printexc.get_callstack 100))
-    );
+    (* After this point, it is critical to not throw a Worker_should_exit
+       exception; otherwise outfd might end up being corrupted *)
+    WorkerCancel.with_no_cancellations (fun () ->
+        let len =
+          Measure.time "worker_send_response" (fun () ->
+              Marshal_tools.to_fd_with_preamble
+                ~flags:[Marshal.Closures]
+                outfd
+                data)
+        in
+        if len > 30 * 1024 * 1024 (* 30 MiB *) then (
+          Hh_logger.log
+            ( "WARNING: you are sending quite a lot of data (%d bytes), "
+            ^^ "which may have an adverse performance impact. "
+            ^^ "If you are sending closures, double-check to ensure that "
+            ^^ "they have not captured large values in their environment." )
+            len;
+          Printf.eprintf
+            "%s"
+            (Caml.Printexc.raw_backtrace_to_string
+               (Caml.Printexc.get_callstack 100))
+        );
 
-    Measure.sample "worker_response_len" (float len);
+        Measure.sample "worker_response_len" (float len);
 
-    let metadata_out =
-      {
-        stats = Measure.serialize (Measure.pop_global ());
-        log_globals = HackEventLogger.serialize_globals ();
-      }
-    in
-    let _ = Marshal_tools.to_fd_with_preamble outfd metadata_out in
-    ()
+        let metadata_out =
+          {
+            stats = Measure.serialize (Measure.pop_global ());
+            log_globals = HackEventLogger.serialize_globals ();
+          }
+        in
+        let _ = Marshal_tools.to_fd_with_preamble outfd metadata_out in
+        ())
   in
+
   try
     Measure.push_global ();
-    let (Request (do_process, { log_globals })) =
+    match
       Measure.time "worker_read_request" (fun () ->
           Marshal_tools.from_fd_with_preamble infd)
-    in
-    WorkerCancel.set_on_worker_cancelled (fun () -> on_clone_cancelled outfd);
-    let tm = Unix.times () in
-    let gc = Gc.quick_stat () in
-    Sys_utils.start_gc_profiling ();
+    with
+    | exception End_of_file ->
+      (* We will end up here when the controller has died. When that is
+         the case the input channel becomes readable (so that the read
+         can notify of the end of file), and we get End_of_file when
+         reading. *)
+      `Controller_has_died
+    | Request (do_process, { log_globals }) ->
+      let tm = Unix.times () in
+      let gc = Gc.quick_stat () in
+      Sys_utils.start_gc_profiling ();
+      start_user_time := tm.Unix.tms_utime +. tm.Unix.tms_cutime;
+      start_system_time := tm.Unix.tms_stime +. tm.Unix.tms_cstime;
+      start_minor_words := gc.Gc.minor_words;
+      start_promoted_words := gc.Gc.promoted_words;
+      start_major_words := gc.Gc.major_words;
+      start_minor_collections := gc.Gc.minor_collections;
+      start_major_collections := gc.Gc.major_collections;
+      start_wall_time := Unix.gettimeofday ();
+      start_proc_fs_status :=
+        ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+      HackEventLogger.deserialize_globals log_globals;
+      Mem_profile.start ();
 
-    start_user_time := tm.Unix.tms_utime +. tm.Unix.tms_cutime;
-    start_system_time := tm.Unix.tms_stime +. tm.Unix.tms_cstime;
-    start_minor_words := gc.Gc.minor_words;
-    start_promoted_words := gc.Gc.promoted_words;
-    start_major_words := gc.Gc.major_words;
-    start_minor_collections := gc.Gc.minor_collections;
-    start_major_collections := gc.Gc.major_collections;
-    start_wall_time := Unix.gettimeofday ();
-    start_proc_fs_status :=
-      ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
-    HackEventLogger.deserialize_globals log_globals;
-    Mem_profile.start ();
-    do_process { send = send_result };
-    exit 0
+      do_process { send = send_result };
+      `Success
   with
-  | End_of_file -> exit 1
-  | SharedMem.Out_of_shared_memory -> Exit.exit Exit_status.Out_of_shared_memory
-  | SharedMem.Hash_table_full -> Exit.exit Exit_status.Hash_table_full
-  | SharedMem.Heap_full -> Exit.exit Exit_status.Heap_full
+  | WorkerCancel.Worker_should_exit -> `Worker_cancelled
+  | SharedMem.Out_of_shared_memory -> `Error Exit_status.Out_of_shared_memory
+  | SharedMem.Hash_table_full -> `Error Exit_status.Hash_table_full
+  | SharedMem.Heap_full -> `Error Exit_status.Heap_full
   | SharedMem.Sql_assertion_failure err_num ->
-    let exit_code =
-      match err_num with
-      | 11 -> Exit_status.Sql_corrupt
-      | 14 -> Exit_status.Sql_cantopen
-      | 21 -> Exit_status.Sql_misuse
-      | _ -> Exit_status.Sql_assertion_failure
-    in
-    Exit.exit exit_code
+    `Error
+      begin
+        match err_num with
+        | 11 -> Exit_status.Sql_corrupt
+        | 14 -> Exit_status.Sql_cantopen
+        | 21 -> Exit_status.Sql_misuse
+        | _ -> Exit_status.Sql_assertion_failure
+      end
   | e ->
     let e_backtrace = Caml.Printexc.get_backtrace () in
     let e_str = Caml.Printexc.to_string e in
@@ -194,11 +213,34 @@ let subprocess_main ic oc =
       "Worker subprocess %d Potential backtrace:\n%s\n%!"
       pid
       e_backtrace;
-    exit 2
+    (* Not quite a type error... But it so happens that
+       Exit_status.Type_error is bound to return code 2,
+       which is what is used in this case. *)
+    `Error Exit_status.Type_error
+
+(*****************************************************************************
+ * Entry point for spawned worker.
+ *****************************************************************************)
+
+(* The exit code used when the controller died and the clone could not read
+ * the input job *)
+let controller_has_died_code = 1
+
+let process_job_and_exit ic oc =
+  match read_and_process_job ic oc with
+  | `Success -> exit 0
+  | `Error status -> Exit.exit status
+  | `Worker_cancelled ->
+    on_clone_cancelled (Daemon.descr_of_out_channel oc);
+    exit 0
+  | `Controller_has_died -> `Controller_has_died
 
 let win32_worker_main restore (state, _controller_fd) (ic, oc) =
+  (* On Windows, there is no clone process, the worker does the job
+     directly and exits when it is done. *)
   restore state;
-  subprocess_main ic oc
+  match process_job_and_exit ic oc with
+  | `Controller_has_died -> exit 0
 
 let maybe_send_status_to_controller fd status =
   match fd with
@@ -209,11 +251,9 @@ let maybe_send_status_to_controller fd status =
     in
     (match status with
     | Unix.WEXITED 0 -> ()
-    | Unix.WEXITED 1 ->
-      (* 1 is an expected exit code. On unix systems, when the controller process exits, the pipe
-       * becomes readable. We fork a worker clone, which reads 0 bytes and exits with code 1.
-       * In this case, the controller is dead so trying to write a message to the controller will
-       * cause an exception *)
+    | Unix.WEXITED code when code = controller_has_died_code ->
+      (* Since the controller died we'd get an error writing to its
+       * fd; so we simply do not do anything. *)
       ()
     | _ ->
       Timeout.with_timeout
@@ -258,40 +298,68 @@ let dummy_closure () = ()
  *)
 let unix_worker_main restore (state, controller_fd) (ic, oc) =
   restore state;
-
   (* see dummy_closure above *)
   ignore Marshal.(from_bytes (to_bytes dummy_closure [Closures]) 0);
-
   let in_fd = Daemon.descr_of_in_channel ic in
-  try
-    while true do
-      (* Wait for an incoming job : is there something to read?
-          But we don't read it yet. It will be read by the forked clone. *)
-      let (readyl, _, _) = Unix.select [in_fd] [] [] (-1.0) in
-      if List.is_empty readyl then exit 0;
+  while true do
+    (* Wait for an incoming job: is there something to read?
+       But we don't read it yet. It will be read by the forked clone. *)
+    let (readyl, _, _) = Unix.select [in_fd] [] [] (-1.0) in
+    if List.is_empty readyl then exit 0;
+    (* We fork a clone process for every incoming request
+       and we let it exit after one request. This is the quickest GC. *)
+    match Fork.fork () with
+    | 0 ->
+      (match process_job_and_exit ic oc with
+      | `Controller_has_died -> exit controller_has_died_code)
+    | pid ->
+      (* Wait for the clone process termination... *)
+      let status = snd (Sys_utils.waitpid_non_intr [] pid) in
+      let () = maybe_send_status_to_controller controller_fd status in
+      (match status with
+      | Unix.WEXITED 0 -> ()
+      | Unix.WEXITED code when code = controller_has_died_code ->
+        (* The controller has died, we can stop working *)
+        exit 0
+      | Unix.WEXITED code ->
+        Printf.printf "Worker exited (code: %d)\n" code;
+        Stdlib.flush stdout;
+        Stdlib.exit code
+      | Unix.WSIGNALED x ->
+        let sig_str = PrintSignal.string_of_signal x in
+        Printf.printf "Worker interrupted with signal: %s\n" sig_str;
+        exit 2
+      | Unix.WSTOPPED x ->
+        Printf.printf "Worker stopped with signal: %d\n" x;
+        exit 3)
+  done;
+  assert false
 
-      (* We fork a clone process for every incoming request
-          and we let it exit after one request. This is the quickest GC. *)
-      match Fork.fork () with
-      | 0 -> subprocess_main ic oc
-      | pid ->
-        (* Wait for the clone process termination... *)
-        let status = snd (Sys_utils.waitpid_non_intr [] pid) in
-        let () = maybe_send_status_to_controller controller_fd status in
-        (match status with
-        | Unix.WEXITED 0 -> ()
-        | Unix.WEXITED 1 -> raise End_of_file
-        | Unix.WEXITED code ->
-          Printf.printf "Worker exited (code: %d)\n" code;
-          Stdlib.flush stdout;
-          Stdlib.exit code
-        | Unix.WSIGNALED x ->
-          let sig_str = PrintSignal.string_of_signal x in
-          Printf.printf "Worker interrupted with signal: %s\n" sig_str;
-          exit 2
-        | Unix.WSTOPPED x ->
-          Printf.printf "Worker stopped with signal: %d\n" x;
-          exit 3)
-    done;
-    assert false
-  with End_of_file -> exit 0
+(* This functions offers the same functionality as unix_worker_main but
+ * does not clone a process for each incoming job. *)
+let unix_worker_main_no_clone restore (state, controller_fd) (ic, oc) =
+  (* T83401330: Long-lived workers are not production ready because
+     they will not flush their logs often enough (c.f. EventLogger.flush).
+     This can be addressed in this file, or in the user code that needs
+     to log. *)
+  restore state;
+  let exit code =
+    let status = Unix.WEXITED (Exit_status.exit_code code) in
+    let () = maybe_send_status_to_controller controller_fd status in
+    Exit.exit code
+  in
+  let in_fd = Daemon.descr_of_in_channel ic in
+  let out_fd = Daemon.descr_of_out_channel oc in
+  while true do
+    let (readyl, _, _) = Unix.select [in_fd] [] [] (-1.0) in
+    if List.is_empty readyl then exit Exit_status.No_error;
+    match read_and_process_job ic oc with
+    | `Success -> ()
+    | `Error status -> exit status
+    | `Worker_cancelled -> on_clone_cancelled out_fd
+    | `Controller_has_died ->
+      (* The controller has died, we can stop working *)
+      exit Exit_status.No_error
+  done;
+  (* The only way out of the above loop is to exit *)
+  assert false

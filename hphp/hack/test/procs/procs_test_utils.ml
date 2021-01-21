@@ -14,10 +14,19 @@ let try_finalize f x finally y =
   finally y;
   res
 
+let use_worker_clones =
+  Array.length Sys.argv < 2 || not (String.equal Sys.argv.(1) "NO_CLONES")
+
 let make_workers n =
   let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
-    MultiWorker.make handle entry n GlobalConfig.gc_control handle
+    MultiWorker.make
+      use_worker_clones
+      handle
+      entry
+      n
+      GlobalConfig.gc_control
+      handle
   in
   workers
 

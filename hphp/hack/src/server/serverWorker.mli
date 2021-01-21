@@ -10,6 +10,7 @@
 open Hh_prelude
 
 val make :
+  use_worker_clones:bool ->
   nbr_procs:int ->
   Gc.control ->
   SharedMem.handle ->

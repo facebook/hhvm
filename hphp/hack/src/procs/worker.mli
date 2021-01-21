@@ -31,3 +31,9 @@ val unix_worker_main :
   'a * Unix.file_descr option ->
   request Daemon.in_channel * 'c Daemon.out_channel ->
   'd
+
+val unix_worker_main_no_clone :
+  ('a -> 'b) ->
+  'a * Unix.file_descr option ->
+  request Daemon.in_channel * 'c Daemon.out_channel ->
+  'd

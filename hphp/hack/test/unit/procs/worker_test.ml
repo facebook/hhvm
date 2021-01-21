@@ -6,9 +6,10 @@ let entry =
 
 let num_workers = 2
 
-let make_worker ?call_wrapper heap_handle =
+let make_worker ?call_wrapper use_worker_clones heap_handle =
   WorkerController.make
     ?call_wrapper
+    ~use_worker_clones
     ~saved_state:()
     ~entry
     ~nbr_procs:num_workers
@@ -38,11 +39,12 @@ let call_and_verify_result worker f x expected =
 (** This is just like the test_worker_uncaught_exception_exits_with_2 test
  * except we add a call_wapper to the worker. It catches all exceptions and
  * makes the worker exit with code 17. *)
-let test_wrapped_worker_with_custom_exit heap_handle () =
+let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
   let workers =
     make_worker
       ~call_wrapper:
         { WorkerController.wrap = catch_exception_and_custom_exit_wrapper }
+      use_clones
       heap_handle
   in
   match workers with
@@ -62,8 +64,8 @@ let test_wrapped_worker_with_custom_exit heap_handle () =
      ->
        i = 17)
 
-let test_worker_uncaught_exception_exits_with_2 heap_handle () =
-  let workers = make_worker heap_handle in
+let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
+  let workers = make_worker use_clones heap_handle in
   match workers with
   | [] ->
     Printf.eprintf "Failed to create workers";
@@ -81,8 +83,8 @@ let test_worker_uncaught_exception_exits_with_2 heap_handle () =
      ->
        i = 2)
 
-let test_simple_worker_spawn heap_handle () =
-  let workers = make_worker heap_handle in
+let test_simple_worker_spawn use_clones heap_handle () =
+  let workers = make_worker use_clones heap_handle in
   match workers with
   | [] ->
     Printf.eprintf "Failed to create workers";
@@ -90,13 +92,16 @@ let test_simple_worker_spawn heap_handle () =
   | worker :: _ -> call_and_verify_result worker (fun () -> "hello") () "hello"
 
 let make_tests handle =
-  [
-    ("simple_worker_spawn_test", test_simple_worker_spawn handle);
-    ( "worker_uncaught_exception_exits_with_2",
-      test_worker_uncaught_exception_exits_with_2 handle );
-    ( "wrapped_worker_with_custom_exit",
-      test_wrapped_worker_with_custom_exit handle );
-  ]
+  let make_test name fn =
+    [(name, fn true handle); ("no_clones_" ^ name, fn false handle)]
+  in
+  make_test "simple_worker_spawn_test" test_simple_worker_spawn
+  @ make_test
+      "worker_uncaught_exception_exits_with_2"
+      test_worker_uncaught_exception_exits_with_2
+  @ make_test
+      "wrapped_worker_with_custom_exit"
+      test_wrapped_worker_with_custom_exit
 
 let () =
   Daemon.check_entry_point ();

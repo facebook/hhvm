@@ -561,17 +561,7 @@ end = struct
 
   external hh_move : Key.md5 -> Key.md5 -> unit = "hh_move"
 
-  let hh_mem_status x =
-    WorkerCancel.with_worker_exit (fun () -> hh_mem_status x)
-
   let _ = hh_mem_status
-
-  let hh_mem x = WorkerCancel.with_worker_exit (fun () -> hh_mem x)
-
-  let hh_add x y = WorkerCancel.with_worker_exit (fun () -> hh_add x y)
-
-  let hh_get_and_deserialize x =
-    WorkerCancel.with_worker_exit (fun () -> hh_get_and_deserialize x)
 
   let measure_add = Value.description ^ " (bytes serialized into shared heap)"
 

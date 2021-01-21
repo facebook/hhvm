@@ -105,6 +105,13 @@ struct UnitEmitter {
   template<typename SerDe> void serde(SerDe&);
 
   /*
+   * Serialize this emitter and then deserialize it into a new emitter
+   * and return it. Used to stress-test the serde logic. Only valid if
+   * EvalStressUnitSerde is enabled.
+   */
+  std::unique_ptr<UnitEmitter> stressSerde();
+
+  /*
    * Run the verifier on this unit.
    */
   bool check(bool verbose) const;
@@ -648,4 +655,3 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
 #define incl_HPHP_VM_UNIT_EMITTER_INL_H_
 #include "hphp/runtime/vm/unit-emitter-inl.h"
 #undef incl_HPHP_VM_UNIT_EMITTER_INL_H_
-

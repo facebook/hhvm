@@ -156,7 +156,7 @@ let check_param_has_hint env param ty is_code_error =
  * A similar line of reasoning is applied for the static method create.
  *)
 let make_param_local_ty env decl_hint param =
-  let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic } in
+  let ety_env = Phase.env_with_self env in
   let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
     match decl_hint with
@@ -533,9 +533,7 @@ and method_def env cls m =
           (* If a 'this' type appears it needs to be compatible with the
            * late static type
            *)
-          let ety_env =
-            { (Phase.env_with_self env) with from_class = Some CIstatic }
-          in
+          let ety_env = Phase.env_with_self env in
           Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
       let return =

@@ -120,7 +120,6 @@ val localize_targs_and_check_constraints :
   ?check_explicit_targs:bool ->
   env ->
   Ast_defs.id ->
-  Nast.class_id_ ->
   decl_tparam list ->
   Aast.hint list ->
   env * locl_ty * Tast.targ list

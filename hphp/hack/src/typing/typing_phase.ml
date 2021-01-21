@@ -977,7 +977,7 @@ and localize_missing_tparams_class env r sid class_ =
       type_expansions = [];
       this_ty = c_ty;
       substs = Subst.make_locl tparams tyl;
-      from_class = Some (Aast.CI sid);
+      from_class = None;
       quiet = false;
       on_error = Errors.unify_error_at use_pos;
     }
@@ -1007,7 +1007,6 @@ and localize_targs_and_check_constraints
     ?(check_explicit_targs = true)
     env
     class_id
-    from_class
     tparaml
     hintl =
   let (env, type_argl) =
@@ -1033,7 +1032,7 @@ and localize_targs_and_check_constraints
           type_expansions = [];
           this_ty;
           substs = Subst.make_locl tparaml targs_tys;
-          from_class = Some from_class;
+          from_class = None;
           quiet = false;
           on_error = Errors.unify_error_at use_pos;
         }

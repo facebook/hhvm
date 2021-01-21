@@ -1961,7 +1961,7 @@ and expr_
         let ce_visibility = ce.ce_visibility in
         let ce_deprecated = ce.ce_deprecated in
         let (env, _tal, te, cid_ty) =
-          static_class_id ~check_constraints:true pc env [] cid
+          static_class_id ~exact:Exact ~check_constraints:true pc env [] cid
         in
         let (env, cid_ty) = Env.expand_type env cid_ty in
         let tyargs =
@@ -1974,7 +1974,7 @@ and expr_
             type_expansions = [];
             substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
-            from_class = Some cid;
+            from_class = None;
             quiet = true;
             on_error = Errors.unify_error_at p;
           }
@@ -2653,9 +2653,7 @@ and expr_
     in
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
-    let ety_env =
-      { (Phase.env_with_self env) with from_class = Some CIstatic }
-    in
+    let ety_env = Phase.env_with_self env in
     let (env, hint_ty) = Phase.localize_hint ~ety_env env hint in
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -2728,9 +2726,7 @@ and expr_
     (* When creating a closure, the 'this' type will mean the late bound type
      * of the current enclosing class
      *)
-    let ety_env =
-      { (Phase.env_with_self env) with from_class = Some CIstatic }
-    in
+    let ety_env = Phase.env_with_self env in
     let (env, declared_ft) =
       Phase.(
         localize_ft
@@ -3171,9 +3167,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       (* When creating a closure, the 'this' type will mean the
        * late bound type of the current enclosing class
        *)
-      let ety_env =
-        { (Phase.env_with_self env) with from_class = Some CIstatic }
-      in
+      let ety_env = Phase.env_with_self env in
       let (env, h) = Phase.localize ~ety_env env h in
       let pos = get_pos h in
       let env =
@@ -3212,9 +3206,7 @@ and closure_bind_variadic env vparam variadic_ty =
       (env, variadic_ty, get_pos variadic_ty)
     | Some hint ->
       let h = Decl_hint.hint env.decl_env hint in
-      let ety_env =
-        { (Phase.env_with_self env) with from_class = Some CIstatic }
-      in
+      let ety_env = Phase.env_with_self env in
       let (env, h) = Phase.localize ~ety_env env h in
       let pos = get_pos h in
       let env =
@@ -3442,9 +3434,7 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               (* If a 'this' type appears it needs to be compatible with the
                * late static type
                *)
-              let ety_env =
-                { (Phase.env_with_self env) with from_class = Some CIstatic }
-              in
+              let ety_env = Phase.env_with_self env in
               Typing_return.make_return_type (Phase.localize ~ety_env) env ret
           in
           let env =
@@ -5711,7 +5701,7 @@ and static_class_id
       | self -> self
     in
     make_result env [] Aast.CIself (mk (Reason.Rwitness p, self))
-  | CI ((p, id) as c) as e1 ->
+  | CI ((p, id) as c) ->
     begin
       match Env.get_pos_and_kind_of_generic env id with
       | Some (def_pos, kind) ->
@@ -5752,7 +5742,6 @@ and static_class_id
                  ~check_explicit_targs
                  env
                  c
-                 e1
                  (Cls.tparams class_)
           in
           make_result env tal (Aast.CI c) ty)
@@ -5804,18 +5793,18 @@ and static_class_id
     make_result env [] (Aast.CIexpr te) result_ty
 
 and call_construct p env class_ params el unpacked_element cid cid_ty =
-  let (cid, cid_ty) =
+  let cid_ty =
     if Nast.equal_class_id_ cid CIparent then
-      (CIstatic, mk (Reason.Rwitness p, TUtils.this_of (Env.get_self env)))
+      mk (Reason.Rwitness p, TUtils.this_of (Env.get_self env))
     else
-      (cid, cid_ty)
+      cid_ty
   in
   let ety_env =
     {
       type_expansions = [];
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
-      from_class = Some cid;
+      from_class = None;
       quiet = true;
       on_error = Errors.unify_error_at p;
     }
@@ -6793,9 +6782,7 @@ and condition
     key_exists env p shape field
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
-    let ety_env =
-      { (Phase.env_with_self env) with from_class = Some CIstatic }
-    in
+    let ety_env = Phase.env_with_self env in
     let (env, hint_ty) = Phase.localize_hint ~ety_env env h in
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
@@ -6924,7 +6911,6 @@ and safely_refine_class_type
       type_expansions = [];
       substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
-      (* In case `this` appears in constraints *)
       from_class = None;
       quiet = true;
       on_error = Errors.unify_error_at p;

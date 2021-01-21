@@ -176,12 +176,7 @@ let is_sub_type_for_union env ty_sub ty_super =
 
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
-  let ety_env =
-    {
-      (Typing_phase.env_with_self env) with
-      Typing_defs.from_class = Some CIstatic;
-    }
-  in
+  let ety_env = Typing_phase.env_with_self env in
   Typing_taccess.referenced_typeconsts
     env
     ety_env

@@ -43,10 +43,7 @@ let parameter_type_collector =
       match hintopt with
       | None -> self#zero
       | Some hint ->
-        let ety_env =
-          Typing_defs.
-            { (Phase.env_with_self tenv) with from_class = Some Aast.CIstatic }
-        in
+        let ety_env = Phase.env_with_self tenv in
         let ty = Decl_hint.hint tenv.Typing_env_types.decl_env hint in
         let ty = snd @@ Phase.localize ~ety_env tenv ty in
         if Typing_defs.equal_locl_ty inferred_hint ty then

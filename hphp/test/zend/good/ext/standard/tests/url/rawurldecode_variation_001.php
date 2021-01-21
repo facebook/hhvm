@@ -16,9 +16,6 @@ echo "*** Testing rawurldecode() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[
@@ -59,12 +56,6 @@ $values = varray[
 
       // object data
       new stdclass(),
-
-      // undefined data
-      $undefined_var,
-
-      // unset data
-      $unset_var,
 ];
 
 // loop through each element of the array for str

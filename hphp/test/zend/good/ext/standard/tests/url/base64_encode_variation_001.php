@@ -17,9 +17,6 @@ function entrypoint_base64_encode_variation_001(): void {
 
   // Initialise function arguments not being substituted (if any)
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   //array of values to iterate over
   $values = varray[
@@ -59,13 +56,7 @@ function entrypoint_base64_encode_variation_001(): void {
         '',
 
         // object data
-        new stdclass(),
-
-        // undefined data
-        $undefined_var,
-
-        // unset data
-        $unset_var,
+        new stdclass()
   ];
 
   // loop through each element of the array for str

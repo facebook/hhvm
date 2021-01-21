@@ -18,9 +18,6 @@ $str = 'aGVsbG8gd29ybGQh!';
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values =  darray [
@@ -61,11 +58,7 @@ $values =  darray [
     // object data
     "stdClass object" => new stdclass(),
 
-    // undefined data
-    "undefined variable" => $undefined_var,
 
-    // unset data
-    "unset variable" => $unset_var,
 
     // resource data
     "resource" => $file_handle

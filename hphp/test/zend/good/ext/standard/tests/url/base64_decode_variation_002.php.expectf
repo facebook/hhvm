@@ -1,70 +1,68 @@
 *** Testing base64_decode() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php(65)
-Error: 8 - Undefined variable: unset_var, %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php(68)
 
 -- Arg value 0 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value 1 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value 12345 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value -2345 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value 10.5 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value -10.5 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value 10.1234567e10 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value 10.7654321E-10 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value .5 --
 
-Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value array() --
 
-Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value array(0) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value array(1) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value array(1, 2) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
 
-Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value NULL --
 
-Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value null --
 
-Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value true --
 bool(false)
@@ -80,25 +78,17 @@ string(12) "hello world!"
 
 -- Arg value "" --
 
-Warning: base64_decode() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value '' --
 
-Warning: base64_decode() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value stdClass object --
 
-Warning: base64_decode() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
-
--- Arg value undefined variable --
-
-Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
-
--- Arg value unset variable --
-
-Warning: base64_decode() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 
 -- Arg value resource --
 
-Warning: base64_decode() expects parameter 2 to be boolean, resource given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, resource given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line %d
 ===Done===

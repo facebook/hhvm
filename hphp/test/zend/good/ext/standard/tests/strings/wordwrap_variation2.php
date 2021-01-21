@@ -16,9 +16,6 @@ $cut = true;
 // resource var
 $fp = fopen(__FILE__, "r");
 
-// get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 
 // array with different values as width
@@ -61,11 +58,7 @@ $values =  varray [
   // resource variable
   $fp,
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var
 ];
 
 

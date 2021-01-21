@@ -14,9 +14,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing trim() function: with unexpected inputs for 'charlist' argument ***\n";
 
-//get an unset variable
-$unset_var = '  string_val  ';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -58,11 +55,7 @@ $inputs =  varray [
           // resource
 /*20*/      $file_handle,
 
-          // undefined variable
-/*21*/      @$undefined_var,
 
-          // unset variable
-/*22*/      @$unset_var
 ];
 
 // loop through with each element of the $inputs array to test trim() function

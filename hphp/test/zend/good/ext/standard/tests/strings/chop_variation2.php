@@ -19,9 +19,6 @@ echo "*** Testing chop() : with different unexpected values for charlist argumen
 // initialize all required variables
 $str = 'hello world12345 ';
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 // defining a resource
 $file_handle = fopen(__FILE__, 'r');
@@ -68,12 +65,6 @@ $values =  varray [
 
   // resource
   $file_handle,
-
-  // undefined variable
-  $undefined_var,
-
-  // unset variable
-  $unset_var
 
 ];
 

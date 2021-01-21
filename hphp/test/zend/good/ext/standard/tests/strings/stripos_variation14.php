@@ -15,9 +15,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function with unexpected values for offset ***\n";
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -62,12 +59,6 @@ $offsets =  varray [
 
   //resource
   $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
 ];
 
 

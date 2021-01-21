@@ -18,9 +18,6 @@ echo "*** Testing chop() : with unexpected values for str argument ***\n";
 // initialize all required variables
 
 $charlist = " @#$%1234567890";
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 $sample_obj = new sample;
 
@@ -64,11 +61,7 @@ $values =  varray [
   NULL,
   null,
 
-  // undefined variable
-  $undefined_var,
 
-  // unset variable
-  $unset_var,
 
   // object
   $sample_obj,

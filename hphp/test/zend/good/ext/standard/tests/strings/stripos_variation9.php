@@ -15,9 +15,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function with unexpected values for haystack ***\n";
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -64,12 +61,6 @@ $haystacks =  varray [
 
   // resource
   $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
 ];
 
 $needle = "heredoc 0 1 2 -2 10.5 -10.5 10.5e10 10.6E-10 .5 array true false object \"\" null Resource";

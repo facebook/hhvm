@@ -17,9 +17,6 @@ echo "*** Testing sha1() : unexpected values for 'str' ***\n";
 
 $raw = false;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, 'r');
@@ -64,11 +61,7 @@ $values = varray[
           // object data
 /*23*/      new MyClass(),
 
-          // undefined data
-/*24*/      @$undefined_var,
 
-          // unset data
-/*25*/      @$unset_var,
 
           //resource data
 /*26*/      $fp

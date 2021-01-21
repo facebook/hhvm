@@ -19,9 +19,6 @@ echo "*** Test strncasecmp() function: unexpected values for 'len' ***\n";
 $str1 = "Hello, World\n";
 $str2 = "Hello, World\n";
 
-/* get an unset variable */
-$unset_var = 'string_val';
-unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
@@ -63,12 +60,6 @@ $lengths =  varray [
   /* empty string */
   "",
   '',
-
-  /* undefined variable */
-  @$undefined_var,
-
-  /* unset variable */
-  @$unset_var,
 
   /* resource */
   $file_handle,

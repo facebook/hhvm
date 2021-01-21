@@ -18,9 +18,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() function: with unexpected inputs for 'str' ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -59,11 +56,7 @@ $strings =  varray [
           // resource
 /*17*/      $file_handle,
 
-          // undefined variable
-/*18*/      @$undefined_var,
 
-          // unset variable
-/*19*/      @$unset_var
 ];
 
 //defining 'from' argument

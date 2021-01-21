@@ -20,9 +20,6 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 // Initialise function argument
 $string = "<html><a>hello</a></html><p>world</p><!-- COMMENT --><?hh echo hello ?>";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -67,11 +64,7 @@ $values = varray[
       // object data
       new classA(),
 
-      // undefined data
-      @$undefined_var,
 
-      // unset data
-      @$unset_var,
 
       // resource variable
       $fp

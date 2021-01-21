@@ -16,9 +16,6 @@ $cut = true;
 // resource var
 $fp = fopen(__FILE__, "r");
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 
 // array with different values for break arg
@@ -64,11 +61,7 @@ $values =  varray [
   // resource var
   $fp,
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var
 ];
 
 // loop though each element of the array and check the working of wordwrap()

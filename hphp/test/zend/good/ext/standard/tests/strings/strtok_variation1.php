@@ -19,9 +19,6 @@ echo "*** Testing strtok() : with first argument as non-string ***\n";
 // initialize all required variables
 $token = '-';
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -66,11 +63,7 @@ $values =  varray [
   NULL,
   null,
 
-  // undefined variable
-  $undefined_var,
 
-  // unset variable
-  $unset_var,
 
   // resource
   $file_handle

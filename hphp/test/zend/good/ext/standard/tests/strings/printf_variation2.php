@@ -20,9 +20,6 @@ echo "*** Testing printf() : with different types of values passed for arg1 argu
 $format = '%s';
 $arg2 = 'third argument';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
@@ -71,11 +68,7 @@ $values = varray[
           // object data
 /*25*/    new sample(),
 
-          // undefined data
-/*26*/    @$undefined_var,
 
-          // unset data
-/*27*/    @$unset_var,
 
           // resource data
 /*28*/    $file_handle

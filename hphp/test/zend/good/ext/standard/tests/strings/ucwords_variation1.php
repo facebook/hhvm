@@ -18,9 +18,6 @@ class my
 echo "*** Testing ucwords() : usage variations ***\n";
 // initialize all required variables
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 $fp = fopen(__FILE__, "r");
 
@@ -80,11 +77,7 @@ $values =  varray [
   "0xFF12",
   "-0xFF12",
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var,
 
   // resource variable
   $fp

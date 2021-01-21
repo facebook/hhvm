@@ -13,9 +13,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing stristr() function: with unexpected inputs for 'string' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -54,12 +51,6 @@ $inputs =  varray [
 
           // resource
 /*18*/      $file_handle,
-
-          // undefined variable
-/*19*/      @$undefined_var,
-
-          // unset variable
-/*20*/      @$unset_var
 ];
 
 //defining '$pad_length' argument

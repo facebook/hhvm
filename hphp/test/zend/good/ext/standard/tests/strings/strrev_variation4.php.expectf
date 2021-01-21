@@ -2,83 +2,83 @@
 
 -- Iterator 1 --
 
-Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 2 --
 
-Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 3 --
 
-Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 4 --
 
-Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 5 --
 
-Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 6 --
 
-Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 7 --
 
-Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 8 --
 
-Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 9 --
 
-Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 10 --
 
-Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 11 --
 
-Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 12 --
 
-Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 13 --
 
-Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 14 --
 
-Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 15 --
 
-Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 16 --
 
-Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 17 --
 
-Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 18 --
 
-Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 19 --
 
-Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 20 --
 
-Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 21 --
 string(0) ""
@@ -88,17 +88,9 @@ string(0) ""
 
 -- Iterator 23 --
 
-Warning: strrev() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 
 -- Iterator 24 --
 
-Warning: strrev() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
-
--- Iterator 25 --
-
-Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
-
--- Iterator 26 --
-
-Warning: strrev() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line 79
+Warning: strrev() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strrev_variation4.php on line %d
 *** Done ***

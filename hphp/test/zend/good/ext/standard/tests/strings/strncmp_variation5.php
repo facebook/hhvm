@@ -19,9 +19,6 @@ echo "*** Test strncmp() function: by supplying all types for 'len' ***\n";
 $str1 = "Hello, World\n";
 $str2 = "Hello, World\n";
 
-/* get an unset variable */
-$unset_var = 'string_val';
-unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
@@ -68,11 +65,7 @@ $lengths =  varray [
   "",
   '',
 
-  /* undefined variable */
-  $undefined_var,
 
-  /* unset variable */
-  $unset_var,
 
   /* resource */
   $file_handle,

@@ -18,9 +18,6 @@ class Sample {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //getting resource
 $file_handle = fopen(__FILE__, "r");
@@ -64,11 +61,7 @@ $values = varray[
   // object data
   new Sample(),
 
-  // undefined data
-  @$undefined_var,
 
-  // unset data
-  @$unset_var,
 ];
 
 // loop through $values array to test nl2br() function with each element

@@ -21,9 +21,6 @@ echo "*** Testing str_split() : unexpected values for 'str' ***\n";
 // Initialise function arguments
 $split_length = 3;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, 'r');
@@ -68,11 +65,7 @@ $values = varray[
   // object data
   new MyClass(),
 
-  // undefined data
-  @$undefined_var,
 
-  // unset data
-  @$unset_var,
 
   //resource data
   $fp

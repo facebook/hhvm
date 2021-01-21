@@ -17,10 +17,6 @@ class classA{
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -64,14 +60,8 @@ $values = varray[
           // object data
 /*23*/    new classA(),
 
-          // undefined data
-/*24*/    @$undefined_var,
-
-          // unset data
-/*25*/    @$unset_var,
-
           // resource variable
-/*26*/    $fp
+/*24*/    $fp
 
 ];
 

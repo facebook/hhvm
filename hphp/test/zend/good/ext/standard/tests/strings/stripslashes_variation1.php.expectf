@@ -1,84 +1,74 @@
 *** Testing stripslashes() : with non-string type argument ***
 
-Notice: Undefined variable: undefined_var in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 62
-
-Notice: Undefined variable: unset_var in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 65
-
 --- Testing stripslashes() by supplying different values for 'str' argument ---
 -- Iteration 1 --
 
-Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 2 --
 
-Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 3 --
 
-Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 4 --
 
-Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 5 --
 
-Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 6 --
 
-Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 7 --
 
-Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 8 --
 
-Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 9 --
 
-Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 10 --
 
-Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 11 --
 
-Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 12 --
 
-Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 13 --
 
-Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 14 --
 
-Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 15 --
 
-Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 16 --
 
-Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 17 --
 
-Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 18 --
 
-Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 19 --
 string(0) ""
 -- Iteration 20 --
 string(0) ""
 -- Iteration 21 --
 
-Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 22 --
 
-Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 23 --
 
-Warning: stripslashes() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 -- Iteration 24 --
 
-Warning: stripslashes() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
--- Iteration 25 --
-
-Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
--- Iteration 26 --
-
-Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line 87
+Warning: stripslashes() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripslashes_variation1.php on line %d
 ===DONE===

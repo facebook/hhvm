@@ -26,10 +26,6 @@ $str = 'string_val';
 $mask = 'soibtFTf1234567890';
 $len = 10;
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
 
@@ -71,12 +67,6 @@ $values = varray[
 
       // object data
       new sample(),
-
-      // undefined data
-      $undefined_var,
-
-      // unset data
-      $unset_var,
 
       // resource
       $file_handle

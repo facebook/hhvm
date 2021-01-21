@@ -14,9 +14,6 @@ class sample  {
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strncasecmp() function: with unexpected values for 'str1' and 'str2' ***\n";
-/* get an unset variable */
-$unset_var = 'string_val';
-unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
@@ -66,12 +63,6 @@ $values =  varray [
   /* empty string */
   "",
   '',
-
-  /* undefined variable */
-  @$undefined_var,
-
-  /* unset variable */
-  @$unset_var,
 
   /* resource */
   $file_handle,

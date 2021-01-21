@@ -20,9 +20,6 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 // get a resource
 $fp=fopen(__FILE__, "r");
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[
@@ -64,11 +61,7 @@ $values = varray[
       // object data
       new classA(),
 
-      // undefined data
-      @$undefined_var,
 
-      // unset data
-      @$unset_var,
 
       // resource variable
       $fp

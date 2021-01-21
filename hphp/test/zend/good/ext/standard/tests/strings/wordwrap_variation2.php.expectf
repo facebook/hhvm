@@ -8,7 +8,7 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: Can't force cut when width is zero in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: Can't force cut when width is zero in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 bool(false)
 -- Iteration 2 --
 string(25) "testing
@@ -26,173 +26,155 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
 -- Iteration 4 --
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 5 --
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 6 --
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 7 --
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 8 --
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 9 --
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 10 --
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 11 --
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 12 --
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 15 --
 
-Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 16 --
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 17 --
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 18 --
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 19 --
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 -- Iteration 20 --
 
-Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 
-Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
--- Iteration 21 --
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
--- Iteration 22 --
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 80
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 81
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 85
-
-Warning: wordwrap() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 89
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line %d
 Done

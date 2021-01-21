@@ -18,9 +18,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -62,11 +59,7 @@ $replace_pairs_arr =  varray [
   // resource
   $file_handle,
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var
 ];
 
 // loop through with each element of the $replace_pairs array to test strtr() function

@@ -22,9 +22,6 @@ echo "*** Testing sprintf() : with unexpected values for format argument ***\n";
 $arg1 = "second arg";
 $arg2 = "third arg";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
@@ -69,11 +66,7 @@ $values = varray[
       // object data
       new sample(),
 
-      // undefined data
-      @$undefined_var,
 
-      // unset data
-      @$unset_var,
 
       // resource data
       $file_handle

@@ -15,9 +15,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing print() function: with unexpected inputs for 'arg' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -57,12 +54,6 @@ $inputs =  varray [
 
           // resource
 /*19*/      $file_handle,
-
-          // undefined variable
-/*20*/      @$undefined_var,
-
-          // unset variable
-/*21*/      @$unset_var
 ];
 
 // loop through with each element of the $inputs array to test print() function

@@ -14,9 +14,6 @@ class sample  {
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strncmp() function: by supplying all types for 'str1' and 'str2' ***\n";
-/* get an unset variable */
-$unset_var = 'string_val';
-unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
@@ -67,11 +64,7 @@ $values =  varray [
   "",
   '',
 
-  /* undefined variable */
-  $undefined_var,
 
-  /* unset variable */
-  $unset_var,
 
   /* resource */
   $file_handle,

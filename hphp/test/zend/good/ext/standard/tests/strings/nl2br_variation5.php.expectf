@@ -1,74 +1,68 @@
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 
-Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 2 --
 
-Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 3 --
 
-Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 4 --
 
-Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 5 --
 
-Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 6 --
 
-Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 7 --
 
-Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 8 --
 
-Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 9 --
 
-Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 10 --
 
-Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 11 --
 
-Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 12 --
 
-Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 13 --
 
-Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 14 --
 
-Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 15 --
 
-Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 16 --
 
-Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 17 --
 
-Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 18 --
 
-Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 19 --
 
-Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 20 --
 
-Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 21 --
 
-Warning: nl2br() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 -- Iteration 22 --
 
-Warning: nl2br() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
--- Iteration 23 --
-
-Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
--- Iteration 24 --
-
-Warning: nl2br() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line 78
+Warning: nl2br() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/nl2br_variation5.php on line %d
 Done

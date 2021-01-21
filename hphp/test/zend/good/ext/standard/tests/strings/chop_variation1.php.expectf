@@ -1,100 +1,96 @@
 *** Testing chop() : with unexpected values for str argument ***
 
-Notice: Undefined variable: undefined_var in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 68
-
-Notice: Undefined variable: unset_var in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 71
-
 --- Testing chop() by supplying different values for 'str' argument ---
 -- Iteration 1 --
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 2 --
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 3 --
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 4 --
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 5 --
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 6 --
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 7 --
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 8 --
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 9 --
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 10 --
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 11 --
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 12 --
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 13 --
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 14 --
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 15 --
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 16 --
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 17 --
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 18 --
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 19 --
 string(0) ""
 string(0) ""
@@ -103,32 +99,22 @@ string(0) ""
 string(0) ""
 -- Iteration 21 --
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 22 --
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 23 --
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 -- Iteration 24 --
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
+Warning: chop() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 
-Warning: chop() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
--- Iteration 25 --
-
-Warning: chop() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
-
-Warning: chop() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
--- Iteration 26 --
-
-Warning: chop() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 90
-
-Warning: chop() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line 91
+Warning: chop() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chop_variation1.php on line %d
 Done

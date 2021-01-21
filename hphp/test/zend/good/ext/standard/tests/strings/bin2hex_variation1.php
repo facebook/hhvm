@@ -14,9 +14,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing bin2hex() function: with unexpected inputs for 'str' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -55,11 +52,7 @@ $inputs =  varray [
       // resource
 /*17*/$file_handle,
 
-      // undefined variable
-/*18*/@$undefined_var,
 
-      // unset variable
-/*19*/@$unset_var
 ];
 
 // loop through with each element of the $inputs array to test bin2hex() function

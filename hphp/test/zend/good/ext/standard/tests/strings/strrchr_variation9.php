@@ -17,9 +17,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with unexpected inputs for haystack ***\n";
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -67,11 +64,7 @@ $haystacks =  varray [
   // resource
   $file_handle,
 
-  // undefined variable
-  @$undefined_var,
 
-  // unset variable
-  @$unset_var
 ];
 
 $needles =  varray [
@@ -109,9 +102,6 @@ $needles =  varray [
   //resource variable in string form
   "\$file_handle",
 
-  //undefined variable in string form
-  @"$undefined_var",
-  @"$unset_var"
 ];
 
 // loop through each element of the array and check the working of strrchr()

@@ -24,9 +24,6 @@ function main(): void {
   // initialize all required variables
   $glue = '::';
 
-  // get an unset variable
-  $unset_var = varray[1, 2];
-  unset($unset_var);
 
   // get a resouce variable
   $fp = fopen(__FILE__, "r");
@@ -69,12 +66,6 @@ function main(): void {
 
     // resource variable
     $fp,
-
-    // undefined variable
-    @$undefined_var,
-
-    // unset variable
-    @$unset_var
   ];
 
   // loop through each element of the array and check the working of join()

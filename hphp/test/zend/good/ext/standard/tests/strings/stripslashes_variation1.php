@@ -18,9 +18,6 @@ class sample  {
 echo "*** Testing stripslashes() : with non-string type argument ***\n";
 // initialize all required variables
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -57,12 +54,6 @@ $values =  varray [
           // empty string
 /*19*/      "",
           '',
-
-          // undefined variable
-/*21*/      $undefined_var,
-
-          // unset variable
-/*22*/      $unset_var,
 
           // objects
 /*23*/      new sample(),

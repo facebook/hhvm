@@ -21,9 +21,6 @@ class class_with_tostring  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing money_format() function: with unexpected inputs for 'number' argument ***\n";
 
-//get an unset variable
-$unset_var = '  string_val  ';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -71,12 +68,6 @@ $numbers =  varray [
 
           // resource
 /*25*/      $file_handle,
-
-          // undefined variable
-/*26*/      @$undefined_var,
-
-          // unset variable
-/*27*/      @$unset_var
 ];
 
 // loop through with each element of the $numbers array to test money_format() function

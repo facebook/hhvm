@@ -17,9 +17,6 @@ echo "*** Testing strrev() : unexpected inputs for 'str' ***\n";
 //get the resource
 $resource = fopen(__FILE__, "r");
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //array of values to iterate over
 $values = varray[
@@ -64,11 +61,7 @@ $values = varray[
   // resource
   $resource,
 
-  // undefined data
-  @$undefined_var,
 
-  // unset data
-  @$unset_var
 ];
 
 // loop through each element of the array for str

@@ -19,9 +19,6 @@ echo "*** Testing chunk_split() : with unexpected values for 'chunklen' argument
 $str = 'This is chuklen variation';
 $ending = '*';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //get resource variable
 $fp = fopen(__FILE__, 'r');
@@ -64,11 +61,7 @@ $values = varray[
   // object data
   new MyClass(),
 
-  // undefined data
-  @$undefined_var,
 
-  // unset data
-  @$unset_var,
 
   // resource variable
   $fp

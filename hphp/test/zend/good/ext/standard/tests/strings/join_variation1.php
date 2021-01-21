@@ -23,9 +23,6 @@ function main(): void {
   // initialize all required variables
   $pieces = varray["element1", "element2"];
 
-  // get an unset variable
-  $unset_var = 'string_val';
-  unset($unset_var);
 
   // get a resource variable
   $fp = fopen(__FILE__, "r");
@@ -64,12 +61,6 @@ function main(): void {
 
     // resource variable
     $fp,
-
-    // undefined variable
-    @$undefined_var,
-
-    // unset variable
-    @$unset_var
   ];
 
   // loop through each element of the array and check the working of join()

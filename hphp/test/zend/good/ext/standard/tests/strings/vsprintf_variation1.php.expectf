@@ -70,11 +70,5 @@ string(0) ""
 string(6) "object"
 
  -- Iteration 24 --
-string(0) ""
-
- -- Iteration 25 --
-string(0) ""
-
- -- Iteration 26 --
 string(%d) "Resource id #%d"
 Done

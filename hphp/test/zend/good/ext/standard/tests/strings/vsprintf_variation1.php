@@ -22,9 +22,6 @@ echo "*** Testing vsprintf() : with unexpected values for format argument ***\n"
 // initialising the required variables
 $args = varray[1, 2];
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -70,11 +67,7 @@ $values = varray[
   // object data
   new sample(),
 
-  // undefined data
-  @$undefined_var,
 
-  // unset data
-  @$unset_var,
 
   // resource data
   $file_handle

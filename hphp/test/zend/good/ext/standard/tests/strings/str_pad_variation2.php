@@ -17,9 +17,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing str_pad() function: with unexpected inputs for 'pad_length' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -58,12 +55,6 @@ $pad_lengths =  varray [
 
           // resource
 /*18*/      $file_handle,
-
-          // undefined variable
-/*19*/      @$undefined_var,
-
-          // unset variable
-/*20*/      @$unset_var
 ];
 
 //defining '$input' argument

@@ -22,9 +22,6 @@ echo "*** Testing quoted_printable_decode() : with unexpected values for 'str' a
 $arg1 = "second arg";
 $arg2 = "third arg";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
@@ -69,11 +66,7 @@ $values = varray[
               // object data
 /*23*/          new sample(),
 
-              // undefined data
-/*24*/          @$undefined_var,
 
-              // unset data
-/*25*/          @$unset_var,
 
               // resource data
 /*26*/          $file_handle

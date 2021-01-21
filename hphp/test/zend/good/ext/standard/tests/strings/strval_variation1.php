@@ -15,9 +15,6 @@ echo "*** Testing strval() : usage variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -73,11 +70,7 @@ $values = varray[
           // resource
 /*29*/    $file_handle,
 
-          // undefined data
-/*30*/    @$undefined_var,
 
-          // unset data
-/*31*/    @$unset_var,
 ];
 
 // loop through each element of the array for strval

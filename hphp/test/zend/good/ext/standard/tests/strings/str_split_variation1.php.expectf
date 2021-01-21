@@ -1,64 +1,64 @@
 *** Testing str_split() : unexpected values for 'str' ***
 -- Iteration 1 --
 
-Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 2 --
 
-Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 3 --
 
-Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 4 --
 
-Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 5 --
 
-Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 6 --
 
-Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 7 --
 
-Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 8 --
 
-Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 9 --
 
-Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 10 --
 
-Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 11 --
 
-Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 12 --
 
-Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 13 --
 
-Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, varray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 14 --
 
-Warning: str_split() expects parameter 1 to be string, darray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, darray given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 15 --
 
-Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 16 --
 
-Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 17 --
 
-Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 18 --
 
-Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 19 --
 
-Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 20 --
 
-Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 21 --
 varray(1) {
   string(0) ""
@@ -69,14 +69,8 @@ varray(1) {
 }
 -- Iteration 23 --
 
-Warning: str_split() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 -- Iteration 24 --
 
-Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
--- Iteration 25 --
-
-Warning: str_split() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
--- Iteration 26 --
-
-Warning: str_split() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line 84
+Warning: str_split() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/str_split_variation1.php on line %d
 Done

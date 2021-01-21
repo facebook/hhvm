@@ -86,10 +86,4 @@ string(7) "MyClass"
 
 -- Iteration 29 --
 string(%d) "Resource id #%d"
-
--- Iteration 30 --
-string(0) ""
-
--- Iteration 31 --
-string(0) ""
 ===DONE===

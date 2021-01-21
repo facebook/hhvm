@@ -2,32 +2,32 @@
 
 -- Iteration 1 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 2 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 5 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -41,51 +41,41 @@ string(6) "012atm"
 
 -- Iteration 10 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 11 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 12 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 13 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 14 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 15 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 16 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
-bool(false)
-
--- Iteration 18 --
-
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
-bool(false)
-
--- Iteration 19 --
-
-Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line 77
+Warning: Invalid argument: 2nd argument: (not array) in %s/strtr_variation8.php on line %d
 bool(false)
 *** Done ***

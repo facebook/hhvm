@@ -405,6 +405,8 @@ let search_symbol_index
     ~search_provider:_ =
   ()
 
+let shallow_decl_errors_emitted _ = ()
+
 module ProfileTypeCheck = struct
   let process_file ~recheck_id:_ ~path:_ ~telemetry:_ = ()
 

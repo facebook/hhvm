@@ -270,76 +270,95 @@ let method_ env m =
   }
 
 let class_ ctx c =
-  let (_, cls_name) = c.c_name in
-  let class_dep = Dep.Class cls_name in
-  let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
-  let hint = Decl_hint.hint env in
-  let (req_extends, req_implements) = split_reqs c in
-  let (static_vars, vars) = split_vars c in
-  let (constructor, statics, rest) = split_methods c in
-  let sc_extends = List.map ~f:hint c.c_extends in
-  let sc_uses = List.map ~f:hint c.c_uses in
-  let sc_req_extends = List.map ~f:hint req_extends in
-  let sc_req_implements = List.map ~f:hint req_implements in
-  let sc_implements = List.map ~f:hint c.c_implements in
-  let additional_parents =
-    (* In an abstract class or a trait, we assume the interfaces
+  let (errs, result) =
+    Errors.do_ @@ fun () ->
+    let (_, cls_name) = c.c_name in
+    let class_dep = Dep.Class cls_name in
+    let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
+    let hint = Decl_hint.hint env in
+    let (req_extends, req_implements) = split_reqs c in
+    let (static_vars, vars) = split_vars c in
+    let (constructor, statics, rest) = split_methods c in
+    let sc_extends = List.map ~f:hint c.c_extends in
+    let sc_uses = List.map ~f:hint c.c_uses in
+    let sc_req_extends = List.map ~f:hint req_extends in
+    let sc_req_implements = List.map ~f:hint req_implements in
+    let sc_implements = List.map ~f:hint c.c_implements in
+    let additional_parents =
+      (* In an abstract class or a trait, we assume the interfaces
        will be implemented in the future, so we take them as
        part of the class (as requested by dependency injection implementers) *)
-    match c.c_kind with
-    | Ast_defs.Cabstract -> sc_implements
-    | Ast_defs.Ctrait -> sc_implements @ sc_req_implements
-    | _ -> []
-  in
-  let add_cstr_dep ty =
-    let (_, (_, class_name), _) = Decl_utils.unwrap_class_type ty in
-    Decl_env.add_constructor_dependency env class_name
-  in
-  let where_constraints =
-    List.map c.c_where_constraints (where_constraint env)
-  in
-  let enum_type hint e =
-    let et =
-      {
-        te_base = hint e.e_base;
-        te_constraint = Option.map e.e_constraint hint;
-        te_includes = List.map e.e_includes hint;
-        te_enum_class = e.e_enum_class;
-      }
+      match c.c_kind with
+      | Ast_defs.Cabstract -> sc_implements
+      | Ast_defs.Ctrait -> sc_implements @ sc_req_implements
+      | _ -> []
     in
-    List.iter ~f:add_cstr_dep et.te_includes;
-    et
+    let add_cstr_dep ty =
+      let (_, (_, class_name), _) = Decl_utils.unwrap_class_type ty in
+      Decl_env.add_constructor_dependency env class_name
+    in
+    let where_constraints =
+      List.map c.c_where_constraints (where_constraint env)
+    in
+    let enum_type hint e =
+      let et =
+        {
+          te_base = hint e.e_base;
+          te_constraint = Option.map e.e_constraint hint;
+          te_includes = List.map e.e_includes hint;
+          te_enum_class = e.e_enum_class;
+        }
+      in
+      List.iter ~f:add_cstr_dep et.te_includes;
+      et
+    in
+    List.iter ~f:add_cstr_dep sc_extends;
+    List.iter ~f:add_cstr_dep sc_uses;
+    List.iter ~f:add_cstr_dep sc_req_extends;
+    List.iter ~f:add_cstr_dep additional_parents;
+    {
+      sc_mode = c.c_mode;
+      sc_final = c.c_final;
+      sc_is_xhp = c.c_is_xhp;
+      sc_has_xhp_keyword = c.c_has_xhp_keyword;
+      sc_kind = c.c_kind;
+      sc_name = c.c_name;
+      sc_tparams = List.map c.c_tparams (type_param env);
+      sc_where_constraints = where_constraints;
+      sc_extends;
+      sc_uses;
+      sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
+      sc_req_extends;
+      sc_req_implements;
+      sc_implements;
+      sc_implements_dynamic = c.c_implements_dynamic;
+      sc_consts = List.filter_map c.c_consts (class_const env c);
+      sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
+      sc_props = List.map ~f:(prop env) vars;
+      sc_sprops = List.map ~f:(static_prop env) static_vars;
+      sc_constructor = Option.map ~f:(method_ env) constructor;
+      sc_static_methods = List.map ~f:(method_ env) statics;
+      sc_methods = List.map ~f:(method_ env) rest;
+      sc_user_attributes =
+        List.map
+          c.c_user_attributes
+          ~f:Decl_hint.aast_user_attribute_to_decl_user_attribute;
+      sc_enum_type = Option.map c.c_enum (enum_type hint);
+    }
   in
-  List.iter ~f:add_cstr_dep sc_extends;
-  List.iter ~f:add_cstr_dep sc_uses;
-  List.iter ~f:add_cstr_dep sc_req_extends;
-  List.iter ~f:add_cstr_dep additional_parents;
-  {
-    sc_mode = c.c_mode;
-    sc_final = c.c_final;
-    sc_is_xhp = c.c_is_xhp;
-    sc_has_xhp_keyword = c.c_has_xhp_keyword;
-    sc_kind = c.c_kind;
-    sc_name = c.c_name;
-    sc_tparams = List.map c.c_tparams (type_param env);
-    sc_where_constraints = where_constraints;
-    sc_extends;
-    sc_uses;
-    sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
-    sc_req_extends;
-    sc_req_implements;
-    sc_implements;
-    sc_implements_dynamic = c.c_implements_dynamic;
-    sc_consts = List.filter_map c.c_consts (class_const env c);
-    sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
-    sc_props = List.map ~f:(prop env) vars;
-    sc_sprops = List.map ~f:(static_prop env) static_vars;
-    sc_constructor = Option.map ~f:(method_ env) constructor;
-    sc_static_methods = List.map ~f:(method_ env) statics;
-    sc_methods = List.map ~f:(method_ env) rest;
-    sc_user_attributes =
-      List.map
-        c.c_user_attributes
-        ~f:Decl_hint.aast_user_attribute_to_decl_user_attribute;
-    sc_enum_type = Option.map c.c_enum (enum_type hint);
-  }
+  if not (Errors.is_empty errs) then (
+    let reason =
+      Errors.get_error_list errs
+      |> Errors.convert_errors_to_string
+      |> List.map ~f:(fun err ->
+             Printf.sprintf
+               "%s\nCallstack:\n%s"
+               err
+               (Caml.Printexc.raw_backtrace_to_string
+                  (Caml.Printexc.get_callstack 500)))
+      |> String.concat ~sep:"\n"
+    in
+    HackEventLogger.shallow_decl_errors_emitted reason;
+    Errors.merge_into_current errs
+  );
+  result

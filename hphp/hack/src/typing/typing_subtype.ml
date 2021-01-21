@@ -1182,7 +1182,6 @@ and simplify_subtype_i
                 substs =
                   TUtils.make_locl_subst_for_class_tparams class_ty tyl_super;
                 this_ty = Option.value this_ty ~default:ty_super;
-                from_class = None;
                 on_error = subtype_env.on_error;
                 quiet = true;
               }
@@ -1679,7 +1678,6 @@ and simplify_subtype_i
                     TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
                   (* TODO: do we need this? *)
                   this_ty = Option.value this_ty ~default:ty_sub;
-                  from_class = None;
                   quiet = true;
                   on_error = subtype_env.on_error;
                 }

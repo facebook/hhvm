@@ -126,7 +126,6 @@ let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_info tyl;
                   this_ty = ty;
-                  from_class = None;
                   quiet = true;
                   on_error;
                 }
@@ -210,7 +209,6 @@ let rec obj_get_concrete_ty
       type_expansions = [];
       this_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
-      from_class = None;
       quiet = true;
       on_error;
     }

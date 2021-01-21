@@ -1974,7 +1974,6 @@ and expr_
             type_expansions = [];
             substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
-            from_class = None;
             quiet = true;
             on_error = Errors.unify_error_at p;
           }
@@ -3726,7 +3725,6 @@ and new_object
               substs =
                 TUtils.make_locl_subst_for_class_tparams class_info params;
               this_ty = obj_ty;
-              from_class = None;
               quiet = false;
               on_error = Errors.unify_error_at p;
             }
@@ -5319,7 +5317,6 @@ and class_get_
           type_expansions = [];
           this_ty;
           substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
-          from_class = None;
           quiet = true;
           on_error = Errors.unify_error_at p;
         }
@@ -5805,7 +5802,6 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       type_expansions = [];
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
-      from_class = None;
       quiet = true;
       on_error = Errors.unify_error_at p;
     }
@@ -6912,7 +6908,6 @@ and safely_refine_class_type
       type_expansions = [];
       substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
-      from_class = None;
       quiet = true;
       on_error = Errors.unify_error_at p;
     }

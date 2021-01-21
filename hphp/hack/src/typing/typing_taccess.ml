@@ -130,9 +130,8 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
             | ty -> ty)
       in
       let ety_env =
-        let from_class = None in
         let this_ty = drop_exact (Option.value ctx.base ~default:root) in
-        { ctx.ety_env with from_class; type_expansions; this_ty }
+        { ctx.ety_env with type_expansions; this_ty }
       in
       let make_abstract env bnd =
         ( if (not ctx.allow_abstract) && not ety_env.quiet then

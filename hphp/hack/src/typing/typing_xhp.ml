@@ -121,7 +121,6 @@ and get_spread_attributes env pos onto_xhp cty =
         type_expansions = [];
         this_ty = xhp_ty;
         substs = TUtils.make_locl_subst_for_class_tparams xhp_info tparams;
-        from_class = None;
         quiet = false;
         on_error = Errors.unify_error;
       }

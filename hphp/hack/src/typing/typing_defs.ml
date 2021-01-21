@@ -175,9 +175,8 @@ type expand_env = {
        *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
-  from_class: Nast.class_id_ option;
-      (** The class that the type is extracted from. Used for creating expression
-       * dependent types for type constants.
+      (** The type that is substituted for `this` in signatures. It should be
+       * set to an expression dependent type if appropraite
        *)
   quiet: bool;
       (** If set to true, do not report errors, just return Terr or equivalent *)

@@ -206,7 +206,7 @@ std::pair<int, double> sizeOfArray(
 
   int size = 0;
   double sized = 0;
-  if (ad->hasVanillaPackedLayout()) {
+  if (ad->isVecType() || ad->isVArray()) {
     FTRACE(2, "Iterating packed array\n");
     if (stack) stack->push_back("ArrayIndex");
 

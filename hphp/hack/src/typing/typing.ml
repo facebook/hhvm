@@ -5312,13 +5312,14 @@ and class_get_
     (match class_ with
     | None -> (env, (Typing_utils.mk_tany env p, []))
     | Some class_ ->
+      let (env, this_ty) = ExprDepTy.make env cid this_ty in
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
         {
           type_expansions = [];
           this_ty;
           substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
-          from_class = Some cid;
+          from_class = None;
           quiet = true;
           on_error = Errors.unify_error_at p;
         }

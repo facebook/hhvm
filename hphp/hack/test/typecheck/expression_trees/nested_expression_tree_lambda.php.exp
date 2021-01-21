@@ -1,0 +1,78 @@
+File "nested_expression_tree_lambda.php", line 6, characters 22-28:
+Expression trees may not be nested. (Parsing[1002])
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "nested_expression_tree_lambda.php", line 135, characters 5-10:
+  Expected `string`
+  File "nested_expression_tree_lambda.php", line 30, characters 32-44:
+  But got `ExampleString`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "nested_expression_tree_lambda.php", line 168, characters 13-15:
+  Expected `int`
+  File "nested_expression_tree_lambda.php", line 16, characters 33-42:
+  But got `ExampleInt`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "nested_expression_tree_lambda.php", line 169, characters 13-15:
+  Expected `int`
+  File "nested_expression_tree_lambda.php", line 16, characters 33-42:
+  But got `ExampleInt`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "nested_expression_tree_lambda.php", line 170, characters 13-15:
+  Expected `int`
+  File "nested_expression_tree_lambda.php", line 16, characters 33-42:
+  But got `ExampleInt`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "nested_expression_tree_lambda.php", line 171, characters 13-15:
+  Expected `int`
+  File "nested_expression_tree_lambda.php", line 16, characters 33-42:
+  But got `ExampleInt`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid index type for this dict
+  File "", line 0, characters 0-0:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "nested_expression_tree_lambda.php", line 30, characters 32-44:
+  But got `ExampleString`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  The keys of this `Map` are incompatible
+  File "nested_expression_tree_lambda.php", line 156, characters 18-23:
+  Expected `string`
+  File "nested_expression_tree_lambda.php", line 30, characters 32-44:
+  But got `ExampleString`
+  File "nested_expression_tree_lambda.php", line 152, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 6, characters 27-27:
+Invalid argument (Typing[4110])
+  File "nested_expression_tree_lambda.php", line 15, characters 5-7:
+  Expected `int`
+  File "nested_expression_tree_lambda.php", line 41, characters 15-28:
+  But got `ExampleContext`

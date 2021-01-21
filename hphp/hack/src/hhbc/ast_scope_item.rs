@@ -126,6 +126,10 @@ impl<'a> Fun<'a> {
         self.either(|x| &x.ctxs, |x| &x.ctxs)
     }
 
+    pub fn get_params(&self) -> &[ast::FunParam] {
+        self.either(|x| &x.params[..], |x| &x.params[..])
+    }
+
     pub fn get_span(&self) -> &Pos {
         self.either(|x| &x.span, |x| &x.span)
     }
@@ -166,6 +170,10 @@ impl<'a> Method<'a> {
 
     pub fn get_ctxs(&self) -> &Option<ast::Contexts> {
         self.either(|x| &x.ctxs, |x| &x.ctxs)
+    }
+
+    pub fn get_params(&self) -> &[ast::FunParam] {
+        self.either(|x| &x.params[..], |x| &x.params[..])
     }
 
     pub fn get_span(&self) -> &Pos {
@@ -219,6 +227,7 @@ pub struct Fun_ {
     mode: file_info::Mode,
     fun_kind: ast::FunKind,
     ctxs: Option<ast::Contexts>,
+    params: Vec<ast::FunParam>,
 }
 
 impl Fun_ {
@@ -231,6 +240,7 @@ impl Fun_ {
             mode: f.mode,
             fun_kind: f.fun_kind,
             ctxs: f.ctxs.clone(),
+            params: f.params.clone(),
         }
     }
 }
@@ -244,6 +254,7 @@ pub struct Method_ {
     static_: bool,
     fun_kind: ast::FunKind,
     ctxs: Option<ast::Contexts>,
+    params: Vec<ast::FunParam>,
 }
 
 impl Method_ {
@@ -256,6 +267,7 @@ impl Method_ {
             user_attributes: m.user_attributes.clone(),
             fun_kind: m.fun_kind,
             ctxs: m.ctxs.clone(),
+            params: m.params.clone(),
         }
     }
 }

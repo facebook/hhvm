@@ -189,10 +189,18 @@ impl<'a> Scope<'a> {
                     return HhasCoeffects::default();
                 }
                 ScopeItem::Method(m) => {
-                    return HhasCoeffects::from_ast(m.get_user_attributes(), m.get_ctxs());
+                    return HhasCoeffects::from_ast(
+                        m.get_user_attributes(),
+                        m.get_ctxs(),
+                        m.get_params(),
+                    );
                 }
                 ScopeItem::Function(f) => {
-                    return HhasCoeffects::from_ast(f.get_user_attributes(), f.get_ctxs());
+                    return HhasCoeffects::from_ast(
+                        f.get_user_attributes(),
+                        f.get_ctxs(),
+                        f.get_params(),
+                    );
                 }
                 ScopeItem::Lambda(Lambda { coeffects, .. })
                 | ScopeItem::LongLambda(LongLambda { coeffects, .. })

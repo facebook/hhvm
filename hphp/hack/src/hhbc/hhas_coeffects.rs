@@ -77,6 +77,7 @@ impl HhasCoeffects {
     pub fn from_ast<Ex, Fb, En, Hi>(
         ast_attrs: impl AsRef<[a::UserAttribute<Ex, Fb, En, Hi>]>,
         ctxs_opt: &Option<a::Contexts>,
+        _params: impl AsRef<[a::FunParam<Ex, Fb, En, Hi>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut is_any_rx = false;

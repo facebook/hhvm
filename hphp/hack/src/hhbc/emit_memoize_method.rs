@@ -133,7 +133,7 @@ fn make_memoize_wrapper_method<'a>(
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
-    let coeffects = HhasCoeffects::from_ast(&method.user_attributes, &method.ctxs);
+    let coeffects = HhasCoeffects::from_ast(&method.user_attributes, &method.ctxs, &method.params);
     let is_reified = method
         .tparams
         .iter()

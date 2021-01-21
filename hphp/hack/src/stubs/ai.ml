@@ -7,8 +7,6 @@
  *
  *)
 
-let magic_builtins = [||]
-
 let do_ _ _ _ = ()
 
 module InfoService = struct

@@ -2071,7 +2071,6 @@ let decl_and_run_mode
       with `Hhi.get_root ()` *)
       let magic_builtins =
         match mode with
-        | Ai _ -> Array.append magic_builtins Ai.magic_builtins
         | Ifc _ -> magic_builtins
         | _ -> magic_builtins
       in

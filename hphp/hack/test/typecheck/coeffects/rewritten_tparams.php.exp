@@ -1,5 +1,5 @@
 File "rewritten_tparams.php", line 7, characters 3-12:
-`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "rewritten_tparams.php", line 6, characters 2-16:
   The local (enclosing) context provides the capability set {$v::C, ctx $f}
   File "coeffect/contexts.hhi", line 28, characters 1-23:

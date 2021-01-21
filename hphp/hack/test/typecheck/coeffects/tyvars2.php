@@ -2,7 +2,7 @@
 
 function mixed_context(
   (function()[_]: void) $f,
-)[local, ctx $f]: void {
+)[write_props, ctx $f]: void {
   $f();
 }
 

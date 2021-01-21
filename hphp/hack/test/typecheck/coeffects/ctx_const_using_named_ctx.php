@@ -2,9 +2,9 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class MyParent {
-  const ctx MyC = [local];
+  const ctx MyC = [write_props];
   public function callsRequiresLocal()[self::MyC]: void {
     $this->requiresLocal();
   }
-  public function requiresLocal()[local]: void {}
+  public function requiresLocal()[write_props]: void {}
 }

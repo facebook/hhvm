@@ -21,7 +21,7 @@ function implicit_context(): void {
   $default_lambda = () ==> $rx_lambda(); // ok
 }
 
-function cipp_context()[output]: void {
+function cipp_context()[cipp_global]: void {
   // the lambda should be typed as having Output capability, not defaults
   () ==> rx_context(); // error
 

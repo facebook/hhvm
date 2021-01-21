@@ -31,9 +31,7 @@ namespace HH\Contexts\Unsafe {
   type cipp_of<T> = mixed;
   type cipp = mixed;
 
-  type output = mixed;
-
-  type local = mixed;
+  type write_props = mixed;
 
   type rx = mixed;
   type rx_shallow = \HH\Capabilities\RxLocal;

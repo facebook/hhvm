@@ -1,7 +1,7 @@
 <?hh
 
 function purification_fail(
-  (function ()[local]: void) $f
+  (function ()[write_props]: void) $f
 ): (function ()[]: void) {
   return $f;
 }

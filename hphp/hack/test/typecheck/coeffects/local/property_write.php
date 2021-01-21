@@ -9,7 +9,7 @@ class X {
   ) {}
 }
 
-function ok(X $x)[local]: void {
+function ok(X $x)[write_props]: void {
   $x->integer = 5;
   $x->str .= 0;
   $x->vector[] = 1;

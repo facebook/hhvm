@@ -1,14 +1,26 @@
 <?hh
 
-function f()[]: (function()[output, local]: void) {
-  return ()[output] ==> print "Hi!\n";
+namespace HH\Contexts {
+  type io = \HH\Capabilities\IO;
+  namespace Unsafe {
+    type io = mixed;
+  }
 }
 
-function test()[output]: void {
-  caller(f(), f());
-}
+namespace {
+  function f()[]: (function()[io, write_props]: void) {
+    return ()[io] ==> print "Hi!\n";
+  }
 
-function caller((function()[_]: void) $f1, (function()[_]: void) $f2)[ctx $f1, ctx $f2]: void {
-  $f1();
-  $f2();
+  function test()[io]: void {
+    caller(f(), f());
+  }
+
+  function caller(
+    (function()[_]: void) $f1,
+    (function()[_]: void) $f2,
+  )[ctx $f1, ctx $f2]: void {
+    $f1();
+    $f2();
+  }
 }

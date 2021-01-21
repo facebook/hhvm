@@ -1,5 +1,5 @@
 File "print_in_rx4.php", line 5, characters 3-6:
-`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "print_in_rx4.php", line 3, characters 14-23:
   The local (enclosing) context provides the capability set {RxShallow, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:

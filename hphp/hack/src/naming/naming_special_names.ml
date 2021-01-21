@@ -855,7 +855,7 @@ module Capabilities = struct
 
   let accessStaticVariable = prefix ^ "AccessStaticVariable"
 
-  let output = prefix ^ "Output"
+  let io = prefix ^ "IO"
 
   let rx = prefix ^ "Rx"
 end

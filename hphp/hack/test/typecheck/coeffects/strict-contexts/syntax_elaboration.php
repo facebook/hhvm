@@ -31,7 +31,7 @@ function fully_qualified_but_wrong_ns()[
 function namespaceless_cap_bad()[AccessStaticVariable]: void {}
 
 function fully_qualified_but_right_ns()[
-  \HH\Contexts\local
+  \HH\Contexts\write_props
 ]: void {}
 
 function toplevel_lowercase_typename_bad()[int]: void {}

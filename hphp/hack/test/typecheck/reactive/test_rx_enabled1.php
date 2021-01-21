@@ -1,5 +1,5 @@
 <?hh // strict
-function f()[local]: int {
+function f()[write_props]: int {
   if (Rx\IS_ENABLED) {
     return rx();
   } else {

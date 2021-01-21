@@ -5,7 +5,7 @@ Static property access requires the capability AccessStaticVariable, which is no
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 5, characters 3-6:
-`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "pure_does_bad_things.php", line 3, characters 16-17:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
@@ -24,7 +24,7 @@ Static property access requires the capability AccessStaticVariable, which is no
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 15, characters 3-6:
-`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "pure_does_bad_things.php", line 13, characters 14-15:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:

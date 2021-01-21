@@ -2177,7 +2177,7 @@ and expr_
     let env =
       match snd e with
       | Id (pos, f) when String.equal f SN.SpecialFunctions.echo ->
-        Typing_local_ops.enforce_output pos env
+        Typing_local_ops.enforce_io pos env
       | _ -> env
     in
     let env = might_throw env in

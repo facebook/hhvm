@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,76 +1,66 @@
+@@ -1,79 +1,67 @@
  [("\\MyParent",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -13,10 +13,12 @@
 -       [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
 -          stc_constraint = None; stc_name = ([5:13-16], "MyC");
 -          stc_type =
--          (Some (Rhint (root|ctx_const_using_named_ctx.php line 5, characters 19-25),
+-          (Some (Rhint (root|ctx_const_using_named_ctx.php line 5, characters 19-31),
 -                 (Tintersection
--                    [(Rhint (root|ctx_const_using_named_ctx.php line 5, characters 20-24),
--                      (Tapply (([5:20-25], "\\HH\\Contexts\\local"), [])))])));
+-                    [(Rhint (root|ctx_const_using_named_ctx.php line 5, characters 20-30),
+-                      (Tapply (([5:20-31], "\\HH\\Contexts\\write_props"), 
+-                         [])))
+-                      ])));
 -          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
 -         ];
 -       sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -60,14 +62,15 @@
                   ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability =
-                    (CapTy (Rhint (root|ctx_const_using_named_ctx.php line 9, characters 35-39),
-                            (Tapply (([9:35-40], "\\HH\\Contexts\\local"), 
+                    (CapTy (Rhint (root|ctx_const_using_named_ctx.php line 9, characters 35-45),
+                            (Tapply (
+                               ([9:35-46], "\\HH\\Contexts\\write_props"), 
                                []))))
                     };
                   ft_ret =
                   { et_enforced = false;
                     et_type =
-                    (Rhint (root|ctx_const_using_named_ctx.php line 9, characters 43-46),
+                    (Rhint (root|ctx_const_using_named_ctx.php line 9, characters 49-52),
                      (Tprim Tvoid))
                     };
                   ft_flags =

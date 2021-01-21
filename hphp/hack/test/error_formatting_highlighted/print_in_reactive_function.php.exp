@@ -1,4 +1,4 @@
-Typing[4401] echo or print builtin requires the capability Output, which is not provided by the context. [1]
+Typing[4401] echo or print builtin requires the capability IO, which is not provided by the context. [1]
 -> The local (enclosing) context provides the capability set {Rx, WriteProperty} [2]
 -> Hack provides a list of supported contexts here [3]
 

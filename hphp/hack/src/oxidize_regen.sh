@@ -4,10 +4,19 @@ set -e # terminate upon non-zero-exit-codes (in case of pipe, only checks at end
 set -o pipefail # in a pipe, the whole pipe runs, but its exit code is that of the first failure
 trap 'echo "exit code $? at line $LINENO" >&2' ERR
 
-set -x # echo every statement in the script
+CYAN=$(tput setaf 6)
+WHITE=$(tput setaf 7)
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
+
+function summary {
+    echo -e "$BOLD$CYAN==>$WHITE ${1}$RESET"
+}
 
 # Try to get the path of this script relative to fbcode/.
-FBCODE_ROOT="$(dirname "${BASH_SOURCE[0]}")/../../../.."
+#set -x # echo every statement in the script
+
+FBCODE_ROOT="$(dirname "${BASH_SOURCE[0]}")/../../.."
 REGEN_COMMAND="$(realpath --relative-to="${FBCODE_ROOT}" "${BASH_SOURCE[0]}")"
 cd "$FBCODE_ROOT"
 
@@ -16,6 +25,57 @@ RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath ../tools/third-party/rustfmt/rustfmt)"
 
 BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
 
+summary "Write oxidized/gen/"
+"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
+  --out-dir hphp/hack/src/oxidized/gen                                        \
+  --regen-command "$REGEN_COMMAND"                                            \
+  --rustfmt-path "$RUSTFMT_PATH"                                              \
+  hphp/hack/src/annotated_ast/aast_defs.ml                                    \
+  hphp/hack/src/annotated_ast/aast.ml                                         \
+  hphp/hack/src/annotated_ast/namespace_env.ml                                \
+  hphp/hack/src/ast/ast_defs.ml                                               \
+  hphp/hack/src/deps/fileInfo.ml                                              \
+  hphp/hack/src/deps/typing_deps_mode.ml                                      \
+  hphp/hack/src/errors/errors.ml                                              \
+  hphp/hack/src/errors/error_codes.ml                                         \
+  hphp/hack/src/naming/naming_types.ml                                        \
+  hphp/hack/src/naming/nast.ml                                                \
+  hphp/hack/src/options/globalOptions.ml                                      \
+  hphp/hack/src/options/parserOptions.ml                                      \
+  hphp/hack/src/options/typecheckerOptions.ml                                 \
+  hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
+  hphp/hack/src/utils/core/prim_defs.ml                                       \
+  hphp/hack/src/parser/scoured_comments.ml                                    \
+
+# Add exports in oxidized/lib.rs from oxidized/gen/mod.rs.
+# BSD sed doesn't have -i
+sed "/^pub use gen::/d" hphp/hack/src/oxidized/lib.rs > hphp/hack/src/oxidized/lib.rs.tmp
+mv hphp/hack/src/oxidized/lib.rs.tmp hphp/hack/src/oxidized/lib.rs
+grep "^pub mod " hphp/hack/src/oxidized/gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> hphp/hack/src/oxidized/lib.rs
+
+summary "Write oxidized/impl_gen/"
+"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  enum-helpers                                                                \
+  --input "hphp/hack/src/oxidized/gen/aast.rs|crate::ast_defs|crate::aast::*|crate::LocalIdMap" \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*"       \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*"         \
+  --output "hphp/hack/src/oxidized/impl_gen/"                                 \
+
+summary "Write oxidized/aast_visitor/"
+"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  visitor                                                                     \
+  --input "hphp/hack/src/oxidized/gen/aast.rs"                                \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
+  --input "hphp/hack/src/oxidized/manual/doc_comment.rs"                      \
+  --output "hphp/hack/src/oxidized/aast_visitor/"                             \
+  --root "Program"                                                            \
+
+summary "Write oxidized_by_ref/gen/"
 "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
   --out-dir hphp/hack/src/oxidized_by_ref/gen                                 \
   --regen-command "$REGEN_COMMAND"                                            \
@@ -56,6 +116,13 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
 
+# Add exports in oxidized_by_ref/lib.rs from oxidized_by_ref/gen/mod.rs.
+# BSD sed doesn't have -i
+sed "/^pub use gen::/d" hphp/hack/src/oxidized_by_ref/lib.rs > hphp/hack/src/oxidized_by_ref/lib.rs.tmp
+mv hphp/hack/src/oxidized_by_ref/lib.rs.tmp hphp/hack/src/oxidized_by_ref/lib.rs
+grep "^pub mod " hphp/hack/src/oxidized_by_ref/gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> hphp/hack/src/oxidized_by_ref/lib.rs
+
+summary "Write oxidized_by_ref/decl_visitor/"
 "${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
@@ -73,10 +140,3 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
   --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \
   --root "Decls"                                                              \
-
-# Re-export generated modules (listed in gen/mod.rs) in the crate root, lib.rs
-cd "$(dirname "${REGEN_COMMAND}")"
-# BSD sed doesn't have -i
-sed "/^pub use gen::/d" lib.rs > lib.rs.tmp
-mv lib.rs.tmp lib.rs
-grep "^pub mod " gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> lib.rs

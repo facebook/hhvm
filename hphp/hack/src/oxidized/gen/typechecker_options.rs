@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1bc9a16a8d4b092ce564b4a089472b70>>
+// @generated SignedSource<<224fe303f4cc088517a6e74e35fbf843>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 #[allow(unused_imports)]
 use crate::*;

@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7cd865639f360280cd5d7a579f5154f0>>
+// @generated SignedSource<<307c9fe8db1f499ae27bf54eb8c18939>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_by_ref/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 pub mod aast;
 pub mod aast_defs;

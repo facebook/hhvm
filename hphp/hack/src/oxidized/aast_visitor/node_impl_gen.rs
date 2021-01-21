@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0e0ca4ba5364b29d033163e76129a662>>
+// @generated SignedSource<<1e8b6e300568624988cae42641609e8d>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 #![allow(unused_variables)]
 use super::node::Node;

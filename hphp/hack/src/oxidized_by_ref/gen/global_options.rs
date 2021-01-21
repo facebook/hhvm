@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e54de59746970f14201177747bde78bc>>
+// @generated SignedSource<<3f8415bce5c453d24a4cea22832146cf>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_by_ref/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRepIn;

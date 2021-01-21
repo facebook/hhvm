@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<24f2b59d7c4fd6b91188ac30dd51a0c6>>
+// @generated SignedSource<<2c08c318f388e4068a19dfa4d99daff9>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 use crate::ast_defs::*;
 impl ShapeFieldName {

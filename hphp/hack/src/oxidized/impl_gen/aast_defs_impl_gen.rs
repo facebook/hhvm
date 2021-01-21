@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28afa7c50a62be9d45685f900b851c9b>>
+// @generated SignedSource<<8d6f5b4c708ad6855459de04f4bb2d65>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized/regen.sh
+//   hphp/hack/src/oxidize_regen.sh
 
 use crate::aast_defs::*;
 impl FuncReactive {

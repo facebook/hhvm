@@ -18,9 +18,6 @@ function entrypoint_xml_parser_set_option_variation2(): void {
   // Initialise function arguments not being substituted (if any)
   $parser = xml_parser_create();
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   //array of values to iterate over
   $values = varray[
@@ -64,11 +61,7 @@ function entrypoint_xml_parser_set_option_variation2(): void {
         // object data
         new aClass(),
 
-        // undefined data
-        $undefined_var,
 
-        // unset data
-        $unset_var,
   ];
 
   // loop through each element of the array for option

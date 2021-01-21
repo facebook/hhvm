@@ -18,9 +18,6 @@ function entrypoint_xml_parser_get_option_variation2(): void {
   // Initialise function arguments not being substituted (if any)
   $parser = xml_parser_create();
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   $fp = fopen(__FILE__, "r");
 
@@ -69,11 +66,7 @@ function entrypoint_xml_parser_get_option_variation2(): void {
         // resource data
         $fp,
 
-        // undefined data
-        $undefined_var,
 
-        // unset data
-        $unset_var,
   ];
 
   // loop through each element of the array for option

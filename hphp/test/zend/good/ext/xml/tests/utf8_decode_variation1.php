@@ -18,9 +18,6 @@ function entrypoint_utf8_decode_variation1(): void {
 
   // Initialise function arguments not being substituted (if any)
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   //array of values to iterate over
   $values = varray[
@@ -62,11 +59,7 @@ function entrypoint_utf8_decode_variation1(): void {
         // object data
         new aClass(),
 
-        // undefined data
-        $undefined_var,
 
-        // unset data
-        $unset_var,
   ];
 
   // loop through each element of the array for data

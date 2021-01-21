@@ -20,9 +20,6 @@ function main_entry(): void {
   $parser = xml_parser_create();
   $option = 1;
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   $fp = fopen(__FILE__, "r");
 
@@ -73,11 +70,7 @@ function main_entry(): void {
         // resource data
         $fp,
 
-        // undefined data
-        $undefined_var,
 
-        // unset data
-        $unset_var,
   ];
 
   // loop through each element of the array for value

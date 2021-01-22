@@ -12,7 +12,7 @@ open Hh_prelude
 (*****************************************************************************)
 (* Recheck loop types. *)
 (*****************************************************************************)
-type seconds = float [@@deriving show]
+type seconds = float
 
 type recheck_loop_stats = {
   updates_stale: bool;
@@ -25,7 +25,6 @@ type recheck_loop_stats = {
   recheck_id: string;
   any_full_checks: bool;
 }
-[@@deriving show]
 
 let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
   {
@@ -97,7 +96,6 @@ type full_check_status =
           whenever there is a command requiring full check pending, or when user
           saves a file. *)
   | Full_check_done  (** All the changes have been fully processed. *)
-[@@deriving show]
 
 let is_full_check_done = function
   | Full_check_done -> true
@@ -210,7 +208,6 @@ type env = {
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
 }
-[@@deriving show]
 
 (** Global rechecks in response to file changes can be paused. If the user
   changes the state to `Paused` during an ongoing recheck, we should cancel

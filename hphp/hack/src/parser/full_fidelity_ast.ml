@@ -176,39 +176,6 @@ let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
   from_text env source_text
 
-let aast_to_tast aast =
-  let tany = Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ()) in
-  let endo =
-    object
-      inherit [_] Aast.map
-
-      method on_'ex _ pos = (pos, tany)
-
-      method on_'fb _ _ = ()
-
-      method on_'en _ _ = Tast.dummy_saved_env
-
-      method on_'hi _ _ = tany
-    end
-  in
-  endo#on_program () aast
-
-let tast_to_aast tast =
-  let endo =
-    object
-      inherit [_] Aast.map
-
-      method on_'ex _ (pos, _) = pos
-
-      method on_'fb _ _ = ()
-
-      method on_'en _ _ = ()
-
-      method on_'hi _ _ = ()
-    end
-  in
-  endo#on_program () tast
-
 type aast_to_nast_env = { mutable last_pos: Pos.t }
 
 let aast_to_nast aast =
@@ -239,20 +206,6 @@ let aast_to_nast aast =
     end
   in
   endo#on_program { last_pos = Pos.none } aast
-
-(**
- * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
- * so that codegen and typing both operate on the same ast structure.
- *
- * There are some errors that are not valid hack but are still expected
- * to produce valid bytecode. hh_single_compile is expected to catch
- * these errors.
- *)
-let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
-    Rust_aast_parser_types.tast_result =
-  let result = from_text_rust env source_text in
-  Rust_aast_parser_types.
-    { result with aast = Result.map ~f:aast_to_tast result.aast }
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)
@@ -335,17 +288,3 @@ let defensive_from_file ?quick ?show_all_errors popt fn =
     (try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "")
   in
   defensive_program ?quick ?show_all_errors popt fn content
-
-let defensive_from_file_with_default_popt ?quick ?show_all_errors fn =
-  defensive_from_file ?quick ?show_all_errors ParserOptions.default fn
-
-let defensive_program_with_default_popt
-    ?quick ?show_all_errors ?fail_open ?elaborate_namespaces fn content =
-  defensive_program
-    ?quick
-    ?show_all_errors
-    ?fail_open
-    ?elaborate_namespaces
-    ParserOptions.default
-    fn
-    content

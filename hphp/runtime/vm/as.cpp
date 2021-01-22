@@ -1884,15 +1884,60 @@ StaticCoeffects coeffectFromName(AsmState& as, std::string name) {
 }
 
 /*
- * directive-static_coeffects : coeffect-name* ';'
+ * directive-coeffects_static : coeffect-name* ';'
  *                            ;
  */
-void parse_static_coeffects(AsmState& as) {
+void parse_coeffects_static(AsmState& as) {
   while (true) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
     as.fe->staticCoeffects |= coeffectFromName(as, name);
+  }
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-coeffects_fun_param : param-index* ';'
+ *                               ;
+ */
+void parse_coeffects_fun_param(AsmState& as) {
+  while (true) {
+    as.in.skipWhitespace();
+    read_opcode_arg<uint32_t>(as);
+    //TODO: Add to coeffectRules
+    if (as.in.peek() == ';') break;
+  }
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-coeffects_cc_param : param-index ctx-name* ';'
+ *                              ;
+ */
+void parse_coeffects_cc_param(AsmState& as) {
+  while (true) {
+    as.in.skipWhitespace();
+    read_opcode_arg<uint32_t>(as);
+    as.in.skipWhitespace();
+    std::string name;
+    as.in.readword(name);
+    //TODO: Add to coeffectRules
+    if (as.in.peek() == ';') break;
+  }
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-coeffects_cc_this : ctx-name* ';'
+ *                             ;
+ */
+void parse_coeffects_cc_this(AsmState& as) {
+  while (true) {
+    as.in.skipWhitespace();
+    std::string name;
+    if (!as.in.readword(name)) break;
+    //TODO: Add to coeffectRules
   }
   as.in.expectWs(';');
 }
@@ -2225,7 +2270,10 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
       if (word == ".doc") { parse_func_doccomment(as); continue; }
-      if (word == ".static_coeffects") { parse_static_coeffects(as); continue; }
+      if (word == ".coeffects_static") { parse_coeffects_static(as); continue; }
+      if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
+      if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
+      if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
       if (word == ".rx_cond_rx_of_arg") {
         parse_rx_cond_rx_of_arg(as);
         continue;

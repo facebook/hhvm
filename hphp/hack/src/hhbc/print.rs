@@ -1151,11 +1151,9 @@ fn print_body<W: Write>(
         })?;
         w.write(";")?;
     }
-    if let Some(static_coeffects) = HhasCoeffects::static_coeffects_to_string(&coeffects) {
+    for s in HhasCoeffects::coeffects_to_hhas(&coeffects).iter() {
         ctx.newline(w)?;
-        w.write(".static_coeffects ")?;
-        w.write(static_coeffects)?;
-        w.write(";")?;
+        w.write(s)?;
     }
     for i in body.rx_cond_rx_of_arg.iter() {
         ctx.newline(w)?;

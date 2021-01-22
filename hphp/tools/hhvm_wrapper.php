@@ -16,6 +16,7 @@ function my_option_map(): OptionInfoMap {
 'dump-hhas'       => Pair { '',  'Print the HHAS after compiling, then exit' },
 'trace-printir::4'=> Pair { 'p', 'Extend TRACE with printir=n' },
 'trace-hhir::3'   => Pair { 't', 'Extend TRACE with hhir=n' },
+'trace-file'      => Pair { 'f', 'Dump trace in file $HPHP_TRACE_FILE' },
 'hphpd'           => Pair { 'd', 'Run as the hphpd client' },
 'compile'         => Pair { 'c', 'Compile with hphpc; run RepoAuthoritative' },
 'create-repo'     => Pair { 'C', 'Compile unoptimized repo named hhvm.hhbc' },
@@ -232,7 +233,10 @@ function determine_trace_env(OptionMap $opts): string {
   $env = getenv("TRACE");
   if ($traces->isEmpty() && !$env) return '';
 
-  $formatting = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
+  $formatting = '';
+  if (!$opts->containsKey('trace-file')) {
+    $formatting = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
+  }
   if (!$traces->isEmpty() && $env) $env .= ',';
   return $formatting.'TRACE='.$env.implode(',', vec($traces)).' ';
 }

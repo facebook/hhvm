@@ -815,12 +815,19 @@ void VariableSerializer::writeOverflow(tv_rval tv) {
 }
 
 void VariableSerializer::writeRefCount() {
-  if (m_type == Type::DebugDump) {
+  if (m_type != Type::DebugDump) return;
+
+  if (m_refCount >= 0) {
     m_buf->append(" refcount(");
     m_buf->append(m_refCount);
     m_buf->append(')');
-    m_refCount = 1;
+  } else if (m_refCount == StaticValue) {
+    m_buf->append(" static");
+  } else {
+    m_buf->append(" uncounted");
   }
+
+  m_refCount = OneReference;
 }
 
 void VariableSerializer::writeArrayHeader(int size, bool isVectorData,

@@ -1,0 +1,4 @@
+string(1) "a" static
+string(1) "a" static
+string(1) "a" refcount(%d)
+string(1) "a" static

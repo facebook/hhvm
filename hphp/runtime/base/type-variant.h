@@ -120,8 +120,10 @@ public:
     return val(m_val).pclsmeth;
   }
 
-  int getRefCount() const noexcept {
-    return isRefcountedType(type(m_val)) ? tvGetCount(*m_val) : 1;
+  RefCount getRefCount() const noexcept {
+    return isRefcountedType(type(m_val)) || hasPersistentFlavor(type(m_val))
+      ? val(m_val).pcnt->count()
+      : OneReference;
   }
 
 protected:

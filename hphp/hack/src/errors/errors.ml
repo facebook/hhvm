@@ -5578,6 +5578,12 @@ let enum_classes_reserved_syntax pos =
     ( "This syntax is reserved for the Enum Classes feature.\n"
     ^ "Enable it with the enable_enum_classes option in .hhconfig" )
 
+let nonsense_member_selection pos kind =
+  add
+    (Typing.err_code Typing.NonsenseMemberSelection)
+    pos
+    ("Dynamic member access requires a local variable, not `" ^ kind ^ "`.")
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -678,6 +678,7 @@ module Typing = struct
     | SubtypeCoeffects [@value 4403]
     | ImmutableLocal [@value 4404]
     | EnumClassesReservedSyntax [@value 4405]
+    | NonsenseMemberSelection [@value 4406]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

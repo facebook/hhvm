@@ -1,0 +1,24 @@
+File "nonsense_member_access.php", line 5, characters 12-16:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 6, characters 12-16:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 7, characters 12-16:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 8, characters 12-13:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])
+File "nonsense_member_access.php", line 9, characters 12-13:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])
+File "nonsense_member_access.php", line 10, characters 12-13:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])
+File "nonsense_member_access.php", line 13, characters 9-13:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 14, characters 9-13:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 15, characters 9-13:
+Dynamic member access requires a local variable, not `$this`. (Typing[4406])
+File "nonsense_member_access.php", line 16, characters 9-10:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])
+File "nonsense_member_access.php", line 17, characters 9-10:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])
+File "nonsense_member_access.php", line 18, characters 9-10:
+Dynamic member access requires a local variable, not `$_`. (Typing[4406])

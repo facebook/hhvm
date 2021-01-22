@@ -583,6 +583,7 @@ dependencies = [
  "escaper",
  "flatten_smart_constructors",
  "hh_autoimport_rust",
+ "namespaces_rust",
  "naming_special_names_rust",
  "oxidized_by_ref",
  "parser_core_types",

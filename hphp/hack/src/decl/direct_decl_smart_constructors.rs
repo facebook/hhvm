@@ -17,6 +17,8 @@ use naming_special_names_rust as naming_special_names;
 
 use arena_collections::{AssocListMut, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
+use namespaces::ElaborateKind;
+use namespaces_rust as namespaces;
 use oxidized_by_ref::{
     aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
@@ -24,10 +26,12 @@ use oxidized_by_ref::{
     direct_decl_parser::Decls,
     file_info::Mode,
     method_flags::MethodFlags,
+    namespace_env::Env as NamespaceEnv,
     nast,
     pos::Pos,
     prop_flags::PropFlags,
     relative_path::RelativePath,
+    s_map::SMap,
     shallow_decl_defs::{
         self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
     },
@@ -81,20 +85,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.state.arena.alloc(val)
     }
 
-    fn qualified_name_from_parts(
-        &self,
-        namespace: &'a str,
-        parts: &'a [Node<'a>],
-        pos: &'a Pos<'a>,
-    ) -> Id<'a> {
-        // If the name is already fully qualified, don't prepend a namespace.
-        let fully_qualified =
-            matches!(parts.first(), Some(Node::Token(t)) if t.kind() == TokenKind::Backslash);
-        let namespace = if fully_qualified { "" } else { namespace };
+    fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
-        let mut len = namespace.len();
-        let mut contains_namespace_token = false;
+        let mut len = 0;
         for part in parts {
             match part {
                 Node::Name(&(name, _)) => len += name.len(),
@@ -103,24 +97,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Node::ListItem(&(Node::Token(t), _backslash))
                     if t.kind() == TokenKind::Namespace =>
                 {
-                    // No +1 here because the current namespace includes a trailing backslash.
-                    len += self.state.namespace_builder.current_namespace().len();
-                    contains_namespace_token = true;
+                    len += t.width() + 1;
                 }
                 _ => {}
             }
         }
-        // If the name is fully qualified, and there's no internal trivia, then
-        // we can just reference the fully qualified name in the original source
-        // text instead of copying it.
+        // If there's no internal trivia, then we can just reference the
+        // qualified name in the original source text instead of copying it.
         let source_len = pos.end_cnum() - pos.start_cnum();
-        if fully_qualified && source_len == len && !contains_namespace_token {
+        if source_len == len {
             let qualified_name = self.str_from_utf8(self.source_text_at_pos(pos));
             return Id(pos, qualified_name);
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
         let mut qualified_name = String::with_capacity_in(len, self.state.arena);
-        qualified_name.push_str(namespace);
         for part in parts {
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
@@ -132,7 +122,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 &Node::ListItem(&(Node::Token(t), _backslash))
                     if t.kind() == TokenKind::Namespace =>
                 {
-                    qualified_name.push_str(self.state.namespace_builder.current_namespace());
+                    qualified_name.push_str("namespace\\");
                 }
                 Node::ListItem(listitem) => {
                     panic!(
@@ -150,25 +140,18 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         Id(pos, qualified_name.into_bump_str())
     }
 
-    /// If the given node is a name (i.e., an identifier or a qualified name),
-    /// elaborate it in the current namespace and return Some.
-    fn elaborate_into_current_ns(&self, name: Node<'a>) -> Option<Id<'a>> {
-        match name {
-            Node::Name(&(name, pos)) => Some(Id(pos, self.prefix_ns(name))),
-            Node::XhpName(&(name, pos)) => Some(Id(
-                pos,
-                if self.state.disable_xhp_element_mangling {
-                    replace_colon(self.state.arena, name)
-                } else {
-                    name
-                },
-            )),
-            Node::QualifiedName(&(parts, pos)) => {
-                let namespace = self.state.namespace_builder.current_namespace();
-                Some(self.qualified_name_from_parts(namespace, parts, pos))
-            }
-            _ => None,
-        }
+    /// If the given node is an identifier, XHP name, or qualified name,
+    /// elaborate it in the current namespace and return Some. To be used for
+    /// the name of a decl in its definition (e.g., "C" in `class C {}` or "f"
+    /// in `function f() {}`).
+    fn elaborate_defined_id(&self, name: Node<'a>) -> Option<Id<'a>> {
+        let id = match name {
+            Node::Name(&(name, pos)) => Id(pos, name),
+            Node::XhpName(&(name, pos)) => Id(pos, name),
+            Node::QualifiedName(&(parts, pos)) => self.qualified_name_from_parts(parts, pos),
+            _ => return None,
+        };
+        Some(self.state.namespace_builder.elaborate_defined_id(id))
     }
 
     /// If the given node is a name (i.e., an identifier or a qualified name),
@@ -179,9 +162,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             return id;
         }
         match name {
-            Node::QualifiedName(&(parts, pos)) => {
-                Some(self.qualified_name_from_parts("", parts, pos))
-            }
+            Node::QualifiedName(&(parts, pos)) => Some(self.qualified_name_from_parts(parts, pos)),
             Node::Token(t) if t.kind() == TokenKind::XHP => {
                 let pos = self.token_pos(t);
                 let text = self.str_from_utf8(self.source_text_at_pos(pos));
@@ -191,12 +172,31 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn elaborate_id(&self, node: Node<'a>) -> Option<Id<'a>> {
-        let Id(pos, name) = self.expect_name(node)?;
-        Some(Id(
+    /// Fully qualify the given identifier as a type name (with consideration
+    /// to `use` statements in scope).
+    fn elaborate_id(&self, id: Id<'a>) -> Id<'a> {
+        let Id(pos, name) = id;
+        Id(pos, self.elaborate_raw_id(name))
+    }
+
+    /// Fully qualify the given identifier as a type name (with consideration
+    /// to `use` statements in scope).
+    fn elaborate_raw_id(&self, id: &'a str) -> &'a str {
+        self.state
+            .namespace_builder
+            .elaborate_raw_id(ElaborateKind::Class, id)
+    }
+
+    /// Fully qualify the given identifier as a constant name (with
+    /// consideration to `use` statements in scope).
+    fn elaborate_const_id(&self, id: Id<'a>) -> Id<'a> {
+        let Id(pos, name) = id;
+        Id(
             pos,
-            self.prefix_ns(self.state.namespace_builder.elaborate_id(name)),
-        ))
+            self.state
+                .namespace_builder
+                .elaborate_raw_id(ElaborateKind::Const, name),
+        )
     }
 
     fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
@@ -238,18 +238,6 @@ fn prefix_colon<'a>(arena: &'a Bump, name: &str) -> &'a str {
     s.push(':');
     s.push_str(name);
     s.into_bump_str()
-}
-
-fn replace_colon<'a>(arena: &'a Bump, name: &'a str) -> &'a str {
-    if name.contains(':') {
-        let mut s = String::with_capacity_in(name.len(), arena);
-        for c in name.chars() {
-            if c == ':' { s.push('\\') } else { s.push(c) }
-        }
-        s.into_bump_str()
-    } else {
-        name
-    }
 }
 
 fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
@@ -312,83 +300,95 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
 }
 
 #[derive(Clone, Debug)]
-struct NamespaceInfo<'a> {
-    name: &'a str,
-    // "use const X", "use function X" don't affect declarations
-    types: AssocListMut<'a, &'a str, &'a str>, // "use type X"
-    namespaces: AssocListMut<'a, &'a str, &'a str>, // "use namespace X"
-    types_or_namespaces: AssocListMut<'a, &'a str, &'a str>, // "use X"
-}
-
-#[derive(Clone, Debug)]
 struct NamespaceBuilder<'a> {
     arena: &'a Bump,
-    stack: Vec<'a, NamespaceInfo<'a>>,
+    stack: Vec<'a, NamespaceEnv<'a>>,
+    auto_ns_map: &'a [(&'a str, &'a str)],
 }
 
 impl<'a> NamespaceBuilder<'a> {
-    fn new_in(auto_ns_map: &'a NamespaceMap, arena: &'a Bump) -> Self {
-        // TODO: The way we handle name elaboration is almost certainly incorrect.
-        // We might benefit from an audit of our name elaboration logic and an
-        // effort to bring it in line with what hackc does (T76827745).
-
-        let mut types = AssocListMut::new_in(arena);
-        for &alias in hh_autoimport::TYPES {
-            types.insert(alias, concat(arena, "\\HH\\", alias));
+    fn new_in(
+        auto_ns_map: &'a NamespaceMap,
+        disable_xhp_element_mangling: bool,
+        arena: &'a Bump,
+    ) -> Self {
+        let mut arena_ns_map = Vec::with_capacity_in(auto_ns_map.len(), arena);
+        for (k, v) in auto_ns_map.iter() {
+            arena_ns_map.push((k.as_str(), v.as_str()));
         }
+        let auto_ns_map = arena_ns_map.into_bump_slice();
 
-        let mut namespaces = AssocListMut::new_in(arena);
+        let mut ns_uses = SMap::empty();
         for &alias in hh_autoimport::NAMESPACES {
-            namespaces.insert(alias, concat(arena, "\\HH\\", alias));
+            ns_uses = ns_uses.add(arena, alias, concat(arena, "HH\\", alias));
         }
         for (alias, ns) in auto_ns_map.iter() {
-            let ns = ns.trim_end_matches('\\');
-            namespaces.insert(alias, prefix_slash(arena, ns));
+            ns_uses = ns_uses.add(arena, alias, ns);
+        }
+
+        let mut class_uses = SMap::empty();
+        for &alias in hh_autoimport::TYPES {
+            class_uses = class_uses.add(arena, alias, concat(arena, "HH\\", alias));
         }
 
         NamespaceBuilder {
             arena,
-            stack: bumpalo::vec![in arena; NamespaceInfo {
-                name: "\\",
-                types,
-                namespaces,
-                types_or_namespaces: AssocListMut::new_in(arena),
+            stack: bumpalo::vec![in arena; NamespaceEnv {
+                ns_uses,
+                class_uses,
+                fun_uses: SMap::empty(),
+                const_uses: SMap::empty(),
+                record_def_uses: SMap::empty(),
+                name: None,
+                auto_ns_map,
+                is_codegen: false,
+                disable_xhp_element_mangling,
             }],
+            auto_ns_map,
         }
     }
 
     fn empty_with_ns_in(ns: &'a str, arena: &'a Bump) -> Self {
         NamespaceBuilder {
             arena,
-            stack: bumpalo::vec![in arena; NamespaceInfo {
-                name: ns,
-                types: AssocListMut::new_in(arena),
-                namespaces: AssocListMut::new_in(arena),
-                types_or_namespaces: AssocListMut::new_in(arena),
+            stack: bumpalo::vec![in arena; NamespaceEnv {
+                ns_uses: SMap::empty(),
+                class_uses: SMap::empty(),
+                fun_uses: SMap::empty(),
+                const_uses: SMap::empty(),
+                record_def_uses: SMap::empty(),
+                name: Some(ns),
+                auto_ns_map: &[],
+                is_codegen: false,
+                disable_xhp_element_mangling: false,
             }],
+            auto_ns_map: &[],
         }
     }
 
     fn push_namespace(&mut self, name: Option<&str>) {
         let current = self.current_namespace();
+        let nsenv = self.stack.last().unwrap().clone(); // shallow clone
         if let Some(name) = name {
-            let mut fully_qualified =
-                String::with_capacity_in(current.len() + name.len() + 1, self.arena);
-            fully_qualified.push_str(current);
+            let mut fully_qualified = match current {
+                None => String::with_capacity_in(name.len(), self.arena),
+                Some(current) => {
+                    let mut fully_qualified =
+                        String::with_capacity_in(current.len() + name.len() + 1, self.arena);
+                    fully_qualified.push_str(current);
+                    fully_qualified.push('\\');
+                    fully_qualified
+                }
+            };
             fully_qualified.push_str(name);
-            fully_qualified.push('\\');
-            self.stack.push(NamespaceInfo {
-                name: fully_qualified.into_bump_str(),
-                types: AssocListMut::new_in(self.arena),
-                namespaces: AssocListMut::new_in(self.arena),
-                types_or_namespaces: AssocListMut::new_in(self.arena),
+            self.stack.push(NamespaceEnv {
+                name: Some(fully_qualified.into_bump_str()),
+                ..nsenv
             });
         } else {
-            self.stack.push(NamespaceInfo {
+            self.stack.push(NamespaceEnv {
                 name: current,
-                types: AssocListMut::new_in(self.arena),
-                namespaces: AssocListMut::new_in(self.arena),
-                types_or_namespaces: AssocListMut::new_in(self.arena),
+                ..nsenv
             });
         }
     }
@@ -406,17 +406,16 @@ impl<'a> NamespaceBuilder<'a> {
     // push_namespace(Y) + push_namespace(X) + pop_previous_namespace()
     fn pop_previous_namespace(&mut self) {
         if self.stack.len() > 2 {
-            let last = self.stack.pop().unwrap().name;
-            let previous = self.stack.pop().unwrap().name;
-            // should always be the case, but just to be safe
-            if last.starts_with(previous) && last.ends_with("\\") {
-                self.push_namespace(Some(&last[previous.len()..last.len() - 1]))
-            }
+            let last = self.stack.pop().unwrap().name.unwrap_or("\\");
+            let previous = self.stack.pop().unwrap().name.unwrap_or("\\");
+            assert!(last.starts_with(previous));
+            let name = &last[previous.len() + 1..last.len()];
+            self.push_namespace(Some(name));
         }
     }
 
-    fn current_namespace(&self) -> &'a str {
-        self.stack.last().map(|ni| ni.name).unwrap_or("\\")
+    fn current_namespace(&self) -> Option<&'a str> {
+        self.stack.last().and_then(|nsenv| nsenv.name)
     }
 
     fn add_import(&mut self, kind: TokenKind, name: &'a str, aliased_name: Option<&'a str>) {
@@ -424,48 +423,55 @@ impl<'a> NamespaceBuilder<'a> {
             .stack
             .last_mut()
             .expect("Attempted to get the current import map, but namespace stack was empty");
-        let imports = match kind {
-            TokenKind::Type => &mut stack_top.types,
-            TokenKind::Namespace => &mut stack_top.namespaces,
-            TokenKind::Mixed => &mut stack_top.types_or_namespaces,
-            _ => panic!("Unexpected import kind: {:?}", kind),
-        };
-
         let aliased_name = aliased_name.unwrap_or_else(|| {
             name.rsplit_terminator('\\')
                 .nth(0)
                 .expect("Expected at least one entry in import name")
         });
+        let name = name.trim_end_matches('\\');
         let name = if name.starts_with('\\') {
             name
         } else {
             prefix_slash(self.arena, name)
         };
-        imports.insert(aliased_name, name);
+        match kind {
+            TokenKind::Type => {
+                stack_top.class_uses = stack_top.class_uses.add(self.arena, aliased_name, name);
+            }
+            TokenKind::Namespace => {
+                stack_top.ns_uses = stack_top.ns_uses.add(self.arena, aliased_name, name);
+            }
+            TokenKind::Mixed => {
+                stack_top.class_uses = stack_top.class_uses.add(self.arena, aliased_name, name);
+                stack_top.ns_uses = stack_top.ns_uses.add(self.arena, aliased_name, name);
+            }
+            _ => panic!("Unexpected import kind: {:?}", kind),
+        }
     }
 
-    fn elaborate_id(&self, name: &'a str) -> &'a str {
+    fn elaborate_raw_id(&self, kind: ElaborateKind, name: &'a str) -> &'a str {
         if name.starts_with('\\') {
             return name;
         }
-        for ni in self.stack.iter().rev() {
-            if let Some(name) = ni.types.get(name) {
-                return name;
+        let env = self.stack.last().unwrap();
+        namespaces::elaborate_raw_id_in(self.arena, env, kind, name)
+    }
+
+    fn elaborate_defined_id(&self, id: Id<'a>) -> Id<'a> {
+        let Id(pos, name) = id;
+        let env = self.stack.last().unwrap();
+        let name = if env.disable_xhp_element_mangling && name.contains(':') {
+            let xhp_name_opt = namespaces::elaborate_xhp_namespace(name);
+            let name = xhp_name_opt.map_or(name, |s| self.arena.alloc_str(&s));
+            if !name.starts_with('\\') {
+                namespaces::elaborate_into_current_ns_in(self.arena, env, name)
+            } else {
+                name
             }
-            if let Some(name) = ni.types_or_namespaces.get(name) {
-                return name;
-            }
-            for (aliased_name, renamed) in ni.namespaces.iter().chain(ni.types_or_namespaces.iter())
-            {
-                if name.starts_with(aliased_name) {
-                    let ns_trimmed = &name[aliased_name.len()..];
-                    if ns_trimmed.starts_with('\\') {
-                        return concat(self.arena, renamed, ns_trimmed);
-                    }
-                }
-            }
-        }
-        name
+        } else {
+            namespaces::elaborate_into_current_ns_in(self.arena, env, name)
+        };
+        Id(pos, name)
     }
 }
 
@@ -560,7 +566,11 @@ impl<'a> State<'a> {
             file_mode,
             disable_xhp_element_mangling,
             decls: Decls::empty(),
-            namespace_builder: Rc::new(NamespaceBuilder::new_in(auto_namespace_map, arena)),
+            namespace_builder: Rc::new(NamespaceBuilder::new_in(
+                auto_namespace_map,
+                disable_xhp_element_mangling,
+                arena,
+            )),
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new_in(arena)),
             // EndOfFile is used here as a None value (signifying "beginning of
@@ -953,11 +963,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             .add(name, Decl::Record(decl), self.state.arena);
     }
 
-    #[inline(always)]
-    fn concat(&self, str1: &str, str2: &str) -> &'a str {
-        concat(self.state.arena, str1, str2)
-    }
-
     fn token_bytes(&self, token: &CompactToken) -> &'a [u8] {
         self.state
             .source_text
@@ -1051,7 +1056,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             }
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => aast::Expr_::Null,
             Node::Name(..) | Node::QualifiedName(..) => {
-                aast::Expr_::Id(self.alloc(self.elaborate_into_current_ns(node)?))
+                aast::Expr_::Id(self.alloc(self.elaborate_const_id(self.expect_name(node)?)))
             }
             _ => return None,
         };
@@ -1164,13 +1169,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         "_" => Ty_::Terr,
                         _ => {
-                            let name = self.state.namespace_builder.elaborate_id(name);
-                            let name = if self.state.disable_xhp_element_mangling {
-                                replace_colon(self.state.arena, name)
-                            } else {
-                                name
-                            };
-                            let name = self.prefix_ns(name);
+                            let name = self.elaborate_raw_id(name);
                             Ty_::Tapply(self.alloc((Id(pos, name), &[][..])))
                         }
                     }
@@ -1473,7 +1472,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Some(Id(pos, naming_special_names::members::__CONSTRUCT))
             }
             (true, _) => self.expect_name(header.name),
-            (false, _) => self.elaborate_into_current_ns(header.name),
+            (false, _) => self.elaborate_defined_id(header.name),
         };
         let id = id_opt.unwrap_or(Id(self.get_pos(header.name), ""));
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
@@ -1560,19 +1559,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
         let ty = self.alloc(Ty(self.alloc(Reason::witness(id.0)), Ty_::Tfun(ft)));
         Some((id, ty, properties))
-    }
-
-    fn prefix_ns(&self, name: &'a str) -> &'a str {
-        if name.starts_with("\\") {
-            name
-        } else {
-            let current = self.state.namespace_builder.current_namespace();
-            let mut fully_qualified =
-                String::with_capacity_in(current.len() + name.len(), self.state.arena);
-            fully_qualified.push_str(current);
-            fully_qualified.push_str(&name);
-            fully_qualified.into_bump_str()
-        }
     }
 
     fn as_fun_params(
@@ -2129,7 +2115,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     || self.state.previous_token_kind == TokenKind::Trait
                     || self.state.previous_token_kind == TokenKind::Interface
                 {
-                    if let Some(current_class_name) = self.elaborate_into_current_ns(name) {
+                    if let Some(current_class_name) = self.elaborate_defined_id(name) {
                         self.state
                             .classish_name_builder
                             .lexed_name_after_classish_keyword(
@@ -2748,12 +2734,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     self.hint_ty(pos, ty_)
                 }
                 _ => {
-                    let class_type = self.state.namespace_builder.elaborate_id(class_type);
-                    let class_type = if class_type.starts_with("\\") {
-                        class_type
-                    } else {
-                        self.concat(self.state.namespace_builder.current_namespace(), class_type)
-                    };
+                    let class_type = self.elaborate_raw_id(class_type);
                     self.make_apply(
                         Id(pos, class_type),
                         type_arguments,
@@ -2776,7 +2757,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_brace: Self::R,
     ) -> Self::R {
-        let name = match self.elaborate_into_current_ns(name) {
+        let name = match self.elaborate_defined_id(name) {
             Some(name) => name,
             None => return Node::Ignored(SK::RecordDeclaration),
         };
@@ -2784,7 +2765,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name.1,
             self.alloc(typing_defs::RecordDefType {
                 name,
-                extends: self.elaborate_into_current_ns(extends_opt),
+                extends: self
+                    .expect_name(extends_opt)
+                    .map(|id| self.elaborate_id(id)),
                 fields: self.slice(fields.iter().filter_map(|node| match node {
                     Node::RecordField(&field) => Some(field),
                     _ => None,
@@ -2829,7 +2812,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         if name.is_ignored() {
             return Node::Ignored(SK::AliasDeclaration);
         }
-        let Id(pos, name) = match self.elaborate_into_current_ns(name) {
+        let Id(pos, name) = match self.elaborate_defined_id(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::AliasDeclaration),
         };
@@ -3081,7 +3064,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_contexts(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
         let mut namespace_builder =
-            NamespaceBuilder::empty_with_ns_in("\\HH\\Contexts\\", self.state.arena);
+            NamespaceBuilder::empty_with_ns_in("HH\\Contexts", self.state.arena);
         std::mem::swap(
             &mut namespace_builder,
             Rc::make_mut(&mut self.state.namespace_builder),
@@ -3186,7 +3169,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             // Global consts.
             Node::List([Node::ConstInitializer(&(name, initializer))]) => {
-                let Id(pos, id) = match self.elaborate_into_current_ns(name) {
+                let Id(pos, id) = match self.elaborate_defined_id(name) {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
                 };
@@ -3351,17 +3334,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         where_clause: Self::R,
         body: Self::R,
     ) -> Self::R {
-        let Id(pos, name) = match self.elaborate_into_current_ns(name) {
+        let raw_name = match self.expect_name(name) {
+            Some(Id(_, name)) => name,
+            None => return Node::Ignored(SK::ClassishDeclaration),
+        };
+        let Id(pos, name) = match self.elaborate_defined_id(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::ClassishDeclaration),
         };
-        let (is_xhp, name) = if name.starts_with(":") {
-            (true, prefix_slash(self.state.arena, name))
-        } else if xhp_keyword.is_present() {
-            (true, self.prefix_ns(name))
-        } else {
-            (false, name)
-        };
+        let is_xhp = raw_name.starts_with(':') || xhp_keyword.is_present();
 
         let mut class_kind = match class_keyword.token_kind() {
             Some(TokenKind::Interface) => ClassKind::Cinterface,
@@ -3869,7 +3850,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         enumerators: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
-        let id = match self.elaborate_into_current_ns(name) {
+        let id = match self.elaborate_defined_id(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
@@ -3985,7 +3966,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         elements: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
-        let name = match self.elaborate_into_current_ns(name) {
+        let name = match self.elaborate_defined_id(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
         };
@@ -4242,7 +4223,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.prim_ty(aast::Tprim::Tstring, id.0)
         } else {
             self.make_apply(
-                Id(id.0, self.state.namespace_builder.elaborate_id(id.1)),
+                Id(id.0, self.elaborate_raw_id(id.1)),
                 targ,
                 self.merge_positions(classname, gt),
             )
@@ -4256,8 +4237,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(class_name, value);
-        let Id(class_name_pos, class_name_str) = match self.elaborate_id(class_name) {
-            Some(id) => id,
+        let Id(class_name_pos, class_name_str) = match self.expect_name(class_name) {
+            Some(id) => self.elaborate_id(id),
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
         let class_id = self.alloc(aast::ClassId(
@@ -4368,8 +4349,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let name = if unqualified_name.1.starts_with("__") {
             unqualified_name
         } else {
-            match self.elaborate_into_current_ns(name) {
-                Some(name) => name,
+            match self.expect_name(name) {
+                Some(name) => self.elaborate_id(name),
                 None => return Node::Ignored(SK::ConstructorCall),
             }
         };
@@ -4377,12 +4358,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node::Expr(aast::Expr(
                 full_pos,
                 aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, aast::ClassId_::CI(&Id(class_name, pos))),
+                    aast::ClassId(_, aast::ClassId_::CI(&Id(pos, class_name))),
                     (_, "class"),
                 )),
             )) => {
-                let name =
-                    self.elaborate_into_current_ns(Node::Name(self.alloc((pos, class_name))))?;
+                let name = self.elaborate_id(Id(pos, class_name));
                 Some(ClassNameParam { name, full_pos })
             }
             _ => None,
@@ -4731,7 +4711,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
+        let id = Id(id.0, self.elaborate_raw_id(id.1));
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
@@ -4746,7 +4726,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
+        let id = Id(id.0, self.elaborate_raw_id(id.1));
         self.make_apply(id, type_arguments, self.get_pos(right_angle))
     }
 
@@ -4762,7 +4742,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
+        let id = Id(id.0, self.elaborate_raw_id(id.1));
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 

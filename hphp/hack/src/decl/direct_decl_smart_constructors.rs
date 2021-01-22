@@ -989,9 +989,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 (true, true) => Pos::none(),
                 (true, false) => pos2,
                 (false, true) => pos1,
-                (false, false) => Pos::merge(self.state.arena, pos1, pos2)
-                    .ok()
-                    .unwrap_or(Pos::none()),
+                (false, false) => {
+                    Pos::merge_without_checking_filename(self.state.arena, pos1, pos2)
+                }
             },
         }
     }

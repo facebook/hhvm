@@ -196,7 +196,9 @@ impl<'a> Pos<'a> {
     }
 
     pub fn btw(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> Result<&'a Self, String> {
-        if x1.filename() != x2.filename() {
+        let file1 = x1.filename();
+        let file2 = x2.filename();
+        if !std::ptr::eq(file1, file2) && file1 != file2 {
             // using string concatenation instead of format!,
             // it is not stable see T52404885
             Err(String::from("Position in separate files ")
@@ -214,14 +216,25 @@ impl<'a> Pos<'a> {
     }
 
     pub fn merge(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> Result<&'a Self, String> {
-        if x1.filename() != x2.filename() {
+        let file1 = x1.filename();
+        let file2 = x2.filename();
+        if !std::ptr::eq(file1, file2) && file1 != file2 {
             // see comment above (T52404885)
             return Err(String::from("Position in separate files ")
                 + &x1.filename().to_string()
                 + " and "
                 + &x2.filename().to_string());
         }
+        Ok(Self::merge_without_checking_filename(b, x1, x2))
+    }
 
+    /// Return the smallest position containing both given positions (if they
+    /// are both in the same file). The returned position will have the
+    /// filename of the first Pos argument.
+    ///
+    /// For merging positions that may not occur within the same file, use
+    /// `Pos::merge`.
+    pub fn merge_without_checking_filename(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> &'a Self {
         let span1 = x1.to_raw_span();
         let span2 = x2.to_raw_span();
 
@@ -245,11 +258,7 @@ impl<'a> Pos<'a> {
             span1.end
         };
 
-        Ok(Self::from_raw_span(
-            b,
-            x1.filename(),
-            PosSpanRaw { start, end },
-        ))
+        Self::from_raw_span(b, x1.filename(), PosSpanRaw { start, end })
     }
 
     pub fn last_char(&'a self, b: &'a Bump) -> &'a Self {

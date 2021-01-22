@@ -1904,7 +1904,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_%s(self, %s)
+        <Self as FlattenSmartConstructors<'src, Self>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1915,28 +1915,23 @@ module GenerateRustDirectDeclSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use flatten_smart_constructors::*;
-use smart_constructors::SmartConstructors;
 use parser_core_types::compact_token::CompactToken;
 use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use smart_constructors::SmartConstructors;
 
-use crate::{State, Node};
+use crate::{DirectDeclSmartConstructors, Node};
 
-#[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'src> {
-    pub state: State<'src>,
-    pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
-}
 impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
-    type State = State<'src>;
+    type State = Self;
     type TF = SimpleTokenFactoryImpl<CompactToken>;
     type R = Node<'src>;
 
-    fn state_mut(&mut self) -> &mut State<'src> {
-        &mut self.state
+    fn state_mut(&mut self) -> &mut Self {
+        self
     }
 
-    fn into_state(self) -> State<'src> {
-      self.state
+    fn into_state(self) -> Self {
+        self
     }
 
     fn token_factory(&mut self) -> &mut Self::TF {
@@ -1944,15 +1939,15 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_missing(self, offset)
+        <Self as FlattenSmartConstructors<'src, Self>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, token: CompactToken) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_token(self, token)
+        <Self as FlattenSmartConstructors<'src, Self>>::make_token(self, token)
     }
 
     fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_list(self, items, offset)
+        <Self as FlattenSmartConstructors<'src, Self>>::make_list(self, items, offset)
     }
 
 CONSTRUCTOR_METHODS}

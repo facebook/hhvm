@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 use bumpalo::Bump;
 
-use direct_decl_smart_constructors::{DirectDeclSmartConstructors, Node, State};
+use direct_decl_smart_constructors::{DirectDeclSmartConstructors, Node};
 use mode_parser::parse_mode;
 use oxidized_by_ref::file_info::Mode;
 use parser::parser::Parser;
@@ -22,7 +22,12 @@ pub fn parse_script<'a>(
     auto_namespace_map: &'a BTreeMap<String, String>,
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
-) -> (Node<'a>, Vec<SyntaxError>, State<'a>, Option<Mode>) {
+) -> (
+    Node<'a>,
+    Vec<SyntaxError>,
+    DirectDeclSmartConstructors<'a>,
+    Option<Mode>,
+) {
     let (_, mode_opt) = parse_mode(source);
     let mode = mode_opt.unwrap_or(Mode::Mpartial);
     let sc = DirectDeclSmartConstructors::new(

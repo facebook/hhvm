@@ -62,11 +62,7 @@ class count_getter fixme_map =
  *)
 let accumulate_types ctx tast check =
   let fixmes =
-    match Fixme_provider.get_hh_fixmes check with
-    | Some fixmes -> fixmes
-    | None ->
-      failwith
-        ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute check)
+    Fixme_provider.get_hh_fixmes check |> Option.value ~default:IMap.empty
   in
   let cg = new count_getter fixmes in
   cg#go ctx tast

@@ -100,11 +100,7 @@ let get_ast tcopt path content =
     in
     Errors.merge_into_current errors;
     let fixmes =
-      match Fixme_provider.get_hh_fixmes path with
-      | Some fixmes -> fixmes
-      | None ->
-        failwith
-          ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute path)
+      Fixme_provider.get_hh_fixmes path |> Option.value ~default:IMap.empty
     in
     IdeAstCache.add digest (ast, fixmes, errors);
     ast

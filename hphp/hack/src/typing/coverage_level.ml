@@ -212,13 +212,12 @@ class level_getter fixme_map =
   end
 
 let get_levels ctx tast check =
-  match Fixme_provider.get_hh_fixmes check with
-  | Some fixmes ->
-    let lg = new level_getter fixmes in
-    let (pmap, cmap) = lg#go ctx tast in
-    Ok
-      (Pos.Map.fold (fun p ty xs -> (Pos.to_absolute p, ty) :: xs) pmap [], cmap)
-  | None -> Error ()
+  let fixmes =
+    Fixme_provider.get_hh_fixmes check |> Option.value ~default:IMap.empty
+  in
+  let lg = new level_getter fixmes in
+  let (pmap, cmap) = lg#go ctx tast in
+  Ok (Pos.Map.fold (fun p ty xs -> (Pos.to_absolute p, ty) :: xs) pmap [], cmap)
 
 let get_percent counts =
   let nchecked = counts.checked in

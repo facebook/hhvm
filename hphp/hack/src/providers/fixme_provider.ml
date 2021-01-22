@@ -96,25 +96,28 @@ let get_disallowed_fixmes filename =
     Fixme_store.get fixmes.disallowed_fixmes filename
 
 let provide_hh_fixmes filename fixme_map =
-  match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> HH_FIXMES.add filename fixme_map
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
-    Fixme_store.add fixmes.hh_fixmes filename fixme_map
+  if not (IMap.is_empty fixme_map) then
+    match Provider_backend.get () with
+    | Provider_backend.Shared_memory -> HH_FIXMES.add filename fixme_map
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
+    | Provider_backend.Decl_service { fixmes; _ } ->
+      Fixme_store.add fixmes.hh_fixmes filename fixme_map
 
 let provide_decl_hh_fixmes filename fixme_map =
-  match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> DECL_HH_FIXMES.add filename fixme_map
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
-    Fixme_store.add fixmes.decl_hh_fixmes filename fixme_map
+  if not (IMap.is_empty fixme_map) then
+    match Provider_backend.get () with
+    | Provider_backend.Shared_memory -> DECL_HH_FIXMES.add filename fixme_map
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
+    | Provider_backend.Decl_service { fixmes; _ } ->
+      Fixme_store.add fixmes.decl_hh_fixmes filename fixme_map
 
 let provide_disallowed_fixmes filename fixme_map =
-  match Provider_backend.get () with
-  | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.add filename fixme_map
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
-    Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
+  if not (IMap.is_empty fixme_map) then
+    match Provider_backend.get () with
+    | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.add filename fixme_map
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
+    | Provider_backend.Decl_service { fixmes; _ } ->
+      Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
 
 let remove_batch paths =
   match Provider_backend.get () with

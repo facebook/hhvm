@@ -34,7 +34,7 @@ let init root popt : Provider_context.t =
   in
   let tcopt =
     {
-      TypecheckerOptions.default with
+      popt with
       GlobalOptions.tco_shallow_class_decl = true;
       tco_higher_kinded_types = true;
     }

@@ -148,6 +148,8 @@ let () =
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
   let enable_enum_classes = ref false in
+  let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
+  let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
@@ -176,6 +178,46 @@ let () =
       ( "--enable-enum-classes",
         Arg.Set enable_enum_classes,
         "Enable the enum classes extension." );
+      (* The following options do not affect the direct decl parser and can be ignored
+         (they are used by hh_single_type_check, and we run hh_single_decl over all of
+         the typecheck test cases). *)
+      ignored_flag "--abstract-static-props";
+      ignored_arg "--allowed-decl-fixme-codes";
+      ignored_arg "--allowed-fixme-codes-strict";
+      ignored_flag "--allow-toplevel-requires";
+      ignored_flag "--check-xhp-attribute";
+      ignored_flag "--complex-coercion";
+      ignored_flag "--const-attribute";
+      ignored_flag "--const-static-props";
+      ignored_flag "--disable-hh-ignore-error";
+      ignored_flag "--disable-modes";
+      ignored_flag "--disable-partially-abstract-typeconsts";
+      ignored_flag "--disable-unset-class-const";
+      ignored_flag "--disable-xhp-children-declarations";
+      ignored_flag "--disallow-discarded-nullable-awaitables";
+      ignored_flag "--disallow-fun-and-cls-meth-pseudo-funcs";
+      ignored_flag "--disallow-func-ptrs-in-constants";
+      ignored_flag "--disallow-invalid-arraykey-constraint";
+      ignored_flag "--disallow-php-lambdas";
+      ignored_flag "--disallow-silence";
+      ignored_flag "--disallow-trait-reuse";
+      ignored_flag "--enable-class-level-where-clauses";
+      ignored_flag "--enable-higher-kinded-types";
+      ignored_flag "--enable-systemlib-annotations";
+      ignored_flag "--forbid_nullable_cast";
+      ( "--hh-log-level",
+        Arg.Tuple [Arg.String (fun _ -> ()); Arg.String (fun _ -> ())],
+        "(ignored)" );
+      ignored_flag "--like-casts";
+      ignored_flag "--like-type-hints";
+      ignored_flag "--like-types-all";
+      ignored_flag "--method-call-inference";
+      ignored_flag "--no-builtins";
+      ignored_flag "--no-strict-contexts";
+      ignored_flag "--report-pos-from-reason";
+      ignored_arg "--simple-pessimize";
+      ignored_arg "--timeout";
+      ignored_flag "--union-intersection-type-hints";
     ]
     set_file
     usage;

@@ -5,89 +5,69 @@
 
 use std::cmp::Ordering;
 use std::fmt;
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
 use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
+use static_assertions::const_assert_eq;
 
 use crate::file_pos::FilePos;
 use crate::file_pos_large::FilePosLarge;
 use crate::pos_span_raw::PosSpanRaw;
 
+// PosSpanTiny packs multiple fields into one 63-bit integer:
+//
+//    6         5         4         3         2         1         0
+// 3210987654321098765432109876543210987654321098765432109876543210
+// X<-------------------><--------------><------------------><---->
+//   byte offset of line   line number      column number     width
+
 /// A compressed representation of a position span, i.e. a start and an end position.
-
-#[inline]
-const fn mask_of_size(n: usize) -> usize {
-    (1 << n) - 1
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, EnumIter)]
-enum Field {
-    /// The character number of the beginning of line of the start position of the span.
-    StartBeginningOfLine,
-    /// The line number of the start position of the span.
-    StartLineNumber,
-    /// The column number of the start position of the span.
-    StartColumnNumber,
-    /// The beginning of line character number of the end position of the span
-    /// is given by adding this increment to the beginning of line character number of the start position.
-    BeginningOfLineIncrement,
-    /// The line number of the end position of the span
-    /// is given by adding this increment to the line number of the start position.
-    LineNumberIncrement,
-    /// The column number of the end position of the span
-    /// is given by adding this increment to the column number of the start position.
-    ColumnNumberIncrement,
-}
-
-impl Field {
-    /// These numbers were obtained by gathering statistics on the positions in the decl heap
-    /// for a large code base run as per december 2020. They should allow to encode about 99% of positions.
-    ///
-    /// /!\ Always make sure the total is 63, due to OCaml reserving 1 bit.
-    fn nbits(self) -> usize {
-        match self {
-            Self::StartBeginningOfLine => 21,
-            Self::StartLineNumber => 16,
-            Self::StartColumnNumber => 20,
-            Self::BeginningOfLineIncrement => 0,
-            Self::LineNumberIncrement => 0,
-            Self::ColumnNumberIncrement => 6,
-        }
-    }
-
-    fn n_rhs_bits(self) -> usize {
-        Field::iter()
-            .skip_while(|field| *field != self)
-            .skip(1) // skip the field itself
-            .map(Field::nbits)
-            .sum()
-    }
-
-    fn dummy_value(self) -> usize {
-        match self {
-            Self::StartBeginningOfLine
-            | Self::StartLineNumber
-            | Self::BeginningOfLineIncrement
-            | Self::LineNumberIncrement
-            | Self::ColumnNumberIncrement => 0,
-            Self::StartColumnNumber => usize::max_value(),
-        }
-    }
-}
-
-/// Multiple fields packed into one 64-bit integer, e.g. :
-///
-///    6         5         4         3         2         1         0
-/// 3210987654321098765432109876543210987654321098765432109876543210
-/// <----------------------------><----------------------><------->X
-///             field1                     field2           field3
-///
-/// Fields are variants of Field.t, and the number of bits for each field
-/// are given by Field.nbits.
 #[derive(Copy, Clone, Eq, PartialEq, Deserialize, Hash, Serialize)]
 pub struct PosSpanTiny(usize);
+
+/// These numbers were obtained by gathering statistics on the positions in
+/// the decl heap for a large code base run as of December 2020. They should
+/// allow us to encode about 99% of positions.
+const START_BEGINNING_OF_LINE_BITS: usize = 21;
+const START_LINE_NUMBER_BITS: usize = 16;
+const START_COLUMN_NUMBER_BITS: usize = 20;
+const BEGINNING_OF_LINE_INCREMENT_BITS: usize = 0;
+const LINE_NUMBER_INCREMENT_BITS: usize = 0;
+const WIDTH_BITS: usize = 6;
+
+// The offset of each field (i.e., the number of bits to the right of it) is
+// the offset of the field to the right plus that field's bit width.
+const WIDTH_OFFSET: usize = 0;
+const LINE_NUMBER_INCREMENT_OFFSET: usize = WIDTH_OFFSET + WIDTH_BITS;
+const BEGINNING_OF_LINE_INCREMENT_OFFSET: usize =
+    LINE_NUMBER_INCREMENT_OFFSET + LINE_NUMBER_INCREMENT_BITS;
+const START_COLUMN_NUMBER_OFFSET: usize =
+    BEGINNING_OF_LINE_INCREMENT_OFFSET + BEGINNING_OF_LINE_INCREMENT_BITS;
+const START_LINE_NUMBER_OFFSET: usize = START_COLUMN_NUMBER_OFFSET + START_COLUMN_NUMBER_BITS;
+const START_BEGINNING_OF_LINE_OFFSET: usize = START_LINE_NUMBER_OFFSET + START_LINE_NUMBER_BITS;
+
+// The total number of bits used must be 63 (OCaml reserves one bit).
+const_assert_eq!(
+    63,
+    START_BEGINNING_OF_LINE_BITS + START_BEGINNING_OF_LINE_OFFSET
+);
+
+#[inline]
+const fn mask(bits: usize) -> usize {
+    (1 << bits) - 1
+}
+
+#[inline]
+const fn mask_by(bits: usize, x: usize) -> usize {
+    x & mask(bits)
+}
+
+const MAX_START_BEGINNING_OF_LINE: usize = mask(START_BEGINNING_OF_LINE_BITS);
+const MAX_START_LINE_NUMBER: usize = mask(START_LINE_NUMBER_BITS);
+const MAX_START_COLUMN_NUMBER: usize = mask(START_COLUMN_NUMBER_BITS);
+const MAX_BEGINNING_OF_LINE_INCREMENT: usize = mask(BEGINNING_OF_LINE_INCREMENT_BITS);
+const MAX_LINE_NUMBER_INCREMENT: usize = mask(LINE_NUMBER_INCREMENT_BITS);
+const MAX_WIDTH: usize = mask(WIDTH_BITS);
 
 const DUMMY: usize = usize::max_value();
 
@@ -102,54 +82,127 @@ impl PosSpanTiny {
         self.0 == DUMMY
     }
 
-    fn project(self, field: Field) -> usize {
-        if self.is_dummy() {
-            field.dummy_value()
-        } else {
-            (self.0 >> field.n_rhs_bits()) & mask_of_size(field.nbits())
+    pub fn make(start: &FilePosLarge, end: &FilePosLarge) -> Option<Self> {
+        if start.is_dummy() || end.is_dummy() {
+            return Some(Self::make_dummy());
         }
-    }
-
-    pub fn start_line(self) -> usize {
-        self.project(Field::StartLineNumber)
+        let start_bol = start.beg_of_line();
+        let start_line = start.line();
+        let start_col = start.column();
+        let start_cnum = start.offset();
+        let end_bol = end.beg_of_line();
+        let end_line = end.line();
+        let end_cnum = end.offset();
+        let bol_increment = end_bol.checked_sub(start_bol)?;
+        let line_increment = end_line.checked_sub(start_line)?;
+        let width = end_cnum.checked_sub(start_cnum)?;
+        if start_bol > MAX_START_BEGINNING_OF_LINE
+            || start_line > MAX_START_LINE_NUMBER
+            || start_col > MAX_START_COLUMN_NUMBER
+            || bol_increment > MAX_BEGINNING_OF_LINE_INCREMENT
+            || line_increment > MAX_LINE_NUMBER_INCREMENT
+            || width > MAX_WIDTH
+        {
+            return None;
+        }
+        Some(Self(
+            start_bol << START_BEGINNING_OF_LINE_OFFSET
+                | start_line << START_LINE_NUMBER_OFFSET
+                | start_col << START_COLUMN_NUMBER_OFFSET
+                | bol_increment << BEGINNING_OF_LINE_INCREMENT_OFFSET
+                | line_increment << LINE_NUMBER_INCREMENT_OFFSET
+                | width << WIDTH_OFFSET,
+        ))
     }
 
     pub fn start_beginning_of_line(self) -> usize {
-        self.project(Field::StartBeginningOfLine)
+        if self.is_dummy() {
+            0
+        } else {
+            mask_by(
+                START_BEGINNING_OF_LINE_BITS,
+                self.0 >> START_BEGINNING_OF_LINE_OFFSET,
+            )
+        }
+    }
+
+    pub fn start_line_number(self) -> usize {
+        if self.is_dummy() {
+            0
+        } else {
+            mask_by(START_LINE_NUMBER_BITS, self.0 >> START_LINE_NUMBER_OFFSET)
+        }
     }
 
     pub fn start_column(self) -> usize {
-        self.project(Field::StartColumnNumber)
+        if self.is_dummy() {
+            DUMMY
+        } else {
+            mask_by(
+                START_COLUMN_NUMBER_BITS,
+                self.0 >> START_COLUMN_NUMBER_OFFSET,
+            )
+        }
+    }
+
+    fn beginning_of_line_increment(self) -> usize {
+        if self.is_dummy() {
+            0
+        } else {
+            mask_by(
+                BEGINNING_OF_LINE_INCREMENT_BITS,
+                self.0 >> BEGINNING_OF_LINE_INCREMENT_OFFSET,
+            )
+        }
+    }
+
+    fn line_number_increment(self) -> usize {
+        if self.is_dummy() {
+            0
+        } else {
+            mask_by(
+                LINE_NUMBER_INCREMENT_BITS,
+                self.0 >> LINE_NUMBER_INCREMENT_OFFSET,
+            )
+        }
+    }
+
+    fn width(self) -> usize {
+        if self.is_dummy() {
+            0
+        } else {
+            mask_by(WIDTH_BITS, self.0 >> WIDTH_OFFSET)
+        }
     }
 
     pub fn start_character_number(self) -> usize {
         self.start_beginning_of_line() + self.start_column()
     }
 
-    pub fn end_line(self) -> usize {
-        self.start_line() + self.project(Field::LineNumberIncrement)
+    pub fn end_line_number(self) -> usize {
+        self.start_line_number() + self.line_number_increment()
     }
 
     pub fn end_beginning_of_line(self) -> usize {
-        self.start_beginning_of_line() + self.project(Field::BeginningOfLineIncrement)
-    }
-
-    pub fn end_column(self) -> usize {
-        self.start_column() + self.project(Field::ColumnNumberIncrement)
+        self.start_beginning_of_line() + self.beginning_of_line_increment()
     }
 
     pub fn end_character_number(self) -> usize {
-        self.end_beginning_of_line() + self.end_column()
+        self.start_character_number() + self.width()
+    }
+
+    pub fn end_column(self) -> usize {
+        self.end_character_number() - self.end_beginning_of_line()
     }
 
     pub fn to_raw_span(self) -> PosSpanRaw {
         if self.is_dummy() {
             PosSpanRaw::make_dummy()
         } else {
-            let start_lnum = self.start_line();
+            let start_lnum = self.start_line_number();
             let start_bol = self.start_beginning_of_line();
             let start_cnum = self.start_character_number();
-            let end_lnum = self.end_line();
+            let end_lnum = self.end_line_number();
             let end_bol = self.end_beginning_of_line();
             let end_cnum = self.end_character_number();
             PosSpanRaw {
@@ -158,37 +211,6 @@ impl PosSpanTiny {
             }
         }
     }
-
-    fn project_raw(start: &FilePosLarge, end: &FilePosLarge, field: Field) -> usize {
-        let (start_line, start_column, start_bol) = start.line_column_beg();
-        let (end_line, end_column, end_bol) = end.line_column_beg();
-        match field {
-            Field::StartBeginningOfLine => start_bol,
-            Field::StartLineNumber => start_line,
-            Field::StartColumnNumber => start_column,
-            Field::BeginningOfLineIncrement => usize_unchecked_sub(end_bol, start_bol),
-            Field::LineNumberIncrement => usize_unchecked_sub(end_line, start_line),
-            Field::ColumnNumberIncrement => usize_unchecked_sub(end_column, start_column),
-        }
-    }
-
-    pub fn make(start: &FilePosLarge, end: &FilePosLarge) -> Option<Self> {
-        let mut tiny = 0;
-        for field in Field::iter() {
-            let value = Self::project_raw(start, end, field);
-            if value == value & mask_of_size(field.nbits()) {
-                tiny <<= field.nbits();
-                tiny |= value;
-            } else {
-                return None;
-            }
-        }
-        Some(Self(tiny))
-    }
-}
-
-fn usize_unchecked_sub(x: usize, y: usize) -> usize {
-    if x >= y { x - y } else { usize::max_value() }
 }
 
 impl Ord for PosSpanTiny {
@@ -246,8 +268,8 @@ mod test {
         match PosSpanTiny::make(&start, &end) {
             None => assert_eq!(true, false),
             Some(span) => {
-                assert_eq!(line, span.start_line());
-                assert_eq!(line, span.end_line());
+                assert_eq!(line, span.start_line_number());
+                assert_eq!(line, span.end_line_number());
                 assert_eq!(bol, span.start_beginning_of_line());
                 assert_eq!(bol, span.end_beginning_of_line());
                 assert_eq!(start_cnum, span.start_character_number());
@@ -277,8 +299,8 @@ mod test {
         match PosSpanTiny::make(&start, &end) {
             None => {}
             Some(span) => {
-                assert_eq!(start_line, span.start_line());
-                assert_eq!(end_line, span.end_line());
+                assert_eq!(start_line, span.start_line_number());
+                assert_eq!(end_line, span.end_line_number());
                 assert_eq!(start_bol, span.start_beginning_of_line());
                 assert_eq!(end_bol, span.end_beginning_of_line());
                 assert_eq!(start_cnum, span.start_character_number());
@@ -308,8 +330,8 @@ mod test {
         match PosSpanTiny::make(&start, &end) {
             None => {}
             Some(span) => {
-                assert_eq!(start_line, span.start_line());
-                assert_eq!(end_line, span.end_line());
+                assert_eq!(start_line, span.start_line_number());
+                assert_eq!(end_line, span.end_line_number());
                 assert_eq!(start_bol, span.start_beginning_of_line());
                 assert_eq!(end_bol, span.end_beginning_of_line());
                 assert_eq!(start_cnum, span.start_character_number());
@@ -335,8 +357,8 @@ mod test {
         let start = FilePosLarge::from_lnum_bol_cnum(line, bol, start_cnum);
         let end = FilePosLarge::from_lnum_bol_cnum(line, bol, end_cnum);
         let span = PosSpanTiny::make_dummy();
-        assert_eq!(line, span.start_line());
-        assert_eq!(line, span.end_line());
+        assert_eq!(line, span.start_line_number());
+        assert_eq!(line, span.end_line_number());
         assert_eq!(bol, span.start_beginning_of_line());
         assert_eq!(bol, span.end_beginning_of_line());
         assert_eq!(start_cnum, span.start_character_number());
@@ -366,8 +388,8 @@ mod test {
             }
             Some(span) => {
                 // will likely fail here
-                assert_eq!(line, span.start_line());
-                assert_eq!(line, span.end_line());
+                assert_eq!(line, span.start_line_number());
+                assert_eq!(line, span.end_line_number());
                 assert_eq!(bol, span.start_beginning_of_line());
                 assert_eq!(bol, span.end_beginning_of_line());
                 assert_eq!(start_cnum, span.start_character_number());
@@ -390,9 +412,9 @@ impl fmt::Debug for PosSpanTiny {
         write!(
             f,
             "PosSpanTiny {{ from {}:{} to {}:{} }}",
-            self.start_line(),
+            self.start_line_number(),
             self.start_column(),
-            self.end_line(),
+            self.end_line_number(),
             self.end_column()
         )
     }

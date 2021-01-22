@@ -17,8 +17,7 @@ ocamlrep_derive = { path = "../ocamlrep_derive" }
 bstr = { version = "0.2", features = ["serde1"] }
 itertools = "0.8"
 serde = { version = "1.0", features = ["derive", "rc"] }
-strum = "0.19"
-strum_macros = "0.19"
+static_assertions = "1.1.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

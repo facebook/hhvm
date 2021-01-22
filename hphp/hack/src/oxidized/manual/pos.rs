@@ -180,7 +180,7 @@ impl Pos {
         match &self.0 {
             Small { start, .. } => start.line(),
             Large { start, .. } => start.line(),
-            Tiny { span, .. } => span.start_line(),
+            Tiny { span, .. } => span.start_line_number(),
             FromReason(_p) => unimplemented!(),
         }
     }

@@ -8,6 +8,88 @@ use oxidized::{ast::*, namespace_env};
 
 use std::borrow::Cow;
 
+trait NamespaceEnv {
+    fn disable_xhp_element_mangling(&self) -> bool;
+    fn is_codegen(&self) -> bool;
+    fn name(&self) -> Option<&str>;
+    fn get_imported_name(
+        &self,
+        kind: ElaborateKind,
+        name: &str,
+        has_backslash: bool,
+    ) -> Option<&str>;
+}
+
+impl NamespaceEnv for namespace_env::Env {
+    fn disable_xhp_element_mangling(&self) -> bool {
+        self.disable_xhp_element_mangling
+    }
+    fn is_codegen(&self) -> bool {
+        self.is_codegen
+    }
+    fn name(&self) -> Option<&str> {
+        match &self.name {
+            None => None,
+            Some(name) => Some(name.as_ref()),
+        }
+    }
+    fn get_imported_name(
+        &self,
+        kind: ElaborateKind,
+        prefix: &str,
+        has_bslash: bool,
+    ) -> Option<&str> {
+        let uses = {
+            if has_bslash {
+                &self.ns_uses
+            } else {
+                match kind {
+                    ElaborateKind::Class => &self.class_uses,
+                    ElaborateKind::Fun => &self.fun_uses,
+                    ElaborateKind::Const => &self.const_uses,
+                    ElaborateKind::Record => &self.record_def_uses,
+                }
+            }
+        };
+        match uses.get(prefix) {
+            None => None,
+            Some(used) => Some(used.as_ref()),
+        }
+    }
+}
+
+impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
+    fn disable_xhp_element_mangling(&self) -> bool {
+        self.disable_xhp_element_mangling
+    }
+    fn is_codegen(&self) -> bool {
+        self.is_codegen
+    }
+    fn name(&self) -> Option<&str> {
+        self.name
+    }
+    fn get_imported_name(
+        &self,
+        kind: ElaborateKind,
+        prefix: &str,
+        has_bslash: bool,
+    ) -> Option<&str> {
+        let uses = {
+            if has_bslash {
+                self.ns_uses
+            } else {
+                match kind {
+                    ElaborateKind::Class => self.class_uses,
+                    ElaborateKind::Fun => self.fun_uses,
+                    ElaborateKind::Const => self.const_uses,
+                    ElaborateKind::Record => self.record_def_uses,
+                }
+            }
+        };
+        uses.get(&prefix).copied()
+    }
+}
+
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
 pub enum ElaborateKind {
     Fun,
@@ -16,7 +98,7 @@ pub enum ElaborateKind {
     Const,
 }
 
-fn elaborate_into_ns(ns_name: &Option<&str>, id: &str) -> String {
+fn elaborate_into_ns(ns_name: Option<&str>, id: &str) -> String {
     match ns_name {
         None => {
             let mut s = String::with_capacity(1 + id.len());
@@ -35,17 +117,11 @@ fn elaborate_into_ns(ns_name: &Option<&str>, id: &str) -> String {
     }
 }
 
-fn elaborate_into_current_ns(nsenv: &namespace_env::Env, id: &str) -> String {
-    match &nsenv.name {
-        None => elaborate_into_ns(&None, id),
-        Some(name) => {
-            let name: &str = &name;
-            elaborate_into_ns(&Some(name), id)
-        }
-    }
+fn elaborate_into_current_ns(nsenv: &impl NamespaceEnv, id: &str) -> String {
+    elaborate_into_ns(nsenv.name(), id)
 }
 
-fn elaborate_xhp_namespace(id: &str) -> Option<String> {
+pub fn elaborate_xhp_namespace(id: &str) -> Option<String> {
     let is_xhp = !id.is_empty() && id.contains(':');
     if is_xhp {
         Some(id.replace(':', "\\"))
@@ -69,77 +145,91 @@ fn elaborate_xhp_namespace(id: &str) -> Option<String> {
 /// not, just relying on the idempotence of this function to make sure everything
 /// works out. (Fully qualifying identifiers is of course idempotent, but there
 /// used to be other schemes here.)
-fn elaborate_raw_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &str) -> String {
-    let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling {
+fn elaborate_raw_id<'a>(
+    nsenv: &impl NamespaceEnv,
+    kind: ElaborateKind,
+    id: &'a str,
+) -> Cow<'a, str> {
+    let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
         elaborate_xhp_namespace(id).map_or(Cow::Borrowed(id), Cow::Owned)
     } else {
         Cow::Borrowed(id)
     };
-    let id = id.as_ref();
     // It is already qualified
-    if id.starts_with("\\") {
-        return id.to_string();
+    if id.starts_with('\\') {
+        return id;
     }
+    let id = id.as_ref();
 
     // Return early if it's a special/pseudo name
-    let fqid = core_utils_rust::add_ns(id).to_string();
+    let fqid = core_utils_rust::add_ns(id).into_owned();
     match kind {
         ElaborateKind::Const => {
             if sn::pseudo_consts::is_pseudo_const(&fqid) {
-                return fqid;
+                return Cow::Owned(fqid);
             }
         }
         ElaborateKind::Fun if sn::pseudo_functions::is_pseudo_function(&fqid) => {
-            return fqid;
+            return Cow::Owned(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_global_name(&id) => {
-            return fqid;
+            return Cow::Owned(fqid);
         }
-        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) && nsenv.is_codegen => {
-            return elaborate_into_ns(&Some("HH"), &id);
+        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) && nsenv.is_codegen() => {
+            return Cow::Owned(elaborate_into_ns(Some("HH"), &id));
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) => {
-            return fqid;
+            return Cow::Owned(fqid);
         }
         _ => {}
     }
 
-    let (prefix, has_bslash) = match id.find("\\") {
+    let (prefix, has_bslash) = match id.find('\\') {
         Some(i) => (&id[..i], true),
         None => (&id[..], false),
     };
 
     if has_bslash && prefix == "namespace" {
-        return elaborate_into_current_ns(nsenv, id.trim_start_matches("namespace\\"));
+        return Cow::Owned(elaborate_into_current_ns(
+            nsenv,
+            id.trim_start_matches("namespace\\"),
+        ));
     }
 
-    let uses = {
-        if has_bslash {
-            &nsenv.ns_uses
-        } else {
-            match kind {
-                ElaborateKind::Class => &nsenv.class_uses,
-                ElaborateKind::Fun => &nsenv.fun_uses,
-                ElaborateKind::Const => &nsenv.const_uses,
-                ElaborateKind::Record => &nsenv.record_def_uses,
-            }
-        }
-    };
-
-    match uses.get(prefix) {
+    match nsenv.get_imported_name(kind, prefix, has_bslash) {
         Some(used) => {
             let without_prefix = id.trim_start_matches(prefix);
             let mut s = String::with_capacity(used.len() + without_prefix.len());
             s.push_str(used);
             s.push_str(without_prefix);
-            core_utils_rust::add_ns(&s).to_string()
+            Cow::Owned(core_utils_rust::add_ns(&s).into_owned())
         }
-        None => elaborate_into_current_ns(nsenv, id),
+        None => Cow::Owned(elaborate_into_current_ns(nsenv, id)),
     }
 }
 
 pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): &Id) -> Id {
-    Id(p.clone(), elaborate_raw_id(nsenv, kind, id))
+    Id(p.clone(), elaborate_raw_id(nsenv, kind, id).into_owned())
+}
+
+pub fn elaborate_raw_id_in<'a>(
+    arena: &'a bumpalo::Bump,
+    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
+    kind: ElaborateKind,
+    id: &'a str,
+) -> &'a str {
+    match elaborate_raw_id(nsenv, kind, id) {
+        Cow::Owned(s) => arena.alloc_str(&s),
+        Cow::Borrowed(s) => s,
+    }
+}
+
+pub fn elaborate_into_current_ns_in<'a>(
+    arena: &'a bumpalo::Bump,
+    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
+    id: &str,
+) -> &'a str {
+    arena.alloc_str(&elaborate_into_current_ns(nsenv, id))
 }
 
 /// First pass of flattening namespaces, run super early in the pipeline, right

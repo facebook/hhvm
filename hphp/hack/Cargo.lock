@@ -1874,10 +1874,12 @@ dependencies = [
 name = "namespaces_rust"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "core_utils_rust",
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
 ]
 
 [[package]]

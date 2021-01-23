@@ -113,43 +113,36 @@ void objReleaseWrapper(ObjectData* obj) noexcept {
 
 }
 
-static_assert(typeToDestrIdx(KindOfDArray)   == 0, "darray destruct index");
-static_assert(typeToDestrIdx(KindOfVArray)   == 1, "varray destruct index");
-static_assert(typeToDestrIdx(KindOfDict)     == 2, "Dict destruct index");
-static_assert(typeToDestrIdx(KindOfVec)      == 3, "Vec destruct index");
-static_assert(typeToDestrIdx(KindOfKeyset)   == 4, "Keyset destruct index");
-static_assert(typeToDestrIdx(KindOfRecord)   == 5, "Record destruct index");
-static_assert(typeToDestrIdx(KindOfString)   == 6, "String destruct index");
-static_assert(typeToDestrIdx(KindOfObject)   == 8, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 9, "Resource destruct index");
-#ifndef USE_LOWPTR
-static_assert(typeToDestrIdx(KindOfClsMeth)  == 10, "ClsMeth destruct index");
-#endif
-static_assert(typeToDestrIdx(KindOfRFunc)    == 11, "RFunc destruct index");
-static_assert(typeToDestrIdx(KindOfRClsMeth) == 12, "RFunc destruct index");
+RawDestructors computeDestructors() {
+  RawDestructors result;
+  for (auto i = 0; i < kDestrTableSize; i++) {
+    result[i] = nullptr;
+  }
+  auto const set = [&](auto const type, auto const destructor) {
+    result[typeToDestrIdx(type)] = (RawDestructor)destructor;
+  };
+  set(KindOfVArray,   &packedReleaseWrapper);
+  set(KindOfDArray,   &mixedReleaseWrapper);
+  set(KindOfVec,      &packedReleaseWrapper);
+  set(KindOfDict,     &mixedReleaseWrapper);
+  set(KindOfKeyset,   &keysetReleaseWrapper);
+  set(KindOfRecord,   getMethodPtr(&RecordData::release));
+  set(KindOfString,   getMethodPtr(&StringData::release));
+  set(KindOfObject,   &objReleaseWrapper);
+  set(KindOfResource, getMethodPtr(&ResourceHdr::release));
+  set(KindOfRClsMeth, getMethodPtr(&RClsMethData::release));
+  set(KindOfRFunc,    getMethodPtr(&RFuncData::release));
+  if constexpr (!use_lowptr) {
+    set(KindOfClsMeth, getMethodPtr(&ClsMethDataRef::Release));
+  }
+#define DT(name, ...)                                       \
+  assertx(IMPLIES(isRefcountedType(KindOf##name),           \
+          result[typeToDestrIdx(KindOf##name)] != nullptr));
+#undef DT
+  return result;
+}
 
-static_assert(kDestrTableSize == 13,
-              "size of g_destructors[] must be kDestrTableSize");
-
-RawDestructor g_destructors[] = {
-  (RawDestructor)&mixedReleaseWrapper,                // KindOfDArray
-  (RawDestructor)&packedReleaseWrapper,               // KindOfVArray
-  (RawDestructor)&mixedReleaseWrapper,                // KindOfDict
-  (RawDestructor)&packedReleaseWrapper,               // KindOfVec
-  (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
-  (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
-  (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
-  nullptr, // hole
-  (RawDestructor)&objReleaseWrapper,                  // KindOfObject
-  (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
-#ifndef USE_LOWPTR
-  (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
-#else
-  nullptr,
-#endif
-  (RawDestructor)getMethodPtr(&RFuncData::release),   // KindOfRFunc
-  (RawDestructor)getMethodPtr(&RClsMethData::release),// KindOfRClsMeth
-};
+RawDestructors g_destructors = computeDestructors();
 
 void specializeVanillaDestructors() {
   auto const specialize = [](auto const type, auto const destructor) {

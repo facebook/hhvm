@@ -442,7 +442,7 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
 Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
   auto const elem_sz = static_cast<int>(sizeof(g_destructors[0]) / 2);
-  auto const table = reinterpret_cast<intptr_t>(g_destructors) -
+  auto const table = reinterpret_cast<intptr_t>(&g_destructors[0]) -
     kMinRefCountedDataType * elem_sz;
 
   auto const index = [&] {

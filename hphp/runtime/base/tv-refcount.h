@@ -34,7 +34,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using RawDestructor = void(*)(void*);
-extern RawDestructor g_destructors[kDestrTableSize];
+using RawDestructors = std::array<RawDestructor, kDestrTableSize>;
+
+extern RawDestructors g_destructors;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +73,7 @@ ALWAYS_INLINE RawDestructor destructorForType(DataType dt) {
   // x86 and ARM.
   assertx(isRefcountedType(dt));
   auto const elem_sz = int{sizeof(g_destructors[0])} / 2;
-  auto const table = reinterpret_cast<char*>(g_destructors) -
+  auto const table = reinterpret_cast<char*>(&g_destructors[0]) -
     kMinRefCountedDataType * elem_sz;
   auto const addr = table + static_cast<int64_t>(dt) * elem_sz;
   auto result = *reinterpret_cast<RawDestructor*>(addr);

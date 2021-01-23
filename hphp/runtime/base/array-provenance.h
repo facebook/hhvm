@@ -224,16 +224,16 @@ private:
 #define ARRPROV_STR_IMPL(X) #X
 #define ARRPROV_STR(X) ARRPROV_STR_IMPL(X)
 
-#define ARRPROV_HERE() ([&]{                            \
-    static auto const file = makeStaticString(          \
-        __FILE__ ":" ARRPROV_STR(__LINE__));            \
-    return ::HPHP::arrprov::Tag::RuntimeLocation(file); \
+#define ARRPROV_HERE() ([&]{                                           \
+    static auto const tag = ::HPHP::arrprov::Tag::RuntimeLocation(     \
+        ::HPHP::makeStaticString(__FILE__ ":" ARRPROV_STR(__LINE__))); \
+    return tag;                                                        \
   }())
 
-#define ARRPROV_HERE_POISON() ([&]{                           \
-    static auto const file = makeStaticString(                \
-        __FILE__ ":" ARRPROV_STR(__LINE__));                  \
-    return ::HPHP::arrprov::Tag::RuntimeLocationPoison(file); \
+#define ARRPROV_HERE_POISON() ([&]{                                      \
+    static auto const tag = ::HPHP::arrprov::Tag::RuntimeLocationPoison( \
+        ::HPHP::makeStaticString(__FILE__ ":" ARRPROV_STR(__LINE__)));   \
+    return tag;                                                          \
   }())
 
 #define ARRPROV_USE_RUNTIME_LOCATION() \

@@ -2110,9 +2110,10 @@ let context_definitions_msg () =
    *)
   let path =
     Relative_path.(
-      let path = Path.concat (Path.make (path_of_prefix Hhi)) "coeffect/contexts.hhi" in
-      create Hhi (Path.to_string path)
-    )
+      let path =
+        Path.concat (Path.make (path_of_prefix Hhi)) "coeffect/contexts.hhi"
+      in
+      create Hhi (Path.to_string path))
   in
   ( Pos.make_from_lnum_bol_cnum
       ~pos_file:path
@@ -5583,6 +5584,17 @@ let nonsense_member_selection pos kind =
     (Typing.err_code Typing.NonsenseMemberSelection)
     pos
     ("Dynamic member access requires a local variable, not `" ^ kind ^ "`.")
+
+let consider_meth_caller pos class_name meth_name =
+  add
+    (Typing.err_code Typing.ConsiderMethCaller)
+    pos
+    ( "Function pointer syntax requires a static method. "
+    ^ "Use `meth_caller("
+    ^ strip_ns class_name
+    ^ "::class, '"
+    ^ meth_name
+    ^ "')` to create a function pointer to the instance method" )
 
 (*****************************************************************************)
 (* Printing *)

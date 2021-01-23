@@ -37,6 +37,7 @@ val smember_not_found :
   Ast_defs.pos ->
   is_const:bool ->
   is_method:bool ->
+  is_function_pointer:bool ->
   Decl_provider.Class.t ->
   string ->
   Errors.typing_error_callback ->

@@ -26,7 +26,8 @@ module Partial = Partial_provider
 
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
-let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
+let smember_not_found
+    pos ~is_const ~is_method ~is_function_pointer class_ member_name on_error =
   let kind =
     if is_const then
       `class_constant
@@ -44,16 +45,20 @@ let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
   in
   let method_suggestion = Env.suggest_member is_method class_ member_name in
   match (static_suggestion, method_suggestion) with
-  (* Prefer suggesting a different static method, unless there's a
-     normal method whose name matches exactly. *)
+  (* If there is a normal method of the same name and the
+   * syntax is a function pointer, suggest meth_caller *)
+  | (_, Some (_, v)) when is_function_pointer && String.equal v member_name ->
+    Errors.consider_meth_caller pos (Cls.name class_) member_name
+  (* If there is a normal method of the same name, suggest it *)
   | (Some _, Some (def_pos, v)) when String.equal v member_name ->
     error (`closest (def_pos, v))
+  (* Otherwise suggest a different static method *)
   | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
+  (* Fallback to closest normal method *)
   | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
-  | (None, None) when not (Cls.members_fully_known class_) ->
-    (* no error in this case ... the member might be present
-     * in one of the parents of class_ that the typing cannot see *)
-    ()
+  (* no error in this case ... the member might be present
+   * in one of the parents of class_ that the typing cannot see *)
+  | (None, None) when not (Cls.members_fully_known class_) -> ()
   | (None, None) -> error `no_hint
 
 let member_not_found

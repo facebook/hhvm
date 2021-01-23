@@ -1488,3 +1488,5 @@ val immutable_local : Pos.t -> unit
 val enum_classes_reserved_syntax : Pos.t -> unit
 
 val nonsense_member_selection : Pos.t -> string -> unit
+
+val consider_meth_caller : Pos.t -> string -> string -> unit

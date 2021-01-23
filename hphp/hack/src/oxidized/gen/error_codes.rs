@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3839eae99e613309fbc140bb26aab144>>
+// @generated SignedSource<<8c1b0f64b30d4939e327a8c2d1077ce5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidize_regen.sh
@@ -570,6 +570,7 @@ pub enum Typing {
     ImmutableLocal = 4404,
     EnumClassesReservedSyntax = 4405,
     NonsenseMemberSelection = 4406,
+    ConsiderMethCaller = 4407,
 }
 impl TrivialDrop for Typing {}
 

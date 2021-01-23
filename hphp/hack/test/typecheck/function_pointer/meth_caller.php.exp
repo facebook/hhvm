@@ -1,0 +1,2 @@
+File "meth_caller.php", line 10, characters 8-10:
+Function pointer syntax requires a static method. Use `meth_caller(Bar::class, 'baz')` to create a function pointer to the instance method (Typing[4407])

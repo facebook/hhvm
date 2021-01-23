@@ -1,4 +1,5 @@
 (*
+n
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -1917,7 +1918,7 @@ and expr_
         ~incl_tc:false (* What is this? *)
         ~coerce_from_ty:None (* What is this? *)
         ~explicit_targs:targs
-        ~function_pointer:true
+        ~is_function_pointer:true
         env
         cty
         meth
@@ -1961,6 +1962,7 @@ and expr_
           (fst meth)
           ~is_const:false
           ~is_method:true
+          ~is_function_pointer:false
           class_
           (snd meth)
           Errors.unify_error;
@@ -5206,7 +5208,7 @@ and class_get
     ~coerce_from_ty
     ?(explicit_targs = [])
     ?(incl_tc = false)
-    ?(function_pointer = false)
+    ?(is_function_pointer = false)
     env
     cty
     (p, mid)
@@ -5224,7 +5226,7 @@ and class_get
     ~explicit_targs
     ~incl_tc
     ~coerce_from_ty
-    ~function_pointer
+    ~is_function_pointer
     env
     cid
     cty
@@ -5237,7 +5239,7 @@ and class_get_
     ~coerce_from_ty
     ?(explicit_targs = [])
     ?(incl_tc = false)
-    ?(function_pointer = false)
+    ?(is_function_pointer = false)
     env
     cid
     cty
@@ -5256,6 +5258,7 @@ and class_get_
             ~explicit_targs
             ~incl_tc
             ~coerce_from_ty
+            ~is_function_pointer
             env
             ty
             (p, mid)
@@ -5274,6 +5277,7 @@ and class_get_
             ~explicit_targs
             ~incl_tc
             ~coerce_from_ty
+            ~is_function_pointer
             env
             ty
             (p, mid)
@@ -5292,6 +5296,7 @@ and class_get_
       ~explicit_targs
       ~incl_tc
       ~coerce_from_ty
+      ~is_function_pointer
       env
       cid
       ty
@@ -5315,6 +5320,7 @@ and class_get_
         ~explicit_targs
         ~incl_tc
         ~coerce_from_ty
+        ~is_function_pointer
         env
         cid
         ty
@@ -5353,6 +5359,7 @@ and class_get_
           ~explicit_targs
           ~incl_tc
           ~coerce_from_ty
+          ~is_function_pointer
           env
           cid
           inter_ty
@@ -5366,6 +5373,7 @@ and class_get_
               p
               ~is_const
               ~is_method
+              ~is_function_pointer
               class_info
               mid
               Errors.unify_error;
@@ -5390,6 +5398,7 @@ and class_get_
             p
             ~is_const
             ~is_method
+            ~is_function_pointer
             class_
             mid
             Errors.unify_error;
@@ -5417,6 +5426,7 @@ and class_get_
             p
             ~is_const
             ~is_method
+            ~is_function_pointer
             class_
             mid
             Errors.unify_error;
@@ -5437,7 +5447,7 @@ and class_get_
             cid
             class_;
           TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
-          check_class_get env p def_pos c mid ce cid function_pointer;
+          check_class_get env p def_pos c mid ce cid is_function_pointer;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)

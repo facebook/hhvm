@@ -106,3 +106,16 @@ val from_saved : Relative_path.t -> saved -> t
 val saved_to_names : saved -> names
 
 val to_string : t -> string
+
+type diff = {
+  removed_funs: SSet.t;
+  added_funs: SSet.t;
+  removed_classes: SSet.t;
+  added_classes: SSet.t;
+  removed_types: SSet.t;
+  added_types: SSet.t;
+  removed_consts: SSet.t;
+  added_consts: SSet.t;
+}
+
+val diff : t -> t -> diff option

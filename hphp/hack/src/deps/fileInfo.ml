@@ -269,3 +269,64 @@ let to_string fast =
            kind
            (List.map l ~f:snd |> String.concat ~sep:","))
   |> String.concat ~sep:";"
+
+type diff = {
+  removed_funs: SSet.t;
+  added_funs: SSet.t;
+  removed_classes: SSet.t;
+  added_classes: SSet.t;
+  removed_types: SSet.t;
+  added_types: SSet.t;
+  removed_consts: SSet.t;
+  added_consts: SSet.t;
+}
+
+let diff f1 f2 =
+  let matches_hash =
+    match (f1.hash, f2.hash) with
+    | (Some h1, Some h2) -> Int64.equal h1 h2
+    | _ -> false
+  in
+  if matches_hash then
+    None
+  else
+    let diff_ids ids1 ids2 =
+      let removed_ids = SSet.diff ids1 ids2 in
+      let added_ids = SSet.diff ids2 ids1 in
+      (removed_ids, added_ids)
+    in
+    let f1 = simplify f1 in
+    let f2 = simplify f2 in
+    let (removed_funs, added_funs) = diff_ids f1.n_funs f2.n_funs in
+    let (removed_classes, added_classes) = diff_ids f1.n_classes f2.n_classes in
+    let (removed_types, added_types) = diff_ids f1.n_types f2.n_types in
+    let (removed_consts, added_consts) = diff_ids f1.n_consts f2.n_consts in
+    let is_empty =
+      List.fold
+        ~f:(fun acc s -> (not (SSet.is_empty s)) || acc)
+        [
+          removed_funs;
+          added_funs;
+          removed_classes;
+          added_classes;
+          removed_types;
+          added_types;
+          removed_consts;
+          added_consts;
+        ]
+        ~init:false
+    in
+    if is_empty then
+      None
+    else
+      Some
+        {
+          removed_funs;
+          added_funs;
+          removed_classes;
+          added_classes;
+          removed_types;
+          added_types;
+          removed_consts;
+          added_consts;
+        }

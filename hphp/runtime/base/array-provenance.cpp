@@ -57,7 +57,8 @@ using TagStorage = std::pair<LowPtr<const StringData>, int32_t>;
 
 static constexpr TagID kKindBits = 3;
 static constexpr TagID kKindMask = 0x7;
-static constexpr size_t kMaxTagID = (1 << (8 * sizeof(TagID) - kKindBits)) - 1;
+static constexpr size_t kNumTagIDs = (1 << (8 * sizeof(TagID) - kKindBits));
+static constexpr size_t kNumRuntimeTagIDs = (1 << 10);
 
 struct TagHashCompare {
   bool equal(TagStorage a, TagStorage b) const {
@@ -75,47 +76,69 @@ struct TagHashCompare {
   }
 };
 
-using TagIDs = tbb::concurrent_hash_map<TagStorage, TagID, TagHashCompare>;
+struct TagMap {
+  TagMap(size_t capacity) : capacity(capacity) {}
 
-static std::atomic<size_t> s_numTags;
-static TagIDs s_tagIDs;
-
-TagStorage* getRawTagStorageArray() {
-  assertx(!use_lowptr || RO::EvalArrayProvenance);
-  static auto const result = []{
-    auto const bytes = (kMaxTagID + 1) * sizeof(TagStorage);
-    auto const alloc = mmap(nullptr, bytes, PROT_READ|PROT_WRITE,
-                            MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
-    always_assert(alloc != nullptr);
-    return reinterpret_cast<TagStorage*>(alloc);
-  }();
-  return result;
-}
-
-TagStorage getTagStorage(TagID i) {
-  return getRawTagStorageArray()[i];
-}
-
-TagID getTagID(TagStorage tag) {
-  {
-    TagIDs::const_accessor it;
-    if (s_tagIDs.find(it, tag)) return it->second;
+  TagStorage getTag(TagID i) {
+    return getRawTagStorageArray()[i];
   }
-  TagIDs::accessor it;
-  if (s_tagIDs.insert(it, tag)) {
-    auto const i = s_numTags++;
-    always_assert(i <= kMaxTagID);
-    getRawTagStorageArray()[i] = tag;
-    it->second = i;
+
+  TagID getTagID(TagStorage tag) {
+    {
+      TagIDs::const_accessor it;
+      if (tagIDs.find(it, tag)) return it->second;
+    }
+    TagIDs::accessor it;
+    if (tagIDs.insert(it, tag)) {
+      auto const i = numTags++;
+      always_assert(i < capacity);
+      getRawTagStorageArray()[i] = tag;
+      it->second = i;
+    }
+    return it->second;
   }
-  return it->second;
-}
+
+private:
+  using TagIDs = tbb::concurrent_hash_map<TagStorage, TagID, TagHashCompare>;
+
+  TagStorage* getRawTagStorageArray() {
+    if (allocation == nullptr) {
+      auto const bytes = capacity * sizeof(TagStorage);
+      auto const alloc = mmap(nullptr, bytes, PROT_READ|PROT_WRITE,
+                              MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+      always_assert(alloc != MAP_FAILED);
+      allocation = reinterpret_cast<TagStorage*>(alloc);
+    }
+    return allocation;
+  }
+
+  size_t capacity;
+  TagStorage* allocation = nullptr;
+  std::atomic<size_t> numTags = 0;
+  TagIDs tagIDs;
+};
+
+static TagMap s_defaultTags(kNumTagIDs);
+static TagMap s_runtimeTags(kNumRuntimeTagIDs);
 
 // "indirect" kinds are kinds that are always stored in the TagStorage table.
 // These are the only kinds that have both a name and a line number, because
 // arrprov::Tag is only 4 bytes and cannot store both itself.
 constexpr bool isIndirectKind(Tag::Kind kind) {
   return kind == Tag::Kind::Known || kind == Tag::Kind::KnownFuncParam;
+}
+
+// "runtime" kinds are associated with a location in the HHVM runtime, not the
+// Hack code that it's executing. These kinds are special because we'll use
+// them even if ArrayProvenance is disabled - in fact, we need to associate
+// config-parsing arrays with such tags before we know the status of arrprov.
+//
+// The total number of runtime tag is tightly-bounded, as we'll only create
+// these tags when we use ARRPROV_USE_RUNTIME_LOCATION or related macros in
+// our C++ code. Right now, there are <64 of these tags.
+constexpr bool isRuntimeKind(Tag::Kind kind) {
+  return kind == Tag::Kind::RuntimeLocation ||
+         kind == Tag::Kind::RuntimeLocationPoison;
 }
 
 const StringData* getFilename(const Func* func, const Unit* unit) {
@@ -153,11 +176,13 @@ Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
   assertx(kind != Kind::Invalid);
 
   if (isIndirectKind(kind)) {
-    m_id = k | (getTagID({name, line}) << kKindBits);
+    m_id = k | (s_defaultTags.getTagID({name, line}) << kKindBits);
+  } else if (!use_lowptr && isRuntimeKind(kind)) {
+    m_id = k | (s_runtimeTags.getTagID({name, line}) << kKindBits);
   } else if (uintptr_t(name) <= std::numeric_limits<TagID>::max()) {
     m_id = k | safe_cast<TagID>(uintptr_t(name));
   } else {
-    m_id = kKindMask | (getTagID({name, -int(k)}) << kKindBits);
+    m_id = kKindMask | (s_defaultTags.getTagID({name, -int(k)}) << kKindBits);
   }
 
   // Check that we can undo tag compression and get back the original values.
@@ -169,19 +194,21 @@ Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
 Tag::Kind Tag::kind() const {
   auto const bits = m_id & kKindMask;
   if (bits < kKindMask) return Tag::Kind(bits);
-  return Tag::Kind(-getTagStorage(size_t(m_id) >> kKindBits).second);
+  return Tag::Kind(-s_defaultTags.getTag(size_t(m_id) >> kKindBits).second);
 }
 const StringData* Tag::name() const {
   auto const bits = m_id & kKindMask;
   if (bits == kKindMask || isIndirectKind(Kind(bits))) {
-    return getTagStorage(size_t(m_id) >> kKindBits).first;
+    return s_defaultTags.getTag(size_t(m_id) >> kKindBits).first;
+  } else if (!use_lowptr && isRuntimeKind(Kind(bits))) {
+    return s_runtimeTags.getTag(size_t(m_id) >> kKindBits).first;
   }
   return reinterpret_cast<StringData*>(m_id & ~kKindMask);
 }
 int32_t Tag::line() const {
   auto const bits = m_id & kKindMask;
   if (isIndirectKind(Kind(bits))) {
-    return getTagStorage(size_t(m_id) >> kKindBits).second;
+    return s_defaultTags.getTag(size_t(m_id) >> kKindBits).second;
   }
   return -1;
 }

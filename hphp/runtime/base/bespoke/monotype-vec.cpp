@@ -115,7 +115,8 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
   auto constexpr offset = (1 << 8);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + offset};
+  auto constexpr type = KindOfUninit;
+  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + uint8_t(type) + offset};
 }
 
 Layout::LayoutSet getAllEmptyOrMonotypeVecLayouts() {

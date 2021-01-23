@@ -113,7 +113,7 @@ DATATYPES
  * These should only be used where MaybeDataType cannot be (e.g., in
  * TypedValues, such as for MixedArray tombstones).
  */
-constexpr DataType kInvalidDataType      = static_cast<DataType>(-128);
+constexpr DataType kInvalidDataType = static_cast<DataType>(-128);
 
 /*
  * DataType limits.
@@ -160,8 +160,7 @@ constexpr DataType dt_with_persistence(DataType dt) {
  * KindOfPersistent$x flavor
  */
 constexpr DataType dt_modulo_persistence(DataType dt) {
-  auto const rep = dt_t(dt);
-  return static_cast<DataType>(rep < 0 ? rep | kRefCountedBit : rep);
+  return hasPersistentFlavor(dt) ? dt_with_rc(dt) : dt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -330,7 +329,7 @@ inline bool isDictOrDArrayType(MaybeDataType t) {
  * Currently matches any PHP dvarray. This method will go away.
  */
 constexpr bool isArrayType(DataType t) {
-  return t <= KindOfVArray;
+  return isPHPArrayType(t);
 }
 inline bool isArrayType(MaybeDataType t) {
   return t && isArrayType(*t);

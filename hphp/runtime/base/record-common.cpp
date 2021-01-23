@@ -22,9 +22,8 @@
 namespace HPHP {
 RecordBase::RecordBase(const RecordDesc* record)
   : m_record(record) {
-  static_assert(KindOfUninit == static_cast<DataType>(0),
-                "RecordBase assumes KindOfUninit == 0");
-  memset(const_cast<TypedValue*>(fieldVec()), 0, fieldSize(record));
+  auto const value = static_cast<data_type_t>(KindOfUninit);
+  memset(const_cast<TypedValue*>(fieldVec()), value, fieldSize(record));
 }
 
 template<class RecordType>

@@ -120,8 +120,9 @@ using StringDict = MonotypeDict<StringData*>;
 constexpr LayoutIndex getEmptyLayoutIndex() {
   auto constexpr offset = 4 * (1 << 8);
   auto constexpr base = kBaseLayoutIndex.raw;
+  auto constexpr type = KindOfUninit;
   static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
-  return LayoutIndex{uint16_t(base + offset)};
+  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
 }
 constexpr LayoutIndex getIntLayoutIndex(DataType type) {
   auto constexpr offset = 2 * (1 << 8);
@@ -1163,9 +1164,7 @@ void MonotypeDict<Key>::ConvertToUncounted(
     assertx(equivDataTypes(dt_mut, dt));
   });
 
-  auto const newType = static_cast<data_type_t>(dt) & kHasPersistentMask
-    ? dt_with_persistence(dt)
-    : dt;
+  auto const newType = hasPersistentFlavor(dt) ? dt_with_persistence(dt) : dt;
   mad->setLayoutIndex(getLayoutIndex<Key>(newType));
 }
 

@@ -256,11 +256,8 @@ void cgCheckInit(IRLS& env, const IRInstruction* inst) {
   assertx(type != InvalidReg);
   auto& v = vmain(env);
 
-  static_assert(KindOfUninit == static_cast<DataType>(0),
-                "cgCheckInit assumes KindOfUninit == 0");
-
   auto const sf = v.makeReg();
-  v << testb{type, type, sf};
+  v << cmpbi{static_cast<data_type_t>(KindOfUninit), type, sf};
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

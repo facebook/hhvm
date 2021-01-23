@@ -1,33 +1,19 @@
 == captureUninit ==
 
 int(2)
-
-Notice: Undefined variable: x in %s on line 13
-NULL
+string(21) "Undefined variable: x"
 int(1)
 
 == captureCatchUninit ==
 
-
-Notice: Undefined variable: e in %s on line 32
-NULL
+string(21) "Undefined variable: e"
 
 == captureUninitWarning ==
 
-
-Notice: Undefined variable: x in %s on line 42
-NULL
+string(21) "Undefined variable: x"
 int(1)
-
-Notice: Undefined variable: x in %s on line 39
-NULL
+string(21) "Undefined variable: x"
 
 == captureExplicitUninit ==
 
-
-Notice: Undefined variable: x in %s on line 56
-int(2)
-
-Notice: Undefined variable: x in %s on line 60
-NULL
-int(1)
+string(21) "Undefined variable: x"

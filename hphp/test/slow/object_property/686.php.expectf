@@ -1,11 +1,5 @@
 string(5) "a-pri"
-
-Notice: Undefined variable: q in %s/test/slow/object_property/686.php on line 8
-string(5) "a-pri"
 string(5) "b-pri"
-string(5) "a-pri"
-
-Notice: Undefined variable: q in %s/test/slow/object_property/686.php on line 8
 string(5) "a-pri"
 string(5) "b-pri"
 string(5) "c-pro"

@@ -20,6 +20,7 @@ error_reporting(E_ALL);
 try {
     @foo(@bar(@foo1()));
 } catch (Exception $e) {
+    var_dump($e->getMessage());
 }
 
 var_dump(error_reporting());

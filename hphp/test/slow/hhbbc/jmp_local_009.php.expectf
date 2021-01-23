@@ -1,3 +1,1 @@
-
-Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_009.php on line 6
-string(4) "asd2"
+string(21) "Undefined variable: x"

@@ -5,10 +5,14 @@ function foo() {
   $b = 2;
   $c = 3;
   unset($a, $b, $c);
-  var_dump($b);
+  try {
+    var_dump($b);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 <<__EntryPoint>>
 function main_1113() {
-foo();
+  foo();
 }

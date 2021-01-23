@@ -42,22 +42,10 @@ string(8) "blue sky"
 >INF<--- using o/p from sprintf with hard-coded precision
 >NAN<--- o/p from string substition
 >NaN<--- using o/p from sprintf with hard-coded precision
-
-Notice: Undefined variable: zX in %s/lexical_structure/tokens/string_literals.php on line 88
-
-Notice: Undefined variable: zz_ in %s/lexical_structure/tokens/string_literals.php on line 88
-
-Notice: Undefined variable: zzz3 in %s/lexical_structure/tokens/string_literals.php on line 88
->|-34 X||ABC _||1 3|5.67E+14+|5.67E+14 +<
-
-Notice: Undefined variable: zX in %s/lexical_structure/tokens/string_literals.php on line 90
-string(0) ""
-
-Notice: Undefined variable: zz_ in %s/lexical_structure/tokens/string_literals.php on line 91
-string(0) ""
-
-Notice: Undefined variable: zzz3 in %s/lexical_structure/tokens/string_literals.php on line 92
-string(0) ""
+string(22) "Undefined variable: zX"
+string(22) "Undefined variable: zX"
+string(23) "Undefined variable: zz_"
+string(24) "Undefined variable: zzz3"
 string(9) "5.67E+14+"
 >$1|$&<
 Array to string conversion

@@ -1,8 +1,3 @@
-
-Notice: Undefined variable: arr in %s/033.php on line 3
-
-Notice: Undefined variable: arr in %s/033.php on line 5
-
-Notice: Undefined variable: arr in %s/033.php on line 7
-
-Notice: Cannot access property on non-object in %s/033.php on line 7
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: arr' in %s/tests/033.php:%d
+Stack trace:
+%A

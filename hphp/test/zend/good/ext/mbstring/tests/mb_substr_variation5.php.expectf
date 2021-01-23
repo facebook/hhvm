@@ -1,4 +1,5 @@
 *** Testing mb_substr() : usage variations ***
+string(21) "Undefined variable: a"
 
 **-- Offset is: -60 --**
 -- ASCII String --

@@ -10,7 +10,11 @@ function captureUninit() {
 
   $foo(); // 2
 
-  var_dump($x); // uninit
+  try {
+    var_dump($x); // uninit
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 
   $x = 1;
   var_dump($x); // 1
@@ -27,19 +31,32 @@ function captureCatchUninit() {
         var_dump($e);
       }
     };
-  } catch (Exception $e) {}
+  } catch (Exception $e) {
+  }
 
-  var_dump($e); // uninit
+  try {
+    var_dump($e); // uninit
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 function captureUninitWarning() {
   echo "\n== captureUninitWarning ==\n\n";
 
   $foo = () ==> { // no warning for $x
-    var_dump($x);
+    try {
+      var_dump($x); // uninit
+    } catch (UndefinedVariableException $e) {
+      var_dump($e->getMessage());
+    }
   };
 
-  var_dump($x); // uninit
+  try {
+    var_dump($x); // uninit
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 
   $x = 1;
   var_dump($x); // 1
@@ -50,24 +67,23 @@ function captureUninitWarning() {
 function captureExplicitUninit() {
   echo "\n== captureExplicitUninit ==\n\n";
 
-  $foo = function() use ($x) { // warning here for $x
-    $x = 2;
-    var_dump($x);
-  };
+  try {
+    $foo = function() use ($x) { // fatal here for $x
+      $x = 2;
+      var_dump($x);
+    };
 
-  $foo(); // 2
-
-  var_dump($x); // uninit
-
-  $x = 1;
-  var_dump($x); // 1
+    $foo(); // 2
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 
 <<__EntryPoint>>
 function main_lambda_uninit_capture() {
-captureUninit();
-captureCatchUninit();
-captureUninitWarning();
-captureExplicitUninit();
+  captureUninit();
+  captureCatchUninit();
+  captureUninitWarning();
+  captureExplicitUninit();
 }

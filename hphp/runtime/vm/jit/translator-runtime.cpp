@@ -263,9 +263,10 @@ void raiseClsMethPropConvertNotice(const TypeConstraint* tc,
   );
 }
 
-void raiseUndefVariable(StringData* nm) {
-  raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
-  decRefStr(nm);
+void throwUndefVariable(StringData* nm) {
+  SCOPE_EXIT { decRefStr(nm); };
+  SystemLib::throwUndefinedVariableExceptionObject(
+    folly::sformat("Undefined variable: {}", nm->data()));
 }
 
 void raise_error_sd(const StringData *msg) {

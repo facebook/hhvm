@@ -35,8 +35,12 @@ foreach ($s as $e) {
     echo ">$e< is ".(is_numeric($e) ? "numeric\n" : "not numeric\t\t***\n");
 }
 
-sprintf($t, ",%b,%B", 0b1010, 0b1010);
-var_dump($t);
+try {
+  sprintf($t, ",%b,%B", 0b1010, 0b1010);
+  var_dump($t);
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
 var_dump((string)INF);
 var_dump((string)-INF);
 var_dump((string)NAN);

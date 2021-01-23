@@ -656,9 +656,5 @@ NULL
 
 Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 77
 NULL
-
-Notice: Undefined variable: arr4 in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
-
-Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
-NULL
+string(24) "Undefined variable: arr4"
 Done

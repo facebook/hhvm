@@ -1,8 +1,13 @@
 <?hh
-function handler ($errno, $errstr, $errfile, $errline, darray $errcontext) {
+function handler($errno, $errstr, $errfile, $errline, darray $errcontext) {
   echo "handler_called\n";
 }
-<<__EntryPoint>> function main(): void {
-set_error_handler(handler<>);
-$undefined->foo();
+<<__EntryPoint>>
+function main(): void {
+  set_error_handler(handler<>);
+  try {
+    $undefined->foo();
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

@@ -35,10 +35,6 @@ $autoload = true;
 //resource
 $res = fopen(__FILE__,'r');
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -87,13 +83,7 @@ $inputs = darray[
       // object data
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
-
-      // undefined data
-      'undefined var' => @$undefined_var,
-
-      // unset data
-      'unset var' => @$unset_var,
-
+      
       //resource
       'resource' => $res,
 ];

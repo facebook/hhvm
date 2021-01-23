@@ -6,16 +6,12 @@ object(ClassA) (1) {
   ["val"]=>
   int(2)
 }
-
-Notice: Undefined variable: val in %s/test/slow/assignment/1704.php on line 16
-NULL
+string(23) "Undefined variable: val"
 int(2)
 int(3)
 object(ClassA) (1) {
   ["val"]=>
   int(3)
 }
-
-Notice: Undefined variable: val in %s/test/slow/assignment/1704.php on line 16
-NULL
+string(23) "Undefined variable: val"
 int(3)

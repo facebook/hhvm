@@ -10,5 +10,9 @@ function foo(inout $perms, inout $t) {
 <<__EntryPoint>>
 function main_1095() {
   $a = null;
-  var_dump(foo(inout $a, inout $a));
+  try {
+    var_dump(foo(inout $a, inout $a));
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

@@ -3,15 +3,15 @@ NULL
 Warning: error_get_last() expects exactly 0 parameters, 1 given in %s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php on line 4
 NULL
 
-Notice: Undefined variable: b in %s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php on line 7
+Notice: Cannot access property on non-object in %s/error_get_last.php on line 8
 darray(4) {
   ["type"]=>
   int(8)
   ["message"]=>
-  string(21) "Undefined variable: b"
+  string(36) "Cannot access property on non-object"
   ["file"]=>
   string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php"
   ["line"]=>
-  int(7)
+  int(8)
 }
 Done

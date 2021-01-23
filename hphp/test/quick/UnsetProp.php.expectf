@@ -12,8 +12,10 @@ string(28) "Undefined property: F::$bart"
 object(F) (0) {
 }
 ------------------------
+string(21) "Undefined variable: x"
 foo
 ------------------------
+string(21) "Undefined variable: y"
 foo
 Test end
 string(4) "set1"

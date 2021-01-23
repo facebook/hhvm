@@ -20,11 +20,7 @@ bool(true)
 ----------------------------------
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >93<
 Inside test() in %s/expressions/source_file_inclusion/test.php
-
-Notice: Undefined variable: v1 in %s/expressions/source_file_inclusion/test.php on line 12
-
-Notice: Undefined variable: v2 in %s/expressions/source_file_inclusion/test.php on line 12
-$v1: , $v2: 
+string(22) "Undefined variable: v1"
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >96<
 ----------------------------------
 Array

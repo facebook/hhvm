@@ -1,6 +1,7 @@
 <?hh
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>>
+function main(): void {
   // Suppress warnings
   error_reporting(0);
 
@@ -38,16 +39,32 @@
   if (!(1 === 1)) {
     printf("Same broken\n");
   }
-  if (0 != $q) {
-    printf("Uninitialized null vs. integer 0\n");
+  try {
+    if (0 != $q) {
+      printf("Uninitialized null vs. integer 0\n");
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
-  if (1 == $q) {
-    printf("Uninitialized null vs. integer 1\n");
+  try {
+    if (1 == $q) {
+      printf("Uninitialized null vs. integer 1\n");
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
-  if (null !== $q) {
-    printf("Uninitialized null vs. null NSame\n");
+  try {
+    if (null !== $q) {
+      printf("Uninitialized null vs. null NSame\n");
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
-  if (!(null === $q)) {
-    printf("Uninitialized null vs. null Same\n");
+  try {
+    if (!(null === $q)) {
+      printf("Uninitialized null vs. null Same\n");
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
 }

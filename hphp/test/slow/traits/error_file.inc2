@@ -1,6 +1,14 @@
 <?hh
 
 trait U {
-  function f() { echo $x; }
-  function h() { foo(); }
+  function f() {
+    try {
+      echo $x;
+    } catch (UndefinedVariableException $e) {
+      var_dump($e->getMessage());
+    }
+  }
+  function h() {
+    foo();
+  }
 }

@@ -1,3 +1,5 @@
 ok
 
-Notice: %s
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: x' in %s/unset_cv01.php:5
+Stack trace:
+%A

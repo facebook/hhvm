@@ -1,14 +1,3 @@
-
-Notice: %s
-ENDOFHEREDOC    ;
-    ENDOFHEREDOC;
-ENDOFHEREDOC    
-    ENDOFHEREDOC
-;
-
-Notice: %s
-ENDOFHEREDOC    ;
-    ENDOFHEREDOC;
-ENDOFHEREDOC    
-    ENDOFHEREDOC
-;
+string(32) "Undefined variable: ENDOFHEREDOC"
+string(32) "Undefined variable: ENDOFHEREDOC"
+string(21) "Undefined variable: x"

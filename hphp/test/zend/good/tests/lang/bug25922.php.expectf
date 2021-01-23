@@ -1,2 +1,3 @@
-Undefined variable: data
-Undefined index here: ''
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: data' in %s/bug25922.php:11
+Stack trace:
+%A

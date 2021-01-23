@@ -29,7 +29,11 @@ function writeAndDump($fp, $format, $args)
     $length = vfprintf( $fp, $format, $args );
     try { rewind( $fp ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     try { $content = stream_get_contents( $fp ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-    var_dump( $content );
+    try {
+        var_dump( $content );
+    } catch (UndefinedVariableException $e) {
+        var_dump($e->getMessage());
+    }
     var_dump( $length );
 }
 <<__EntryPoint>> function main(): void {
@@ -39,9 +43,6 @@ echo "*** Testing vfprintf() : variation functionality ***\n";
 $file = __SystemLib\hphp_test_tmppath('vfprintf_variation1.phpt.txt');
 $fp = fopen( $file, 'a+' );
 
-$funset = fopen( __FILE__, 'r' );
-unset( $funset );
-
 // Test vfprintf()
 writeAndDump( $fp, "format", null );
 writeAndDump( $fp, "Foo is %d and %s", varray[ 30, 'bar' ] );
@@ -50,7 +51,6 @@ writeAndDump( $fp, "%s %s %s", varray[ 'bar', 'bar', 'bar' ] );
 writeAndDump( $fp, "%02d", varray[ 50 ] );
 writeAndDump( $fp, "", varray[] );
 writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", varray[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
-@writeAndDump( $funset, "Foo with %s", varray[ 'string' ] );
 @writeAndDump( new FooClass(), "Foo with %s", varray[ 'string' ] );
 
 // Close handle

@@ -7,5 +7,9 @@ function main() {
   do {
     var_dump($res = pagelet_server_task_result($r, inout $h, inout $c));
   } while ($res !== null && $c === 0);
-  var_dump($c);
+  try {
+    var_dump($c);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

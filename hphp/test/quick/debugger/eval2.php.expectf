@@ -14,9 +14,9 @@ Breakpoint 1 reached at foo() on line 3 of %s/eval2.php
 1
 c
 = $x
-
-Notice: Undefined variable: x
-null
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
+Stack trace:
+%A
 $_ = "don't want to see this"
 = throwSomething()
 Hit a php exception : exception 'Exception' with message 'I want to see this' in %s/eval2.php:8

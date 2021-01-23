@@ -2470,8 +2470,9 @@ static void raise_undefined_local(ActRec* fp, LocalName pind) {
       vm->getLine()
     );
   }
-  raise_notice(Strings::UNDEFINED_VARIABLE,
-               fp->func()->localVarName(pind)->data());
+  SystemLib::throwUndefinedVariableExceptionObject(
+    folly::sformat("Undefined variable: {}",
+                   fp->func()->localVarName(pind)->data()));
 }
 
 static inline void cgetl_inner_body(tv_rval fr, TypedValue* to) {

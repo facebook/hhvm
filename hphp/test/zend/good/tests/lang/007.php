@@ -23,8 +23,16 @@ error_reporting(0);
 $a = 10;
 
 Test();
-echo "$a ".Lang007::$b." $c ";
+try {
+  echo "$a ".Lang007::$b." $c ";
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
 Test();
-echo "$a ".Lang007::$b." $c ";
+try {
+  echo "$a ".Lang007::$b." $c ";
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
 Test();
 }

@@ -1,6 +1,0 @@
-.* \[hphp\] \[(\d+).*
-Notice: Undefined variable: g in .*\/test\/slow\/ext_process\/fork_log.php on line 6
-NULL
-.* \[hphp\] \[(?!\g1)\d+.*
-Notice: Undefined variable: g in .*\/test\/slow\/ext_process\/fork_log.php on line 8
-NULL

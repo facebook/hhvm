@@ -17,10 +17,6 @@ function entrypoint_image_type_to_mime_type_variation1(): void {
 
   error_reporting(E_ALL ^ E_NOTICE);
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
-
   //array of values to iterate over
   $values = varray[
 
@@ -54,13 +50,7 @@ function entrypoint_image_type_to_mime_type_variation1(): void {
         'string',
 
         // object data
-        new MyClass(),
-
-        // undefined data
-        @$undefined_var,
-
-        // unset data
-        @$unset_var,
+        new MyClass()
   ];
 
   // loop through each element of the array for imagetype

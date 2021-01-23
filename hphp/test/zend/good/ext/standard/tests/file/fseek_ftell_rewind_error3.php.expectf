@@ -28,5 +28,5 @@ Warning: rewind() expects parameter 1 to be resource, object given in %s/fseek_f
 Warning: Not a valid stream resource in %s/fseek_ftell_rewind_error3.php on line 42
 bool(false)
 
-Warning: rewind() expects parameter 1 to be resource, null given in %s/fseek_ftell_rewind_error3.php on line 47
+Warning: Undefined variable: file_handle in %s/fseek_ftell_rewind_error3.php on line 47
 Done

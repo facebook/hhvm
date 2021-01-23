@@ -1,6 +1,5 @@
-Notice: Undefined variable: x in %s/test/slow/traits/error_file.inc2 on line 4
-
-Notice: Undefined variable: x in %s/test/slow/traits/error_file.inc on line 5
+string(21) "Undefined variable: x"
+string(21) "Undefined variable: x"
 darray(4) {
   ["class"]=>
   string(1) "X"
@@ -9,5 +8,5 @@ darray(4) {
   ["function"]=>
   string(1) "h"
   ["line"]=>
-  int(5)
+  int(12)
 }

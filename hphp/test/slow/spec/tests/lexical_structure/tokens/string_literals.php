@@ -85,12 +85,31 @@ $z = -34;
 $zz = "ABC";
 $zzz = TRUE;
 $zzzz = 567e12;
-echo ">$zX|$z X|$zz_|$zz _|$zzz3|$zzz 3|$zzzz+|$zzzz +<\n";
-
-var_dump("$zX");
-var_dump("$zz_");
-var_dump("$zzz3");
-var_dump("$zzzz+");
+try {
+  echo ">$zX|$z X|$zz_|$zz _|$zzz3|$zzz 3|$zzzz+|$zzzz +<\n";
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump("$zX");
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump("$zz_");
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump("$zzz3");
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump("$zzzz+");
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
 
 // $s not preceding a variable name are used verbatim
 echo ">$1|$&<\n";

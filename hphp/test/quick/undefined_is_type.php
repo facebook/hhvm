@@ -1,6 +1,7 @@
 <?hh
 
-<<__EntryPoint>> function foo(): void {
+<<__EntryPoint>>
+function foo(): void {
   // Force all the types to be in so these don't get constant folded.
   if (\HH\global_isset('a')) $a = 1;
   if (\HH\global_isset('b')) $a = 1.2;
@@ -10,16 +11,62 @@
   if (\HH\global_isset('f')) $a = false;
   if (\HH\global_isset('g')) $a = null;
 
-  echo "set:     ", isset($a)      . "\n";
-  echo "nul:     ", is_null($a)    . "\n";
-  echo "str:     ", is_string($a)  . "\n";
-  echo "obj:     ", is_object($a)  . "\n";
-  echo "arr:     ", is_array($a)   . "\n";
-  echo "int:     ", is_int($a)     . "\n";
-  echo "integer: ", is_integer($a) . "\n";
-  echo "long:    ", is_long($a)    . "\n";
-  echo "real:    ", is_real($a)    . "\n";
-  echo "double:  ", is_double($a)  . "\n";
-  echo "float:   ", is_float($a)   . "\n";
-  echo "bool:    ", is_bool($a)    . "\n";
+  echo "set:     ", isset($a)."\n";
+  try {
+    echo "nul:     ", is_null($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "str:     ", is_string($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "obj:     ", is_object($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "arr:     ", is_array($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "int:     ", is_int($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "integer: ", is_integer($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "long:    ", is_long($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "real:    ", is_real($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "double:  ", is_double($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "float:   ", is_float($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "bool:    ", is_bool($a)."\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+
+
 }

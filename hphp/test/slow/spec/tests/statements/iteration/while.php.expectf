@@ -9,15 +9,11 @@
 9	81
 10	100
 1
-
-Notice: Undefined variable: done in %s/statements/iteration/while.php on line %d
+string(24) "Undefined variable: done"
 2
-
-Notice: Undefined variable: done in %s/statements/iteration/while.php on line %d
+string(24) "Undefined variable: done"
 3
-
-Notice: Undefined variable: done in %s/statements/iteration/while.php on line %d
+string(24) "Undefined variable: done"
 4
-
-Notice: Undefined variable: done in %s/statements/iteration/while.php on line %d
+string(24) "Undefined variable: done"
 5

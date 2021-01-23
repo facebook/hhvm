@@ -1,6 +1,3 @@
-
-Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_008.php on line 4
-NULL
-
-Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_008.php on line 5
-string(4) "asd2"
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: x' in %s/jmp_local_008.php:4
+Stack trace:
+%A

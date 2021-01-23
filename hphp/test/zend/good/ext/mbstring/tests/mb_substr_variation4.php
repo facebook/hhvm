@@ -21,9 +21,13 @@ $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXv
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -60; $i <= 60; $i += 10) {
-    if (@$a || @$b) {
+    try {
+      if (@$a || @$b) {
         $a = null;
         $b = null;
+      }
+    } catch (UndefinedVariableException $e) {
+      var_dump($e->getMessage());
     }
     echo "\n**-- Offset is: $i --**\n";
     echo "-- ASCII String --\n";

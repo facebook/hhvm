@@ -11,7 +11,11 @@ var_dump($b() is stdClass);
 $c = varray[new stdClass];
 var_dump($c[0] is stdClass);
 
-var_dump(@$inexistent is stdClass);
+try {
+    var_dump(@$inexistent is stdClass);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
 
 var_dump("$a" is stdClass);
 }

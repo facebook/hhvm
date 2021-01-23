@@ -1,2 +1,3 @@
-Notice: Undefined variable: foo in %s on line %d
-bool(false)
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: foo' in %s/unused_param_unset_local.php:4
+Stack trace:
+%A

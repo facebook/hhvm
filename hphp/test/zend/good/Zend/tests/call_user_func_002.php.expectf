@@ -3,10 +3,6 @@ Warning: Invalid argument: function: class not found in %s/call_user_func_002.ph
 
 Warning: Invalid argument: function: class not found in %s/call_user_func_002.php on line 5
 
-Notice: Undefined variable: foo in %s/call_user_func_002.php on line 6
-
-Warning: Invalid argument: function: not a valid callback array in %s/call_user_func_002.php on line 6
-
-Notice: Undefined variable: foo in %s/call_user_func_002.php on line 7
-
-Warning: Invalid argument: function: not a valid callback array in %s/call_user_func_002.php on line 7
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: foo' in %s/call_user_func_002.php:6
+Stack trace:
+%A

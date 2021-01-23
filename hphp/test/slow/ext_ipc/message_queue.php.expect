@@ -1,8 +1,8 @@
 bool(true)
 string(5) "start"
 string(2) "ok"
-bool(false)
-bool(true)
+string(32) "Undefined variable: s_error_code"
+string(32) "Undefined variable: s_error_code"
 bool(false)
 bool(true)
 int(0)

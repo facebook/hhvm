@@ -510,7 +510,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetRecDesc:
   case VerifyPropRecDesc:
   case RaiseClsMethPropConvertNotice:
-  case RaiseUninitLoc:
+  case ThrowUninitLoc:
   case RaiseUndefProp:
   case RaiseTooManyArg:
   case RaiseError:

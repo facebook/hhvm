@@ -1,6 +1,6 @@
 int(-1)
 int(-1)
 
-Notice: Undefined variable: y in %s/expressions/error_control_operator/error_control.php on line 12
-int(-1)
-Done
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: y' in %s/error_control.php:12
+Stack trace:
+%A

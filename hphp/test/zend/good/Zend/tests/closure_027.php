@@ -1,16 +1,23 @@
 <?hh
 
 function test(closure $a) {
-    var_dump($a());
+  var_dump($a());
 }
 
-<<__EntryPoint>> function main(): void {
-test(function() { return new stdclass; });
+<<__EntryPoint>>
+function main(): void {
+  test(function() {
+    return new stdclass;
+  });
 
-test(function() { });
+  test(function() {});
 
-$a = function($x) use ($y) {};
-try { test($a); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try {
+    $a = function($x) use ($y) {};
+    test($a);
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
 
-test(new stdclass);
+  test(new stdclass);
 }

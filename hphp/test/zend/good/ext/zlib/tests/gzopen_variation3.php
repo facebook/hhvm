@@ -25,10 +25,6 @@ function entrypoint_gzopen_variation3(): void {
   $filename = dirname(__FILE__)."/004.txt.gz";
   $mode = 'r';
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
-
   // heredoc string
   $heredoc = <<<EOT
 hello world
@@ -80,12 +76,6 @@ EOT;
         // object data
         'instance of classWithToString' => new classWithToString(),
         'instance of classWithoutToString' => new classWithoutToString(),
-
-        // undefined data
-        'undefined var' => @$undefined_var,
-
-        // unset data
-        'unset var' => @$unset_var,
 
         // resource variable
         'resource' => $fp

@@ -1,4 +1,3 @@
-
-Notice: Undefined variable: y in %s/test/slow/unary_operators/1439.php on line 6
-bool(false)
-NULL
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: y' in %s/unary_operators/1439.php:6
+Stack trace:
+%A

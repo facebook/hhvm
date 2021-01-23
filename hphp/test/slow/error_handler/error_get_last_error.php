@@ -18,10 +18,14 @@ function entrypoint_error_get_last_error(): void {
   set_error_handler(handleError<>);
   register_shutdown_function(shutdownFunc<>);
 
-  if ($x) {
-    echo "x\n";
-  } else {
-    echo "no x\n";
+  try {
+    if ($x) {
+      echo "x\n";
+    } else {
+      echo "no x\n";
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
 
   // it should been clean

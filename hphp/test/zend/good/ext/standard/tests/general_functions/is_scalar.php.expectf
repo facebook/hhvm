@@ -87,20 +87,6 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 bool(false)
--- Iteration 11 --
-bool(false)
--- Iteration 12 --
-bool(false)
--- Iteration 13 --
-bool(false)
--- Iteration 14 --
-bool(false)
--- Iteration 15 --
-bool(false)
--- Iteration 16 --
-bool(false)
--- Iteration 17 --
-bool(false)
 
 *** Testing error conditions ***
 

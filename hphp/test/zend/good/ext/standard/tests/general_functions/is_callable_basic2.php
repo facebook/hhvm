@@ -76,9 +76,6 @@ function main(): void {
   /* objects of different classes */
   $obj = new contains_object_class;
   $temp_class_obj = new object_class();
-  /* object which is unset */
-  $unset_obj = new object_class();
-  unset($unset_obj);
 
   /* check is_callable() on static method */
   echo "\n** Testing behavior of is_callable() on static methods **\n";
@@ -94,7 +91,6 @@ function main(): void {
     $obj->class_object1,
     $obj->no_member_class_object,
     $temp_class_obj,
-    @$unset_obj
   ];
 
   /* loop to check whether given object/string has valid given method name

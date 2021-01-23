@@ -14,10 +14,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing explode() function: with unexpected inputs for 'delimiter' argument ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
 
@@ -56,13 +52,7 @@ $delimiters =  varray [
   new sample(),
 
   // resource
-  $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
+  $file_handle
 ];
 
 // loop through with each element of the $delimiters array to test explode() function

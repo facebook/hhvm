@@ -425,7 +425,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
   case RaiseUndefProp:
-  case RaiseUninitLoc:
+  case ThrowUninitLoc:
   case RaiseWarning:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:

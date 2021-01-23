@@ -6,20 +6,21 @@
    +-------------------------------------------------------------+
 */
 
-function e()
-{
+function e() {
+  try {
     var_dump($p);
     var_dump(isset($p));
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
-function f($p)
-{
-    var_dump($p);
-    var_dump(isset($p));
+function f($p) {
+  var_dump($p);
+  var_dump(isset($p));
 }
 
-class X1
-{
+class X1 {
 }
 <<__EntryPoint>>
 function entrypoint_intrinsics_isset(): void {
@@ -37,7 +38,9 @@ function entrypoint_intrinsics_isset(): void {
 
   echo "--------- TRUE, 12.3, NULL -------------\n";
 
-  $v1 = TRUE; $v2 = 12.3; $v3 = NULL;
+  $v1 = TRUE;
+  $v2 = 12.3;
+  $v3 = NULL;
   var_dump(isset($v1, $v2, $v3));
 
   echo "--------- undefined parameter -------------\n";

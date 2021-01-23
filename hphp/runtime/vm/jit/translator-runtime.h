@@ -81,7 +81,7 @@ StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceHdr* o);
 
 void raiseUndefProp(ObjectData* base, const StringData* name);
-void raiseUndefVariable(StringData* nm);
+void throwUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          const TypeConstraint* expected,

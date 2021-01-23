@@ -2038,9 +2038,9 @@ To string conversions:
   coercing class_meth types is removed this ir instruction can also be removed
   (T61738946).
 
-| RaiseUninitLoc<localId>, ND, S(Str), NF
+| ThrowUninitLoc<localId>, ND, S(Str), T
 
-  Raise a notice for an uninitialized local variable.
+  Throws an UndefinedVariableException on an uninitialized local variable.
 
 | RaiseUndefProp, ND, S(Obj) CStr, T
 

@@ -26,7 +26,6 @@ constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
 constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
-constexpr char UNDEFINED_VARIABLE[] = "Undefined variable: %s";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
 constexpr char UNKNOWN_RECORD[] = "Record undefined: %s";
 constexpr char CANT_ACCESS_SELF[] =

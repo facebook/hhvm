@@ -142,7 +142,11 @@ EOD;
   /* Simple syntax */
   var_dump( strstr("Hello, world", "$needle") );  // works
   var_dump( strstr("Hello, world'S", "$needle'S") );  // works
-  var_dump( strstr("Hello, worldS", "$needleS") );  // won't work
+  try {
+    var_dump( strstr("Hello, worldS", "$needleS") );  // won't work
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 
   /* String with curly braces, complex syntax */
   var_dump( strstr("Hello, worldS", "{$needle}S") );  // works

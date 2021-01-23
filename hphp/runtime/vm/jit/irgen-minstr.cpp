@@ -1602,7 +1602,7 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
     auto const baseName = curFunc(env)->localVarName(loc.name);
     env.irb->constrainLocal(loc.id, DataTypeSpecific,
                             "emitBaseL: Uninit base local");
-    gen(env, RaiseUninitLoc, cns(env, baseName));
+    gen(env, ThrowUninitLoc, cns(env, baseName));
   }
 
   env.irb->fs().setMemberBase(base);

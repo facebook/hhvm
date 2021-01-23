@@ -1,7 +1,4 @@
-
-Notice: Undefined variable: abc in %s/test/slow/closure/1921.php on line 7
-NULL
-int(123)
+string(23) "Undefined variable: abc"
 NULL
 int(789)
 int(123)

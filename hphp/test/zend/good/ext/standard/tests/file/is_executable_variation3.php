@@ -7,9 +7,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_executable(): usage variations ***\n";
 
-$file_handle = fopen(__FILE__, "r");
-unset($file_handle);
-
 echo "\n*** Testing is_executable() on invalid files ***\n";
 $invalid_files = varray[
   0,
@@ -20,7 +17,6 @@ $invalid_files = varray[
   NULL,
   " ",
   @varray[],
-  @$file_handle
 ];
 /* loop through to test each element in the above array 
    is an executable file */

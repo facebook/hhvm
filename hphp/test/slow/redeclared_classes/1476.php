@@ -24,8 +24,5 @@ class D2 extends D1 {
 }
 <<__EntryPoint>>
 function entrypoint_1476(): void {
-  if ($x) {
-    include '1476.inc';
-  }
   PEAR::f();
 }

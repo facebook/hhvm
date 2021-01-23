@@ -1,5 +1,3 @@
-
-Notice: %s
-
-Notice: %s
-NULL
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: i' in %s/closure_012.php:4
+Stack trace:
+%A

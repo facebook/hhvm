@@ -16,7 +16,11 @@ class ClassA {
     f($this->$val = 2);
   }
   function zoo() {
-    var_dump($val);
+    try {
+      var_dump($val);
+    } catch (UndefinedVariableException $e) {
+      var_dump($e->getMessage());
+    }
     var_dump($this->val);
   }
 }

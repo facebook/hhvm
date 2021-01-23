@@ -1,8 +1,6 @@
 object(stdClass) (0) {
 }
 NULL
+string(21) "Undefined variable: y"
 
-Notice: Undefined variable: y in %s/closure_027.php on line 12
-string(47) "__invoke() expects exactly 1 parameter, 0 given"
-
-Catchable fatal error: Argument 1 passed to test() must be an instance of closure, stdClass given in %s/closure_027.php on line 15
+Catchable fatal error: Argument 1 passed to test() must be an instance of closure, stdClass given in %s/closure_027.php on line %d

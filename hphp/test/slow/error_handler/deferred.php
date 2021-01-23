@@ -1,7 +1,10 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function make_error() { $a = $b; }
+function make_error() {
+  $a = darray['x' => 2];
+  $a->foo;
+}
 
 function error_handler1() {
   echo "===================== error_handler1 =========================\n";

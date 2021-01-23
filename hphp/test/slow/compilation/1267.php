@@ -1,7 +1,10 @@
 <?hh
 
-
 <<__EntryPoint>>
 function main_1267() {
-$a = 0xC0000000 & $b;
+  try {
+    $a = 0xC0000000 & $b;
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

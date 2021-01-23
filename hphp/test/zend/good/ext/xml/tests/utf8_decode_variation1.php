@@ -18,7 +18,6 @@ function entrypoint_utf8_decode_variation1(): void {
 
   // Initialise function arguments not being substituted (if any)
 
-
   //array of values to iterate over
   $values = varray[
 

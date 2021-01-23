@@ -6,55 +6,58 @@
    +-------------------------------------------------------------+
 */
 
-function e()
-{
+function e() {
+  try {
     var_dump($p);
     var_dump(isset($p));
     unset($p);
     var_dump(isset($p));
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
-function f($p)
-{
-    var_dump($p);
-    var_dump(isset($p));
-    unset($p);
-    var_dump(isset($p));
+function f($p) {
+  var_dump($p);
+  var_dump(isset($p));
+  unset($p);
+  var_dump(isset($p));
 }
 
-class X1
-{
+class X1 {
 }
 
-function g2()
-{
-    var_dump(\HH\global_isset('gl'));
-    \HH\global_unset('gl');              // unsets global "version"
-    var_dump(\HH\global_isset('gl'));
+function g2() {
+  var_dump(\HH\global_isset('gl'));
+  \HH\global_unset('gl'); // unsets global "version"
+  var_dump(\HH\global_isset('gl'));
 }
 
-function g3($p1, inout $p2)
-{
+function g3($p1, inout $p2) {
+  try {
     var_dump(isset($p1, $p2));
-    unset($p1, $p2);            // unsets local "version" in current scope
+    unset($p1, $p2); // unsets local "version" in current scope
     var_dump(isset($p1, $p2));
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
-class State { static $count = 0; }
-function g4()
-{
-    ++State::$count;
-    echo "count = ".State::$count."\n";
+class State {
+  static $count = 0;
+}
+function g4() {
+  ++State::$count;
+  echo "count = ".State::$count."\n";
 
-    var_dump(isset(State::$count));
-    var_dump(false);
+  var_dump(isset(State::$count));
+  var_dump(false);
 }
 
-class C
-{
-    const CON1 = 123;
-    public $prop = 10;
-    public static $sprop = -5;
+class C {
+  const CON1 = 123;
+  public $prop = 10;
+  public static $sprop = -5;
 }
 
 <<__EntryPoint>>
@@ -77,7 +80,9 @@ function entrypoint_intrinsics_unset(): void {
 
   echo "--------- TRUE, 12.3, NULL -------------\n";
 
-  $v1 = TRUE; $v2 = 12.3; $v3 = "abc";
+  $v1 = TRUE;
+  $v2 = 12.3;
+  $v3 = "abc";
   var_dump(isset($v1, $v2, $v3));
   unset($v1, $v2, $v3);
   var_dump(isset($v1, $v2, $v3));
@@ -100,19 +105,23 @@ function entrypoint_intrinsics_unset(): void {
   echo "---------- unsetting inside a function (\$GLOBALS) ------------\n";
 
   \HH\global_set('gl', 100);
-  var_dump(\HH\global_isset('gl'));       // still set
+  var_dump(\HH\global_isset('gl')); // still set
 
   g2();
-  var_dump(\HH\global_isset('gl'));       // no longer set
+  var_dump(\HH\global_isset('gl')); // no longer set
 
   echo "---------- unsetting inside a function (pass-by-inout) ------------\n";
 
   $v1 = 10;
   $v2 = 20;
-  g3($v1, inout $v2);
-  var_dump(isset($v1));       // still set
+  try {
+    g3($v1, inout $v2);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
+  var_dump(isset($v1)); // still set
   var_dump($v1);
-  var_dump(isset($v2));       // no longer set
+  var_dump(isset($v2)); // no longer set
   var_dump($v2);
 
   echo "---------- unsetting inside a function (static) ------------\n";
@@ -125,7 +134,7 @@ function entrypoint_intrinsics_unset(): void {
   $c1 = new C;
   var_dump($c1);
   var_dump(isset($c1->prop));
-  unset($c1->prop);           // remove it from this instance
+  unset($c1->prop); // remove it from this instance
   var_dump(isset($c1->prop));
 
   //unset(C::$sprop);         // Attempt to unset static property

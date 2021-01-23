@@ -36,7 +36,7 @@ Warning: fread() expects parameter 1 to be resource, object given in %s/zend/goo
 Warning: Not a valid stream resource in %s/zend/good/ext/standard/tests/file/fread_error.php on line 48
 bool(false)
 
-Warning: fread() expects parameter 1 to be resource, null given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 53
+Warning: Undefined variable: fp in %s/fread_error.php on line 53
 
-Warning: fclose() expects parameter 1 to be resource, null given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 54
+Warning: Undefined variable: fp in %s/fread_error.php on line 54
 Done

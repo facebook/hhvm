@@ -1,5 +1,4 @@
-
-Notice: Undefined variable: i in %s/test/slow/redeclared_classes/1467.php on line 15
+string(21) "Undefined variable: i"
 int(1)
 object(p) (1) {
   ["data1"]=>

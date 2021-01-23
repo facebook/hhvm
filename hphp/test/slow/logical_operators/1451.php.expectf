@@ -1,8 +1,4 @@
-
-Notice: Undefined variable: c in %s/test/slow/logical_operators/1451.php on line 8
-
-Notice: Undefined variable: d in %s/test/slow/logical_operators/1451.php on line 9
 bool(false)
 bool(true)
-bool(true)
-bool(false)
+string(21) "Undefined variable: c"
+string(21) "Undefined variable: d"

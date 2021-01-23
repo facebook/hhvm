@@ -52,15 +52,6 @@ foreach($scalar_variables as $scalar) {
 }
 
 echo "\n*** Testing possible variations ***\n";
-// different scalar variables which are unset
-$int_var = 10;
-$float_var = 1e5;
-$string_var = "string";
-$boolean_var = true;
-$object = new stdclass;
-$array = varray[10];
-$resource = opendir('.');
-unset($int_var, $float_var, $string_var, $boolean_var, $object, $array, $resource);
 
 // resources 
 $fp = fopen(__FILE__, "r");
@@ -80,16 +71,6 @@ $variation_array = varray[
   $dfp,
 
   new stdclass, // object
-
-  @$int_var,  // scalars that are unset
-  @$float_var,
-  @$string_var,
-  @$boolean_var,
-
-  @$array,   // non scalars that are unset
-  @$object,
-  @$resource,
-
 ];  
 
 /* loop through each element of $variation_array to see the 

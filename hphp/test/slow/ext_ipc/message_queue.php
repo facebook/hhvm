@@ -31,9 +31,17 @@ msg_send($queue, 1, "ok", true, true, inout $errcode);
 msg_receive($queue, 2, inout $type, 100, inout $msg, true, 0, inout $errcode);
 var_dump($msg);
 
-$ret = @msg_send($queue, 0, 'msg', false, false, inout $s_error_code);
-var_dump($ret);
-var_dump(22 === $s_error_code); // 22 - invalid argument
+try {
+  $ret = @msg_send($queue, 0, 'msg', false, false, inout $s_error_code);
+  var_dump($ret);
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  var_dump(22 === $s_error_code); // 22 - invalid argument
+} catch (UndefinedVariableException $e) {
+  var_dump($e->getMessage());
+}
 
 $r_error_code = null;
 $ret = msg_receive(

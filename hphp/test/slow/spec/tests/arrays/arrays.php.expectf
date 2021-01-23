@@ -180,13 +180,9 @@ darray(3) {
 }
 123,6,13,
 Out of bounds darray access: invalid index 1
-
-Notice: Undefined variable: v1 in %s on line 110
-NULL
+Undefined variable: v1
 Out of bounds darray access: invalid index 4
-
-Notice: Undefined variable: v1 in %s on line 112
-NULL
+Undefined variable: v1
 darray(5) {
   [7]=>
   int(123)

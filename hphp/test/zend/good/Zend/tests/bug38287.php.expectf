@@ -3,4 +3,4 @@ varray(3) {
   int(2)
   int(3)
 }
-NULL
+string(29) "Undefined variable: not_there"

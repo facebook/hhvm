@@ -1,18 +1,21 @@
 <?hh
 
 class C {
- }
+}
 function foo($p) {
   if ($p) {
     $obj = new C;
-  }
- else {
+  } else {
     $a = varray[1];
   }
-  var_dump($obj == $a);
+  try {
+    var_dump($obj == $a);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 <<__EntryPoint>>
 function main_1053() {
-foo(false);
+  foo(false);
 }

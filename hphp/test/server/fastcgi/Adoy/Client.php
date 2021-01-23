@@ -234,6 +234,8 @@ class Client
     private function connect()
     {
         if (!$this->_sock) {
+            $errno = 0;
+            $errstr = "";
             if ($this->_persistentSocket) {
                 $this->_sock = \pfsockopen($this->_host, $this->_port, inout $errno, inout $errstr, $this->_connectTimeout/1000.0);
             } else {

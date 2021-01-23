@@ -5,15 +5,18 @@ function f($i) {
   var_dump($j);
   if ($i == 1) {
     include '1467-1.inc';
-  }
- else {
+  } else {
     include '1467-2.inc';
- }
+  }
 }
 <<__EntryPoint>>
 function entrypoint_1467(): void {
-  if ($i == 1) {
-    include '1467-3.inc';
+  try {
+    if ($i == 1) {
+      include '1467-3.inc';
+    }
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
   }
   f(1);
   $obj = new p();

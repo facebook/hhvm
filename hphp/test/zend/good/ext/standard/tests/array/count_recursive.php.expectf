@@ -58,7 +58,7 @@ COUNT_NORMAL: should be 1, is 1
 -- Testing count() on NULL and Unset variables --
 COUNT_NORMAL: should be 0, is 0
 COUNT_NORMAL: should be 1, is 1
-COUNT_NORMAL: should be 0, is 0
+string(21) "Undefined variable: a"
 
 -- Testing count() on an empty sub-array --
 COUNT_NORMAL: should be 2, is 2

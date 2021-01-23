@@ -1,3 +1,5 @@
 bool(true)
 
-Notice: Undefined variable: x in %s on line 5
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: x' in %s/lambda_uninit_capture.php:5
+Stack trace:
+%A

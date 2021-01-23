@@ -246,7 +246,7 @@ static CallMap s_callMap {
                              {SSA, 2}, {TV, 3}}},
     {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync,
                          {extra(&ParamData::paramId), {TV, 0}}},
-    {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
+    {ThrowUninitLoc,     throwUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},

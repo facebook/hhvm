@@ -1,2 +1,1 @@
-
-Notice: Undefined variable: a in %s/test/slow/ternary/1733.php on line 8
+string(21) "Undefined variable: a"

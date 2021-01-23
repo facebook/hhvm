@@ -14,9 +14,6 @@ class object_temp {
 function main(): void {
   echo "*** Testing pathinfo() with miscelleneous input arguments ***\n";
 
-  $fp = fopen(__FILE__, "r");
-  unset($fp);
-
   $obj = new object_temp();
 
   $path_arr = varray[
@@ -56,9 +53,6 @@ function main(): void {
     /* pathname as NULL */
     NULL,
     null,
-
-    /* filename as resource */
-    $fp,
 
     /* pathname as members of object */
     $obj->url_var,

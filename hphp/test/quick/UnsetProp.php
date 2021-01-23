@@ -17,13 +17,21 @@ function t($o, $memb) {
 function u() {
   echo "------------------------\n";
   $obj = new F;
-  $obj->foo = $x;
+  try {
+    $obj->foo = $x;
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
   foreach ($obj as $k => $_) {
     echo $k."\n";
   }
   echo "------------------------\n";
   $obj = new F;
-  $obj->foo = $y++;
+  try {
+    $obj->foo = $y++;
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
   foreach ($obj as $k => $_) {
     echo $k."\n";
   }

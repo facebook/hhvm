@@ -226,6 +226,10 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
                             make_varray(iterable));
 }
 
+Object AllocUndefinedVariableExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_UndefinedVariableExceptionClass, message);
+}
+
 void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
@@ -303,6 +307,10 @@ void throwInvalidForeachArgumentExceptionObject() {
 
 void throwUndefinedPropertyExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedPropertyExceptionObject(message));
+}
+
+void throwUndefinedVariableExceptionObject(const Variant& message) {
+  throw_object(AllocUndefinedVariableExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

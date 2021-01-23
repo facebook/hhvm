@@ -6,10 +6,13 @@
    +-------------------------------------------------------------+
 */
 
-function test()
-{
-    echo "Inside test() in " . __FILE__ . "\n";
+function test() {
+  echo "Inside test() in ".__FILE__."\n";
+  try {
     echo "\$v1: $v1, \$v2: $v2\n";
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 <<__EntryPoint>>
 function entrypoint_test(): void {

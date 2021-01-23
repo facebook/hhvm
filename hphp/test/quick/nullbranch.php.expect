@@ -1,2 +1,2 @@
 a evaluates to false
-b evaluates to false
+string(21) "Undefined variable: b"

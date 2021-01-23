@@ -1,13 +1,21 @@
 <?hh
 function foo() {
   if (\HH\global_isset('b')) $b = 0;
-  return $b;
+  try {
+    return $b;
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 function baz($x) {}
 function bar() {
   if (\HH\global_isset('a')) $a = 0;
-  baz($a);
+  try {
+    baz($a);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 <<__EntryPoint>>

@@ -5,10 +5,7 @@ bool(false)
 --------- TRUE, 12.3, NULL -------------
 bool(false)
 --------- undefined parameter -------------
-
-Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_isset.php on line 11
-NULL
-bool(false)
+string(21) "Undefined variable: p"
 NULL
 bool(false)
 int(10)

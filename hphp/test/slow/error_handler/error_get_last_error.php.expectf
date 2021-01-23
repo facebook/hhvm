@@ -1,8 +1,6 @@
 NULL
-Undefined variable: x
-NULL
-no x
+string(21) "Undefined variable: x"
 NULL
 
-Fatal error: Call to undefined function nosuchfunc() in %s on line 30
-int(30)
+Fatal error: Call to undefined function nosuchfunc() in %s on line %d
+int(34)

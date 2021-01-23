@@ -28,7 +28,7 @@ Arg value 101234567000
 
 Warning: utf8_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line %d
 
-Arg value 1.07654321E-9 
+Arg value 1.0%d54321E-9 
 
 Warning: utf8_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line %d
 

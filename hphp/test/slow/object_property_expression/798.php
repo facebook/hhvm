@@ -15,12 +15,16 @@ class X {
   }
 }
 function foo() {
- var_dump('foo');
- return 'foo';
+  var_dump('foo');
+  return 'foo';
 }
 function test($x, $a, $s) {
   unset($x->bar()->x);
-  unset($x->q->r->s->$foo);
+  try {
+    unset($x->q->r->s->$foo);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
   unset($x->y->a->b->c);
   unset($x->a['x']->y->a->b->c);
   unset($a['a']['y'][foo()]);

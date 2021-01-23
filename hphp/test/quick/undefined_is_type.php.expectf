@@ -1,34 +1,12 @@
 set:     
-nul:     
-Notice: Undefined variable: a in %s on line 14
-1
-str:     
-Notice: Undefined variable: a in %s on line 15
-
-obj:     
-Notice: Undefined variable: a in %s on line 16
-
-arr:     
-Notice: Undefined variable: a in %s on line 17
-
-int:     
-Notice: Undefined variable: a in %s on line 18
-
-integer: 
-Notice: Undefined variable: a in %s on line 19
-
-long:    
-Notice: Undefined variable: a in %s on line 20
-
-real:    
-Notice: Undefined variable: a in %s on line 21
-
-double:  
-Notice: Undefined variable: a in %s on line 22
-
-float:   
-Notice: Undefined variable: a in %s on line 23
-
-bool:    
-Notice: Undefined variable: a in %s on line 24
-
+nul:     string(21) "Undefined variable: a"
+str:     string(21) "Undefined variable: a"
+obj:     string(21) "Undefined variable: a"
+arr:     string(21) "Undefined variable: a"
+int:     string(21) "Undefined variable: a"
+integer: string(21) "Undefined variable: a"
+long:    string(21) "Undefined variable: a"
+real:    string(21) "Undefined variable: a"
+double:  string(21) "Undefined variable: a"
+float:   string(21) "Undefined variable: a"
+bool:    string(21) "Undefined variable: a"

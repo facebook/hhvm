@@ -63,9 +63,7 @@ $values =  varray [
   /* empty string */
   "",
   '',
-
-
-
+  
   /* resource */
   $file_handle,
 

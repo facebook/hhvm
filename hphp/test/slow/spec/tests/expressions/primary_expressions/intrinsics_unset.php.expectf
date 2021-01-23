@@ -8,11 +8,7 @@ bool(false)
 bool(true)
 bool(false)
 --------- undefined parameter -------------
-
-Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_unset.php on line 11
-NULL
-bool(false)
-bool(false)
+string(21) "Undefined variable: p"
 NULL
 bool(false)
 bool(false)
@@ -31,12 +27,11 @@ bool(false)
 ---------- unsetting inside a function (pass-by-inout) ------------
 bool(true)
 bool(false)
-
-Notice: Undefined variable: p2 in %s/intrinsics_unset.php on line %d
+string(22) "Undefined variable: p2"
 bool(true)
 int(10)
-bool(false)
-NULL
+bool(true)
+int(20)
 ---------- unsetting inside a function (static) ------------
 count = 1
 bool(true)

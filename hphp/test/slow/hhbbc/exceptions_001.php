@@ -18,15 +18,19 @@ function foo() {
   } catch (Exception $y) {
     // $x: Uninit here.  This is a divergence from php5 (where it will
     // be int(1)).
-    var_dump($x);
+    try {
+      var_dump($x);
+    } catch (UndefinedVariableException $e) {
+      var_dump($e->getMessage());
+    }
   }
 }
 
 
 <<__EntryPoint>>
 function main_exceptions_001() {
-error_reporting(-1);
-set_error_handler(heh<>);
+  error_reporting(-1);
+  set_error_handler(heh<>);
 
-foo();
+  foo();
 }

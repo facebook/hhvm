@@ -15,10 +15,6 @@ echo "*** Testing getimagesize() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $imagefile = dirname(__FILE__)."/test1pix.jpg";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //array of values to iterate over
 $values = darray[
 
@@ -57,13 +53,7 @@ $values = darray[
       "''" => '',
 
       // object data
-      "new stdclass()" => new stdclass(),
-
-      // undefined data
-      "undefined_var" => $undefined_var,
-
-      // unset data
-      "unset_var" => $unset_var,
+      "new stdclass()" => new stdclass()
 ];
 
 // loop through each element of the array for info

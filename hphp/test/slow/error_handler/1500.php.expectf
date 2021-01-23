@@ -1,5 +1,1 @@
-handler_called
-
-Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function foo() on a non-object (null)' in %s/1500.php:7
-Stack trace:
-%a {main}
+string(29) "Undefined variable: undefined"

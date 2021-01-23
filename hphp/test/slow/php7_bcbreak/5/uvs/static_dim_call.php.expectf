@@ -1,4 +1,1 @@
-
-Notice: Undefined variable: bar in %s/static_dim_call.php on line %d
-
-Fatal error: Function name must be a string in %s/static_dim_call.php on line %d
+string(23) "Undefined variable: bar"

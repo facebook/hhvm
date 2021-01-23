@@ -15,11 +15,7 @@ function entrypoint_function_exists_variation1(): void {
   */ 
 
   echo "*** Testing function_exists() function: with unexpected inputs for 'str' argument ***\n";
-
-  //get an unset variable
-  $unset_var = 'string_val';
-  unset($unset_var);
-
+  
   //getting the resource
   $file_handle = fopen(__FILE__, "r");
 
@@ -58,13 +54,7 @@ function entrypoint_function_exists_variation1(): void {
     new sample(),
 
     // resource
-    $file_handle,
-
-    // undefined variable
-    @$undefined_var,
-
-    // unset variable
-    @$unset_var
+    $file_handle
   ];
 
   // loop through with each element of the $inputs array to test function_exists() function

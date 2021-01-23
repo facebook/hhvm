@@ -11,6 +11,9 @@ function myfunc() {
 function entrypoint_static_dim_call(): void {
 
   error_reporting(-1);
-
-  var_dump(Foo::$bar['baz']());
+  try {
+    var_dump(Foo::$bar['baz']());
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

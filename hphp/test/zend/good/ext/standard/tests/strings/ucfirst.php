@@ -104,7 +104,11 @@ $str = 'world';
 /* Simple syntax */
 var_dump(ucfirst("$str"));
 var_dump(ucfirst("$str'S"));
-var_dump(ucfirst("$strS"));
+try {
+    var_dump(ucfirst("$strS"));
+} catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+}
 
 
 /* String with curly braces, complex syntax */

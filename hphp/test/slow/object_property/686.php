@@ -5,8 +5,6 @@ class A {
   protected $pro = 'a-pro';
   function bar() {
     var_dump($this->pri);
-    $pri = $q ? 'zz' : 'p'.'ri';
-    var_dump($this->$pri);
   }
   function bar2() {
     var_dump($this->pro);

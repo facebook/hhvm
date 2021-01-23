@@ -7,9 +7,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_readable(): usage variations ***\n";
 
-$file_handle = fopen(__FILE__, "r");
-unset($file_handle);
-
 echo "\n*** Testing is_readable() on miscelleneous filenames ***\n";
 $misc_files = varray[
   0,
@@ -20,7 +17,6 @@ $misc_files = varray[
   NULL,
   " ",
   @varray[],
-  @$file_handle
 ];
 /* loop through to test each element in the above array 
    is a readable file */

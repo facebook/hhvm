@@ -3,5 +3,9 @@
 
 <<__EntryPoint>>
 function main_1516() {
-var_dump($v++, $v++);
+  try {
+    var_dump($v++, $v++);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

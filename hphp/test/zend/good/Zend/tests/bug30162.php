@@ -30,9 +30,9 @@ class hariCow extends FIIFO {
 <<__EntryPoint>> function main(): void {
 try {
     $db = new FIIFO();
+    var_dump($db);
 } catch(Exception $e) {
 }
-var_dump($db);
 
 $db = new hariCow;
 

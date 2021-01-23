@@ -22,7 +22,7 @@ Warning: fseek() expects parameter 1 to be resource, double given in %s/fseek_ft
 Warning: fseek() expects parameter 1 to be resource, boolean given in %s/fseek_ftell_rewind_error1.php on line 37
 -- Iteration 5 --
 
-Warning: fseek() expects parameter 1 to be resource, %rv?%rarray given in %s/fseek_ftell_rewind_error1.php on line 37
+Warning: fseek() expects parameter 1 to be resource, varray given in %s/fseek_ftell_rewind_error1.php on line 37
 -- Iteration 6 --
 
 Warning: fseek() expects parameter 1 to be resource, object given in %s/fseek_ftell_rewind_error1.php on line 37
@@ -30,5 +30,5 @@ Warning: fseek() expects parameter 1 to be resource, object given in %s/fseek_ft
 Warning: Not a valid stream resource in %s/fseek_ftell_rewind_error1.php on line 43
 bool(false)
 
-Warning: fseek() expects parameter 1 to be resource, null given in %s/fseek_ftell_rewind_error1.php on line 48
+Warning: Undefined variable: file_handle in %s/fseek_ftell_rewind_error1.php on line 48
 Done

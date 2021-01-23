@@ -96,10 +96,6 @@ echo "\n*** Testing is_numeric() on non numeric types ***\n";
 $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
-// unset variable
-$unset_var = 10.5;
-unset ($unset_var);
-
 // other types in a array
 $not_numerics = varray[
   "0x80001",
@@ -129,8 +125,6 @@ $not_numerics = varray[
   TRUE,
   FALSE,
   false,
-  @$unset_var, // unset variable
-  @$undefined_var
 ];
 /* loop through the $not_numerics to see working of
    is_numeric() on non numeric values, expected output: bool(false) */

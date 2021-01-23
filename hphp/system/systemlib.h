@@ -63,7 +63,8 @@ namespace HPHP { namespace SystemLib {
   x(__PHP_Incomplete_Class)                     \
   x(DivisionByZeroException)                    \
   x(InvalidForeachArgumentException)            \
-  x(UndefinedPropertyException)
+  x(UndefinedPropertyException)                 \
+  x(UndefinedVariableException)
 
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
@@ -157,6 +158,7 @@ void throwSoapFaultObject(const Variant& code,
                           const Variant& header = uninit_variant);
 [[noreturn]] void throwInvalidForeachArgumentExceptionObject();
 [[noreturn]] void throwUndefinedPropertyExceptionObject(const Variant& message);
+[[noreturn]] void throwUndefinedVariableExceptionObject(const Variant& message);
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

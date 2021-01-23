@@ -5,5 +5,9 @@ function add_cssclass($add, $class) {
   return $class;
 }
 <<__EntryPoint>> function main(): void {
-add_cssclass('test', $a);
+  try {
+    add_cssclass('test', $a);
+  } catch (UndefinedVariableException $e) {
+    var_dump($e->getMessage());
+  }
 }

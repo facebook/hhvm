@@ -1,6 +1,3 @@
-
-Notice: %s
-NULL
 object(hariCow) (2) {
   ["x"]=>
   string(1) "x"

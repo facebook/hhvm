@@ -169,13 +169,6 @@ and _ ty_ =
   | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
-  (* The type of the various forms of "array":
-   * Tarray (None, None)         => "array"
-   * Tarray (Some ty, None)      => "array<ty>"
-   * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
-   * Tarray (None, Some ty)      => [invalid]
-   *)
-  | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any

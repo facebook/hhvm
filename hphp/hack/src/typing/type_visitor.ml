@@ -25,8 +25,6 @@ class type ['a] decl_type_visitor_type =
 
     method on_tthis : 'a -> Reason.t -> 'a
 
-    method on_tarray : 'a -> Reason.t -> decl_ty option -> decl_ty option -> 'a
-
     method on_tvarray_or_darray : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
 
     method on_tvarray : 'a -> Reason.t -> decl_ty -> 'a
@@ -78,11 +76,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tdynamic acc _ = acc
 
     method on_tthis acc _ = acc
-
-    method on_tarray acc _ ty1_opt ty2_opt =
-      let acc = Option.fold ~f:this#on_type ~init:acc ty1_opt in
-      let acc = Option.fold ~f:this#on_type ~init:acc ty2_opt in
-      acc
 
     method on_tvarray_or_darray acc _ ty1 ty2 =
       let acc = this#on_type acc ty1 in
@@ -147,10 +140,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
       | Tthis -> this#on_tthis acc r
-      | Tarray (ty1_opt, ty2_opt) -> this#on_tarray acc r ty1_opt ty2_opt
-      | Tdarray (ty1, ty2) ->
-        this#on_type acc (mk (r, Tarray (Some ty1, Some ty2)))
-      | Tvarray ty -> this#on_type acc (mk (r, Tarray (Some ty, None)))
+      | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
+      | Tvarray ty -> this#on_tvarray acc r ty
       | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
       | Tgeneric (s, args) -> this#on_tgeneric acc r s args
       | Toption ty -> this#on_toption acc r ty

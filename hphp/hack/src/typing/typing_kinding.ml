@@ -323,11 +323,6 @@ module Simple = struct
     check_well_kinded_type ~allow_missing_targs:false env enf_ty.et_type
 
   and check_well_kinded_type ~allow_missing_targs env (ty : decl_ty) =
-    let check_opt =
-      Option.value_map
-        ~default:()
-        ~f:(check_well_kinded_type ~allow_missing_targs:false env)
-    in
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r in
     let check = check_well_kinded_type ~allow_missing_targs:false env in
@@ -353,9 +348,6 @@ module Simple = struct
     | Tmixed
     | Tthis ->
       ()
-    | Tarray (ty1, ty2) ->
-      check_opt ty1;
-      check_opt ty2
     | Tdarray (tk, tv) ->
       check tk;
       check tv

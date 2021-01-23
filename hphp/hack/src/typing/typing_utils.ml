@@ -542,7 +542,6 @@ let unwrap_class_type ty =
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | ( _,
       ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull
-      | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _ | Tvarray_or_darray _ | Tgeneric _ | Toption _ | Tlike _
       | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<495e92f107571ba0201dac80f1d7393d>>
+// @generated SignedSource<<becd8eff3a61376a6e44b26b811aad2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidize_regen.sh
@@ -399,15 +399,6 @@ pub enum Ty_<'a> {
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
     Tapply(&'a (nast::Sid<'a>, &'a [&'a Ty<'a>])),
-    /// The type of the various forms of "array":
-    ///
-    /// ```
-    /// Tarray (None, None)         => "array"
-    /// Tarray (Some ty, None)      => "array<ty>"
-    /// Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
-    /// Tarray (None, Some ty)      => [invalid]
-    /// ```
-    Tarray(&'a (Option<&'a Ty<'a>>, Option<&'a Ty<'a>>)),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any

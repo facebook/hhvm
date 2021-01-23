@@ -171,16 +171,6 @@ and _ ty_ =
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
-  | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
-      (** The type of the various forms of "array":
-       *
-       * ```
-       * Tarray (None, None)         => "array"
-       * Tarray (Some ty, None)      => "array<ty>"
-       * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
-       * Tarray (None, Some ty)      => [invalid]
-       * ```
-       *)
   | Tmixed : decl_phase ty_
       (** "Any" is the type of a variable with a missing annotation, and "mixed" is
        * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -576,22 +566,6 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Taccess@ ";
       pp_taccess_type fmt a0;
       Format.fprintf fmt "@])"
-    | Tarray (a0, a1) ->
-      Format.fprintf fmt "(@[<2>Tarray (@,";
-      (match a0 with
-      | None -> Format.pp_print_string fmt "None"
-      | Some x ->
-        Format.pp_print_string fmt "(Some ";
-        pp_ty fmt x;
-        Format.pp_print_string fmt ")");
-      Format.fprintf fmt ",@ ";
-      (match a1 with
-      | None -> Format.pp_print_string fmt "None"
-      | Some x ->
-        Format.pp_print_string fmt "(Some ";
-        pp_ty fmt x;
-        Format.pp_print_string fmt ")");
-      Format.fprintf fmt "@,))@]"
     | Tdarray (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tdarray (@,";
       pp_ty fmt a0;

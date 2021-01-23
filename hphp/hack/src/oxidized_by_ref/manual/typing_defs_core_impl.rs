@@ -120,7 +120,6 @@ impl std::fmt::Debug for Ty_<'_> {
             Tthis => write!(f, "Tthis"),
             Tapply((id, tys)) => f.debug_tuple("Tapply").field(id).field(tys).finish(),
             Taccess(taccess) => f.debug_tuple("Taccess").field(taccess).finish(),
-            Tarray((tk, tv)) => f.debug_tuple("Tarray").field(tk).field(tv).finish(),
             Tmixed => write!(f, "Tmixed"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
             Tany(_) => write!(f, "Tany"),

@@ -132,10 +132,16 @@ let validator =
           r
           "a type with generics, because generics are erased at runtime"
 
-    method! on_tarray acc r tk_opt tv_opt =
+    method! on_tvarray acc r tk =
       if acc.like_context then
-        let acc = Option.fold ~f:this#on_type ~init:acc tk_opt in
-        Option.fold ~f:this#on_type ~init:acc tv_opt
+        this#on_type acc tk
+      else
+        this#invalid acc r "an array type"
+
+    method! on_tdarray acc r tk tv =
+      if acc.like_context then
+        let acc = this#on_type acc tk in
+        this#on_type acc tv
       else
         this#invalid acc r "an array type"
 

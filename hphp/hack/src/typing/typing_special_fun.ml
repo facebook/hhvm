@@ -11,13 +11,11 @@ open Hh_prelude
 open Typing_defs
 module SN = Naming_special_names
 module MakeType = Typing_make_type
-module TUtils = Typing_utils
 
 let update_param p ty = { p with fp_type = { p.fp_type with et_type = ty } }
 
-(* Given a decl function type that was obtained from an hhi file,
- * transform it for special functions such as `idx` and `array_map`
- * according to the number of arguments actually passed to the function
+(* Transform the special function `idx` according to the number
+ * of arguments actually passed to the function
  *)
 let transform_special_fun_ty fty id nargs =
   (* The idx function has two signatures, depending on number of arguments
@@ -75,86 +73,5 @@ let transform_special_fun_ty fty id nargs =
       | _ -> (fty.ft_params, fty.ft_ret.et_type)
     in
     { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
-  else if
-    (*
-      Builds a function with signature:
-
-      function<T1, ..., Tn, Tr>(
-        (function(T1, ..., Tn):Tr),
-        Container<T1>,
-        ...,
-        Container<Tn>,
-      ): array<Tr>
-
-      where n is one fewer than the actual number of arguments. The hhi
-      file just has the untyped declaration
-
-      function array_map($callback, $arr1, ...$args);
-    *)
-    String.equal (snd id) SN.StdlibFunctions.array_map && nargs > 0
-  then
-    let arity = nargs - 1 in
-    if Int.equal arity 0 then
-      fty
-    else
-      let (param1, param2) =
-        match fty.ft_params with
-        | param1 :: param2 :: _ -> (param1, param2)
-        | _ -> assert false
-      in
-      let r1 = get_reason param1.fp_type.et_type in
-      let r2 = get_reason param2.fp_type.et_type in
-      let rret = get_reason fty.ft_ret.et_type in
-      let tr = MakeType.generic rret "Tr" in
-      let rec make_tparam_names i =
-        if Int.equal i 0 then
-          []
-        else
-          ("T" ^ string_of_int i) :: make_tparam_names (i - 1)
-      in
-      let tparam_names = List.rev (make_tparam_names arity) in
-      let vars = List.map tparam_names (fun n -> MakeType.generic r2 n) in
-      let make_tparam name =
-        {
-          tp_variance = Ast_defs.Invariant;
-          tp_name = (fst id, name);
-          tp_tparams = [];
-          tp_constraints = [];
-          tp_reified = Aast.Erased;
-          tp_user_attributes = [];
-        }
-      in
-      let ft_tparams = List.map tparam_names make_tparam @ [make_tparam "Tr"] in
-      (* Construct type of first parameter *)
-      let param1 =
-        update_param
-          param1
-          (mk
-             ( r1,
-               Tfun
-                 {
-                   ft_arity = Fstandard;
-                   ft_tparams = [];
-                   ft_where_constraints = [];
-                   ft_params = List.map vars TUtils.default_fun_param;
-                   ft_ret = MakeType.unenforced tr;
-                   ft_implicit_params = { capability = CapDefaults (fst id) };
-                   ft_flags = fty.ft_flags;
-                   ft_reactive = fty.ft_reactive;
-                   ft_ifc_decl = fty.ft_ifc_decl;
-                 } ))
-      in
-      let param_rest =
-        List.map vars (fun var ->
-            let tc = Tapply ((fst id, SN.Collections.cContainer), [var]) in
-            TUtils.default_fun_param (mk (r2, tc)))
-      in
-      {
-        fty with
-        ft_arity = Fstandard;
-        ft_params = param1 :: param_rest;
-        ft_tparams;
-        ft_ret = MakeType.unenforced (mk (rret, Tarray (Some tr, None)));
-      }
   else
     fty

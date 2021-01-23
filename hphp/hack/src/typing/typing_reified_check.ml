@@ -42,7 +42,9 @@ let validator =
       | Nast.SoftReified -> this#invalid acc r "soft reified"
       | Nast.Reified -> acc
 
-    method! on_tarray acc r _ _ = this#invalid acc r "an array type"
+    method! on_tvarray acc r _ = this#invalid acc r "an array type"
+
+    method! on_tdarray acc r _ _ = this#invalid acc r "an array type"
 
     method! on_tvarray_or_darray acc r _ _ = this#invalid acc r "an array type"
 

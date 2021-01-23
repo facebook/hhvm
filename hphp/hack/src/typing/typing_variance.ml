@@ -400,10 +400,6 @@ and fun_ret tenv root variance env ty =
   in
   type_ tenv root variance env ty
 
-and type_option tenv root variance env = function
-  | None -> ()
-  | Some ty -> type_ tenv root variance env ty
-
 and type_list tenv root variance env tyl =
   List.iter tyl ~f:(type_ tenv root variance env)
 
@@ -441,15 +437,11 @@ and type_ tenv root variance env ty =
   | Tdynamic
   | Tvar _ ->
     ()
-  | Tarray (ty1, ty2) ->
-    type_option tenv root variance env ty1;
-    type_option tenv root variance env ty2
-  | Tdarray (ty1, ty2) ->
-    type_ tenv root variance env (mk (reason, Tarray (Some ty1, Some ty2)))
-  | Tvarray ty ->
-    type_ tenv root variance env (mk (reason, Tarray (Some ty, None)))
+  | Tdarray (ty1, ty2)
   | Tvarray_or_darray (ty1, ty2) ->
-    type_ tenv root variance env (mk (reason, Tarray (Some ty1, Some ty2)))
+    type_ tenv root variance env ty1;
+    type_ tenv root variance env ty2
+  | Tvarray ty -> type_ tenv root variance env ty
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.
@@ -617,9 +609,6 @@ and get_typarams tenv root env (ty : decl_ty) =
   let flip (pos, neg) = (neg, pos) in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
   let get_typarams_union acc ty = union acc (get_typarams tenv root env ty) in
-  let get_typarams_opt ty_opt =
-    Option.value_map ty_opt ~f:(get_typarams tenv root env) ~default:empty
-  in
   match get_node ty with
   | Tgeneric (id, _tyargs) ->
     (* TODO(T69551141) handle type arguments *)
@@ -824,7 +813,6 @@ and get_typarams tenv root env (ty : decl_ty) =
     in
     let variancel = get_class_variance tenv pos_name in
     get_typarams_variance_list empty variancel tyl
-  | Tarray (ty1, ty2) -> union (get_typarams_opt ty1) (get_typarams_opt ty2)
   | Tdarray (ty1, ty2) ->
     union (get_typarams tenv root env ty1) (get_typarams tenv root env ty2)
   | Tvarray ty -> get_typarams tenv root env ty

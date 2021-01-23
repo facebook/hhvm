@@ -48,9 +48,6 @@ end = struct
         List.iter tyl ty
       | Tapply (_, tyl) -> List.iter tyl ty
       | Taccess (t, _) -> ty t
-      | Tarray (t1, t2) ->
-        Option.iter ~f:ty t1;
-        Option.iter ~f:ty t2
       | Tdarray (t1, t2)
       | Tvarray_or_darray (t1, t2) ->
         ty t1;

@@ -84,8 +84,6 @@ let is_enforceable (env : env) (ty : decl_ty) =
       false
     | Taccess _ -> false
     | Tlike _ -> false
-    | Tarray (None, None) -> true
-    | Tarray _ -> false
     | Tprim prim ->
       begin
         match prim with

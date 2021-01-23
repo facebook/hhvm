@@ -62,10 +62,6 @@ and instantiate_ subst x =
   | Taccess (ty, id) ->
     let ty = instantiate subst ty in
     Taccess (ty, id)
-  | Tarray (ty1, ty2) ->
-    let ty1 = Option.map ty1 (instantiate subst) in
-    let ty2 = Option.map ty2 (instantiate subst) in
-    Tarray (ty1, ty2)
   | Tdarray (ty1, ty2) -> Tdarray (instantiate subst ty1, instantiate subst ty2)
   | Tvarray ty -> Tvarray (instantiate subst ty)
   | Tvarray_or_darray (ty1, ty2) ->

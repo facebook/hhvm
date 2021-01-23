@@ -142,28 +142,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
           | reason -> Reason.Rinstantiate (reason, SN.Typehints.this, r))
     in
     (env, ty)
-  | (r, Tarray (ty1, ty2)) ->
-    let (env, ty) =
-      match (ty1, ty2) with
-      | (None, None) ->
-        let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
-        let (env, tv) =
-          if GlobalOptions.tco_global_inference env.genv.tcopt then
-            Env.new_global_tyvar env r
-          else
-            (env, mk (r, TUtils.tany env))
-        in
-        (env, Tvarray_or_darray (tk, tv))
-      | (Some tv, None) ->
-        let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-        (env, Tvarray tv)
-      | (Some tk, Some tv) ->
-        let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
-        let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-        (env, Tdarray (tk, tv))
-      | (None, Some _) -> failwith "Invalid array declaration type"
-    in
-    (env, mk (r, ty))
   | (r, Tdarray (tk, tv)) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in

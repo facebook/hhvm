@@ -219,13 +219,6 @@ module Full = struct
 
   let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
-  let tarray k x y =
-    match (x, y) with
-    | (None, None) -> text "array"
-    | (Some x, None) -> list "array<" k [x] ">"
-    | (Some x, Some y) -> list "array<" k [x; y] ">"
-    | (None, Some _) -> assert false
-
   let tfun ~ty to_doc st env ft =
     Concat
       [
@@ -330,7 +323,6 @@ module Full = struct
     | Tdarray (x, y) -> tdarray k x y
     | Tvarray x -> tvarray k x
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
-    | Tarray (x, y) -> tarray k x y
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric (s, []) -> to_doc s
     | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]

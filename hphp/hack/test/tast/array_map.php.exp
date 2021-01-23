@@ -124,25 +124,22 @@
                  )))));
           ([15:3-22],
            (Expr
-              (([15:3-21], darray<arraykey, bool>),
+              (([15:3-21], darray<arraykey, _>),
                (Call (
-                  (([15:3-12], (function<T1, Tr>((function(int): bool) $callback, Container<int>): darray<arraykey, bool>)),
+                  (([15:3-12], (function($callback, $arr1, ...): darray<arraykey, _>)),
                    (Id ([15:3-12], "\\array_map"))),
-                  [((int), ([15:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((bool), ([15:3-12], (Happly (([Pos.none], "_"), []))))],
+                  [],
                   [(([15:13-15], (function(int): bool)),
                     (Lvar ([15:13-15], $f)));
                     (([15:17-20], Container<int>), (Lvar ([15:17-20], $ci)))],
                   None)))));
           ([16:3-27],
            (Expr
-              (([16:3-26], varray<bool>),
+              (([16:3-26], _),
                (Call (
-                  (([16:3-12], (function<T1, T2, Tr>((function(int, string): bool) $callback, Container<int>, Container<string>): varray<bool>)),
+                  (([16:3-12], (function($callback, $arr1, ...): _)),
                    (Id ([16:3-12], "\\array_map"))),
-                  [((int), ([16:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((string), ([16:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((bool), ([16:3-12], (Happly (([Pos.none], "_"), []))))],
+                  [],
                   [(([16:13-15], (function(int, string): bool)),
                     (Lvar ([16:13-15], $g)));
                     (([16:17-20], Container<int>), (Lvar ([16:17-20], $ci)));
@@ -152,16 +149,11 @@
                   None)))));
           ([17:3-32],
            (Expr
-              (([17:3-31], varray<Container<int>>),
+              (([17:3-31], _),
                (Call (
-                  (([17:3-12], (function<T1, T2, T3, Tr>((function(int, string, num): Container<int>) $callback, Container<int>, Container<string>, Container<num>): varray<Container<int>>)),
+                  (([17:3-12], (function($callback, $arr1, ...): _)),
                    (Id ([17:3-12], "\\array_map"))),
-                  [((int), ([17:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((string), ([17:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((num), ([17:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((Container<int>),
-                     ([17:3-12], (Happly (([Pos.none], "_"), []))))
-                    ],
+                  [],
                   [(([17:13-15], (function(int, string, num): Container<int>)),
                     (Lvar ([17:13-15], $h)));
                     (([17:17-20], Container<int>), (Lvar ([17:17-20], $ci)));
@@ -173,12 +165,11 @@
                   None)))));
           ([18:3-30],
            (Expr
-              (([18:3-29], darray<arraykey, bool>),
+              (([18:3-29], darray<arraykey, _>),
                (Call (
-                  (([18:3-12], (function<T1, Tr>((function(num): bool) $callback, Container<num>): darray<arraykey, bool>)),
+                  (([18:3-12], (function($callback, $arr1, ...): darray<arraykey, _>)),
                    (Id ([18:3-12], "\\array_map"))),
-                  [((num), ([18:3-12], (Happly (([Pos.none], "_"), []))));
-                    ((bool), ([18:3-12], (Happly (([Pos.none], "_"), []))))],
+                  [],
                   [(([18:13-15], (function(num): bool)),
                     (Lvar ([18:13-15], $i)));
                     (([18:17-28], (Container<int> | KeyedContainer<int, num>)),

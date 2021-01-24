@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ddc9983ebfd417f7f7edcec53575de4c>>
+// @generated SignedSource<<12ab8293a9b2f7474749905fcb8a52b2>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidize_regen.sh
+//   hphp/hack/src/oxidized_regen.sh
 
 #![allow(unused_variables)]
 use super::type_params::Params;

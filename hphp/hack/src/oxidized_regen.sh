@@ -4,10 +4,17 @@ set -e # terminate upon non-zero-exit-codes (in case of pipe, only checks at end
 set -o pipefail # in a pipe, the whole pipe runs, but its exit code is that of the first failure
 trap 'echo "exit code $? at line $LINENO" >&2' ERR
 
-CYAN=$(tput setaf 6)
-WHITE=$(tput setaf 7)
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
+CYAN=""
+WHITE=""
+BOLD=""
+RESET=""
+
+if [ -t 1 ]; then
+    CYAN=$(tput setaf 6)
+    WHITE=$(tput setaf 7)
+    BOLD=$(tput bold)
+    RESET=$(tput sgr0)
+fi
 
 function summary {
     echo -e "$BOLD$CYAN==>$WHITE ${1}$RESET"

@@ -81,8 +81,8 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
 //////////////////////////////////////////////////////////////////////
 
 void emitJmp(IRGS& env, Offset relOffset) {
-  auto const offset = bcOff(env) + relOffset;
-  jmpImpl(env, offset);
+  surpriseCheck(env, relOffset);
+  jmpImpl(env, bcOff(env) + relOffset);
 }
 
 void emitJmpNS(IRGS& env, Offset relOffset) {
@@ -90,11 +90,13 @@ void emitJmpNS(IRGS& env, Offset relOffset) {
 }
 
 void emitJmpZ(IRGS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, true, popC(env));
 }
 
 void emitJmpNZ(IRGS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, false, popC(env));
 }

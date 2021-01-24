@@ -115,7 +115,14 @@ struct CoeffectRule final {
   struct CondRxImpl {};
   struct CondRxArgImpl {};
 
+  struct FunParam {};
+  struct CCParam {};
+  struct CCThis {};
+
   CoeffectRule() = default;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Attribute based RX rules /////////////////////////////////////////////////
 
   CoeffectRule(CondRxArg, uint32_t index)
     : m_type(Type::ConditionalReactiveArg)
@@ -135,6 +142,26 @@ struct CoeffectRule final {
     , m_ne(NamedEntity::get(name))
   { assertx(name); }
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Native coeffect rules ////////////////////////////////////////////////////
+
+  CoeffectRule(FunParam, uint32_t index)
+    : m_type(Type::FunParam)
+    , m_index(index)
+  {}
+
+  CoeffectRule(CCParam, uint32_t index, const StringData* ctx_name)
+    : m_type(Type::CCParam)
+    , m_index(index)
+    , m_name(ctx_name)
+  { assertx(ctx_name); }
+
+  CoeffectRule(CCThis, const StringData* ctx_name)
+    : m_type(Type::CCThis)
+    , m_name(ctx_name)
+  { assertx(ctx_name); }
+
+
   std::string getDirectiveString() const {
     switch (m_type) {
       case Type::ConditionalReactiveArg:
@@ -146,6 +173,16 @@ struct CoeffectRule final {
       case Type::ConditionalReactiveArgImplements:
         return folly::sformat(".rx_cond_implements_arg {} \"{}\";",
                               m_index,
+                              folly::cEscape<std::string>(
+                                m_name->toCppString()));
+      case Type::FunParam:
+        return folly::sformat(".coeffects_fun_param {};", m_index);
+      case Type::CCParam:
+        return folly::sformat(".coeffects_cc_param {} {};", m_index,
+                              folly::cEscape<std::string>(
+                                m_name->toCppString()));
+      case Type::CCThis:
+        return folly::sformat(".coeffects_cc_this {};",
                               folly::cEscape<std::string>(
                                 m_name->toCppString()));
       case Type::Invalid:
@@ -168,6 +205,9 @@ struct CoeffectRule final {
           m_ne = NamedEntity::get(m_name);
           break;
         case Type::ConditionalReactiveArg:
+        case Type::FunParam:
+        case Type::CCParam:
+        case Type::CCThis:
           break;
         case Type::Invalid:
           always_assert(false);
@@ -180,7 +220,11 @@ private:
     Invalid = 0,
     ConditionalReactiveArg,
     ConditionalReactiveImplements,
-    ConditionalReactiveArgImplements
+    ConditionalReactiveArgImplements,
+
+    FunParam,
+    CCParam,
+    CCThis,
   };
 
   Type m_type{Type::Invalid};

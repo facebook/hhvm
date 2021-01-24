@@ -1904,8 +1904,9 @@ void parse_coeffects_static(AsmState& as) {
 void parse_coeffects_fun_param(AsmState& as) {
   while (true) {
     as.in.skipWhitespace();
-    read_opcode_arg<uint32_t>(as);
-    //TODO: Add to coeffectRules
+    auto const pos = read_opcode_arg<uint32_t>(as);
+    as.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::FunParam{}, pos));
     if (as.in.peek() == ';') break;
   }
   as.in.expectWs(';');
@@ -1918,11 +1919,12 @@ void parse_coeffects_fun_param(AsmState& as) {
 void parse_coeffects_cc_param(AsmState& as) {
   while (true) {
     as.in.skipWhitespace();
-    read_opcode_arg<uint32_t>(as);
+    auto const pos = read_opcode_arg<uint32_t>(as);
     as.in.skipWhitespace();
     std::string name;
     as.in.readword(name);
-    //TODO: Add to coeffectRules
+    as.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::CCParam{}, pos, makeStaticString(name)));
     if (as.in.peek() == ';') break;
   }
   as.in.expectWs(';');
@@ -1937,7 +1939,8 @@ void parse_coeffects_cc_this(AsmState& as) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
-    //TODO: Add to coeffectRules
+    as.fe->coeffectRules.emplace_back(
+      CoeffectRule(CoeffectRule::CCThis{}, makeStaticString(name)));
   }
   as.in.expectWs(';');
 }

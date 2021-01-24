@@ -1,4 +1,4 @@
-(13,5)-(13,5) An equals sign `=` is expected here.
-(13,5)-(13,6) Invalid expression in constant initializer
-(13,7)-(13,7) An expression is expected here.
-(13,7)-(13,9) Encountered unexpected token `E2`.
+(9,5)-(9,5) An equals sign `=` is expected here.
+(9,5)-(9,6) Invalid expression in constant initializer
+(9,7)-(9,7) An expression is expected here.
+(9,7)-(9,9) Encountered unexpected token `E2`.

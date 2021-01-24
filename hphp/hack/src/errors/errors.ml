@@ -5596,6 +5596,13 @@ let consider_meth_caller pos class_name meth_name =
     ^ meth_name
     ^ "')` to create a function pointer to the instance method" )
 
+let enum_supertyping_reserved_syntax pos =
+  add
+    (Typing.err_code Typing.EnumSupertypingReservedSyntax)
+    pos
+    ( "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
+    ^ "Enable it with the enable_enum_supertyping option in .hhconfig" )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

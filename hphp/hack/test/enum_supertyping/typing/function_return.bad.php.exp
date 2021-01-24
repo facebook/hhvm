@@ -1,6 +1,6 @@
-File "function_return.bad.php", line 18, characters 10-13:
+File "function_return.bad.php", line 14, characters 10-13:
 Invalid return type (Typing[4110])
-  File "function_return.bad.php", line 17, characters 19-19:
+  File "function_return.bad.php", line 13, characters 19-19:
   Expected `F`
-  File "function_return.bad.php", line 12, characters 6-6:
+  File "function_return.bad.php", line 8, characters 6-6:
   But got `arraykey` arising from an implicit `as arraykey` constraint on this type

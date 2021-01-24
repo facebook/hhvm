@@ -276,6 +276,7 @@ let parse_options () =
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let use_direct_decl_parser = ref false in
   let enable_enum_classes = ref false in
+  let enable_enum_supertyping = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -636,6 +637,9 @@ let parse_options () =
       ( "--enable-enum-classes",
         Arg.Set enable_enum_classes,
         "Enable the enum classes extension." );
+      ( "--enable-enum-supertyping",
+        Arg.Set enable_enum_supertyping,
+        "Enable the enum supertyping extension." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -768,6 +772,7 @@ let parse_options () =
           [] )
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:!enable_enum_classes
+      ~po_enable_enum_supertyping:!enable_enum_supertyping
       ()
   in
   Errors.allowed_fixme_codes_strict :=

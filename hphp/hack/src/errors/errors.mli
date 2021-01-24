@@ -1490,3 +1490,5 @@ val enum_classes_reserved_syntax : Pos.t -> unit
 val nonsense_member_selection : Pos.t -> string -> unit
 
 val consider_meth_caller : Pos.t -> string -> string -> unit
+
+val enum_supertyping_reserved_syntax : Pos.t -> unit

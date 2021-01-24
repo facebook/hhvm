@@ -292,7 +292,9 @@ type t = {
   (* Enable ifc on the specified list of path prefixes
     (a list containing the empty string would denote all files,
     an empty list denotes no files) *)
-  tco_ifc_enabled: string list; (* Enables the enum class extension *)
+  tco_ifc_enabled: string list;
+  (* Enables the enum supertyping extension *)
+  po_enable_enum_supertyping: bool;
 }
 [@@deriving eq, show]
 
@@ -406,6 +408,7 @@ val make :
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
+  ?po_enable_enum_supertyping:bool ->
   unit ->
   t
 
@@ -656,3 +659,5 @@ val po_disallow_hash_comments : t -> bool
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val tco_use_direct_decl_parser : t -> bool
+
+val po_enable_enum_supertyping : t -> bool

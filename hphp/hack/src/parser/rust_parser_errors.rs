@@ -79,7 +79,6 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    EnumSupertyping,
     EnumAtom,
     IFC,
 }
@@ -5630,7 +5629,6 @@ where
                 }
                 _ => {}
             },
-            EnumUse(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
             EnumAtomExpression(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumAtom),
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);

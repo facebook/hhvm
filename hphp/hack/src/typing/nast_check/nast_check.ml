@@ -32,6 +32,7 @@ let visitor =
       Attribute_nast_checks.handler;
       Trait_reuse_check.handler;
       Enum_classes_check.handler;
+      Enum_supertyping_check.handler;
     ]
 
 let stateful_visitor ctx =

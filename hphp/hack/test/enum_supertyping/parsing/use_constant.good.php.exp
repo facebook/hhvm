@@ -53,16 +53,17 @@
           }
         },
         {
-          "kind":"file_attribute_specification",
-          "file_attribute_specification_left_double_angle":{
+          "kind":"enum_declaration",
+          "enum_attribute_spec":{"kind":"missing"},
+          "enum_keyword":{
             "kind":"token",
             "token":{
-              "kind":"<<",
-              "text":"<<",
+              "kind":"enum",
+              "text":"enum",
               "offset":5,
               "leading_width":74,
-              "width":2,
-              "trailing_width":0,
+              "width":4,
+              "trailing_width":1,
               "leading":[
                 {
                   "kind":"single_line_comment",
@@ -73,164 +74,8 @@
                 {"kind":"end_of_line","text":"\n","offset":77,"width":1},
                 {"kind":"end_of_line","text":"\n","offset":78,"width":1}
               ],
-              "trailing":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":83,"width":1}],
               "line_number":4
-            }
-          },
-          "file_attribute_specification_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"file",
-              "text":"file",
-              "offset":81,
-              "leading_width":0,
-              "width":4,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":4
-            }
-          },
-          "file_attribute_specification_colon":{
-            "kind":"token",
-            "token":{
-              "kind":":",
-              "text":":",
-              "offset":85,
-              "leading_width":0,
-              "width":1,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":4
-            }
-          },
-          "file_attribute_specification_attributes":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"constructor_call",
-                  "constructor_call_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"name",
-                        "text":"__EnableUnstableFeatures",
-                        "offset":86,
-                        "leading_width":0,
-                        "width":24,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":4
-                      }
-                    }
-                  },
-                  "constructor_call_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":110,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":111,"width":1}],
-                      "line_number":4
-                    }
-                  },
-                  "constructor_call_argument_list":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"literal",
-                          "literal_expression":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"single_quoted_string_literal",
-                              "text":"'enum_supertyping'",
-                              "offset":112,
-                              "leading_width":2,
-                              "width":18,
-                              "trailing_width":0,
-                              "leading":[{"kind":"whitespace","text":"  ","offset":112,"width":2}],
-                              "trailing":[],
-                              "line_number":5
-                            }
-                          }
-                        },
-                        "list_separator":{
-                          "kind":"token",
-                          "token":{
-                            "kind":",",
-                            "text":",",
-                            "offset":132,
-                            "leading_width":0,
-                            "width":1,
-                            "trailing_width":1,
-                            "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":133,"width":1}],
-                            "line_number":5
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "constructor_call_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":134,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":6
-                    }
-                  }
-                },
-                "list_separator":{"kind":"missing"}
-              }
-            ]
-          },
-          "file_attribute_specification_right_double_angle":{
-            "kind":"token",
-            "token":{
-              "kind":">>",
-              "text":">>",
-              "offset":135,
-              "leading_width":0,
-              "width":2,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":137,"width":1}],
-              "line_number":6
-            }
-          }
-        },
-        {
-          "kind":"enum_declaration",
-          "enum_attribute_spec":{"kind":"missing"},
-          "enum_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"enum",
-              "text":"enum",
-              "offset":138,
-              "leading_width":1,
-              "width":4,
-              "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":138,"width":1}],
-              "trailing":[{"kind":"whitespace","text":" ","offset":143,"width":1}],
-              "line_number":8
             }
           },
           "enum_name":{
@@ -238,13 +83,13 @@
             "token":{
               "kind":"name",
               "text":"F",
-              "offset":144,
+              "offset":84,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":145,"width":1}],
-              "line_number":8
+              "trailing":[{"kind":"whitespace","text":" ","offset":85,"width":1}],
+              "line_number":4
             }
           },
           "enum_colon":{
@@ -252,13 +97,13 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":146,
+              "offset":86,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":147,"width":1}],
-              "line_number":8
+              "trailing":[{"kind":"whitespace","text":" ","offset":87,"width":1}],
+              "line_number":4
             }
           },
           "enum_base":{
@@ -268,13 +113,13 @@
               "token":{
                 "kind":"string",
                 "text":"string",
-                "offset":148,
+                "offset":88,
                 "leading_width":0,
                 "width":6,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":154,"width":1}],
-                "line_number":8
+                "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
+                "line_number":4
               }
             }
           },
@@ -284,13 +129,13 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":155,
+              "offset":95,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":8
+              "line_number":4
             }
           },
           "enum_use_clauses":{"kind":"missing"},
@@ -300,13 +145,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":156,
+              "offset":96,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":157,"width":1}],
-              "line_number":8
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":97,"width":1}],
+              "line_number":4
             }
           }
         },
@@ -318,13 +163,13 @@
             "token":{
               "kind":"enum",
               "text":"enum",
-              "offset":158,
+              "offset":98,
               "leading_width":1,
               "width":4,
               "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":158,"width":1}],
-              "trailing":[{"kind":"whitespace","text":" ","offset":163,"width":1}],
-              "line_number":10
+              "leading":[{"kind":"end_of_line","text":"\n","offset":98,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":103,"width":1}],
+              "line_number":6
             }
           },
           "enum_name":{
@@ -332,13 +177,13 @@
             "token":{
               "kind":"name",
               "text":"E",
-              "offset":164,
+              "offset":104,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
-              "line_number":10
+              "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
+              "line_number":6
             }
           },
           "enum_colon":{
@@ -346,13 +191,13 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":166,
+              "offset":106,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":167,"width":1}],
-              "line_number":10
+              "trailing":[{"kind":"whitespace","text":" ","offset":107,"width":1}],
+              "line_number":6
             }
           },
           "enum_base":{
@@ -362,13 +207,13 @@
               "token":{
                 "kind":"string",
                 "text":"string",
-                "offset":168,
+                "offset":108,
                 "leading_width":0,
                 "width":6,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":174,"width":1}],
-                "line_number":10
+                "trailing":[{"kind":"whitespace","text":" ","offset":114,"width":1}],
+                "line_number":6
               }
             }
           },
@@ -378,13 +223,13 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":175,
+              "offset":115,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":176,"width":1}],
-              "line_number":10
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":116,"width":1}],
+              "line_number":6
             }
           },
           "enum_use_clauses":{
@@ -397,13 +242,13 @@
                   "token":{
                     "kind":"use",
                     "text":"use",
-                    "offset":177,
+                    "offset":117,
                     "leading_width":2,
                     "width":3,
                     "trailing_width":1,
-                    "leading":[{"kind":"whitespace","text":"  ","offset":177,"width":2}],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":182,"width":1}],
-                    "line_number":11
+                    "leading":[{"kind":"whitespace","text":"  ","offset":117,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":122,"width":1}],
+                    "line_number":7
                   }
                 },
                 "enum_use_names":{
@@ -418,13 +263,13 @@
                           "token":{
                             "kind":"name",
                             "text":"F",
-                            "offset":183,
+                            "offset":123,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":0,
                             "leading":[],
                             "trailing":[],
-                            "line_number":11
+                            "line_number":7
                           }
                         }
                       },
@@ -437,13 +282,13 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":184,
+                    "offset":124,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"end_of_line","text":"\n","offset":185,"width":1}],
-                    "line_number":11
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":125,"width":1}],
+                    "line_number":7
                   }
                 }
               }
@@ -459,13 +304,13 @@
                   "token":{
                     "kind":"name",
                     "text":"USE",
-                    "offset":186,
+                    "offset":126,
                     "leading_width":2,
                     "width":3,
                     "trailing_width":1,
-                    "leading":[{"kind":"whitespace","text":"  ","offset":186,"width":2}],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":191,"width":1}],
-                    "line_number":12
+                    "leading":[{"kind":"whitespace","text":"  ","offset":126,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":131,"width":1}],
+                    "line_number":8
                   }
                 },
                 "enumerator_equal":{
@@ -473,13 +318,13 @@
                   "token":{
                     "kind":"=",
                     "text":"=",
-                    "offset":192,
+                    "offset":132,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":193,"width":1}],
-                    "line_number":12
+                    "trailing":[{"kind":"whitespace","text":" ","offset":133,"width":1}],
+                    "line_number":8
                   }
                 },
                 "enumerator_value":{
@@ -489,13 +334,13 @@
                     "token":{
                       "kind":"double_quoted_string_literal",
                       "text":"\"use\"",
-                      "offset":194,
+                      "offset":134,
                       "leading_width":0,
                       "width":5,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":12
+                      "line_number":8
                     }
                   }
                 },
@@ -504,13 +349,13 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":199,
+                    "offset":139,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"end_of_line","text":"\n","offset":200,"width":1}],
-                    "line_number":12
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":140,"width":1}],
+                    "line_number":8
                   }
                 }
               }
@@ -521,13 +366,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":201,
+              "offset":141,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":202,"width":1}],
-              "line_number":13
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":142,"width":1}],
+              "line_number":9
             }
           }
         },
@@ -538,19 +383,19 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":203,
+              "offset":143,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":14
+              "line_number":10
             }
           }
         }
       ]
     }
   },
-  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum F : string {}\n\nenum E : string {\n  use F;\n  USE = \"use\";\n}\n",
-  "version":"2021-01-20-0001"
+  "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\nenum F : string {}\n\nenum E : string {\n  use F;\n  USE = \"use\";\n}\n",
+  "version":"2021-01-21-0001"
 }

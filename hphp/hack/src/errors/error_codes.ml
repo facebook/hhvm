@@ -680,6 +680,7 @@ module Typing = struct
     | EnumClassesReservedSyntax [@value 4405]
     | NonsenseMemberSelection [@value 4406]
     | ConsiderMethCaller [@value 4407]
+    | EnumSupertypingReservedSyntax [@value 4408]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

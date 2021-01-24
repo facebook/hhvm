@@ -111,7 +111,6 @@ static_assert(sizeof(StaticCoeffects) == sizeof(RuntimeCoeffects), "");
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CoeffectRule final {
-  struct CondRxArg {};
   struct CondRxImpl {};
   struct CondRxArgImpl {};
 
@@ -123,11 +122,6 @@ struct CoeffectRule final {
 
   /////////////////////////////////////////////////////////////////////////////
   // Attribute based RX rules /////////////////////////////////////////////////
-
-  CoeffectRule(CondRxArg, uint32_t index)
-    : m_type(Type::ConditionalReactiveArg)
-    , m_index(index)
-  {}
 
   CoeffectRule(CondRxImpl, const StringData* name)
     : m_type(Type::ConditionalReactiveImplements)
@@ -164,8 +158,6 @@ struct CoeffectRule final {
 
   std::string getDirectiveString() const {
     switch (m_type) {
-      case Type::ConditionalReactiveArg:
-        return folly::sformat(".rx_cond_rx_of_arg {};", m_index);
       case Type::ConditionalReactiveImplements:
         return folly::sformat(".rx_cond_implements \"{}\";",
                               folly::cEscape<std::string>(
@@ -204,7 +196,6 @@ struct CoeffectRule final {
         case Type::ConditionalReactiveArgImplements:
           m_ne = NamedEntity::get(m_name);
           break;
-        case Type::ConditionalReactiveArg:
         case Type::FunParam:
         case Type::CCParam:
         case Type::CCThis:
@@ -218,7 +209,6 @@ struct CoeffectRule final {
 private:
   enum class Type {
     Invalid = 0,
-    ConditionalReactiveArg,
     ConditionalReactiveImplements,
     ConditionalReactiveArgImplements,
 

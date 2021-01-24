@@ -1157,7 +1157,7 @@ fn print_body<W: Write>(
     }
     for i in body.rx_cond_rx_of_arg.iter() {
         ctx.newline(w)?;
-        concat_str(w, [".rx_cond_rx_of_arg ", i.to_string().as_ref(), ";"])?;
+        concat_str(w, [".coeffects_fun_param ", i.to_string().as_ref(), ";"])?;
     }
     if let Some((_, s)) = extract_rx_if_impl_attr(0, attrs) {
         ctx.newline(w)?;

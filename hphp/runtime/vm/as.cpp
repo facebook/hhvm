@@ -1946,17 +1946,6 @@ void parse_coeffects_cc_this(AsmState& as) {
 }
 
 /*
- * directive-rx_cond_rx_of_arg : integer ';'
- *                             ;
- */
-void parse_rx_cond_rx_of_arg(AsmState& as) {
-  auto const pos = read_opcode_arg<uint32_t>(as);
-  as.fe->coeffectRules.emplace_back(
-    CoeffectRule(CoeffectRule::CondRxArg{}, pos));
-  as.in.expectWs(';');
-}
-
-/*
  * directive-rx_cond_implements : name ';'
  *                              ;
  */
@@ -2277,10 +2266,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
       if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
-      if (word == ".rx_cond_rx_of_arg") {
-        parse_rx_cond_rx_of_arg(as);
-        continue;
-      }
       if (word == ".rx_cond_implements") {
         parse_rx_cond_implements(as);
         continue;

@@ -122,7 +122,9 @@ let merge_saved_state_futures
                   is_cached = _;
                 })) ->
           let (_ : float) =
-            Hh_logger.log_duration "Finished downloading naming table." t
+            Hh_logger.log_duration
+              "Finished downloading naming table and dependency graph."
+              t
           in
           let path =
             main_artifacts

@@ -30,6 +30,8 @@ type validation_state = {
   expanded_typedefs: SSet.t;
 }
 
+type error_emitter = Pos.t -> (Pos.t * string) list -> unit
+
 class virtual type_validator =
   object (this)
     inherit [validation_state] Type_visitor.decl_type_visitor
@@ -150,7 +152,7 @@ class virtual type_validator =
         (env : Env.env)
         (hint : Aast.hint)
         ?(reification : reification = Unresolved)
-        (emit_error : Pos.t -> (Pos.t * string) list -> unit) =
+        (emit_error : error_emitter) : unit =
       let hint_ty = Env.hint_to_ty env hint in
       this#validate_type env (fst hint) hint_ty ~reification emit_error
 

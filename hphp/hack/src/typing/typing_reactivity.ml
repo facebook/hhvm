@@ -10,13 +10,11 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
-module Phase = Typing_phase
 module Env = Typing_env
 module SubType = Typing_subtype
 module TU = Typing_utils
 module CT = SubType.ConditionTypes
 module MakeType = Typing_make_type
-module TL = Typing_logic
 
 type method_call_info = {
   receiver_type: locl_ty;
@@ -36,10 +34,6 @@ let type_to_str env ty =
     | _ -> ty
   in
   Typing_print.full env (unwrap ty)
-
-let localize env ty =
-  let (_, t) = Phase.localize (Phase.env_with_self env) env ty in
-  t
 
 let rec condition_type_from_reactivity r =
   match r with

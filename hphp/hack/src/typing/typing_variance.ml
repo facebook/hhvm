@@ -12,7 +12,6 @@ open Typing_defs
 open Utils
 module Env = Typing_env
 module SN = Naming_special_names
-module TGen = Typing_generic
 module Cls = Decl_provider.Class
 
 (*****************************************************************************)
@@ -320,7 +319,7 @@ and class_member class_type tenv root static env (_member_name, member) =
       let (lazy ty) = member.ce_type in
       let var_type_pos = get_pos ty in
       let class_pos = Cls.pos class_type in
-      match TGen.IsGeneric.ty ty with
+      match Typing_generic.is_generic ty with
       | None -> ()
       | Some (generic_pos, _generic_name) ->
         Errors.static_property_type_generic_param

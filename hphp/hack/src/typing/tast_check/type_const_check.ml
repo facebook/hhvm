@@ -46,7 +46,7 @@ let handler =
                 | ((TCPartiallyAbstract | TCConcrete), Some ty) ->
                   if snd tc.ttc_enforceable then
                     let pos = fst tc.ttc_enforceable in
-                    Typing_enforceable_hint.validator#validate_type
+                    Typing_enforceable_hint.validate_type
                       env
                       (fst tc.ttc_name)
                       ty

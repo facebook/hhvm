@@ -14,8 +14,6 @@ open Hh_prelude
 
 open Typing_defs
 module Reason = Typing_reason
-module Env = Typing_env
-module MakeType = Typing_make_type
 
 (*****************************************************************************)
 (* Exporting. *)

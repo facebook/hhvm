@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Aast
-open Typing_enforceable_hint
 
 let handler =
   object
@@ -17,7 +16,7 @@ let handler =
 
     method! at_expr env e =
       let validate hint op =
-        validator#validate_hint
+        Typing_enforceable_hint.validate_hint
           env
           hint
           (Errors.invalid_is_as_expression_hint op)

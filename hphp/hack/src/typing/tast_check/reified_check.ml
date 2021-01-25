@@ -86,7 +86,7 @@ let verify_targ_valid env reification tparam targ =
     | Nast.Erased -> () );
 
   if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
-    Typing_enforceable_hint.validator#validate_hint
+    Typing_enforceable_hint.validate_hint
       env
       (snd targ)
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name);

@@ -13,7 +13,6 @@ open Typing_defs
 open Type_validator
 module Env = Tast_env
 module Reason = Typing_reason
-module TySet = Typing_set
 module Cls = Decl_provider.Class
 module Nast = Aast
 
@@ -194,3 +193,7 @@ let validator =
           "a reified type parameter that is not marked `<<__Enforceable>>`"
       | (Nast.Reified, true) -> acc
   end
+
+let validate_hint = validator#validate_hint ?reification:None
+
+let validate_type = validator#validate_type ?reification:None

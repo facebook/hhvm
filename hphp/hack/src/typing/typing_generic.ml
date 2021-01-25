@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-module Env = Typing_env
 
 (* Module checking if a type is generic, I like to use an exception for this sort
  * of things, the code is more readable (subjective :-), and the exception never
@@ -60,3 +59,5 @@ end = struct
       None
     with Found (p, x) -> Some (p, x)
 end
+
+let is_generic = IsGeneric.ty

@@ -179,3 +179,5 @@ let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =
       ft_params
   in
   { ft with ft_params; ft_ret }
+
+let compute_enforced_ty = compute_enforced_ty ?explicitly_untrusted:None

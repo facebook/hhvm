@@ -733,7 +733,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
         let emit_error =
           Errors.invalid_enforceable_type "constant" (pos, name)
         in
-        Typing_enforceable_hint.validator#validate_type
+        Typing_enforceable_hint.validate_type
           tast_env
           (fst child_typeconst.ttc_name)
           ty

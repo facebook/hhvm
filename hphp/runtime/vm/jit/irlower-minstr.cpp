@@ -667,31 +667,6 @@ void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
   v << lea{arr[px3 * 8 + MixedArray::dataOff()], dst};
 }
 
-void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
-  auto const pos_tmp = inst->src(1);
-  auto const arr = srcLoc(env, inst, 0).reg();
-  auto const pos = srcLoc(env, inst, 1).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  if (pos_tmp->hasConstVal(TInt)) {
-    auto const n = pos_tmp->intVal();
-    auto const offset = PackedArray::entriesOffset() + n * sizeof(TypedValue);
-    if (deltaFits(offset, sz::dword)) {
-      v << addqi{safe_cast<int32_t>(offset), arr, dst, v.makeReg()};
-      return;
-    }
-  }
-
-  auto const pos_l = v.makeReg();
-  auto const px2 = v.makeReg();
-  auto const px2_l = v.makeReg();
-  v << movtql{pos, pos_l};
-  v << shlli{1, pos_l, px2_l, v.makeReg()};
-  v << movzlq{px2_l, px2};
-  v << lea{arr[px2 * 8 + PackedArray::entriesOffset()], dst};
-}
-
 void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
@@ -699,16 +674,6 @@ void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const extra = inst->extra<AdvanceDictPtrIter>();
   auto const delta = extra->offset * int32_t(sizeof(MixedArrayElm));
-  v << addqi{delta, src, dst, v.makeReg()};
-}
-
-void cgAdvanceVecPtrIter(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  auto const extra = inst->extra<AdvanceVecPtrIter>();
-  auto const delta = extra->offset * int32_t(sizeof(TypedValue));
   v << addqi{delta, src, dst, v.makeReg()};
 }
 

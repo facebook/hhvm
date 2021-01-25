@@ -280,9 +280,7 @@ bool canDCE(IRInstruction* inst) {
   case AllocVArray:
   case AllocVec:
   case GetDictPtrIter:
-  case GetVecPtrIter:
   case AdvanceDictPtrIter:
-  case AdvanceVecPtrIter:
   case LdPtrIterKey:
   case LdPtrIterVal:
   case EqPtrIter:

@@ -205,9 +205,7 @@ int32_t iteratorType(const IterTypeData& data) {
     switch (data.type.base_type) {
       case S::Packed:
       case S::Vec: {
-        return data.type.base_const && !data.type.output_key
-          ? IterNextIndex::ArrayPackedPointer
-          : IterNextIndex::ArrayPacked;
+        return IterNextIndex::ArrayPacked;
       }
       case S::Mixed:
       case S::Dict: {

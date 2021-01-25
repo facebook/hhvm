@@ -343,12 +343,11 @@ struct Accessor {
 
 struct PackedAccessor : public Accessor {
   explicit PackedAccessor(IterSpecialization specialization) {
-    is_ptr_iter = specialization.base_const && !specialization.output_key;
     arr_type = getArrType(specialization);
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
+    pos_type = TInt;
     layout = ArrayLayout::Vanilla();
     iter_type = specialization;
   }
@@ -358,7 +357,7 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetVecPtrIter, arr, idx) : idx;
+    return idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
@@ -370,18 +369,12 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    if (is_ptr_iter) return gen(env, LdPtrIterVal, TInt, elm);
     return gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return is_ptr_iter
-      ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
-      : gen(env, AddInt, cns(env, offset), pos);
+    return gen(env, AddInt, cns(env, offset), pos);
   }
-
-private:
-  bool is_ptr_iter = false;
 };
 
 struct MixedAccessor : public Accessor {

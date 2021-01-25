@@ -1494,7 +1494,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddInt:
   case AddIntO:
   case AdvanceDictPtrIter:
-  case AdvanceVecPtrIter:
   case AndInt:
   case AssertType:
   case AssertLoc:
@@ -1522,7 +1521,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqInt:
   case EqPtrIter:
   case GetDictPtrIter:
-  case GetVecPtrIter:
   case GteBool:
   case GteInt:
   case GtBool:

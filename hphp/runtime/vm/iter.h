@@ -43,16 +43,11 @@ enum class IterNextIndex : uint8_t {
 
   // JIT-only "pointer iteration", designed for good specialized code-gen.
   // In pointer iteration, the iterator has a pointer directly into the base.
-  // We can only use it when the base is guaranteed unchanged during iteration.
   //
-  // This condition is true for non-local iters, and for local iters with the
-  // BaseUnchanged enum value. Almost all iters fall into these two cases.
-  //
-  // We additionally restrict pointer iteration based on the base layout:
-  //   - For PackedArrays, we only do it for value iters. (For key-value iters,
-  //     the position is also the key, so we must materialize it anyway.)
-  //   - Fox MixedArrays, we only use it when the base is free of tombstones.
-  ArrayPackedPointer,
+  // We only use this mode if all the following conditions are met:
+  //  - The array is guaranteed to be unchanged during iteration
+  //  - The array is a MixedArray (a dict or a darray)
+  //  - The array is free of tombstones
   ArrayMixedPointer,
 
   // Helpers specific to bespoke array-likes.

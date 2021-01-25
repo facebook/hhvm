@@ -2944,15 +2944,6 @@ SSATmp* simplifyGetDictPtrIter(State& env, const IRInstruction* inst) {
   return cns(env, Type::cns(elm, outputType(inst)));
 }
 
-SSATmp* simplifyGetVecPtrIter(State& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const idx = inst->src(1);
-  if (!arr->hasConstVal(TArrLike)) return nullptr;
-  if (!idx->hasConstVal(TInt)) return nullptr;
-  auto const elm = packedData(arr->arrLikeVal()) + idx->intVal();
-  return cns(env, Type::cns(elm, outputType(inst)));
-}
-
 SSATmp* simplifyCheckDictKeys(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return mergeBranchDests(env, inst);
@@ -3773,7 +3764,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(KeysetGetQuiet)
       X(KeysetGetK)
       X(GetDictPtrIter)
-      X(GetVecPtrIter)
       X(CheckDictKeys)
       X(CheckMixedArrayOffset)
       X(CheckDictOffset)

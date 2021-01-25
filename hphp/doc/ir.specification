@@ -2637,15 +2637,11 @@ To string conversions:
 
 | GetDictPtrIter,  DPtrIter, S(DArr,Dict) S(Int), NF
 
-| GetVecPtrIter, DPtrIter, S(VArr,Vec) S(Int), NF
-
-  Returns a pointer to the elm S1 of a {mixed,packed}-layout array S0. S1 does
-  not need to be a valid array position; for example, it may equal the size of
-  the array (so that the "elm" returned is the pointer-iteration end for S0).
+  Returns a pointer to the elm S1 of a mixed-layout array S0. S1 does not need
+  to be a valid array position; for example, it may equal the size of the array
+  (so that the "elm" returned is the pointer-iteration end for S0).
 
 | AdvanceDictPtrIter<offset>,  DPtrIter, S(PtrToElemCell), NF
-
-| AdvanceVecPtrIter<offset>, DPtrIter, S(PtrToElemCell), NF
 
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.

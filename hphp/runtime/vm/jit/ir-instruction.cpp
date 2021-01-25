@@ -491,12 +491,12 @@ Type ptrToLvalReturn(const IRInstruction* inst) {
 // This definition makes sense by analogy to regular int* types in C: the type
 // of the end of the array is an int* even though its target is invalid.
 Type ptrIterReturn(const IRInstruction* inst) {
-  if (inst->is(AdvanceDictPtrIter, AdvanceVecPtrIter)) {
+  if (inst->is(AdvanceDictPtrIter)) {
     auto const ptr = inst->src(0)->type();
     assertx(ptr <= TPtrToElemCell);
     return ptr;
   }
-  assertx(inst->is(GetDictPtrIter, GetVecPtrIter));
+  assertx(inst->is(GetDictPtrIter));
   auto const arr = inst->src(0)->type();
   assertx(arr <= TArrLike);
   auto const value = [&]{

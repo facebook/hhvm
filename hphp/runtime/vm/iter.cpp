@@ -127,8 +127,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   DEBUG_ONLY auto const arr = ad ? ad : m_data;
 
   // Check that array's vtable index is compatible with the array's layout.
-  if (m_nextHelperIdx == IterNextIndex::ArrayPacked ||
-      m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
+  if (m_nextHelperIdx == IterNextIndex::ArrayPacked) {
     assertx(arr->hasVanillaPackedLayout());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
     assertx(arr->hasVanillaMixedLayout());
@@ -152,10 +151,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   }
 
   // Check the consistency of the pos and end fields.
-  if (m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
-    assertx(m_packed_elm < m_packed_end);
-    assertx(m_packed_end == packedData(arr) + arr->size());
-  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
+  if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(m_mixed_elm < m_mixed_end);
     assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->size());
   } else {
@@ -308,7 +304,6 @@ bool Iter::next() {
   // The emitter should never generate bytecode where the iterator is at the
   // end before IterNext is executed. checkInvariants tests this invariant.
   assertx(m_iter.checkInvariants());
-  assertx(m_iter.getHelperIndex() != IterNextIndex::ArrayPackedPointer);
   assertx(m_iter.getHelperIndex() != IterNextIndex::ArrayMixedPointer);
   m_iter.next();
   // If the iterator is now at the end, dec-ref the base. (For local iterators,
@@ -505,15 +500,9 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   }
 
   if (LIKELY(ad->hasVanillaPackedLayout())) {
-    if (BaseConst) {
-      aiter.m_packed_elm = packedData(ad);
-      aiter.m_packed_end = aiter.m_packed_elm + size;
-      aiter.setArrayNext(IterNextIndex::ArrayPackedPointer);
-    } else {
-      aiter.m_pos = 0;
-      aiter.m_end = size;
-      aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    }
+    aiter.m_pos = 0;
+    aiter.m_end = size;
+    aiter.setArrayNext(IterNextIndex::ArrayPacked);
     tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
     return 1;
   }
@@ -808,32 +797,6 @@ ALWAYS_INLINE void setOutputLocal(TypedValue tv, TypedValue* out) {
 
 }
 
-// "virtual" method implementation of *IterNext* for ArrayPackedPointer.
-// We don't use this iteration mode for key-value iterators, so it's simple.
-//
-// See iter.h for the meaning of a "local" iterator. At this point,
-// we have the base, but we only dec-ref it when non-local iters hit the end.
-//
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-template<bool HasKey, bool Local>
-int64_t iter_next_packed_pointer(
-    Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* arr) {
-  always_assert(!HasKey);
-  auto& iter = *unwrap(it);
-  auto const elm = iter.m_packed_elm + 1;
-  if (elm == iter.m_packed_end) {
-    if (!Local && arr->decReleaseCheck()) {
-      return iter_next_free_packed(it, arr);
-    }
-    iter.kill();
-    return 0;
-  }
-
-  iter.m_packed_elm = elm;
-  setOutputLocal(*elm, valOut);
-  return 1;
-}
-
 // "virtual" method implementation of *IterNext* for ArrayMixedPointer.
 // Since we know the base is mixed and free of tombstones, we can simply
 // increment the element pointer and compare it to the end pointer.
@@ -1021,7 +984,6 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
 
 VTABLE_METHODS(ArrayPacked,        iter_next_packed_impl);
 VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
-VTABLE_METHODS(ArrayPackedPointer, iter_next_packed_pointer);
 VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
 VTABLE_METHODS(MonotypeVec,        iter_next_monotype_vec);
 
@@ -1037,7 +999,6 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayMixed,
   &iterNextArray,
   &iterNextObject,
-  &iterNextArrayPackedPointer,
   &iterNextArrayMixedPointer,
   &iterNextMonotypeVec,
 };
@@ -1047,7 +1008,6 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArrayMixed,
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
-  &iterNextKArrayPackedPointer,
   &iterNextKArrayMixedPointer,
   &iterNextKMonotypeVec,
 };
@@ -1057,7 +1017,6 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextArrayMixed,
   &literNextArray,
   &literNextObject,
-  &literNextArrayPackedPointer,
   &literNextArrayMixedPointer,
   &literNextMonotypeVec,
 };
@@ -1067,7 +1026,6 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArrayMixed,
   &literNextKArray,
   &literNextKObject,
-  &literNextKArrayPackedPointer,
   &literNextKArrayMixedPointer,
   &literNextKMonotypeVec,
 };

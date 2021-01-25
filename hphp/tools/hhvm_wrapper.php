@@ -178,7 +178,9 @@ function determine_flags(OptionMap $opts): string {
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'bespoke'         => '-v Eval.BespokeArrayLikeMode=2 '.
-                         '-v Eval.EmitLoggingArraySampleRate=1000 ',
+                         '-v Eval.ArrayProvenance=0 '.
+                         '-v Eval.ExportLoggingArrayDataPath="/tmp/logging-array-export" '.
+                         '-v Eval.EmitLoggingArraySampleRate=17 ',
      'hadva'          => '-v Eval.HackArrDVArrs=true '.
                          '-v Eval.HackArrDVArrMark=true ',
     'hphpd'           => '-m debug ',

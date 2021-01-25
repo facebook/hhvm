@@ -541,9 +541,32 @@ void PackedArray::Release(ArrayData* ad) {
   if (RuntimeOption::EvalArrayProvenance) {
     arrprov::clearTag(ad);
   }
-  for (uint32_t i = 0; i < ad->m_size; ++i) {
-    tvDecRefGen(LvalUncheckedInt(ad, i));
+
+  if constexpr (stores_typed_values) {
+    for (uint32_t i = 0; i < ad->m_size; ++i) {
+      tvDecRefGen(LvalUncheckedInt(ad, i));
+    }
+  } else {
+    auto constexpr n = PackedBlock::kNumItems;
+    auto block = PackedBlock::BlockAt(ad, 0);
+    auto remainder = ad->size();
+    while (remainder >= n) {
+      if (!block.AllTypesAreUncounted(n)) {
+        for (auto i = 0; i < n; i++) {
+          tvDecRefGen(block[i]);
+        }
+      }
+      ++block;
+      remainder -= n;
+    }
+    if (remainder && !block.AllTypesAreUncounted(remainder)) {
+      auto i = 0;
+      do {
+        tvDecRefGen(block[i++]);
+      } while (i < remainder);
+    }
   }
+
   tl_heap->objFreeIndex(ad, sizeClass(ad));
   AARCH64_WALKABLE_FRAME();
 }

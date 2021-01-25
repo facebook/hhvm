@@ -22,11 +22,11 @@ File "invalid_operator.php", line 22, characters 33-33:
 Variable `$__0` is undefined, or not always defined. (Naming[2050])
 File "invalid_operator.php", line 13, characters 13-13:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 13, characters 18-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 19, characters 13-24:
 You are trying to access the method `__plus` but this is an int (Typing[4062])
@@ -34,29 +34,29 @@ You are trying to access the method `__plus` but this is an int (Typing[4062])
   Definition is here
 File "invalid_operator.php", line 19, characters 24-24:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 25, characters 34-37:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 55, characters 5-43:
+  File "invalid_operator.php", line 66, characters 5-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 29, characters 30-30:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 32, characters 35-35:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 32, characters 40-40:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 33, characters 42-42:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 36, characters 34-34:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 46, characters 6-43:
+  File "invalid_operator.php", line 57, characters 6-43:
   But got `dynamic` because it is an unenforceable type

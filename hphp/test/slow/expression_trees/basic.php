@@ -20,6 +20,16 @@ function test(): void {
 }
 
 final class MyVisitor {
+  public static function makeTree<TInfer>(
+    ?ExprPos $pos,
+    ?string $filepath,
+    dict<string, mixed> $cached_dict,
+    (function(MyVisitor): mixed) $ast,
+    (function(): TInfer) $err,
+  ): ExprTree<MyVisitor, mixed, TInfer> {
+    return new ExprTree($pos, $filepath, $cached_dict, $ast, $err);
+  }
+
   public static function intLiteral(
     int $i,
   ): ExprTree<MyVisitor, mixed, int> {

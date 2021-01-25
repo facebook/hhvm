@@ -10,6 +10,17 @@ function test(): void {
 // Placeholder definition so we don't get naming/typing errors.
 class Code {
   const type TAst = mixed;
+
+  public static function makeTree<TVisitor as Code, TInfer>(
+    ?ExprPos $pos,
+    string $filepath,
+    dict<string, mixed> $spliced_values,
+    (function(TVisitor): Code::TAst) $ast,
+    (function(): TInfer) $err,
+  ): ExprTree<TVisitor, Code::TAst, TInfer> {
+    throw new Exception();
+  }
+
   // Lifting literals.
   public static function intLiteral(
     int $_,
@@ -136,11 +147,6 @@ class Code {
     Spliceable<Code, Code::TAst, T> $_,
   ): Code::TAst {
     throw new Exception();
-  }
-
-  // TODO: Discard unsupported syntax nodes while lowering
-  public function unsupportedSyntax(string $msg): Code::TAst {
-    throw new Exception($msg);
   }
 }
 

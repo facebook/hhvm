@@ -1,8 +1,8 @@
 File "splice_err2.php", line 9, characters 17-21:
 Invalid argument (Typing[4110])
-  File "splice_err2.php", line 174, characters 26-35:
+  File "splice_err2.php", line 185, characters 26-35:
   Expected `ExampleInt`
-  File "splice_err2.php", line 33, characters 32-44:
+  File "splice_err2.php", line 44, characters 32-44:
   But got `ExampleString`
-  File "splice_err2.php", line 150, characters 44-49:
+  File "splice_err2.php", line 161, characters 44-49:
     via this generic `TInfer`

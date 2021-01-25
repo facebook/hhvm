@@ -22,6 +22,17 @@ function foo(): void {
 // Placeholder definition so we don't get naming/typing errors.
 class Code {
   const type TAst = mixed;
+
+  public static function makeTree<TVisitor as Code, TInfer>(
+    ?ExprPos $pos,
+    string $filepath,
+    dict<string, mixed> $spliced_values,
+    (function(TVisitor): Code::TAst) $ast,
+    (function(): TInfer) $err,
+  ): ExprTree<TVisitor, Code::TAst, TInfer> {
+    throw new Exception();
+  }
+
   // Lifting literals.
   public static function intLiteral(
     int $_,

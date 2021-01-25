@@ -144,9 +144,12 @@
                                  ([4:8-60],
                                   (Return
                                      (Some ([4:8-60],
-                                            (New (
+                                            (Call (
                                                ([4:8-60],
-                                                (CI ([4:8-60], "\\ExprTree"))),
+                                                (Class_const (
+                                                   ([4:8-60],
+                                                    (CI ([4:8-60], "\\Code"))),
+                                                   ([4:8-60], "makeTree")))),
                                                [],
                                                [([4:8-60],
                                                  (New (
@@ -1031,7 +1034,7 @@
                                                        ([4:26-27], $__0)]
                                                      )))
                                                  ],
-                                               None, [4:8-60]))))))
+                                               None))))))
                                  ];
                                fb_annotation = Named };
                              f_fun_kind = FSync; f_user_attributes = [];

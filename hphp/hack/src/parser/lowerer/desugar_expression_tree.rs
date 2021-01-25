@@ -107,11 +107,11 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
     let typing_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(typing_fun_, vec![]));
 
-    // Make `return new ExprTree(...)`
+    // Make `return Visitor::makeTree(...)`
     let return_stmt = wrap_return(
-        new_obj(
-            &temp_pos,
-            "\\ExprTree",
+        static_meth_call(
+            &visitor_name,
+            "makeTree",
             vec![
                 exprpos(&temp_pos),
                 Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
@@ -119,6 +119,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
                 visitor_lambda,
                 typing_lambda,
             ],
+            &temp_pos.clone(),
         ),
         &temp_pos.clone(),
     );

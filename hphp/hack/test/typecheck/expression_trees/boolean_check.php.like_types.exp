@@ -1,136 +1,136 @@
 File "boolean_check.php", line 27, characters 11-25:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 28, characters 11-25:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 30, characters 11-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 31, characters 11-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 33, characters 11-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 34, characters 16-30:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 36, characters 11-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 37, characters 16-30:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 40, characters 11-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 41, characters 16-23:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 45, characters 13-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 46, characters 13-20:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 48, characters 13-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 49, characters 17-17:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 49, characters 20-34:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 50, characters 14-28:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 50, characters 41-41:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 51, characters 17-17:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 51, characters 20-34:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 51, characters 47-47:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 53, characters 13-20:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 54, characters 17-17:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 54, characters 20-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 55, characters 14-21:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 55, characters 34-34:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 56, characters 17-17:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 56, characters 20-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 56, characters 40-40:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 59, characters 7-21:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 59, characters 25-25:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 59, characters 29-29:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 60, characters 7-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 103, characters 6-34:
+  File "boolean_check.php", line 114, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 60, characters 18-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_check.php", line 60, characters 22-22:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_check.php", line 77, characters 6-43:
+  File "boolean_check.php", line 88, characters 6-43:
   But got `dynamic` because it is an unenforceable type

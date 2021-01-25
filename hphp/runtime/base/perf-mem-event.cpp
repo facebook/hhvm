@@ -151,21 +151,22 @@ void fill_record(const StringData* sd, const void* addr,
 void fill_record(const ArrayData* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
-
-  // We can't implement this function without making an assumption on the
-  // layout of the array. We'll need to make more than local changes here.
-  static_assert(PackedArray::stores_typed_values);
-  auto const tv = reinterpret_cast<const TypedValue*>(addr);
-  auto const idx = tv - packedData(arr);
+  auto const idx = PackedArray::pointerToIndex(arr, addr);
   if (idx < 0) return;
 
   record.setInt("ikey", idx);
 
   if (idx < arr->size()) {
-    if (auto const memb = nameof_member(tv, addr)) {
-      record.setStr("value_memb", memb);
+    auto const base = reinterpret_cast<const char*>(addr);
+    auto const rval = PackedArray::LvalInt(const_cast<ArrayData*>(arr), idx);
+    auto const type_diff = reinterpret_cast<const char*>(&type(rval)) - base;
+    auto const data_diff = reinterpret_cast<const char*>(&val(rval)) - base;
+    if (0 <= type_diff && type_diff < sizeof(type(rval))) {
+      record.setStr("value_memb", "m_type");
+    } else if (0 <= data_diff && data_diff < sizeof(val(rval))) {
+      record.setStr("value_memb", "m_data");
     }
-    record.setStr("value_type", tname(tv->m_type));
+    record.setStr("value_type", tname(type(rval)));
   }
 }
 

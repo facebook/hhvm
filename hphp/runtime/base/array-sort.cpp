@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/packed-sort.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -254,9 +255,15 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   assertx(!ad->hasMultipleRefs());
   auto a = ad;
   SortFlavor flav = preSort(ad);
-  auto data_begin = packedData(ad);
-  auto data_end = data_begin + a->m_size;
-  CALL_SORT(TVAccessor);
+  if constexpr (stores_typed_values) {
+    auto const data_begin = PackedArray::entries(ad);
+    auto const data_end = data_begin + a->m_size;
+    CALL_SORT(TVAccessor);
+  } else {
+    auto data_begin = PackedBlockIterator { ad, 0 };
+    auto data_end = data_begin + a->m_size;
+    CALL_SORT(PackedBlockAccessor);
+  }
 }
 
 #undef SORT_CASE
@@ -308,22 +315,22 @@ bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 SortFlavor PackedArray::preSort(ArrayData* ad) {
   assertx(checkInvariants(ad));
   assertx(ad->m_size > 0);
-  TVAccessor acc;
   bool allInts = true;
   bool allStrs = true;
-  auto elm = packedData(ad);
-  auto const end = elm + ad->m_size;
+  uint32_t i = 0;
+  uint32_t size = ad->m_size;
   do {
-    if (acc.isInt(*elm)) {
+    const auto type = PackedArray::LvalUncheckedInt(ad, i).type();
+    if (type == KindOfInt64) {
       if (!allInts) return GenericSort;
       allStrs = false;
-    } else if (acc.isStr(*elm)) {
+    } else if (isStringType(type)) {
       if (!allStrs) return GenericSort;
       allInts = false;
     } else {
       return GenericSort;
     }
-  } while (++elm < end);
+  } while (++i < size);
   if (allInts) return IntegerSort;
   assertx(allStrs);
   return StringSort;
@@ -335,15 +342,22 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
     return true;
   }
   assertx(!ad->hasMultipleRefs());
-  ElmUCompare<TVAccessor> comp;
   CallCtx ctx;
   vm_decode_function(cmp_function, ctx);
   if (!ctx.func) {
     return false;
   }
-  comp.ctx = &ctx;
-  auto const data = packedData(ad);
-  Sort::sort(data, data + ad->m_size, comp);
+  if constexpr (stores_typed_values) {
+    ElmUCompare<TVAccessor> comp;
+    comp.ctx = &ctx;
+    auto const data = PackedArray::entries(ad);
+    Sort::sort(data, data + ad->m_size, comp);
+  } else {
+    ElmUCompare<PackedBlockAccessor> comp;
+    comp.ctx = &ctx;
+    auto data = PackedBlockIterator { ad, 0 };
+    Sort::sort(data, data + ad->m_size, comp);
+  }
   return true;
 }
 

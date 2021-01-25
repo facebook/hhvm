@@ -179,10 +179,16 @@ TypedValue BaseVector::removeKeyImpl(int64_t k) {
   mutate();
   const auto result = *lvalAt(k);
   if (k+1 < m_size) {
-    static_assert(PackedArray::stores_typed_values, "");
-    size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
-    std::memmove(&packedData(arrayData())[k],
-                 &packedData(arrayData())[k+1], bytes);
+    if constexpr (PackedArray::stores_typed_values) {
+      auto* data = PackedArray::entries(arrayData());
+      size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
+      std::memmove(&data[k], &data[k+1], bytes);
+    } else {
+      uint32_t i = k, end = m_size - 1;
+      do {
+        tvCopy(*lvalAt(i + 1), lvalAt(i));
+      } while (++i < end);
+    }
   }
   decSize();
   return result;
@@ -196,9 +202,8 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   if (LIKELY(!oldAd->cowCheck())) {
     assertx(oldAd->isVecKind());
     if (m_size > 0) {
-      static_assert(PackedArray::stores_typed_values, "");
-      size_t bytes = m_size * sizeof(TypedValue);
-      std::memcpy(packedData(arr), packedData(oldAd), bytes);
+      const size_t bytes = PackedArray::capacityToSizeBytes(m_size);
+      std::memcpy(arrayData() + 1, oldAd + 1, bytes - sizeof(ArrayData));
       // Mark oldAd as having 0 elements so that the array release logic doesn't
       // decRef the elements (since we teleported the elements to a new array)
       oldAd->m_size = 0;

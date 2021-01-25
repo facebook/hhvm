@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -40,19 +41,24 @@ TRACE_SET_MOD(apc);
 
 namespace {
 
-size_t getMemSize(const TypedValue* tv, bool recurse = true) {
-  const auto& v = tvAsCVarRef(tv);
-  auto type = v.getType();
+// NEVER includes the size of TypedValue pointed to by the lval. The type and
+// value may be stored in some exotic layout instead of in a TypedValue shape,
+// so we only want to account for any memory pointed to from the value.
+//
+// (For example, for an int lval, we should return 0, and for a string lval,
+// we should return the number of bytes in the string's payload.)
+size_t getIndirectMemSize(tv_rval lval, bool recurse = true) {
+  const auto type = lval.type();
   if (isArrayLikeType(type)) {
     if (!recurse) return 0;
-    auto a = v.getArrayData();
-    return a->isStatic() ? sizeof(v) : getMemSize(a);
+    auto a = val(lval).parr;
+    return a->isStatic() ? 0 : getMemSize(a);
   }
   if (type == KindOfString) {
-    return getMemSize(v.getStringData());
+    return getMemSize(val(lval).pstr);
   }
   if (!isRefcountedType(type)) {
-    return sizeof(Variant);
+    return 0;
   }
   assertx(!"Unsupported Variant type for getMemSize()");
   return 0;
@@ -191,12 +197,11 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind:
   case ArrayData::ArrayKind::kVecKind: {
-    // This array space overhead computation assumes a TypedValue* layout.
-    static_assert(PackedArray::stores_typed_values);
-    auto size = PackedArray::heapSize(arr) - (sizeof(TypedValue) * arr->m_size);
-    PackedArray::IterateVNoInc(arr, [&](TypedValue tv) {
-      size += getMemSize(&tv, recurse);
-    });
+    auto size = PackedArray::heapSize(arr);
+    for (uint32_t i = 0; i < arr->m_size; ++i) {
+      auto const tv = PackedArray::NvGetInt(arr, i);
+      size += getIndirectMemSize(&tv);
+    }
     return size;
   }
   case ArrayData::ArrayKind::kDictKind:
@@ -211,8 +216,13 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
         size += sizeof(MixedArray::Elm);
         continue;
       }
+      // TODO(kshaunak): I think our key-size accounting is wrong. We count the
+      // direct size within the MixedArray for int64 keys but only the indirect
+      // size for string keys. We should use the object's heap size to get all
+      // the direct memory sizes, like we do for arrays, above.
       size += ptr->hasStrKey() ? getMemSize(ptr->skey) : sizeof(int64_t);
-      size += getMemSize(&ptr->data, recurse);
+      size += getIndirectMemSize(&ptr->data, recurse);
+      size += sizeof(TypedValueAux);
     }
     return size;
   }

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hash-table.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
@@ -27,43 +28,40 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Return the payload from a ArrayData* that is kPacked/VecKind.
- */
-ALWAYS_INLINE
-TypedValue* packedData(const ArrayData* arr) {
-  return const_cast<TypedValue*>(
-    reinterpret_cast<const TypedValue*>(arr + 1)
-  );
+// This method does the actual logic for computing a size given a layout,
+// using `stores_typed_values` to select between layout types.
+constexpr size_t bytes2PackedArrayCapacity(size_t bytes) {
+  if (PackedArray::stores_typed_values) {
+    return bytes / sizeof(TypedValue);
+  } else {
+    static_assert(sizeof(Value) == 8);
+    static_assert(sizeof(DataType) == 1);
+    const size_t values = bytes / sizeof(Value);
+    return values / 9 * 8 + std::max(int8_t(values % 9) - 1, 0);
+  }
 }
 
-ALWAYS_INLINE
-ptrdiff_t PackedArray::entriesOffset() {
-  // The JIT calls entriesOffset in code that depends on the TypeValue* layout.
-  // There may be other places where the JIT depends on this layout, too.
-  static_assert(PackedArray::stores_typed_values);
-  return reinterpret_cast<ptrdiff_t>(
-    packedData(reinterpret_cast<ArrayData*>(0x0)));
-}
-
-/* this only exists to make compilers happy about types in the below macro */
-inline constexpr uint32_t sizeClassParams2PackedArrayCapacity(
+// This method is just to help compilers with types in the macro usage below.
+// It also checks that the result of the arithmetic above fits in a uint32_t;
+// if this check fails, it probably means that MaxSizeIndex must be adjusted.
+constexpr uint32_t sizeClassParams2PackedArrayCapacity(
   size_t index,
   size_t lg_grp,
   size_t lg_delta,
   size_t ndelta
 ) {
   static_assert(sizeof(ArrayData) <= kSizeIndex2Size[0],
-    "this math only works if ArrayData fits in the smallest size class");
-  return index <= PackedArray::MaxSizeIndex
-    ? (((size_t{1} << lg_grp) + (ndelta << lg_delta)) - sizeof(ArrayData))
-      / sizeof(TypedValue)
-    : 0;
+    "This math only works if ArrayData fits in the smallest size class.");
+  if (index > PackedArray::MaxSizeIndex) return 0;
+  const size_t total = ((size_t{1} << lg_grp) + (ndelta << lg_delta));
+  const size_t capacity = bytes2PackedArrayCapacity(total - sizeof(ArrayData));
+  return capacity <= std::numeric_limits<uint32_t>::max()
+    ? capacity
+    : throw std::length_error("capacity > uint32_t::max");
 }
 
-/* We can use uint32_t safely because capacity is in units of array elements,
- * and arrays can't have more than 32 bits worth of elements.
- */
+// We can use uint32_t safely because capacity is in units of array elements,
+// and an ArrayData's m_size field is a uint32_t. See also the guard above.
 alignas(64) constexpr uint32_t kSizeIndex2PackedArrayCapacity[] = {
 #define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   sizeClassParams2PackedArrayCapacity(index, lg_grp, lg_delta, ndelta),
@@ -71,33 +69,47 @@ alignas(64) constexpr uint32_t kSizeIndex2PackedArrayCapacity[] = {
 #undef SIZE_CLASS
 };
 
+// This assertion lets us allocate by index and assume we know the capacity.
 static_assert(
   kSizeIndex2PackedArrayCapacity[PackedArray::SmallSizeIndex]
     == PackedArray::SmallSize,
   "SmallSizeIndex must be MM size class index for array of SmallSize"
 );
 
-// MaxSizeIndex corresponds to HashTableCommon::MaxSize - 1 (which is the same
-// as MixedArray::MaxSize - 1) because HashTableCommon::MaxSize - 1 exactly fits
-// into a MM size class, PackedArray::capacity is a function of MM size class,
-// and we can't allow a capacity > MaxSize since most operations only check
-// that size <= capacity stays true (and don't explicitly check size <= MaxSize)
-static_assert(
-  kSizeIndex2PackedArrayCapacity[PackedArray::MaxSizeIndex]
-    == array::HashTableCommon::MaxSize - 1,
-  "MaxSizeIndex must be the largest possible size class index for PackedArrays"
-);
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE TypedValue* PackedArray::entries(ArrayData* arr) {
+  assertx(stores_typed_values);
+  return reinterpret_cast<TypedValue*>(arr + 1);
+}
+
+ALWAYS_INLINE ptrdiff_t PackedArray::entriesOffset() {
+  return sizeof(ArrayData);
+}
 
 ALWAYS_INLINE
-size_t PackedArray::capacityToSizeIndex(size_t cap) {
-  if (cap <= PackedArray::SmallSize) {
+size_t PackedArray::capacityToSizeBytes(size_t capacity) {
+  const auto base = sizeof(ArrayData);
+  if constexpr (stores_typed_values) {
+    return base + capacity * sizeof(TypedValue);
+  }
+  // When we use the PackedBlock layout, we can store each entry in 9 bytes
+  // (1 byte for the type and 8 bytes for the value), but we must round up to
+  // a multiple of 8 to handle the leftover types.
+  //
+  // We round to up to a multiple of 16 since our allocations are aligned.
+  auto const size = base + capacity * (sizeof(DataType) + sizeof(Value));
+  return (size + 15) & size_t(-16);
+}
+
+ALWAYS_INLINE
+size_t PackedArray::capacityToSizeIndex(size_t capacity) {
+  if (capacity <= PackedArray::SmallSize) {
     return PackedArray::SmallSizeIndex;
   }
-  auto const sizeIndex = MemoryManager::size2Index(
-    sizeof(ArrayData) + cap * sizeof(TypedValue)
-  );
-  assertx(sizeIndex <= PackedArray::MaxSizeIndex);
-  return sizeIndex;
+  const auto index = MemoryManager::size2Index(capacityToSizeBytes(capacity));
+  assertx(index <= PackedArray::MaxSizeIndex);
+  return index;
 }
 
 ALWAYS_INLINE
@@ -126,8 +138,15 @@ uint8_t PackedArray::sizeClass(const ArrayData* ad) {
 
 inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assertx(checkInvariants(a));
-  auto data = packedData(a);
-  scanner.scan(*data, a->size() * sizeof(*data));
+  if constexpr (stores_typed_values) {
+    const auto* data = PackedArray::entries(const_cast<ArrayData*>(a));
+    scanner.scan(*data, a->size() * sizeof(*data));
+  } else {
+    for (uint32_t i = 0; i < a->size(); ++i) {
+      const auto lval = LvalUncheckedInt(const_cast<ArrayData*>(a), i);
+      if (isRefcountedType(type(lval))) scanner.scan(val(lval).pcnt);
+    }
+  }
 }
 
 template <class F, bool inc>

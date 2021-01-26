@@ -29,7 +29,6 @@
 #include <memory>
 #include <sys/stat.h>
 
-#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"

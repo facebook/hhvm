@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/coeffects.h"
 
+#include "hphp/runtime/base/coeffects-config.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

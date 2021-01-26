@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {

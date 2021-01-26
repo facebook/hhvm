@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/runtime-error.h"

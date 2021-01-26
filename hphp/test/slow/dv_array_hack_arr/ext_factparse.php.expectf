@@ -72,7 +72,7 @@ dict(3) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
-        int(2)
+        int(0)
         ["kindOf"]=>
         string(4) "enum"
         ["name"]=>
@@ -288,7 +288,7 @@ dict(3) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
-        int(2)
+        int(0)
         ["kindOf"]=>
         string(4) "enum"
         ["name"]=>
@@ -504,7 +504,7 @@ dict(3) {
           string(14) "HH\BuiltinEnum"
         }
         ["flags"]=>
-        int(2)
+        int(0)
         ["kindOf"]=>
         string(4) "enum"
         ["name"]=>

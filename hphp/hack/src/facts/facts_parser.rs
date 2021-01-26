@@ -336,12 +336,22 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
             tf.require_extends.append(&mut delta.require_extends);
             tf.require_implements.append(&mut delta.require_implements);
         })
-        .or_insert_with(|| {
-            if let TypeKind::Enum = delta.kind {
-                delta.base_types.insert("HH\\BuiltinEnum".into());
+        .or_insert(delta);
+}
+
+fn use_clauses_into_facts(
+    use_clauses: Node,
+    enum_facts: &mut TypeFacts,
+    namespace: &str,
+    namespaced_xhp: bool,
+) {
+    if let Node::List(use_clauses_node) = use_clauses {
+        for use_clause_node in use_clauses_node {
+            if let Node::EnumUseClause(uses) = use_clause_node {
+                typenames_from_list(*uses, namespace, &mut enum_facts.base_types, namespaced_xhp);
             }
-            delta
-        });
+        }
+    }
 }
 
 type CollectAcc = (String, Facts, bool);
@@ -354,15 +364,40 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         EnumDecl(decl) => {
             if let Some(name) = qualified_name(&acc.0, decl.name, acc.2) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
-                let enum_facts = TypeFacts {
-                    flags: Flag::Final as isize,
+                let mut enum_facts = TypeFacts {
+                    flags: Flag::default(),
                     kind: TypeKind::Enum,
                     attributes,
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                 };
+                use_clauses_into_facts(decl.use_clauses, &mut enum_facts, &acc.0, acc.2);
+                enum_facts.base_types.insert("HH\\BuiltinEnum".into());
                 add_or_update_classish_decl(name, enum_facts, &mut acc.1.types);
+            }
+        }
+        EnumClassDecl(decl) => {
+            if let Some(name) = qualified_name(&acc.0, decl.name, acc.2) {
+                let attributes = attributes_into_facts(&acc.0, decl.attributes);
+                let mut enum_class_facts = TypeFacts {
+                    flags: Flag::default(),
+                    kind: TypeKind::Enum,
+                    attributes,
+                    base_types: StringSet::new(),
+                    require_extends: StringSet::new(),
+                    require_implements: StringSet::new(),
+                };
+                typenames_from_list(
+                    decl.extends,
+                    &acc.0,
+                    &mut enum_class_facts.base_types,
+                    acc.2,
+                );
+                enum_class_facts
+                    .base_types
+                    .insert("HH\\BuiltinEnumClass".into());
+                add_or_update_classish_decl(name, enum_class_facts, &mut acc.1.types);
             }
         }
         FunctionDecl(name) => {

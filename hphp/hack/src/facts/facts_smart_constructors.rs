@@ -79,7 +79,9 @@ pub enum Node {
     ClassDecl(Box<ClassDeclChildren>),
     FunctionDecl(Box<Node>),
     MethodDecl(Box<Node>),
+    EnumUseClause(Box<Node>),
     EnumDecl(Box<EnumDeclChildren>),
+    EnumClassDecl(Box<EnumClassDeclChildren>),
     TraitUseClause(Box<Node>),
     RequireExtendsClause(Box<Node>),
     RequireImplementsClause(Box<Node>),
@@ -107,7 +109,14 @@ pub struct ClassDeclChildren {
 pub struct EnumDeclChildren {
     pub name: Node,
     pub attributes: Node,
-    pub includes: Node,
+    pub use_clauses: Node,
+}
+
+#[derive(Debug)]
+pub struct EnumClassDeclChildren {
+    pub name: Node,
+    pub attributes: Node,
+    pub extends: Node,
 }
 
 #[derive(Debug)]
@@ -281,6 +290,13 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         class_type
     }
 
+    fn make_enum_use(&mut self, _keyword: Self::R, names: Self::R, _semicolon: Self::R) -> Self::R {
+        match names {
+            Node::Ignored => Node::Ignored,
+            _ => Node::EnumUseClause(Box::new(names)),
+        }
+    }
+
     fn make_enum_declaration(
         &mut self,
         attributes: Self::R,
@@ -290,7 +306,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _base: Self::R,
         _type: Self::R,
         _left_brace: Self::R,
-        _use_clauses: Self::R,
+        use_clauses: Self::R,
         _enumerators: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
@@ -299,7 +315,31 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             _ => Node::EnumDecl(Box::new(EnumDeclChildren {
                 name,
                 attributes,
-                includes: Node::List(vec![]), /* TODO[T83319054]: enum inclusion is not exported into facts yet */
+                use_clauses,
+            })),
+        }
+    }
+
+    fn make_enum_class_declaration(
+        &mut self,
+        attributes: Self::R,
+        _enum_keyword: Self::R,
+        _class_keyword: Self::R,
+        name: Self::R,
+        _colon: Self::R,
+        _base: Self::R,
+        _extends_keyword: Self::R,
+        extends_list: Self::R,
+        _left_brace: Self::R,
+        _elements: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
+        match name {
+            Node::Ignored => Node::Ignored,
+            _ => Node::EnumClassDecl(Box::new(EnumClassDeclChildren {
+                name,
+                attributes,
+                extends: extends_list,
             })),
         }
     }

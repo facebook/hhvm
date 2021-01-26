@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "thrift/lib/cpp2/async/RequestCallback.h"
+#include "thrift/lib/cpp2/async/RequestChannel.h"
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,38 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      int options);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct InteractionId {
+  static Object newInstance() { return Object{PhpClass()}; }
+
+  static Class* PhpClass();
+
+  ~InteractionId() { sweep(); }
+
+  void sweep() {
+    if (interactionId_) {
+      channel_->terminateInteraction(std::move(interactionId_));
+      channel_.reset();
+    }
+  }
+
+  void attach(
+      const std::shared_ptr<apache::thrift::RequestChannel>& channel,
+      apache::thrift::InteractionId&& id) {
+    channel_ = channel;
+    interactionId_ = std::move(id);
+  }
+
+  const apache::thrift::InteractionId& getInteractionId() const {
+    return interactionId_;
+  }
+
+  private:
+  apache::thrift::InteractionId interactionId_;
+  std::shared_ptr<apache::thrift::RequestChannel> channel_;
+};
+
+/////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_RpcOptions("RpcOptions");
 

@@ -41,6 +41,11 @@ function thrift_protocol_read_compact_struct(object $transportobj,
                                              string $obj_typename,
                                              int $options = 0): object;
 
+<<__NativeData("InteractionId")>>
+class InteractionId {
+  private function __construct(): void {}
+}
+
 <<__NativeData("RpcOptions")>>
 final class RpcOptions {
   public function __construct(): void {}
@@ -74,6 +79,9 @@ final class RpcOptions {
 
   <<__Native>>
   public function setProcessingTimeout(int $processing_timeout): RpcOptions;
+
+  <<__Native>>
+  public function setInteractionId(InteractionId $interaction_id): RpcOptions;
 
   <<__Native>>
   public function __toString(): string;

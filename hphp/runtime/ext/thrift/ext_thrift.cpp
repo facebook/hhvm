@@ -23,6 +23,14 @@ namespace HPHP { namespace thrift {
 
 const int64_t k_THRIFT_MARK_LEGACY_ARRAYS = 1LL << 0;
 
+const StaticString s_InteractionId("InteractionId");
+
+Class* InteractionId::PhpClass() {
+  Class* c_InteractionId = Class::lookup(s_InteractionId.get());
+  assert(c_InteractionId);
+  return c_InteractionId;
+}
+
 Class* RpcOptions::c_RpcOptions = nullptr;
 
 Object HHVM_METHOD(RpcOptions, setChunkBufferSize, int64_t chunk_buffer_size) {
@@ -88,6 +96,13 @@ Object HHVM_METHOD(RpcOptions, setProcessingTimeout, int64_t processing_timeout)
   return Object(this_);
 }
 
+Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
+  auto data = RpcOptions::GetDataOrThrowException(this_);
+  auto interaction = Native::data<InteractionId>(interaction_id.get());
+  data->rpcOptions.setInteractionId(interaction->getInteractionId());
+  return Object(this_);
+}
+
 String HHVM_METHOD(RpcOptions, __toString) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   std::string result("RpcOptions(");
@@ -100,6 +115,8 @@ String HHVM_METHOD(RpcOptions, __toString) {
     std::to_string(data->rpcOptions.getOverallTimeout().count()) + "ms; ";
   result += "processingTimeout: " +
     std::to_string(data->rpcOptions.getProcessingTimeout().count()) + "ms; ";
+  result += "interactionId: " +
+    std::to_string(data->rpcOptions.getInteractionId()) + "; ";
   result += "headers: {";
   bool first = true;
   for (const auto& it : data->rpcOptions.getWriteHeaders()) {
@@ -139,7 +156,10 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setLoggingContext);
     HHVM_ME(RpcOptions, setOverallTimeout);
     HHVM_ME(RpcOptions, setProcessingTimeout);
+    HHVM_ME(RpcOptions, setInteractionId);
     HHVM_ME(RpcOptions, __toString);
+
+    Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());
 
     loadSystemlib("thrift");
   }

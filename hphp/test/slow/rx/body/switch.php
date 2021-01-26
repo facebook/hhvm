@@ -1,7 +1,6 @@
 <?hh
 
-<<__Rx>>
-function test_switch_with_default(int $x): int {
+function test_switch_with_default(int $x)[rx]: int {
   switch ($x) {
     case 0: return 5;
     case 1: return 6;
@@ -9,8 +8,7 @@ function test_switch_with_default(int $x): int {
   }
 }
 
-<<__Rx>>
-function test_switch_no_default(int $x): int {
+function test_switch_no_default(int $x)[rx]: int {
   try {
     switch ($x) {
       case 0: return 5;

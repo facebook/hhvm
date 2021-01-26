@@ -1,23 +1,20 @@
 <?hh
 
-<<__Rx>>
-function test_inout(inout bool $x) {
+function test_inout(inout bool $x)[rx] {
   $x = false;
 }
 
 class C {
   public $p;
 
-  <<__Rx>>
-  public function ok_base() {
+  public function ok_base()[rx] {
     $a = darray[1 => true];
     $x1 = $a[1]; // BaseL
     $x2 = (darray[1 => true])[1]; // BaseC
     $x3 = $this->p; // BaseH
   }
 
-  <<__Rx>>
-  public function ok_dim() {
+  public function ok_dim()[rx] {
     $a = darray[1 => darray[2 => true], 'two' => darray[2 => true]];
     $p = new stdClass();
     $p->q = true;
@@ -89,8 +86,7 @@ class C {
     unset($this->{__hhvm_intrinsics\launder_value('p')}[2]);
   }
 
-  <<__Rx>>
-  public function ok_final() {
+  public function ok_final()[rx] {
     $io1 = new stdClass();
     $io1->i = 1;
     $a = darray['a' => darray['i' => 1], 'o' => $io1];

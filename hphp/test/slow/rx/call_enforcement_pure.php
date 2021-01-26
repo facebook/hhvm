@@ -4,18 +4,15 @@ function non_rx($fn) {
   if ($fn) $fn(null);
 }
 
-<<__RxLocal>>
-function rx_local($fn) {
+function rx_local($fn)[rx_local] {
   if ($fn) $fn(null);
 }
 
-<<__RxShallow>>
-function rx_shallow($fn) {
+function rx_shallow($fn)[rx_shallow] {
   if ($fn) $fn(null);
 }
 
-<<__Rx>>
-function rx($fn) {
+function rx($fn)[rx] {
   if ($fn) $fn(null);
 }
 

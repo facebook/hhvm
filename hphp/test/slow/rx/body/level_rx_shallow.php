@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint, __RxShallow>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx_shallow] {
   echo "Un-oh\n";
 }

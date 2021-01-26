@@ -2,8 +2,7 @@
 
 class C { public static $p; }
 
-<<__Rx>>
-function test() {
+function test()[rx] {
   C::$p['a'] = 'b';
 }
 

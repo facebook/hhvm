@@ -3,8 +3,7 @@
 class C {
   public $p;
 
-  <<__Rx>>
-  public function bad() {
+  public function bad()[rx] {
     $this->p = new stdClass();
 
     $this->p->q++;

@@ -1,7 +1,7 @@
 <?hh
 
-<<__Rx>>        function rx_caller($c)      { return $c(); }
-<<__RxShallow>> function shallow_caller($c) { return $c(); }
+<<__Rx>>        function rx_caller($c)[rx]      { return $c(); }
+<<__RxShallow>> function shallow_caller($c)[rx_shallow] { return $c(); }
 
 function check_rx_level($name, $c) {
   echo $name;
@@ -19,19 +19,16 @@ function check_rx_level($name, $c) {
 }
 
 
-<<__Rx>>
-function create_php_anon_function() {
+function create_php_anon_function()[rx] {
   return function () { return 1; };
 }
 
-<<__Rx>>
-function create_php_closure() {
+function create_php_closure()[rx] {
   $x = 1;
   return function () use ($x) { return $x; };
 }
 
-<<__Rx>>
-function create_short_lambda() {
+function create_short_lambda()[rx] {
   $x = 1;
   return () ==> { return $x; };
 }
@@ -43,8 +40,7 @@ function test_closure_types() {
 }
 
 
-<<__Rx>>
-async function check_async_block() {
+async function check_async_block()[rx] {
   // we can't defer invoking an async block so we have to test it differently
   return await async { return 1; };
 }
@@ -57,13 +53,11 @@ async function test_async_block() {
 
 
 class C {
-  <<__Rx>>
-  public static function create_closure_in_static_method() {
+  public static function create_closure_in_static_method()[rx] {
     return () ==> { return 1; };
   }
 
-  <<__Rx>>
-  public function create_closure_in_instance_method() {
+  public function create_closure_in_instance_method()[rx] {
     return () ==> { return 1; };
   }
 }
@@ -80,8 +74,7 @@ function test_closure_from_method() {
 }
 
 
-<<__Rx>>
-function create_nested_closure() {
+function create_nested_closure()[rx] {
   $x = 1;
   $c = () ==> {
     return () ==> { return $x; };
@@ -89,8 +82,7 @@ function create_nested_closure() {
   return $c();
 }
 
-<<__Rx>>
-function create_nested_closure_with_override() {
+function create_nested_closure_with_override()[rx] {
   $x = 1;
   $c = () ==> {
     return <<__RxShallow>> () ==> { return $x; };
@@ -98,8 +90,7 @@ function create_nested_closure_with_override() {
   return $c();
 }
 
-<<__Rx>>
-function create_nested_closure_with_override_to_nonrx() {
+function create_nested_closure_with_override_to_nonrx()[rx] {
   $x = 1;
   $c = () ==> {
     return <<__NonRx>> () ==> { return $x; };
@@ -107,8 +98,7 @@ function create_nested_closure_with_override_to_nonrx() {
   return $c();
 }
 
-<<__Rx>>
-function create_nested_closure_with_override_to_nonrx_and_more_nesting() {
+function create_nested_closure_with_override_to_nonrx_and_more_nesting()[rx] {
   $x = 1;
   $c = () ==> {
     return <<__NonRx>> () ==> {

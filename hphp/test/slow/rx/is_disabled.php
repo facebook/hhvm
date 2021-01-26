@@ -1,7 +1,6 @@
 <?hh
 
-<<__Rx>>
-function react() {
+function react()[rx] {
   if (Rx\IS_ENABLED) {
     // can't have side effects
     return 0;

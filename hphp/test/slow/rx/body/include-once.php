@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function test() {
+<<__EntryPoint>>
+function test()[rx] {
   include_once 'requires-includes.inc';
 }

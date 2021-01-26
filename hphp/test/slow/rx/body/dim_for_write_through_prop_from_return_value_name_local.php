@@ -1,14 +1,13 @@
 <?hh
 
-<<__Rx>>
-function returns_object() {
+function returns_object()[rx] {
   $o = new stdClass();
   $o->p = darray[5 => true];
   return $o;
 }
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   $lp = 'p';
   returns_object()->{$lp}[5] = false;
 }

@@ -3,24 +3,20 @@
 class Foo {
   private int $bar = 0;
 
-  <<__Rx>>
-  public static function get(): Foo {
+  public static function get()[rx]: Foo {
     return new Foo();
   }
 
-  <<__Rx>>
-  public function getBar(): int {
+  public function getBar()[rx]: int {
     return $this->bar;
   }
 
-  <<__Rx>>
-  public function setBar(int $bar): void {
+  public function setBar(int $bar)[rx]: void {
     $this->bar = $bar;
   }
 }
 
-<<__Rx>>
-function main(): void {
+function main()[rx]: void {
   $mutable = HH\Rx\mutable(Foo::get());
   $mutable->setBar(42);
   HH\Rx\freeze($mutable);

@@ -2,7 +2,7 @@
 
 class C { public static $p; }
 
-<<__EntryPoint, __Rx>>
-function test() {
+<<__EntryPoint>>
+function test()[rx] {
   C::$p *= 2;
 }

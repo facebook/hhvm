@@ -1,11 +1,10 @@
 <?hh
 
-<<__Rx>>
-function returns_object() {
+function returns_object()[rx] {
   return new stdClass();
 }
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   returns_object()->q *= 2;
 }

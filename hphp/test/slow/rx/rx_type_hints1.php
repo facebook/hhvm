@@ -1,36 +1,30 @@
 <?hh
 
-<<__Rx>>
-function rx(Rx<(function(): int)> $a): int {
+function rx(Rx<(function(): int)> $a)[rx]: int {
   return $a();
 }
 
-<<__RxLocal>>
-function local(RxLocal<(function(): int)> $a): int {
+function local(RxLocal<(function(): int)> $a)[rx_local]: int {
   return $a();
 }
 
-<<__RxShallow>>
-function shallow(RxShallow<(function(): int)> $a): int {
+function shallow(RxShallow<(function(): int)> $a)[rx_shallow]: int {
   return $a();
 }
 
-<<__Rx>>
-function returnsrx(): Rx<(function(): int)> {
+function returnsrx()[rx]: Rx<(function(): int)> {
   return () ==> 1;
 }
 
 class A {
-  <<__Rx>>
-  public function f(): void {
+  public function f()[rx]: void {
   }
 }
 
-<<__Rx>>
 function f(
   Rx<(function (Mutable<A>): void)> $f1,
   Rx<(function (MaybeMutable<A>): void)> $f2,
-  Rx<(function (OwnedMutable<A>): void)> $f3): void {
+  Rx<(function (OwnedMutable<A>): void)> $f3)[rx]: void {
   $a = \HH\Rx\mutable(new A());
   $f1($a);
   $f2($a);
@@ -38,7 +32,7 @@ function f(
 }
 
 <<__RxLocal, __EntryPoint>>
-function g(): void {
+function g()[rx_local]: void {
   rx(<<__Rx>>() ==> 1);
   local(<<__RxLocal>>() ==> 1);
   shallow(<<__RxShallow>>() ==> 1);

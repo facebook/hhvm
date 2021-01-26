@@ -13,11 +13,10 @@ class A {
   }
 }
 
-<<__Rx>>
 function f(
   Pure<(function (Mutable<A>): void)> $f1,
   Pure<(function (MaybeMutable<A>): void)> $f2,
-  Pure<(function (OwnedMutable<A>): void)> $f3): void {
+  Pure<(function (OwnedMutable<A>): void)> $f3)[rx]: void {
   $a = \HH\Rx\mutable(new A());
   $f1($a);
   $f2($a);
@@ -25,7 +24,7 @@ function f(
 }
 
 <<__RxLocal, __EntryPoint>>
-function g(): void {
+function g()[rx_local]: void {
   pure(()[] ==> 1);
   pure(returnspure());
 

@@ -19,15 +19,15 @@ rx -> rx_shallow: ok
 rx -> rx: ok
 rx -> pure: ok
 
-Warning: Call to non_rx() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 23
+Warning: Call to non_rx() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 20
 pure -> non_rx: ok
 
-Warning: Call to rx_local() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 23
+Warning: Call to rx_local() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 20
 pure -> rx_local: ok
 
-Warning: Call to rx_shallow() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 23
+Warning: Call to rx_shallow() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 20
 pure -> rx_shallow: ok
 
-Warning: Call to rx() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 23
+Warning: Call to rx() requires [defaults] coeffects but pure() provided [] in %s/test/slow/rx/call_enforcement_pure_soft.php on line 20
 pure -> rx: ok
 pure -> pure: ok

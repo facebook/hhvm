@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   echo "Problem\n";
 }

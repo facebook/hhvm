@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function main() {
+<<__EntryPoint>>
+function main()[rx] {
   echo "WARN\n";
 }

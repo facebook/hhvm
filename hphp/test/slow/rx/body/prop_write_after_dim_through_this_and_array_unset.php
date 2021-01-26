@@ -3,8 +3,7 @@
 class C {
   public $p;
 
-  <<__Rx>>
-  public function bad() {
+  public function bad()[rx] {
     $io = new stdClass();
     $this->p = darray[2 => $io];
 

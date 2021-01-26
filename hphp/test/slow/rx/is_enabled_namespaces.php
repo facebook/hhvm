@@ -5,8 +5,7 @@
 // runtime. Test this here.
 
 namespace Unrelated {
-  <<__Rx>>
-  function test_explicit() {
+  function test_explicit()[rx] {
     if (\HH\Rx\IS_ENABLED) {
       return true;
     } else {
@@ -15,8 +14,7 @@ namespace Unrelated {
     }
   }
 
-  <<__Rx>>
-  function test_autoimported() {
+  function test_autoimported()[rx] {
     if (Rx\IS_ENABLED) {
       return true;
     } else {
@@ -27,8 +25,7 @@ namespace Unrelated {
 }
 
 namespace HH {
-  <<__Rx>>
-  function test_explicit() {
+  function test_explicit()[rx] {
     if (\HH\Rx\IS_ENABLED) {
       return true;
     } else {
@@ -37,8 +34,7 @@ namespace HH {
     }
   }
 
-  <<__Rx>>
-  function test_implicit() {
+  function test_implicit()[rx] {
     if (Rx\IS_ENABLED) {
       return true;
     } else {
@@ -49,8 +45,7 @@ namespace HH {
 }
 
 namespace HH\Rx {
-  <<__Rx>>
-  function test_explicit() {
+  function test_explicit()[rx] {
     if (\HH\Rx\IS_ENABLED) {
       return true;
     } else {
@@ -59,8 +54,7 @@ namespace HH\Rx {
     }
   }
 
-  <<__Rx>>
-  function test_implicit() {
+  function test_implicit()[rx] {
     if (IS_ENABLED) {
       return true;
     } else {
@@ -69,8 +63,7 @@ namespace HH\Rx {
     }
   }
 
-  <<__Rx>>
-  function test_autoimported() {
+  function test_autoimported()[rx] {
     if (Rx\IS_ENABLED) {
       return true;
     } else {
@@ -81,8 +74,7 @@ namespace HH\Rx {
 }
 
 namespace {
-  <<__Rx>>
-  function test_explicit() {
+  function test_explicit()[rx] {
     if (\HH\Rx\IS_ENABLED) {
       return true;
     } else {
@@ -91,8 +83,7 @@ namespace {
     }
   }
 
-  <<__Rx>>
-  function test_autoimported() {
+  function test_autoimported()[rx] {
     if (Rx\IS_ENABLED) {
       return true;
     } else {

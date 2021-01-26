@@ -1,7 +1,7 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   $io = new stdClass();
   $a = darray['o' => $io];
 

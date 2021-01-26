@@ -1,13 +1,12 @@
 <?hh
 
-<<__Rx>>
-function returns_object() {
+function returns_object()[rx] {
   $o = new stdClass();
   $o->p = darray[5 => true];
   return $o;
 }
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   unset(returns_object()->{__hhvm_intrinsics\launder_value('p')}[5]);
 }

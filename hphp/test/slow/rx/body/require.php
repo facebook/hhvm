@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function test() {
+<<__EntryPoint>>
+function test()[rx] {
   require 'requires-includes.inc';
 }

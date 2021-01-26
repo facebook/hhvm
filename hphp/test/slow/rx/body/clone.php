@@ -1,7 +1,7 @@
 <?hh
 
-<<__EntryPoint, __Rx>>
-function bad() {
+<<__EntryPoint>>
+function bad()[rx] {
   $x = new stdClass();
 
   $y = clone $x;

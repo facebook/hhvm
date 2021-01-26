@@ -28,7 +28,7 @@ namespace HH {
  * Construct it with a `Traversable`:
  *
  * ```
- * $a = array('a' => 1, 'b' => 2);
+ * $a = dict['a' => 1, 'b' => 2];
  * $fm = new ImmMap($a);
  * ```
  *

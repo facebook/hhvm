@@ -33,7 +33,7 @@ namespace HH {
  * construct it with a `Traversable`:
  *
  * ```
- * $a = array(1, 2, 3);
+ * $a = vec[1, 2, 3];
  * $fv = new ImmVector($a);
  * ```
  *

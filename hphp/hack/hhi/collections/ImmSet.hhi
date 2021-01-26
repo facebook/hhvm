@@ -29,7 +29,7 @@ namespace HH {
  * Construct it with a `Traversable`:
  *
  * ```
- * $a = array(1, 2);
+ * $a = vec[1, 2];
  * $s = new ImmSet($a);
  * ```
  *

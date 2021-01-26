@@ -19,14 +19,14 @@ use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
 #[no_mangle]
 pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
-    disable_xhp_element_mangling: usize,
+    bool_opts: usize,
     filename_ptr: usize,
     text_ptr: usize,
     ns_map_ptr: usize,
     include_hash: usize,
 ) -> usize {
     fn inner(
-        disable_xhp_element_mangling: usize,
+        bool_opts: usize,
         filename_ptr: usize,
         text_ptr: usize,
         ns_map_ptr: usize,
@@ -36,8 +36,8 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
         let include_hash = unsafe { bool::from_ocaml(include_hash).unwrap() };
 
         // SAFETY: We trust we've been handed a valid, immutable OCaml value
-        let disable_xhp_element_mangling =
-            unsafe { bool::from_ocaml(disable_xhp_element_mangling).unwrap() };
+        let (disable_xhp_element_mangling, array_unification) =
+            unsafe { <(bool, bool)>::from_ocaml(bool_opts).unwrap() };
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
@@ -58,6 +58,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
 
                 let (decls, mode) = parse_decls_and_mode(
                     disable_xhp_element_mangling,
+                    array_unification,
                     filename,
                     &text,
                     &ns_map,
@@ -113,13 +114,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
         }
     }
     ocamlrep_ocamlpool::catch_unwind(|| {
-        inner(
-            disable_xhp_element_mangling,
-            filename_ptr,
-            text_ptr,
-            ns_map_ptr,
-            include_hash,
-        )
+        inner(bool_opts, filename_ptr, text_ptr, ns_map_ptr, include_hash)
     })
 }
 

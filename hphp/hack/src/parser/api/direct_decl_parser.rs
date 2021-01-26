@@ -34,6 +34,7 @@ pub fn parse_script<'a>(
         &source,
         mode,
         env.disable_xhp_element_mangling,
+        env.array_unification,
         auto_namespace_map,
         arena,
     );

@@ -137,6 +137,11 @@ let disallow_fun_and_cls_meth_pseudo_funcs =
 let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
   { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
 
+let array_unification = GlobalOptions.po_array_unification
+
+let with_array_unification po b =
+  { po with GlobalOptions.po_array_unification = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -164,7 +169,8 @@ let make
     ~disable_array
     ~disable_array_typehint
     ~disallow_hash_comments
-    ~disallow_fun_and_cls_meth_pseudo_funcs =
+    ~disallow_fun_and_cls_meth_pseudo_funcs
+    ~array_unification =
   GlobalOptions.
     {
       default with
@@ -196,11 +202,13 @@ let make
       po_disallow_hash_comments = disallow_hash_comments;
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
+      po_array_unification = array_unification;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -243,4 +251,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_array_typehint po,
     allow_unstable_features po,
     disallow_hash_comments po,
-    disallow_fun_and_cls_meth_pseudo_funcs po )
+    disallow_fun_and_cls_meth_pseudo_funcs po,
+    array_unification po )

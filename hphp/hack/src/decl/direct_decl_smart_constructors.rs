@@ -66,6 +66,7 @@ pub struct DirectDeclSmartConstructors<'a> {
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub disable_xhp_element_mangling: bool,
+    pub array_unification: bool,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -80,6 +81,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         src: &SourceText<'a>,
         file_mode: Mode,
         disable_xhp_element_mangling: bool,
+        array_unification: bool,
         auto_namespace_map: &'a NamespaceMap,
         arena: &'a Bump,
     ) -> Self {
@@ -96,6 +98,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             filename: arena.alloc(filename),
             file_mode,
             disable_xhp_element_mangling,
+            array_unification,
             decls: Decls::empty(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
                 auto_namespace_map,

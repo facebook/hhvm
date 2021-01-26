@@ -13,7 +13,8 @@ let popt
     ~auto_namespace_map
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
-    ~enable_enum_classes =
+    ~enable_enum_classes
+    ~array_unification =
   let po = ParserOptions.default in
   let po =
     ParserOptions.with_disable_xhp_element_mangling
@@ -25,6 +26,7 @@ let popt
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
   in
   let po = ParserOptions.with_enable_enum_classes po enable_enum_classes in
+  let po = ParserOptions.with_array_unification po array_unification in
   po
 
 let init root popt : Provider_context.t =
@@ -96,8 +98,14 @@ let compare_decls ctx fn text =
   let disable_xhp_element_mangling =
     ParserOptions.disable_xhp_element_mangling popt
   in
+  let array_unification = ParserOptions.array_unification popt in
   let decls =
-    parse_decls_ffi disable_xhp_element_mangling fn text auto_namespace_map
+    parse_decls_ffi
+      disable_xhp_element_mangling
+      array_unification
+      fn
+      text
+      auto_namespace_map
   in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
@@ -148,6 +156,7 @@ let () =
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
   let enable_enum_classes = ref false in
+  let array_unification = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -178,6 +187,10 @@ let () =
       ( "--enable-enum-classes",
         Arg.Set enable_enum_classes,
         "Enable the enum classes extension." );
+      ( "--array-unification",
+        Arg.Set array_unification,
+        "Treat varray as vec, darray as dict, TODO varray_or_darray as vec_or_dict"
+      );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -245,12 +258,14 @@ let () =
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
         let enable_enum_classes = !enable_enum_classes in
+        let array_unification = !array_unification in
         let popt =
           popt
             ~auto_namespace_map
             ~enable_xhp_class_modifier
             ~disable_xhp_element_mangling
             ~enable_enum_classes
+            ~array_unification
         in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in

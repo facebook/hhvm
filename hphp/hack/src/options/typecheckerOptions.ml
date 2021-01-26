@@ -168,3 +168,5 @@ let report_pos_from_reason = GlobalOptions.tco_report_pos_from_reason
 let enable_sound_dynamic = GlobalOptions.tco_enable_sound_dynamic
 
 let use_direct_decl_parser = GlobalOptions.tco_use_direct_decl_parser
+
+let array_unification = GlobalOptions.po_array_unification

@@ -47,11 +47,13 @@ type t = {
   type_path_and_kind_cache:
     (Relative_path.t * Naming_types.kind_of_type) option String.Table.t;
   disable_xhp_element_mangling: bool;
+  array_unification: bool;
 }
 
 let from_raw_client
     (client : Decl_ipc_ffi_externs.decl_client)
     (disable_xhp_element_mangling : bool)
+    (array_unification : bool)
     (ns_map : (string * string) list) : t =
   {
     client;
@@ -61,6 +63,7 @@ let from_raw_client
     fun_path_cache = String.Table.create ();
     type_path_and_kind_cache = String.Table.create ();
     disable_xhp_element_mangling;
+    array_unification;
   }
 
 (* HACK: The decl service just stores the decl (rather than a decl option),
@@ -244,6 +247,7 @@ let parse_and_cache_decls_in
   let decls =
     Direct_decl_parser.parse_decls_ffi
       t.disable_xhp_element_mangling
+      t.array_unification
       filename
       contents
       t.ns_map

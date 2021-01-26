@@ -295,6 +295,8 @@ type t = {
   tco_ifc_enabled: string list;
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
+  (* Treat varray as vec, dict as dict, TODO varray_or_darray as vec_or_dict *)
+  po_array_unification: bool;
 }
 [@@deriving eq, show]
 
@@ -409,6 +411,7 @@ val make :
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
+  ?po_array_unification:bool ->
   unit ->
   t
 
@@ -661,3 +664,5 @@ val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 val tco_use_direct_decl_parser : t -> bool
 
 val po_enable_enum_supertyping : t -> bool
+
+val po_array_unification : t -> bool

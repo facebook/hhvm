@@ -85,9 +85,10 @@ let direct_decl_parse_and_cache ?(decl_hash = false) ctx file =
     let disable_xhp_element_mangling =
       ParserOptions.disable_xhp_element_mangling popt
     in
+    let array_unification = ParserOptions.array_unification popt in
     let (decls, mode, hash) =
       Direct_decl_parser.parse_decls_and_mode_ffi
-        disable_xhp_element_mangling
+        (disable_xhp_element_mangling, array_unification)
         file
         contents
         ns_map

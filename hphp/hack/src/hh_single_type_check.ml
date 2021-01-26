@@ -277,6 +277,7 @@ let parse_options () =
   let use_direct_decl_parser = ref false in
   let enable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
+  let array_unification = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -640,6 +641,9 @@ let parse_options () =
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         "Enable the enum supertyping extension." );
+      ( "--array-unification",
+        Arg.Set array_unification,
+        "Varray and darray become vec and dict." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -773,6 +777,7 @@ let parse_options () =
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:!enable_enum_classes
       ~po_enable_enum_supertyping:!enable_enum_supertyping
+      ~po_array_unification:!array_unification
       ()
   in
   Errors.allowed_fixme_codes_strict :=

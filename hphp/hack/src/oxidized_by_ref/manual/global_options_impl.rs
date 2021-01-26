@@ -117,6 +117,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_use_direct_decl_parser: false,
     tco_ifc_enabled: &[],
     po_enable_enum_supertyping: false,
+    po_array_unification: false,
 };
 
 impl GlobalOptions<'static> {

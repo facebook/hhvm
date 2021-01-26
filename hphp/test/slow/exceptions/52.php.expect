@@ -7,14 +7,14 @@ varray(2) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(3) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
     ["file"]=>
     string(6) "string"

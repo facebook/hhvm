@@ -3,7 +3,7 @@ varray(4) {
     ["function"]=>
     string(12) "my_generator"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(7) {
@@ -21,7 +21,7 @@ varray(4) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       NULL
     }
   }
@@ -33,14 +33,14 @@ varray(4) {
     ["function"]=>
     string(10) "my_wrapper"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(39) "entrypoint_debug_backtrace_continuation"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }
@@ -53,7 +53,7 @@ varray(4) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(7) {
@@ -71,7 +71,7 @@ varray(4) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       NULL
     }
   }
@@ -83,14 +83,14 @@ varray(4) {
     ["function"]=>
     string(16) "my_class_wrapper"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(39) "entrypoint_debug_backtrace_continuation"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }

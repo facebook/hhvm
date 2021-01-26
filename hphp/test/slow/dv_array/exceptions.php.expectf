@@ -7,14 +7,14 @@ varray(2) {
     ["function"]=>
     string(10) "throws_exn"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }
@@ -28,14 +28,14 @@ varray(3) {
     ["function"]=>
     string(13) "throws_my_exn"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }

@@ -36,7 +36,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => backtrace_print
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => 
                 )
@@ -48,7 +48,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => a
                     [1] => b
@@ -68,7 +68,7 @@ Array
                 )
 
             [type] => ->
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -83,7 +83,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -94,7 +94,7 @@ Array
     [4] => Array
         (
             [function] => entrypoint_debug_backtrace_options
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -109,7 +109,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => 18
             [function] => backtrace_print
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => 1
                 )
@@ -121,7 +121,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => a
                     [1] => b
@@ -141,7 +141,7 @@ Array
                 )
 
             [type] => ->
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -156,7 +156,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -167,7 +167,7 @@ Array
     [4] => Array
         (
             [function] => entrypoint_debug_backtrace_options
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -182,7 +182,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => 20
             [function] => backtrace_print
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => 0
                 )
@@ -194,7 +194,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => a
                     [1] => b
@@ -210,7 +210,7 @@ Array
             [function] => doCall
             [class] => foo
             [type] => ->
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -225,7 +225,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -236,7 +236,7 @@ Array
     [4] => Array
         (
             [function] => entrypoint_debug_backtrace_options
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -251,7 +251,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => 22
             [function] => backtrace_print
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => 1
                 )
@@ -263,7 +263,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => a
                     [1] => b
@@ -283,7 +283,7 @@ Array
                 )
 
             [type] => ->
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -298,7 +298,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
-            [args] => Array
+            [args] => Vec
                 (
                     [0] => doit
                     [1] => backtrace_print
@@ -309,7 +309,7 @@ Array
     [4] => Array
         (
             [function] => entrypoint_debug_backtrace_options
-            [args] => Array
+            [args] => Vec
                 (
                 )
 

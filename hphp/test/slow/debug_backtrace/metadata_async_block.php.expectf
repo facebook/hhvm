@@ -7,7 +7,7 @@ varray(6) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       int(0)
     }
   }
@@ -19,7 +19,7 @@ varray(6) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       int(0)
     }
   }
@@ -27,21 +27,21 @@ varray(6) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       object(HH\AsyncFunctionWaitHandle) (0) {
       }
     }
@@ -50,7 +50,7 @@ varray(6) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       function(main)
     }
   }
@@ -64,7 +64,7 @@ varray(6) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       int(65536)
     }
   }
@@ -76,7 +76,7 @@ varray(6) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       int(65536)
     }
     ["metadata"]=>
@@ -86,21 +86,21 @@ varray(6) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       object(HH\AsyncFunctionWaitHandle) (0) {
       }
     }
@@ -109,7 +109,7 @@ varray(6) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       function(main)
     }
   }

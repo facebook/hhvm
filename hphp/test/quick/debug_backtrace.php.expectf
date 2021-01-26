@@ -11,7 +11,7 @@ varray(7) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(7) {
@@ -29,7 +29,7 @@ varray(7) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(3) {
+    vec(3) {
       int(1)
       string(3) "str"
       varray(3) {
@@ -43,7 +43,7 @@ varray(7) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -54,7 +54,7 @@ varray(7) {
     ["function"]=>
     string(14) "call_user_func"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       string(3) "bar"
     }
   }
@@ -66,7 +66,7 @@ varray(7) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -77,14 +77,14 @@ varray(7) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }
@@ -101,7 +101,7 @@ varray(7) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(5) {
@@ -115,7 +115,7 @@ varray(7) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       NULL
@@ -125,7 +125,7 @@ varray(7) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -136,7 +136,7 @@ varray(7) {
     ["function"]=>
     string(14) "call_user_func"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       string(3) "bar"
     }
   }
@@ -148,7 +148,7 @@ varray(7) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -159,14 +159,14 @@ varray(7) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }
@@ -183,7 +183,7 @@ varray(7) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(5) {
@@ -197,7 +197,7 @@ varray(7) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(3) {
+    vec(3) {
       int(1)
       int(2)
       NULL
@@ -207,7 +207,7 @@ varray(7) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -218,7 +218,7 @@ varray(7) {
     ["function"]=>
     string(14) "call_user_func"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       string(3) "bar"
     }
   }
@@ -230,7 +230,7 @@ varray(7) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -241,14 +241,14 @@ varray(7) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(2) {
     ["function"]=>
     string(26) "entrypoint_debug_backtrace"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }

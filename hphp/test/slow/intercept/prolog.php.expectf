@@ -12,7 +12,7 @@ varray(4) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    varray(5) {
+    vec(5) {
       string(9) "Cls::func"
       object(Cls) (0) {
       }
@@ -37,7 +37,7 @@ varray(4) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(4) {
@@ -48,7 +48,7 @@ varray(4) {
     ["function"]=>
     string(4) "test"
     ["args"]=>
-    varray(1) {
+    vec(1) {
       string(10) "intercept2"
     }
   }
@@ -56,7 +56,7 @@ varray(4) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
 }

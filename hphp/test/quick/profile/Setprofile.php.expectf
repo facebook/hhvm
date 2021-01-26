@@ -132,7 +132,7 @@ varray(3) {
           ["function"]=>
           string(14) "test_exception"
           ["args"]=>
-          varray(0) {
+          vec(0) {
           }
         }
         darray(4) {
@@ -143,14 +143,14 @@ varray(3) {
           ["function"]=>
           string(4) "main"
           ["args"]=>
-          varray(0) {
+          vec(0) {
           }
         }
         darray(2) {
           ["function"]=>
           string(21) "entrypoint_Setprofile"
           ["args"]=>
-          varray(0) {
+          vec(0) {
           }
         }
       }

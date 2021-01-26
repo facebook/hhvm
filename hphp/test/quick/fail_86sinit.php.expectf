@@ -21,14 +21,14 @@ varray(6) {
       ["function"]=>
       string(4) "test"
       ["args"]=>
-      varray(0) {
+      vec(0) {
       }
     }
     darray(2) {
       ["function"]=>
       string(23) "entrypoint_fail_86sinit"
       ["args"]=>
-      varray(0) {
+      vec(0) {
       }
     }
   }

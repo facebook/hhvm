@@ -7,14 +7,14 @@ varray(2) {
     ["function"]=>
     string(7) "thrower"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
   }
   darray(3) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    varray(0) {
+    vec(0) {
     }
     ["file"]=>
     string(6) "string"

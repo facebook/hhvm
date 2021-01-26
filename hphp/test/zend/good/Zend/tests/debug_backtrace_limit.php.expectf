@@ -5,7 +5,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -19,7 +19,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -30,7 +30,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -44,7 +44,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -55,7 +55,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -66,7 +66,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 19
             [function] => a
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -75,7 +75,7 @@ Array
     [3] => Array
         (
             [function] => entrypoint_debug_backtrace_limit
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -89,7 +89,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -100,7 +100,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -111,7 +111,7 @@ Array
             [file] => %sdebug_backtrace_limit.php
             [line] => 19
             [function] => a
-            [args] => Array
+            [args] => Vec
                 (
                 )
 
@@ -120,7 +120,7 @@ Array
     [3] => Array
         (
             [function] => entrypoint_debug_backtrace_limit
-            [args] => Array
+            [args] => Vec
                 (
                 )
 

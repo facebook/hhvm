@@ -20,7 +20,7 @@ varray(6) {
       ["function"]=>
       string(9) "test_soft"
       ["args"]=>
-      varray(1) {
+      vec(1) {
         float(0)
       }
     }
@@ -28,7 +28,7 @@ varray(6) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      varray(0) {
+      vec(0) {
       }
     }
   }
@@ -53,7 +53,7 @@ varray(6) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      varray(0) {
+      vec(0) {
       }
     }
   }

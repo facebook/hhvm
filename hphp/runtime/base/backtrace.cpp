@@ -402,7 +402,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
         frame.set(s_args,
-                  make_varray(VarNR(btArgs.m_parserFrame->filename.get())));
+                  make_vec_array(VarNR(btArgs.m_parserFrame->filename.get())));
       }
       bt.append(frame.toVariant());
       depth++;
@@ -487,11 +487,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // do nothing
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());
-      frame.set(s_args, make_varray(filepath));
+      frame.set(s_args, make_vec_array(filepath));
     } else if (fp->localsDecRefd()) {
-      frame.set(s_args, empty_varray());
+      frame.set(s_args, empty_vec_array());
     } else {
-      auto args = Array::CreateVArray();
+      auto args = Array::CreateVec();
       auto const nparams = fp->func()->numNonVariadicParams();
 
       for (int i = 0; i < nparams; i++) {
@@ -752,7 +752,7 @@ Array CompactTraceData::extract() const {
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());
-      frame.set(s_args, make_varray(filepath));
+      frame.set(s_args, make_vec_array(filepath));
     }
 
     aInit.append(frame.toVariant());

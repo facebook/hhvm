@@ -114,6 +114,8 @@ module DepSet : sig
 
   val is_empty : t -> bool
 
+  val of_list : Mode.t -> elt list -> t
+
   val pp : Format.formatter -> t -> unit
 end
 
@@ -158,7 +160,7 @@ end
 module Files : sig
   val get_files : DepSet.t -> Relative_path.Set.t
 
-  val deps_of_file_info : Mode.t -> FileInfo.t -> DepSet.t
+  val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
 
   val update_file : Mode.t -> Relative_path.t -> FileInfo.t -> unit
 end

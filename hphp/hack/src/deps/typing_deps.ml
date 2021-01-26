@@ -206,6 +206,8 @@ module CustomDepSet = struct
 
   external is_empty : t -> bool = "hh_dep_set_is_empty"
 
+  external of_list : elt list -> t = "hh_dep_set_of_list"
+
   let iter s ~f = List.iter (elements s) ~f
 
   let fold : 'a. t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a =
@@ -305,6 +307,13 @@ module DepSet = struct
     match s with
     | SQLiteDepSet s -> SQLiteDepSet.is_empty s
     | CustomDepSet s -> CustomDepSet.is_empty s
+
+  let of_list mode xs =
+    match mode with
+    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.of_list xs)
+    | CustomMode _
+    | SaveCustomMode _ ->
+      CustomDepSet (CustomDepSet.of_list xs)
 
   let pp fmt s =
     match s with
@@ -719,7 +728,7 @@ module Files = struct
       deps
       ~init:Relative_path.Set.empty
 
-  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
+  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
     let {
       FileInfo.funs;
       classes;
@@ -733,63 +742,60 @@ module Files = struct
       file_info
     in
     let hash_mode = Mode.hash_mode mode in
-    let empty = DepSet.make mode in
-    let consts =
+    let defs =
       List.fold_left
         consts
         ~f:
           begin
             fun acc (_, const_id) ->
-            DepSet.add acc (Dep.make hash_mode (Dep.GConst const_id))
+            Dep.make hash_mode (Dep.GConst const_id) :: acc
           end
-        ~init:empty
+        ~init:[]
     in
-    let funs =
+    let defs =
       List.fold_left
         funs
         ~f:
           begin
             fun acc (_, fun_id) ->
-            DepSet.add acc (Dep.make hash_mode (Dep.Fun fun_id))
+            Dep.make hash_mode (Dep.Fun fun_id) :: acc
           end
-        ~init:empty
+        ~init:defs
     in
-    let classes =
+    let defs =
       List.fold_left
         classes
         ~f:
           begin
             fun acc (_, class_id) ->
-            DepSet.add acc (Dep.make hash_mode (Dep.Class class_id))
+            Dep.make hash_mode (Dep.Class class_id) :: acc
           end
-        ~init:empty
+        ~init:defs
     in
-    let classes =
+    let defs =
       List.fold_left
         record_defs
         ~f:
           begin
             fun acc (_, type_id) ->
-            DepSet.add acc (Dep.make hash_mode (Dep.Class type_id))
+            Dep.make hash_mode (Dep.Class type_id) :: acc
           end
-        ~init:classes
+        ~init:defs
     in
-    let classes =
+    let defs =
       List.fold_left
         typedefs
         ~f:
           begin
             fun acc (_, type_id) ->
-            DepSet.add acc (Dep.make hash_mode (Dep.Class type_id))
+            Dep.make hash_mode (Dep.Class type_id) :: acc
           end
-        ~init:classes
+        ~init:defs
     in
-    let defs = DepSet.union funs classes in
-    let defs = DepSet.union defs consts in
     defs
 
   let update_file mode filename info =
-    DepSet.iter (deps_of_file_info mode info) ~f:(fun def ->
+    List.iter (deps_of_file_info mode info) ~f:(fun def ->
         let previous =
           match Hashtbl.find_opt !ifiles def with
           | Some files -> files

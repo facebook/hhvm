@@ -904,6 +904,10 @@ ocaml_ffi! {
      fn hh_dep_set_is_empty(s: Custom<DepSet>) -> bool {
          s.is_empty()
      }
+
+     fn hh_dep_set_of_list(xs: Vec<Dep>) -> Custom<DepSet> {
+         Custom::from(OrdSet::from(&xs).into())
+     }
 }
 
 #[cfg(all(test, use_unstable_features))]

@@ -16,7 +16,7 @@ use im_rc::OrdSet;
 /// # Example
 ///
 /// ```
-/// let opener = DepGraphOpener::from_path("/tmp/").unwrap();
+/// let opener = DepGraphOpener::from_path("/tmp/graph.bin").unwrap();
 /// let depgraph = opener.open().unwrap();
 /// ```
 pub struct DepGraphOpener {
@@ -181,7 +181,7 @@ impl<'bytes> DepGraph<'bytes> {
 
 /// The header of the structure.
 ///
-/// Contains the offset to the the indexer and the lookup table.
+/// Contains the offset to the indexer and the lookup table.
 ///
 /// Memory layout:
 ///

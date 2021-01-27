@@ -30,7 +30,7 @@ where
         State: Clone,
         'r: 'arena,
     {
-        let mut errs: Vec<&SyntaxError> = if self.is_decl() {
+        let mut errs: Vec<&SyntaxError> = if self.is_hhi() {
             self.errors
                 .iter()
                 .filter(|e| !Self::is_in_body(&self.root, e.start_offset))
@@ -201,8 +201,8 @@ where
         self.mode == Some(Mode::Mstrict)
     }
 
-    pub fn is_decl(&self) -> bool {
-        self.mode == Some(Mode::Mdecl)
+    pub fn is_hhi(&self) -> bool {
+        self.mode == Some(Mode::Mhhi)
     }
 
     pub fn required_stack_size(&self) -> Option<usize> {

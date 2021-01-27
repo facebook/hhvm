@@ -1188,8 +1188,7 @@ and class_prop_expr_is_xhp env cv =
   let expr = Option.map cv.Aast.cv_expr (expr env) in
   let expr =
     if
-      FileInfo.equal_mode (fst env).in_mode FileInfo.Mdecl
-      && Option.is_none expr
+      FileInfo.equal_mode (fst env).in_mode FileInfo.Mhhi && Option.is_none expr
     then
       Some (fst cv.Aast.cv_id, N.Any)
     else
@@ -1398,7 +1397,7 @@ and method_ genv m =
   in
   let body =
     match genv.in_mode with
-    | FileInfo.Mdecl ->
+    | FileInfo.Mhhi ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
@@ -1512,7 +1511,7 @@ and fun_ ctx f =
   let f_kind = f.Aast.f_fun_kind in
   let body =
     match genv.in_mode with
-    | FileInfo.Mdecl ->
+    | FileInfo.Mhhi ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->

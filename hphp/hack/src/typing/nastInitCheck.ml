@@ -259,7 +259,7 @@ let class_prop_pos class_name prop_name ctx : Pos.t =
           fst cv.Aast.cv_id))
 
 let rec class_ tenv c =
-  if not FileInfo.(equal_mode c.c_mode Mdecl) then
+  if not FileInfo.(equal_mode c.c_mode Mhhi) then
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->

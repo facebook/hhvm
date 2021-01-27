@@ -11,4 +11,4 @@ let should_check_error mode code =
   match mode with
   | FileInfo.Mstrict -> true
   | FileInfo.Mpartial -> Errors.is_strict_code code
-  | FileInfo.Mdecl -> false
+  | FileInfo.Mhhi -> false

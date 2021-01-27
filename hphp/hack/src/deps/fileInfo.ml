@@ -25,7 +25,7 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mdecl  (** just declare signatures, don't check anything *)
+  | Mhhi  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
   | Mpartial  (** Don't fail if you see a function/class you don't know *)
 [@@deriving eq, show, enum]
@@ -39,12 +39,12 @@ let parse_mode = function
 
 let is_strict = function
   | Mstrict -> true
-  | Mdecl
+  | Mhhi
   | Mpartial ->
     false
 
 let string_of_mode = function
-  | Mdecl -> "decl"
+  | Mhhi -> "hhi"
   | Mstrict -> "strict"
   | Mpartial -> "partial"
 
@@ -52,7 +52,7 @@ let pp_mode fmt mode =
   Format.pp_print_string fmt
   @@
   match mode with
-  | Mdecl -> "Mdecl"
+  | Mhhi -> "Mhhi"
   | Mstrict -> "Mstrict"
   | Mpartial -> "Mpartial"
 

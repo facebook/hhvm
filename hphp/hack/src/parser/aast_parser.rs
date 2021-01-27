@@ -167,7 +167,7 @@ impl<'src> AastParser {
             mode = Some(Mode::Mstrict);
         }
         let quick_mode = match mode {
-            None | Some(Mode::Mdecl) => !env.codegen,
+            None | Some(Mode::Mhhi) => !env.codegen,
             _ => !env.codegen && env.quick_mode,
         };
         let parser_env = ParserEnv {

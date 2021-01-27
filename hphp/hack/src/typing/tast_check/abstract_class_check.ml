@@ -32,7 +32,7 @@ let check_method_body env m =
     Errors.abstract_with_body m.m_name;
   let tenv = Env.tast_env_as_typing_env env in
   if
-    (not (Typing_env.is_decl tenv))
+    (not (Typing_env.is_hhi tenv))
     && (not m.m_abstract)
     && List.is_empty named_body.fb_ast
   then

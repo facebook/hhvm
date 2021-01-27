@@ -185,7 +185,7 @@ val get_mode : env -> FileInfo.mode
 
 val is_strict : env -> bool
 
-val is_decl : env -> bool
+val is_hhi : env -> bool
 
 val get_allow_solve_globals : env -> bool
 

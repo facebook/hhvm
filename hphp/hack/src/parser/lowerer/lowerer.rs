@@ -2314,7 +2314,7 @@ where
                 let attr_expr = &c.expression;
                 let name = Self::p_pstring(&c.name, env)?;
                 let expr = if attr_expr.is_braced_expression()
-                    && env.file_mode() == file_info::Mode::Mdecl
+                    && env.file_mode() == file_info::Mode::Mhhi
                     && !env.codegen()
                 {
                     ast::Expr::new(env.mk_none_pos(), E_::Null)
@@ -3748,7 +3748,7 @@ where
                         }
                         _ => {
                             if !e.top_level_statements
-                                && ((e.file_mode() == file_info::Mode::Mdecl && !e.codegen())
+                                && ((e.file_mode() == file_info::Mode::Mhhi && !e.codegen())
                                     || e.quick_mode)
                             {
                                 mk_noop_result(e)
@@ -5133,7 +5133,7 @@ where
                     emit_id: None,
                 })])
             }
-            InclusionDirective(c) if env.file_mode() != file_info::Mode::Mdecl || env.codegen() => {
+            InclusionDirective(c) if env.file_mode() != file_info::Mode::Mhhi || env.codegen() => {
                 let expr = Self::p_expr(&c.expression, env)?;
                 Ok(vec![ast::Def::mk_stmt(ast::Stmt::new(
                     Self::p_pos(node, env),
@@ -5200,7 +5200,7 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                 })])
             }
-            _ if env.file_mode() == file_info::Mode::Mdecl => Ok(vec![]),
+            _ if env.file_mode() == file_info::Mode::Mhhi => Ok(vec![]),
             _ => Ok(vec![ast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }
     }

@@ -76,7 +76,7 @@ pub(crate) mod convert {
     pub fn mode_to_i64(mode: Option<Mode>) -> Option<i64> {
         match mode {
             Some(mode) => Some(match mode {
-                Mode::Mdecl => 0,
+                Mode::Mhhi => 0,
                 Mode::Mstrict => 1,
                 Mode::Mpartial => 2,
             }),

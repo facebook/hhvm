@@ -25,7 +25,7 @@ let get_next_elem_id () =
 let json_element_id = get_next_elem_id ()
 
 let get_type_from_hint ctx h =
-  let mode = FileInfo.Mdecl in
+  let mode = FileInfo.Mhhi in
   let decl_env = { mode; droot = None; ctx } in
   Typing_print.full_decl ctx (Decl_hint.hint decl_env h)
 

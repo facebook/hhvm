@@ -39,7 +39,7 @@ let handle_unbound_name env (pos, name) kind =
     match env.mode with
     | FileInfo.Mstrict
     | FileInfo.Mpartial
-    | FileInfo.Mdecl ->
+    | FileInfo.Mhhi ->
       Errors.unbound_name pos name kind;
       (* In addition to reporting errors, we also add to the global dependency table *)
       let dep =

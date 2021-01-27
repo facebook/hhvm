@@ -68,7 +68,7 @@ pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
                             // <?hh optionally followed by // mode
                             _ => {
                                 if text.file_path().has_extension("hhi") {
-                                    (Language::Hack, Some(Mode::Mdecl))
+                                    (Language::Hack, Some(Mode::Mhhi))
                                 } else {
                                     let skip_length = hashbang.full_width()
                                         + ltq.full_width()

@@ -111,9 +111,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | Some mode -> FileInfo.is_strict mode
       | None -> false
 
-    let is_decl tree =
+    let is_hhi tree =
       match tree.mode with
-      | Some FileInfo.Mdecl -> true
+      | Some FileInfo.Mhhi -> true
       | _ -> false
 
     let errors_no_bodies tree =
@@ -127,7 +127,7 @@ all errors that happen in a body. *)
 
     let errors tree =
       let e =
-        if is_decl tree then
+        if is_hhi tree then
           errors_no_bodies tree
         else
           all_errors tree

@@ -51,7 +51,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
 
     val is_strict : t -> bool
 
-    val is_decl : t -> bool
+    val is_hhi : t -> bool
 
     val to_json : ?with_value:bool -> ?ignore_missing:bool -> t -> Hh_json.json
   end

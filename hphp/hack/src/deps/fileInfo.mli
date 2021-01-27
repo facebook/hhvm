@@ -24,7 +24,7 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mdecl (* just declare signatures, don't check anything *)
+  | Mhhi (* just declare signatures, don't check anything *)
   | Mstrict (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 [@@deriving eq, show, enum]

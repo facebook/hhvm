@@ -1552,7 +1552,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 let name = strip_dollar_prefix(name);
                                 let mut flags = PropFlags::empty();
                                 flags.set(PropFlags::CONST, attributes.const_);
-                                flags.set(PropFlags::NEEDS_INIT, self.file_mode != Mode::Mdecl);
+                                flags.set(PropFlags::NEEDS_INIT, self.file_mode != Mode::Mhhi);
                                 flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
@@ -3468,7 +3468,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         strip_dollar_prefix(name)
                     };
                     let ty = self.node_to_non_ret_ty(hint);
-                    let needs_init = if self.file_mode == Mode::Mdecl {
+                    let needs_init = if self.file_mode == Mode::Mhhi {
                         false
                     } else {
                         initializer.is_ignored()

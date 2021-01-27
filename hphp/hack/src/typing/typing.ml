@@ -112,7 +112,7 @@ let unbound_name env (pos, name) e =
   | FileInfo.Mpartial when strictish ->
     Errors.unbound_name_typing pos name;
     expr_error env (Reason.Rwitness pos) e
-  | FileInfo.Mdecl
+  | FileInfo.Mhhi
   | FileInfo.Mpartial ->
     expr_any env pos e
 

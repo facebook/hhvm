@@ -373,24 +373,6 @@ impl<'a> NamespaceBuilder<'a> {
         }
     }
 
-    fn empty_with_ns_in(ns: &'a str, arena: &'a Bump) -> Self {
-        NamespaceBuilder {
-            arena,
-            stack: bumpalo::vec![in arena; NamespaceEnv {
-                ns_uses: SMap::empty(),
-                class_uses: SMap::empty(),
-                fun_uses: SMap::empty(),
-                const_uses: SMap::empty(),
-                record_def_uses: SMap::empty(),
-                name: Some(ns),
-                auto_ns_map: &[],
-                is_codegen: false,
-                disable_xhp_element_mangling: false,
-            }],
-            auto_ns_map: &[],
-        }
-    }
-
     fn push_namespace(&mut self, name: Option<&str>) {
         let current = self.current_namespace();
         let nsenv = self.stack.last().unwrap().clone(); // shallow clone
@@ -737,6 +719,7 @@ pub enum Node<'a> {
     BracketedList(&'a (&'a Pos<'a>, &'a [Node<'a>], &'a Pos<'a>)),
     Name(&'a (&'a str, &'a Pos<'a>)),
     XhpName(&'a (&'a str, &'a Pos<'a>)),
+    Variable(&'a (&'a str, &'a Pos<'a>)),
     QualifiedName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
     StringLiteral(&'a (&'a BStr, &'a Pos<'a>)), // For shape keys and const expressions.
     IntLiteral(&'a (&'a str, &'a Pos<'a>)),     // For const expressions.
@@ -883,6 +866,16 @@ impl<'a> Node<'a> {
         }
     }
 
+    // If this node is a Variable token, return its position and text.
+    // As an attempt at error recovery (when the dollar sign is omitted), also
+    // return other unqualified identifiers (i.e., the Name token kind).
+    fn as_variable(&self) -> Option<Id<'a>> {
+        match self {
+            Node::Variable(&(name, pos)) | Node::Name(&(name, pos)) => Some(Id(pos, name)),
+            _ => None,
+        }
+    }
+
     fn is_ignored(&self) -> bool {
         matches!(self, Node::Ignored(..))
     }
@@ -934,6 +927,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.decls.add(name, Decl::Record(decl), self.arena);
     }
 
+    fn join(&self, strs: &[&str]) -> &'a str {
+        let len = strs.iter().map(|s| s.len()).sum();
+        let mut result = String::with_capacity_in(len, self.arena);
+        for s in strs {
+            result.push_str(s);
+        }
+        result.into_bump_str()
+    }
+
+    #[inline]
+    fn concat(&self, str1: &str, str2: &str) -> &'a str {
+        concat(self.arena, str1, str2)
+    }
+
     fn token_bytes(&self, token: &CompactToken) -> &'a [u8] {
         self.source_text
             .source_text()
@@ -980,7 +987,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn get_pos_opt(&self, node: Node<'a>) -> Option<&'a Pos<'a>> {
         let pos = match node {
-            Node::Name(&(_, pos)) => pos,
+            Node::Name(&(_, pos)) | Node::Variable(&(_, pos)) => pos,
             Node::Ty(ty) => return ty.get_pos(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
@@ -1119,6 +1126,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
                 )))
             }
+            // In coeffects contexts, we get types like `ctx $f` or `$v::C`.
+            // Node::Variable is used for the `$f` and `$v`, so that we don't
+            // incorrectly attempt to elaborate them as names.
+            Node::Variable(&(name, pos)) => Some(self.alloc(Ty(
+                self.alloc(Reason::hint(pos)),
+                Ty_::Tapply(self.alloc((Id(pos, name), &[][..]))),
+            ))),
             node => {
                 let Id(pos, name) = self.expect_name(node)?;
                 let reason = self.alloc(Reason::hint(pos));
@@ -1126,7 +1140,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     // TODO (T69662957) must fill type args of Tgeneric
                     Ty_::Tgeneric(self.alloc((name, &[])))
                 } else {
-                    match name.as_ref() {
+                    match name {
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
@@ -1504,6 +1518,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Node::WhereConstraint(x) => Some(x),
                 _ => None,
             }));
+
+        let (params, tparams, implicit_params, where_constraints) =
+            self.rewrite_effect_polymorphism(params, tparams, implicit_params, where_constraints);
 
         let ft = self.alloc(FunType {
             arity,
@@ -1944,6 +1961,251 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => None,
         }
     }
+
+    fn has_polymorphic_context(contexts: &[&Ty<'_>]) -> bool {
+        contexts.iter().any(|&ty| match ty.1 {
+            Ty_::Tapply((root, &[])) // Hfun_context in the AST
+            | Ty_::Taccess(TaccessType(Ty(_, Ty_::Tapply((root, &[]))), _)) => root.1.contains('$'),
+            _ => false,
+        })
+    }
+
+    fn rewrite_effect_polymorphism(
+        &self,
+        params: &'a [&'a FunParam<'a>],
+        tparams: &'a [&'a Tparam<'a>],
+        implicit_params: &'a FunImplicitParams<'a>,
+        where_constraints: &'a [&'a WhereConstraint<'a>],
+    ) -> (
+        &'a [&'a FunParam<'a>],
+        &'a [&'a Tparam<'a>],
+        &'a FunImplicitParams<'a>,
+        &'a [&'a WhereConstraint<'a>],
+    ) {
+        let (cap_reason, context_tys) = match implicit_params.capability {
+            CapTy(&Ty(r, Ty_::Tintersection(tys))) if Self::has_polymorphic_context(tys) => {
+                (r, tys)
+            }
+            CapTy(ty) if Self::has_polymorphic_context(&[ty]) => {
+                (ty.0, std::slice::from_ref(self.alloc(ty)))
+            }
+            _ => return (params, tparams, implicit_params, where_constraints),
+        };
+        let tp = |name, constraints| {
+            self.alloc(Tparam {
+                variance: Variance::Invariant,
+                name,
+                tparams: &[],
+                constraints,
+                reified: aast::ReifyKind::Erased,
+                user_attributes: &[],
+            })
+        };
+
+        // For a polymorphic context with form `ctx $f` (represented here as
+        // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
+        // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
+        let rewrite_fun_ctx = |
+            tparams: &mut Vec<&'a Tparam<'a>>,
+            ty: &Ty<'a>,
+            param_name: &str,
+        | -> Option<&'a Ty<'a>> {
+            let ft = match ty.1 {
+                Ty_::Tfun(ft) => ft,
+                _ => return None,
+            };
+            let cap_ty = match ft.implicit_params.capability {
+                CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
+                _ => return None,
+            };
+            let pos = match cap_ty.1 {
+                Ty_::Tapply((Id(pos, "_"), _)) => pos,
+                _ => return None,
+            };
+            let name = self.concat("Tctx", param_name);
+            let tparam = tp(Id(pos, name), &[]);
+            tparams.push(tparam);
+            let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
+            let ft = self.alloc(FunType {
+                implicit_params: self.alloc(FunImplicitParams {
+                    capability: CapTy(cap_ty),
+                }),
+                ..*ft
+            });
+            Some(self.alloc(Ty(ty.0, Ty_::Tfun(ft))))
+        };
+
+        // For a polymorphic context with form `$g::C`, if we have a function
+        // parameter `$g` with type `G` (where `G` is not a type parameter),
+        //   - add a type parameter constrained by $g's type: `T$g as G`
+        //   - replace $g's type hint (`G`) with the new type parameter `T$g`
+        // Then, for each polymorphic context with form `$g::C`,
+        //   - add a type parameter `T$g@C`
+        //   - add a where constraint `T$g@C = T$g :: C`
+        let rewrite_arg_ctx = |
+            tparams: &mut Vec<&'a Tparam<'a>>,
+            where_constraints: &mut Vec<&'a WhereConstraint<'a>>,
+            ty: &'a Ty<'a>,
+            param_pos: &'a Pos<'a>,
+            name: &str,
+            context_reason: &'a Reason<'a>,
+            cst: Id<'a>,
+        | -> Option<&'a Ty<'a>> {
+            let rewritten_ty = match ty.1 {
+                // If the type hint for this function parameter is a type
+                // parameter introduced in this function declaration, don't add
+                // a new type parameter.
+                Ty_::Tgeneric(&(type_name, _))
+                    if tparams.iter().any(|tp| tp.name.1 == type_name) =>
+                {
+                    None
+                }
+                // Otherwise, if the parameter is `G $g`, create tparam
+                // `T$g as G` and replace $g's type hint
+                _ => {
+                    let id = Id(param_pos, self.concat("T", name));
+                    tparams.push(tp(
+                        id,
+                        std::slice::from_ref(self.alloc((ConstraintKind::ConstraintAs, ty))),
+                    ));
+                    Some(self.alloc(Ty(
+                        self.alloc(Reason::hint(param_pos)),
+                        Ty_::Tgeneric(self.alloc((id.1, &[]))),
+                    )))
+                }
+            };
+            let ty = rewritten_ty.unwrap_or(ty);
+            let ty = self.alloc(Ty(context_reason, ty.1));
+            let right = self.alloc(Ty(
+                context_reason,
+                Ty_::Taccess(self.alloc(TaccessType(ty, cst))),
+            ));
+            let left_id = Id(
+                context_reason.pos().unwrap_or(Pos::none()),
+                // IMPORTANT: using `::` here will not work, because
+                // Typing_taccess constructs its own fake type parameter
+                // for the Taccess with `::`. So, if the two type parameters
+                // are named `Tprefix` and `Tprefix::Const`, the latter
+                // will collide with the one generated for `Tprefix`::Const
+                self.join(&["T", name, "@", &cst.1]),
+            );
+            tparams.push(tp(left_id, &[]));
+            let left = self.alloc(Ty(
+                context_reason,
+                Ty_::Tgeneric(self.alloc((left_id.1, &[]))),
+            ));
+            where_constraints.push(self.alloc(WhereConstraint(
+                left,
+                ConstraintKind::ConstraintEq,
+                right,
+            )));
+            rewritten_ty
+        };
+
+        let mut tparams = Vec::from_iter_in(tparams.iter().copied(), self.arena);
+        let mut where_constraints =
+            Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
+
+        let mut ty_by_param: BTreeMap<&str, (&'a Ty<'a>, &'a Pos<'a>)> = params
+            .iter()
+            .filter_map(|param| Some((param.name?, (param.type_.type_, param.pos))))
+            .collect();
+
+        for context_ty in context_tys {
+            match context_ty.1 {
+                // Hfun_context in the AST
+                Ty_::Tapply((Id(_, name), _)) if name.starts_with('$') => {
+                    if let Some((param_ty, _)) = ty_by_param.get_mut(name) {
+                        if let Ty_::Toption(ty) = param_ty.1 {
+                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, ty, name) {
+                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                            }
+                        } else {
+                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, param_ty, name) {
+                                *param_ty = ty;
+                            }
+                        }
+                    }
+                }
+                Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply((Id(_, name), _))), cst)) => {
+                    if let Some((param_ty, param_pos)) = ty_by_param.get_mut(name) {
+                        if let Ty_::Toption(ty) = param_ty.1 {
+                            if let Some(ty) = rewrite_arg_ctx(
+                                &mut tparams,
+                                &mut where_constraints,
+                                ty,
+                                param_pos,
+                                name,
+                                context_ty.0,
+                                cst,
+                            ) {
+                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                            }
+                        } else {
+                            if let Some(ty) = rewrite_arg_ctx(
+                                &mut tparams,
+                                &mut where_constraints,
+                                param_ty,
+                                param_pos,
+                                name,
+                                context_ty.0,
+                                cst,
+                            ) {
+                                *param_ty = ty;
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let params = self.slice(params.iter().copied().map(|param| match param.name {
+            None => param,
+            Some(name) => match ty_by_param.get(name) {
+                Some(&(type_, _)) if !std::ptr::eq(param.type_.type_, type_) => {
+                    self.alloc(FunParam {
+                        type_: self.alloc(PossiblyEnforcedTy {
+                            type_,
+                            ..*param.type_
+                        }),
+                        ..*param
+                    })
+                }
+                _ => param,
+            },
+        }));
+
+        let context_tys = self.slice(context_tys.iter().copied().map(|ty| {
+            let ty_ = match ty.1 {
+                Ty_::Tapply((Id(_, name), &[])) if name.starts_with('$') => {
+                    Ty_::Tgeneric(self.alloc((self.concat("Tctx", name), &[])))
+                }
+                Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply((Id(_, name), &[]))), cst))
+                    if name.starts_with('$') =>
+                {
+                    let name = self.join(&["T", name, "@", &cst.1]);
+                    Ty_::Tgeneric(self.alloc((name, &[])))
+                }
+                _ => return ty,
+            };
+            self.alloc(Ty(ty.0, ty_))
+        }));
+        let cap_ty = match context_tys {
+            [ty] => ty,
+            _ => self.alloc(Ty(cap_reason, Ty_::Tintersection(context_tys))),
+        };
+        let implicit_params = self.alloc(FunImplicitParams {
+            capability: CapTy(cap_ty),
+        });
+
+        (
+            params,
+            tparams.into_bump_slice(),
+            implicit_params,
+            where_constraints.into_bump_slice(),
+        )
+    }
 }
 
 enum NodeIterHelper<'a: 'b, 'b> {
@@ -2082,10 +2344,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 name
             }
             TokenKind::Class => Node::Name(self.alloc((token_text(self), token_pos(self)))),
+            TokenKind::Variable => Node::Variable(self.alloc((token_text(self), token_pos(self)))),
             // There are a few types whose string representations we have to
             // grab anyway, so just go ahead and treat them as generic names.
-            TokenKind::Variable
-            | TokenKind::Vec
+            TokenKind::Vec
             | TokenKind::Dict
             | TokenKind::Keyset
             | TokenKind::Tuple
@@ -2839,7 +3101,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     ) -> Self::R {
         let (variadic, pos, name) = match name {
             Node::ListItem(&(ellipsis, id)) => {
-                let Id(pos, name) = match id.as_id() {
+                let Id(pos, name) = match id.as_variable() {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
@@ -2847,7 +3109,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 (variadic, pos, Some(name))
             }
             name => {
-                let Id(pos, name) = match name.as_id() {
+                let Id(pos, name) = match name.as_variable() {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
@@ -2924,38 +3186,82 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         }
     }
 
-    fn make_contexts(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
-        let mut namespace_builder = NamespaceBuilder::empty_with_ns_in("HH\\Contexts", self.arena);
-        std::mem::swap(
-            &mut namespace_builder,
-            Rc::make_mut(&mut self.namespace_builder),
-        );
+    fn make_contexts(
+        &mut self,
+        left_bracket: Self::R,
+        tys: Self::R,
+        right_bracket: Self::R,
+    ) -> Self::R {
+        let tys = self.slice(tys.iter().filter_map(|ty| match ty {
+            Node::ListItem(&(ty, _)) | &ty => {
+                // A wildcard is used for the context of a closure type on a
+                // parameter of a function with a function context (e.g.,
+                // `function f((function ()[_]: void) $f)[ctx $f]: void {}`).
+                if let Some(Id(pos, "_")) = self.expect_name(ty) {
+                    return Some(self.alloc(Ty(
+                        self.alloc(Reason::hint(pos)),
+                        Ty_::Tapply(self.alloc((Id(pos, "_"), &[]))),
+                    )));
+                }
+                let ty = self.node_to_ty(ty)?;
+                match ty.1 {
+                    // Only three forms of type can appear here in a valid program:
+                    //   - function contexts (`ctx $f`)
+                    //   - value-dependent paths (`$v::C`)
+                    //   - built-in contexts (`rx`, `cipp_of<EntFoo>`)
+                    // The first and last will be represented with `Tapply`,
+                    // but function contexts will use a variable name
+                    // (containing a `$`). Built-in contexts are always in the
+                    // \HH\Contexts namespace, so we rewrite those names here.
+                    Ty_::Tapply(&(Id(pos, name), targs)) if !name.starts_with('$') => {
+                        // The name will have been elaborated in the current
+                        // namespace, but we actually want it to be in the
+                        // \HH\Contexts namespace. Grab the last component of
+                        // the name, and rewrite it in the correct namespace.
+                        // Note that this makes it impossible to express names
+                        // in any sub-namespace of \HH\Contexts (e.g.,
+                        // "Unsafe\\cipp" will be rewritten as
+                        // "\\HH\\Contexts\\cipp" rather than
+                        // "\\HH\\Contexts\\Unsafe\\cipp").
+                        let name = match name.trim_end_matches('\\').split('\\').next_back() {
+                            Some(name) => self.concat("\\HH\\Contexts\\", name),
+                            None => name,
+                        };
+                        Some(self.alloc(Ty(ty.0, Ty_::Tapply(self.alloc((Id(pos, name), targs))))))
+                    }
+                    _ => Some(ty),
+                }
+            }
+        }));
         // Simulating Typing_make_type.intersection here
         let make_mixed = || {
-            let pos = Reason::hint(self.merge_positions(lb, rb));
+            let pos = Reason::hint(self.merge_positions(left_bracket, right_bracket));
             Node::Ty(self.alloc(Ty(
                 self.alloc(pos),
                 Ty_::Toption(self.alloc(Ty(self.alloc(pos), Ty_::Tnonnull))),
             )))
         };
-        let cap = match tys {
-            Node::Ignored(_) => make_mixed(),
-            Node::List(tys_list) => {
-                if tys_list.is_empty() {
-                    make_mixed()
-                } else if tys_list.len() == 1 {
-                    Node::Ty(self.node_to_ty(tys_list[0]).unwrap())
-                } else {
-                    self.make_intersection_type_specifier(lb, tys, rb)
-                }
+        match tys {
+            [] => make_mixed(),
+            [ty] => Node::Ty(ty),
+            tys => {
+                let pos = self.merge_positions(left_bracket, right_bracket);
+                self.hint_ty(pos, Ty_::Tintersection(tys))
             }
-            _ => self.make_intersection_type_specifier(lb, tys, rb),
-        };
-        std::mem::swap(
-            &mut namespace_builder,
-            Rc::make_mut(&mut self.namespace_builder),
-        );
-        cap
+        }
+    }
+
+    fn make_function_ctx_type_specifier(
+        &mut self,
+        ctx_keyword: Self::R,
+        variable: Self::R,
+    ) -> Self::R {
+        match variable.as_variable() {
+            Some(Id(pos, name)) => {
+                Node::Variable(self.alloc((name, self.merge(pos, self.get_pos(ctx_keyword)))))
+            }
+            None => Node::Ignored(SK::FunctionCtxTypeSpecifier),
+        }
     }
 
     fn make_function_declaration_header(
@@ -3461,7 +3767,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             |declarator| match declarator {
                 Node::ListItem(&(name, initializer)) => {
                     let attributes = self.to_attributes(attrs);
-                    let Id(pos, name) = name.as_id()?;
+                    let Id(pos, name) = name.as_variable()?;
                     let name = if modifiers.is_static {
                         name
                     } else {

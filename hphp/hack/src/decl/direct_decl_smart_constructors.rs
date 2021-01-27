@@ -1430,6 +1430,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
         let capability = match self.node_to_ty(capability) {
+            Some(Ty(_, Ty_::Tintersection(&[ty]))) => CapTy(ty),
             Some(ty) => CapTy(ty),
             None => CapDefaults(default_pos),
         };
@@ -3243,7 +3244,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         match tys {
             [] => make_mixed(),
-            [ty] => Node::Ty(ty),
             tys => {
                 let pos = self.merge_positions(left_bracket, right_bracket);
                 self.hint_ty(pos, Ty_::Tintersection(tys))
@@ -4728,6 +4728,42 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 None => (Pos::none(), false),
             },
             reifiable: attributes.reifiable,
+        }))
+    }
+
+    fn make_context_const_declaration(
+        &mut self,
+        modifiers: Self::R,
+        _const_keyword: Self::R,
+        _ctx_keyword: Self::R,
+        name: Self::R,
+        _type_parameters: Self::R,
+        _constraint: Self::R,
+        _equal: Self::R,
+        ctx_list: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        let name = match name.as_id() {
+            Some(name) => name,
+            None => return Node::Ignored(SK::TypeConstDeclaration),
+        };
+        let has_abstract_keyword = modifiers
+            .iter()
+            .any(|node| node.is_token(TokenKind::Abstract));
+        let context = self.node_to_ty(ctx_list);
+        let (context, abstract_) = match (has_abstract_keyword, context) {
+            (false, None) => (context, TypeconstAbstractKind::TCConcrete),
+            (false, Some(_)) => (context, TypeconstAbstractKind::TCConcrete),
+            (true, None) => (context, TypeconstAbstractKind::TCAbstract(context)),
+            (true, Some(_)) => (None, TypeconstAbstractKind::TCAbstract(context)),
+        };
+        Node::TypeConstant(self.alloc(ShallowTypeconst {
+            abstract_,
+            name,
+            constraint: None,
+            type_: context,
+            enforceable: (Pos::none(), false),
+            reifiable: None,
         }))
     }
 

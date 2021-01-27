@@ -277,6 +277,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               )
           | _ -> Concat [Space; t env elements]);
           t env semi;
+          Newline;
         ]
     | Syntax.RecordDeclaration
         {

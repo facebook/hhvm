@@ -681,13 +681,6 @@ tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {
   return lval;
 }
 
-ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {
-  assertx(adIn->cowCheck() || adIn->notCyclic(v));
-  return MutableOpInt(adIn, k, adIn->cowCheck(),
-    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
-  );
-}
-
 ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   auto const copy = adIn->cowCheck();
@@ -701,7 +694,7 @@ ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   );
 }
 
-ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, TypedValue v) {
+ArrayData* PackedArray::SetStrMove(ArrayData* adIn, StringData* k, TypedValue v) {
   assertx(checkInvariants(adIn));
   throwInvalidArrayKeyException(k, adIn);
 }
@@ -778,10 +771,6 @@ ArrayData* PackedArray::AppendImpl(
     tvDup(v, LvalUncheckedInt(ad, ad->m_size++));
   }
   return ad;
-}
-
-ArrayData* PackedArray::Append(ArrayData* adIn, TypedValue v) {
-  return AppendImpl(adIn, v, adIn->cowCheck());
 }
 
 ArrayData* PackedArray::AppendMove(ArrayData* adIn, TypedValue v) {

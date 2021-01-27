@@ -1332,24 +1332,20 @@ inline void SetElemRecord(tv_lval base, key_type<keyType> key,
  * bookkeeping after mutating an array.
  */
 ALWAYS_INLINE
-void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
-  if (newData == oldData) return;
-
+void arraySetUpdateBase(ArrayData* newData, tv_lval base) {
   assertx(isArrayLikeType(type(base)));
-  assertx(val(base).parr == oldData);
   type(base) = dt_with_rc(type(base));
   val(base).parr = newData;
   assertx(type(base) == newData->toDataType());
   assertx(tvIsPlausible(*base));
-
-  decRefArr(oldData);
 }
 
 /**
  * SetElem when base is a Vec
  */
 inline ArrayData* SetElemVecPre(ArrayData* a, int64_t key, TypedValue* value) {
-  return PackedArray::SetInt(a, key, *value);
+  tvIncRefGen(*value);
+  return PackedArray::SetIntMove(a, key, *value);
 }
 
 inline ArrayData*
@@ -1371,19 +1367,21 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
 
   ArrayData* a = val(base).parr;
   auto const newData = SetElemVecPre(a, key, value);
-  arraySetUpdateBase(a, newData, base);
+  arraySetUpdateBase(newData, base);
 }
 
 /**
  * SetElem when base is a Dict
  */
 inline ArrayData* SetElemDictPre(ArrayData* a, int64_t key, TypedValue* value) {
-  return MixedArray::SetInt(a, key, *value);
+  tvIncRefGen(*value);
+  return MixedArray::SetIntMove(a, key, *value);
 }
 
 inline ArrayData*
 SetElemDictPre(ArrayData* a, StringData* key, TypedValue* value) {
-  return MixedArray::SetStr(a, key, *value);
+  tvIncRefGen(*value);
+  return MixedArray::SetStrMove(a, key, *value);
 }
 
 inline ArrayData*
@@ -1401,7 +1399,7 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
 
   ArrayData* a = val(base).parr;
   auto const newData = SetElemDictPre(a, key, value);
-  arraySetUpdateBase(a, newData, base);
+  arraySetUpdateBase(newData, base);
 }
 
 /**
@@ -1409,12 +1407,14 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
  */
 inline ArrayData* SetElemBespokePre(
     ArrayData* a, int64_t key, TypedValue* value) {
-  return BespokeArray::SetInt(a, key, *value);
+  tvIncRefGen(*value);
+  return BespokeArray::SetIntMove(a, key, *value);
 }
 
 inline ArrayData* SetElemBespokePre(
     ArrayData* a, StringData* key, TypedValue* value) {
-  return BespokeArray::SetStr(a, key, *value);
+  tvIncRefGen(*value);
+  return BespokeArray::SetStrMove(a, key, *value);
 }
 
 inline ArrayData* SetElemBespokePre(
@@ -1434,12 +1434,7 @@ inline void SetElemBespoke(
   assertx(!oldArr->isVanilla());
   auto const result = SetElemBespokePre(oldArr, key, value);
 
-  if (result != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result;
-    decRefArr(oldArr);
-  }
-  assertx(tvIsPlausible(*base));
+  arraySetUpdateBase(result, base);
 }
 
 /**
@@ -1580,12 +1575,8 @@ inline void SetNewElemBespoke(tv_lval base, TypedValue* value) {
   assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
   auto const oldArr = base.val().parr;
-  auto const result = BespokeArray::Append(oldArr, *value);
-  if (result != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result;
-    decRefArr(oldArr);
-  }
+  auto const result = BespokeArray::AppendMove(oldArr, *value);
+  arraySetUpdateBase(result, base);
   assertx(tvIsPlausible(*base));
 }
 
@@ -1596,29 +1587,9 @@ inline void SetNewElemVec(tv_lval base, TypedValue* value) {
   assertx(tvIsVecOrVArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = PackedArray::Append(a, *value);
-  if (a2 != a) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
-  }
-}
-
-/**
- * SetNewElem when base is a Vec (moves value)
- */
-inline void SetNewElemVecMove(tv_lval base, TypedValue* value) {
-  assertx(tvIsVecOrVArray(base));
-  assertx(tvIsPlausible(*base));
-  auto a = val(base).parr;
   auto a2 = PackedArray::AppendMove(a, *value);
-  if (a2 != a) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = a2;
-  }
+  arraySetUpdateBase(a2, base);
 }
-
 
 /**
  * SetNewElem when base is a Dict
@@ -1627,13 +1598,8 @@ inline void SetNewElemDict(tv_lval base, TypedValue* value) {
   assertx(tvIsDictOrDArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = MixedArray::Append(a, *value);
-  if (a2 != a) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
-  }
+  auto a2 = MixedArray::AppendMove(a, *value);
+  arraySetUpdateBase(a2, base);
 }
 
 /**
@@ -1643,12 +1609,11 @@ inline void SetNewElemKeyset(tv_lval base, TypedValue* value) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = SetArray::Append(a, *value);
+  auto a2 = SetArray::AppendMove(a, *value);
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
   }
 }
 
@@ -1669,6 +1634,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
   assertx(tvIsPlausible(*base));
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    tvIncRefGen(*value);
     return SetNewElemBespoke(base, value);
   }
 
@@ -1694,14 +1660,17 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
+      tvIncRefGen(*value);
       return SetNewElemVec(base, value);
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentDict:
     case KindOfDict:
+      tvIncRefGen(*value);
       return SetNewElemDict(base, value);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      tvIncRefGen(*value);
       return SetNewElemKeyset(base, value);
     case KindOfObject:
       return SetNewElemObject(base, value);
@@ -1710,6 +1679,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
         return SetNewElemScalar<setResult>(value);
       }
       detail::promoteClsMeth(base);
+      tvIncRefGen(*value);
       return SetNewElemVec(base, value);
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);

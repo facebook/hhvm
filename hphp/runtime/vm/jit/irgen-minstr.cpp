@@ -1392,6 +1392,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType.subtypeOfAny(TDArr, TDict)) {
     constrainBase(env);
+    gen(env, IncRef, value);
     gen(env, SetNewElemDict, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
@@ -1403,6 +1404,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
       auto const base = extractBase(env);
       gen(env, ThrowInvalidArrayKey, base, value);
     } else {
+      gen(env, IncRef, value);
       gen(env, SetNewElemKeyset, basePtr, value);
     }
   } else {

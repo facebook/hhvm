@@ -180,12 +180,6 @@ tv_lval BespokeArray::ElemStr(
 }
 
 // insertion
-ArrayData* BespokeArray::SetInt(ArrayData* ad, int64_t key, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnSetInt(ad, key, v);
-}
-ArrayData* BespokeArray::SetStr(ArrayData* ad, StringData* key, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnSetStr(ad, key, v);
-}
 ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
   return asBespoke(ad)->vtable()->fnSetIntMove(ad, key, v);
 }
@@ -218,9 +212,6 @@ ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
 }
 
 // high-level ops
-ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnAppend(ad, v);
-}
 ArrayData* BespokeArray::AppendMove(ArrayData* ad, TypedValue v) {
   return asBespoke(ad)->vtable()->fnAppendMove(ad, v);
 }

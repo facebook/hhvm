@@ -285,12 +285,13 @@ protected:
     if (raw) {
       assertx(canMutateBuffer());
       setArrayData(PackedArray::AppendInPlace(oldAd, tv));
+      if (arrayData() != oldAd) {
+        decRefArr(oldAd);
+      }
     } else {
       dropImmCopy();
-      setArrayData(PackedArray::Append(oldAd, tv));
-    }
-    if (arrayData() != oldAd) {
-      decRefArr(oldAd);
+      setArrayData(PackedArray::AppendMove(oldAd, tv));
+      tvIncRefGen(tv);
     }
     m_size = arrayData()->m_size;
   }

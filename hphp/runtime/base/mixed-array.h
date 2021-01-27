@@ -301,7 +301,6 @@ private:
   using ArrayData::exists;
   using ArrayData::at;
   using ArrayData::lval;
-  using ArrayData::set;
   using ArrayData::remove;
   using ArrayData::release;
 
@@ -315,9 +314,7 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k);
   static arr_lval LvalStr(ArrayData* ad, StringData* k);
-  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
@@ -325,7 +322,6 @@ public:
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, TypedValue v);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -522,6 +518,7 @@ private:
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
   static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
 
+  template <bool Move>
   void nextInsert(TypedValue);
   ArrayData* addVal(int64_t ki, TypedValue data);
   ArrayData* addVal(StringData* key, TypedValue data);

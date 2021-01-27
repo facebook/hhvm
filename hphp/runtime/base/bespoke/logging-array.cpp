@@ -475,23 +475,11 @@ tv_lval LoggingArray::ElemStr(
               mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
-ArrayData* LoggingArray::SetInt(LoggingArray* lad, int64_t k, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
-  logEvent(lad, ms, ArrayOp::SetInt, k, v);
-  return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
-}
 ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
   logEvent(lad, ms, ArrayOp::SetInt, k, v);
   return mutateMove(lad, ms, [&](ArrayData* w) { return w->setMove(k, v); });
-}
-ArrayData* LoggingArray::SetStr(LoggingArray* lad, StringData* k, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
-  logEvent(lad, ms, ArrayOp::SetStr, k, v);
-  return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
 ArrayData* LoggingArray::SetStrMove(LoggingArray* lad, StringData* k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
@@ -508,19 +496,13 @@ ArrayData* LoggingArray::RemoveStr(LoggingArray* lad, const StringData* k) {
   return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
 }
 
-ArrayData* LoggingArray::Append(LoggingArray* lad, TypedValue v) {
+ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
   logEvent(lad, ms, ArrayOp::Append, v);
-  return mutate(lad, ms, [&](ArrayData* w) { return w->append(v); });
-}
-ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
-  auto const result = Append(lad, v);
-  if (result != lad && lad->decReleaseCheck()) Release(lad);
-  tvDecRefGen(v);
-  return result;
+  return mutateMove(lad, ms, [&](ArrayData* w) { return w->appendMove(v); });
 }
 ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
   logEvent(lad, ArrayOp::Pop);

@@ -1027,6 +1027,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   assertx(checkInvariants());
 }
 
+template <bool Move>
 void MixedArray::nextInsert(TypedValue v) {
   assertx(m_nextKI >= 0);
   assertx(!isFull());
@@ -1043,7 +1044,11 @@ void MixedArray::nextInsert(TypedValue v) {
   e->setIntKey(ki, h);
   mutableKeyTypes()->recordInt();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  tvDup(v, e->data);
+  if constexpr (Move) {
+    tvCopy(v, e->data);
+  } else {
+    tvDup(v, e->data);
+  }
 }
 
 template <class K, bool move> ALWAYS_INLINE
@@ -1113,11 +1118,6 @@ void MixedArray::AppendTombstoneInPlace(ArrayData* ad) {
   a->m_used++;
 }
 
-ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
-  assertx(ad->cowCheck() || ad->notCyclic(v));
-  return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
-}
-
 ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
@@ -1130,11 +1130,6 @@ ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(!ad->cowCheck());
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
-}
-
-ArrayData* MixedArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
-  assertx(ad->cowCheck() || ad->notCyclic(v));
-  return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
 }
 
 ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
@@ -1259,20 +1254,14 @@ ArrayData* MixedArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
                   "already occupied");
     return a;
   }
-  a = a->prepareForInsert(copy);
-  a->nextInsert(v);
-  return a;
-}
-
-ArrayData* MixedArray::Append(ArrayData* ad, TypedValue v) {
-  return AppendImpl(ad, v, ad->cowCheck());
+  auto const res = a->prepareForInsert(copy);
+  res->nextInsert<true>(v);
+  if (res != a && a->decReleaseCheck()) MixedArray::Release(a);
+  return res;
 }
 
 ArrayData* MixedArray::AppendMove(ArrayData* ad, TypedValue v) {
-  auto const result = AppendImpl(ad, v, ad->cowCheck());
-  if (ad != result && ad->decReleaseCheck()) Release(ad);
-  tvDecRefGen(v);
-  return result;
+  return AppendImpl(ad, v, ad->cowCheck());
 }
 
 /*
@@ -1345,7 +1334,7 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
     Variant key = it.first();
     auto const value = it.secondVal();
     if (key.asTypedValue()->m_type == KindOfInt64) {
-      ret->nextInsert(value);
+      ret->nextInsert<false>(value);
     } else {
       StringData* sd = key.getStringData();
       auto const lval = ret->addLvalImpl(sd);
@@ -1375,7 +1364,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (isTombstone(srcElem->data.m_type)) continue;
 
       if (srcElem->hasIntKey()) {
-        ret->nextInsert(srcElem->data);
+        ret->nextInsert<false>(srcElem->data);
       } else {
         auto const lval = ret->addLvalImpl(srcElem->skey);
         assertx(srcElem->data.m_type != KindOfUninit);
@@ -1390,7 +1379,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   }
 
   PackedArray::IterateVNoInc(elems, [&](TypedValue tv) {
-    ret->nextInsert(tv);
+    ret->nextInsert<false>(tv);
   });
   return tagArrProv(ret);
 }

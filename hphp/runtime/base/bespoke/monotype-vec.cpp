@@ -257,16 +257,6 @@ tv_lval EmptyMonotypeVec::ElemStr(
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-ArrayData* EmptyMonotypeVec::SetInt(EmptyMonotypeVec* eadIn, int64_t k,
-                                    TypedValue) {
-  throwOOBArrayKeyException(k, eadIn);
-}
-
-ArrayData* EmptyMonotypeVec::SetStr(EmptyMonotypeVec* eadIn, StringData* k,
-                                    TypedValue) {
-  throwInvalidArrayKeyException(k, eadIn);
-}
-
 ArrayData* EmptyMonotypeVec::SetIntMove(EmptyMonotypeVec* eadIn, int64_t k,
                                         TypedValue) {
   throwOOBArrayKeyException(k, eadIn);
@@ -304,14 +294,6 @@ ssize_t EmptyMonotypeVec::IterAdvance(const EmptyMonotypeVec*, ssize_t) {
 
 ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t pos) {
   return 0;
-}
-
-ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* ead, TypedValue v) {
-  auto const mad = MonotypeVec::MakeReserve(
-      ead->m_kind, ead->isLegacyArray(), 1, type(v));
-  auto const res = MonotypeVec::Append(mad, v);
-  assertx(mad == res);
-  return res;
 }
 
 ArrayData* EmptyMonotypeVec::AppendMove(EmptyMonotypeVec* ead, TypedValue v) {
@@ -424,7 +406,8 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
     : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
 
   PackedArray::IterateVNoInc(ad, [&](auto v) {
-    auto const next = Append(result, v);
+    auto const next = AppendMove(result, v);
+    tvIncRefGen(v);
     assertx(result == next);
     result = As(next);
   });
@@ -684,7 +667,6 @@ tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-template <bool Move>
 ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   assertx(cowCheck() || notCyclic(v));
 
@@ -695,40 +677,25 @@ ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   auto const dt = type();
   if (!equivDataTypes(dt, v.type())) {
     auto const vad = EscalateToVanilla(this, __func__);
-    auto const res = vad->set(k, v);
+    auto const res = vad->setMove(k, v);
     assertx(vad == res);
-    if constexpr (Move) {
-      if (decReleaseCheck()) Release(this);
-      tvDecRefGen(v);
-    }
+    if (decReleaseCheck()) Release(this);
     return res;
   }
 
-  if constexpr (!Move) {
-    tvIncRefGen(v);
-  }
   auto const cow = cowCheck();
   auto const mad = cow ? copy() : this;
   if (dt != v.type()) {
     mad->setLayoutIndex(getLayoutIndex(dt_with_rc(dt)));
   }
   mad->valueRefUnchecked(k) = val(v);
-  if constexpr (Move) {
-    if (cow && decReleaseCheck()) Release(this);
-  }
+  if (cow && decReleaseCheck()) Release(this);
+
   return mad;
 }
 
-ArrayData* MonotypeVec::SetInt(MonotypeVec* madIn, int64_t k, TypedValue v) {
-  return madIn->setIntImpl<false>(k, v);
-}
-
 ArrayData* MonotypeVec::SetIntMove(MonotypeVec* madIn, int64_t k, TypedValue v) {
-  return madIn->setIntImpl<true>(k, v);
-}
-
-ArrayData* MonotypeVec::SetStr(MonotypeVec* madIn, StringData* k, TypedValue) {
-  throwInvalidArrayKeyException(k, madIn);
+  return madIn->setIntImpl(k, v);
 }
 
 ArrayData* MonotypeVec::SetStrMove(MonotypeVec* madIn, StringData* k, TypedValue) {
@@ -775,12 +742,11 @@ ssize_t MonotypeVec::IterRewind(const MonotypeVec* mad, ssize_t pos) {
   return pos > 0 ? pos - 1 : mad->size();
 }
 
-template <bool Move>
 ArrayData* MonotypeVec::appendImpl(TypedValue v) {
   auto const dt = type();
   if (dt != KindOfUninit && !equivDataTypes(dt, v.type())) {
     auto const ad = escalateWithCapacity(size() + 1, __func__);
-    auto const result = PackedArray::Append(ad, v);
+    auto const result = PackedArray::AppendMove(ad, v);
     assertx(ad == result);
     return result;
   }
@@ -793,21 +759,13 @@ ArrayData* MonotypeVec::appendImpl(TypedValue v) {
   }
   mad->valueRefUnchecked(mad->m_size++) = val(v);
 
-  if constexpr (Move) {
-    if (mad != this && decReleaseCheck()) Release(this);
-  } else {
-    tvIncRefGen(v);
-  }
-
   return mad;
 }
 
-ArrayData* MonotypeVec::Append(MonotypeVec* madIn, TypedValue v) {
-  return madIn->appendImpl<false>(v);
-}
-
 ArrayData* MonotypeVec::AppendMove(MonotypeVec* madIn, TypedValue v) {
-  return madIn->appendImpl<true>(v);
+  auto const res = madIn->appendImpl(v);
+  if (res != madIn && madIn->decReleaseCheck()) Release(madIn);
+  return res;
 }
 
 ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {

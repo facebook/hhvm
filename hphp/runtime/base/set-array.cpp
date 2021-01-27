@@ -122,17 +122,17 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
     if (isIntType(tv.m_type)) {
       ad->insert(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
-      ad->insert(tv.m_data.pstr);
+      ad->insert<false>(tv.m_data.pstr);
       decRefStr(tv.m_data.pstr); // FIXME
     } else if (isClassType(tv.m_type)) {
       auto const keyStr =
         const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
-      ad->insert(keyStr);
+      ad->insert<false>(keyStr);
     } else {
       assertx(isLazyClassType(tv.m_type));
       auto const keyStr =
         const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass));
-      ad->insert(keyStr);
+      ad->insert<false>(keyStr);
     }
   }
   return ad;
@@ -259,13 +259,13 @@ ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, int64_t i) {
 
 ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s) {
   auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
-  a->insert(s);
+  a->insert<false>(s);
   return a;
 }
 
 ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, StringData* s) {
   auto a = asSet(ad)->prepareForInsert(false);
-  a->insert(s);
+  a->insert<false>(s);
   return a;
 }
 
@@ -331,15 +331,17 @@ void SetArray::insert(int64_t k, inthash_t h) {
 }
 void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
+template <bool Move>
 void SetArray::insert(StringData* k, strhash_t h) {
   assertx(!isFull());
   auto const loc = findForInsert(k, h);
   if (isValidIns(loc)) {
     auto elm = allocElm(loc);
-    elm->setStrKey(k, h);
+    elm->setStrKey<Move>(k, h);
   }
 }
-void SetArray::insert(StringData* k) { return insert(k, k->hash()); }
+template <bool Move>
+void SetArray::insert(StringData* k) { return insert<Move>(k, k->hash()); }
 
 void SetArray::erase(RemovePos pos) {
   assertx(pos.valid() && pos.elmIdx < m_used);
@@ -579,11 +581,11 @@ arr_lval SetArray::LvalStr(ArrayData*, StringData*) {
   throwInvalidKeysetOperation();
 }
 
-ArrayData* SetArray::SetInt(ArrayData*, int64_t, TypedValue) {
+ArrayData* SetArray::SetIntMove(ArrayData*, int64_t, TypedValue) {
   throwInvalidKeysetOperation();
 }
 
-ArrayData* SetArray::SetStr(ArrayData*, StringData*, TypedValue) {
+ArrayData* SetArray::SetStrMove(ArrayData*, StringData*, TypedValue) {
   throwInvalidKeysetOperation();
 }
 
@@ -628,28 +630,25 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
 }
 
 ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
-  if (isIntType(v.m_type)) {
-    auto a = asSet(ad)->prepareForInsert(copy);
-    a->insert(v.m_data.num);
-    return a;
-  } else if (isStringType(v.m_type)) {
-    auto a = asSet(ad)->prepareForInsert(copy);
-    a->insert(v.m_data.pstr);
-    return a;
-  } else {
-    throwInvalidArrayKeyException(&v, ad);
-  }
-}
-
-ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
-  return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
+  auto const res = [&] {
+    if (isIntType(v.m_type)) {
+      auto a = asSet(ad)->prepareForInsert(copy);
+      a->insert(v.m_data.num);
+      return a;
+    } else if (isStringType(v.m_type)) {
+      auto a = asSet(ad)->prepareForInsert(copy);
+      a->insert<true>(v.m_data.pstr);
+      return a;
+    } else {
+      throwInvalidArrayKeyException(&v, ad);
+    }
+  }();
+  if (res != ad && ad->decReleaseCheck()) SetArray::Release(ad);
+  return res;
 }
 
 ArrayData* SetArray::AppendMove(ArrayData* ad, TypedValue v) {
-  auto const result = AppendImpl(ad, tvClassToString(v), ad->cowCheck());
-  if (ad != result && ad->decReleaseCheck()) Release(ad);
-  tvDecRefGen(v);
-  return result;
+  return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
 ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {

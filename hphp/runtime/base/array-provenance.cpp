@@ -554,15 +554,16 @@ ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
     auto const next = make_array_like_tv(ad);
     if (result || !cow) {
       result = result ? result : in;
-      auto const escalated = result->set(key, next);
+      auto const escalated = result->setMove(key, next);
+      ad->incRefCount();
       assertx(escalated->hasExactlyOneRef());
       if (escalated == result) return;
-      if (result != in) result->release();
+      result->incRefCount();
       result = escalated;
     } else {
       in->incRefCount();
-      SCOPE_EXIT { in->decRefCount(); };
-      result = in->set(key, next);
+      result = in->setMove(key, next);
+      ad->incRefCount();
       assertx(result->hasExactlyOneRef());
     }
   });

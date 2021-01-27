@@ -166,6 +166,17 @@ template<typename T> struct ptr final {
     return py;
   }
 
+  /**
+   * Modify the value contained using the operation provided. The operation is
+   * assumed to decrement the ref count on the old value if it returns a new
+   * pointer.
+   */
+  template <typename X>
+  void mutateInPlace(X op) {
+    auto const newVal = op(m_px);
+    m_px = newVal;
+  }
+
 private:
   // For templatized ptr<Y> move constructor.
   template <typename Y> friend struct ptr;

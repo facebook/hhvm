@@ -73,9 +73,7 @@ private:
   void decRefValues();
   void incRefValues();
 
-  template <bool Move>
   ArrayData* appendImpl(TypedValue v);
-  template <bool Move>
   ArrayData* setIntImpl(int64_t k, TypedValue v);
   arr_lval elemImpl(int64_t k, bool throwOnMissing);
 

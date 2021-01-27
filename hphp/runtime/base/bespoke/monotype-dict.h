@@ -192,9 +192,8 @@ private:
   template <typename K> arr_lval elemImpl(Key key, K k, bool throwOnMissing);
   arr_lval lvalDispatch(int64_t k);
   arr_lval lvalDispatch(StringData* k);
-  template <bool Move>
   ArrayData* appendImpl(TypedValue v);
-  template <bool Move, typename K>
+  template <typename K>
   ArrayData* setImpl(Key key, K k, TypedValue v);
 
   // Iterate over values of this MonotypeDict, calling these callbacks for

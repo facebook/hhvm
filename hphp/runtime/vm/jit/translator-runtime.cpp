@@ -84,7 +84,7 @@ void setNewElem(tv_lval base, TypedValue val) {
 }
 
 void setNewElemVec(tv_lval base, TypedValue val) {
-  HPHP::SetNewElemVecMove(base, &val);
+  HPHP::SetNewElemVec(base, &val);
 }
 
 void setNewElemDict(tv_lval base, TypedValue val) {
@@ -95,16 +95,14 @@ void setNewElemDict(tv_lval base, TypedValue val) {
 
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
   assertx(vec->hasVanillaPackedLayout());
-  auto out = PackedArray::Append(vec, v);
-  if (vec != out) decRefArr(vec);
-  return out;
+  tvIncRefGen(v);
+  return PackedArray::AppendMove(vec, v);
 }
 
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
   assertx(keyset->isKeysetKind());
-  auto out = SetArray::Append(keyset, v);
-  if (keyset != out) decRefArr(keyset);
-  return out;
+  tvIncRefGen(v);
+  return SetArray::AppendMove(keyset, v);
 }
 
 //////////////////////////////////////////////////////////////////////

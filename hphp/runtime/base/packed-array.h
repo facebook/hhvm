@@ -70,10 +70,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
-  static constexpr auto SetStrMove = &SetStr;
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static bool IsVectorData(const ArrayData*) { return true; }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
@@ -95,7 +93,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
-  static ArrayData* Append(ArrayData*, TypedValue v);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);

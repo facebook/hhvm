@@ -114,22 +114,10 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
   return Variant::wrap(nvGetVal(pos));
 }
 
-inline ArrayData* ArrayData::set(int64_t k, TypedValue v) {
-  assertx(tvIsPlausible(v));
-  assertx(cowCheck() || notCyclic(v));
-  return g_array_funcs.setInt[kind()](this, k, v);
-}
-
 inline ArrayData* ArrayData::setMove(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setIntMove[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::set(StringData* k, TypedValue v) {
-  assertx(tvIsPlausible(v));
-  assertx(cowCheck() || notCyclic(v));
-  return g_array_funcs.setStr[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setMove(StringData* k, TypedValue v) {
@@ -138,30 +126,12 @@ inline ArrayData* ArrayData::setMove(StringData* k, TypedValue v) {
   return g_array_funcs.setStrMove[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::set(int64_t k, const Variant& v) {
-  auto c = *v.asTypedValue();
-  assertx(cowCheck() || notCyclic(c));
-  return g_array_funcs.setInt[kind()](this, k, c);
-}
-
-inline ArrayData* ArrayData::set(StringData* k, const Variant& v) {
-  auto c = *v.asTypedValue();
-  assertx(cowCheck() || notCyclic(c));
-  return g_array_funcs.setStr[kind()](this, k, c);
-}
-
 inline ArrayData* ArrayData::remove(int64_t k) {
   return g_array_funcs.removeInt[kind()](this, k);
 }
 
 inline ArrayData* ArrayData::remove(const StringData* k) {
   return g_array_funcs.removeStr[kind()](this, k);
-}
-
-inline ArrayData* ArrayData::append(TypedValue v) {
-  assertx(v.m_type != KindOfUninit);
-  assertx(cowCheck() || notCyclic(v));
-  return g_array_funcs.append[kind()](this, v);
 }
 
 inline ArrayData* ArrayData::appendMove(TypedValue v) {
@@ -299,15 +269,6 @@ inline TypedValue ArrayData::at(TypedValue k) const {
                              : at(detail::getStringKey(k));
 }
 
-inline ArrayData* ArrayData::set(TypedValue k, TypedValue v) {
-  assertx(tvIsPlausible(k));
-  assertx(tvIsPlausible(v));
-  assertx(IsValidKey(k));
-
-  return detail::isIntKey(k) ? set(detail::getIntKey(k), v)
-                             : set(detail::getStringKey(k), v);
-}
-
 inline ArrayData* ArrayData::remove(TypedValue k) {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? remove(detail::getIntKey(k))
@@ -343,18 +304,38 @@ inline TypedValue ArrayData::get(const Variant& k, bool error) const {
   return get(*k.asTypedValue(), error);
 }
 
-inline ArrayData* ArrayData::set(const String& k, TypedValue v) {
+inline ArrayData* ArrayData::setMove(TypedValue k, TypedValue v) {
+  assertx(tvIsPlausible(k));
   assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
-  return set(k.get(), v);
+
+  return detail::isIntKey(k) ? setMove(detail::getIntKey(k), v)
+                             : setMove(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::set(const String& k, const Variant& v) {
-  return set(k, *v.asTypedValue());
+inline ArrayData* ArrayData::setMove(const String& k, TypedValue v) {
+  assertx(tvIsPlausible(v));
+  assertx(IsValidKey(k));
+
+  return setMove(k.get(), v);
 }
 
-inline ArrayData* ArrayData::set(const Variant& k, const Variant& v) {
-  return set(*k.asTypedValue(), *v.asTypedValue());
+inline ArrayData* ArrayData::setMove(int64_t k, const Variant& v) {
+  return setMove(k, *v.asTypedValue());
+}
+
+inline ArrayData* ArrayData::setMove(StringData* k, const Variant& v) {
+  assertx(IsValidKey(k));
+  return setMove(k, *v.asTypedValue());
+}
+
+inline ArrayData* ArrayData::setMove(const String& k, const Variant& v) {
+  assertx(IsValidKey(k));
+  return setMove(k.get(), *v.asTypedValue());
+}
+
+inline ArrayData* ArrayData::setMove(const Variant& k, const Variant& v) {
+  return setMove(*k.asTypedValue(), *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::remove(const String& k) {

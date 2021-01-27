@@ -420,20 +420,15 @@ public:
    * These methods return `this' if copy/escalation are not needed, or a
    * copied/escalated array data if they are.
    */
-  ArrayData* set(int64_t k, TypedValue v);
-  ArrayData* set(StringData* k, TypedValue v);
-  ArrayData* set(TypedValue k, TypedValue v);
-  ArrayData* set(const String& k, TypedValue v);
   ArrayData* setMove(int64_t k, TypedValue v);
   ArrayData* setMove(StringData* k, TypedValue v);
 
-  ArrayData* set(int64_t k, const Variant& v);
-  ArrayData* set(StringData* k, const Variant& v);
-  ArrayData* set(const String& k, const Variant& v);
-  ArrayData* set(const Variant& k, const Variant& v);
-
-  ArrayData* set(const StringData*, TypedValue) = delete;
-  ArrayData* set(const StringData*, const Variant&) = delete;
+  ArrayData* setMove(TypedValue k, TypedValue v);
+  ArrayData* setMove(const String& k, TypedValue v);
+  ArrayData* setMove(int64_t k, const Variant& v);
+  ArrayData* setMove(StringData* k, const Variant& v);
+  ArrayData* setMove(const String& k, const Variant& v);
+  ArrayData* setMove(const Variant& k, const Variant& v);
 
   /*
    * Remove the value at key `k', making a copy first if necessary. Returns
@@ -452,7 +447,6 @@ public:
    * appendMove dec-refs the old array if we needed copy / escalation, and
    * does not do any refcounting ops on the value.
    */
-  ArrayData* append(TypedValue v);
   ArrayData* appendMove(TypedValue v);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -795,9 +789,7 @@ struct ArrayFunctions {
   ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);
   TypedValue (*getPosVal[NK])(const ArrayData*, ssize_t pos);
-  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
-  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, TypedValue v);
   ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
@@ -819,7 +811,6 @@ struct ArrayFunctions {
   bool (*usort[NK])(ArrayData* ad, const Variant& cmp_function);
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
-  ArrayData* (*append[NK])(ArrayData*, TypedValue v);
   ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*toDVArray[NK])(ArrayData*, bool copy);

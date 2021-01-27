@@ -320,8 +320,9 @@ template<typename T> ALWAYS_INLINE
 tv_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   if (!m_arr->exists(key)) {
-    auto const escalated = m_arr->set(key, make_tv<KindOfNull>());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+    m_arr.mutateInPlace([&](ArrayData* ad) {
+      return ad->setMove(key, make_tv<KindOfNull>());
+    });
   }
   auto const lval = m_arr->lval(key);
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
@@ -347,8 +348,10 @@ void Array::setImpl(const T& key, TypedValue v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(key, v));
   } else {
-    auto const escalated = m_arr->set(key, v);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+    m_arr.mutateInPlace([&](ArrayData* ad) {
+      return ad->setMove(key, v);
+    });
+    tvIncRefGen(v);
   }
 }
 
@@ -509,8 +512,10 @@ FOR_EACH_KEY_TYPE(set)
 void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-  auto const escalated = m_arr->append(tvToInit(v));
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  m_arr.mutateInPlace([&](ArrayData* ad) {
+    return ad->appendMove(tvToInit(v));
+  });
+  tvIncRefGen(v);
 }
 
 Variant Array::pop() {

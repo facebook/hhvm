@@ -52,9 +52,12 @@ struct SetArrayElm {
   static auto constexpr kTombstone = kInvalidDataType;
   static auto constexpr kEmpty = KindOfUninit;
 
+  template <bool Move>
   void setStrKey(StringData* k, strhash_t h) {
     assertx(isEmpty());
-    k->incRefCount();
+    if constexpr (!Move) {
+      k->incRefCount();
+    }
     tv.m_type = KindOfString;
     tv.m_data.pstr = k;
     tv.hash() = h;
@@ -270,7 +273,9 @@ private:
    */
   void insert(int64_t k, inthash_t h);
   void insert(int64_t k);
+  template <bool Move>
   void insert(StringData* k, strhash_t h);
+  template <bool Move>
   void insert(StringData* k);
 
   void erase(RemovePos);
@@ -355,7 +360,6 @@ private:
   using ArrayData::exists;
   using ArrayData::at;
   using ArrayData::lval;
-  using ArrayData::set;
   using ArrayData::remove;
   using ArrayData::release;
 
@@ -391,15 +395,12 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t);
   static arr_lval LvalStr(ArrayData*, StringData*);
-  static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
-  static constexpr auto SetIntMove = &SetInt;
-  static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);
-  static constexpr auto SetStrMove = &SetStr;
+  static ArrayData* SetIntMove(ArrayData*, int64_t, TypedValue);
+  static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue);
   static ArrayData* RemoveInt(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, TypedValue);
   static ArrayData* AppendMove(ArrayData*, TypedValue);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* ToDVArray(ArrayData*, bool copy);

@@ -642,7 +642,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
         resolveTSListStatically(env, seenTs, generics, declaringCls);
       if (!rgenerics) return nullptr;
       auto result = const_cast<ArrayData*>(ts);
-      return finish(result->set(s_generic_types.get(), Variant(rgenerics)));
+      return finish(result->setMove(s_generic_types.get(), Variant(rgenerics)));
     }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -656,7 +656,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
       auto relems = resolveTSListStatically(env, seenTs, elems, declaringCls);
       if (!relems) return nullptr;
       auto result = const_cast<ArrayData*>(ts);
-      return finish(result->set(s_elem_types.get(), Variant(relems)));
+      return finish(result->setMove(s_elem_types.get(), Variant(relems)));
     }
     case TypeStructure::Kind::T_shape:
       // TODO(T31677864): We can also optimize this but shapes could have
@@ -671,7 +671,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
         auto rgenerics =
           resolveTSListStatically(env, seenTs, generics, declaringCls);
         if (!rgenerics) return nullptr;
-        result = result->set(s_generic_types.get(), Variant(rgenerics));
+        result = result->setMove(s_generic_types.get(), Variant(rgenerics));
       }
       auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
       if (!rcls || !rcls->resolved()) return nullptr;
@@ -682,8 +682,8 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
         if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
         return TypeStructure::Kind::T_class;
       }();
-      return finish(result->set(s_kind.get(),
-                                Variant(static_cast<uint8_t>(kind))));
+      return finish(result->setMove(s_kind.get(),
+                                    Variant(static_cast<uint8_t>(kind))));
     }
     case TypeStructure::Kind::T_typeaccess: {
       auto const accList = get_ts_access_list(ts);
@@ -740,14 +740,14 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
                                              declaringCls);
       if (!rparams) return nullptr;
       auto result = const_cast<ArrayData*>(ts)
-        ->set(s_return_type.get(), Variant(rreturn))
-        ->set(s_param_types.get(), Variant(rparams));
+        ->setMove(s_return_type.get(), Variant(rreturn))
+        ->setMove(s_param_types.get(), Variant(rparams));
       auto const variadic = get_ts_variadic_type_opt(ts);
       if (variadic) {
         auto rvariadic =
           resolveTSStaticallyImpl(env, seenTs, variadic, declaringCls);
         if (!rvariadic) return nullptr;
-        result = result->set(s_variadic_type.get(), Variant(rvariadic));
+        result = result->setMove(s_variadic_type.get(), Variant(rvariadic));
       }
       return finish(result);
     }
@@ -1041,7 +1041,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
         auto vtv = tv(v);
         if (!vtv) return false;
         return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
-          *arr = (*arr)->set(*ktv, *vtv);
+          *arr = (*arr)->setMove(*ktv, *vtv);
         });
       }();
       if (handled) {
@@ -1098,7 +1098,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
         auto vtv = tv(v);
         if (!vtv) return false;
         return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
-          *arr = (*arr)->append(*vtv);
+          *arr = (*arr)->appendMove(*vtv);
         });
       }();
       if (handled) {

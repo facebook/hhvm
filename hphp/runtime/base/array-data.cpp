@@ -449,7 +449,6 @@ const ArrayFunctions g_array_funcs = {
    *   SetIntMove is equivalent to SetInt, followed by a dec-ref of the value,
    *   followed by a dec-ref of the old array (if it was copied or escalated).
    */
-  DISPATCH(SetInt)
   DISPATCH(SetIntMove)
 
   /*
@@ -459,7 +458,6 @@ const ArrayFunctions g_array_funcs = {
    *   SetStrMove is equivalent to SetStr, followed by a dec-ref of the value,
    *   followed by a dec-ref of the old array (if it was copied or escalated).
    */
-  DISPATCH(SetStr)
   DISPATCH(SetStrMove)
 
   /*
@@ -639,7 +637,6 @@ const ArrayFunctions g_array_funcs = {
    *   AppendMove is equivalent to calling Append, dec-ref-ing the value,
    *   and (if copy or escalation was needed), dec-ref-ing the old array.
    */
-  DISPATCH(Append)
   DISPATCH(AppendMove)
 
   /*

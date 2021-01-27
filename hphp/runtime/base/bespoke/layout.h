@@ -55,13 +55,10 @@ BespokeArray* maybeMonoify(ArrayData*);
   X(arr_lval, LvalStr, T* ad, StringData* k) \
   X(tv_lval, ElemInt, tv_lval lval, int64_t k, bool) \
   X(tv_lval, ElemStr, tv_lval lval, StringData* k, bool) \
-  X(ArrayData*, SetInt, T*, int64_t k, TypedValue v) \
-  X(ArrayData*, SetStr, T*, StringData* k, TypedValue v)\
   X(ArrayData*, SetIntMove, T*, int64_t k, TypedValue v) \
   X(ArrayData*, SetStrMove, T*, StringData* k, TypedValue v)\
   X(ArrayData*, RemoveInt, T*, int64_t) \
   X(ArrayData*, RemoveStr, T*, const StringData*) \
-  X(ArrayData*, Append, T*, TypedValue v) \
   X(ArrayData*, AppendMove, T*, TypedValue v) \
   X(ArrayData*, Pop, T*, Variant&) \
   X(ArrayData*, ToDVArray, T*, bool copy) \
@@ -152,12 +149,6 @@ struct LayoutFunctionDispatcher {
     Cast(lval.val().parr, __func__);
     return Array::ElemStr(lval, k, throwOnMissing);
   }
-  static ArrayData* SetInt(ArrayData* ad, int64_t k, TypedValue v) {
-    return Array::SetInt(Cast(ad, __func__), k, v);
-  }
-  static ArrayData* SetStr(ArrayData* ad, StringData* k, TypedValue v){
-    return Array::SetStr(Cast(ad, __func__), k, v);
-  }
   static ArrayData* SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
     return Array::SetIntMove(Cast(ad, __func__), k, v);
   }
@@ -184,9 +175,6 @@ struct LayoutFunctionDispatcher {
   }
   static ssize_t IterRewind(const ArrayData* ad, ssize_t pos) {
     return Array::IterRewind(Cast(ad, __func__), pos);
-  }
-  static ArrayData* Append(ArrayData* ad, TypedValue v) {
-    return Array::Append(Cast(ad, __func__), v);
   }
   static ArrayData* AppendMove(ArrayData* ad, TypedValue v) {
     return Array::AppendMove(Cast(ad, __func__), v);

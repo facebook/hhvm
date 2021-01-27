@@ -51,10 +51,10 @@ inline ArrayData* SetInPlace(ArrayData* ad, const String& k, TypedValue v) {
 inline ArrayData* SetInPlace(ArrayData* ad, TypedValue k, TypedValue v) {
   if (isIntType(k.m_type)) {
     return MixedArray::SetIntInPlace(ad, k.m_data.num, tvToInit(v));
-  } else  if (isStringType(k.m_type)) {
+  } else {
+    assertx(isStringType(k.m_type));
     return MixedArray::SetStrInPlace(ad, k.m_data.pstr, tvToInit(v));
   }
-  return ad->set(k, v);
 }
 }
 
@@ -233,8 +233,9 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfUninit> {
    */
   MixedPHPArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::Append(this->m_arr, tvToInit(tv));
+      return MixedArray::AppendMove(this->m_arr, tvToInit(tv));
     });
+    tvIncRefGen(tv);
     return *this;
   }
   MixedPHPArrayInitBase& append(const Variant& v) {
@@ -379,7 +380,8 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
   /////////////////////////////////////////////////////////////////////////////
 
   DictInit& append(TypedValue tv) {
-    performOp([&]{ return MixedArray::Append(m_arr, tvToInit(tv)); });
+    performOp([&]{ return MixedArray::AppendMove(m_arr, tvToInit(tv)); });
+    tvIncRefGen(tv);
     return *this;
   }
   DictInit& append(const Variant& v) {
@@ -608,7 +610,8 @@ struct DArrayInit {
   }
 
   DArrayInit& append(TypedValue tv) {
-    performOp([&]{ return m_arr->append(tvToInit(tv)); });
+    performOp([&]{ return m_arr->appendMove(tvToInit(tv)); });
+    tvIncRefGen(tv);
     return *this;
   }
   DArrayInit& append(const Variant& v) {
@@ -793,7 +796,8 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
     return *this;
   }
   KeysetInit& add(TypedValue tv) {
-    performOp([&]{ return SetArray::Append(m_arr, tvToInit(tv)); });
+    performOp([&]{ return SetArray::AppendMove(m_arr, tvToInit(tv)); });
+    tvIncRefGen(tv);
     return *this;
   }
   KeysetInit& add(const Variant& v) {

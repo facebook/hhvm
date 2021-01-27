@@ -179,8 +179,6 @@ public:
   static tv_lval ElemStr(tv_lval lvalIn, StringData* key, bool throwOnMissing);
 
   // insertion
-  static ArrayData* SetInt(ArrayData* ad, int64_t key, TypedValue v);
-  static ArrayData* SetStr(ArrayData* ad, StringData* key, TypedValue v);
   static ArrayData* SetIntMove(ArrayData* ad, int64_t key, TypedValue v);
   static ArrayData* SetStrMove(ArrayData* ad, StringData* key, TypedValue v);
 
@@ -204,7 +202,6 @@ public:
   static auto constexpr Uksort = UnsupportedOp<bool, ArrayData*, const Variant&>;
 
   // high-level ops
-  static ArrayData* Append(ArrayData* ad, TypedValue v);
   static ArrayData* AppendMove(ArrayData* ad, TypedValue v);
   static ArrayData* Pop(ArrayData* ad, Variant& out);
   static void OnSetEvalScalar(ArrayData* ad);

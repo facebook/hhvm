@@ -20,7 +20,7 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use oxidized_by_ref::{
-    aast, aast_defs,
+    aast,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_defs::MethodReactivity,
     direct_decl_parser::Decls,
@@ -159,15 +159,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 {
                     qualified_name.push_str("namespace\\");
                 }
-                Node::ListItem(listitem) => {
-                    panic!(
-                        "Expected ListItem with name and backslash, but got {:?}",
-                        listitem
-                    );
-                }
-                n => {
-                    panic!("Expected a name, backslash, or list item, but got {:?}", n);
-                }
+                _ => {}
             }
         }
         debug_assert_eq!(len, qualified_name.len());
@@ -451,7 +443,7 @@ impl<'a> NamespaceBuilder<'a> {
         self.stack.last().and_then(|nsenv| nsenv.name)
     }
 
-    fn add_import(&mut self, kind: TokenKind, name: &'a str, aliased_name: Option<&'a str>) {
+    fn add_import(&mut self, kind: NamespaceUseKind, name: &'a str, aliased_name: Option<&'a str>) {
         let stack_top = &mut self
             .stack
             .last_mut()
@@ -468,17 +460,16 @@ impl<'a> NamespaceBuilder<'a> {
             prefix_slash(self.arena, name)
         };
         match kind {
-            TokenKind::Type => {
+            NamespaceUseKind::Type => {
                 stack_top.class_uses = stack_top.class_uses.add(self.arena, aliased_name, name);
             }
-            TokenKind::Namespace => {
+            NamespaceUseKind::Namespace => {
                 stack_top.ns_uses = stack_top.ns_uses.add(self.arena, aliased_name, name);
             }
-            TokenKind::Mixed => {
+            NamespaceUseKind::Mixed => {
                 stack_top.class_uses = stack_top.class_uses.add(self.arena, aliased_name, name);
                 stack_top.ns_uses = stack_top.ns_uses.add(self.arena, aliased_name, name);
             }
-            _ => panic!("Unexpected import kind: {:?}", kind),
         }
     }
 
@@ -612,9 +603,16 @@ pub struct ClosureTypeHint<'a> {
 
 #[derive(Debug)]
 pub struct NamespaceUseClause<'a> {
-    kind: TokenKind,
+    kind: NamespaceUseKind,
     id: Id<'a>,
     as_: Option<&'a str>,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum NamespaceUseKind {
+    Type,
+    Namespace,
+    Mixed,
 }
 
 #[derive(Debug)]
@@ -689,7 +687,7 @@ mod fixed_width_token {
 
             let offset: u64 = offset.try_into().unwrap();
             if offset > MAX_OFFSET {
-                panic!("FixedWidthToken: offset too large");
+                panic!("FixedWidthToken: offset too large: {}", offset);
             }
             Self(offset << KIND_BITS | kind as u8 as u64)
         }
@@ -1321,8 +1319,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     _ => {}
                 }
-            } else {
-                panic!("Expected an attribute, but was {:?}", node);
             }
         }
 
@@ -1676,7 +1672,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 }
                             };
                         }
-                        n => panic!("Expected a function parameter, but got {:?}", n),
+                        _ => {}
                     }
                 }
                 Some((
@@ -1686,7 +1682,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 ))
             }
             n if n.is_ignored() => Some((&[], &[], FunArity::Fstandard)),
-            n => panic!("Expected a list of function parameters, but got {:?}", n),
+            _ => None,
         }
     }
 
@@ -1938,14 +1934,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         })
     }
 
-    fn namespace_use_kind(use_kind: &Node) -> Option<TokenKind> {
+    fn namespace_use_kind(use_kind: &Node) -> Option<NamespaceUseKind> {
         match use_kind.token_kind() {
             Some(TokenKind::Const) => None,
             Some(TokenKind::Function) => None,
-            Some(TokenKind::Type) => Some(TokenKind::Type),
-            Some(TokenKind::Namespace) => Some(TokenKind::Namespace),
-            _ if !use_kind.is_present() => Some(TokenKind::Mixed),
-            x => panic!("Unexpected namespace use kind: {:?}", x),
+            Some(TokenKind::Type) => Some(NamespaceUseKind::Type),
+            Some(TokenKind::Namespace) => Some(NamespaceUseKind::Namespace),
+            _ if !use_kind.is_present() => Some(NamespaceUseKind::Mixed),
+            _ => None,
         }
     }
 }
@@ -2714,7 +2710,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,
             Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
-            n => panic!("Expected either As or Super, but was {:?}", n),
+            _ => return Node::Ignored(SK::TypeConstraint),
         };
         Node::TypeConstraint(self.alloc((kind, value)))
     }
@@ -2740,8 +2736,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
         let constraints = self.slice(constraints.iter().filter_map(|node| match node {
             Node::TypeConstraint(&constraint) => Some(constraint),
-            n if n.is_ignored() => None,
-            n => panic!("Expected a type constraint, but was {:?}", n),
+            _ => None,
         }));
 
         // TODO(T70068435) Once we add support for constraints on higher-kinded types
@@ -2794,7 +2789,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     tparam_names.insert(name.1);
                     tparams_with_name.push((decl, name));
                 }
-                n => panic!("Expected a type parameter, but got {:?}", n),
+                _ => {}
             }
         }
         Rc::make_mut(&mut self.type_parameters).push(tparam_names.into());
@@ -3231,7 +3226,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
         let body = match body {
             Node::ClassishBody(body) => body,
-            body => panic!("Expected a classish body, but was {:?}", body),
+            _ => return Node::Ignored(SK::ClassishDeclaration),
         };
 
         let mut uses_len = 0;
@@ -3493,7 +3488,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         flags,
                     })
                 }
-                n => panic!("Expected a ListItem, but was {:?}", n),
+                _ => None,
             },
         ));
         Node::Property(self.alloc(PropertyNode {
@@ -3610,7 +3605,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     ) -> Self::R {
         let header = match header {
             Node::FunctionHeader(header) => header,
-            n => panic!("Expected a FunctionDecl header, but was {:?}", n),
+            _ => return Node::Ignored(SK::MethodishDeclaration),
         };
         // If we don't have a body, use the closing token. A closing token of
         // '}' indicates a regular function, while a closing token of ';'
@@ -3743,7 +3738,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     }),
                 )
             }
-            n => panic!("Expected an enum case, got {:?}", n),
+            _ => None,
         }));
 
         let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.arena);
@@ -4016,11 +4011,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let fields_iter = fields.iter();
         let mut fields = AssocListMut::new_in(self.arena);
         for node in fields_iter {
-            match node {
-                &Node::ShapeFieldSpecifier(&ShapeFieldNode { name, type_ }) => {
-                    fields.insert(*name, type_)
-                }
-                n => panic!("Expected a shape field specifier, but was {:?}", n),
+            if let &Node::ShapeFieldSpecifier(&ShapeFieldNode { name, type_ }) = node {
+                fields.insert(*name, type_)
             }
         }
         let kind = match open.token_kind() {
@@ -4152,10 +4144,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             Node::List(nodes) => {
                 Node::BracketedList(self.alloc((self.get_pos(ltlt), nodes, self.get_pos(gtgt))))
             }
-            node => panic!(
-                "Expected List in old_attribute_specification, but got {:?}",
-                node
-            ),
+            _ => Node::Ignored(SK::OldAttributeSpecification),
         }
     }
 

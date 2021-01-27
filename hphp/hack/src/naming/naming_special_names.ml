@@ -324,8 +324,6 @@ module UserAttributes = struct
 
   let uaAlwaysInline = "__ALWAYS_INLINE"
 
-  let uaPu = "__Pu"
-
   let uaEnableUnstableFeatures = "__EnableUnstableFeatures"
 
   let uaEnumClass = "__EnumClass"
@@ -387,7 +385,6 @@ module UserAttributes = struct
           (uaReifiable, [typeconst]);
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
-          (uaPu, [cls]);
           (uaEnableUnstableFeatures, [file]);
           (uaEnumClass, [cls; enum]);
           (uaPolicied, [fn; mthd; instProperty; parameter]);

@@ -18,7 +18,7 @@ var_dump(keyset(Vector {1, 2, 3, 4, 5, 6}));
 var_dump(keyset(Set {1, '2', '3', 3}));
 var_dump(keyset(Pair {1, '1'}));
 
-$x = 'HH\keyset';
+$x = HH\keyset<>;
 var_dump($x(Map {1 => 1, '2' => 2, '3' => 's', 3 => 'i'}));
 var_dump($x(Vector {1, 2, 3, 4, 5, 6}));
 var_dump($x(Set {1, '2', '3', 3}));

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray['strtoupper', 'strtolower'];
+$arr = varray[strtoupper<>, strtolower<>];
 
 $k = 0;
 

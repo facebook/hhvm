@@ -8,9 +8,9 @@ function do_print($f, $v, $k, $d) {
 }
 
 function run($v, $k, $d) {
-  do_print('var_dump', $v, $k, $d);
-  do_print('var_export', $v, $k, $d);
-  do_print('print_r', $v, $k, $d);
+  do_print(var_dump<>, $v, $k, $d);
+  do_print(var_export<>, $v, $k, $d);
+  do_print(print_r<>, $v, $k, $d);
 }
 <<__EntryPoint>> function main(): void {
 run(vec['a', 'b', 'c'],

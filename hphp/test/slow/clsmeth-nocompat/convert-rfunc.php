@@ -134,14 +134,14 @@ function test_dynamic() {
   $foo = LV(class_meth(Foo::class, 'bar'));
   try { var_dump(varray($foo)); } catch (Exception $_) {}
 
-  try { 
+  try {
     var_dump(array_map($x ==> var_dump($x) ?? 42, $foo));
   } catch (Exception $_) {}
 }
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   test_static();  test_static();  test_static();
   test_dynamic(); test_dynamic(); test_dynamic();

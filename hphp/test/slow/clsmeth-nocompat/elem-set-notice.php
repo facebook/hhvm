@@ -151,7 +151,7 @@ function set_dynamic4(): void {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   set_static1();  set_static1();
   set_dynamic1(); set_dynamic1();

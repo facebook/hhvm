@@ -366,7 +366,7 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
   static_compare();
   dynamic_compare();
 }

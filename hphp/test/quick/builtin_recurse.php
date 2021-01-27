@@ -9,8 +9,8 @@ function foo($s) {
   print "Test begin\n";
 
   call_user_func_array(print_r<>, varray["Hello!\n"]);
-  call_user_func_array(call_user_func_array<>, varray["print_r",
-                                                     varray["Hello!\n"]]);
+  call_user_func_array(call_user_func_array<>,
+                       varray[print_r<>, varray["Hello!\n"]]);
 
   // Throw an exception throw nested builtin calls.
   try {

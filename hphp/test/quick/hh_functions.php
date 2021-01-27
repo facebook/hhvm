@@ -5,9 +5,9 @@ function compose<X,Y,Z>((function(Y):Z) $f, (function(X):Y) $g):(function(X):Z) 
   };
 }
 <<__EntryPoint>> function main(): void {
-$x = compose('htmlspecialchars_decode', 'htmlspecialchars');
+$x = compose(htmlspecialchars_decode<>, htmlspecialchars<>);
 
-for($i=0;$i<256;$i++) {
+for ($i=0;$i<256;$i++) {
   if (chr($i) !== $x(chr($i))) {
     echo "[$i]\n";
   }

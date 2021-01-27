@@ -32,7 +32,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 }
 
 function set_custom_error_handler() {
-	set_error_handler('test_error_handler');
+	set_error_handler(test_error_handler<>);
 }
 
 // Var def for testing

@@ -32,7 +32,7 @@ foreach ($tests as $test) {
 	date_default_timezone_set($test[0]);
 	print "{$test[0]}\n";
 	array_shift(inout $test);
-	$timestamp = call_user_func_array('mktime', $test);
+	$timestamp = call_user_func_array(mktime<>, $test);
 
 	print "ts     = ". date("l Y-m-d H:i:s T", $timestamp). "\n";
 	$strtotime_tstamp = strtotime("first monday", $timestamp);

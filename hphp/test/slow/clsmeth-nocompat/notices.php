@@ -85,7 +85,7 @@ function is_functions_builtins() {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   is_functions_static();
   is_functions_dynamic();

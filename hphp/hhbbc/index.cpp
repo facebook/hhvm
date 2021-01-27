@@ -1544,7 +1544,7 @@ bool build_class_constants(BuildClsInfo& info,
 
       // A constant from an interface or from an included enum collides
       // with an existing constant.
-      if (rparent->cls->attrs & (AttrInterface | AttrEnum)) {
+      if (rparent->cls->attrs & (AttrInterface | AttrEnum) && !c.isTypeconst) {
         ITRACE(2,
                "build_cls_info_rec failed for `{}' because "
                "`{}' was defined by both `{}' and `{}'\n",

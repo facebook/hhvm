@@ -2299,15 +2299,15 @@ void Class::setConstants() {
     if (it2 != builder.end()) {
       auto definingClass = builder[it2->second].cls;
       // Forbid redefining constants from interfaces, but not superclasses.
-      // Constants from interfaces implemented by superclasses can be
-      // overridden.
+      // Constants from interfaces implemented by superclasses can be overridden.
+      // Note that we don't do this check for type constants due to the
+      // existence of abstract type constants with defaults, which we don't
+      // currently have a way of tracking within HHVM.
       if (definingClass->attrs() & AttrInterface) {
         for (auto interface : m_declInterfaces) {
-          if (interface->hasConstant(preConst->name()) ||
-              interface->hasTypeConstant(preConst->name())) {
-            raise_error("Cannot override previously defined %sconstant "
+          if (interface->hasConstant(preConst->name())) {
+            raise_error("Cannot override previously defined constant "
                         "%s::%s in %s",
-                        builder[it2->second].isType() ? "type " : "",
                         builder[it2->second].cls->name()->data(),
                         preConst->name()->data(),
                         m_preClass->name()->data());

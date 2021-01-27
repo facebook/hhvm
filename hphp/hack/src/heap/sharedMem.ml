@@ -676,6 +676,13 @@ end = struct
     ()
 end
 
+type 'a profiled_value =
+  | RawValue of 'a
+  | ProfiledValue of {
+      entry: 'a;
+      write_time: float;
+    }
+
 module ProfiledImmediate : functor (Key : Key) (Value : Value.Type) -> sig
   include module type of Immediate (Key) (Value)
 end =
@@ -689,12 +696,7 @@ functor
         size by 1 byte, and does not change its unmarshalled memory
         representation provided Value.t is a record type containing at least one
         non-float member. *)
-      type t =
-        | Raw of Value.t
-        | Profiled of {
-            entry: Value.t;
-            write_time: float;
-          }
+      type t = Value.t profiled_value
 
       let prefix = Value.prefix
 
@@ -707,17 +709,16 @@ functor
       let sample_rate = hh_sample_rate () in
       let entry =
         if hh_log_level () <> 0 && Random.float 1.0 < sample_rate then
-          ProfiledValue.Profiled
-            { entry = y; write_time = Unix.gettimeofday () }
+          ProfiledValue { entry = y; write_time = Unix.gettimeofday () }
         else
-          ProfiledValue.Raw y
+          RawValue y
       in
       Immediate.add x entry
 
     let get x =
       match Immediate.get x with
-      | ProfiledValue.Raw y -> y
-      | ProfiledValue.Profiled { entry; write_time } ->
+      | RawValue y -> y
+      | ProfiledValue { entry; write_time } ->
         EventLogger.(
           log_if_initialized @@ fun () ->
           sharedmem_access_sample

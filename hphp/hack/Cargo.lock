@@ -303,6 +303,8 @@ dependencies = [
  "anyhow",
  "atty",
  "compile_rust",
+ "libc",
+ "log",
  "ocamlrep",
  "ocamlrep_derive",
  "ocamlrep_ocamlpool",

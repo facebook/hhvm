@@ -1,5 +1,6 @@
 [(Fun
     { f_span = [3:1-7:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
       f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -7,8 +8,9 @@
       [{ param_annotation = ([3:36-41], bool);
          param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool))));
          param_is_variadic = false; param_pos = [3:36-41];
-         param_name = "$cond"; param_expr = None; param_callconv = None;
-         param_user_attributes = []; param_visibility = None }
+         param_name = "$cond"; param_expr = None; param_readonly = None;
+         param_callconv = None; param_user_attributes = [];
+         param_visibility = None }
         ];
       f_ctxs = None; f_unsafe_ctxs = None;
       f_body =

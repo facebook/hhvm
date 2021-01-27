@@ -49,6 +49,8 @@ and class_kind =
 
 and param_kind = Pinout
 
+and readonly_kind = Readonly
+
 and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe

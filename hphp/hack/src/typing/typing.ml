@@ -317,6 +317,7 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
       Aast.param_name = param.param_name;
       Aast.param_expr = param_te;
       Aast.param_callconv = param.param_callconv;
+      Aast.param_readonly = param.param_readonly;
       Aast.param_user_attributes = user_attributes;
       Aast.param_visibility = param.param_visibility;
     }
@@ -3490,6 +3491,7 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_span = f.f_span;
               Aast.f_mode = f.f_mode;
               Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
+              Aast.f_readonly_ret = f.f_readonly_ret;
               Aast.f_name = f.f_name;
               Aast.f_tparams = tparams;
               Aast.f_where_constraints = f.f_where_constraints;

@@ -1838,7 +1838,7 @@ where
         } else {
             let (left, params, right) = self.parse_parameter_list_opt();
             let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
-            let (colon, return_type) = self.parse_optional_return();
+            let (colon, readonly_opt, return_type) = self.parse_optional_return();
             S!(
                 make_lambda_signature,
                 self,
@@ -1847,6 +1847,7 @@ where
                 right,
                 contexts,
                 colon,
+                readonly_opt,
                 return_type
             )
         }
@@ -2579,15 +2580,23 @@ where
         }
     }
 
-    fn parse_optional_return(&mut self) -> (S::R, S::R) {
+    fn parse_optional_readonly(&mut self) -> S::R {
+        self.optional_token(TokenKind::Readonly)
+    }
+
+    fn parse_optional_return(&mut self) -> (S::R, S::R, S::R) {
         // Parse an optional "colon-folowed-by-return-type"
         let colon = self.optional_token(TokenKind::Colon);
-        let return_type = if colon.is_missing() {
-            S!(make_missing, self, self.pos())
+        let (readonly_opt, return_type) = if colon.is_missing() {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
         } else {
-            self.with_type_parser(|p| p.parse_return_type())
+            let readonly = self.parse_optional_readonly();
+            let return_type = self.with_type_parser(|p| p.parse_return_type());
+            (readonly, return_type)
         };
-        (colon, return_type)
+        (colon, readonly_opt, return_type)
     }
 
     fn parse_anon(&mut self, attribute_spec: S::R) -> S::R {
@@ -2609,7 +2618,7 @@ where
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
         let ctx_list = self.with_type_parser(|p| p.parse_contexts());
-        let (colon, return_type) = self.parse_optional_return();
+        let (colon, readonly_opt, return_type) = self.parse_optional_return();
         let use_clause = self.parse_anon_use_opt();
         // Detect if the user has the type in the wrong place
         // function() use(): T // wrong
@@ -2635,6 +2644,7 @@ where
             right_paren,
             ctx_list,
             colon,
+            readonly_opt,
             return_type,
             use_clause,
             body,

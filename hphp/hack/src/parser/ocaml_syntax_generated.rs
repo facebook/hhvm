@@ -630,7 +630,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
@@ -642,7 +642,8 @@ where
           arg7.value, 
           arg8.value, 
           arg9.value, 
-          arg10.value
+          arg10.value, 
+          arg11.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -660,7 +661,8 @@ where
               arg7.syntax, 
               arg8.syntax, 
               arg9.syntax, 
-              arg10.syntax
+              arg10.syntax, 
+              arg11.syntax
           ],
       );
       Self { syntax, value }
@@ -1062,14 +1064,15 @@ where
       Self { syntax, value }
     }
 
-    fn make_parameter_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
+    fn make_parameter_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
           arg2.value, 
           arg3.value, 
           arg4.value, 
-          arg5.value
+          arg5.value, 
+          arg6.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -1082,7 +1085,8 @@ where
               arg2.syntax, 
               arg3.syntax, 
               arg4.syntax, 
-              arg5.syntax
+              arg5.syntax, 
+              arg6.syntax
           ],
       );
       Self { syntax, value }
@@ -1886,7 +1890,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
+    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self, arg12: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
@@ -1899,7 +1903,8 @@ where
           arg8.value, 
           arg9.value, 
           arg10.value, 
-          arg11.value
+          arg11.value, 
+          arg12.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -1918,7 +1923,8 @@ where
               arg8.syntax, 
               arg9.syntax, 
               arg10.syntax, 
-              arg11.syntax
+              arg11.syntax, 
+              arg12.syntax
           ],
       );
       Self { syntax, value }
@@ -1970,14 +1976,15 @@ where
       Self { syntax, value }
     }
 
-    fn make_lambda_signature(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
+    fn make_lambda_signature(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
           arg2.value, 
           arg3.value, 
           arg4.value, 
-          arg5.value
+          arg5.value, 
+          arg6.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -1990,7 +1997,8 @@ where
               arg2.syntax, 
               arg3.syntax, 
               arg4.syntax, 
-              arg5.syntax
+              arg5.syntax, 
+              arg6.syntax
           ],
       );
       Self { syntax, value }

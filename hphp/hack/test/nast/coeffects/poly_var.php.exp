@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-5:18]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([5:11-15], (Hprim Tvoid))));
+      f_readonly_ret = None; f_ret = ((), (Some ([5:11-15], (Hprim Tvoid))));
       f_name = ([3:10-14], "\\poly");
       f_tparams =
       [{ tp_variance = Invariant; tp_name = ([4:5-7], "T$f");
@@ -22,7 +22,7 @@
       [{ param_annotation = [4:5-7];
          param_type_hint = ((), (Some ([4:5-7], (Habstr ("T$f", [])))));
          param_is_variadic = false; param_pos = [4:5-7]; param_name = "$f";
-         param_expr = None; param_callconv = None;
+         param_expr = None; param_readonly = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
       f_ctxs =

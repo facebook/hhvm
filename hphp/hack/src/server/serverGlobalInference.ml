@@ -406,6 +406,7 @@ let get_patches
                                 parameter_attribute;
                                 parameter_visibility;
                                 parameter_call_convention;
+                                parameter_readonly = _;
                                 parameter_type;
                                 parameter_name;
                                 parameter_default_value = _;

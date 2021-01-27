@@ -1,5 +1,6 @@
 [(Fun
     { f_span = [4:1-41]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret = ((void), (Some ([4:34-38], (Hprim Tvoid))));
       f_name = ([4:10-22], "\\expect_mixed"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -7,7 +8,7 @@
       [{ param_annotation = ([4:29-31], mixed);
          param_type_hint = ((mixed), (Some ([4:23-28], Hmixed)));
          param_is_variadic = false; param_pos = [4:29-31]; param_name = "$_";
-         param_expr = None; param_callconv = None;
+         param_expr = None; param_readonly = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
       f_ctxs = None; f_unsafe_ctxs = None;
@@ -22,6 +23,7 @@
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [6:1-13:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([6:35-39], (Hprim Tvoid))));
        f_name = ([6:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -29,13 +31,15 @@
        [{ param_annotation = ([6:19-21], int);
           param_type_hint = ((int), (Some ([6:15-18], (Hprim Tint))));
           param_is_variadic = false; param_pos = [6:19-21];
-          param_name = "$a"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None };
+          param_name = "$a"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None };
          { param_annotation = ([6:30-32], string);
            param_type_hint = ((string), (Some ([6:23-29], (Hprim Tstring))));
            param_is_variadic = false; param_pos = [6:30-32];
-           param_name = "$b"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_name = "$b"; param_expr = None; param_readonly = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =

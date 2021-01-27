@@ -514,6 +514,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           function_right_paren = rightp;
           function_contexts = ctxs;
           function_colon = colon;
+          function_readonly_return = readonly_return;
           function_type = ret_type;
           function_where_clause = where;
         } ->
@@ -524,6 +525,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env ctxs;
           t env colon;
           when_present colon space;
+          t env readonly_return;
+          when_present readonly_return space;
           t env ret_type;
           when_present where space;
           t env where;
@@ -884,6 +887,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_attribute = attr;
           parameter_visibility = visibility;
           parameter_call_convention = callconv;
+          parameter_readonly = readonly;
           parameter_type = param_type;
           parameter_name = name;
           parameter_default_value = default;
@@ -896,6 +900,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present visibility space;
           t env callconv;
           when_present callconv space;
+          t env readonly;
+          when_present readonly space;
           t env param_type;
           ( if
             Syntax.is_missing visibility
@@ -1379,6 +1385,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_right_paren = rp;
           anonymous_ctx_list = ctx_list;
           anonymous_colon = colon;
+          anonymous_readonly_return = readonly_ret;
           anonymous_type = ret_type;
           anonymous_use = use;
           anonymous_body = body;
@@ -1399,6 +1406,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             rp
             ctx_list
             colon
+            readonly_ret
             ret_type;
           t env use;
           handle_possible_compound_statement
@@ -1442,6 +1450,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           lambda_right_paren = rp;
           lambda_contexts = ctxs;
           lambda_colon = colon;
+          lambda_readonly_return = readonly;
           lambda_type = ret_type;
         } ->
       Concat
@@ -1452,6 +1461,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env ctxs;
           t env colon;
           when_present colon space;
+          t env readonly;
+          when_present readonly space;
           t env ret_type;
         ]
     | Syntax.CastExpression _ -> Span (List.map (Syntax.children node) (t env))
@@ -2919,7 +2930,7 @@ and transform_fn_decl_args env params rightp =
     )
 
 and transform_argish_with_return_type
-    env left_p params right_p ctx_list colon ret_type =
+    env left_p params right_p ctx_list colon readonly_ret ret_type =
   Concat
     [
       t env left_p;
@@ -2928,6 +2939,8 @@ and transform_argish_with_return_type
       t env ctx_list;
       t env colon;
       when_present colon space;
+      t env readonly_ret;
+      when_present readonly_ret space;
       t env ret_type;
     ]
 

@@ -193,6 +193,7 @@ module type Syntax_S = sig
         function_right_paren: t;
         function_contexts: t;
         function_colon: t;
+        function_readonly_return: t;
         function_type: t;
         function_where_clause: t;
       }
@@ -313,6 +314,7 @@ module type Syntax_S = sig
         parameter_attribute: t;
         parameter_visibility: t;
         parameter_call_convention: t;
+        parameter_readonly: t;
         parameter_type: t;
         parameter_name: t;
         parameter_default_value: t;
@@ -539,6 +541,7 @@ module type Syntax_S = sig
         anonymous_right_paren: t;
         anonymous_ctx_list: t;
         anonymous_colon: t;
+        anonymous_readonly_return: t;
         anonymous_type: t;
         anonymous_use: t;
         anonymous_body: t;
@@ -562,6 +565,7 @@ module type Syntax_S = sig
         lambda_right_paren: t;
         lambda_contexts: t;
         lambda_colon: t;
+        lambda_readonly_return: t;
         lambda_type: t;
       }
     | CastExpression of {
@@ -1128,7 +1132,7 @@ module type Syntax_S = sig
   val make_function_declaration : t -> t -> t -> t
 
   val make_function_declaration_header :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_contexts : t -> t -> t -> t
 
@@ -1167,7 +1171,7 @@ module type Syntax_S = sig
 
   val make_decorated_expression : t -> t -> t
 
-  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t -> t
 
   val make_variadic_parameter : t -> t -> t -> t
 
@@ -1245,13 +1249,13 @@ module type Syntax_S = sig
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
 
   val make_lambda_expression : t -> t -> t -> t -> t -> t
 
-  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t
+  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t -> t
 
   val make_cast_expression : t -> t -> t -> t -> t
 

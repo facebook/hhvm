@@ -201,6 +201,7 @@ type t =
   | Backtick
   | XHP
   | Hash
+  | Readonly
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -413,6 +414,7 @@ let from_string keyword ~only_reserved =
   | "`" -> Some Backtick
   | "xhp" when not only_reserved -> Some XHP
   | "#" -> Some Hash
+  | "readonly" -> Some Readonly
   | _ -> None
 
 let to_string kind =
@@ -600,6 +602,7 @@ let to_string kind =
   | Backtick -> "`"
   | XHP -> "xhp"
   | Hash -> "#"
+  | Readonly -> "readonly"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

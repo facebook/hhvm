@@ -2129,6 +2129,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_option_with validate_where_clause x.function_where_clause;
           function_type =
             validate_option_with validate_attributized_specifier x.function_type;
+          function_readonly_return =
+            validate_option_with validate_token x.function_readonly_return;
           function_colon = validate_option_with validate_token x.function_colon;
           function_contexts =
             validate_option_with validate_contexts x.function_contexts;
@@ -2172,6 +2174,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with invalidate_contexts x.function_contexts;
             function_colon =
               invalidate_option_with invalidate_token x.function_colon;
+            function_readonly_return =
+              invalidate_option_with invalidate_token x.function_readonly_return;
             function_type =
               invalidate_option_with
                 invalidate_attributized_specifier
@@ -2847,6 +2851,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           parameter_name = validate_expression x.parameter_name;
           parameter_type =
             validate_option_with validate_specifier x.parameter_type;
+          parameter_readonly =
+            validate_option_with validate_token x.parameter_readonly;
           parameter_call_convention =
             validate_option_with validate_token x.parameter_call_convention;
           parameter_visibility =
@@ -2874,6 +2880,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_token
                 x.parameter_call_convention;
+            parameter_readonly =
+              invalidate_option_with invalidate_token x.parameter_readonly;
             parameter_type =
               invalidate_option_with invalidate_specifier x.parameter_type;
             parameter_name = invalidate_expression x.parameter_name;
@@ -3970,6 +3978,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               x.anonymous_use;
           anonymous_type =
             validate_option_with validate_specifier x.anonymous_type;
+          anonymous_readonly_return =
+            validate_option_with validate_token x.anonymous_readonly_return;
           anonymous_colon =
             validate_option_with validate_token x.anonymous_colon;
           anonymous_ctx_list =
@@ -4015,6 +4025,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with invalidate_contexts x.anonymous_ctx_list;
             anonymous_colon =
               invalidate_option_with invalidate_token x.anonymous_colon;
+            anonymous_readonly_return =
+              invalidate_option_with
+                invalidate_token
+                x.anonymous_readonly_return;
             anonymous_type =
               invalidate_option_with invalidate_specifier x.anonymous_type;
             anonymous_use =
@@ -4098,6 +4112,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       ( v,
         {
           lambda_type = validate_option_with validate_specifier x.lambda_type;
+          lambda_readonly_return =
+            validate_option_with validate_token x.lambda_readonly_return;
           lambda_colon = validate_option_with validate_token x.lambda_colon;
           lambda_contexts =
             validate_option_with validate_contexts x.lambda_contexts;
@@ -4122,6 +4138,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with invalidate_contexts x.lambda_contexts;
             lambda_colon =
               invalidate_option_with invalidate_token x.lambda_colon;
+            lambda_readonly_return =
+              invalidate_option_with invalidate_token x.lambda_readonly_return;
             lambda_type =
               invalidate_option_with invalidate_specifier x.lambda_type;
           };

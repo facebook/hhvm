@@ -11,6 +11,7 @@ Errors:
   [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
     { f_span = [3:1-16:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid))));
       f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = []; f_ctxs = None;
@@ -76,6 +77,7 @@ Errors:
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [18:1-20:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((T), (Some ([18:78-79], (Habstr ("T", [])))));
        f_name = ([18:10-17], "\\goodbye");
        f_tparams =
@@ -97,8 +99,9 @@ Errors:
                   (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"),
                      [([18:64-65], (Habstr ("T", [])))])))));
           param_is_variadic = false; param_pos = [18:67-75];
-          param_name = "$pattern"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None }
+          param_name = "$pattern"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
@@ -123,6 +126,7 @@ Errors:
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [24:1-42:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid))));
        f_name = ([24:10-21], "\\bad_pattern"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -322,6 +326,7 @@ Errors:
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [46:1-59:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid))));
        f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -427,6 +432,7 @@ Errors:
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [61:1-65:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid))));
        f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [2:1-8:2]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([2:33-37], (Hprim Tvoid))));
+      f_readonly_ret = None; f_ret = ((), (Some ([2:33-37], (Hprim Tvoid))));
       f_name = ([2:10-29], "\\anons_with_ctx_list"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_ctxs = None; f_unsafe_ctxs = None;
@@ -13,7 +13,7 @@
                  ([3:18-62],
                   (Efun (
                      { f_span = [3:18-62]; f_annotation = ();
-                       f_mode = Mstrict;
+                       f_mode = Mstrict; f_readonly_ret = None;
                        f_ret = ((), (Some ([3:38-41], (Hprim Tint))));
                        f_name = ([3:18-62], ";anonymous"); f_tparams = [];
                        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -64,7 +64,8 @@
                   ([6:18-63],
                    (Efun (
                       { f_span = [6:18-63]; f_annotation = ();
-                        f_mode = Mstrict; f_ret = ((), None);
+                        f_mode = Mstrict; f_readonly_ret = None;
+                        f_ret = ((), None);
                         f_name = ([6:18-63], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
@@ -110,7 +111,7 @@
                   ([7:11-56],
                    (Efun (
                       { f_span = [7:11-56]; f_annotation = ();
-                        f_mode = Mstrict;
+                        f_mode = Mstrict; f_readonly_ret = None;
                         f_ret = ((), (Some ([7:27-30], (Hprim Tint))));
                         f_name = ([7:11-56], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;

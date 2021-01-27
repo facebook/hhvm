@@ -14,7 +14,7 @@
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_ctxs = None; m_unsafe_ctxs = None;
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
-         m_fun_kind = FSync; m_user_attributes = [];
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
          m_ret = ((), (Some ([6:34-38], (Hprim Tvoid)))); m_external = false;
          m_doc_comment = None }
         ];
@@ -29,6 +29,7 @@
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [9:1-15:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((), (Some ([9:17-21], (Hprim Tvoid))));
        f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

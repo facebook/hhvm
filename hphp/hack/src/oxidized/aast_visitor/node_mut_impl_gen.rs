@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4249dead35b75b49842518afa01c30c6>>
+// @generated SignedSource<<99016f31f17bcba3584c80cf51014412>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1022,6 +1022,7 @@ impl<P: Params> NodeMut<P> for FunParam<P::Ex, P::Fb, P::En, P::Hi> {
         self.pos.accept(c, v)?;
         self.name.accept(c, v)?;
         self.expr.accept(c, v)?;
+        self.readonly.accept(c, v)?;
         self.callconv.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.visibility.accept(c, v)?;
@@ -1070,6 +1071,7 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.span.accept(c, v)?;
         v.visit_en(c, &mut self.annotation)?;
         self.mode.accept(c, v)?;
+        self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.name.accept(c, v)?;
         self.tparams.accept(c, v)?;
@@ -1443,6 +1445,7 @@ impl<P: Params> NodeMut<P> for Method_<P::Ex, P::Fb, P::En, P::Hi> {
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
+        self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.external.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
@@ -1543,6 +1546,24 @@ impl<P: Params> NodeMut<P> for ParamMutability {
             ParamMutability::PMutable => Ok(()),
             ParamMutability::POwnedMutable => Ok(()),
             ParamMutability::PMaybeMutable => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for ReadonlyKind {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_readonly_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ReadonlyKind::Readonly => Ok(()),
         }
     }
 }

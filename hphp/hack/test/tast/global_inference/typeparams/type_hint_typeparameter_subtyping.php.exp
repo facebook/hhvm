@@ -30,6 +30,7 @@ Errors:
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [4:1-26]; f_annotation = (); f_mode = Mpartial;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid))));
        f_name = ([4:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic;
@@ -39,8 +40,9 @@ Errors:
           ((D<nothing, string>),
            (Some ([4:12-13], (Happly (([4:12-13], "\\D"), [])))));
           param_is_variadic = false; param_pos = [4:14-16];
-          param_name = "$x"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None }
+          param_name = "$x"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };

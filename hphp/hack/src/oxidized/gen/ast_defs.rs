@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85ad14ebded5bd72c6253a9314c1c9b7>>
+// @generated SignedSource<<c840f68735f6c42336324e4e2082c80e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -158,6 +158,27 @@ pub enum ParamKind {
     Pinout,
 }
 impl TrivialDrop for ParamKind {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ReadonlyKind {
+    Readonly,
+}
+impl TrivialDrop for ReadonlyKind {}
 
 #[derive(
     Clone,

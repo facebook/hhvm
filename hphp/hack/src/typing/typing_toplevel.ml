@@ -426,6 +426,7 @@ let rec fun_def ctx f :
           Aast.f_annotation = Env.save local_tpenv env;
           Aast.f_span = f.f_span;
           Aast.f_mode = f.f_mode;
+          Aast.f_readonly_ret = f.f_readonly_ret;
           Aast.f_ret = (return_ty, hint_of_type_hint f.f_ret);
           Aast.f_name = f.f_name;
           Aast.f_tparams = tparams;
@@ -667,6 +668,7 @@ and method_def env cls m =
           Aast.m_unsafe_ctxs = m.m_unsafe_ctxs;
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
+          Aast.m_readonly_ret = m.m_readonly_ret;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
           Aast.m_body = { Aast.fb_ast = tb; fb_annotation = () };
           Aast.m_external = m.m_external;

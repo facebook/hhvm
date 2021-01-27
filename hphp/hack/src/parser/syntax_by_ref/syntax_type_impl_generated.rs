@@ -332,7 +332,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, contexts: Self, colon: Self, type_: Self, where_clause: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, type_: Self, where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(ctx.get_arena().alloc(FunctionDeclarationHeaderChildren {
             modifiers,
             keyword,
@@ -343,6 +343,7 @@ where
             right_paren,
             contexts,
             colon,
+            readonly_return,
             type_,
             where_clause,
         }));
@@ -548,11 +549,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, call_convention: Self, type_: Self, name: Self, default_value: Self) -> Self {
+    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, call_convention: Self, readonly: Self, type_: Self, name: Self, default_value: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(ctx.get_arena().alloc(ParameterDeclarationChildren {
             attribute,
             visibility,
             call_convention,
+            readonly,
             type_,
             name,
             default_value,
@@ -960,7 +962,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(ctx: &C, attribute_spec: Self, static_keyword: Self, async_keyword: Self, function_keyword: Self, left_paren: Self, parameters: Self, right_paren: Self, ctx_list: Self, colon: Self, type_: Self, use_: Self, body: Self) -> Self {
+    fn make_anonymous_function(ctx: &C, attribute_spec: Self, static_keyword: Self, async_keyword: Self, function_keyword: Self, left_paren: Self, parameters: Self, right_paren: Self, ctx_list: Self, colon: Self, readonly_return: Self, type_: Self, use_: Self, body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(ctx.get_arena().alloc(AnonymousFunctionChildren {
             attribute_spec,
             static_keyword,
@@ -971,6 +973,7 @@ where
             right_paren,
             ctx_list,
             colon,
+            readonly_return,
             type_,
             use_,
             body,
@@ -1002,13 +1005,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(ctx: &C, left_paren: Self, parameters: Self, right_paren: Self, contexts: Self, colon: Self, type_: Self) -> Self {
+    fn make_lambda_signature(ctx: &C, left_paren: Self, parameters: Self, right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(ctx.get_arena().alloc(LambdaSignatureChildren {
             left_paren,
             parameters,
             right_paren,
             contexts,
             colon,
+            readonly_return,
             type_,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

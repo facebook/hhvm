@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35afff8ca906a3fcbb4b2bfd4eb74677>>
+// @generated SignedSource<<bd0ea1a4fb97b2f615c6e01e0dbce36a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -940,6 +940,7 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     pub pos: Pos,
     pub name: String,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
+    pub readonly: Option<ast_defs::ReadonlyKind>,
     pub callconv: Option<ast_defs::ParamKind>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub visibility: Option<Visibility>,
@@ -991,6 +992,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub annotation: En,
     pub mode: file_info::Mode,
+    pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Hi>,
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
@@ -1509,6 +1511,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Hi>,
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)

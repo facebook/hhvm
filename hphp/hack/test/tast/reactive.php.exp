@@ -1,5 +1,6 @@
 [(Fun
     { f_span = [2:1-6:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret =
       (((function(int): void)),
        (Some ([4:18-45],

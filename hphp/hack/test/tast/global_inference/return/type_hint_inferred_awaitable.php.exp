@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
-      f_ret = ((Awaitable<int>), None);
+      f_readonly_ret = None; f_ret = ((Awaitable<int>), None);
       f_name = ([3:16-31], "\\returnAwaitable"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_ctxs = None; f_unsafe_ctxs = None;

@@ -81,6 +81,7 @@ enum UnstableFeatures {
     ExpressionTrees,
     EnumAtom,
     IFC,
+    Readonly,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -1758,6 +1759,9 @@ where
             FunctionDeclarationHeader(x) => {
                 let function_parameter_list = &x.parameter_list;
                 let function_type = &x.type_;
+                if x.readonly_return.is_readonly() {
+                    self.check_can_use_feature(&x.readonly_return, &UnstableFeatures::Readonly)
+                }
 
                 self.produce_error(
                     |self_, x| Self::class_constructor_has_non_void_type(self_, x),
@@ -2064,6 +2068,14 @@ where
         }
     }
 
+    fn check_parameter_readonly(&mut self, node: S<'a, Token, Value>) {
+        if let ParameterDeclaration(x) = &node.children {
+            if x.readonly.is_readonly() {
+                self.check_can_use_feature(&x.readonly, &UnstableFeatures::Readonly);
+            }
+        }
+    }
+
     fn parameter_rx_errors(&mut self, node: S<'a, Token, Value>) {
         if let ParameterDeclaration(x) = &node.children {
             let spec = &x.attribute;
@@ -2303,6 +2315,7 @@ where
             for x in Self::syntax_to_list_no_separators(params) {
                 self_.parameter_rx_errors(x);
                 self_.check_parameter_ifc(x);
+                self_.check_parameter_readonly(x);
             }
             self_.params_errors(params)
         };
@@ -2313,8 +2326,10 @@ where
                     errors::error2074(callconv_text)
                 });
                 self.parameter_rx_errors(node);
+
                 self.check_type_hint(&p.type_);
                 self.check_parameter_ifc(node);
+                self.check_parameter_readonly(node);
 
                 if let Some(inout_modifier) = Self::parameter_callconv(node) {
                     if self.is_inside_async_method() {

@@ -1649,18 +1649,30 @@ where
         }
     }
 
-    fn parse_return_type_hint_opt(&mut self) -> (S::R, S::R) {
+    fn parse_return_readonly_opt(&mut self) -> S::R {
+        let token_kind = self.peek_token_kind();
+        if token_kind == TokenKind::Readonly {
+            let token = self.next_token();
+            return S!(make_token, self, token);
+        } else {
+            return S!(make_missing, self, self.pos());
+        }
+    }
+
+    fn parse_return_type_hint_opt(&mut self) -> (S::R, S::R, S::R) {
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Colon {
             let token = self.next_token();
             let colon_token = S!(make_token, self, token);
+            let readonly_opt = self.parse_return_readonly_opt();
             let return_type =
                 self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_return_type());
-            (colon_token, return_type)
+            (colon_token, readonly_opt, return_type)
         } else {
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
-            (missing1, missing2)
+            let missing3 = S!(make_missing, self, self.pos());
+            (missing1, missing2, missing3)
         }
     }
 
@@ -1727,6 +1739,7 @@ where
         // parameter-declaration:
         //   attribute-specification-opt \
         //   call-convention-opt \
+        //   mutability-opt \
         //   type-specifier  variable-name \
         //   default-argument-specifier-opt
         //
@@ -1742,6 +1755,7 @@ where
         let attrs = self.parse_attribute_specification_opt();
         let visibility = self.parse_visibility_modifier_opt();
         let callconv = self.parse_call_convention_opt();
+        let readonly = self.parse_readonly_opt();
         let token = self.peek_token();
         let type_specifier = match token.kind() {
             TokenKind::Variable | TokenKind::DotDotDot => S!(make_missing, self, self.pos()),
@@ -1757,6 +1771,7 @@ where
             attrs,
             visibility,
             callconv,
+            readonly,
             type_specifier,
             name,
             default
@@ -1810,6 +1825,24 @@ where
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Inout => {
+                let token = self.next_token();
+                S!(make_token, self, token)
+            }
+            _ => S!(make_missing, self, self.pos()),
+        }
+    }
+
+     // SPEC
+    //
+    // TODO: Add this to the specification.
+    // (This work is tracked by task T22582676.)
+    //
+    // readonly:
+    //   readonly
+    fn parse_readonly_opt(&mut self) -> S::R {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
+            TokenKind::Readonly => {
                 let token = self.next_token();
                 S!(make_token, self, token)
             }
@@ -1939,7 +1972,7 @@ where
         });
         let (left_paren_token, parameter_list, right_paren_token) = self.parse_parameter_list_opt();
         let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
-        let (colon_token, return_type) = self.parse_return_type_hint_opt();
+        let (colon_token, readonly_opt, return_type) = self.parse_return_type_hint_opt();
         let where_clause = self.parse_where_clause_opt();
         S!(
             make_function_declaration_header,
@@ -1953,6 +1986,7 @@ where
             right_paren_token,
             contexts,
             colon_token,
+            readonly_opt,
             return_type,
             where_clause,
         )

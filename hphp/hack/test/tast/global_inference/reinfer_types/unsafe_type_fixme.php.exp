@@ -29,6 +29,7 @@
   ]
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
+      f_readonly_ret = None;
       f_ret =
       ((string),
        (Some ([3:15-35], (Happly (([3:15-35], "\\UNSAFE_TYPE_HH_FIXME"), [])))));
@@ -78,6 +79,7 @@
   ]
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
+      f_readonly_ret = None;
       f_ret =
       ((int),
        (Some ([3:15-37],

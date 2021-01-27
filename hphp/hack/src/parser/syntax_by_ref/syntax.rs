@@ -173,6 +173,10 @@ impl<'a, T: LexableToken, V> Syntax<'a, T, V> {
         self.is_specific_token(TokenKind::Semicolon) || self.is_missing()
     }
 
+    pub fn is_readonly(&self) -> bool {
+        self.is_specific_token(TokenKind::Readonly)
+    }
+
     pub fn is_namespace_empty_body(&self) -> bool {
         self.kind() == SyntaxKind::NamespaceEmptyBody
     }

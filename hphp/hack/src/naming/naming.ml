@@ -1434,6 +1434,7 @@ and method_ genv m =
     N.m_unsafe_ctxs;
     N.m_body = body;
     N.m_fun_kind = m.Aast.m_fun_kind;
+    N.m_readonly_ret = m.Aast.m_readonly_ret;
     N.m_ret = ret;
     N.m_variadic = variadicity;
     N.m_user_attributes = attrs;
@@ -1478,6 +1479,7 @@ and fun_param env (param : Nast.fun_param) =
     param_name = name;
     param_expr = eopt;
     param_callconv = param.Aast.param_callconv;
+    param_readonly = param.Aast.param_readonly;
     param_user_attributes = user_attributes env param.Aast.param_user_attributes;
     param_visibility = param.Aast.param_visibility;
   }
@@ -1540,6 +1542,7 @@ and fun_ ctx f =
       N.f_annotation = ();
       f_span = f.Aast.f_span;
       f_mode = f.Aast.f_mode;
+      f_readonly_ret = f.Aast.f_readonly_ret;
       f_ret = h;
       f_name = f.Aast.f_name;
       f_tparams;
@@ -2258,6 +2261,7 @@ and expr_lambda env f =
     N.f_annotation = ();
     f_span = f.Aast.f_span;
     f_mode = (fst env).in_mode;
+    f_readonly_ret = f.Aast.f_readonly_ret;
     f_ret = h;
     f_name = f.Aast.f_name;
     f_params = paraml;

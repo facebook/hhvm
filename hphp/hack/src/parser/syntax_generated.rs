@@ -326,7 +326,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_declaration_header(_: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_contexts: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self {
+    fn make_function_declaration_header(_: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_contexts: Self, function_colon: Self, function_readonly_return: Self, function_type: Self, function_where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
             function_modifiers,
             function_keyword,
@@ -337,6 +337,7 @@ where
             function_right_paren,
             function_contexts,
             function_colon,
+            function_readonly_return,
             function_type,
             function_where_clause,
         }));
@@ -542,11 +543,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self {
+    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
             parameter_visibility,
             parameter_call_convention,
+            parameter_readonly,
             parameter_type,
             parameter_name,
             parameter_default_value,
@@ -954,7 +956,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
+    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_readonly_return: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
             anonymous_attribute_spec,
             anonymous_static_keyword,
@@ -965,6 +967,7 @@ where
             anonymous_right_paren,
             anonymous_ctx_list,
             anonymous_colon,
+            anonymous_readonly_return,
             anonymous_type,
             anonymous_use,
             anonymous_body,
@@ -996,13 +999,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(_: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_type: Self) -> Self {
+    fn make_lambda_signature(_: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_readonly_return: Self, lambda_type: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
             lambda_left_paren,
             lambda_parameters,
             lambda_right_paren,
             lambda_contexts,
             lambda_colon,
+            lambda_readonly_return,
             lambda_type,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2112,7 +2116,7 @@ where
                 acc
             },
             SyntaxVariant::FunctionDeclarationHeader(x) => {
-                let FunctionDeclarationHeaderChildren { function_modifiers, function_keyword, function_name, function_type_parameter_list, function_left_paren, function_parameter_list, function_right_paren, function_contexts, function_colon, function_type, function_where_clause } = *x;
+                let FunctionDeclarationHeaderChildren { function_modifiers, function_keyword, function_name, function_type_parameter_list, function_left_paren, function_parameter_list, function_right_paren, function_contexts, function_colon, function_readonly_return, function_type, function_where_clause } = *x;
                 let acc = f(function_modifiers, acc);
                 let acc = f(function_keyword, acc);
                 let acc = f(function_name, acc);
@@ -2122,6 +2126,7 @@ where
                 let acc = f(function_right_paren, acc);
                 let acc = f(function_contexts, acc);
                 let acc = f(function_colon, acc);
+                let acc = f(function_readonly_return, acc);
                 let acc = f(function_type, acc);
                 let acc = f(function_where_clause, acc);
                 acc
@@ -2274,10 +2279,11 @@ where
                 acc
             },
             SyntaxVariant::ParameterDeclaration(x) => {
-                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_type, parameter_name, parameter_default_value } = *x;
+                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_name, parameter_default_value } = *x;
                 let acc = f(parameter_attribute, acc);
                 let acc = f(parameter_visibility, acc);
                 let acc = f(parameter_call_convention, acc);
+                let acc = f(parameter_readonly, acc);
                 let acc = f(parameter_type, acc);
                 let acc = f(parameter_name, acc);
                 let acc = f(parameter_default_value, acc);
@@ -2572,7 +2578,7 @@ where
                 acc
             },
             SyntaxVariant::AnonymousFunction(x) => {
-                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_ctx_list, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
+                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_ctx_list, anonymous_colon, anonymous_readonly_return, anonymous_type, anonymous_use, anonymous_body } = *x;
                 let acc = f(anonymous_attribute_spec, acc);
                 let acc = f(anonymous_static_keyword, acc);
                 let acc = f(anonymous_async_keyword, acc);
@@ -2582,6 +2588,7 @@ where
                 let acc = f(anonymous_right_paren, acc);
                 let acc = f(anonymous_ctx_list, acc);
                 let acc = f(anonymous_colon, acc);
+                let acc = f(anonymous_readonly_return, acc);
                 let acc = f(anonymous_type, acc);
                 let acc = f(anonymous_use, acc);
                 let acc = f(anonymous_body, acc);
@@ -2605,12 +2612,13 @@ where
                 acc
             },
             SyntaxVariant::LambdaSignature(x) => {
-                let LambdaSignatureChildren { lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_contexts, lambda_colon, lambda_type } = *x;
+                let LambdaSignatureChildren { lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_contexts, lambda_colon, lambda_readonly_return, lambda_type } = *x;
                 let acc = f(lambda_left_paren, acc);
                 let acc = f(lambda_parameters, acc);
                 let acc = f(lambda_right_paren, acc);
                 let acc = f(lambda_contexts, acc);
                 let acc = f(lambda_colon, acc);
+                let acc = f(lambda_readonly_return, acc);
                 let acc = f(lambda_type, acc);
                 acc
             },
@@ -3605,9 +3613,10 @@ where
                  function_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::FunctionDeclarationHeader, 11) => SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
+             (SyntaxKind::FunctionDeclarationHeader, 12) => SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
                  function_where_clause: ts.pop().unwrap(),
                  function_type: ts.pop().unwrap(),
+                 function_readonly_return: ts.pop().unwrap(),
                  function_colon: ts.pop().unwrap(),
                  function_contexts: ts.pop().unwrap(),
                  function_right_paren: ts.pop().unwrap(),
@@ -3749,10 +3758,11 @@ where
                  decorated_expression_decorator: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ParameterDeclaration, 6) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+             (SyntaxKind::ParameterDeclaration, 7) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
                  parameter_default_value: ts.pop().unwrap(),
                  parameter_name: ts.pop().unwrap(),
                  parameter_type: ts.pop().unwrap(),
+                 parameter_readonly: ts.pop().unwrap(),
                  parameter_call_convention: ts.pop().unwrap(),
                  parameter_visibility: ts.pop().unwrap(),
                  parameter_attribute: ts.pop().unwrap(),
@@ -4009,10 +4019,11 @@ where
                  anonymous_class_class_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AnonymousFunction, 12) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
+             (SyntaxKind::AnonymousFunction, 13) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
                  anonymous_body: ts.pop().unwrap(),
                  anonymous_use: ts.pop().unwrap(),
                  anonymous_type: ts.pop().unwrap(),
+                 anonymous_readonly_return: ts.pop().unwrap(),
                  anonymous_colon: ts.pop().unwrap(),
                  anonymous_ctx_list: ts.pop().unwrap(),
                  anonymous_right_paren: ts.pop().unwrap(),
@@ -4039,8 +4050,9 @@ where
                  lambda_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::LambdaSignature, 6) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
+             (SyntaxKind::LambdaSignature, 7) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
                  lambda_type: ts.pop().unwrap(),
+                 lambda_readonly_return: ts.pop().unwrap(),
                  lambda_colon: ts.pop().unwrap(),
                  lambda_contexts: ts.pop().unwrap(),
                  lambda_right_paren: ts.pop().unwrap(),
@@ -4813,6 +4825,7 @@ pub struct FunctionDeclarationHeaderChildren<T, V> {
     pub function_right_paren: Syntax<T, V>,
     pub function_contexts: Syntax<T, V>,
     pub function_colon: Syntax<T, V>,
+    pub function_readonly_return: Syntax<T, V>,
     pub function_type: Syntax<T, V>,
     pub function_where_clause: Syntax<T, V>,
 }
@@ -4969,6 +4982,7 @@ pub struct ParameterDeclarationChildren<T, V> {
     pub parameter_attribute: Syntax<T, V>,
     pub parameter_visibility: Syntax<T, V>,
     pub parameter_call_convention: Syntax<T, V>,
+    pub parameter_readonly: Syntax<T, V>,
     pub parameter_type: Syntax<T, V>,
     pub parameter_name: Syntax<T, V>,
     pub parameter_default_value: Syntax<T, V>,
@@ -5273,6 +5287,7 @@ pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_right_paren: Syntax<T, V>,
     pub anonymous_ctx_list: Syntax<T, V>,
     pub anonymous_colon: Syntax<T, V>,
+    pub anonymous_readonly_return: Syntax<T, V>,
     pub anonymous_type: Syntax<T, V>,
     pub anonymous_use: Syntax<T, V>,
     pub anonymous_body: Syntax<T, V>,
@@ -5302,6 +5317,7 @@ pub struct LambdaSignatureChildren<T, V> {
     pub lambda_right_paren: Syntax<T, V>,
     pub lambda_contexts: Syntax<T, V>,
     pub lambda_colon: Syntax<T, V>,
+    pub lambda_readonly_return: Syntax<T, V>,
     pub lambda_type: Syntax<T, V>,
 }
 
@@ -6393,7 +6409,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionDeclarationHeader(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.function_modifiers),
                     1 => Some(&x.function_keyword),
                     2 => Some(&x.function_name),
@@ -6403,8 +6419,9 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     6 => Some(&x.function_right_paren),
                     7 => Some(&x.function_contexts),
                     8 => Some(&x.function_colon),
-                    9 => Some(&x.function_type),
-                    10 => Some(&x.function_where_clause),
+                    9 => Some(&x.function_readonly_return),
+                    10 => Some(&x.function_type),
+                    11 => Some(&x.function_where_clause),
                         _ => None,
                     }
                 })
@@ -6591,13 +6608,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(7).and_then(|index| { match index {
                         0 => Some(&x.parameter_attribute),
                     1 => Some(&x.parameter_visibility),
                     2 => Some(&x.parameter_call_convention),
-                    3 => Some(&x.parameter_type),
-                    4 => Some(&x.parameter_name),
-                    5 => Some(&x.parameter_default_value),
+                    3 => Some(&x.parameter_readonly),
+                    4 => Some(&x.parameter_type),
+                    5 => Some(&x.parameter_name),
+                    6 => Some(&x.parameter_default_value),
                         _ => None,
                     }
                 })
@@ -6965,7 +6983,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(13).and_then(|index| { match index {
                         0 => Some(&x.anonymous_attribute_spec),
                     1 => Some(&x.anonymous_static_keyword),
                     2 => Some(&x.anonymous_async_keyword),
@@ -6975,9 +6993,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     6 => Some(&x.anonymous_right_paren),
                     7 => Some(&x.anonymous_ctx_list),
                     8 => Some(&x.anonymous_colon),
-                    9 => Some(&x.anonymous_type),
-                    10 => Some(&x.anonymous_use),
-                    11 => Some(&x.anonymous_body),
+                    9 => Some(&x.anonymous_readonly_return),
+                    10 => Some(&x.anonymous_type),
+                    11 => Some(&x.anonymous_use),
+                    12 => Some(&x.anonymous_body),
                         _ => None,
                     }
                 })
@@ -7004,13 +7023,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaSignature(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(7).and_then(|index| { match index {
                         0 => Some(&x.lambda_left_paren),
                     1 => Some(&x.lambda_parameters),
                     2 => Some(&x.lambda_right_paren),
                     3 => Some(&x.lambda_contexts),
                     4 => Some(&x.lambda_colon),
-                    5 => Some(&x.lambda_type),
+                    5 => Some(&x.lambda_readonly_return),
+                    6 => Some(&x.lambda_type),
                         _ => None,
                     }
                 })

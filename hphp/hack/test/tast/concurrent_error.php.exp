@@ -6,6 +6,7 @@ Errors:
   [3:27-41] But got `Awaitable<int>`
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret =
       ((Awaitable<int>),
        (Some ([3:27-41],
@@ -27,6 +28,7 @@ Errors:
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [7:1-13:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((Awaitable<int>),
         (Some ([7:24-38],

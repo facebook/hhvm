@@ -1012,6 +1012,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           } ->
@@ -1024,6 +1025,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc function_right_paren in
         let acc = f acc function_contexts in
         let acc = f acc function_colon in
+        let acc = f acc function_readonly_return in
         let acc = f acc function_type in
         let acc = f acc function_where_clause in
         acc
@@ -1234,6 +1236,7 @@ module WithToken (Token : TokenType) = struct
             parameter_attribute;
             parameter_visibility;
             parameter_call_convention;
+            parameter_readonly;
             parameter_type;
             parameter_name;
             parameter_default_value;
@@ -1241,6 +1244,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc parameter_attribute in
         let acc = f acc parameter_visibility in
         let acc = f acc parameter_call_convention in
+        let acc = f acc parameter_readonly in
         let acc = f acc parameter_type in
         let acc = f acc parameter_name in
         let acc = f acc parameter_default_value in
@@ -1600,6 +1604,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -1613,6 +1618,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc anonymous_right_paren in
         let acc = f acc anonymous_ctx_list in
         let acc = f acc anonymous_colon in
+        let acc = f acc anonymous_readonly_return in
         let acc = f acc anonymous_type in
         let acc = f acc anonymous_use in
         let acc = f acc anonymous_body in
@@ -1650,6 +1656,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           } ->
         let acc = f acc lambda_left_paren in
@@ -1657,6 +1664,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc lambda_right_paren in
         let acc = f acc lambda_contexts in
         let acc = f acc lambda_colon in
+        let acc = f acc lambda_readonly_return in
         let acc = f acc lambda_type in
         acc
       | CastExpression
@@ -2697,6 +2705,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           } ->
@@ -2710,6 +2719,7 @@ module WithToken (Token : TokenType) = struct
           function_right_paren;
           function_contexts;
           function_colon;
+          function_readonly_return;
           function_type;
           function_where_clause;
         ]
@@ -2915,6 +2925,7 @@ module WithToken (Token : TokenType) = struct
             parameter_attribute;
             parameter_visibility;
             parameter_call_convention;
+            parameter_readonly;
             parameter_type;
             parameter_name;
             parameter_default_value;
@@ -2923,6 +2934,7 @@ module WithToken (Token : TokenType) = struct
           parameter_attribute;
           parameter_visibility;
           parameter_call_convention;
+          parameter_readonly;
           parameter_type;
           parameter_name;
           parameter_default_value;
@@ -3251,6 +3263,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -3265,6 +3278,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_right_paren;
           anonymous_ctx_list;
           anonymous_colon;
+          anonymous_readonly_return;
           anonymous_type;
           anonymous_use;
           anonymous_body;
@@ -3304,6 +3318,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           } ->
         [
@@ -3312,6 +3327,7 @@ module WithToken (Token : TokenType) = struct
           lambda_right_paren;
           lambda_contexts;
           lambda_colon;
+          lambda_readonly_return;
           lambda_type;
         ]
       | CastExpression
@@ -4298,6 +4314,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           } ->
@@ -4311,6 +4328,7 @@ module WithToken (Token : TokenType) = struct
           "function_right_paren";
           "function_contexts";
           "function_colon";
+          "function_readonly_return";
           "function_type";
           "function_where_clause";
         ]
@@ -4516,6 +4534,7 @@ module WithToken (Token : TokenType) = struct
             parameter_attribute;
             parameter_visibility;
             parameter_call_convention;
+            parameter_readonly;
             parameter_type;
             parameter_name;
             parameter_default_value;
@@ -4524,6 +4543,7 @@ module WithToken (Token : TokenType) = struct
           "parameter_attribute";
           "parameter_visibility";
           "parameter_call_convention";
+          "parameter_readonly";
           "parameter_type";
           "parameter_name";
           "parameter_default_value";
@@ -4852,6 +4872,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -4866,6 +4887,7 @@ module WithToken (Token : TokenType) = struct
           "anonymous_right_paren";
           "anonymous_ctx_list";
           "anonymous_colon";
+          "anonymous_readonly_return";
           "anonymous_type";
           "anonymous_use";
           "anonymous_body";
@@ -4905,6 +4927,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           } ->
         [
@@ -4913,6 +4936,7 @@ module WithToken (Token : TokenType) = struct
           "lambda_right_paren";
           "lambda_contexts";
           "lambda_colon";
+          "lambda_readonly_return";
           "lambda_type";
         ]
       | CastExpression
@@ -6025,6 +6049,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           ] ) ->
@@ -6039,6 +6064,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           }
@@ -6261,6 +6287,7 @@ module WithToken (Token : TokenType) = struct
             parameter_attribute;
             parameter_visibility;
             parameter_call_convention;
+            parameter_readonly;
             parameter_type;
             parameter_name;
             parameter_default_value;
@@ -6270,6 +6297,7 @@ module WithToken (Token : TokenType) = struct
             parameter_attribute;
             parameter_visibility;
             parameter_call_convention;
+            parameter_readonly;
             parameter_type;
             parameter_name;
             parameter_default_value;
@@ -6626,6 +6654,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -6641,6 +6670,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -6682,6 +6712,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           ] ) ->
         LambdaSignature
@@ -6691,6 +6722,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           }
       | ( SyntaxKind.CastExpression,
@@ -7917,6 +7949,7 @@ module WithToken (Token : TokenType) = struct
           function_right_paren
           function_contexts
           function_colon
+          function_readonly_return
           function_type
           function_where_clause =
         let syntax =
@@ -7931,6 +7964,7 @@ module WithToken (Token : TokenType) = struct
               function_right_paren;
               function_contexts;
               function_colon;
+              function_readonly_return;
               function_type;
               function_where_clause;
             }
@@ -8217,6 +8251,7 @@ module WithToken (Token : TokenType) = struct
           parameter_attribute
           parameter_visibility
           parameter_call_convention
+          parameter_readonly
           parameter_type
           parameter_name
           parameter_default_value =
@@ -8226,6 +8261,7 @@ module WithToken (Token : TokenType) = struct
               parameter_attribute;
               parameter_visibility;
               parameter_call_convention;
+              parameter_readonly;
               parameter_type;
               parameter_name;
               parameter_default_value;
@@ -8718,6 +8754,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_right_paren
           anonymous_ctx_list
           anonymous_colon
+          anonymous_readonly_return
           anonymous_type
           anonymous_use
           anonymous_body =
@@ -8733,6 +8770,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_right_paren;
               anonymous_ctx_list;
               anonymous_colon;
+              anonymous_readonly_return;
               anonymous_type;
               anonymous_use;
               anonymous_body;
@@ -8783,6 +8821,7 @@ module WithToken (Token : TokenType) = struct
           lambda_right_paren
           lambda_contexts
           lambda_colon
+          lambda_readonly_return
           lambda_type =
         let syntax =
           LambdaSignature
@@ -8792,6 +8831,7 @@ module WithToken (Token : TokenType) = struct
               lambda_right_paren;
               lambda_contexts;
               lambda_colon;
+              lambda_readonly_return;
               lambda_type;
             }
         in
@@ -9899,6 +9939,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           } =
@@ -9913,6 +9954,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           }
@@ -9943,6 +9985,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -9958,6 +10001,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -9987,6 +10031,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           } =
         LambdaSignature
@@ -9996,6 +10041,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           }
 
@@ -10052,6 +10098,7 @@ module WithToken (Token : TokenType) = struct
               function_right_paren;
               function_contexts;
               function_colon;
+              function_readonly_return;
               function_type;
               function_where_clause;
             } ->
@@ -10065,6 +10112,7 @@ module WithToken (Token : TokenType) = struct
             function_right_paren;
             function_contexts;
             function_colon;
+            function_readonly_return;
             function_type;
             function_where_clause;
           }
@@ -10102,6 +10150,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_right_paren;
               anonymous_ctx_list;
               anonymous_colon;
+              anonymous_readonly_return;
               anonymous_type;
               anonymous_use;
               anonymous_body;
@@ -10116,6 +10165,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_right_paren;
             anonymous_ctx_list;
             anonymous_colon;
+            anonymous_readonly_return;
             anonymous_type;
             anonymous_use;
             anonymous_body;
@@ -10150,6 +10200,7 @@ module WithToken (Token : TokenType) = struct
               lambda_right_paren;
               lambda_contexts;
               lambda_colon;
+              lambda_readonly_return;
               lambda_type;
             } ->
           {
@@ -10158,6 +10209,7 @@ module WithToken (Token : TokenType) = struct
             lambda_right_paren;
             lambda_contexts;
             lambda_colon;
+            lambda_readonly_return;
             lambda_type;
           }
         | _ -> failwith "get_lambda_signature: not a LambdaSignature"

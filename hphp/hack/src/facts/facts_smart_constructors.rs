@@ -407,6 +407,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _right_parens: Self::R,
         _capability: Self::R,
         _colon: Self::R,
+        _readonly: Self::R,
         _type: Self::R,
         _where: Self::R,
     ) -> Self::R {

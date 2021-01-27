@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a49697dc1f4914656f668ad804dcfa57>>
+// @generated SignedSource<<169b10b3311ea33c4571ac328806de74>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -534,6 +534,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node mut ParamMutability,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_readonly_kind(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node mut ReadonlyKind,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

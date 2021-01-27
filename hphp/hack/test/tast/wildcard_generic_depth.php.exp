@@ -25,6 +25,7 @@
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [6:1-8:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([6:15-19], (Hprim Tvoid))));
        f_name = ([6:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None;

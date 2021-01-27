@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-6:28]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([6:21-25], (Hprim Tvoid))));
+      f_readonly_ret = None; f_ret = ((), (Some ([6:21-25], (Hprim Tvoid))));
       f_name = ([3:10-14], "\\poly");
       f_tparams =
       [{ tp_variance = Invariant; tp_name = ([4:19-20], "Tctx$f");
@@ -26,7 +26,7 @@
                       hf_return_ty = ([4:23-27], (Hprim Tvoid));
                       hf_is_mutable_return = false }))));
          param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f";
-         param_expr = None; param_callconv = None;
+         param_expr = None; param_readonly = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None };
         { param_annotation = [5:33-36];
           param_type_hint =
@@ -46,8 +46,9 @@
                            hf_return_ty = ([5:27-31], (Hprim Tbool));
                            hf_is_mutable_return = false }))))));
           param_is_variadic = false; param_pos = [5:33-36];
-          param_name = "$nf"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None }
+          param_name = "$nf"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
         ];
       f_ctxs =
       (Some ([6:2-19],

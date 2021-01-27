@@ -105,6 +105,7 @@ struct
     function_right_paren: t;
     function_contexts: t;
     function_colon: t;
+    function_readonly_return: t;
     function_type: t;
     function_where_clause: t;
   }
@@ -126,6 +127,7 @@ struct
     anonymous_right_paren: t;
     anonymous_ctx_list: t;
     anonymous_colon: t;
+    anonymous_readonly_return: t;
     anonymous_type: t;
     anonymous_use: t;
     anonymous_body: t;
@@ -145,6 +147,7 @@ struct
     lambda_right_paren: t;
     lambda_contexts: t;
     lambda_colon: t;
+    lambda_readonly_return: t;
     lambda_type: t;
   }
 
@@ -319,6 +322,7 @@ struct
         function_right_paren: t;
         function_contexts: t;
         function_colon: t;
+        function_readonly_return: t;
         function_type: t;
         function_where_clause: t;
       }
@@ -439,6 +443,7 @@ struct
         parameter_attribute: t;
         parameter_visibility: t;
         parameter_call_convention: t;
+        parameter_readonly: t;
         parameter_type: t;
         parameter_name: t;
         parameter_default_value: t;
@@ -665,6 +670,7 @@ struct
         anonymous_right_paren: t;
         anonymous_ctx_list: t;
         anonymous_colon: t;
+        anonymous_readonly_return: t;
         anonymous_type: t;
         anonymous_use: t;
         anonymous_body: t;
@@ -688,6 +694,7 @@ struct
         lambda_right_paren: t;
         lambda_contexts: t;
         lambda_colon: t;
+        lambda_readonly_return: t;
         lambda_type: t;
       }
     | CastExpression of {
@@ -1607,6 +1614,7 @@ struct
     function_right_paren: Token.t value;
     function_contexts: contexts option value;
     function_colon: Token.t option value;
+    function_readonly_return: Token.t option value;
     function_type: attributized_specifier option value;
     function_where_clause: where_clause option value;
   }
@@ -1745,6 +1753,7 @@ struct
     parameter_attribute: attribute_specification option value;
     parameter_visibility: Token.t option value;
     parameter_call_convention: Token.t option value;
+    parameter_readonly: Token.t option value;
     parameter_type: specifier option value;
     parameter_name: expression value;
     parameter_default_value: simple_initializer option value;
@@ -2011,6 +2020,7 @@ struct
     anonymous_right_paren: Token.t value;
     anonymous_ctx_list: contexts option value;
     anonymous_colon: Token.t option value;
+    anonymous_readonly_return: Token.t option value;
     anonymous_type: specifier option value;
     anonymous_use: anonymous_function_use_clause option value;
     anonymous_body: compound_statement value;
@@ -2037,6 +2047,7 @@ struct
     lambda_right_paren: Token.t value;
     lambda_contexts: contexts option value;
     lambda_colon: Token.t option value;
+    lambda_readonly_return: Token.t option value;
     lambda_type: specifier option value;
   }
 

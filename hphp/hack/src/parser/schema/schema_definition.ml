@@ -440,6 +440,7 @@ let schema : schema_node list =
           ("right_paren", Token);
           ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
+          ("readonly_return", ZeroOrOne Token);
           ("type", ZeroOrOne (Just "AttributizedSpecifier"));
           ("where_clause", ZeroOrOne (Just "WhereClause"));
         ];
@@ -715,6 +716,7 @@ let schema : schema_node list =
           ("attribute", ZeroOrOne (Aggregate AttributeSpecification));
           ("visibility", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
+          ("readonly", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
           ("name", Aggregate Expression);
           ("default_value", ZeroOrOne (Just "SimpleInitializer"));
@@ -1224,6 +1226,7 @@ let schema : schema_node list =
           ("right_paren", Token);
           ("ctx_list", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
+          ("readonly_return", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
           ("use", ZeroOrOne (Just "AnonymousFunctionUseClause"));
           ("body", Just "CompoundStatement");
@@ -1274,6 +1277,7 @@ let schema : schema_node list =
           ("right_paren", Token);
           ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
+          ("readonly_return", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
         ];
     };

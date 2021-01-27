@@ -427,6 +427,7 @@ pub struct FunctionDeclarationHeaderChildren<'a, T, V> {
     pub right_paren: Syntax<'a, T, V>,
     pub contexts: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
+    pub readonly_return: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub where_clause: Syntax<'a, T, V>,
 }
@@ -583,6 +584,7 @@ pub struct ParameterDeclarationChildren<'a, T, V> {
     pub attribute: Syntax<'a, T, V>,
     pub visibility: Syntax<'a, T, V>,
     pub call_convention: Syntax<'a, T, V>,
+    pub readonly: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub default_value: Syntax<'a, T, V>,
@@ -887,6 +889,7 @@ pub struct AnonymousFunctionChildren<'a, T, V> {
     pub right_paren: Syntax<'a, T, V>,
     pub ctx_list: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
+    pub readonly_return: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub use_: Syntax<'a, T, V>,
     pub body: Syntax<'a, T, V>,
@@ -916,6 +919,7 @@ pub struct LambdaSignatureChildren<'a, T, V> {
     pub right_paren: Syntax<'a, T, V>,
     pub contexts: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
+    pub readonly_return: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
 }
 

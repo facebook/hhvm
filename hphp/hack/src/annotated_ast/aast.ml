@@ -655,6 +655,7 @@ and ('ex, 'fb, 'en, 'hi) fun_param = {
   param_pos: pos;
   param_name: string;
   param_expr: ('ex, 'fb, 'en, 'hi) expr option;
+  param_readonly: Ast_defs.readonly_kind option;
   param_callconv: Ast_defs.param_kind option;
   param_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   param_visibility: visibility option;
@@ -677,6 +678,8 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;
   f_annotation: 'en;
   f_mode: FileInfo.mode; [@visitors.opaque]
+  f_readonly_ret: Ast_defs.readonly_kind option;
+  (* Whether the return value is readonly *)
   f_ret: 'hi type_hint;
   f_name: sid;
   f_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
@@ -887,6 +890,7 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_body: ('ex, 'fb, 'en, 'hi) func_body;
   m_fun_kind: Ast_defs.fun_kind;
   m_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  m_readonly_ret: Ast_defs.readonly_kind option;
   m_ret: 'hi type_hint;
   m_external: bool;
       (** true if this declaration has no body because it is an external method

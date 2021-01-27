@@ -48,7 +48,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_namespace_group_use_declaration(ctx: &C, namespace_group_use_keyword: Self, namespace_group_use_kind: Self, namespace_group_use_prefix: Self, namespace_group_use_left_brace: Self, namespace_group_use_clauses: Self, namespace_group_use_right_brace: Self, namespace_group_use_semicolon: Self) -> Self;
     fn make_namespace_use_clause(ctx: &C, namespace_use_clause_kind: Self, namespace_use_name: Self, namespace_use_as: Self, namespace_use_alias: Self) -> Self;
     fn make_function_declaration(ctx: &C, function_attribute_spec: Self, function_declaration_header: Self, function_body: Self) -> Self;
-    fn make_function_declaration_header(ctx: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_contexts: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self;
+    fn make_function_declaration_header(ctx: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_contexts: Self, function_colon: Self, function_readonly_return: Self, function_type: Self, function_where_clause: Self) -> Self;
     fn make_contexts(ctx: &C, contexts_left_bracket: Self, contexts_types: Self, contexts_right_bracket: Self) -> Self;
     fn make_where_clause(ctx: &C, where_clause_keyword: Self, where_clause_constraints: Self) -> Self;
     fn make_where_constraint(ctx: &C, where_constraint_left_type: Self, where_constraint_operator: Self, where_constraint_right_type: Self) -> Self;
@@ -66,7 +66,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_type_const_declaration(ctx: &C, type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self;
     fn make_context_const_declaration(ctx: &C, context_const_modifiers: Self, context_const_const_keyword: Self, context_const_ctx_keyword: Self, context_const_name: Self, context_const_type_parameters: Self, context_const_constraint: Self, context_const_equal: Self, context_const_ctx_list: Self, context_const_semicolon: Self) -> Self;
     fn make_decorated_expression(ctx: &C, decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self;
-    fn make_parameter_declaration(ctx: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self;
+    fn make_parameter_declaration(ctx: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self;
     fn make_variadic_parameter(ctx: &C, variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self;
     fn make_old_attribute_specification(ctx: &C, old_attribute_specification_left_double_angle: Self, old_attribute_specification_attributes: Self, old_attribute_specification_right_double_angle: Self) -> Self;
     fn make_attribute_specification(ctx: &C, attribute_specification_attributes: Self) -> Self;
@@ -104,10 +104,10 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_concurrent_statement(ctx: &C, concurrent_keyword: Self, concurrent_statement: Self) -> Self;
     fn make_simple_initializer(ctx: &C, simple_initializer_equal: Self, simple_initializer_value: Self) -> Self;
     fn make_anonymous_class(ctx: &C, anonymous_class_class_keyword: Self, anonymous_class_left_paren: Self, anonymous_class_argument_list: Self, anonymous_class_right_paren: Self, anonymous_class_extends_keyword: Self, anonymous_class_extends_list: Self, anonymous_class_implements_keyword: Self, anonymous_class_implements_list: Self, anonymous_class_body: Self) -> Self;
-    fn make_anonymous_function(ctx: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self;
+    fn make_anonymous_function(ctx: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_readonly_return: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self;
     fn make_anonymous_function_use_clause(ctx: &C, anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self;
     fn make_lambda_expression(ctx: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self;
-    fn make_lambda_signature(ctx: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_type: Self) -> Self;
+    fn make_lambda_signature(ctx: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_readonly_return: Self, lambda_type: Self) -> Self;
     fn make_cast_expression(ctx: &C, cast_left_paren: Self, cast_type: Self, cast_right_paren: Self, cast_operand: Self) -> Self;
     fn make_scope_resolution_expression(ctx: &C, scope_resolution_qualifier: Self, scope_resolution_operator: Self, scope_resolution_name: Self) -> Self;
     fn make_member_selection_expression(ctx: &C, member_object: Self, member_operator: Self, member_name: Self) -> Self;

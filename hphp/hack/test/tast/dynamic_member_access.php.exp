@@ -1,5 +1,6 @@
 [(Fun
     { f_span = [3:1-57]; f_annotation = (); f_mode = Mpartial;
+      f_readonly_ret = None;
       f_ret = ((string), (Some ([3:33-39], (Hprim Tstring))));
       f_name = ([3:10-29], "\\returnsTheStringFoo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -18,6 +19,7 @@
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [5:1-10:2]; f_annotation = (); f_mode = Mpartial;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -25,8 +27,9 @@
        [{ param_annotation = ([5:23-25], dynamic);
           param_type_hint = ((dynamic), (Some ([5:15-22], Hdynamic)));
           param_is_variadic = false; param_pos = [5:23-25];
-          param_name = "$c"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None }
+          param_name = "$c"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =

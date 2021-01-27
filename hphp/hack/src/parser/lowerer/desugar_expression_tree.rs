@@ -83,6 +83,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
         name: "$v".into(),
         expr: None,
         callconv: None,
+        readonly: None,
         user_attributes: vec![],
         visibility: None,
     };
@@ -146,6 +147,7 @@ fn wrap_fun_<TF>(
         span: pos,
         annotation: (),
         mode: file_info::Mode::Mstrict,
+        readonly_ret: None,
         ret: ast::TypeHint((), None),
         name: make_id(";anonymous"),
         tparams: vec![],

@@ -463,6 +463,7 @@ fn make_closure(
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,
         user_attributes: fd.user_attributes.clone(),
+        readonly_ret: None, // readonly on closure_convert
         ret: fd.ret.clone(),
         external: false,
         doc_comment: fd.doc_comment.clone(),
@@ -798,6 +799,7 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
         } else {
             None
         },
+        readonly: None, // TODO
         user_attributes: vec![],
         visibility: None,
     }
@@ -894,6 +896,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         span: pos(),
         annotation: dummy_saved_env,
         mode: get_scope_fmode(&env.scope),
+        readonly_ret: None,
         ret: TypeHint((), None),
         name: Id(pos(), mangle_name.clone()),
         tparams: vec![],
@@ -976,6 +979,7 @@ fn make_dyn_meth_caller_lambda(
         span: pos(),
         annotation: dummy_saved_env,
         mode: get_scope_fmode(&env.scope),
+        readonly_ret: None, // TODO: readonly_ret in closure convert
         ret: TypeHint((), None),
         name: Id(pos(), ";anonymous".to_string()),
         tparams: vec![],
@@ -1537,6 +1541,7 @@ fn extract_debugger_main(
         span: pos,
         annotation: (),
         mode: Mode::Mstrict,
+        readonly_ret: None, // TODO: readonly_ret in closure_convert
         ret: TypeHint((), None),
         name: Id(Pos::make_none(), "include".into()),
         tparams: vec![],

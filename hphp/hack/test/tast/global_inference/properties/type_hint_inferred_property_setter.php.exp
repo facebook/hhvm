@@ -22,8 +22,8 @@
          [{ param_annotation = ([6:31-33], int);
             param_type_hint = ((int), None); param_is_variadic = false;
             param_pos = [6:31-33]; param_name = "$x"; param_expr = None;
-            param_callconv = None; param_user_attributes = [];
-            param_visibility = None }
+            param_readonly = None; param_callconv = None;
+            param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
@@ -39,7 +39,7 @@
                     (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
              ];
            fb_annotation = () };
-         m_fun_kind = FSync; m_user_attributes = [];
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
         { m_span = [12:3-14:4]; m_annotation = (); m_final = false;
@@ -57,8 +57,8 @@
                            OG_nullthrows, false))))))
               ];
             fb_annotation = () };
-          m_fun_kind = FSync; m_user_attributes = []; m_ret = ((int), None);
-          m_external = false; m_doc_comment = None }
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
+          m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -70,6 +70,7 @@
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [17:1-19:2]; f_annotation = (); f_mode = Mpartial;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([17:17-21], (Hprim Tvoid))));
        f_name = ([17:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

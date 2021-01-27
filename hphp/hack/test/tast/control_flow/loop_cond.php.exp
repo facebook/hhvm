@@ -17,6 +17,7 @@
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [5:1-7:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((?A),
         (Some ([5:23-25],
@@ -43,6 +44,7 @@
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [9:1-14:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([9:20-24], (Hprim Tvoid))));
        f_name = ([9:10-16], "\\fwhile"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -87,6 +89,7 @@
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid))));
        f_name = ([16:10-14], "\\ffor"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

@@ -316,7 +316,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionDeclarationHeader(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.modifiers),
                     1 => Some(&x.keyword),
                     2 => Some(&x.name),
@@ -326,8 +326,9 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     6 => Some(&x.right_paren),
                     7 => Some(&x.contexts),
                     8 => Some(&x.colon),
-                    9 => Some(&x.type_),
-                    10 => Some(&x.where_clause),
+                    9 => Some(&x.readonly_return),
+                    10 => Some(&x.type_),
+                    11 => Some(&x.where_clause),
                         _ => None,
                     }
                 })
@@ -514,13 +515,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(7).and_then(|index| { match index {
                         0 => Some(&x.attribute),
                     1 => Some(&x.visibility),
                     2 => Some(&x.call_convention),
-                    3 => Some(&x.type_),
-                    4 => Some(&x.name),
-                    5 => Some(&x.default_value),
+                    3 => Some(&x.readonly),
+                    4 => Some(&x.type_),
+                    5 => Some(&x.name),
+                    6 => Some(&x.default_value),
                         _ => None,
                     }
                 })
@@ -888,7 +890,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(13).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.static_keyword),
                     2 => Some(&x.async_keyword),
@@ -898,9 +900,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     6 => Some(&x.right_paren),
                     7 => Some(&x.ctx_list),
                     8 => Some(&x.colon),
-                    9 => Some(&x.type_),
-                    10 => Some(&x.use_),
-                    11 => Some(&x.body),
+                    9 => Some(&x.readonly_return),
+                    10 => Some(&x.type_),
+                    11 => Some(&x.use_),
+                    12 => Some(&x.body),
                         _ => None,
                     }
                 })
@@ -927,13 +930,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaSignature(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(7).and_then(|index| { match index {
                         0 => Some(&x.left_paren),
                     1 => Some(&x.parameters),
                     2 => Some(&x.right_paren),
                     3 => Some(&x.contexts),
                     4 => Some(&x.colon),
-                    5 => Some(&x.type_),
+                    5 => Some(&x.readonly_return),
+                    6 => Some(&x.type_),
                         _ => None,
                     }
                 })

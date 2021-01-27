@@ -3,6 +3,7 @@ Errors:
   [4:45-52] The field `foo` is not defined in this shape
 [(Fun
     { f_span = [4:1-6:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret =
       ((Awaitable<shape()>),
        (Some ([4:35-53],
@@ -30,6 +31,7 @@ Errors:
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [8:1-16:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((Awaitable<void>),
         (Some ([8:24-39],

@@ -164,8 +164,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_function_declaration(self, attribute_spec, declaration_header, body)
     }
 
-    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, contexts, colon, type_, where_clause)
+    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, readonly_return: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, contexts, colon, readonly_return, type_, where_clause)
     }
 
     fn make_contexts(&mut self, left_bracket: Self::R, types: Self::R, right_bracket: Self::R) -> Self::R {
@@ -236,8 +236,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_decorated_expression(self, decorator, expression)
     }
 
-    fn make_parameter_declaration(&mut self, attribute: Self::R, visibility: Self::R, call_convention: Self::R, type_: Self::R, name: Self::R, default_value: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_parameter_declaration(self, attribute, visibility, call_convention, type_, name, default_value)
+    fn make_parameter_declaration(&mut self, attribute: Self::R, visibility: Self::R, call_convention: Self::R, readonly: Self::R, type_: Self::R, name: Self::R, default_value: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_parameter_declaration(self, attribute, visibility, call_convention, readonly, type_, name, default_value)
     }
 
     fn make_variadic_parameter(&mut self, call_convention: Self::R, type_: Self::R, ellipsis: Self::R) -> Self::R {
@@ -388,8 +388,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_class(self, class_keyword, left_paren, argument_list, right_paren, extends_keyword, extends_list, implements_keyword, implements_list, body)
     }
 
-    fn make_anonymous_function(&mut self, attribute_spec: Self::R, static_keyword: Self::R, async_keyword: Self::R, function_keyword: Self::R, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, ctx_list: Self::R, colon: Self::R, type_: Self::R, use_: Self::R, body: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_function(self, attribute_spec, static_keyword, async_keyword, function_keyword, left_paren, parameters, right_paren, ctx_list, colon, type_, use_, body)
+    fn make_anonymous_function(&mut self, attribute_spec: Self::R, static_keyword: Self::R, async_keyword: Self::R, function_keyword: Self::R, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, ctx_list: Self::R, colon: Self::R, readonly_return: Self::R, type_: Self::R, use_: Self::R, body: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_function(self, attribute_spec, static_keyword, async_keyword, function_keyword, left_paren, parameters, right_paren, ctx_list, colon, readonly_return, type_, use_, body)
     }
 
     fn make_anonymous_function_use_clause(&mut self, keyword: Self::R, left_paren: Self::R, variables: Self::R, right_paren: Self::R) -> Self::R {
@@ -400,8 +400,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_lambda_expression(self, attribute_spec, async_, signature, arrow, body)
     }
 
-    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, type_: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_lambda_signature(self, left_paren, parameters, right_paren, contexts, colon, type_)
+    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, readonly_return: Self::R, type_: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_lambda_signature(self, left_paren, parameters, right_paren, contexts, colon, readonly_return, type_)
     }
 
     fn make_cast_expression(&mut self, left_paren: Self::R, type_: Self::R, right_paren: Self::R, operand: Self::R) -> Self::R {

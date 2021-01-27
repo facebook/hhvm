@@ -380,6 +380,7 @@
                               }
                             },
                             "parameter_call_convention":{"kind":"missing"},
+                            "parameter_readonly":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -433,6 +434,7 @@
                     },
                     "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
+                    "function_readonly_return":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
                   },
@@ -718,6 +720,7 @@
                             "parameter_attribute":{"kind":"missing"},
                             "parameter_visibility":{"kind":"missing"},
                             "parameter_call_convention":{"kind":"missing"},
+                            "parameter_readonly":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -784,6 +787,7 @@
                         "line_number":11
                       }
                     },
+                    "function_readonly_return":{"kind":"missing"},
                     "function_type":{
                       "kind":"simple_type_specifier",
                       "simple_type_specifier":{
@@ -1224,6 +1228,7 @@
                         "line_number":17
                       }
                     },
+                    "function_readonly_return":{"kind":"missing"},
                     "function_type":{
                       "kind":"simple_type_specifier",
                       "simple_type_specifier":{
@@ -2474,5 +2479,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\ninterface ExBox {}\n\nclass Box<T> implements ExBox {\n  public function __construct(public T $data) {}\n}\n\nclass IBox extends Box<int> {\n  public function add(int $x): void {\n    $this->data = $this->data + $x;\n  }\n}\n\nabstract final class Helper {\n  public static function ibox(): IBox {\n    return new IBox(42);\n  }\n}\n\nenum class E: ExBox {\n  Box<string> A = new Box('bli');\n  IBox B = Helper::ibox();\n  Box<int> C = new Box(42);\n}\n\nenum class F: ExBox extends E {\n  Box<int> D = new Box(1664);\n}\n",
-  "version":"2021-01-05-0001"
+  "version":"2021-01-18-0001"
 }

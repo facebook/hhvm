@@ -2483,7 +2483,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             | TokenKind::Namespace
             | TokenKind::XHP
             | TokenKind::Required
-            | TokenKind::Ctx => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Ctx
+            | TokenKind::Readonly => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
             | TokenKind::Await
@@ -2663,6 +2664,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _right_paren: Self::R,
         _ctx_list: Self::R,
         _colon: Self::R,
+        _readonly_return: Self::R,
         _type_: Self::R,
         _use_: Self::R,
         _body: Self::R,
@@ -3096,6 +3098,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         attributes: Self::R,
         visibility: Self::R,
         inout: Self::R,
+        _readonly: Self::R, // TODO: handle readonly in declarations
         hint: Self::R,
         name: Self::R,
         initializer: Self::R,
@@ -3275,6 +3278,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _right_paren: Self::R,
         capability: Self::R,
         _colon: Self::R,
+        _readonly_return: Self::R, // TODO, declare readonly return
         ret_hint: Self::R,
         where_constraints: Self::R,
     ) -> Self::R {

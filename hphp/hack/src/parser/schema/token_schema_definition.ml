@@ -256,6 +256,7 @@ let given_text_tokens =
     make_token_node "Backtick" "`" ();
     make_token_node "XHP" "xhp" ~allowed_as_identifier:true ();
     make_token_node "Hash" "#" ();
+    make_token_node "Readonly" "readonly" ();
   ]
 
 let tokens = variable_text_tokens @ no_text_tokens @ given_text_tokens

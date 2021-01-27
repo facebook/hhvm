@@ -112,6 +112,7 @@ pub struct FunHdr {
     parameters: Vec<ast::FunParam>,
     contexts: Option<ast::Contexts>,
     unsafe_contexts: Option<ast::Contexts>,
+    readonly_return: Option<ast::ReadonlyKind>,
     return_type: Option<ast::Hint>,
 }
 
@@ -125,6 +126,7 @@ impl FunHdr {
             parameters: vec![],
             contexts: None,
             unsafe_contexts: None,
+            readonly_return: None,
             return_type: None,
         }
     }
@@ -1533,9 +1535,11 @@ where
         match &node.children {
             LambdaExpression(c) => {
                 let suspension_kind = Self::mk_suspension_kind(&c.async_);
-                let (params, (ctxs, unsafe_ctxs), ret) = match &c.signature.children {
+                let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
                     LambdaSignature(c) => {
                         let params = Self::could_map(Self::p_fun_param, &c.parameters, env)?;
+                        let readonly_ret =
+                            Self::mp_optional(Self::p_readonly, &c.readonly_return, env)?;
                         let (ctxs, unsafe_ctxs) = Self::p_contexts(&c.contexts, env)?;
                         if Self::has_polymorphic_context(&ctxs) {
                             Self::raise_parsing_error(
@@ -1545,7 +1549,7 @@ where
                             );
                         }
                         let ret = Self::mp_optional(Self::p_hint, &c.type_, env)?;
-                        (params, (ctxs, unsafe_ctxs), ret)
+                        (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
                     }
                     Token(_) => {
                         let ast::Id(p, n) = Self::pos_name(&c.signature, env)?;
@@ -1558,10 +1562,12 @@ where
                                 name: n,
                                 expr: None,
                                 callconv: None,
+                                readonly: None,
                                 user_attributes: vec![],
                                 visibility: None,
                             }],
                             (None, None),
+                            None,
                             None,
                         )
                     }
@@ -1579,6 +1585,7 @@ where
                     span: pos.clone(),
                     annotation: (),
                     mode: env.file_mode(),
+                    readonly_ret,
                     ret: ast::TypeHint((), ret),
                     name: ast::Id(pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -2140,6 +2147,7 @@ where
                     span: Self::p_pos(node, env),
                     annotation: (),
                     mode: env.file_mode(),
+                    readonly_ret: Self::mp_optional(Self::p_readonly, &c.readonly_return, env)?,
                     ret: ast::TypeHint((), Self::mp_optional(Self::p_hint, &c.type_, env)?),
                     name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -2174,6 +2182,7 @@ where
                     span: pos.clone(),
                     annotation: (),
                     mode: env.file_mode(),
+                    readonly_ret: None, // TODO: awaitable creation expression
                     ret: ast::TypeHint((), None),
                     name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -3425,6 +3434,13 @@ where
         }
     }
 
+    fn p_readonly(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::ReadonlyKind> {
+        match Self::token_kind(node) {
+            Some(TK::Readonly) => Ok(ast::ReadonlyKind::Readonly),
+            _ => Self::missing_syntax("readonly", node, env),
+        }
+    }
+
     fn param_template(node: S<'a, T, V>, env: &Env<TF>) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
         ast::FunParam {
@@ -3435,6 +3451,7 @@ where
             name: Self::text(node, env),
             expr: None,
             callconv: None,
+            readonly: None,
             user_attributes: vec![],
             visibility: None,
         }
@@ -3446,6 +3463,7 @@ where
                 attribute,
                 visibility,
                 call_convention,
+                readonly,
                 type_,
                 name,
                 default_value,
@@ -3492,6 +3510,7 @@ where
                     name,
                     expr: Self::p_fun_param_default_value(default_value, env)?,
                     callconv: Self::mp_optional(Self::p_param_kind, call_convention, env)?,
+                    readonly: Self::mp_optional(Self::p_readonly, readonly, env)?,
                     /* implicit field via constructor parameter.
                      * This is always None except for constructors and the modifier
                      * can be only Public or Protected or Private.
@@ -3635,6 +3654,7 @@ where
                 parameter_list,
                 type_,
                 contexts,
+                readonly_return,
                 ..
             }) => {
                 if name.value.is_missing() {
@@ -3642,6 +3662,7 @@ where
                 }
                 let kinds = Self::p_kinds(modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
+                let readonly_ret = Self::mp_optional(Self::p_readonly, readonly_return, env)?;
                 let mut type_parameters = Self::p_tparam_l(false, type_parameter_list, env)?;
                 let mut parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
                 let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
@@ -3664,6 +3685,7 @@ where
                     parameters,
                     contexts,
                     unsafe_contexts,
+                    readonly_return: readonly_ret,
                     return_type,
                 })
             }
@@ -3671,14 +3693,17 @@ where
                 parameters,
                 contexts,
                 type_,
+                readonly_return,
                 ..
             }) => {
+                let readonly_ret = Self::mp_optional(Self::p_readonly, readonly_return, env)?;
                 let mut header = FunHdr::make_empty(env);
                 header.parameters = Self::could_map(Self::p_fun_param, parameters, env)?;
                 let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
                 header.contexts = contexts;
                 header.unsafe_contexts = unsafe_contexts;
                 header.return_type = Self::mp_optional(Self::p_hint, type_, env)?;
+                header.readonly_return = readonly_ret;
                 Ok(header)
             }
             Token(_) => Ok(FunHdr::make_empty(env)),
@@ -4377,6 +4402,7 @@ where
                     },
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, body_has_yield),
                     user_attributes,
+                    readonly_ret: hdr.readonly_return,
                     ret: ast::TypeHint((), hdr.return_type),
                     external: is_external,
                     doc_comment: doc_comment_opt,
@@ -4753,6 +4779,7 @@ where
                     annotation: (),
                     mode: env.file_mode(),
                     ret,
+                    readonly_ret: hdr.readonly_return,
                     name: hdr.name,
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,

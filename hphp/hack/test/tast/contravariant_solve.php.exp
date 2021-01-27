@@ -47,6 +47,7 @@
        c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [8:1-10:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((I<T>),
         (Some ([8:34-38],
@@ -67,8 +68,9 @@
                   (Happly (([8:15-16], "\\I"),
                      [([8:17-18], (Habstr ("T", [])))])))));
           param_is_variadic = false; param_pos = [8:20-22];
-          param_name = "$_"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None };
+          param_name = "$_"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None };
          { param_annotation = ([8:29-31], I<T>);
            param_type_hint =
            ((I<T>),
@@ -76,8 +78,9 @@
                    (Happly (([8:24-25], "\\I"),
                       [([8:26-27], (Habstr ("T", [])))])))));
            param_is_variadic = false; param_pos = [8:29-31];
-           param_name = "$_"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_name = "$_"; param_expr = None; param_readonly = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
@@ -102,6 +105,7 @@
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [12:1-14:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((E<T>),
         (Some ([12:22-26],
@@ -118,8 +122,9 @@
        [{ param_annotation = ([12:17-19], T);
           param_type_hint = ((T), (Some ([12:15-16], (Habstr ("T", [])))));
           param_is_variadic = false; param_pos = [12:17-19];
-          param_name = "$_"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None }
+          param_name = "$_"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
@@ -144,6 +149,7 @@
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [16:1-18:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid))));
        f_name = ([16:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

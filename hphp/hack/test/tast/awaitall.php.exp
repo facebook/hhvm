@@ -1,5 +1,6 @@
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
+      f_readonly_ret = None;
       f_ret =
       ((Awaitable<int>),
        (Some ([3:26-40],
@@ -21,6 +22,7 @@
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [7:1-9:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((Awaitable<string>),
         (Some ([7:29-46],
@@ -43,6 +45,7 @@
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [11:1-17:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret =
        ((Awaitable<void>),
         (Some ([11:21-36],

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
+      f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_ctxs = None; f_unsafe_ctxs = None;
@@ -24,7 +24,8 @@
                        ([4:8-19],
                         (Lfun (
                            { f_span = [4:8-19]; f_annotation = ();
-                             f_mode = Mstrict; f_ret = ((), None);
+                             f_mode = Mstrict; f_readonly_ret = None;
+                             f_ret = ((), None);
                              f_name = ([Pos.none], ";anonymous");
                              f_tparams = []; f_where_constraints = [];
                              f_variadic = FVnonVariadic; f_params = [];
@@ -108,6 +109,7 @@
                                                      { f_span = [4:8-19];
                                                        f_annotation = ();
                                                        f_mode = Mstrict;
+                                                       f_readonly_ret = None;
                                                        f_ret = ((), None);
                                                        f_name =
                                                        ([Pos.none],
@@ -132,6 +134,8 @@
                                                           param_pos = [4:3-7];
                                                           param_name = "$v";
                                                           param_expr = None;
+                                                          param_readonly =
+                                                          None;
                                                           param_callconv =
                                                           None;
                                                           param_user_attributes =
@@ -386,6 +390,7 @@
                                                      { f_span = [4:8-19];
                                                        f_annotation = ();
                                                        f_mode = Mstrict;
+                                                       f_readonly_ret = None;
                                                        f_ret = ((), None);
                                                        f_name =
                                                        ([Pos.none],

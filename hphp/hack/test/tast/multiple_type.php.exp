@@ -17,7 +17,7 @@
          { fb_ast =
            [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))];
            fb_annotation = () };
-         m_fun_kind = FSync; m_user_attributes = [];
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
          m_ret = ((int), (Some ([5:26-29], (Hprim Tint))));
          m_external = false; m_doc_comment = None }
         ];
@@ -49,7 +49,7 @@
             [([12:5-16], (Return (Some (([12:12-15], string), (String "s")))))
               ];
             fb_annotation = () };
-          m_fun_kind = FSync; m_user_attributes = [];
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
           m_ret = ((string), (Some ([11:26-32], (Hprim Tstring))));
           m_external = false; m_doc_comment = None }
          ];
@@ -63,6 +63,7 @@
        c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = Mstrict;
+       f_readonly_ret = None;
        f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey))));
        f_name = ([16:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -71,19 +72,22 @@
           param_type_hint =
           ((C1), (Some ([16:15-17], (Happly (([16:15-17], "\\C1"), [])))));
           param_is_variadic = false; param_pos = [16:18-21];
-          param_name = "$c1"; param_expr = None; param_callconv = None;
-          param_user_attributes = []; param_visibility = None };
+          param_name = "$c1"; param_expr = None; param_readonly = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None };
          { param_annotation = ([16:26-29], C2);
            param_type_hint =
            ((C2), (Some ([16:23-25], (Happly (([16:23-25], "\\C2"), [])))));
            param_is_variadic = false; param_pos = [16:26-29];
-           param_name = "$c2"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None };
+           param_name = "$c2"; param_expr = None; param_readonly = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None };
          { param_annotation = ([16:36-41], bool);
            param_type_hint = ((bool), (Some ([16:31-35], (Hprim Tbool))));
            param_is_variadic = false; param_pos = [16:36-41];
-           param_name = "$cond"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_name = "$cond"; param_expr = None; param_readonly = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_ctxs = None; f_unsafe_ctxs = None;
        f_body =

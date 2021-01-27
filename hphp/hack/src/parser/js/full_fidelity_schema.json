@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-01-21-0001",
+  "version" : "2021-01-22-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -379,6 +379,8 @@
       "token_text" : "xhp" },
     { "token_kind" : "Hash",
       "token_text" : "#" },
+    { "token_kind" : "Readonly",
+      "token_text" : "readonly" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -721,6 +723,7 @@
         { "field_name" : "right_paren" },
         { "field_name" : "contexts" },
         { "field_name" : "colon" },
+        { "field_name" : "readonly_return" },
         { "field_name" : "type" },
         { "field_name" : "where_clause" }
       ] },
@@ -913,6 +916,7 @@
         { "field_name" : "attribute" },
         { "field_name" : "visibility" },
         { "field_name" : "call_convention" },
+        { "field_name" : "readonly" },
         { "field_name" : "type" },
         { "field_name" : "name" },
         { "field_name" : "default_value" }
@@ -1293,6 +1297,7 @@
         { "field_name" : "right_paren" },
         { "field_name" : "ctx_list" },
         { "field_name" : "colon" },
+        { "field_name" : "readonly_return" },
         { "field_name" : "type" },
         { "field_name" : "use" },
         { "field_name" : "body" }
@@ -1328,6 +1333,7 @@
         { "field_name" : "right_paren" },
         { "field_name" : "contexts" },
         { "field_name" : "colon" },
+        { "field_name" : "readonly_return" },
         { "field_name" : "type" }
       ] },
     { "kind_name" : "CastExpression",

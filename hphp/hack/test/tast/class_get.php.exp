@@ -43,7 +43,7 @@
                 )))
              ];
            fb_annotation = () };
-         m_fun_kind = FSync; m_user_attributes = [];
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
          m_ret = ((int), (Some ([15:33-36], (Hprim Tint))));
          m_external = false; m_doc_comment = None }
         ];

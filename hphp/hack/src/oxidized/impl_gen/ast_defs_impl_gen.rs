@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<59f5990df2e29aa23ba92d14f72b1250>>
+// @generated SignedSource<<279a96355dc95258c2fb66f03ea228c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -202,6 +202,14 @@ impl ParamKind {
         ParamKind::Pinout
     }
     pub fn is_pinout(&self) -> bool {
+        true
+    }
+}
+impl ReadonlyKind {
+    pub fn mk_readonly() -> Self {
+        ReadonlyKind::Readonly
+    }
+    pub fn is_readonly(&self) -> bool {
         true
     }
 }

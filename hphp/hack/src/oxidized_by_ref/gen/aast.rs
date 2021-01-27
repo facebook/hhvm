@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<63180a9c213420570f0083da5cdb362b>>
+// @generated SignedSource<<170e21b6fcc473f12cbbfeadd974dbb2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1028,6 +1028,7 @@ pub struct FunParam<'a, Ex, Fb, En, Hi> {
     pub pos: &'a Pos<'a>,
     pub name: &'a str,
     pub expr: Option<&'a Expr<'a, Ex, Fb, En, Hi>>,
+    pub readonly: Option<oxidized::ast_defs::ReadonlyKind>,
     pub callconv: Option<oxidized::ast_defs::ParamKind>,
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
     pub visibility: Option<oxidized::aast::Visibility>,
@@ -1086,6 +1087,7 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub span: &'a Pos<'a>,
     pub annotation: En,
     pub mode: oxidized::file_info::Mode,
+    pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     pub ret: &'a TypeHint<'a, Hi>,
     pub name: Sid<'a>,
     pub tparams: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],
@@ -1586,6 +1588,7 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub body: &'a FuncBody<'a, Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
+    pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     pub ret: &'a TypeHint<'a, Hi>,
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)

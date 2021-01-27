@@ -5,7 +5,7 @@ Errors:
   [3:18-23] But got `mixed`
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
-      f_ret = ((mixed), (Some ([3:18-23], Hmixed)));
+      f_readonly_ret = None; f_ret = ((mixed), (Some ([3:18-23], Hmixed)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_ctxs = None; f_unsafe_ctxs = None;

@@ -16,7 +16,12 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/coeffects.h"
+
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map.h"
+
+#include <folly/Optional.h>
 
 #include <memory>
 
@@ -24,18 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CoeffectsConfig {
-  static void init(const std::unordered_map<std::string, int>& map) {
-    assertx(!s_instance);
-    s_instance = std::make_unique<CoeffectsConfig>();
-    // Purity enforcement must be at least as strong as the highest level of
-    // enforcement otherwise the whole coeffect system breaks
-    s_instance->m_pureLevel = 0;
-    s_instance->m_rxLevel = 0;
-    for (auto const [name, level] : map) {
-      if (name == s_rx) s_instance->m_rxLevel = level;
-      s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);
-    }
-  }
+  static void init(const std::unordered_map<std::string, int>&);
 
   static bool enabled() {
     assertx(s_instance);
@@ -49,25 +43,44 @@ struct CoeffectsConfig {
     assertx(s_instance);
     return s_instance->m_rxLevel;
   }
-
-  static std::string mangle() {
+  static int cippEnforcementLevel() {
     assertx(s_instance);
-    return folly::to<std::string>(
-      s_instance->s_pure, std::to_string(s_instance->m_pureLevel),
-      s_instance->s_rx, std::to_string(s_instance->m_rxLevel)
-    );
+    return s_instance->m_cippLevel;
   }
 
-private:
-  inline static const std::string s_pure = "pure";
-  inline static const std::string s_rx = "rx";
+  static RuntimeCoeffects::storage_t escapeMask() {
+    assertx(s_instance);
+    return s_instance->m_escapeMask;
+  }
+  static RuntimeCoeffects::storage_t warningMask() {
+    assertx(s_instance);
+    return s_instance->m_warningMask;
+  }
 
-public:
+  struct FromNameResult {
+    StaticCoeffects value;
+    bool isPure : 1;
+    bool isAnyRx : 1;
+  };
+  static FromNameResult fromName(const std::string&);
+  static StaticCoeffects combine(const StaticCoeffects, const StaticCoeffects);
+  static std::vector<std::string> toStringList(const StaticCoeffects data);
+  static std::string mangle();
+
+
+private:
+  static void initEnforcementLevel(const std::unordered_map<std::string, int>&);
+  static void initCapabilities();
+
+private:
   static std::unique_ptr<CoeffectsConfig> s_instance;
 
 private:
+  RuntimeCoeffects::storage_t m_escapeMask;
+  RuntimeCoeffects::storage_t m_warningMask;
   int m_pureLevel;
   int m_rxLevel;
+  int m_cippLevel;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

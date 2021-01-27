@@ -99,6 +99,7 @@ namespace Trace {
       TM(bespoke)       \
       TM(bisector)      \
       TM(class_load)    \
+      TM(coeffects)     \
       TM(cti)           \
       TM(datablock)     \
       TM(debugger)      \

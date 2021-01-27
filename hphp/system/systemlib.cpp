@@ -17,6 +17,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/object-data.h"
@@ -24,7 +25,6 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -352,7 +352,7 @@ Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrDynamicallyCallable));
-  clone->setStaticCoeffects(StaticCoeffects::pure());
+  clone->setStaticCoeffects(CoeffectsConfig::fromName("pure").value);
   return clone;
 }
 

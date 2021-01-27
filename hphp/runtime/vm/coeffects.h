@@ -16,27 +16,21 @@
 
 #pragma once
 
-#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/class.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct RuntimeCoeffects {
-  enum Level : uint16_t {
-    Default   = 0,
-    RxShallow = 1,
-    Rx        = 2,
-    Pure      = 3,
-  };
-
-  explicit RuntimeCoeffects(Level level) : m_data(level) {}
+  using storage_t = uint16_t;
 
   static RuntimeCoeffects none() {
-    return RuntimeCoeffects{Level::Default};
+    return RuntimeCoeffects{0};
   }
 
   static RuntimeCoeffects fromValue(uint16_t value) {
-    return RuntimeCoeffects{static_cast<Level>(value)};
+    return RuntimeCoeffects{value};
   }
 
   uint16_t value() const { return m_data; }
@@ -45,56 +39,39 @@ struct RuntimeCoeffects {
 
   // Checks whether provided coeffects in `this` can call
   // required coeffects in `o`
-  bool canCall(const RuntimeCoeffects& o) const {
-    return m_data <= o.m_data;
+  bool canCall(const RuntimeCoeffects o) const {
+    // a & b == a
+    // a & ~b == 0
+    return (m_data & (~o.m_data)) == 0;
   }
 
-  bool canCallWithWarning(const RuntimeCoeffects& o) const {
-    if (canCall(o)) return true;
-
-    auto callerIsPure = m_data == Level::Pure;
-    return (CoeffectsConfig::rxEnforcementLevel() < 2) &&
-           (!callerIsPure || CoeffectsConfig::pureEnforcementLevel() < 2);
-  }
+  bool canCallWithWarning(const RuntimeCoeffects) const;
 
 private:
-  Level m_data;
+  explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
+  storage_t m_data;
 };
 
 struct StaticCoeffects {
-  enum class Level : uint16_t {
-    None    = 0,
-    Local   = 1,
-    Shallow = 2,
-    Rx      = 3,
-    Pure    = 4,
-  };
+  using storage_t = RuntimeCoeffects::storage_t;
 
-  bool isPure() const {
-    return m_data == Level::Pure;
-  }
-
-  bool isAnyRx() const {
-    return m_data == Level::Local ||
-           m_data == Level::Shallow ||
-           m_data == Level::Rx;
-  }
-
-  const char* toString() const;
+  const folly::Optional<std::string> toString() const;
 
   RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;
 
-  static StaticCoeffects fromName(const std::string&);
+  static StaticCoeffects fromValue(uint16_t value) {
+    return StaticCoeffects{value};
+  }
 
-  static StaticCoeffects none() { return StaticCoeffects{Level::None}; }
-  static StaticCoeffects pure() { return StaticCoeffects{Level::Pure}; }
+  uint16_t value() const { return m_data; }
+
+  static StaticCoeffects none() {
+    return StaticCoeffects::fromValue(0);
+  }
 
   // This operator is equivalent to & of [coeffectA & coeffectB]
-  StaticCoeffects& operator|=(const StaticCoeffects& o) {
-    m_data = std::max(m_data, o.m_data);
-    return *this;
-  }
+  StaticCoeffects& operator|=(const StaticCoeffects);
 
   template<class SerDe>
   void serde(SerDe& sd) {
@@ -102,8 +79,8 @@ struct StaticCoeffects {
   }
 
 private:
-  explicit StaticCoeffects(Level level) : m_data(level) {}
-  Level m_data;
+  explicit StaticCoeffects(uint16_t data) : m_data(data) {}
+  storage_t m_data;
 };
 
 static_assert(sizeof(StaticCoeffects) == sizeof(uint16_t), "");

@@ -1872,16 +1872,12 @@ void parse_declvars(AsmState& as) {
 }
 
 StaticCoeffects coeffectFromName(AsmState& as, std::string name) {
-  auto const coeffect = StaticCoeffects::fromName(name);
+  auto const result = CoeffectsConfig::fromName(name);
 
-  if (coeffect.isAnyRx()) as.fe->attrs |= AttrRxBody;
-  if (coeffect.isPure()) as.fe->attrs |= AttrPureBody;
+  if (result.isAnyRx) as.fe->attrs |= AttrRxBody;
+  if (result.isPure) as.fe->attrs |= AttrPureBody;
 
-  if (!CoeffectsConfig::enabled() ||
-      (!CoeffectsConfig::rxEnforcementLevel() && coeffect.isAnyRx())) {
-    return StaticCoeffects::none();
-  }
-  return coeffect;
+  return result.value;
 }
 
 /*

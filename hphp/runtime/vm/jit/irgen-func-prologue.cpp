@@ -272,11 +272,14 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   ifThen(
     env,
     [&] (Block* taken) {
+      // providedCoeffects & (~requiredCoeffects) == 0
       auto const providedCoeffects =
         gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+      auto const requiredCoeffectsFlipped =
+        (~(uint64_t)requiredCoeffects.value()) & ((1 << 16) - 1);
       auto const cond =
-        gen(env, GteInt, cns(env, requiredCoeffects.value()), providedCoeffects);
-      gen(env, JmpZero, taken, cond);
+        gen(env, AndInt, providedCoeffects, cns(env, requiredCoeffectsFlipped));
+      gen(env, JmpNZero, taken, cond);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);

@@ -1832,7 +1832,7 @@ where
         }
     }
 
-     // SPEC
+    // SPEC
     //
     // TODO: Add this to the specification.
     // (This work is tracked by task T22582676.)

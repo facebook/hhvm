@@ -24,17 +24,17 @@ File "invalid_operator.php", line 13, characters 13-18:
 Typing error (Typing[4110])
   File "invalid_operator.php", line 13, characters 13-13:
   Expected `int` because this is used in an arithmetic operation
-  File "invalid_operator.php", line 57, characters 33-42:
+  File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "invalid_operator.php", line 188, characters 44-49:
+  File "expr_tree.hhi", line 150, characters 44-49:
     via this generic `TInfer`
 File "invalid_operator.php", line 13, characters 13-18:
 Typing error (Typing[4110])
   File "invalid_operator.php", line 13, characters 18-18:
   Expected `int` because this is used in an arithmetic operation
-  File "invalid_operator.php", line 57, characters 33-42:
+  File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "invalid_operator.php", line 188, characters 44-49:
+  File "expr_tree.hhi", line 150, characters 44-49:
     via this generic `TInfer`
 File "invalid_operator.php", line 19, characters 13-24:
 You are trying to access the method `__plus` but this is an int (Typing[4062])
@@ -44,7 +44,7 @@ File "invalid_operator.php", line 36, characters 28-34:
 Typing error (Typing[4110])
   File "invalid_operator.php", line 36, characters 34-34:
   Expected `num` because this is used in an arithmetic operation
-  File "invalid_operator.php", line 57, characters 33-42:
+  File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "invalid_operator.php", line 188, characters 44-49:
+  File "expr_tree.hhi", line 150, characters 44-49:
     via this generic `TInfer`

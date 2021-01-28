@@ -1,8 +1,8 @@
 File "boolean_and.php", line 6, characters 13-16:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_and.php", line 36, characters 5-43:
+  File "expr_tree.hhi", line 28, characters 5-43:
   But got `dynamic` because it is an unenforceable type
 File "boolean_and.php", line 6, characters 21-25:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "boolean_and.php", line 36, characters 5-43:
+  File "expr_tree.hhi", line 28, characters 5-43:
   But got `dynamic` because it is an unenforceable type

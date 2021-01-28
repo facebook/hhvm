@@ -6,9 +6,9 @@ File "invalid_call1.php", line 15, characters 5-6:
 Was expecting a class, but got an untyped value (Typing[4026])
 File "invalid_call1.php", line 15, characters 5-18:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_call1.php", line 63, characters 6-34:
+  File "expr_tree.hhi", line 45, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "invalid_call1.php", line 15, characters 13-17:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_call1.php", line 51, characters 5-45:
+  File "expr_tree.hhi", line 33, characters 5-45:
   But got `dynamic` because it is an unenforceable type

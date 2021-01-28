@@ -1,8 +1,5 @@
 <?hh
 
-
-//// BEGIN DEFS
-// Placeholder definition so we don't get naming/typing errors.
 class Code {
   const type TAst = mixed;
 
@@ -235,5 +232,3 @@ final class ExampleString {}
 final class ExampleContext {}
 
 final class ExampleFloat {}
-
-//// END DEFS

@@ -129,7 +129,7 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-inline void ArrayData::release() noexcept {
+inline void ArrayData::release() DEBUG_NOEXCEPT {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);
   AARCH64_WALKABLE_FRAME();

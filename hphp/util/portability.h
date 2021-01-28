@@ -107,6 +107,12 @@
 # define DEBUG_ONLY UNUSED
 #endif
 
+#ifndef NDEBUG
+#define DEBUG_NOEXCEPT
+#else
+#define DEBUG_NOEXCEPT noexcept
+#endif
+
 
 /*
  * AARCH64 needs to create a walkable stack frame for

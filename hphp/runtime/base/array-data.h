@@ -206,7 +206,7 @@ public:
    * This is normally called when the reference count goes to zero (e.g., via a
    * helper like decRefArr()).
    */
-  void release() noexcept;
+  void release() DEBUG_NOEXCEPT;
 
   /*
    * Decref the array and release() it if its refcount goes to zero.

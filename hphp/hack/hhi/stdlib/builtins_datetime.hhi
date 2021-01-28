@@ -28,6 +28,13 @@ const DAY_5 = 131083;
 const DAY_6 = 131084;
 const DAY_7 = 131085;
 
+type DateTimeErrors = shape(
+  'warning_count' => int,
+  'warnings' => darray<int, string>,
+  'error_count' => int,
+  'errors' => darray<int, string>
+);
+
 <<__PHPStdLib>>
 function checkdate(int $month, int $day, int $year);
 <<__PHPStdLib>>
@@ -151,13 +158,13 @@ class DateTime implements DateTimeInterface {
   public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
   public function add(DateInterval $interval);
   public function modify(string $modify);
-  public function getOffset();
-  public function getTimestamp();
+  public function getOffset(): int;
+  public function getTimestamp(): int;
   public function getTimezone();
   public function setDate(int $year, int $month, int $day);
   public function setISODate(int $year, int $week, int $day = 1);
   public function setTime(int $hour, int $minute, int $second = 0);
-  public function setTimestamp(int $unixtimestamp);
+  public function setTimestamp(int $unixtimestamp): this;
   public function setTimezone(DateTimeZone $timezone);
   public function sub(DateInterval $interval);
   public function diff(DateTimeInterface $datetime2, bool $absolute = false);
@@ -167,24 +174,25 @@ class DateTime implements DateTimeInterface {
     string $time,
     ?DateTimeZone $timezone = null,
   );
-  public static function getLastErrors(): darray;
+  public static function getLastErrors(): DateTimeErrors;
 }
+
 
 class DateTimeImmutable implements DateTimeInterface {
   private DateTime $data;
 
   public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
-  public function add(DateInterval $interval);
-  public function modify(string $modify);
-  public function getOffset();
-  public function getTimestamp();
+  public function add(DateInterval $interval): this;
+  public function modify(string $modify): this;
+  public function getOffset(): int;
+  public function getTimestamp(): int;
   public function getTimezone();
-  public function setDate(int $year, int $month, int $day);
-  public function setISODate(int $year, int $week, int $day = 1);
-  public function setTime(int $hour, int $minute, int $second = 0);
-  public function setTimestamp(int $unixtimestamp);
-  public function setTimezone(DateTimeZone $timezone);
-  public function sub(DateInterval $interval);
+  public function setDate(int $year, int $month, int $day): this;
+  public function setISODate(int $year, int $week, int $day = 1): this;
+  public function setTime(int $hour, int $minute, int $second = 0): this;
+  public function setTimestamp(int $unixtimestamp): this;
+  public function setTimezone(DateTimeZone $timezone): this;
+  public function sub(DateInterval $interval): this;
   public function diff(DateTimeInterface $datetime2, bool $absolute = false);
   public function format(string $format);
   public static function createFromFormat(
@@ -193,7 +201,7 @@ class DateTimeImmutable implements DateTimeInterface {
     ?DateTimeZone $timezone = null,
   );
   public static function createFromMutable(DateTime $datetime);
-  public static function getLastErrors(): darray;
+  public static function getLastErrors(): DateTimeErrors;
   public function __clone();
 }
 

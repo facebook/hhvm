@@ -74,11 +74,11 @@ class DateTimeImmutable implements DateTimeInterface {
     return $this->data->format($format);
   }
 
-  public function getOffset() {
+  public function getOffset(): int {
     return $this->data->getOffset();
   }
 
-  public function getTimestamp() {
+  public function getTimestamp(): int {
     return $this->data->getTimestamp();
   }
 

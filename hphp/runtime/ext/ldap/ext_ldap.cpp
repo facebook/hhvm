@@ -150,6 +150,10 @@ static struct LdapExtension final : Extension {
 #endif
 
     loadSystemlib();
+    LDAP* link = nullptr;
+    if (ldap_create(&link) == LDAP_SUCCESS) {
+      ldap_unbind(link);
+    }
   }
 } s_ldap_extension;
 

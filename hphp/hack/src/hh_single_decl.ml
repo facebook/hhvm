@@ -231,6 +231,7 @@ let () =
       ignored_arg "--simple-pessimize";
       ignored_arg "--timeout";
       ignored_flag "--union-intersection-type-hints";
+      ignored_arg "--extra-builtin";
     ]
     set_file
     usage;

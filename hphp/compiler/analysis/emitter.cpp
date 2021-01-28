@@ -39,6 +39,7 @@
 
 #include <exception>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <vector>
 
@@ -199,7 +200,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   auto const outputPath = ar->getOutputPath();
 
   std::thread wp_thread;
-  std::exception_ptr wp_thread_ex = nullptr;
+  std::future<void> fut;
+  
   auto unexpectedException = [&] (const char* what) {
     if (wp_thread.joinable()) {
       Logger::Error("emitAllHHBC exited via an exception "
@@ -281,30 +283,36 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
       std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+      std::promise<void> arrTableReady;
+      fut = arrTableReady.get_future();
 
-      wp_thread = std::thread([&] {
+      wp_thread = std::thread([program = std::move(program),
+                               &ueq,
+                               &arrTable,
+                               &arrTableReady] () mutable {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
           try {
+            // We rely on this function to provide a value to arrTable
             HHBBC::whole_program(
               std::move(program), ueq, arrTable,
-              Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
+              Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0,
+              &arrTableReady);
           } catch (...) {
-            wp_thread_ex = std::current_exception();
+            arrTableReady.set_exception(std::current_exception());
             ueq.push(nullptr);
           }
         });
-
       {
         commitLoop();
-        commitGlobalData(std::move(arrTable), autoloadMapBuilder);
+        fut.wait();
+        if (arrTable) // Commit anyway if arrTable was initialised.
+          commitGlobalData(std::move(arrTable), autoloadMapBuilder);
       }
     }
 
     wp_thread.join();
-    if (wp_thread_ex != nullptr) {
-      rethrow_exception(wp_thread_ex);
-    }
+    fut.get(); // Exception thrown here if it holds one, otherwise no-op.
   } catch (std::exception& ex) {
     unexpectedException(ex.what());
   } catch (const Object& o) {

@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <deque>
+#include <future>
 #include <vector>
 #include <memory>
 #include <string>
@@ -127,7 +128,8 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
 void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
-                   int num_threads = 0);
+                   int num_threads = 0,
+                   std::promise<void>* arrTableReady = nullptr);
 
 //////////////////////////////////////////////////////////////////////
 

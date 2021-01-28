@@ -106,6 +106,22 @@
     utils_core))
 
 (executable
+  (name hh_single_decl)
+  (modes exe byte_complete)
+  (modules hh_single_decl)
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    decl_provider
+    default_injector_config
+    direct_decl_parser
+    file_provider
+    ppxlib.print_diff
+    provider_context
+    provider_utils
+    server_env
+    utils_core))
+
+(executable
   (name hackfmt)
   (modules
     hackfmt)
@@ -140,6 +156,7 @@
     hh_parse.exe
     hh_server.exe
     hh_single_compile.exe
+    hh_single_decl.exe
     hh_single_type_check.exe
     ai/zoncolan.exe
     ))

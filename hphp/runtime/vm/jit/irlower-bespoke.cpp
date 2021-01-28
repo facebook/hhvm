@@ -84,16 +84,6 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace {
-static TypedValue getInt(const ArrayData* ad, int64_t key) {
-  return ad->get(key);
-}
-
-static TypedValue getStr(const ArrayData* ad, const StringData* key) {
-  return ad->get(key);
-}
-}
-
 // This macro returns a CallSpec to one of several static functions:
 //
 //    - the one on a specific, concrete bespoke layout;
@@ -130,11 +120,16 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   using GetInt = TypedValue (ArrayData::*)(int64_t) const;
   using GetStr = TypedValue (ArrayData::*)(const StringData*) const;
 
+  auto const getInt =
+    CallSpec::method(static_cast<GetInt>(&ArrayData::get));
+  auto const getStr =
+    CallSpec::method(static_cast<GetStr>(&ArrayData::get));
+
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
   auto const target = (key <= TInt)
-    ? CALL_TARGET(arr, NvGetInt, CallSpec::direct(getInt))
-    : CALL_TARGET(arr, NvGetStr, CallSpec::direct(getStr));
+    ? CALL_TARGET(arr, NvGetInt, getInt)
+    : CALL_TARGET(arr, NvGetStr, getStr);
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);

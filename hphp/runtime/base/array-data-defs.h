@@ -233,14 +233,22 @@ inline arr_lval ArrayData::lval(TypedValue k) {
                              : lval(detail::getStringKey(k));
 }
 
+inline TypedValue ArrayData::get(int64_t k) const {
+  return g_array_funcs.nvGetInt[kind()](this, k);
+}
+
+inline TypedValue ArrayData::get(const StringData* k) const {
+  return g_array_funcs.nvGetStr[kind()](this, k);
+}
+
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
-  auto const result = g_array_funcs.nvGetInt[kind()](this, k);
+  auto const result = get(k);
   if (error && !result.is_init()) getNotFound(k);
   return result;
 }
 
 inline TypedValue ArrayData::get(const StringData* k, bool error) const {
-  auto const result = g_array_funcs.nvGetStr[kind()](this, k);
+  auto const result = get(k);
   if (error && !result.is_init()) getNotFound(k);
   return result;
 }

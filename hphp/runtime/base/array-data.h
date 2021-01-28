@@ -397,14 +397,21 @@ public:
   Variant getValue(ssize_t pos) const;
 
   /*
+   * Get the value of the element at key `k'. Returns an Uninit TypedValue if
+   * the key `k` is missing from the array.
+   */
+  TypedValue get(int64_t k) const;
+  TypedValue get(const StringData* k) const;
+
+  /*
    * Get the value of the element at key `k'.
    *
    * If `error` is false, get returns an Uninit TypedValue if `k` is missing.
    * If `error` is true, get throws if `k` is missing.
    */
+  TypedValue get(int64_t k, bool error) const;
+  TypedValue get(const StringData* k, bool error) const;
   TypedValue get(TypedValue k, bool error = false) const;
-  TypedValue get(int64_t k, bool error = false) const;
-  TypedValue get(const StringData* k, bool error = false) const;
   TypedValue get(const String& k, bool error = false) const;
   TypedValue get(const Variant& k, bool error = false) const;
 

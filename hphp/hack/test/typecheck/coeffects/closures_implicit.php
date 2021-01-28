@@ -21,13 +21,13 @@ function implicit_context(): void {
   $default_lambda = () ==> $rx_lambda(); // ok
 }
 
-function cipp_context()[cipp_global]: void {
+function policied_context()[policied]: void {
   // the lambda should be typed as having Output capability, not defaults
   () ==> rx_context(); // error
 
   ()[rx] ==> {
     // the type-checker shouldn't close over the output capability
-    () ==> cipp_context(); // error FIXME(coeffects)
+    () ==> policied_context(); // error FIXME(coeffects)
 
     () ==> rx_context(); // ok (since rx is in the enclosing scope / inherited)
   };

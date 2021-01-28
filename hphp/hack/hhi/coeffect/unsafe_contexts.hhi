@@ -23,15 +23,17 @@
  */
 namespace HH\Contexts\Unsafe {
   type defaults = mixed;
-  // TODO(coeffects)
   // TODO(coeffects) after implementing lower bounds on const ctx/type, do:
-  // = \HH\Capabilities\RxLocal
-
-  type cipp_global = mixed;
-  type cipp_of<T> = mixed;
-  type cipp = mixed;
+  // = \HH\Capabilities\RxLocal & \HH\Capabilities\ImplicitPolicyLocal;
 
   type write_props = mixed;
+
+  type policied = mixed;
+  type policied_shallow = \HH\Capabilities\ImplicitPolicyLocal;
+  type policied_local = \HH\Contexts\defaults;
+  type policied_of<T> = mixed;
+  type policied_of_shallow<T> = \HH\Capabilities\ImplicitPolicyOfLocal<T>;
+  type policied_of_local<T> = \HH\Contexts\defaults;
 
   type rx = mixed;
   type rx_shallow = \HH\Capabilities\RxLocal;

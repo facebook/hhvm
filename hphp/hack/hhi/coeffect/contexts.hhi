@@ -40,28 +40,51 @@ namespace HH\Contexts {
     \HH\Capabilities\IO
   ); */
 
-  // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)
-  type cipp_global = (
-    \HH\Capabilities\AccessStaticVariable &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
-  );
-  // type cipp = (\HH\Capabilities\Cipp & cipp_global);
-  type cipp = (
-    \HH\Capabilities\Cipp &
-    \HH\Capabilities\AccessStaticVariable &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
-  );
-  // type cipp_of<T> = (\HH\Capabilities\Cipp_of<T> & cipp);
-  type cipp_of<T> = (
-    \HH\Capabilities\Cipp_of<T> &
-    \HH\Capabilities\AccessStaticVariable &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
-  );
-
   type write_props = \HH\Capabilities\WriteProperty;
+
+  // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)
+
+  type policied = (
+    \HH\Capabilities\ImplicitPolicy &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
+  // type policied_shallow = (\HH\Capabilities\ImplicitPolicyShallow & policied);
+  type policied_shallow = (
+    \HH\Capabilities\ImplicitPolicyShallow &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
+  // type policied_local = (\HH\Capabilities\ImplicitPolicyLocal & policied_shallow);
+  type policied_local = (
+    \HH\Capabilities\ImplicitPolicyLocal &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
+  // type policied_of<T> = (\HH\Capabilities\ImplicitPolicyOf<T> & policied);
+  type policied_of<T> = (
+    \HH\Capabilities\ImplicitPolicyOf<T> &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
+  // type policied_of_shallow<T> = (\HH\Capabilities\ImplicitPolicyOfShallow<T> & policied_of<T>);
+  type policied_of_shallow<T> = (
+    \HH\Capabilities\ImplicitPolicyOfShallow<T> &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
+  // type policied_of_local<T> = (\HH\Capabilities\ImplicitPolicyOfLocal<T> & policied_of_shallow<T>);
+  type policied_of_local<T> = (
+    \HH\Capabilities\ImplicitPolicyOfLocal<T> &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\IO &
+    \HH\Capabilities\WriteProperty
+  );
 
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);

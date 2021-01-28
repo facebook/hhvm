@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 function rx_context()[rx]: void {
-  $more_permissive = ()[rx, cipp_global] ==> {
+  $more_permissive = ()[rx, policied] ==> {
     rx_context(); // ok
   };
 
@@ -18,22 +18,22 @@ function rx_context()[rx]: void {
   };
 }
 
-function cipp_global_context()[cipp_global]: void {
+function policied_context()[policied]: void {
   // the type-checker shouldn't close over the Output capability
-  ()[rx] ==> cipp_global_context(); // error
+  ()[rx] ==> policied_context(); // error
 }
 
 function nesting_test()[]: void {
   $rx_lambda = ()[rx] ==> {};
   $least_permissive = ()[] ==> {};
-  $cipp_global = ()[cipp_global] ==> {};
+  $policied = ()[policied] ==> {};
 
-  ()[cipp_global] ==> {
+  ()[policied] ==> {
     $call_lp = ()[] ==> $least_permissive();
     $call_rx = ()[rx] ==> {
       $rx_lambda(); // ok
       $least_permissive(); // ok
-      $cipp_global(); // error
+      $policied(); // error
     };
     ()[] ==> {
       $rx_lambda(); // error
@@ -42,7 +42,7 @@ function nesting_test()[]: void {
       $least_permissive(); // ok
       $call_lp(); // ok (verify inner lambda is typed properly)
 
-      $cipp_global(); // error
+      $policied(); // error
     };
   };
 }

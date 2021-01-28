@@ -17,14 +17,14 @@ function call_explicitly_pure_ctor()[]: WithPureCtor {
 }
 
 class WithImpureCtor implements \HH\FunctionAttribute {
-  public function __construct()[cipp_global] {}
+  public function __construct()[policied] {}
 }
 
 function call_impure_ctor_bad()[]: WithImpureCtor {
   return new WithImpureCtor(); // error
 }
 
-function call_impure_ctor_good()[cipp_global]: WithImpureCtor {
+function call_impure_ctor_good()[policied]: WithImpureCtor {
   return new WithImpureCtor(); // ok
 }
 

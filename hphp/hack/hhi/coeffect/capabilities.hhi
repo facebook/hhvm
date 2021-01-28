@@ -31,11 +31,6 @@
  * a subtype of the callee's capability type.
  */
 namespace HH\Capabilities {
-  <<__Sealed(Cipp_of::class)>>
-  interface Cipp {}
-  <<__Sealed()>>
-  interface Cipp_of<T> extends Cipp {}
-
   <<__Sealed()>>
   interface AccessStaticVariable {}
 
@@ -44,6 +39,20 @@ namespace HH\Capabilities {
 
   <<__Sealed()>>
   interface WriteProperty {}
+
+  <<__Sealed(ImplicitPolicyOf::class, ImplicitPolicyShallow::class)>>
+  interface ImplicitPolicy {}
+  <<__Sealed(ImplicitPolicyOfShallow::class, ImplicitPolicyLocal::class)>>
+  interface ImplicitPolicyShallow extends ImplicitPolicy {}
+  <<__Sealed(ImplicitPolicyOfLocal::class)>>
+  interface ImplicitPolicyLocal extends ImplicitPolicyShallow {}
+
+  <<__Sealed(ImplicitPolicyOfShallow::class)>>
+  interface ImplicitPolicyOf<T> extends ImplicitPolicy {}
+  <<__Sealed(ImplicitPolicyOfLocal::class)>>
+  interface ImplicitPolicyOfShallow<T> extends ImplicitPolicyOf<T>, ImplicitPolicyShallow {}
+  <<__Sealed()>>
+  interface ImplicitPolicyOfLocal<T> extends ImplicitPolicyOfShallow<T>, ImplicitPolicyLocal {}
 
   /**
    * The core capability present in every reactive context.

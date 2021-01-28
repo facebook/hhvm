@@ -58,17 +58,11 @@ let go_hackfmt ?filename_for_logging ~content args =
     | None -> args
   in
   Hh_logger.log "%s" (String.concat ~sep:" " args);
-  let dirname = Filename.dirname Sys.argv.(0) in
+  let paths = [Path.to_string (Path.make BuildOptions.default_hackfmt_path)] in
   let paths =
-    List.map
-      ~f:(fun x -> Path.make x |> Path.to_string)
-      [
-        (* if running from build tree *)
-        dirname ^ "/hackfmt";
-        dirname ^ "/../hackfmt/hackfmt";
-        (* look for system installation *)
-        BuildOptions.default_hackfmt_path;
-      ]
+    match Sys.getenv_opt "HACKFMT_TEST_PATH" with
+    | Some p -> [p] @ paths
+    | None -> paths
   in
   let path = List.find ~f:Sys.file_exists paths in
   match path with

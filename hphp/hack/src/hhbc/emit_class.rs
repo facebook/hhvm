@@ -253,7 +253,13 @@ fn from_class_elt_typeconsts<'a>(
     class_
         .typeconsts
         .iter()
-        .map(|x| from_type_constant(emitter, x))
+        .filter_map(|x| {
+            if x.is_ctx {
+                None
+            } else {
+                Some(from_type_constant(emitter, x))
+            }
+        })
         .collect()
 }
 

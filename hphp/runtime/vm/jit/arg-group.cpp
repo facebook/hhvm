@@ -98,10 +98,11 @@ ArgDesc::ArgDesc(SSATmp* tmp,
 ///////////////////////////////////////////////////////////////////////////////
 
 ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
-  auto s = m_inst->src(i);
-  ArgDesc arg(s, m_locs[s]);
+  auto const s = m_inst->src(i);
+  auto const loc = m_locs[s];
+
   if (s->isA(TDbl) && allowFP) {
-    push_SIMDarg(arg, s->type());
+    push_SIMDarg(ArgDesc{s, loc}, s->type());
     if (arch() == Arch::PPC64) {
       // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
       push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
@@ -114,10 +115,10 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
       if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
       SCOPE_EXIT { m_override = nullptr; };
 
-      push_arg(arg, s->type());
-      push_arg(ArgDesc{ArgDesc::Kind::Reg, m_locs[s].reg(1), -1});
+      push_arg(ArgDesc{ArgDesc::Kind::Reg, loc.reg(0), -1}, s->type());
+      push_arg(ArgDesc{ArgDesc::Kind::Reg, loc.reg(1), -1});
     } else {
-      push_arg(arg, s->type());
+      push_arg(ArgDesc{s, loc}, s->type());
     }
   }
   return *this;

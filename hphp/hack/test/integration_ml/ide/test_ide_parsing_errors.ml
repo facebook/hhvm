@@ -80,4 +80,4 @@ let test () =
   let (env, _) = Test.(run_loop_once env default_loop_input) in
   (* Check that Foo definiton is still available for querying *)
   let (_, loop_output) = Test.autocomplete env autocomplete_contents in
-  Test.assert_autocomplete loop_output ["bar"]
+  Test.assert_autocomplete_does_not_contain loop_output ["bar"]

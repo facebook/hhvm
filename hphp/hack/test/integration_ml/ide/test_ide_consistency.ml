@@ -38,7 +38,7 @@ function test() {
 }
 "
 
-let run_and_check_autocomplete env expected_rechecked =
+let run_and_check_autocomplete env expected_rechecked expected =
   (* Simulate time passing to trigger recheck *)
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
@@ -47,7 +47,7 @@ let run_and_check_autocomplete env expected_rechecked =
       (Printf.sprintf "Expected %d files to be rechecked" expected_rechecked);
 
   let (env, loop_output) = Test.ide_autocomplete env (bar_name, 3, 15) in
-  Test.assert_ide_autocomplete loop_output ["foo"];
+  Test.assert_ide_autocomplete loop_output expected;
   (env, loop_output)
 
 let test () =
@@ -58,9 +58,9 @@ let test () =
   let env = Test.open_file env bar_name ~contents:bar_contents in
   (* Check that autocompletions in one file are aware of definitions in
    * another one*)
-  let (env, _) = run_and_check_autocomplete env 2 in
+  let (env, _) = run_and_check_autocomplete env 2 ["foo"] in
   let (env, _) = Test.edit_file env foo_name foo_contents_with_parse_error in
   (* If C had parse errors, we'll not update it's declarations, so
    * the result will not change *)
-  let _ = run_and_check_autocomplete env 1 in
+  let _ = run_and_check_autocomplete env 1 ["bar"] in
   ()

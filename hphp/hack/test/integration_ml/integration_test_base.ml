@@ -777,6 +777,25 @@ let assert_autocomplete loop_output expected =
   in
   assertEqual expected_as_string results_as_string
 
+let assert_autocomplete_does_not_contain loop_output not_expected =
+  let results =
+    match loop_output.persistent_client_response with
+    | Some res -> res
+    | _ -> fail "Expected autocomplete response"
+  in
+  let results =
+    List.map results ~f:(fun x -> x.AutocompleteTypes.res_name) |> SSet.of_list
+  in
+  let not_expected = SSet.of_list not_expected in
+  let occured = SSet.inter results not_expected in
+  if SSet.is_empty occured |> not then
+    Printf.sprintf
+      "unexpected symbol(s) %s occurs in autocomplete list"
+      (SSet.show occured)
+    |> fail
+  else
+    ()
+
 let assert_ide_autocomplete loop_output expected =
   let results =
     match loop_output.persistent_client_response with

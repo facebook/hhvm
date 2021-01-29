@@ -268,18 +268,6 @@ let get_files_with_stale_errors
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
-(* Even when we remove an IDE file that failed after parsing stage, it might
- * appear again in later stages - we need to filter it every time we extend
- * the set of files to process *)
-let remove_failed_parsing_map fast ~stop_at_errors env failed_parsing =
-  if stop_at_errors then
-    Relative_path.Map.filter fast ~f:(fun k _ ->
-        not
-        @@ Relative_path.(
-             Set.mem failed_parsing k && Set.mem env.editor_open_files k))
-  else
-    fast
-
 let remove_failed_parsing_set fast ~stop_at_errors env failed_parsing =
   if stop_at_errors then
     Relative_path.Set.filter fast ~f:(fun k ->
@@ -350,21 +338,9 @@ let parsing genv env to_check ~stop_at_errors profiling =
   in
 
   if stop_at_errors then (
-    (* Revert changes and ignore results for IDE files that failed parsing *)
-    let ide_failed_parsing = Relative_path.Set.inter failed_parsing ide_files in
-    let fast =
-      remove_failed_parsing_map fast stop_at_errors env ide_failed_parsing
-    in
-    let ide_success_parsing =
-      Relative_path.Set.diff ide_files ide_failed_parsing
-    in
-    File_provider.local_changes_revert_batch failed_parsing;
-    Ast_provider.local_changes_revert_batch ide_failed_parsing;
-    Fixme_provider.local_changes_revert_batch ide_failed_parsing;
-
-    File_provider.local_changes_commit_batch ide_success_parsing;
-    Ast_provider.local_changes_commit_batch ide_success_parsing;
-    Fixme_provider.local_changes_commit_batch ide_success_parsing;
+    File_provider.local_changes_commit_batch ide_files;
+    Ast_provider.local_changes_commit_batch ide_files;
+    Fixme_provider.local_changes_commit_batch ide_files;
     Ast_provider.local_changes_commit_batch disk_files;
     Fixme_provider.local_changes_commit_batch disk_files;
 
@@ -805,11 +781,9 @@ functor
         (genv : genv)
         (env : env)
         ~(errors : Errors.t)
-        ~(failed_parsing : Relative_path.Set.t)
         ~(fast_parsed : FileInfo.t Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
         ~(files_to_parse : Relative_path.Set.t)
-        ~(stop_at_errors : bool)
         ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
       let (errors, failed_naming, fast) =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
@@ -825,9 +799,6 @@ functor
         let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
         let fast = extend_fast genv fast naming_table failed_decl in
         let fast = add_old_decls env.naming_table fast in
-        let fast =
-          remove_failed_parsing_map fast stop_at_errors env failed_parsing
-        in
         (errors, failed_naming, fast)
       in
       { errors_after_naming = errors; failed_naming; fast }
@@ -1205,11 +1176,9 @@ functor
           genv
           env
           ~errors
-          ~failed_parsing
           ~fast_parsed
           ~naming_table
           ~files_to_parse
-          ~stop_at_errors
           ~profiling
       in
 
@@ -1302,13 +1271,6 @@ functor
             naming_table
             to_redecl_phase2
             env
-      in
-      let fast_redecl_phase2_now =
-        remove_failed_parsing_map
-          fast_redecl_phase2_now
-          stop_at_errors
-          env
-          failed_parsing
       in
       let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
       let telemetry =

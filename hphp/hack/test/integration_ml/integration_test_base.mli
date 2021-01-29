@@ -155,6 +155,9 @@ val assert_coverage_counts :
 val assert_autocomplete :
   ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit
 
+val assert_autocomplete_does_not_contain :
+  ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit
+
 val assert_ide_autocomplete :
   ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit
 

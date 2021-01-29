@@ -15,6 +15,7 @@ use std::{fs, io};
 use depgraph::dep::Dep;
 use depgraph::reader::{DepGraph, DepGraphOpener};
 use depgraph::writer::{DepGraphWriter, HashListIndex};
+use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 struct EdgesDir {
@@ -192,12 +193,48 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
 
 fn main(
     incremental: Option<OsString>,
-    new_edges_dir: OsString,
+    new_edges_dir: Option<OsString>,
+    delta_file: Option<OsString>,
     output: OsString,
 ) -> io::Result<()> {
     env_logger::init_from_env(
         env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
     );
+
+    let all_edges = match (new_edges_dir, delta_file) {
+        (None, None) => {
+            panic!("buid: at least one of --edges-dir or --delta-file flags should be passed")
+        }
+        (Some(_), Some(_)) => {
+            panic!("build: cannot specify both --edges-dir and --delta-file")
+        }
+        (Some(new_edges_dir), None) => {
+            info!("Opening binary files in {:?}", new_edges_dir);
+            let mut new_edges_dir = EdgesDir::open(new_edges_dir)?;
+
+            info!("Discovered {} files with edges", new_edges_dir.count());
+            let all_edges = new_edges_dir.read_all_edges()?;
+            info!(
+                "All binary files loaded ({} unique edges)",
+                all_edges.count_edges()
+            );
+            all_edges
+        }
+        (None, Some(delta_file)) => {
+            info!("Opening dep graph delta at {:?}", delta_file);
+            let f = std::fs::OpenOptions::new().read(true).open(&delta_file)?;
+            let mut r = std::io::BufReader::new(f);
+            let mut delta = DepGraphDelta::new();
+            let num_read = delta.read_from(&mut r, |_, _| true)?;
+            info!("Delta loaded with {} edges", num_read);
+
+            let all_edges = Edges::new();
+            for (dependent, dependency) in delta.iter() {
+                all_edges.register(dependent.into(), dependency.into());
+            }
+            all_edges
+        }
+    };
 
     info!("Opening output file at {:?}", output);
     let f = fs::OpenOptions::new()
@@ -205,16 +242,6 @@ fn main(
         .create(true)
         .open(&output)?;
     let f = BufWriter::new(f);
-
-    info!("Opening binary files in {:?}", new_edges_dir);
-    let mut new_edges_dir = EdgesDir::open(new_edges_dir)?;
-
-    info!("Discovered {} files with edges", new_edges_dir.count());
-    let all_edges = new_edges_dir.read_all_edges()?;
-    info!(
-        "All binary files loaded ({} unique edges)",
-        all_edges.count_edges()
-    );
 
     match incremental {
         None => info!("Not reading in edges from previous dependency graph (incremental=None)"),
@@ -272,9 +299,10 @@ fn main(
 ocaml_ffi! {
   fn hh_fanout_build_main(
     incremental: Option<OsString>,
-    new_edges_dir: OsString,
+    new_edges_dir: Option<OsString>,
+    delta_file: Option<OsString>,
     output: OsString,
   ) {
-    main(incremental, new_edges_dir, output).unwrap();
+    main(incremental, new_edges_dir, delta_file, output).unwrap();
   }
 }

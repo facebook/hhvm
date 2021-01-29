@@ -1304,6 +1304,7 @@ name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
+ "deps_rust",
  "env_logger",
  "log",
  "ocamlrep_ocamlpool",

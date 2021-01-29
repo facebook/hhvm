@@ -254,6 +254,17 @@ impl DepGraphDelta {
         self.0.get(&dependency)
     }
 
+    /// Return an iterator over this dependency graph delta.
+    ///
+    /// Iterates over (dependent, dependency) pairs
+    pub fn iter(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
+        self.0.iter().flat_map(|(&dependency, dependents_set)| {
+            dependents_set
+                .iter()
+                .map(move |&dependent| (dependent, dependency))
+        })
+    }
+
     /// Write all edges in the delta to the writer in a custom format.
     pub fn write_to<W: Write>(&self, w: &mut W) -> io::Result<usize> {
         let mut edges_added = 0;
@@ -1039,5 +1050,28 @@ mod tests {
 
         assert_eq!(num_loaded, 4);
         assert_eq!(x, y);
+    }
+
+    #[test]
+    fn test_dep_graph_delta_iter_empty() {
+        let x = DepGraphDelta::new();
+        let v: Vec<_> = x.iter().collect();
+        assert_eq!(v.len(), 0);
+    }
+
+    #[test]
+    fn test_dep_graph_delta_iter_non_empty() {
+        let mut x = DepGraphDelta::new();
+        let edges = vec![
+            (Dep::new(10), Dep::new(1)),
+            (Dep::new(10), Dep::new(2)),
+            (Dep::new(11), Dep::new(2)),
+            (Dep::new(12), Dep::new(3)),
+        ];
+        for (dependency, dependent) in edges.iter() {
+            x.insert(*dependency, *dependent)
+        }
+        let v: Vec<_> = x.iter().collect();
+        assert_eq!(v, edges);
     }
 }

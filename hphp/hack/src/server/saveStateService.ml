@@ -247,6 +247,31 @@ let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
     let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
     { dep_table_edges_added }
 
+let dump_dep_graph_64bit
+    ~mode ~db_name ~incremental_info_file ~replace_state_after_saving =
+  let t = Unix.gettimeofday () in
+  let base_dep_graph =
+    match mode with
+    | Typing_deps_mode.SQLiteMode -> None
+    | Typing_deps_mode.CustomMode base_dep_graph -> base_dep_graph
+    | Typing_deps_mode.SaveCustomMode { graph; _ } -> graph
+  in
+  let () =
+    let open Hh_json in
+    Out_channel.with_file incremental_info_file ~f:(fun fh ->
+        json_to_output fh
+        @@ JSON_Object [("base_dep_graph", opt_string_to_json base_dep_graph)])
+  in
+  let dep_table_edges_added =
+    Typing_deps.save_discovered_edges
+      mode
+      ~dest:db_name
+      ~build_revision:Build_id.build_revision
+      ~reset_state_after_saving:replace_state_after_saving
+  in
+  let (_ : float) = Hh_logger.log_duration "Writing discovered edges took" t in
+  { dep_table_edges_added }
+
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
@@ -256,7 +281,13 @@ let save_state
     (output_filename : string)
     ~(replace_state_after_saving : bool) : save_state_result =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
-  let db_name = output_filename ^ ".sql" in
+  let db_name =
+    match env.ServerEnv.deps_mode with
+    | Typing_deps_mode.SQLiteMode -> output_filename ^ ".sql"
+    | Typing_deps_mode.CustomMode _
+    | Typing_deps_mode.SaveCustomMode _ ->
+      output_filename ^ "_64bit_dep_graph.delta"
+  in
   let () =
     if Sys.file_exists output_filename then
       failwith
@@ -283,7 +314,21 @@ let save_state
       errors;
     Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
   in
-  dump_dep_graph_32bit ~db_name ~replace_state_after_saving
+  match env.ServerEnv.deps_mode with
+  | Typing_deps_mode.SQLiteMode ->
+    dump_dep_graph_32bit ~db_name ~replace_state_after_saving
+  | Typing_deps_mode.CustomMode _ ->
+    let incremental_info_file = output_filename ^ "_incremental_info.json" in
+    dump_dep_graph_64bit
+      ~mode:env.ServerEnv.deps_mode
+      ~db_name
+      ~incremental_info_file
+      ~replace_state_after_saving
+  | Typing_deps_mode.SaveCustomMode { graph = _; new_edges_dir } ->
+    Hh_logger.warn
+      "saveStateService: not saving 64-bit dep graph edges to disk, because they are already in %s"
+      new_edges_dir;
+    { dep_table_edges_added = 0 }
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->

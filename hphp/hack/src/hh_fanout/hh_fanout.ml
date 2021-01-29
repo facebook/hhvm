@@ -863,7 +863,7 @@ to be produced by hh_server
   let incremental =
     let doc =
       "Use the provided dependency graph as a base. Build a new dependency graph"
-      ^ " by adding the edges in EDGES_DIR to this graph."
+      ^ " by adding the edges in EDGES_DIR or DELTA_FILE to this graph."
     in
     value
     & opt (some string) None
@@ -876,19 +876,25 @@ to be produced by hh_server
       ^ " The files should just contain a sequence of pairs of big-endian"
       ^ " encoded 64-bit hashes."
     in
-    required
-    & opt (some string) None
-    & info ["edges-dir"] ~doc ~docv:"EDGES_DIR"
+    value & opt (some string) None & info ["edges-dir"] ~doc ~docv:"EDGES_DIR"
+  in
+  let delta_file =
+    let doc =
+      "A file containing a dependency graph delta in binary format."
+      ^ " The files should contain edges as produced by calling"
+      ^ " `hh --save-state /path/to/file` (which is a special binary format)."
+    in
+    value & opt (some string) None & info ["delta-file"] ~doc ~docv:"DELTA_FILE"
   in
   let output =
     let doc = "Where to put the 64-bit dependency graph." in
     required & opt (some string) None & info ["output"] ~doc ~docv:"OUTPUT"
   in
-  let run incremental edges_dir output =
-    Lwt_main.run (mode_build ~incremental ~edges_dir ~output)
+  let run incremental edges_dir delta_file output =
+    Lwt_main.run (mode_build ~incremental ~edges_dir ~delta_file ~output)
   in
   Term.
-    ( const run $ incremental $ edges_dir $ output,
+    ( const run $ incremental $ edges_dir $ delta_file $ output,
       info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
 let mode_dep_graph_stats = Dep_graph_stats.go

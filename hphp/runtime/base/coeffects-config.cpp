@@ -196,6 +196,7 @@ void CoeffectsConfig::initCapabilities() {
   }
 
   assertx(s_instance);
+  s_instance->m_numUsedBits = nextBit;
   s_instance->m_escapeMask = escapeMask;
 
   storage_t warningMask = 0;

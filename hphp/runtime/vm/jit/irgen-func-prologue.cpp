@@ -275,8 +275,8 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
       // providedCoeffects & (~requiredCoeffects) == 0
       auto const providedCoeffects =
         gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
-      auto const requiredCoeffectsFlipped =
-        (~(uint64_t)requiredCoeffects.value()) & ((1 << 16) - 1);
+      auto const requiredCoeffectsFlipped = (~requiredCoeffects.value()) &
+        ((1 << CoeffectsConfig::numUsedBits()) - 1);
       auto const cond =
         gen(env, AndInt, providedCoeffects, cns(env, requiredCoeffectsFlipped));
       gen(env, JmpNZero, taken, cond);

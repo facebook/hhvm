@@ -57,6 +57,11 @@ struct CoeffectsConfig {
     return s_instance->m_warningMask;
   }
 
+  static int numUsedBits() {
+    assertx(s_instance);
+    return s_instance->m_numUsedBits;
+  }
+
   struct FromNameResult {
     StaticCoeffects value;
     bool isPure : 1;
@@ -81,6 +86,7 @@ private:
   int m_pureLevel;
   int m_rxLevel;
   int m_cippLevel;
+  int m_numUsedBits;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/trace.h"
 
-#include <bitset>
+#include <queue>
 
 TRACE_SET_MOD(coeffects);
 
@@ -40,10 +40,21 @@ static std::vector<std::pair<std::string, storage_t>>& getCapabilityVector() {
   return capabilityVector;
 }
 
+struct CapabilityCombinator {
+  size_t pos;
+  size_t size;
+};
+
+static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
+  static std::vector<CapabilityCombinator> combinator = {};
+  return combinator;
+}
+
 #define RX_COEFFECTS \
   X(rx_local)        \
   X(rx_shallow)      \
-  X(rx)
+  X(rx)              \
+  X(write_props)
 
 #define CIPP_COEFFECTS \
   X(cipp_local)        \
@@ -98,11 +109,13 @@ struct CapabilityNode {
   : name(name)
   , escape(escape)
   , children({})
+  , parents({})
   {}
 
   std::string name;
   bool escape;
   std::vector<CapabilityNode*> children;
+  std::vector<CapabilityNode*> parents;
 };
 
 struct CapabilityGraphs {
@@ -119,6 +132,7 @@ template <typename T>
 T addEdges(T src, T dst) {
   FTRACE(5, "Adding edge {} -> {}\n", src->name, dst->name);
   src->children.push_back(dst);
+  dst->parents.push_back(src);
   return src;
 }
 
@@ -139,9 +153,12 @@ CapabilityNode* createNode(const std::string& name,
 }
 
 void initCapabilityGraphs() {
+  auto rx_pure = createNode(Cap::s_rx_pure);
   addEdges(createNode(Cap::s_rx_defaults, false, true),
            addEdges(createNode(Cap::s_rx, true),
-                    createNode(Cap::s_rx_pure)));
+                    rx_pure),
+           addEdges(createNode(Cap::s_write_props),
+                    rx_pure));
 
   addEdges(createNode(Cap::s_cipp_defaults, false, true),
            addEdges(createNode(Cap::s_cipp, true),
@@ -177,43 +194,63 @@ void CoeffectsConfig::initEnforcementLevel(
 void CoeffectsConfig::initCapabilities() {
   storage_t escapeMask = 0;
 
-  using bitset_t = std::bitset<std::numeric_limits<storage_t>::digits>;
-
-  bitset_t bits;
   auto nextBit = 0;
-
-  auto const add = [&] (const std::string& name, bitset_t& bits) {
-    storage_t value = bits.to_ulong();
+  auto const add = [] (const std::string& name, storage_t value) {
     getCapabilityMap().insert({name, value});
     getCapabilityVector().push_back({name, value});
     FTRACE(1, "{:<14}: {:016b}\n", name, value);
   };
 
   for (auto cap_defaults : getCapabilityGraphs().entries) {
-    bits.reset();
-    auto cap = cap_defaults;
-    add(cap->name, bits);
-    while (!cap->children.empty()) {
+    add(cap_defaults->name, 0);
+
+    std::queue<CapabilityNode*> queue;
+    for (auto child : cap_defaults->children) queue.push(child);
+    while (!queue.empty()) {
+      auto cap = queue.front();
+      queue.pop();
+
+      // Am I already processed?
+      if (getCapabilityMap().find(cap->name) != getCapabilityMap().end()) {
+        continue;
+      }
+
+      storage_t bits = 0;
+      bool again = false;
+      // Are all my parents processed?
+      for (auto parent : cap->parents) {
+        auto const it = getCapabilityMap().find(parent->name);
+        if (it != getCapabilityMap().end()) {
+          bits |= it->second;
+        } else {
+          again = true;
+          break;
+        }
+      }
+      if (again) continue;
+
       always_assert(nextBit < std::numeric_limits<storage_t>::digits);
-      always_assert(cap->children.size() == 1); // TODO: support more children
-      cap = cap->children[0];
+
+      getCapabilityCombinator().push_back(
+        {static_cast<size_t>(nextBit),
+         static_cast<size_t>(cap->escape ? 2 : 1)});
+
       if (cap->escape) {
         always_assert(nextBit + 1 < std::numeric_limits<storage_t>::digits);
         // Set local
-        bits.set(nextBit);
-        add(folly::to<std::string>(cap->name, "_local"), bits);
-        escapeMask |= (storage_t)(1 << nextBit);
-        bits.set(nextBit, false);
+        add(folly::to<std::string>(cap->name, "_local"),
+            bits | (1 << nextBit));
+        escapeMask |= (1 << nextBit);
 
         // Set shallow
-        bits.set(nextBit + 1);
-        add(folly::to<std::string>(cap->name, "_shallow"), bits);
-        bits.set(nextBit + 1, false);
+        add(folly::to<std::string>(cap->name, "_shallow"),
+            bits | (1 << (nextBit + 1)));
 
-        bits.set(nextBit++);
+        bits |= (1 << nextBit++);
       }
-      bits.set(nextBit++);
+      bits |= (1 << nextBit++);
       add(cap->name, bits);
+      for (auto child : cap->children) queue.push(child);
     }
   }
 
@@ -291,12 +328,11 @@ CoeffectsConfig::fromName(const std::string& coeffect) {
 
 StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,
                                          const StaticCoeffects b) {
-  storage_t rxMask = getCapabilityMap().find(Cap::s_rx_pure)->second;
-  storage_t cippMask = getCapabilityMap().find(Cap::s_cipp_pure)->second;
-
   storage_t result = 0;
-  result |= std::max(a.value() & rxMask, b.value() & rxMask);
-  result |= std::max(a.value() & cippMask, b.value() & cippMask);
+  for (auto entry : getCapabilityCombinator()) {
+    auto const mask = ((1 << entry.size) - 1) << entry.pos;
+    result |= std::max(a.value() & mask, b.value() & mask);
+  }
   return StaticCoeffects::fromValue(result);
 }
 

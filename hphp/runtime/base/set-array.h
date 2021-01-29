@@ -50,7 +50,7 @@ struct SetArrayElm {
   TypedValueAux tv;
 
   static auto constexpr kTombstone = kInvalidDataType;
-  static auto constexpr kEmpty = KindOfUninit;
+  static auto constexpr kEmpty = kExtraInvalidDataType;
 
   template <bool Move>
   void setStrKey(StringData* k, strhash_t h) {

@@ -282,68 +282,52 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   }
 
   auto const cc = [&] {
+    auto const test = [&] (DataType kind) {
+      assertx(kind == dt_modulo_persistence(kind));
+      auto const mask = ~static_cast<data_type_t>(kind);
+      emitTestTVType(v, sf, mask, typeSrc);
+      return CC_E;
+    };
+
     auto const cmp = [&] (DataType kind, ConditionCode cc) {
       emitCmpTVType(v, sf, kind, typeSrc);
       return cc;
     };
 
-    auto const persistent_type = [&](DataType dt) {
-      auto const masked = emitMaskTVType(v, ~kRefCountedBit, typeSrc);
-      emitCmpTVType(v, sf, dt, masked);
-      return CC_E;
-    };
-
-    // Type-tests of union types that may be specialized.
     auto const base = type.unspecialize();
-    if (base == TVArr)      return persistent_type(KindOfPersistentVArray);
-    if (base == TDArr)      return cmp(KindOfDArray, CC_LE);
-    if (base == TVec)       return persistent_type(KindOfPersistentVec);
-    if (base == TKeyset)    return persistent_type(KindOfPersistentKeyset);
-    if (base == (TVArr|TDArr))  return cmp(KindOfVArray, CC_LE);
-    if (base == TArrLike)   return cmp(KindOfKeyset, CC_LE);
+    if (base == TArrLike)       return cmp(KindOfKeyset, CC_BE);
+    if (type == (TVArr|TDArr))  return cmp(KindOfVArray, CC_BE);
+    if (type == TNull)          return cmp(KindOfUninit, CC_AE);
+    if (type == TStaticStr)     return test(KindOfString);
+    if (type.isKnownDataType()) return test(type.toDataType());
 
-    // Certain array-like type tests are more efficient post-HADVAs,
-    // because dvarray types no longer exist when that flag is enabled.
-    if (base == TDict) {
-      return RO::EvalHackArrDVArrs ? cmp(KindOfDict, CC_LE)
-                                   : persistent_type(KindOfPersistentDict);
-    }
-    if (base == (TVec|TDict)) {
+    if (type == (TVec|TDict)) {
       always_assert(RO::EvalHackArrDVArrs);
       return cmp(KindOfVec, CC_LE);
     }
 
-    // Type-tests of union types that should not be specialized.
-    if (type == TNull)      return cmp(KindOfNull, CC_BE);
-    if (type == TStr)       return cmp(KindOfPersistentString, CC_AE);
-    if (type == TStaticStr) return cmp(KindOfPersistentString, CC_AE);
     if (type == TUncountedInit) {
       auto const rtype = emitGetTVType(v, typeSrc);
       auto const sf2 = v.makeReg();
       emitTestTVType(v, sf2, kRefCountedBit, rtype);
       doJcc(CC_Z, sf2);
 
-      static_assert(KindOfUninit == static_cast<DataType>(0),
-                    "KindOfUninit == 0 in codegen");
-      v << testb{rtype, rtype, sf};
+      v << cmpbi{static_cast<data_type_t>(KindOfUninit), rtype, sf};
       return CC_NZ;
     }
+
     if (type == TUncounted) {
       return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
     }
 
     if (type == TInitCell) {
       auto const rtype = emitGetTVType(v, typeSrc);
-      static_assert(KindOfUninit == static_cast<DataType>(0));
-      v << testb{rtype, rtype, sf};
+      v << cmpbi{static_cast<data_type_t>(KindOfUninit), rtype, sf};
       return CC_NZ;
     }
 
     // All other valid types must not be unions.
-    always_assert_flog(type.isKnownDataType(), "Unknown DataType: {}", type);
-    always_assert_flog(!type.isUnion(), "Union type: {}", type);
-    auto const dt = type.toDataType();
-    return cmp(dt, CC_E);
+    always_assert_flog(false, "Uncheckable type: {}", type);
   }();
 
   doJcc(cc, sf);

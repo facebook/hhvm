@@ -106,6 +106,12 @@ static void sqlite3_do_callback(sqlite3_context *context,
   if (is_agg) {
     agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context
       (context, sizeof(php_sqlite3_agg_context));
+    // context is zero-initialized. We must turn that into a valid DataType.
+    auto tv = agg_context->context.asTypedValue();
+    static_assert(kExtraInvalidDataType == static_cast<DataType>(0));
+    if (tv->m_type == kExtraInvalidDataType) {
+      tv->m_type = KindOfNull;
+    }
     params.append(agg_context->context);
     params.append(agg_context->row_count);
   }

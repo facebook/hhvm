@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/datatype-macros.h"
 
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -24,6 +25,12 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Static asserts.
+
+template<int A, int B> struct CheckEqual {
+  static_assert(A == B);
+  static constexpr bool value = A == B;
+};
+static_assert(CheckEqual<UNINIT_DT_VALUE, int8_t(KindOfUninit)>::value);
 
 static_assert(isStringType(KindOfString),           "");
 static_assert(isStringType(KindOfPersistentString), "");
@@ -277,10 +284,6 @@ static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
 // No more compatibility between darrays and varrays.
 static_assert(!equivDataTypes(KindOfVArray, KindOfPersistentDArray), "");
 static_assert(!equivDataTypes(KindOfDArray, KindOfPersistentVArray), "");
-
-static_assert(KindOfUninit == static_cast<DataType>(0),
-              "Several things assume this tag is 0, especially RDS");
-
 
 } // namespace
 

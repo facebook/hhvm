@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/datatype-macros.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -98,7 +99,8 @@ TEST(Vasm, XlsByteXmm) {
   EXPECT_EQ(test_const(true), 1);
   // DataType is actually mapped to uint64_t constants, for some reason,
   // but if that changes we still want to test them as bytes here.
-  EXPECT_EQ(test_const(KindOfUninit), 0);
+  EXPECT_EQ(test_const(kExtraInvalidDataType), 0);
+  EXPECT_EQ(test_const(KindOfUninit), UNINIT_DT_VALUE);
   EXPECT_EQ(static_cast<DataType>(test_const(KindOfDict)), KindOfDict);
 }
 

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/datatype-macros.h"
 #include "hphp/runtime/base/hash-table-x64.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
@@ -94,7 +95,7 @@ ETCH_LABEL(fail\MANGLED_NAME):
  * If the element is missing, we only need to clear the type register.
  */
         jnp       ETCH_LABEL(nextprobe\MANGLED_NAME) // Tombstone
-        xor       %edx, %edx
+        mov       $UNINIT_DT_VALUE, %edx
         pop       %rbx
         ret
 

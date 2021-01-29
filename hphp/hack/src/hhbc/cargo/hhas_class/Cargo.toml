@@ -10,6 +10,7 @@ path = "../../hhas_class.rs"
 
 [dependencies]
 hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_coeffects = { path = "../hhas_coeffects" }
 hhas_constant_rust = { path = "../hhas_constant" }
 hhas_method_rust = { path = "../hhas_method" }
 hhas_pos_rust = { path = "../hhas_pos" }

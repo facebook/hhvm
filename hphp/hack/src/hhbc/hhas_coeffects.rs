@@ -51,6 +51,12 @@ impl fmt::Display for Ctx {
     }
 }
 
+#[derive(Debug)]
+pub struct HhasCtxConstant {
+    pub name: String,
+    pub coeffects: Vec<Ctx>,
+}
+
 #[derive(Clone, Debug, Default, ToOcamlRep, FromOcamlRep)]
 pub struct HhasCoeffects {
     static_coeffects: Vec<Ctx>,
@@ -62,7 +68,7 @@ pub struct HhasCoeffects {
 }
 
 impl HhasCoeffects {
-    fn vec_to_string<T, F: Fn(&T) -> String>(v: &[T], f: F) -> Option<String> {
+    pub fn vec_to_string<T, F: Fn(&T) -> String>(v: &[T], f: F) -> Option<String> {
         if v.is_empty() {
             return None;
         }
@@ -91,6 +97,42 @@ impl HhasCoeffects {
             results.push(format!(".coeffects_cc_this {};", str));
         }
         results
+    }
+
+    fn from_type_static(hint: &Hint) -> Option<Ctx> {
+        let Hint(_, h) = hint;
+        match &**h {
+            Hint_::Happly(Id(_, id), _) => match strip_ns(id.as_str()) {
+                c::DEFAULTS => Some(Ctx::Defaults),
+                c::RX_LOCAL => Some(Ctx::RxLocal),
+                c::RX_SHALLOW => Some(Ctx::RxShallow),
+                c::RX => Some(Ctx::Rx),
+                c::WRITE_PROPS => Some(Ctx::WriteProps),
+                c::CIPP_LOCAL => Some(Ctx::CippLocal),
+                c::CIPP_SHALLOW => Some(Ctx::CippShallow),
+                c::CIPP_GLOBAL => Some(Ctx::CippGlobal),
+                c::CIPP | c::CIPP_OF => Some(Ctx::Cipp),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    pub fn from_ctx_constant(hint: &Hint) -> Vec<Ctx> {
+        let Hint(_, h) = hint;
+        match &**h {
+            Hint_::Hintersection(hl) if hl.is_empty() => vec![Ctx::Pure],
+            Hint_::Hintersection(hl) => {
+                let mut result = vec![];
+                for h in hl {
+                    if let Some(c) = HhasCoeffects::from_type_static(h) {
+                        result.push(c);
+                    }
+                }
+                result
+            }
+            _ => vec![],
+        }
     }
 
     pub fn from_ast<Ex, Fb, En, Hi>(
@@ -140,17 +182,8 @@ impl HhasCoeffects {
                 let Hint(_, h) = ctx;
                 match &**h {
                     Hint_::Happly(Id(_, id), _) => {
-                        match strip_ns(id.as_str()) {
-                            c::DEFAULTS => static_coeffects.push(Ctx::Defaults),
-                            c::RX_LOCAL => static_coeffects.push(Ctx::RxLocal),
-                            c::RX_SHALLOW => static_coeffects.push(Ctx::RxShallow),
-                            c::RX => static_coeffects.push(Ctx::Rx),
-                            c::WRITE_PROPS => static_coeffects.push(Ctx::WriteProps),
-                            c::CIPP_LOCAL => static_coeffects.push(Ctx::CippLocal),
-                            c::CIPP_SHALLOW => static_coeffects.push(Ctx::CippShallow),
-                            c::CIPP_GLOBAL => static_coeffects.push(Ctx::CippGlobal),
-                            c::CIPP | c::CIPP_OF => static_coeffects.push(Ctx::Cipp),
-                            _ => {}
+                        if let Some(c) = HhasCoeffects::from_type_static(ctx) {
+                            static_coeffects.push(c)
                         }
                         if let c::RX_LOCAL | c::RX_SHALLOW | c::RX = strip_ns(id.as_str()) {
                             is_any_rx = true;

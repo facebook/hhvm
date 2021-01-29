@@ -6,6 +6,7 @@
 use bitflags::bitflags;
 
 use hhas_attribute_rust::HhasAttribute;
+use hhas_coeffects::HhasCtxConstant;
 use hhas_constant_rust::HhasConstant;
 use hhas_method_rust::HhasMethod;
 use hhas_pos_rust::Span;
@@ -43,6 +44,7 @@ pub struct HhasClass<'a> {
     pub properties: Vec<HhasProperty<'a>>,
     pub constants: Vec<HhasConstant<'a>>,
     pub type_constants: Vec<HhasTypeConstant>,
+    pub ctx_constants: Vec<HhasCtxConstant>,
     pub requirements: Vec<(class::Type<'a>, TraitReqKind)>,
     pub upper_bounds: Vec<(String, Vec<hhas_type::Info>)>,
     pub doc_comment: Option<DocComment>,

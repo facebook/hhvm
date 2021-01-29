@@ -1372,6 +1372,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "hhas_attribute_rust",
+ "hhas_coeffects",
  "hhas_constant_rust",
  "hhas_method_rust",
  "hhas_pos_rust",

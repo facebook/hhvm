@@ -25,7 +25,7 @@ use hhas_adata_rust::{
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
-use hhas_coeffects::HhasCoeffects;
+use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhas_constant_rust::HhasConstant;
 use hhas_function_rust::HhasFunction;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
@@ -476,6 +476,19 @@ fn print_type_constant<W: Write>(
     w.write(";")
 }
 
+fn print_ctx_constant<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    c: &HhasCtxConstant,
+) -> Result<(), W::Error> {
+    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects, |c| c.to_string()) {
+        ctx.newline(w)?;
+        concat_str_by(w, " ", [".ctx", &c.name, coeffects.as_ref()])?;
+        w.write(";")?;
+    }
+    Ok(())
+}
+
 fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty) -> Result<(), W::Error> {
     if let Some(s) = p.doc_comment.as_ref() {
         w.write(triple_quote_string(&(s.0).1))?;
@@ -918,6 +931,9 @@ fn print_class_def<W: Write>(
         }
         for x in &class_def.type_constants {
             print_type_constant(c, w, x)?;
+        }
+        for x in &class_def.ctx_constants {
+            print_ctx_constant(c, w, x)?;
         }
         for x in &class_def.properties {
             print_property(c, w, class_def, x)?;

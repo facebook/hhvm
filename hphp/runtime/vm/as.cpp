@@ -3033,6 +3033,29 @@ void parse_class_constant(AsmState& as) {
 }
 
 /*
+ * directive-ctx : identifier coeffect-name* ';'
+ */
+void parse_context_constant(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("expected name for context constant");
+  }
+
+  auto coeffects = StaticCoeffects::none();
+  while (true) {
+    as.in.skipWhitespace();
+    std::string coeffect;
+    if (!as.in.readword(name)) break;
+    coeffects |= CoeffectsConfig::fromName(name).value;
+  }
+
+  // TODO: Add this to class
+  as.in.expectWs(';');
+}
+
+/*
  * directive-default-ctor : ';'
  *                        ;
  *
@@ -3227,6 +3250,7 @@ void parse_class_body(AsmState& as, bool class_is_const,
     if (directive == ".enum_ty")      { parse_enum_ty(as);        continue; }
     if (directive == ".require")      { parse_require(as);        continue; }
     if (directive == ".doc")          { parse_cls_doccomment(as); continue; }
+    if (directive == ".ctx")          { parse_context_constant(as); continue; }
 
     as.error("unrecognized directive `" + directive + "' in class");
   }

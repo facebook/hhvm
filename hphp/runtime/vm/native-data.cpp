@@ -135,7 +135,13 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   assertx(obj->hasExactlyOneRef());
 
   if (UNLIKELY(cls->hasMemoSlots())) {
-    std::memset(node + 1, 0, nativeDataSize - sizeof(NativeNode));
+    auto cur = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(node) + sizeof(NativeNode));
+    auto end = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(node) + nativeDataSize);
+    while (cur < end) {
+      (cur++)->init();
+    }
   }
 
   if (ndi->init) {
@@ -172,7 +178,13 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
   obj->props()->init(cls->numDeclProperties());
 
   if (UNLIKELY(cls->hasMemoSlots())) {
-    std::memset(node + 1, 0, nativeDataSize - sizeof(NativeNode));
+    auto cur = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(node) + sizeof(NativeNode));
+    auto end = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(node) + nativeDataSize);
+    while (cur < end) {
+      (cur++)->init();
+    }
   }
 
   if (ndi->init) {

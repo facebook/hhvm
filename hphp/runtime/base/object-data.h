@@ -71,21 +71,38 @@ namespace Native {
 struct MemoSlot {
 public:
   /*
-   * We use the type field of the TypedValue to determine whether this is a single
-   * value or a memo cache. If the type is kInvalidDataType (which cannot occur
-   * for a valid TypedValue), its a memo cache. As a special case, if type is Uninit,
-   * and the pointer is null, it can also be a cache (its also a value). This
-   * lets us initialize the slots with zero regardless of how it will be
-   * used. When its actually used, the correct type will be filed in. The
-   * ambiguity isn't an issue because these predicates are just for assertions
-   * (the type of the slot is implied by the function).
+   * When we initialize a MemoSlot, we both make its type KindOfUninit
+   * (so that it's a valid value slot) and make its cache pointer nullptr
+   * (so that it's a valid cache slot). We don't need to know which one it is.
    */
+  void init() {
+    value.m_data.pcache = nullptr;
+    value.m_type = KindOfUninit;
+  }
 
+  /*
+   * We use the type field of the TypedValue to determine whether this is a
+   * single value or a memo cache:
+   *
+   *  - If the type is kInvalidDataType (i.e. it's not a valid TypedValue),
+   *    this slot is for a memo cache.
+   *
+   *  - If the type is valid and not KindOfUninit, then it's a single value.
+   *
+   *  - If the type is Uninit, and the cache pointer is nullptr, we cannot
+   *    distinguish the two cases - that's how we initialize these slots.
+   *
+   * The ambiguity in the last case is okay, because we only use the helpers
+   * below for assertions. For any given memo slot, the single vs. multiple
+   * value distinction is implied by whether the function takes arguments.
+   */
   bool isCache() const {
     return value.m_type == kInvalidDataType ||
-      (value.m_type == KindOfUninit && value.m_data.pcache == nullptr);
+           (value.m_type == KindOfUninit && value.m_data.pcache == nullptr);
   }
-  bool isValue() const { return value.m_type != kInvalidDataType; }
+  bool isValue() const {
+    return value.m_type != kInvalidDataType;
+  }
 
   // Get a reference to the pointer to the cache, for the purpose of a set on
   // the cache. Since we're going to be creating a cache in this slot, change
@@ -121,6 +138,7 @@ public:
     assertx(isCache());
     value.m_data.pcache = nullptr;
   }
+
 private:
   TYPE_SCAN_CUSTOM() {
     isCache() ? scanner.scan(value.m_data.pcache) : scanner.scan(value);

@@ -83,11 +83,13 @@ ALWAYS_INLINE ObjectData::Alloc ObjectData::allocMemoInit(Class* cls) {
   if (cls->hasMemoSlots()) {
     auto const objOff = objOffFromMemoNode(cls);
     new (NotNull{}, result.mem) MemoNode(objOff);
-    std::memset(
-      reinterpret_cast<char*>(result.mem) + sizeof(MemoNode),
-      0,
-      objOff - sizeof(MemoNode)
-    );
+    auto cur = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(result.mem) + sizeof(MemoNode));
+    auto end = reinterpret_cast<MemoSlot*>(
+        reinterpret_cast<char*>(result.mem) + objOff);
+    while (cur < end) {
+      (cur++)->init();
+    }
     result.mem = reinterpret_cast<char*>(result.mem) + objOff;
   }
   return result;

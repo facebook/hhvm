@@ -186,6 +186,12 @@ IMPL_OPCODE_CALL(FuncCred);
 
 namespace {
 
+static void initObjMemoSlots(MemoSlot* slots, size_t n) {
+  for (auto i = 0; i < n; i++) {
+    slots[i].init();
+  }
+}
+
 void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
                           Vreg dst, const Class* cls, size_t nprops) {
   // memcpy the values from the class property init vec.
@@ -208,17 +214,17 @@ void implInitObjMemoSlots(Vout& v, IRLS& env, const IRInstruction* inst,
     for (Slot i = 0; i < nslots; ++i) {
       static_assert(sizeof(MemoSlot) == 16, "");
       auto const offset = -(sizeof(MemoSlot) * (nslots - i));
-      emitImmStoreq(v, 0, obj[offset]);
-      emitImmStoreq(v, 0, obj[offset+8]);
+      auto const dt = static_cast<data_type_t>(KindOfUninit);
+      emitImmStoreq(v, 0, obj[offset + TVOFF(m_data)]);
+      v << storebi{dt, obj[offset + TVOFF(m_type)]};
     }
     return;
   }
 
   auto const args = argGroup(env, inst)
     .addr(obj, -safe_cast<int32_t>(sizeof(MemoSlot) * nslots))
-    .imm(0)
-    .imm(sizeof(MemoSlot) * nslots);
-  cgCallHelper(v, env, CallSpec::direct(memset),
+    .imm(nslots);
+  cgCallHelper(v, env, CallSpec::direct(initObjMemoSlots),
                kVoidDest, SyncOptions::None, args);
 }
 

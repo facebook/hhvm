@@ -2936,6 +2936,8 @@ let string_of_class_member_kind = function
   | `static_method -> "static method"
   | `class_variable -> "class variable"
   | `class_typeconst -> "type constant"
+  | `method_ -> "method"
+  | `property -> "property"
 
 let smember_not_found
     kind
@@ -3832,14 +3834,11 @@ let top_member_write =
   top_member Typing.NullMemberWrite Typing.NonObjectMemberWrite
 
 let non_object_member
-    code ~is_method s pos1 ty pos2 (on_error : typing_error_callback) =
+    code ~kind s pos1 ty pos2 (on_error : typing_error_callback) =
   let msg_start =
     Printf.sprintf
       "You are trying to access the %s %s but this is %s"
-      ( if is_method then
-        "method"
-      else
-        "property" )
+      (string_of_class_member_kind kind)
       (Markdown_lite.md_codify s)
       ty
   in

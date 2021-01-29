@@ -275,7 +275,7 @@ let rec expand ctx env root : _ * result =
     let (pos, tconst) = ctx.id in
     let ty = Typing_print.error env root in
     Errors.non_object_member_read
-      ~is_method:false
+      ~kind:`class_typeconst
       tconst
       (get_pos root)
       ty

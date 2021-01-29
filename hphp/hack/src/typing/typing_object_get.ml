@@ -492,7 +492,11 @@ let rec obj_get_concrete_ty
         Errors.non_object_member_write
     in
     err
-      ~is_method
+      ~kind:
+        ( if is_method then
+          `method_
+        else
+          `property )
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
@@ -765,7 +769,11 @@ and obj_get_inner
           Errors.non_object_member_write
       in
       err
-        ~is_method
+        ~kind:
+          ( if is_method then
+            `method_
+          else
+            `property )
         id_str
         id_pos
         (Typing_print.error env ety1)

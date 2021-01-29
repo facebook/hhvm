@@ -695,7 +695,7 @@ val top_member_write :
   unit
 
 val non_object_member_read :
-  is_method:bool ->
+  kind:[< `property | `method_ | `class_typeconst ] ->
   string ->
   Pos.t ->
   string ->
@@ -704,7 +704,7 @@ val non_object_member_read :
   unit
 
 val non_object_member_write :
-  is_method:bool ->
+  kind:[< `property | `method_ | `class_typeconst ] ->
   string ->
   Pos.t ->
   string ->

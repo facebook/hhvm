@@ -213,34 +213,39 @@ let dump_naming_errors_decls
 
   if save_decls then dump_class_decls genv env ~base_filename:output_filename
 
-let update_save_state
-    ~(save_decls : bool)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (output_filename : string)
-    (replace_state_after_saving : bool) : save_state_result =
+let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
   let t = Unix.gettimeofday () in
-  let db_name = output_filename ^ ".sql" in
-  if not (RealDisk.file_exists db_name) then
-    failwith "Given existing save state SQL file missing";
-  let naming_table = env.ServerEnv.naming_table in
-  let errors = env.ServerEnv.errorl in
-  dump_naming_errors_decls
-    ~save_decls
-    genv
-    env
-    output_filename
-    naming_table
-    errors;
-  let dep_table_edges_added =
-    SharedMem.update_dep_table_sqlite
-      db_name
-      Build_id.build_revision
-      replace_state_after_saving
-  in
-  ignore @@ Hh_logger.log_duration "Updating saved state took" t;
-  let result = { dep_table_edges_added } in
-  result
+  match SharedMem.loaded_dep_table_filename () with
+  | None ->
+    let dep_table_edges_added =
+      SharedMem.save_dep_table_sqlite
+        db_name
+        Build_id.build_revision
+        ~replace_state_after_saving
+    in
+    let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
+    { dep_table_edges_added }
+  | Some old_table_filename ->
+    (* If server is running from a loaded saved state, its in-memory
+     * tracked depdnencies are incomplete - most of the actual dependencies
+     * are in the SQL table. We need to copy that file and update it with
+     * the in-memory edges. *)
+    let t = Unix.gettimeofday () in
+    FileUtil.cp [old_table_filename] db_name;
+    let (_ : float) =
+      Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t
+    in
+    if not (RealDisk.file_exists db_name) then
+      failwith
+        "Existing save state SQL file missing; disk copy must have failed";
+    let dep_table_edges_added =
+      SharedMem.update_dep_table_sqlite
+        db_name
+        Build_id.build_revision
+        replace_state_after_saving
+    in
+    let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
+    { dep_table_edges_added }
 
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
@@ -265,8 +270,7 @@ let save_state
     else
       ()
   in
-  match SharedMem.loaded_dep_table_filename () with
-  | None ->
+  let (_ : float) =
     let naming_table = env.ServerEnv.naming_table in
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
@@ -277,31 +281,9 @@ let save_state
       output_filename
       naming_table
       errors;
-
-    let dep_table_edges_added =
-      SharedMem.save_dep_table_sqlite
-        db_name
-        Build_id.build_revision
-        ~replace_state_after_saving
-    in
-    let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
-    { dep_table_edges_added }
-  | Some old_table_filename ->
-    (* If server is running from a loaded saved state, its in-memory
-     * tracked depdnencies are incomplete - most of the actual dependencies
-     * are in the SQL table. We need to copy that file and update it with
-     * the in-memory edges. *)
-    let t = Unix.gettimeofday () in
-    FileUtil.cp [old_table_filename] db_name;
-    let (_ : float) =
-      Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t
-    in
-    update_save_state
-      ~save_decls
-      genv
-      env
-      output_filename
-      replace_state_after_saving
+    Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
+  in
+  dump_dep_graph_32bit ~db_name ~replace_state_after_saving
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->

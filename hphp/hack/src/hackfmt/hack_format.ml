@@ -2500,8 +2500,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat
         [
           t env type_;
+          when_present type_ space;
           t env name;
+          Space;
           t env equal_;
+          Space;
           t env initial_value;
           t env semicolon;
           Newline;

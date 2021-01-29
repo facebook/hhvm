@@ -94,23 +94,66 @@ const hphp_fast_string_map<hphp_fast_set<std::string>> s_coeffects_to_capabiliti
 };
 
 struct CapabilityNode {
-  CapabilityNode(const char* name,
-                 std::unique_ptr<CapabilityNode> child,
-                 bool escape)
+  CapabilityNode(const std::string& name, bool escape)
   : name(name)
-  , child(std::move(child))
   , escape(escape)
+  , children({})
   {}
 
-  const char* name;
-  std::unique_ptr<CapabilityNode> child;
+  std::string name;
   bool escape;
+  std::vector<CapabilityNode*> children;
 };
+
+struct CapabilityGraphs {
+  hphp_fast_string_map<std::unique_ptr<CapabilityNode>> map;
+  std::vector<CapabilityNode*> entries;
+};
+
+static CapabilityGraphs& getCapabilityGraphs() {
+  static CapabilityGraphs capabilityGraphs = {};
+  return capabilityGraphs;
+}
+
+template <typename T>
+T addEdges(T src, T dst) {
+  FTRACE(5, "Adding edge {} -> {}\n", src->name, dst->name);
+  src->children.push_back(dst);
+  return src;
+}
+
+template<typename T, typename... Args>
+T addEdges(T src, T dst, Args... args) {
+  addEdges(src, dst);
+  return addEdges(src, args...);
+}
+
+CapabilityNode* createNode(const std::string& name,
+                           bool escape = false,
+                           bool entry = false) {
+  auto node = std::make_unique<CapabilityNode>(name, escape);
+  auto ptr = node.get();
+  if (entry) getCapabilityGraphs().entries.push_back(ptr);
+  getCapabilityGraphs().map.insert({name, std::move(node)});
+  return ptr;
+}
+
+void initCapabilityGraphs() {
+  addEdges(createNode(Cap::s_rx_defaults, false, true),
+           addEdges(createNode(Cap::s_rx, true),
+                    createNode(Cap::s_rx_pure)));
+
+  addEdges(createNode(Cap::s_cipp_defaults, false, true),
+           addEdges(createNode(Cap::s_cipp, true),
+                    addEdges(createNode(Cap::s_cipp_global),
+                             createNode(Cap::s_cipp_pure))));
+}
 
 } //namespace
 
 void CoeffectsConfig::init(const std::unordered_map<std::string, int>& map) {
   initEnforcementLevel(map);
+  initCapabilityGraphs();
   initCapabilities();
 }
 
@@ -132,28 +175,6 @@ void CoeffectsConfig::initEnforcementLevel(
 }
 
 void CoeffectsConfig::initCapabilities() {
-  auto rx_pure =
-    std::make_unique<CapabilityNode>(Cap::s_rx_pure, nullptr, false);
-  auto rx =
-    std::make_unique<CapabilityNode>(Cap::s_rx, std::move(rx_pure), true);
-  auto rx_defaults =
-    std::make_unique<CapabilityNode>(Cap::s_rx_defaults, std::move(rx), false);
-
-  auto cipp_pure =
-    std::make_unique<CapabilityNode>(Cap::s_cipp_pure, nullptr, false);
-  auto cipp_global =
-    std::make_unique<CapabilityNode>(Cap::s_cipp_global, std::move(cipp_pure),
-                                     false);
-  auto cipp =
-    std::make_unique<CapabilityNode>(Cap::s_cipp, std::move(cipp_global), true);
-  auto cipp_defaults =
-    std::make_unique<CapabilityNode>(Cap::s_cipp_defaults, std::move(cipp),
-                                     false);
-
-  std::vector<std::unique_ptr<CapabilityNode>> graphs;
-  graphs.push_back(std::move(rx_defaults));
-  graphs.push_back(std::move(cipp_defaults));
-
   storage_t escapeMask = 0;
 
   using bitset_t = std::bitset<std::numeric_limits<storage_t>::digits>;
@@ -168,13 +189,14 @@ void CoeffectsConfig::initCapabilities() {
     FTRACE(1, "{:<14}: {:016b}\n", name, value);
   };
 
-  for (auto& cap_defaults : graphs) {
+  for (auto cap_defaults : getCapabilityGraphs().entries) {
     bits.reset();
-    auto cap = cap_defaults.get();
+    auto cap = cap_defaults;
     add(cap->name, bits);
-    while (cap->child) {
+    while (!cap->children.empty()) {
       always_assert(nextBit < std::numeric_limits<storage_t>::digits);
-      cap = cap->child.get();
+      always_assert(cap->children.size() == 1); // TODO: support more children
+      cap = cap->children[0];
       if (cap->escape) {
         always_assert(nextBit + 1 < std::numeric_limits<storage_t>::digits);
         // Set local

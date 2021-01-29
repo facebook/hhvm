@@ -7,6 +7,7 @@ GDB pretty printers for HHVM types.
 from compatibility import *
 
 import gdb
+import gdb.types
 import re
 
 import gdbutils
@@ -219,12 +220,15 @@ class LowPtrPrinter(PtrPrinter):
         return self.val.type
 
     def _pointer(self):
-        inner = self.val.type.template_argument(0)
-        storage = template_type(rawtype(self.val.type.template_argument(1)))
-
-        if storage == 'HPHP::detail::AtomicStorage':
-            return atomic_get(self.val['m_s']).cast(inner.pointer())
-        else:
+        rtype = gdb.types.get_basic_type(self.val.type)
+        inner = rtype.template_argument(0)
+        try:
+            storage = template_type(rawtype(rtype.template_argument(1)))
+            if storage == 'HPHP::detail::AtomicStorage':
+                return atomic_get(self.val['m_s']).cast(inner.pointer())
+            else:
+                return self.val['m_s'].cast(inner.pointer())
+        finally:
             return self.val['m_s'].cast(inner.pointer())
 
 

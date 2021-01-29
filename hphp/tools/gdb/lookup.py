@@ -39,7 +39,7 @@ def lookup_func(val):
         raise
     except:
         # LowPtr
-        return rawptr(funcid).cast(T('HPHP::Func').pointer())
+        return rawptr(funcid['m_id']).cast(T('HPHP::Func').pointer())
 
 
 def lookup_func_from_fp(fp):

@@ -42,6 +42,13 @@ struct HttpClient {
              const std::string &password = "");
 
   /**
+   * Configure options to connect using TLS to the proxy.
+   */
+  void setHttpsProxy(const std::string &proxyCaBundle,
+      const std::string &proxySSLCertPath = "",
+      const std::string &proxySSLKeyPath = "");
+
+  /**
    * StreamContext settings for this connection
    */
   void setStreamContextOptions(const Array &opts) {
@@ -110,6 +117,10 @@ private:
   int         m_proxyPort;
   std::string m_proxyUsername;
   std::string m_proxyPassword;
+
+  std::string m_proxyCaBundle;
+  std::string m_proxySSLCertPath;
+  std::string m_proxySSLKeyPath;
 
   long m_use_ssl = CURLUSESSL_NONE;
   long m_sslversion = CURL_SSLVERSION_DEFAULT;  //try to match remote SSL

@@ -89,6 +89,14 @@ void HttpClient::proxy(const std::string &host, int port,
   m_proxyPassword = password;
 }
 
+void HttpClient::setHttpsProxy(const std::string& proxyCaBundle,
+                      const std::string& proxySSLCertPath /* = "" */,
+                      const std::string& proxySSLKeyPath /* = "" */) {
+  m_proxyCaBundle = proxyCaBundle;
+  m_proxySSLCertPath = proxySSLCertPath;
+  m_proxySSLKeyPath = proxySSLKeyPath;
+}
+
 int HttpClient::get(const char *url, StringBuffer &response,
                     const HeaderMap *requestHeaders /* = NULL */,
                     req::vector<String> *responseHeaders /* = NULL */) {
@@ -183,6 +191,19 @@ int HttpClient::request(const char* verb,
       curl_easy_setopt(cp, CURLOPT_PROXYUSERNAME, m_proxyUsername.c_str());
       curl_easy_setopt(cp, CURLOPT_PROXYPASSWORD, m_proxyPassword.c_str());
     }
+
+    if (!m_proxyCaBundle.empty()) {
+      curl_easy_setopt(cp, CURLOPT_PROXYTYPE, CURLPROXY_HTTPS);
+      curl_easy_setopt(
+          cp, CURLOPT_PROXY_CAINFO, m_proxyCaBundle.c_str());
+      if (!m_proxySSLCertPath.empty() && !m_proxySSLKeyPath.empty()) {
+        curl_easy_setopt(
+            cp, CURLOPT_PROXY_SSLCERT, m_proxySSLCertPath.c_str());
+        curl_easy_setopt(
+            cp, CURLOPT_PROXY_SSLKEY, m_proxySSLKeyPath.c_str());
+      }
+    }
+
   }
 
   curl_slist *slist = nullptr;

@@ -1924,6 +1924,9 @@ const StaticString
   s_proxy_port("proxy_port"),
   s_proxy_login("proxy_login"),
   s_proxy_password("proxy_password"),
+  s_proxy_ssl_cert_path("proxy_ssl_cert_path"),
+  s_proxy_ssl_key_path("proxy_ssl_key_path"),
+  s_proxy_ssl_ca_bundle("proxy_ssl_ca_bundle"),
   s_trace("trace"),
   s_exceptions("exceptions"),
   s_compression("compression"),
@@ -2494,6 +2497,10 @@ void HHVM_METHOD(SoapClient, __construct,
     data->m_proxy_login = options[s_proxy_login].toString();
     data->m_proxy_password = options[s_proxy_password].toString();
 
+    data->m_proxy_ssl_cert_path = options[s_proxy_ssl_cert_path].toString();
+    data->m_proxy_ssl_key_path = options[s_proxy_ssl_key_path].toString();
+    data->m_proxy_ssl_ca_bundle = options[s_proxy_ssl_ca_bundle].toString();
+
     data->m_trace = options[s_trace].toBoolean();
     if (options.exists(s_exceptions)) {
       data->m_exceptions = options[s_exceptions].toBoolean();
@@ -2536,6 +2543,12 @@ void HHVM_METHOD(SoapClient, __construct,
       if (!data->m_proxy_host.empty() && data->m_proxy_port) {
         http.proxy(data->m_proxy_host.data(), data->m_proxy_port,
                    data->m_proxy_login.data(), data->m_proxy_password.data());
+
+        if (!data->m_proxy_ssl_ca_bundle.empty()) {
+          http.setHttpsProxy(data->m_proxy_ssl_ca_bundle.data(),
+              data->m_proxy_ssl_cert_path.data(),
+              data->m_proxy_ssl_key_path.data());
+        }
       }
       if (!data->m_login.empty()) {
         http.auth(data->m_login.data(), data->m_password.data(),
@@ -2870,6 +2883,12 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   if (!data->m_proxy_host.empty() && data->m_proxy_port) {
     http.proxy(data->m_proxy_host.data(), data->m_proxy_port,
                data->m_proxy_login.data(), data->m_proxy_password.data());
+
+    if (!data->m_proxy_ssl_ca_bundle.empty()) {
+      http.setHttpsProxy(data->m_proxy_ssl_ca_bundle.data(),
+          data->m_proxy_ssl_cert_path.data(),
+          data->m_proxy_ssl_key_path.data());
+    }
   }
   if (!data->m_login.empty()) {
     http.auth(data->m_login.data(), data->m_password.data(), !data->m_digest);

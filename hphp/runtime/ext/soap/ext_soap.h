@@ -74,6 +74,9 @@ struct SoapClient {
   int                         m_proxy_port;
   String                      m_proxy_login;
   String                      m_proxy_password;
+  String                      m_proxy_ssl_cert_path;
+  String                      m_proxy_ssl_key_path;
+  String                      m_proxy_ssl_ca_bundle;
   int                         m_connection_timeout;
   int                         m_max_redirect;
   bool                        m_use11;

@@ -56,15 +56,14 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(rx)              \
   X(write_props)
 
-#define CIPP_COEFFECTS \
-  X(cipp_local)        \
-  X(cipp_shallow)      \
-  X(cipp)              \
-  X(cipp_global)
+#define POLICIED_COEFFECTS \
+  X(policied_local)        \
+  X(policied_shallow)      \
+  X(policied)
 
-#define COEFFECTS \
-  RX_COEFFECTS    \
-  CIPP_COEFFECTS
+#define COEFFECTS    \
+  RX_COEFFECTS       \
+  POLICIED_COEFFECTS
 
 struct Coeffects {
   static constexpr auto s_defaults = "defaults";
@@ -77,10 +76,10 @@ struct Coeffects {
 
 struct Capabilities {
   static constexpr auto s_rx_defaults = "rx_defaults";
-  static constexpr auto s_cipp_defaults = "cipp_defaults";
+  static constexpr auto s_policied_defaults = "policied_defaults";
 
   static constexpr auto s_rx_pure = "rx_pure";
-  static constexpr auto s_cipp_pure = "cipp_pure";
+  static constexpr auto s_policied_pure = "policied_pure";
 
 #define X(x) static constexpr auto s_##x = #x;
   COEFFECTS
@@ -91,15 +90,15 @@ using C = Coeffects;
 using Cap = Capabilities;
 
 const hphp_fast_string_map<hphp_fast_set<std::string>> s_coeffects_to_capabilities{
-  {C::s_defaults, {Cap::s_rx_defaults, Cap::s_cipp_defaults}},
-  {C::s_pure, {Cap::s_rx_pure, Cap::s_cipp_pure}},
+  {C::s_defaults, {Cap::s_rx_defaults, Cap::s_policied_defaults}},
+  {C::s_pure, {Cap::s_rx_pure, Cap::s_policied_pure}},
 
-#define X(x) {C::s_##x, {Cap::s_##x, Cap::s_cipp_defaults}},
+#define X(x) {C::s_##x, {Cap::s_##x, Cap::s_policied_defaults}},
   RX_COEFFECTS
 #undef X
 
 #define X(x) {C::s_##x, {Cap::s_rx_defaults, Cap::s_##x}},
-  CIPP_COEFFECTS
+  POLICIED_COEFFECTS
 #undef X
 
 };
@@ -160,10 +159,9 @@ void initCapabilityGraphs() {
            addEdges(createNode(Cap::s_write_props),
                     rx_pure));
 
-  addEdges(createNode(Cap::s_cipp_defaults, false, true),
-           addEdges(createNode(Cap::s_cipp, true),
-                    addEdges(createNode(Cap::s_cipp_global),
-                             createNode(Cap::s_cipp_pure))));
+  addEdges(createNode(Cap::s_policied_defaults, false, true),
+           addEdges(createNode(Cap::s_policied, true),
+                    createNode(Cap::s_policied_pure)));
 }
 
 } //namespace
@@ -183,10 +181,10 @@ void CoeffectsConfig::initEnforcementLevel(
   // enforcement otherwise the whole coeffect system breaks
   s_instance->m_pureLevel = 0;
   s_instance->m_rxLevel = 0;
-  s_instance->m_cippLevel = 0;
+  s_instance->m_policiedLevel = 0;
   for (auto const [name, level] : map) {
     if (name == C::s_rx) s_instance->m_rxLevel = level;
-    else if (name == C::s_cipp) s_instance->m_cippLevel = level;
+    else if (name == C::s_policied) s_instance->m_policiedLevel = level;
     s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);
   }
 }
@@ -198,7 +196,7 @@ void CoeffectsConfig::initCapabilities() {
   auto const add = [] (const std::string& name, storage_t value) {
     getCapabilityMap().insert({name, value});
     getCapabilityVector().push_back({name, value});
-    FTRACE(1, "{:<14}: {:016b}\n", name, value);
+    FTRACE(1, "{:<18}: {:016b}\n", name, value);
   };
 
   for (auto cap_defaults : getCapabilityGraphs().entries) {
@@ -262,12 +260,15 @@ void CoeffectsConfig::initCapabilities() {
 
   if (CoeffectsConfig::enabled()) {
     storage_t rxPure = getCapabilityMap().find(Cap::s_rx_pure)->second;
-    storage_t cippPure = getCapabilityMap().find(Cap::s_cipp_pure)->second;
+    storage_t policiedPure =
+      getCapabilityMap().find(Cap::s_policied_pure)->second;
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
-      warningMask = (rxPure | cippPure);
+      warningMask = (rxPure | policiedPure);
     } else {
       if (CoeffectsConfig::rxEnforcementLevel() == 1) warningMask |= rxPure;
-      if (CoeffectsConfig::cippEnforcementLevel() == 1) warningMask |= cippPure;
+      if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
+        warningMask |= policiedPure;
+      }
     }
   }
 
@@ -280,7 +281,7 @@ std::string CoeffectsConfig::mangle() {
   return folly::to<std::string>(
     C::s_pure, std::to_string(s_instance->m_pureLevel),
     C::s_rx, std::to_string(s_instance->m_rxLevel),
-    C::s_cipp, std::to_string(s_instance->m_cippLevel)
+    C::s_policied, std::to_string(s_instance->m_policiedLevel)
   );
 }
 
@@ -309,9 +310,9 @@ CoeffectsConfig::fromName(const std::string& coeffect) {
 #undef X
   }
 
-  if (!CoeffectsConfig::cippEnforcementLevel()) {
+  if (!CoeffectsConfig::policiedEnforcementLevel()) {
 #define X(x) if (coeffect == C::s_##x) return finish();
-  CIPP_COEFFECTS
+  POLICIED_COEFFECTS
 #undef X
   }
 

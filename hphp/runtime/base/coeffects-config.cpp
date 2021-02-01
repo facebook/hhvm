@@ -367,6 +367,9 @@ CoeffectsConfig::toStringList(const StaticCoeffects data) {
       result.push_back(name);
     }
   }
+  // Alphabetically sort them so that the contents of the error messages
+  // always appear in the same order
+  std::sort(result.begin(), result.end());
 
   FTRACE(3, "coeffects: {}\n", folly::join(" ", result));
   return result;

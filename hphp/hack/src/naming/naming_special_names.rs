@@ -846,15 +846,17 @@ pub mod coeffects {
 
     pub const WRITE_PROPS: &str = "write_props";
 
-    pub const CIPP_LOCAL: &str = "cipp_local";
+    pub const POLICIED_LOCAL: &str = "policied_local";
 
-    pub const CIPP_SHALLOW: &str = "cipp_shallow";
+    pub const POLICIED_SHALLOW: &str = "policied_shallow";
 
-    pub const CIPP: &str = "cipp";
+    pub const POLICIED: &str = "policied";
 
-    pub const CIPP_OF: &str = "cipp_of";
+    pub const POLICIED_OF_LOCAL: &str = "policied_of_local";
 
-    pub const CIPP_GLOBAL: &str = "cipp_global";
+    pub const POLICIED_OF_SHALLOW: &str = "policied_of_shallow";
+
+    pub const POLICIED_OF: &str = "policied_of";
 
     pub const PURE: &str = "pure";
 }

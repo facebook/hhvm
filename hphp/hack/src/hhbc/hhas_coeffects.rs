@@ -17,17 +17,21 @@ use std::fmt;
 pub enum Ctx {
     Defaults,
 
+    // Shared
+    WriteProps,
+
     // Rx hierarchy
     RxLocal,
     RxShallow,
     Rx,
-    WriteProps,
 
-    // Cipp hierarchy
-    CippLocal,
-    CippShallow,
-    Cipp,
-    CippGlobal,
+    // Policied hierarchy
+    PoliciedOfLocal,
+    PoliciedOfShallow,
+    PoliciedOf,
+    PoliciedLocal,
+    PoliciedShallow,
+    Policied,
 
     // Pure
     Pure,
@@ -42,10 +46,12 @@ impl fmt::Display for Ctx {
             RxShallow => write!(f, "{}", c::RX_SHALLOW),
             Rx => write!(f, "{}", c::RX),
             WriteProps => write!(f, "{}", c::WRITE_PROPS),
-            CippLocal => write!(f, "{}", c::CIPP_LOCAL),
-            CippShallow => write!(f, "{}", c::CIPP_SHALLOW),
-            Cipp => write!(f, "{}", c::CIPP),
-            CippGlobal => write!(f, "{}", c::CIPP_GLOBAL),
+            PoliciedOfLocal => write!(f, "{}", c::POLICIED_OF_LOCAL),
+            PoliciedOfShallow => write!(f, "{}", c::POLICIED_OF_SHALLOW),
+            PoliciedOf => write!(f, "{}", c::POLICIED_OF),
+            PoliciedLocal => write!(f, "{}", c::POLICIED_LOCAL),
+            PoliciedShallow => write!(f, "{}", c::POLICIED_SHALLOW),
+            Policied => write!(f, "{}", c::POLICIED),
             Pure => write!(f, "{}", c::PURE),
         }
     }
@@ -108,10 +114,12 @@ impl HhasCoeffects {
                 c::RX_SHALLOW => Some(Ctx::RxShallow),
                 c::RX => Some(Ctx::Rx),
                 c::WRITE_PROPS => Some(Ctx::WriteProps),
-                c::CIPP_LOCAL => Some(Ctx::CippLocal),
-                c::CIPP_SHALLOW => Some(Ctx::CippShallow),
-                c::CIPP_GLOBAL => Some(Ctx::CippGlobal),
-                c::CIPP | c::CIPP_OF => Some(Ctx::Cipp),
+                c::POLICIED_OF_LOCAL => Some(Ctx::PoliciedOfLocal),
+                c::POLICIED_OF_SHALLOW => Some(Ctx::PoliciedOfShallow),
+                c::POLICIED_OF => Some(Ctx::PoliciedOf),
+                c::POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
+                c::POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
+                c::POLICIED => Some(Ctx::Policied),
                 _ => None,
             },
             _ => None,

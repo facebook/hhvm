@@ -81,6 +81,10 @@ type variance =
    *)
   | Vboth
 
+(** The set of type parameters which are bound at a given location,
+    with their variances. *)
+type environment = variance SMap.t
+
 (*****************************************************************************)
 (* Reason pretty-printing *)
 (*****************************************************************************)
@@ -226,6 +230,9 @@ let get_tparam_variance env name =
 
 let make_tparam_variance t =
   make_variance Rtype_parameter (fst t.tp_name) t.tp_variance
+
+let make_ast_tparam_variance : Nast.tparam -> variance =
+ (fun t -> make_variance Rtype_parameter (fst t.Aast.tp_name) t.Aast.tp_variance)
 
 (******************************************************************************)
 (* Checks that a 'this' type is correctly used at a given contravariant       *)
@@ -734,6 +741,132 @@ and constraint_ tenv root env (ck, ty) =
   in
   type_ tenv root var env ty
 
+let hint :
+    Typing_env_types.env ->
+    Cls.t option ->
+    variance ->
+    environment ->
+    Aast_defs.hint ->
+    unit =
+ fun tenv root variance env h ->
+  let rec hint variance (pos, h) =
+    let open Aast_defs in
+    match h with
+    | Habstr (name, targs) ->
+      (* This section makes the position more precise.
+       * Say we find a return type that is a tuple (int, int, T).
+       * The whole tuple is in covariant position, and so the position
+       * is going to include the entire tuple.
+       * That can make things pretty unreadable when the type is long.
+       * Here we replace the position with the exact position of the generic
+       * that was problematic. *)
+      let variance =
+        match variance with
+        | Vcovariant ((pos', x, y) :: rest) when not (Pos.equal pos pos') ->
+          Vcovariant ((pos, x, y) :: rest)
+        | Vcontravariant ((pos', x, y) :: rest) when not (Pos.equal pos pos') ->
+          Vcontravariant ((pos, x, y) :: rest)
+        | x -> x
+      in
+      generic_ env variance name targs
+    | Hany
+    | Herr
+    | Hmixed
+    | Hnonnull
+    | Hdynamic
+    | Hnothing
+    | Hvar _
+    | Hfun_context _
+    | Hprim _ ->
+      ()
+    | Hvarray h -> hint variance h
+    | Hdarray (hk, hv) ->
+      hint variance hk;
+      hint variance hv
+    | Hvarray_or_darray (hk, hv) ->
+      Option.iter hk ~f:(hint variance);
+      hint variance hv
+    | Hthis ->
+      (* Check that 'this' isn't being improperly referenced in a contravariant
+       * position.
+       * With the exception of that check, `this` constraints are bivariant
+       * (otherwise any class that used the `this` type would not be able to use
+       * covariant type params). *)
+      Option.value_map
+        root
+        ~default:()
+        ~f:(check_final_this_pos_variance variance pos)
+    | Hoption h
+    | Hlike h
+    | Hsoft h
+    | Haccess (h, _) ->
+      hint variance h
+    | Hunion tyl
+    | Hintersection tyl
+    | Htuple tyl ->
+      hint_list variance tyl
+    | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
+      List.iter
+        nsi_field_map
+        ~f:(fun { sfi_hint; sfi_optional = _; sfi_name = _ } ->
+          hint variance sfi_hint)
+    | Hfun hfun ->
+      let {
+        hf_param_tys;
+        hf_param_kinds;
+        hf_variadic_ty;
+        hf_return_ty;
+        hf_reactive_kind = _;
+        hf_param_mutability = _;
+        hf_ctxs = _;
+        hf_is_mutable_return = _;
+      } =
+        hfun
+      in
+      List.iter2_exn hf_param_kinds hf_param_tys ~f:(fun_param variance);
+      fun_arity variance hf_variadic_ty;
+      fun_ret variance hf_return_ty
+    | Happly (_, []) -> ()
+    | Happly (name, hl) ->
+      let variancel = get_class_variance tenv name in
+      iter2_shortest
+        begin
+          fun tparam_variance h ->
+          let pos = Ast_defs.get_pos h in
+          let reason =
+            Rtype_argument (Utils.strip_ns @@ Ast_defs.get_id name)
+          in
+          let variance = compose (pos, reason) variance tparam_variance in
+          hint variance h
+        end
+        variancel
+        hl
+  and hint_list variance tyl = List.iter tyl ~f:(hint variance)
+  and fun_param variance inout h =
+    let pos = Ast_defs.get_pos h in
+    match inout with
+    | None ->
+      let reason = (pos, Rfun_parameter, Pcontravariant) in
+      let variance = flip reason variance in
+      hint variance h
+    | Some Ast_defs.Pinout ->
+      let variance =
+        make_variance Rfun_inout_parameter pos Ast_defs.Invariant
+      in
+      hint variance h
+  and fun_ret variance h =
+    let pos = Ast_defs.get_pos h in
+    let reason_covariant = (pos, Rfun_return, Pcovariant) in
+    let variance =
+      match variance with
+      | Vcovariant stack -> Vcovariant (reason_covariant :: stack)
+      | Vcontravariant stack -> Vcontravariant (reason_covariant :: stack)
+      | variance -> variance
+    in
+    hint variance h
+  and fun_arity variance h = Option.iter h ~f:(fun_param variance None) in
+  hint variance h
+
 let class_property class_type tenv root static env (_member_name, member) =
   if phys_equal static `Static then
     if
@@ -805,15 +938,27 @@ let class_def tenv class_type impl =
 (*****************************************************************************)
 (* The entry point (for typedefs). *)
 (*****************************************************************************)
-let typedef tenv type_name =
-  match Env.get_typedef tenv type_name with
-  | Some { td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _ } ->
-    let root = None in
-    let env =
-      List.fold_left td_tparams ~init:SMap.empty ~f:(fun env tp ->
-          SMap.add (snd tp.tp_name) (make_tparam_variance tp) env)
-    in
-    let pos = get_pos td_type in
-    let reason_covariant = [(pos, Rtypedef, Pcovariant)] in
-    type_ tenv root (Vcovariant reason_covariant) env td_type
-  | None -> ()
+let typedef : Typing_env_types.env -> Nast.typedef -> unit =
+ fun tenv typedef ->
+  let {
+    Aast.t_tparams;
+    t_kind;
+    t_annotation = _;
+    t_name = _;
+    t_constraint = _;
+    t_user_attributes = _;
+    t_mode = _;
+    t_vis = _;
+    t_namespace = _;
+    t_span = _;
+    t_emit_id = _;
+  } =
+    typedef
+  in
+  let root = None in
+  let env =
+    List.fold t_tparams ~init:SMap.empty ~f:(fun env tp ->
+        SMap.add (snd tp.Aast.tp_name) (make_ast_tparam_variance tp) env)
+  in
+  let reason_covariant = [(Ast_defs.get_pos t_kind, Rtypedef, Pcovariant)] in
+  hint tenv root (Vcovariant reason_covariant) env t_kind

@@ -15,7 +15,7 @@ val class_def :
   unit
 
 (** Check a type definition for correct usage of variant generic parameters *)
-val typedef : Typing_env_types.env -> string -> unit
+val typedef : Typing_env_types.env -> Nast.typedef -> unit
 
 type variance
 

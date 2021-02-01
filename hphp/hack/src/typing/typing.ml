@@ -7169,7 +7169,7 @@ and typedef_def ctx typedef =
       []
   in
   Typing_check_decls.typedef env typedef;
-  Typing_variance.typedef env (snd typedef.t_name);
+  Typing_variance.typedef env typedef;
   let {
     t_annotation = ();
     t_name = (t_pos, t_name);

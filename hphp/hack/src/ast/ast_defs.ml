@@ -15,7 +15,9 @@ include Ast_defs_visitors_ancestors
 
 type pos = (Pos.t[@visitors.opaque])
 
-and id = pos * string
+and id_ = string
+
+and id = pos * id_
 
 and pstring = pos * string
 
@@ -144,6 +146,10 @@ and visibility =
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
+
+let get_pos : type a. Pos.t * a -> Pos.t = (fun (p, _) -> p)
+
+let get_id : id -> id_ = (fun (_p, id) -> id)
 
 let is_c_normal = function
   | Cnormal -> true

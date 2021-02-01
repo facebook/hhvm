@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c7f6b0cdbcf5e539728af1efa116f1c>>
+// @generated SignedSource<<c3e3f56f0a92b216d434f5f8a96aa640>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -21,6 +21,8 @@ pub use crate::shape_map;
 
 pub use pos::Pos;
 
+pub type Id_<'a> = str;
+
 #[derive(
     Clone,
     Copy,
@@ -34,7 +36,7 @@ pub use pos::Pos;
     Serialize,
     ToOcamlRep
 )]
-pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
+pub struct Id<'a>(pub &'a Pos<'a>, pub &'a Id_<'a>);
 impl<'a> TrivialDrop for Id<'a> {}
 
 pub type Pstring<'a> = (&'a Pos<'a>, &'a str);

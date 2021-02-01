@@ -1448,11 +1448,18 @@ pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Res
 pub fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Result {
     match block {
         [] => emit_dropthrough_return(e, env),
-        [s] => emit_final_stmt(e, env, s),
-        [s, ..] => Ok(InstrSeq::gather(vec![
-            emit_stmt(e, env, s)?,
-            emit_final_stmts(e, env, &block[1..])?,
-        ])),
+        _ => {
+            let mut ret = Vec::with_capacity(block.len());
+            for (i, s) in block.iter().enumerate() {
+                let instrs = if i == block.len() - 1 {
+                    emit_final_stmt(e, env, s)?
+                } else {
+                    emit_stmt(e, env, s)?
+                };
+                ret.push(instrs);
+            }
+            Ok(InstrSeq::gather(ret))
+        }
     }
 }
 

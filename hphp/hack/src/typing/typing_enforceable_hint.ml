@@ -151,6 +151,12 @@ let validator =
       else
         this#invalid acc r "an array type"
 
+    method! on_tintersection acc r _ =
+      this#invalid
+        acc
+        r
+        "an intersection type, which is restricted to coeffects"
+
     method is_wildcard ty =
       match get_node ty with
       | Tapply ((_, name), _) -> String.equal name SN.Typehints.wildcard

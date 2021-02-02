@@ -60,6 +60,8 @@ type class_id_ = (Pos.t, func_body_ann, unit, unit) Aast.class_id_
 
 type class_ = (Pos.t, func_body_ann, unit, unit) Aast.class_
 
+type class_var = (Pos.t, func_body_ann, unit, unit) Aast.class_var
+
 type method_ = (Pos.t, func_body_ann, unit, unit) Aast.method_
 
 type file_attribute = (Pos.t, func_body_ann, unit, unit) Aast.file_attribute
@@ -579,8 +581,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_c_const : 'a -> class_const -> 'a
 
-      method on_class_var :
-        'a -> (Pos.t, func_body_ann, unit, unit) class_var -> 'a
+      method on_class_var : 'a -> class_var -> 'a
 
       method on_class_use : 'a -> hint -> 'a
 

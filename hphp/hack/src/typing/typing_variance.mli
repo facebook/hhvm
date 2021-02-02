@@ -8,11 +8,7 @@
  *)
 
 (** Check a class definition for correct usage of variant generic parameters *)
-val class_def :
-  Typing_env_types.env ->
-  Decl_provider.Class.t ->
-  Typing_defs.decl_ty list ->
-  unit
+val class_def : Typing_env_types.env -> Nast.class_ -> unit
 
 (** Check a type definition for correct usage of variant generic parameters *)
 val typedef : Typing_env_types.env -> Nast.typedef -> unit

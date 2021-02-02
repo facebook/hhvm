@@ -954,6 +954,50 @@ let check_extend_abstract_const ~is_final p seq =
         let cc_pos = get_pos cc.cc_type in
         Errors.implement_abstract ~is_final p cc_pos "constant" x)
 
+exception Found of Pos.t
+
+let contains_generic : Typing_defs.decl_ty -> Pos.t option =
+ fun ty ->
+  let visitor =
+    object
+      inherit [_] Type_visitor.decl_type_visitor as super
+
+      method! on_type env ty =
+        match get_node ty with
+        | Tgeneric _ -> raise (Found (get_pos ty))
+        | _ -> super#on_type env ty
+    end
+  in
+  try
+    visitor#on_type () ty;
+    None
+  with Found p -> Some p
+
+let check_no_generic_static_property tc =
+  if
+    (* Check whether the type of a static property (class variable) contains
+     * any generic type parameters. Outside of traits, this is illegal as static
+     * properties are shared across all generic instantiations.
+     * Although not strictly speaking a variance check, it fits here because
+     * it concerns the presence of generic type parameters in types.
+     *)
+    Ast_defs.(equal_class_kind (Cls.kind tc) Ctrait)
+  then
+    ()
+  else
+    Cls.sprops tc
+    |> List.iter ~f:(fun (_prop_name, prop) ->
+           let (lazy ty) = prop.ce_type in
+           let var_type_pos = get_pos ty in
+           let class_pos = Cls.pos tc in
+           match contains_generic ty with
+           | None -> ()
+           | Some generic_pos ->
+             Errors.static_property_type_generic_param
+               ~class_pos
+               ~var_type_pos
+               ~generic_pos)
+
 let get_decl_prop_ty env cls ~is_static prop_id =
   let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
   if is_global_inference_on then
@@ -1351,7 +1395,8 @@ let class_def_ env c tc =
       env
       (Cls.where_constraints tc)
   in
-  Typing_variance.class_def env tc impl;
+  Typing_variance.class_def env c;
+  check_no_generic_static_property tc;
   let check_where_constraints env ht =
     let (_, (p, _), _) = TUtils.unwrap_class_type ht in
     let (env, locl_ty) = Phase.localize_with_self env ht in

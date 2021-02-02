@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<170e21b6fcc473f12cbbfeadd974dbb2>>
+// @generated SignedSource<<818a3f0726d2ca666d36be39b76fbdcd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1319,7 +1319,11 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub tparams: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],
     pub extends: &'a [&'a ClassHint<'a>],
     pub uses: &'a [&'a TraitHint<'a>],
+    /// PHP feature not supported in hack but required
+    /// because we have runtime support.
     pub use_as_alias: &'a [&'a UseAsAlias<'a>],
+    /// PHP feature not supported in hack but required
+    /// because we have runtime support.
     pub insteadof_alias: &'a [&'a InsteadofAlias<'a>],
     pub xhp_attr_uses: &'a [&'a XhpAttrHint<'a>],
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,

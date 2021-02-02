@@ -773,7 +773,11 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_extends: class_hint list;
   c_uses: trait_hint list;
   c_use_as_alias: use_as_alias list;
+      (** PHP feature not supported in hack but required
+          because we have runtime support. *)
   c_insteadof_alias: insteadof_alias list;
+      (** PHP feature not supported in hack but required
+          because we have runtime support. *)
   c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * is_extends) list;

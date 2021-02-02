@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd0ea1a4fb97b2f615c6e01e0dbce36a>>
+// @generated SignedSource<<db0cc99e06bd58e1de1308938794c39f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1228,7 +1228,11 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
     pub extends: Vec<ClassHint>,
     pub uses: Vec<TraitHint>,
+    /// PHP feature not supported in hack but required
+    /// because we have runtime support.
     pub use_as_alias: Vec<UseAsAlias>,
+    /// PHP feature not supported in hack but required
+    /// because we have runtime support.
     pub insteadof_alias: Vec<InsteadofAlias>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,

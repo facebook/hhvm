@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1a2345ca14728e384ecf7007cbd1a579>>
+// @generated SignedSource<<bd26f06c284b35d928f9950b610981cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,6 +64,8 @@ pub type UserAttribute<'a> = aast::UserAttribute<'a, &'a pos::Pos<'a>, FuncBodyA
 pub type ClassId_<'a> = aast::ClassId_<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type Class_<'a> = aast::Class_<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
+
+pub type ClassVar<'a> = aast::ClassVar<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type Method_<'a> = aast::Method_<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 

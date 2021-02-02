@@ -112,6 +112,16 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
       Unchanged
     else
       Updated newval
+  | (Type t1, Type t2) ->
+    if equal_internal_type t1 t2 then
+      Unchanged
+    else
+      Updated newval
+  | (SubtypeProp p1, SubtypeProp p2) ->
+    if Typing_logic.equal_subtype_prop p1 p2 then
+      Unchanged
+    else
+      Updated newval
   | (Set s1, Set s2) ->
     let added = SSet.diff s2 s1 in
     let removed = SSet.diff s1 s2 in
@@ -596,10 +606,10 @@ let log_env_diff p ?function_name old_env new_env =
   | _ -> log_position p ?function_name (fun () -> log_delta new_env d)
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
-let hh_show_env p env =
+let hh_show_env ?function_name p env =
   let old_env = !lastenv in
   lastenv := env;
-  log_env_diff p old_env env
+  log_env_diff ?function_name p old_env env
 
 let hh_show_full_env p env =
   let empty_env =

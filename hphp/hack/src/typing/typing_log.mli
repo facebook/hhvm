@@ -18,7 +18,7 @@ val log_env_diff :
   Typing_env_types.env ->
   unit
 
-val hh_show_env : Pos.t -> Typing_env_types.env -> unit
+val hh_show_env : ?function_name:string -> Pos.t -> Typing_env_types.env -> unit
 
 val hh_show_full_env : Pos.t -> Typing_env_types.env -> unit
 

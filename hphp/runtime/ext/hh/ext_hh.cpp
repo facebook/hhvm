@@ -1246,6 +1246,10 @@ TypedValue HHVM_FUNCTION(get_executable_lines, StringArg path) {
   return tvReturn(vinit.toVariant());
 }
 
+int64_t HHVM_FUNCTION(hphp_get_logger_request_id) {
+  return Logger::GetRequestId();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1284,6 +1288,7 @@ static struct HHExtension final : Extension {
     X(set_implicit_context);
     X(set_implicit_context_by_index);
     X(get_executable_lines);
+    X(hphp_get_logger_request_id);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

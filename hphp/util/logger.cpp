@@ -103,6 +103,11 @@ void Logger::ResetRequestCount() {
   threadData->message = 0;
 }
 
+int64_t Logger::GetRequestId() {
+  ThreadData *threadData = s_threadData.get();
+  return threadData->request;
+}
+
 void Logger::LogImpl(LogLevelType level, const std::string &msg,
                      const StackTrace *stackTrace,
                      bool escape /* = false */, bool escapeMore /* = false */) {

@@ -1,0 +1,7 @@
+Requesting 'test_get_request_id.php'
+string(6) "int(2)"
+Requesting 'test_get_request_id.php'
+string(6) "int(3)"
+Requesting 'test_get_request_id.php'
+string(6) "int(4)"
+

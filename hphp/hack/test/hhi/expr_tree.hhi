@@ -170,65 +170,30 @@ final class ExprPos {
   ) {}
 }
 
-final class ExampleInt {
-  public function __plus(ExampleInt $_): ExampleInt {
-    throw new Exception();
-  }
-  public function __minus(ExampleInt $_): ExampleInt {
-    throw new Exception();
-  }
-  public function __star(ExampleInt $_): ExampleInt {
-    throw new Exception();
-  }
-  public function __slash(ExampleInt $_): ExampleInt {
-    throw new Exception();
-  }
+abstract class ExampleMixed {
+  public abstract function __tripleEquals(ExampleMixed $_): ExampleBool;
+  public abstract function __notTripleEquals(ExampleMixed $_): ExampleBool;
+}
+abstract class ExampleInt extends ExampleMixed {
+  public abstract function __plus(ExampleInt $_): ExampleInt;
+  public abstract function __minus(ExampleInt $_): ExampleInt;
+  public abstract function __star(ExampleInt $_): ExampleInt;
+  public abstract function __slash(ExampleInt $_): ExampleInt;
 
-  public function __lessThan(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __lessThanEqual(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __greaterThan(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __greaterThanEqual(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __tripleEquals(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __notTripleEquals(ExampleInt $_): ExampleBool {
-    throw new Exception();
-  }
+  public abstract function __lessThan(ExampleInt $_): ExampleBool;
+  public abstract function __lessThanEqual(ExampleInt $_): ExampleBool;
+  public abstract function __greaterThan(ExampleInt $_): ExampleBool;
+  public abstract function __greaterThanEqual(ExampleInt $_): ExampleBool;
 }
 
-final class ExampleBool {
-  public function __ampamp(ExampleBool $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __barbar(ExampleBool $_): ExampleBool {
-    throw new Exception();
-  }
-
-  public function __bool(): bool {
-    throw new Exception();
-  }
-
-  public function __exclamationMark(): ExampleBool {
-    throw new Exception();
-  }
+abstract class ExampleBool extends ExampleMixed {
+  public abstract function __ampamp(ExampleBool $_): ExampleBool;
+  public abstract function __barbar(ExampleBool $_): ExampleBool;
+  public abstract function __bool(): bool;
+  public abstract function __exclamationMark(): ExampleBool;
 }
 
-final class ExampleString {}
+abstract class ExampleString extends ExampleMixed {}
+abstract class ExampleFloat extends ExampleMixed {}
 
 final class ExampleContext {}
-
-final class ExampleFloat {}

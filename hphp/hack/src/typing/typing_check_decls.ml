@@ -7,18 +7,13 @@
  *
  *)
 
-(* This module performs some "validity" checks on declared types in
- * function and member signatures, extends, implements, uses, etc.
- * - trivial syntactic errors (e.g. writing ?nonnull instead of mixed)
- * - unsatisfied constraints (e.g. C<bool> where C requires T as arraykey)
- *)
-
 open Hh_prelude
 open Aast
 open Typing_defs
 open Typing_env_types
 open Utils
 module Env = Typing_env
+module FunUtils = Decl_fun_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module SN = Naming_special_names
@@ -26,20 +21,11 @@ module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
-module Partial = Partial_provider
 
 type env = {
   typedef_tparams: Nast.tparam list;
   tenv: Typing_env_types.env;
 }
-
-let get_ctx env = Env.get_ctx env.tenv
-
-let get_tracing_info env =
-  {
-    Decl_counters.origin = Decl_counters.TopLevel;
-    file = Env.get_file env.tenv;
-  }
 
 let check_hint_wellkindedness env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
@@ -104,8 +90,68 @@ let check_atom_on_param env pos dty lty =
     | _ -> Errors.atom_invalid_parameter_in_enum_class pos)
   | _ -> Errors.atom_invalid_parameter pos
 
+let check_happly ?(is_atom = false) unchecked_tparams env h =
+  let pos = fst h in
+  let decl_ty = Decl_hint.hint env.decl_env h in
+  let unchecked_tparams =
+    List.map
+      unchecked_tparams
+      (Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
+  in
+  let tyl =
+    List.map unchecked_tparams (fun t ->
+        mk (Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()))
+  in
+  let subst = Inst.make_subst unchecked_tparams tyl in
+  let decl_ty = Inst.instantiate subst decl_ty in
+  match get_node decl_ty with
+  | Tapply _ ->
+    let (env, locl_ty) = Phase.localize_with_self env decl_ty in
+    let () = if is_atom then check_atom_on_param env pos decl_ty locl_ty in
+    begin
+      match get_node (TUtils.get_base_type env locl_ty) with
+      | Tclass (cls, _, tyl) ->
+        (match Env.get_class env (snd cls) with
+        | Some cls ->
+          let tc_tparams = Cls.tparams cls in
+          (* We want to instantiate the class type parameters with the
+           * type list of the class we are localizing. We do not want to
+           * add any more constraints when we localize the constraints
+           * stored in the class_type since it may lead to infinite
+           * recursion
+           *)
+          let ety_env =
+            {
+              (Phase.env_with_self env) with
+              substs = Subst.make_locl tc_tparams tyl;
+            }
+          in
+          iter2_shortest
+            begin
+              fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
+              List.iter cstrl (fun (ck, cstr_ty) ->
+                  let r = Reason.Rwitness p in
+                  let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
+                  let (_ : Typing_env_types.env) =
+                    TGenConstraint.check_constraint
+                      env
+                      ck
+                      ty
+                      ~cstr_ty
+                      (fun ?code:_ l ->
+                        Reason.explain_generic_constraint (fst h) r x l)
+                  in
+                  ())
+            end
+            tc_tparams
+            tyl
+        | _ -> ())
+      | _ -> ()
+    end
+  | _ -> ()
+
 let rec fun_ tenv f =
-  Decl_fun_utils.check_params f.f_params;
+  FunUtils.check_params f.f_params;
   let env = { typedef_tparams = []; tenv } in
   let (p, _) = f.f_name in
   (* Add type parameters to typing environment and localize the bounds
@@ -136,8 +182,6 @@ and hint ?(is_atom = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
   hint_ ~is_atom env p h
-
-and hint_no_kind_check env (p, h) = hint_ ~is_atom:false env p h
 
 and hint_ ~is_atom env p h_ =
   let hint env (p, h) = hint_ ~is_atom:false env p h in
@@ -221,67 +265,53 @@ and hint_ ~is_atom env p h_ =
     (* TODO(coeffects) *)
     ()
 
-and check_happly ?(is_atom = false) unchecked_tparams env h =
-  let pos = fst h in
-  let decl_ty = Decl_hint.hint env.decl_env h in
-  let unchecked_tparams =
-    List.map
-      unchecked_tparams
-      (Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
+and fun_param env param =
+  let is_atom =
+    List.exists
+      ~f:(fun { ua_name; ua_params } ->
+        String.equal (snd ua_name) SN.UserAttributes.uaAtom
+        && List.is_empty ua_params)
+      param.param_user_attributes
   in
-  let tyl =
-    List.map unchecked_tparams (fun t ->
-        mk (Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()))
-  in
-  let subst = Inst.make_subst unchecked_tparams tyl in
-  let decl_ty = Inst.instantiate subst decl_ty in
-  match get_node decl_ty with
-  | Tapply _ ->
-    let (env, locl_ty) = Phase.localize_with_self env decl_ty in
-    let () = if is_atom then check_atom_on_param env pos decl_ty locl_ty in
-    begin
-      match get_node (TUtils.get_base_type env locl_ty) with
-      | Tclass (cls, _, tyl) ->
-        (match Env.get_class env (snd cls) with
-        | Some cls ->
-          let tc_tparams = Cls.tparams cls in
-          (* We want to instantiate the class type parameters with the
-           * type list of the class we are localizing. We do not want to
-           * add any more constraints when we localize the constraints
-           * stored in the class_type since it may lead to infinite
-           * recursion
-           *)
-          let ety_env =
-            {
-              (Phase.env_with_self env) with
-              substs = Subst.make_locl tc_tparams tyl;
-            }
-          in
-          iter2_shortest
-            begin
-              fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
-              List.iter cstrl (fun (ck, cstr_ty) ->
-                  let r = Reason.Rwitness p in
-                  let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
-                  let (_ : Typing_env_types.env) =
-                    TGenConstraint.check_constraint
-                      env
-                      ck
-                      ty
-                      ~cstr_ty
-                      (fun ?code:_ l ->
-                        Reason.explain_generic_constraint (fst h) r x l)
-                  in
-                  ())
-            end
-            tc_tparams
-            tyl
-        | _ -> ())
-      | _ -> ()
-    end
+  maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
+
+and variadic_param env vparam =
+  match vparam with
+  | FVvariadicArg p -> fun_param env p
   | _ -> ()
 
-and class_ tenv c =
+let enum env e =
+  hint env e.e_base;
+  maybe hint env e.e_constraint
+
+let const env class_const = maybe hint env class_const.Aast.cc_type
+
+let typeconst (env, _) tconst =
+  maybe hint env tconst.c_tconst_type;
+  maybe hint env tconst.c_tconst_constraint
+
+let class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
+
+let method_ env m =
+  (* Add method type parameters to environment and localize the bounds
+     and where constraints *)
+  let tenv =
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      (fst m.m_name)
+      env.tenv
+      m.m_tparams
+      m.m_where_constraints
+  in
+  let env = { env with tenv } in
+  List.iter m.m_params (fun_param env);
+  variadic_param env m.m_variadic;
+  List.iter m.m_tparams (tparam env);
+  List.iter m.m_where_constraints (where_constr env);
+  maybe hint env (hint_of_type_hint m.m_ret)
+
+let hint_no_kind_check env (p, h) = hint_ ~is_atom:false env p h
+
+let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv =
@@ -308,50 +338,6 @@ and class_ tenv c =
   List.iter c_statics (method_ env);
   List.iter c_methods (method_ env);
   maybe enum env c.c_enum
-
-and typeconst (env, _) tconst =
-  maybe hint env tconst.c_tconst_type;
-  maybe hint env tconst.c_tconst_constraint
-
-and const env class_const = maybe hint env class_const.cc_type
-
-and class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
-
-and method_ env m =
-  (* Add method type parameters to environment and localize the bounds
-     and where constraints *)
-  let tenv =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      (fst m.m_name)
-      env.tenv
-      m.m_tparams
-      m.m_where_constraints
-  in
-  let env = { env with tenv } in
-  List.iter m.m_params (fun_param env);
-  variadic_param env m.m_variadic;
-  List.iter m.m_tparams (tparam env);
-  List.iter m.m_where_constraints (where_constr env);
-  maybe hint env (hint_of_type_hint m.m_ret)
-
-and fun_param env param =
-  let is_atom =
-    List.exists
-      ~f:(fun { ua_name; ua_params } ->
-        String.equal (snd ua_name) SN.UserAttributes.uaAtom
-        && List.is_empty ua_params)
-      param.param_user_attributes
-  in
-  maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
-
-and variadic_param env vparam =
-  match vparam with
-  | FVvariadicArg p -> fun_param env p
-  | _ -> ()
-
-and enum env e =
-  hint env e.e_base;
-  maybe hint env e.e_constraint
 
 let typedef tenv t =
   (* We don't allow constraints on typdef parameters, but we still

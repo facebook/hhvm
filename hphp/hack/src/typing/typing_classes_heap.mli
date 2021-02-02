@@ -33,6 +33,9 @@ module Api : sig
 
   val need_init : t -> bool
 
+  (** Whether the typechecker knows of all (non-interface) ancestors
+      and thus knows all accessible members of this class.
+      This is not the case if one ancestor at least could not be found. *)
   val members_fully_known : t -> bool
 
   val linearization :

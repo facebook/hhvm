@@ -316,16 +316,6 @@ let where_constraint env (ty1, ck, ty2) =
 (* Functions building the types for the parameters of a function *)
 (* It's not completely trivial because of optional arguments  *)
 
-let minimum_arity paraml =
-  (* We're looking for the minimum number of arguments that must be specified
-  in a call to this method. Variadic "..." parameters need not be specified,
-  parameters with default values need not be specified, so this method counts
-  non-default-value, non-variadic parameters. *)
-  let f param =
-    (not param.param_is_variadic) && Option.is_none param.param_expr
-  in
-  List.count paraml f
-
 let check_params paraml =
   (* We wish to give an error on the first non-default parameter
   after a default parameter. That is:

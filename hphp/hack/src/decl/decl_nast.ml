@@ -14,10 +14,10 @@
 (*****************************************************************************)
 
 open Hh_prelude
-open Decl_fun_utils
 open Aast
 open Typing_defs
 open Typing_deps
+module FunUtils = Decl_fun_utils
 module Reason = Typing_reason
 module SN = Naming_special_names
 
@@ -38,17 +38,21 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
 
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  let reactivity = fun_reactivity env f.f_user_attributes in
-  let ifc_decl = find_policied_attribute f.f_user_attributes in
-  let returns_mutable = fun_returns_mutable f.f_user_attributes in
-  let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
-  let return_disposable = has_return_disposable_attribute f.f_user_attributes in
-  let params = make_params env ~is_lambda f.f_params in
+  let reactivity = FunUtils.fun_reactivity env f.f_user_attributes in
+  let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
+  let returns_mutable = FunUtils.fun_returns_mutable f.f_user_attributes in
+  let returns_void_to_rx =
+    FunUtils.fun_returns_void_to_rx f.f_user_attributes
+  in
+  let return_disposable =
+    FunUtils.has_return_disposable_attribute f.f_user_attributes
+  in
+  let params = FunUtils.make_params env ~is_lambda f.f_params in
   let capability =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
   in
   let ret_ty =
-    ret_from_fun_kind
+    FunUtils.ret_from_fun_kind
       ~is_lambda
       env
       (fst f.f_name)
@@ -59,13 +63,13 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     match f.f_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      Fvariadic (make_param_ty env ~is_lambda param)
-    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
+      Fvariadic (FunUtils.make_param_ty env ~is_lambda param)
+    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty p)
     | FVnonVariadic -> Fstandard
   in
-  let tparams = List.map f.f_tparams (type_param env) in
+  let tparams = List.map f.f_tparams (FunUtils.type_param env) in
   let where_constraints =
-    List.map f.f_where_constraints (where_constraint env)
+    List.map f.f_where_constraints (FunUtils.where_constraint env)
   in
   let fe_deprecated =
     Naming_attributes_deprecated.deprecated
@@ -156,7 +160,7 @@ let typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   in
   let dep = Typing_deps.Dep.Class tid in
   let env = { Decl_env.mode; droot = Some dep; ctx } in
-  let td_tparams = List.map params (type_param env) in
+  let td_tparams = List.map params (FunUtils.type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
   { td_vis; td_tparams; td_constraint; td_type; td_pos }

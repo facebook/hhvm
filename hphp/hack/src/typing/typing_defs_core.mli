@@ -487,6 +487,8 @@ end
 
 include module type of Pp
 
+type decl_ty_ = decl_phase ty_
+
 type locl_ty_ = locl_phase ty_
 
 type decl_tparam = decl_ty tparam [@@deriving show]

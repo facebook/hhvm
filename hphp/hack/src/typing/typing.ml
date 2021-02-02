@@ -21,6 +21,7 @@ open Typing_defs
 open Typing_env_types
 open Utils
 open Typing_helpers
+module FunUtils = Decl_fun_utils
 module TFTerm = Typing_func_terminality
 module TUtils = Typing_utils
 module Reason = Typing_reason
@@ -2767,7 +2768,7 @@ and expr_
     (* Is the return type declared? *)
     let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
     let reactivity =
-      Decl_fun_utils.fun_reactivity_opt env.decl_env f.f_user_attributes
+      FunUtils.fun_reactivity_opt env.decl_env f.f_user_attributes
       |> Option.value
            ~default:(TR.strip_conditional_reactivity (env_reactivity env))
     in

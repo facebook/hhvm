@@ -19,6 +19,7 @@ open Typing_defs
 open Typing_env_types
 open Typing_helpers
 open Utils
+module FunUtils = Decl_fun_utils
 module Reason = Typing_reason
 module Env = Typing_env
 module EnvFromDef = Typing_env_from_def
@@ -29,7 +30,7 @@ let param_has_at_most_rx_as_func p =
   Naming_attributes.mem UA.uaAtMostRxAsFunc p.param_user_attributes
 
 let fun_reactivity env attrs params =
-  let r = Decl_fun_utils.fun_reactivity env attrs in
+  let r = FunUtils.fun_reactivity env attrs in
   let module UA = Naming_special_names.UserAttributes in
   let r =
     (* if at least one of parameters has <<__AtMostRxAsFunc>> attribute -
@@ -169,7 +170,7 @@ let make_param_local_ty env decl_hint param =
           ty
       in
       let condition_type =
-        Decl_fun_utils.condition_type_from_attributes
+        FunUtils.condition_type_from_attributes
           env.decl_env
           param.param_user_attributes
       in
@@ -295,7 +296,7 @@ let get_ctx_vars ctxs =
     ~default:[]
     ctxs
 
-let rec fun_def ctx f :
+let fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
@@ -448,10 +449,10 @@ let rec fun_def ctx f :
       let (_env, global_inference_env) = Env.extract_global_inference_env env in
       (fundef, (pos, global_inference_env)))
 
-and method_def env cls m =
+let method_def env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name ~do_:(fun env ->
-      Decl_fun_utils.check_params m.m_params;
+      FunUtils.check_params m.m_params;
       let initial_env = env in
       (* reset the expression dependent display ids for each method body *)
       Reason.expr_display_id_map := IMap.empty;
@@ -680,7 +681,7 @@ and method_def env cls m =
       (method_def, (pos, global_inference_env)))
 
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
-and check_parent env class_def class_type =
+let check_parent env class_def class_type =
   match Env.get_parent_class env with
   | Some parent_type ->
     let position = fst class_def.c_name in
@@ -690,7 +691,7 @@ and check_parent env class_def class_type =
       Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   | None -> ()
 
-and check_parent_sealed child_type parent_type =
+let check_parent_sealed child_type parent_type =
   match Cls.sealed_whitelist parent_type with
   | None -> ()
   | Some whitelist ->
@@ -713,7 +714,7 @@ and check_parent_sealed child_type parent_type =
       | (Ast_defs.Cenum, _) -> ()
     end
 
-and check_parents_sealed env child_def child_type =
+let check_parents_sealed env child_def child_type =
   let parents =
     child_def.c_extends @ child_def.c_implements @ child_def.c_uses
   in
@@ -732,7 +733,7 @@ and check_parents_sealed env child_def child_type =
  *
  * O(n^2) but we don't expect number of instantiated interfaces to be large
  *)
-and check_implements_or_extends_unique impl =
+let rec check_implements_or_extends_unique impl =
   match impl with
   | [] -> ()
   | ty :: rest ->
@@ -750,7 +751,7 @@ and check_implements_or_extends_unique impl =
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
-and check_cstr_dep deps =
+let check_cstr_dep deps =
   List.iter deps (fun dep ->
       match deref dep with
       | (_, Tapply _) -> ()
@@ -761,7 +762,7 @@ and check_cstr_dep deps =
         let p = Typing_reason.to_pos r in
         Errors.expected_class ~suffix:" or interface" p)
 
-and check_const_trait_members pos env use_list =
+let check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
   | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
@@ -885,34 +886,375 @@ let expr_with_pure_coeffects env ?expected e =
   in
   (env, te, ty)
 
-let rec class_def ctx c =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
-  Errors.run_with_span c.c_span @@ fun () ->
-  let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let tc = Env.get_class env (snd c.c_name) in
-  let env = Env.set_env_pessimize env in
-  Typing_helpers.add_decl_errors (Option.bind tc Cls.decl_errors);
-  Typing_check_decls.class_ env c;
-  NastInitCheck.class_ env c;
-  match tc with
-  | None ->
-    (* This can happen if there was an error during the declaration
-     * of the class. *)
-    None
-  | Some tc ->
-    (* If there are duplicate definitions of the class then we will end up
-       * checking one AST with respect to the decl corresponding to the other definition.
-       * Naming has already detected duplicates, so let's just avoid cascading unhelpful
-       * typing errors, and also avoid triggering the bad position assert
-       *)
-    if not (Pos.equal (fst c.c_name) (Cls.pos tc)) then
-      None
-    else
-      let env = Typing_requirements.check_class env tc in
-      if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
-      Some (class_def_ env c tc)
+(** Checks that a dynamic element is also dynamic in the parents. *)
+let check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
+  (* The non-static properties that we get passed do not start with '$', but the
+     static properties we want to look up do, so add it. *)
+  let id =
+    match elt_type with
+    | `Method -> element_name
+    | `Property -> "$" ^ element_name
+  in
+  match get_static_elt id with
+  | None -> ()
+  | Some static_element ->
+    let (lazy ty) = static_element.ce_type in
+    Errors.static_redeclared_as_dynamic
+      dyn_pos
+      (get_pos ty)
+      element_name
+      ~elt_type
 
-and class_def_ env c tc =
+(** Checks that a static element is also static in the parents. *)
+let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
+  (* The static properties that we get passed in start with '$', but the
+     non-static properties we're matching against don't, so we need to detect
+     that and remove it if present. *)
+  let element_name = String_utils.lstrip element_name "$" in
+  match get_dyn_elt element_name with
+  | None -> ()
+  | Some dyn_element ->
+    let (lazy ty) = dyn_element.ce_type in
+    Errors.dynamic_redeclared_as_static
+      static_pos
+      (get_pos ty)
+      element_name
+      ~elt_type
+
+(** Error if there are abstract methods that this class is supposed to provide
+    implementation for. *)
+let check_extend_abstract_meth ~is_final p seq =
+  List.iter seq (fun (x, ce) ->
+      match ce.ce_type with
+      | (lazy ty) when get_ce_abstract ce && is_fun ty ->
+        Errors.implement_abstract ~is_final p (get_pos ty) "method" x
+      | _ -> ())
+
+let check_extend_abstract_prop ~is_final p seq =
+  List.iter seq (fun (x, ce) ->
+      if get_ce_abstract ce then
+        let ce_pos = Lazy.force ce.ce_type |> get_pos in
+        Errors.implement_abstract ~is_final p ce_pos "property" x)
+
+(* Type constants must be bound to a concrete type for non-abstract classes.
+ *)
+let check_extend_abstract_typeconst ~is_final p seq =
+  List.iter seq (fun (x, tc) ->
+      if Option.is_none tc.ttc_type then
+        Errors.implement_abstract
+          ~is_final
+          p
+          (fst tc.ttc_name)
+          "type constant"
+          x)
+
+let check_extend_abstract_const ~is_final p seq =
+  List.iter seq (fun (x, cc) ->
+      if cc.cc_abstract && not cc.cc_synthesized then
+        let cc_pos = get_pos cc.cc_type in
+        Errors.implement_abstract ~is_final p cc_pos "constant" x)
+
+let get_decl_prop_ty env cls ~is_static prop_id =
+  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
+  if is_global_inference_on then
+    let prop_opt =
+      if is_static then
+        (* this is very ad-hoc, but this is how we do it in the decl-heap *)
+        Cls.get_sprop cls ("$" ^ prop_id)
+      else
+        Cls.get_prop cls prop_id
+    in
+    match prop_opt with
+    | None -> failwith "error: could not find property in decl heap"
+    | Some { ce_type; _ } -> Some (Lazy.force ce_type)
+  else
+    None
+
+let typeconst_def
+    cls
+    env
+    {
+      c_tconst_abstract;
+      c_tconst_name = (pos, _) as id;
+      c_tconst_constraint;
+      c_tconst_type = hint;
+      c_tconst_user_attributes;
+      c_tconst_span;
+      c_tconst_doc_comment;
+      c_tconst_is_ctx;
+    } =
+  begin
+    match cls.c_kind with
+    | Ast_defs.Ctrait
+    | Ast_defs.Cenum ->
+      let kind =
+        match cls.c_kind with
+        | Ast_defs.Ctrait -> `trait
+        | Ast_defs.Cenum -> `enum
+        | _ -> assert false
+      in
+      Errors.cannot_declare_constant kind pos cls.c_name
+    | _ -> ()
+  end;
+  let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
+  let (env, ty) =
+    match hint with
+    | None -> (env, None)
+    | Some hint ->
+      let ty = Decl_hint.hint env.decl_env hint in
+      (* We want to report cycles through the definition *)
+      let name = snd cls.c_name ^ "::" ^ snd id in
+      let (env, ty) =
+        Phase.localize_with_self env ~pos ~report_cycle:(pos, name) ty
+      in
+      (env, Some ty)
+  in
+  let check env t c =
+    Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
+  in
+  let env = Option.value ~default:env @@ Option.map2 ty cstr ~f:(check env) in
+  let env =
+    match hint with
+    | Some (pos, Hshape { nsi_field_map; _ }) ->
+      let get_name sfi = sfi.sfi_name in
+      Typing.check_shape_keys_validity
+        env
+        pos
+        (List.map ~f:get_name nsi_field_map)
+    | _ -> env
+  in
+  let env =
+    Typing.attributes_check_def
+      env
+      SN.AttributeKinds.typeconst
+      c_tconst_user_attributes
+  in
+  let (env, user_attributes) =
+    List.map_env env c_tconst_user_attributes Typing.user_attribute
+  in
+  ( env,
+    {
+      Aast.c_tconst_abstract;
+      Aast.c_tconst_name = id;
+      Aast.c_tconst_constraint;
+      Aast.c_tconst_type = hint;
+      Aast.c_tconst_user_attributes = user_attributes;
+      Aast.c_tconst_span;
+      Aast.c_tconst_doc_comment;
+      Aast.c_tconst_is_ctx;
+    } )
+
+(* This should agree with the set of expressions whose type can be inferred in
+ * Decl_utils.infer_const
+ *)
+let is_literal_expr e =
+  match snd e with
+  | String _
+  | True
+  | False
+  | Int _
+  | Float _
+  | Null ->
+    true
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, (Int _ | Float _))) -> true
+  | _ -> false
+
+let class_const_def ~in_enum_class c env cc =
+  let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
+  begin
+    match c.c_kind with
+    | Ast_defs.Ctrait -> Errors.cannot_declare_constant `trait (fst id) c.c_name
+    | _ -> ()
+  end;
+  let (env, ty, opt_expected) =
+    match h with
+    | None ->
+      begin
+        match e with
+        | None -> ()
+        | Some e ->
+          if
+            (not (is_literal_expr e))
+            && Partial.should_check_error c.c_mode 2035
+            && not Ast_defs.(equal_class_kind c.c_kind Cenum)
+          then
+            Errors.missing_typehint (fst id)
+      end;
+      let (env, ty) = Env.fresh_type env (fst id) in
+      (env, MakeType.unenforced ty, None)
+    | Some h ->
+      let ty = Decl_hint.hint env.decl_env h in
+      let ty = Typing_enforceability.compute_enforced_ty env ty in
+      let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
+      (* Removing the HH\MemberOf wrapper in case of enum classes so the
+       * following call to expr_* has the right expected type
+       *)
+      let opt_ty =
+        if in_enum_class then
+          match get_node ty.et_type with
+          | Tnewtype (memberof, [_; et_type], _)
+            when String.equal memberof SN.Classes.cMemberOf ->
+            { ty with et_type }
+          | _ -> ty
+        else
+          ty
+      in
+      ( env,
+        ty,
+        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty)
+      )
+  in
+  let (env, eopt, ty) =
+    match e with
+    | Some e ->
+      let (env, te, ty') =
+        expr_with_pure_coeffects env ?expected:opt_expected e
+      in
+      (* If we are checking an enum class, wrap ty' into the right
+       * HH\MemberOf<class name, ty'> alias
+       *)
+      let (te, ty') =
+        if in_enum_class then
+          match deref ty.et_type with
+          | (r, Tnewtype (memberof, [enum_name; _], _))
+            when String.equal memberof SN.Classes.cMemberOf ->
+            let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
+            let ((p, te_ty), te) = te in
+            let te = ((p, lift (get_reason te_ty) te_ty), te) in
+            let ty' = lift r ty' in
+            (te, ty')
+          | _ -> (te, ty')
+        else
+          (te, ty')
+      in
+      let env =
+        Typing_coercion.coerce_type
+          (fst id)
+          Reason.URhint
+          env
+          ty'
+          ty
+          Errors.class_constant_value_does_not_match_hint
+      in
+      (env, Some te, ty')
+    | None -> (env, None, ty.et_type)
+  in
+  ( env,
+    ( {
+        Aast.cc_type = cc.cc_type;
+        Aast.cc_id = cc.cc_id;
+        Aast.cc_expr = eopt;
+        Aast.cc_doc_comment = cc.cc_doc_comment;
+      },
+      ty ) )
+
+let class_constr_def env cls constructor =
+  let env = { env with inside_constructor = true } in
+  Option.bind constructor (method_def env cls)
+
+let class_implements_type env c1 ctype2 =
+  let params =
+    List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
+        mk (Reason.Rwitness p, Tgeneric (s, [])))
+  in
+  let r = Reason.Rwitness (fst c1.c_name) in
+  let ctype1 = mk (r, Tapply (c1.c_name, params)) in
+  Typing_extends.check_implements env ctype2 ctype1
+
+(** Type-check a property declaration, with optional initializer *)
+let class_var_def ~is_static cls env cv =
+  (* First pick up and localize the hint if it exists *)
+  let decl_cty =
+    merge_hint_with_decl_hint
+      env
+      (hint_of_type_hint cv.cv_type)
+      (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
+  in
+  let (env, expected) =
+    match decl_cty with
+    | None -> (env, None)
+    | Some decl_cty ->
+      let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
+      let (env, cty) =
+        Phase.localize_possibly_enforced_with_self env decl_cty
+      in
+      let expected =
+        Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
+      in
+      (env, expected)
+  in
+  (* Next check the expression, passing in expected type if present *)
+  let (env, typed_cv_expr) =
+    match cv.cv_expr with
+    | None -> (env, None)
+    | Some e ->
+      let (env, te, ty) = expr_with_pure_coeffects env ?expected e in
+      (* Check that the inferred type is a subtype of the expected type.
+       * Eventually this will be the responsibility of `expr`
+       *)
+      let env =
+        match expected with
+        | None -> env
+        | Some ExpectedTy.{ pos = p; reason = ur; ty = cty } ->
+          Typing_coercion.coerce_type
+            p
+            ur
+            env
+            ty
+            cty
+            Errors.class_property_initializer_type_does_not_match_hint
+      in
+      (env, Some te)
+  in
+
+  let env =
+    if is_static then
+      Typing.attributes_check_def
+        env
+        SN.AttributeKinds.staticProperty
+        cv.cv_user_attributes
+    else
+      Typing.attributes_check_def
+        env
+        SN.AttributeKinds.instProperty
+        cv.cv_user_attributes
+  in
+  let (env, user_attributes) =
+    List.map_env env cv.cv_user_attributes Typing.user_attribute
+  in
+  if
+    Option.is_none (hint_of_type_hint cv.cv_type)
+    && Partial.should_check_error (Env.get_mode env) 2001
+  then
+    Errors.prop_without_typehint
+      (string_of_visibility cv.cv_visibility)
+      cv.cv_id;
+  let (env, global_inference_env) = Env.extract_global_inference_env env in
+  let cv_type =
+    match expected with
+    | Some expected ->
+      (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
+    | None -> Tast.dummy_type_hint (hint_of_type_hint cv.cv_type)
+  in
+  ( env,
+    ( {
+        Aast.cv_final = cv.cv_final;
+        Aast.cv_xhp_attr = cv.cv_xhp_attr;
+        Aast.cv_abstract = cv.cv_abstract;
+        Aast.cv_visibility = cv.cv_visibility;
+        Aast.cv_type;
+        Aast.cv_id = cv.cv_id;
+        Aast.cv_expr = typed_cv_expr;
+        Aast.cv_user_attributes = user_attributes;
+        Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
+        Aast.cv_doc_comment = cv.cv_doc_comment;
+        (* Can make None to save space *)
+        Aast.cv_is_static = is_static;
+        Aast.cv_span = cv.cv_span;
+      },
+      (cv.cv_span, global_inference_env) ) )
+
+let class_def_ env c tc =
   let env =
     let kind =
       match c.c_kind with
@@ -1215,373 +1557,32 @@ and class_def_ env c tc =
     @ static_vars_global_inference_envs
     @ vars_global_inference_envs )
 
-(** Checks that a dynamic element is also dynamic in the parents. *)
-and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
-  (* The non-static properties that we get passed do not start with '$', but the
-     static properties we want to look up do, so add it. *)
-  let id =
-    match elt_type with
-    | `Method -> element_name
-    | `Property -> "$" ^ element_name
-  in
-  match get_static_elt id with
-  | None -> ()
-  | Some static_element ->
-    let (lazy ty) = static_element.ce_type in
-    Errors.static_redeclared_as_dynamic
-      dyn_pos
-      (get_pos ty)
-      element_name
-      ~elt_type
-
-(** Checks that a static element is also static in the parents. *)
-and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
-  (* The static properties that we get passed in start with '$', but the
-     non-static properties we're matching against don't, so we need to detect
-     that and remove it if present. *)
-  let element_name = String_utils.lstrip element_name "$" in
-  match get_dyn_elt element_name with
-  | None -> ()
-  | Some dyn_element ->
-    let (lazy ty) = dyn_element.ce_type in
-    Errors.dynamic_redeclared_as_static
-      static_pos
-      (get_pos ty)
-      element_name
-      ~elt_type
-
-(** Error if there are abstract methods that this class is supposed to provide
-    implementation for. *)
-and check_extend_abstract_meth ~is_final p seq =
-  List.iter seq (fun (x, ce) ->
-      match ce.ce_type with
-      | (lazy ty) when get_ce_abstract ce && is_fun ty ->
-        Errors.implement_abstract ~is_final p (get_pos ty) "method" x
-      | _ -> ())
-
-and check_extend_abstract_prop ~is_final p seq =
-  List.iter seq (fun (x, ce) ->
-      if get_ce_abstract ce then
-        let ce_pos = Lazy.force ce.ce_type |> get_pos in
-        Errors.implement_abstract ~is_final p ce_pos "property" x)
-
-(* Type constants must be bound to a concrete type for non-abstract classes.
- *)
-and check_extend_abstract_typeconst ~is_final p seq =
-  List.iter seq (fun (x, tc) ->
-      if Option.is_none tc.ttc_type then
-        Errors.implement_abstract
-          ~is_final
-          p
-          (fst tc.ttc_name)
-          "type constant"
-          x)
-
-and check_extend_abstract_const ~is_final p seq =
-  List.iter seq (fun (x, cc) ->
-      if cc.cc_abstract && not cc.cc_synthesized then
-        let cc_pos = get_pos cc.cc_type in
-        Errors.implement_abstract ~is_final p cc_pos "constant" x)
-
-and get_decl_prop_ty env cls ~is_static prop_id =
-  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
-  if is_global_inference_on then
-    let prop_opt =
-      if is_static then
-        (* this is very ad-hoc, but this is how we do it in the decl-heap *)
-        Cls.get_sprop cls ("$" ^ prop_id)
-      else
-        Cls.get_prop cls prop_id
-    in
-    match prop_opt with
-    | None -> failwith "error: could not find property in decl heap"
-    | Some { ce_type; _ } -> Some (Lazy.force ce_type)
-  else
+let class_def ctx c =
+  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Errors.run_with_span c.c_span @@ fun () ->
+  let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
+  let tc = Env.get_class env (snd c.c_name) in
+  let env = Env.set_env_pessimize env in
+  Typing_helpers.add_decl_errors (Option.bind tc Cls.decl_errors);
+  Typing_check_decls.class_ env c;
+  NastInitCheck.class_ env c;
+  match tc with
+  | None ->
+    (* This can happen if there was an error during the declaration
+     * of the class. *)
     None
-
-and typeconst_def
-    cls
-    env
-    {
-      c_tconst_abstract;
-      c_tconst_name = (pos, _) as id;
-      c_tconst_constraint;
-      c_tconst_type = hint;
-      c_tconst_user_attributes;
-      c_tconst_span;
-      c_tconst_doc_comment;
-      c_tconst_is_ctx;
-    } =
-  begin
-    match cls.c_kind with
-    | Ast_defs.Ctrait
-    | Ast_defs.Cenum ->
-      let kind =
-        match cls.c_kind with
-        | Ast_defs.Ctrait -> `trait
-        | Ast_defs.Cenum -> `enum
-        | _ -> assert false
-      in
-      Errors.cannot_declare_constant kind pos cls.c_name
-    | _ -> ()
-  end;
-  let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
-  let (env, ty) =
-    match hint with
-    | None -> (env, None)
-    | Some hint ->
-      let ty = Decl_hint.hint env.decl_env hint in
-      (* We want to report cycles through the definition *)
-      let name = snd cls.c_name ^ "::" ^ snd id in
-      let (env, ty) =
-        Phase.localize_with_self env ~pos ~report_cycle:(pos, name) ty
-      in
-      (env, Some ty)
-  in
-  let check env t c =
-    Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
-  in
-  let env = Option.value ~default:env @@ Option.map2 ty cstr ~f:(check env) in
-  let env =
-    match hint with
-    | Some (pos, Hshape { nsi_field_map; _ }) ->
-      let get_name sfi = sfi.sfi_name in
-      Typing.check_shape_keys_validity
-        env
-        pos
-        (List.map ~f:get_name nsi_field_map)
-    | _ -> env
-  in
-  let env =
-    Typing.attributes_check_def
-      env
-      SN.AttributeKinds.typeconst
-      c_tconst_user_attributes
-  in
-  let (env, user_attributes) =
-    List.map_env env c_tconst_user_attributes Typing.user_attribute
-  in
-  ( env,
-    {
-      Aast.c_tconst_abstract;
-      Aast.c_tconst_name = id;
-      Aast.c_tconst_constraint;
-      Aast.c_tconst_type = hint;
-      Aast.c_tconst_user_attributes = user_attributes;
-      Aast.c_tconst_span;
-      Aast.c_tconst_doc_comment;
-      Aast.c_tconst_is_ctx;
-    } )
-
-(* This should agree with the set of expressions whose type can be inferred in
- * Decl_utils.infer_const
- *)
-and is_literal_expr e =
-  match snd e with
-  | String _
-  | True
-  | False
-  | Int _
-  | Float _
-  | Null ->
-    true
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, (Int _ | Float _))) -> true
-  | _ -> false
-
-and class_const_def ~in_enum_class c env cc =
-  let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
-  begin
-    match c.c_kind with
-    | Ast_defs.Ctrait -> Errors.cannot_declare_constant `trait (fst id) c.c_name
-    | _ -> ()
-  end;
-  let (env, ty, opt_expected) =
-    match h with
-    | None ->
-      begin
-        match e with
-        | None -> ()
-        | Some e ->
-          if
-            (not (is_literal_expr e))
-            && Partial.should_check_error c.c_mode 2035
-            && not Ast_defs.(equal_class_kind c.c_kind Cenum)
-          then
-            Errors.missing_typehint (fst id)
-      end;
-      let (env, ty) = Env.fresh_type env (fst id) in
-      (env, MakeType.unenforced ty, None)
-    | Some h ->
-      let ty = Decl_hint.hint env.decl_env h in
-      let ty = Typing_enforceability.compute_enforced_ty env ty in
-      let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
-      (* Removing the HH\MemberOf wrapper in case of enum classes so the
-       * following call to expr_* has the right expected type
+  | Some tc ->
+    (* If there are duplicate definitions of the class then we will end up
+       * checking one AST with respect to the decl corresponding to the other definition.
+       * Naming has already detected duplicates, so let's just avoid cascading unhelpful
+       * typing errors, and also avoid triggering the bad position assert
        *)
-      let opt_ty =
-        if in_enum_class then
-          match get_node ty.et_type with
-          | Tnewtype (memberof, [_; et_type], _)
-            when String.equal memberof SN.Classes.cMemberOf ->
-            { ty with et_type }
-          | _ -> ty
-        else
-          ty
-      in
-      ( env,
-        ty,
-        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty)
-      )
-  in
-  let (env, eopt, ty) =
-    match e with
-    | Some e ->
-      let (env, te, ty') =
-        expr_with_pure_coeffects env ?expected:opt_expected e
-      in
-      (* If we are checking an enum class, wrap ty' into the right
-       * HH\MemberOf<class name, ty'> alias
-       *)
-      let (te, ty') =
-        if in_enum_class then
-          match deref ty.et_type with
-          | (r, Tnewtype (memberof, [enum_name; _], _))
-            when String.equal memberof SN.Classes.cMemberOf ->
-            let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
-            let ((p, te_ty), te) = te in
-            let te = ((p, lift (get_reason te_ty) te_ty), te) in
-            let ty' = lift r ty' in
-            (te, ty')
-          | _ -> (te, ty')
-        else
-          (te, ty')
-      in
-      let env =
-        Typing_coercion.coerce_type
-          (fst id)
-          Reason.URhint
-          env
-          ty'
-          ty
-          Errors.class_constant_value_does_not_match_hint
-      in
-      (env, Some te, ty')
-    | None -> (env, None, ty.et_type)
-  in
-  ( env,
-    ( {
-        Aast.cc_type = cc.cc_type;
-        Aast.cc_id = cc.cc_id;
-        Aast.cc_expr = eopt;
-        Aast.cc_doc_comment = cc.cc_doc_comment;
-      },
-      ty ) )
-
-and class_constr_def env cls constructor =
-  let env = { env with inside_constructor = true } in
-  Option.bind constructor (method_def env cls)
-
-and class_implements_type env c1 ctype2 =
-  let params =
-    List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness p, Tgeneric (s, [])))
-  in
-  let r = Reason.Rwitness (fst c1.c_name) in
-  let ctype1 = mk (r, Tapply (c1.c_name, params)) in
-  Typing_extends.check_implements env ctype2 ctype1
-
-(** Type-check a property declaration, with optional initializer *)
-and class_var_def ~is_static cls env cv =
-  (* First pick up and localize the hint if it exists *)
-  let decl_cty =
-    merge_hint_with_decl_hint
-      env
-      (hint_of_type_hint cv.cv_type)
-      (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
-  in
-  let (env, expected) =
-    match decl_cty with
-    | None -> (env, None)
-    | Some decl_cty ->
-      let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
-      let (env, cty) =
-        Phase.localize_possibly_enforced_with_self env decl_cty
-      in
-      let expected =
-        Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
-      in
-      (env, expected)
-  in
-  (* Next check the expression, passing in expected type if present *)
-  let (env, typed_cv_expr) =
-    match cv.cv_expr with
-    | None -> (env, None)
-    | Some e ->
-      let (env, te, ty) = expr_with_pure_coeffects env ?expected e in
-      (* Check that the inferred type is a subtype of the expected type.
-       * Eventually this will be the responsibility of `expr`
-       *)
-      let env =
-        match expected with
-        | None -> env
-        | Some ExpectedTy.{ pos = p; reason = ur; ty = cty } ->
-          Typing_coercion.coerce_type
-            p
-            ur
-            env
-            ty
-            cty
-            Errors.class_property_initializer_type_does_not_match_hint
-      in
-      (env, Some te)
-  in
-
-  let env =
-    if is_static then
-      Typing.attributes_check_def
-        env
-        SN.AttributeKinds.staticProperty
-        cv.cv_user_attributes
+    if not (Pos.equal (fst c.c_name) (Cls.pos tc)) then
+      None
     else
-      Typing.attributes_check_def
-        env
-        SN.AttributeKinds.instProperty
-        cv.cv_user_attributes
-  in
-  let (env, user_attributes) =
-    List.map_env env cv.cv_user_attributes Typing.user_attribute
-  in
-  if
-    Option.is_none (hint_of_type_hint cv.cv_type)
-    && Partial.should_check_error (Env.get_mode env) 2001
-  then
-    Errors.prop_without_typehint
-      (string_of_visibility cv.cv_visibility)
-      cv.cv_id;
-  let (env, global_inference_env) = Env.extract_global_inference_env env in
-  let cv_type =
-    match expected with
-    | Some expected ->
-      (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
-    | None -> Tast.dummy_type_hint (hint_of_type_hint cv.cv_type)
-  in
-  ( env,
-    ( {
-        Aast.cv_final = cv.cv_final;
-        Aast.cv_xhp_attr = cv.cv_xhp_attr;
-        Aast.cv_abstract = cv.cv_abstract;
-        Aast.cv_visibility = cv.cv_visibility;
-        Aast.cv_type;
-        Aast.cv_id = cv.cv_id;
-        Aast.cv_expr = typed_cv_expr;
-        Aast.cv_user_attributes = user_attributes;
-        Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
-        Aast.cv_doc_comment = cv.cv_doc_comment;
-        (* Can make None to save space *)
-        Aast.cv_is_static = is_static;
-        Aast.cv_span = cv.cv_span;
-      },
-      (cv.cv_span, global_inference_env) ) )
+      let env = Typing_requirements.check_class env tc in
+      if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
+      Some (class_def_ env c tc)
 
 let gconst_def ctx cst =
   Counters.count Counters.Category.Typecheck @@ fun () ->

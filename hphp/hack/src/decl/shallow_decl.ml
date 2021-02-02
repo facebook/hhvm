@@ -9,13 +9,12 @@
 
 open Hh_prelude
 open Decl_defs
-open Decl_fun_utils
 open Shallow_decl_defs
 open Aast
 open Typing_deps
 open Typing_defs
 module Attrs = Naming_attributes
-module Partial = Partial_provider
+module FunUtils = Decl_fun_utils
 
 let class_const env c cc =
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
@@ -99,7 +98,7 @@ let make_xhp_attr cv =
 let prop env cv =
   let cv_pos = fst cv.cv_id in
   let ty =
-    hint_to_type_opt
+    FunUtils.hint_to_type_opt
       env
       ~is_lambda:false
       (Reason.Rglobal_class_prop cv_pos)
@@ -128,7 +127,7 @@ let prop env cv =
 and static_prop env cv =
   let (cv_pos, cv_name) = cv.cv_id in
   let ty =
-    hint_to_type_opt
+    FunUtils.hint_to_type_opt
       env
       ~is_lambda:false
       (Reason.Rglobal_class_prop cv_pos)
@@ -157,18 +156,22 @@ and static_prop env cv =
   }
 
 let method_type env m =
-  let reactivity = fun_reactivity env m.m_user_attributes in
-  let mut = get_param_mutability m.m_user_attributes in
-  let ifc_decl = find_policied_attribute m.m_user_attributes in
-  let returns_mutable = fun_returns_mutable m.m_user_attributes in
-  let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
-  let return_disposable = has_return_disposable_attribute m.m_user_attributes in
-  let params = make_params env ~is_lambda:false m.m_params in
+  let reactivity = FunUtils.fun_reactivity env m.m_user_attributes in
+  let mut = FunUtils.get_param_mutability m.m_user_attributes in
+  let ifc_decl = FunUtils.find_policied_attribute m.m_user_attributes in
+  let returns_mutable = FunUtils.fun_returns_mutable m.m_user_attributes in
+  let returns_void_to_rx =
+    FunUtils.fun_returns_void_to_rx m.m_user_attributes
+  in
+  let return_disposable =
+    FunUtils.has_return_disposable_attribute m.m_user_attributes
+  in
+  let params = FunUtils.make_params env ~is_lambda:false m.m_params in
   let capability =
     Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
   in
   let ret =
-    ret_from_fun_kind
+    FunUtils.ret_from_fun_kind
       ~is_lambda:false
       ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
       env
@@ -180,13 +183,13 @@ let method_type env m =
     match m.m_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      Fvariadic (make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
+      Fvariadic (FunUtils.make_param_ty env ~is_lambda:false param)
+    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty p)
     | FVnonVariadic -> Fstandard
   in
-  let tparams = List.map m.m_tparams (type_param env) in
+  let tparams = List.map m.m_tparams (FunUtils.type_param env) in
   let where_constraints =
-    List.map m.m_where_constraints (where_constraint env)
+    List.map m.m_where_constraints (FunUtils.where_constraint env)
   in
   {
     ft_arity = arity;
@@ -298,7 +301,7 @@ let class_ ctx c =
       Decl_env.add_constructor_dependency env class_name
     in
     let where_constraints =
-      List.map c.c_where_constraints (where_constraint env)
+      List.map c.c_where_constraints (FunUtils.where_constraint env)
     in
     let enum_type hint e =
       let et =
@@ -323,7 +326,7 @@ let class_ ctx c =
       sc_has_xhp_keyword = c.c_has_xhp_keyword;
       sc_kind = c.c_kind;
       sc_name = c.c_name;
-      sc_tparams = List.map c.c_tparams (type_param env);
+      sc_tparams = List.map c.c_tparams (FunUtils.type_param env);
       sc_where_constraints = where_constraints;
       sc_extends;
       sc_uses;

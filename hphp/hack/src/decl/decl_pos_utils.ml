@@ -11,7 +11,6 @@ open Hh_prelude
 open Decl_defs
 open Shallow_decl_defs
 open Typing_defs
-module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Functor traversing a type, but applies a user defined function for

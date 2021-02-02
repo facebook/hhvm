@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5ae2a87af2e7a9c2b05a9e8f9a62e485>>
+// @generated SignedSource<<e50ec7b10301cbbcb6d157eb0028f9ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,7 +198,8 @@ impl<'a> TrivialDrop for Requirement<'a> {}
 pub struct ClassType<'a> {
     pub need_init: bool,
     /// Whether the typechecker knows of all (non-interface) ancestors
-    /// and thus known all accessible members of this class
+    /// and thus knows all accessible members of this class
+    /// This is not the case if one ancestor at least could not be found.
     pub members_fully_known: bool,
     pub abstract_: bool,
     pub final_: bool,

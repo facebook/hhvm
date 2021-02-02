@@ -79,7 +79,8 @@ and class_type = {
   tc_need_init: bool;
   tc_members_fully_known: bool;
       (** Whether the typechecker knows of all (non-interface) ancestors
-       * and thus known all accessible members of this class *)
+       * and thus knows all accessible members of this class
+       * This is not the case if one ancestor at least could not be found. *)
   tc_abstract: bool;
   tc_final: bool;
   tc_const: bool;

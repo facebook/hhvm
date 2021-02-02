@@ -414,7 +414,12 @@ void RegionDesc::sortBlocks() {
   RegionDesc::BlockIdSet visited;
   RegionDesc::BlockIdVec reverse;
 
-  postOrderSort(entry()->id(), visited, reverse);
+  auto const entryId = entry()->id();
+  for (auto& block : m_blocks) {
+    if (block->start() == start()) {
+      postOrderSort(block->id(), visited, reverse);
+    }
+  }
   assertx(m_blocks.size() >= reverse.size());
 
   // Remove unreachable blocks from `m_data'.
@@ -427,12 +432,19 @@ void RegionDesc::sortBlocks() {
     }
   }
 
-  // Update `m_blocks' vector.
+  // Update `m_blocks' vector, making sure that entryId remains the first one.
   m_blocks.clear();
+  m_blocks.push_back(block(entryId));
   auto size = reverse.size();
   for (size_t i = 0; i < size; i++) {
-    m_blocks.push_back(block(reverse[size - i - 1]));
+    auto const id = reverse[size - i - 1];
+    if (id != entryId) m_blocks.push_back(block(id));
   }
+  always_assert_flog(
+    entryId == entry()->id(),
+    "sortBlocks() changed region entry: entryId ({}) != entry()->id() ({})",
+    entryId, entry()->id()
+  );
 }
 
 namespace {
@@ -500,6 +512,8 @@ void RegionDesc::chainRetransBlocks() {
   auto profData = jit::profData();
 
   // 1. Initially assign each region block to its own chain.
+  const auto entryBid = entry()->id();
+  RegionDesc::BlockId entryCid = -1;
   for (auto b : blocks()) {
     auto bid = b->id();
     auto cid = chains.size();
@@ -508,10 +522,21 @@ void RegionDesc::chainRetransBlocks() {
     blockIds.insert(bid);
     always_assert(hasTransID(bid));
     blockWgt[bid] = profData->transCounter(bid);
+    if (bid == entryBid) entryCid = cid;
   }
   always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
-  // 2. For each block, if it has 2 successors with the same SrcKey,
+  // 2. Merge all blocks with the same SrcKey as the entry into the entry's
+  //    chain.
+  for (auto b : blocks()) {
+    if (b->id() == entryBid) continue;
+    if (b->start() == entry()->start()) {
+      const auto cid = block2chain[b->id()];
+      mergeChains(chains[entryCid], chains[cid], block2chain);
+    }
+  }
+
+  // 3. For each block, if it has 2 successors with the same SrcKey,
   //    then merge the successors' chains into one.
   for (auto b : blocks()) {
     auto bid = b->id();
@@ -530,7 +555,7 @@ void RegionDesc::chainRetransBlocks() {
   }
   always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
-  // 3. Sort each chain.  In general, we want to sort each chain in
+  // 4. Sort each chain.  In general, we want to sort each chain in
   //    decreasing order of profile weights.  However, note that this
   //    transformation can turn acyclic graphs into cyclic ones (see
   //    example below).
@@ -553,6 +578,9 @@ void RegionDesc::chainRetransBlocks() {
   //        Note the cycle: B2" -R-> B2' -> B3 -> B2".
   //
   auto cmpBlocks = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
+    const auto isEntry1 = bid1 == entryBid;
+    const auto isEntry2 = bid2 == entryBid;
+    if (isEntry1 != isEntry2) return isEntry1;
     return blockWgt[bid1] > blockWgt[bid2];
   };
 
@@ -570,7 +598,7 @@ void RegionDesc::chainRetransBlocks() {
   }
   always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
-  // 4. Set the nextRetrans blocks according to the computed chains.
+  // 5. Set the nextRetrans blocks according to the computed chains.
   for (auto& c : chains) {
     if (c.blocks.size() == 0) continue;
     for (size_t i = 0; i < c.blocks.size() - 1; i++) {
@@ -578,7 +606,7 @@ void RegionDesc::chainRetransBlocks() {
     }
   }
 
-  // 5. For each block with multiple successors in the same chain,
+  // 6. For each block with multiple successors in the same chain,
   //    only keep the successor that first appears in the chain.
   BlockIdSet erased_ids;
   for (auto b : blocks()) {
@@ -600,7 +628,13 @@ void RegionDesc::chainRetransBlocks() {
     erased_ids.clear();
   }
 
-  // 6. Reorder the blocks in the region in topological order (if
+  ITRACE(
+    3,
+    "selectHotCFG: before sortBlocks at the end of chainRetransBlocks:\n{}\n",
+    show(*this)
+  );
+
+  // 7. Reorder the blocks in the region in topological order (if
   //    region is acyclic), since the previous steps may break it.
   sortBlocks();
 }
@@ -854,7 +888,7 @@ RegionDescPtr selectHotRegion(TransID transId) {
   HotTransContext ctx;
   ctx.cfg = &cfg;
   ctx.profData = profData;
-  ctx.tid = transId;
+  ctx.entries = {transId};
   ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
   switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:

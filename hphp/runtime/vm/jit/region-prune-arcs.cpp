@@ -187,9 +187,11 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
     auto& binfo = blockInfos[rpoID];
     binfo.blockID = b->id();
     blockToRPO[binfo.blockID] = rpoID;
+    if (b->start() == region.start()) {
+      workQ.push(rpoID);
+      blockInfos[rpoID].in = entry_state(region, input);
+    }
   }
-  workQ.push(0);
-  blockInfos[0].in = entry_state(region, input);
 
   FTRACE(4, "Iterating:\n");
   do {

@@ -49,10 +49,11 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining,
-      bool* truncated)
+  DFS(const ProfData* p, const TransCFG& c, const TransIDSet& entries,
+      int32_t maxBCInstrs, bool inlining, bool* truncated)
     : m_profData(p)
     , m_cfg(c)
+    , m_entries(entries)
     , m_numBCInstrs(maxBCInstrs)
     , m_inlining(inlining)
     , m_truncated(truncated)
@@ -74,9 +75,22 @@ struct DFS {
            head, m_cfg.weight(head), m_minBlockWeight, m_minArcProb);
     Trace::Indent indent;
     visit(head);
+    // now visit potential retranslations for the head block
+    DEBUG_ONLY auto const entrySrcKey = m_profData->transRec(head)->srcKey();
+    for (auto bid : m_entries) {
+      assertx(m_profData->transRec(bid)->srcKey() == entrySrcKey);
+      visit(bid);
+    }
+
     for (auto& arc : m_arcs) {
       m_region->addArc(arc.src, arc.dst);
     }
+    always_assert_flog(
+      m_region->empty() || m_region->entry()->id() == head,
+      "formRegion() produced region with wrong entry: "
+      "entry id ({}) != head ({})",
+      m_region->entry()->id(), head
+    );
     return m_region;
   }
 
@@ -204,6 +218,8 @@ private:
     m_numBCInstrs -= tidInstrs;
     ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
+    m_region->append(*tidRegion);
+
     auto const termSk = rec->lastSrcKey();
     auto const termOp = termSk.op();
     if (!breaksRegion(termSk)) {
@@ -249,10 +265,6 @@ private:
       }
     }
 
-    // Now insert the region for tid in the front of m_region.  We do
-    // this last so that the region ends up in (quasi-)topological order
-    // (it'll be in topological order for acyclic regions).
-    m_region->prepend(*tidRegion);
     always_assert(m_numBCInstrs >= 0);
 
     m_visiting.erase(tid);
@@ -261,6 +273,7 @@ private:
 private:
   const ProfData*              m_profData;
   const TransCFG&              m_cfg;
+  const TransIDSet&            m_entries;
   RegionDescPtr                m_region;
   int32_t                      m_numBCInstrs;
   jit::hash_set<TransID>       m_visiting;
@@ -290,6 +303,7 @@ private:
 void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
   jit::fast_map<TransID, double> scales;
   jit::fast_set<TransID> inRegion;
+  jit::fast_set<TransID> inEntryChain;
   jit::fast_map<TransID, TransIDSet> merged;
 
   ITRACE(4, "scaleProfCounts:\n");
@@ -301,6 +315,14 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
       inRegion.emplace(m);
       merged[bid].emplace(m);
     }
+  }
+
+  TransID ebid = region->entry()->id();
+  while (true) {
+    inEntryChain.insert(ebid);
+    auto const next = region->nextRetrans(ebid);
+    if (!next) break;
+    ebid = *next;
   }
 
   auto const setScale = [&] (TransID tid, double scale) {
@@ -318,9 +340,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
 
     assertx(region->blockProfCountScale(bid) == 1.0);
 
-    auto const& inArcs = ctx.cfg->inArcs(bid);
-    if (inArcs.empty()) {
-      assertx(bid == ctx.tid);
+    if (inEntryChain.count(bid)) {
       ITRACE(5, "    entry block. No scaling\n");
       setScale(bid, 1.0);
       continue;
@@ -328,6 +348,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
 
     int64_t totalPredWeight = 0;
     int64_t includedPredWeight = 0;
+    auto const& inArcs = ctx.cfg->inArcs(bid);
     for (auto const inArc : inArcs) {
       auto const pred = inArc->src();
       auto const predWeight = ctx.cfg->weight(pred);
@@ -379,20 +400,44 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
   }
 }
 
+/*
+ * Finds the TransID with highest profile count among ctx's entries.
+ */
+TransID selectMainEntry(const HotTransContext& ctx) {
+  TransID ret = kInvalidTransID;
+  int64_t maxCount = -1;
+  auto const profData = ctx.profData;
+  for (auto tid : ctx.entries) {
+    auto const count = profData->transCounter(tid);
+    if (count > maxCount) {
+      maxCount = count;
+      ret = tid;
+    }
+  }
+  return ret;
 }
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
   if (truncated) *truncated = false;
   ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
+  assertx(ctx.entries.size() >= 1);
+  auto const mainEntryTid = selectMainEntry(ctx);
+  ITRACE(1, "  selected mainEntry: {}\n", mainEntryTid);
+  assertx(mainEntryTid != kInvalidTransID);
   auto const region =
-    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining, truncated)
-      .formRegion(ctx.tid);
+    DFS(ctx.profData, *ctx.cfg, ctx.entries, ctx.maxBCInstrs, ctx.inlining,
+        truncated).formRegion(mainEntryTid);
 
   if (region->empty()) return nullptr;
 
   ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));
   region_prune_arcs(*region, ctx.inputTypes);
+
   ITRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
          show(*region));
   region->chainRetransBlocks();

@@ -333,12 +333,15 @@ void updateWeights(const RegionDesc&   region,
 }
 
 /*
- * This function sorts the `blockData' vector in decreasing order or
- * weight, and keeping the deleted ones at the end.
+ * This function sorts the `blockData' vector in decreasing order or weight,
+ * while keeping the region entry first and the deleted blocks at the end.
  */
-void sortBlockData(BlockDataVec& blockData) {
+void sortBlockData(BlockDataVec& blockData, RegionDesc::BlockId entryId) {
   std::sort(blockData.begin(), blockData.end(),
             [&](const BlockData& bd1, const BlockData& bd2) {
+              const auto isEntry1 = bd1.blockId == entryId;
+              const auto isEntry2 = bd2.blockId == entryId;
+              if (isEntry1 != isEntry2) return isEntry1;
               if (bd1.deleted != bd2.deleted) return bd1.deleted < bd2.deleted;
               return bd1.weight > bd2.weight;
             });
@@ -500,7 +503,7 @@ void optimizeChain(RegionDesc&         region,
 
   FTRACE(2, "optimizeChain(rootId {}): before sortBlockData:\n{}\n",
          rootId, show(blockData));
-  sortBlockData(blockData);
+  sortBlockData(blockData, region.entry()->id());
 
   FTRACE(2, "optimizeChain(rootId {}): before updateRegion:\n{}\n",
          rootId, show(blockData));

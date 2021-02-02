@@ -497,7 +497,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
                              int32_t maxBCInstrs, bool inlining = false);
 
 struct HotTransContext {
-  TransID tid;
+  TransIDSet entries;
   TransCFG* cfg;
   const ProfData* profData;
   int32_t maxBCInstrs;

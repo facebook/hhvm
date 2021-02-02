@@ -358,7 +358,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       HotTransContext ctx;
       ctx.cfg = &cfg;
       ctx.profData = profData;
-      ctx.tid = newHead;
+      ctx.entries = {newHead};
       ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
       switch (regionMode) {
         case PGORegionMode::Hottrace:

@@ -61,7 +61,8 @@ static void mergePostConds(TypedLocations& dst,
 
 RegionDescPtr selectHotTrace(HotTransContext& ctx) {
   auto region = std::make_shared<RegionDesc>();
-  TransID tid    = ctx.tid;
+  assertx(ctx.entries.size() == 1);
+  TransID tid    = *ctx.entries.begin();
   TransID prevId = kInvalidTransID;
   TransIDSet selectedSet;
   TypedLocations accumPostConds;

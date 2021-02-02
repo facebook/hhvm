@@ -638,12 +638,12 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   return r;
 }
 
-TransID findTransIDForCallee(const ProfData* profData, const Func* callee,
-                             Type ctxType, std::vector<Type>& argTypes) {
+TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
+                                 Type ctxType, std::vector<Type>& argTypes) {
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
   auto const offset = callee->getEntryForNumArgs(argTypes.size());
-  TransID ret = kInvalidTransID;
+  TransIDSet ret;
   FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
@@ -665,11 +665,7 @@ TransID findTransIDForCallee(const ProfData* profData, const Func* callee,
       return true;
     }();
 
-    if (!isvalid) continue;
-    // Found multiple entries that may match the arguments, so don't return
-    // any.
-    if (ret != kInvalidTransID) return kInvalidTransID;
-    ret = id;
+    if (isvalid) ret.insert(id);
   }
   return ret;
 }
@@ -692,9 +688,9 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
     return nullptr;
   }
 
-  auto const dvID = findTransIDForCallee(profData, callee, ctxType, argTypes);
+  auto const dvIDs = findTransIDsForCallee(profData, callee, ctxType, argTypes);
 
-  if (dvID == kInvalidTransID) {
+  if (dvIDs.empty()) {
     traceRefusal(callerSk, callee, "didn't find entry TransID for callee",
                  annotations);
     return nullptr;
@@ -703,7 +699,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
   TransCFG cfg(callee->getFuncId(), profData, true /* inlining */);
 
   HotTransContext ctx;
-  ctx.tid = dvID;
+  ctx.entries = dvIDs;
   ctx.cfg = &cfg;
   ctx.profData = profData;
   ctx.maxBCInstrs = maxBCInstrs;

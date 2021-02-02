@@ -3724,6 +3724,7 @@ where
                 }
             }
             TypeConstDeclaration(x) => check(&x.name, c_names),
+            ContextConstDeclaration(x) => check(&x.name, c_names),
             _ => {}
         }
     }

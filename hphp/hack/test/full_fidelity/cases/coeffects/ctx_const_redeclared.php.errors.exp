@@ -1,0 +1,2 @@
+(5,3)-(5,40) Cannot redeclare `Base::C`
+(10,3)-(10,22) Cannot redeclare `Concrete::C`

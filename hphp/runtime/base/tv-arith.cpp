@@ -48,7 +48,7 @@ void throw_bad_array_operand(const ArrayData* ad) {
     assertx(ad->isPHPArrayType());
     return "arrays";
   }();
-  throw ExtendedException(
+  SystemLib::throwInvalidOperationExceptionObject(
     folly::sformat(
       "Invalid operand type was used: "
       "cannot perform this operation with {}", type
@@ -215,8 +215,8 @@ struct Add {
     return make_int(add_ignore_overflow(a, b));
   }
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    throwInvalidAdditionException(a1);
+  ArrayData* operator()(ArrayData* a1, ArrayData* /*ad2*/) const {
+    throw_bad_array_operand(a1);
   }
 };
 
@@ -336,8 +336,8 @@ struct AddEq {
   double  operator()(int64_t a, double  b) const { return a + b; }
   double  operator()(double  a, double  b) const { return a + b; }
 
-  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
-    throwInvalidAdditionException(ad1);
+  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
+    throw_bad_array_operand(ad1);
   }
 };
 

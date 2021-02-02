@@ -1031,19 +1031,6 @@ void throwInvalidKeysetOperation() {
   SystemLib::throwInvalidOperationExceptionObject(s_InvalidKeysetOperationMsg);
 }
 
-void throwInvalidAdditionException(const ArrayData* ad) {
-  const char* type = [&]{
-    if (ad->isPHPArrayType()) return "Arrays";
-    if (ad->isVecType()) return "Vecs";
-    if (ad->isDictType()) return "Dicts";
-    if (ad->isKeysetType()) return "Keysets";
-    not_reached();
-  }();
-  SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat("{} do not support the + operator", type)
-  );
-}
-
 void throwVarrayUnsetException() {
   SystemLib::throwInvalidOperationExceptionObject(s_VarrayUnsetMsg);
 }

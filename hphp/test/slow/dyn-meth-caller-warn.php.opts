@@ -1,1 +1,1 @@
--vEval.ForbidDynamicCallsToMethCaller=1
+-vEval.DynamicMethCallerLevel=1

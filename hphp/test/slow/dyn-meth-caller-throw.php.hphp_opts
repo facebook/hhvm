@@ -1,1 +1,1 @@
--vRuntime.Eval.ForbidDynamicCallsToMethCaller=2
+-vRuntime.Eval.DynamicMethCallerLevel=2

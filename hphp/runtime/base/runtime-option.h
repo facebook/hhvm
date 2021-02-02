@@ -1232,7 +1232,6 @@ struct RuntimeOption {
   F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
   F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
   F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
-  F(int32_t, ForbidDynamicCallsToMethCaller, 0)                         \
   F(int32_t, ForbidDynamicConstructs, 0)                                \
   /*                                                                    \
    * Keep logging dynamic calls according to options above even if      \
@@ -1339,6 +1338,13 @@ struct RuntimeOption {
      1 - raise a warning
      2 - throw */                                                       \
   F(uint64_t, DynamicClsMethLevel, 1)                                   \
+  /* When dynamic_meth_caller is called on a static method or
+     a method not marked as __DynamicallyCallable:
+
+     0 - do nothing
+     1 - raise a warning
+     2 - throw */                                                       \
+  F(uint64_t, DynamicMethCallerLevel, 1)                                \
   F(bool, APCSerializeFuncs, true)                                      \
   F(bool, APCSerializeClsMeth, true)                                    \
   /* When set:

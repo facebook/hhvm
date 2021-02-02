@@ -214,12 +214,29 @@ void CoeffectsConfig::initCapabilities() {
       }
 
       storage_t bits = 0;
+      storage_t bits_shallow = 0;
+      storage_t bits_local = 0;
       bool again = false;
       // Are all my parents processed?
       for (auto parent : cap->parents) {
         auto const it = getCapabilityMap().find(parent->name);
         if (it != getCapabilityMap().end()) {
           bits |= it->second;
+          if (parent->escape) {
+            auto const it_shallow =
+              getCapabilityMap().find(folly::to<std::string>(parent->name,
+                                                             "_shallow"));
+            assertx(it_shallow != getCapabilityMap().end());
+            bits_shallow |= it_shallow->second;
+            auto const it_local =
+              getCapabilityMap().find(folly::to<std::string>(parent->name,
+                                                             "_local"));
+            assertx(it_local != getCapabilityMap().end());
+            bits_local |= it_local->second;
+          } else {
+            bits_shallow |= it->second;
+            bits_local |= it->second;
+          }
         } else {
           again = true;
           break;
@@ -237,12 +254,12 @@ void CoeffectsConfig::initCapabilities() {
         always_assert(nextBit + 1 < std::numeric_limits<storage_t>::digits);
         // Set local
         add(folly::to<std::string>(cap->name, "_local"),
-            bits | (1 << nextBit));
+            bits_local | (1 << nextBit));
         escapeMask |= (1 << nextBit);
 
         // Set shallow
         add(folly::to<std::string>(cap->name, "_shallow"),
-            bits | (1 << (nextBit + 1)));
+            bits_shallow | (1 << (nextBit + 1)));
 
         bits |= (1 << nextBit++);
       }

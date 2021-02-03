@@ -30,6 +30,7 @@
 
 namespace HPHP {
 
+decltype(MemoryStats::s_allocCounts) MemoryStats::s_allocCounts;
 decltype(MemoryStats::s_allocSizes) MemoryStats::s_allocSizes;
 
 void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
@@ -65,12 +66,12 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   w->writeEntry("mem.rss_adjusted", ProcStatus::adjustedRssKb());
 
   w->writeEntry("static_string_count", makeStaticStringCount());
-  w->writeEntry("static_string_size", totalSize(AllocKind::StaticString));
+  w->writeEntry("static_string_size", TotalSize(AllocKind::StaticString));
   w->writeEntry("static_array_count", loadedStaticArrayCount());
-  w->writeEntry("static_array_size", totalSize(AllocKind::StaticArray));
-  w->writeEntry("unit_size", totalSize(AllocKind::Unit));
-  w->writeEntry("class_size", totalSize(AllocKind::Class));
-  w->writeEntry("func_size", totalSize(AllocKind::Func));
+  w->writeEntry("static_array_size", TotalSize(AllocKind::StaticArray));
+  w->writeEntry("unit_size", TotalSize(AllocKind::Unit));
+  w->writeEntry("class_size", TotalSize(AllocKind::Class));
+  w->writeEntry("func_size", TotalSize(AllocKind::Func));
 
   w->endObject("Memory");
   w->writeFileFooter();

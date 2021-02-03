@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/http-server.h"
 
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
@@ -28,6 +29,7 @@
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/static-content-cache.h"
@@ -199,6 +201,19 @@ HttpServer::HttpServer() {
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
         counters["windowed_rss"] = ProcStatus::adjustedRssKb();
+        counters["windowed_units"] = MemoryStats::Count(AllocKind::Unit);
+        counters["windowed_classes"] = MemoryStats::Count(AllocKind::Class);
+        counters["windowed_funcs"] = MemoryStats::Count(AllocKind::Func);
+        counters["windowed_unit_size"] =
+          MemoryStats::TotalSize(AllocKind::Unit);
+        counters["windowed_class_size"] =
+          MemoryStats::TotalSize(AllocKind::Class);
+        counters["windowed_func_size"] =
+          MemoryStats::TotalSize(AllocKind::Func);
+        auto const& apc = APCStats::getAPCStats();
+        counters["windowed_apc_entries"] = apc.totalEntries();
+        counters["windowed_apc_key_size"] = apc.totalKeySize();
+        counters["windowed_apc_value_size"] = apc.totalValueSize();
       }
     }
   );

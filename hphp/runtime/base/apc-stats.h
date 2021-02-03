@@ -281,6 +281,19 @@ struct APCStats {
     m_pendingDeleteSize->addValue(-size);
   }
 
+  size_t totalEntries() const {
+    if (m_entries) return m_entries->getValue();
+    return 0;
+  }
+  size_t totalKeySize() const {
+    if (m_keySize) return m_keySize->getValue();
+    return 0;
+  }
+  size_t totalValueSize() const {
+    if (m_valueSize) return m_valueSize->getValue();
+    return 0;
+  }
+
 private:
   static std::unique_ptr<APCStats> s_apcStats;
 
@@ -323,4 +336,3 @@ private:
 };
 
 }
-

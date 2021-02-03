@@ -54,8 +54,8 @@
       c_vars = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([4:19-22], "get"); m_tparams = [];
+         m_abstract = false; m_static = false; m_readonly_this = false;
+         m_visibility = Public; m_name = ([4:19-22], "get"); m_tparams = [];
          m_where_constraints =
          [(([4:35-36], (Habstr ("T", []))), Constraint_super,
            ([4:43-51], (Hprim Tarraykey)))];

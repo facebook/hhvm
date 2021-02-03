@@ -71,8 +71,8 @@
       c_vars = [];
       c_methods =
       [{ m_span = [4:3-45]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([4:19-22], "add"); m_tparams = [];
+         m_abstract = false; m_static = false; m_readonly_this = false;
+         m_visibility = Public; m_name = ([4:19-22], "add"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([4:26-28], Tk);
@@ -95,8 +95,8 @@
          m_ret = ((void), (Some ([4:38-42], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
         { m_span = [5:3-7:4]; m_annotation = (); m_final = false;
-          m_abstract = false; m_static = false; m_visibility = Public;
-          m_name = ([5:19-22], "get"); m_tparams = [];
+          m_abstract = false; m_static = false; m_readonly_this = false;
+          m_visibility = Public; m_name = ([5:19-22], "get"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
           [{ param_annotation = ([5:26-28], Tk);

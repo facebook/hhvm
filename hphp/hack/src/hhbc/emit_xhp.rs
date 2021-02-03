@@ -422,6 +422,7 @@ fn from_xhp_attribute_declaration_method<'a>(
         final_,
         abstract_,
         static_,
+        readonly_this: false, // TODO readonly emitter
         visibility,
         name: ast_defs::Id(Pos::make_none(), name.into()),
         tparams: vec![],

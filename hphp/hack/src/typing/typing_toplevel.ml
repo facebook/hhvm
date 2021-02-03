@@ -660,6 +660,7 @@ let method_def env cls m =
           Aast.m_static = m.m_static;
           Aast.m_abstract = m.m_abstract;
           Aast.m_visibility = m.m_visibility;
+          Aast.m_readonly_this = m.m_readonly_this;
           Aast.m_name = m.m_name;
           Aast.m_tparams = tparams;
           Aast.m_where_constraints = m.m_where_constraints;
@@ -1296,6 +1297,7 @@ let class_var_def ~is_static cls env cv =
         (* Can make None to save space *)
         Aast.cv_is_static = is_static;
         Aast.cv_span = cv.cv_span;
+        Aast.cv_readonly = cv.cv_readonly;
       },
       (cv.cv_span, global_inference_env) ) )
 

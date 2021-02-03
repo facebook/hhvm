@@ -16,7 +16,7 @@ Errors:
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-         cv_visibility = Public;
+         cv_readonly = false; cv_visibility = Public;
          cv_type = ((T), (Some ([4:10-11], (Habstr ("T", [])))));
          cv_id = ([4:12-14], "y"); cv_expr = None; cv_user_attributes = [];
          cv_doc_comment = None; cv_is_promoted_variadic = false;
@@ -24,9 +24,10 @@ Errors:
         ];
       c_methods =
       [{ m_span = [5:3-7:4]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([5:19-30], "__construct"); m_tparams = [];
-         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_abstract = false; m_static = false; m_readonly_this = false;
+         m_visibility = Public; m_name = ([5:19-30], "__construct");
+         m_tparams = []; m_where_constraints = [];
+         m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([5:33-35], T);
             param_type_hint = ((T), (Some ([5:31-32], (Habstr ("T", [])))));

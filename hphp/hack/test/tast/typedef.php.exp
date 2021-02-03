@@ -11,9 +11,9 @@
       c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [3:46-87]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([3:62-73], "__construct"); m_tparams = [];
-         m_where_constraints = [];
+         m_abstract = false; m_static = false; m_readonly_this = false;
+         m_visibility = Public; m_name = ([3:62-73], "__construct");
+         m_tparams = []; m_where_constraints = [];
          m_variadic =
          (FVvariadicArg
             { param_annotation = ([3:81-83], varray<int>);

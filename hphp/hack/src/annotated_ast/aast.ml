@@ -870,6 +870,7 @@ and ('ex, 'fb, 'en, 'hi) class_var = {
   cv_final: bool;
   cv_xhp_attr: xhp_attr_info option;
   cv_abstract: bool;
+  cv_readonly: bool;
   cv_visibility: visibility;
   cv_type: 'hi type_hint;
   cv_id: sid;
@@ -887,6 +888,7 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_final: bool;
   m_abstract: bool;
   m_static: bool;
+  m_readonly_this: bool;
   m_visibility: visibility;
   m_name: sid;
   m_tparams: ('ex, 'fb, 'en, 'hi) tparam list;

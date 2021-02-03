@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77a21c5926e59bfe66834a945e484aa4>>
+// @generated SignedSource<<ca41668804bfec1142a84a0e9634751e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1551,6 +1551,7 @@ pub struct ClassVar<'a, Ex, Fb, En, Hi> {
     pub final_: bool,
     pub xhp_attr: Option<&'a oxidized::aast::XhpAttrInfo>,
     pub abstract_: bool,
+    pub readonly: bool,
     pub visibility: oxidized::aast::Visibility,
     pub type_: &'a TypeHint<'a, Hi>,
     pub id: Sid<'a>,
@@ -1585,6 +1586,7 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub final_: bool,
     pub abstract_: bool,
     pub static_: bool,
+    pub readonly_this: bool,
     pub visibility: oxidized::aast::Visibility,
     pub name: Sid<'a>,
     pub tparams: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],

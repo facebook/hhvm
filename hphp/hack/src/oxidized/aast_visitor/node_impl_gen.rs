@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ad020c2b74934e20c3239d0aed790e4>>
+// @generated SignedSource<<c56cbbdfa3505087002f976e82b8b23b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -391,6 +391,7 @@ impl<P: Params> Node<P> for ClassVar<P::Ex, P::Fb, P::En, P::Hi> {
         self.final_.accept(c, v)?;
         self.xhp_attr.accept(c, v)?;
         self.abstract_.accept(c, v)?;
+        self.readonly.accept(c, v)?;
         self.visibility.accept(c, v)?;
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
@@ -1438,6 +1439,7 @@ impl<P: Params> Node<P> for Method_<P::Ex, P::Fb, P::En, P::Hi> {
         self.final_.accept(c, v)?;
         self.abstract_.accept(c, v)?;
         self.static_.accept(c, v)?;
+        self.readonly_this.accept(c, v)?;
         self.visibility.accept(c, v)?;
         self.name.accept(c, v)?;
         self.tparams.accept(c, v)?;

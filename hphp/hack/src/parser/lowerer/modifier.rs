@@ -19,6 +19,7 @@ pub const PUBLIC: Kind = Kind(0b0000100000u32);
 pub const PROTECTED: Kind = Kind(0b0001000000u32);
 pub const VAR: Kind = Kind(0b0010000000u32);
 pub const ASYNC: Kind = Kind(0b0100000000u32);
+pub const READONLY: Kind = Kind(0b1000000000u32);
 
 pub fn from_token_kind(t: TK) -> Option<Kind> {
     match t {
@@ -31,6 +32,7 @@ pub fn from_token_kind(t: TK) -> Option<Kind> {
         TK::Var => Some(VAR),
         TK::Async => Some(ASYNC),
         TK::XHP => Some(XHP),
+        TK::Readonly => Some(READONLY),
         _ => None,
     }
 }

@@ -4294,6 +4294,7 @@ where
                         final_: kinds.has(modifier::FINAL),
                         xhp_attr: None,
                         abstract_: kinds.has(modifier::ABSTRACT),
+                        readonly: kinds.has(modifier::READONLY),
                         visibility: vis,
                         type_: ast::TypeHint((), type_.clone()),
                         id: name_expr.1,
@@ -4338,6 +4339,11 @@ where
                             final_: false,
                             xhp_attr: None,
                             abstract_: false,
+                            // We use the param readonlyness here to represent the
+                            // ClassVar's readonlyness once lowered
+                            // TODO(jjwu): Convert this to an enum when we support
+                            // multiple types of readonlyness
+                            readonly: param.readonly.is_some(),
                             visibility: param.visibility.unwrap(),
                             type_: param.type_hint.clone(),
                             id: ast::Id(p.clone(), cvname.to_string()),
@@ -4365,6 +4371,7 @@ where
                 let kinds = Self::p_kinds(&h.modifiers, env)?;
                 let visibility = p_method_vis(&h.modifiers, &hdr.name.0, env)?;
                 let is_static = kinds.has(modifier::STATIC);
+                let readonly_this = kinds.has(modifier::READONLY);
                 *env.in_static_method() = is_static;
                 let (mut body, body_has_yield) =
                     Self::mp_yielding(Self::p_function_body, &c.function_body, env)?;
@@ -4387,6 +4394,7 @@ where
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
                     final_: kinds.has(modifier::FINAL),
+                    readonly_this,
                     abstract_: is_abstract,
                     static_: is_static,
                     name: hdr.name,
@@ -4549,6 +4557,7 @@ where
                                     final_: false,
                                     xhp_attr: Some(ast::XhpAttrInfo { xai_tag: req }),
                                     abstract_: false,
+                                    readonly: false,
                                     visibility: ast::Visibility::Public,
                                     type_: ast::TypeHint((), hint),
                                     id: ast::Id(p, String::from(":") + &name),

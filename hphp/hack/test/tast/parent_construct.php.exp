@@ -9,9 +9,10 @@
       c_vars = [];
       c_methods =
       [{ m_span = [4:3-41]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([4:19-30], "__construct"); m_tparams = [];
-         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_abstract = false; m_static = false; m_readonly_this = false;
+         m_visibility = Public; m_name = ([4:19-30], "__construct");
+         m_tparams = []; m_where_constraints = [];
+         m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([4:35-37], num);
             param_type_hint = ((num), (Some ([4:31-34], (Hprim Tnum))));
@@ -46,9 +47,10 @@
        c_vars = [];
        c_methods =
        [{ m_span = [7:3-9:4]; m_annotation = (); m_final = false;
-          m_abstract = false; m_static = false; m_visibility = Public;
-          m_name = ([7:19-30], "__construct"); m_tparams = [];
-          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_abstract = false; m_static = false; m_readonly_this = false;
+          m_visibility = Public; m_name = ([7:19-30], "__construct");
+          m_tparams = []; m_where_constraints = [];
+          m_variadic = FVnonVariadic;
           m_params =
           [{ param_annotation = ([7:35-37], int);
              param_type_hint = ((int), (Some ([7:31-34], (Hprim Tint))));

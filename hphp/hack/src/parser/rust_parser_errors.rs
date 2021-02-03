@@ -1084,6 +1084,9 @@ where
         if let Some(modifiers) = Self::get_modifiers_of_declaration(node) {
             for modifier in Self::syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = Self::token_kind(modifier) {
+                    if kind == TokenKind::Readonly {
+                        self.check_can_use_feature(modifier, &UnstableFeatures::Readonly)
+                    }
                     if !ok(kind) {
                         self.errors.push(Self::make_error_from_node(
                             modifier,
@@ -1881,6 +1884,7 @@ where
                         || kind == TokenKind::Protected
                         || kind == TokenKind::Public
                         || kind == TokenKind::Async
+                        || kind == TokenKind::Readonly
                 });
 
                 if self.is_inside_interface() {
@@ -4811,6 +4815,7 @@ where
                     || kind == TokenKind::Private
                     || kind == TokenKind::Protected
                     || kind == TokenKind::Public
+                    || kind == TokenKind::Readonly
             });
 
             self.produce_error(

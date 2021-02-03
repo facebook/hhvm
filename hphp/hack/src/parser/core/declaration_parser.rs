@@ -2205,7 +2205,8 @@ where
                 | TokenKind::Protected
                 | TokenKind::Private
                 | TokenKind::Async
-                | TokenKind::Final => {
+                | TokenKind::Final
+                | TokenKind::Readonly => {
                     let token = self.next_token();
                     let item = S!(make_token, self, token);
                     items.push(item)
@@ -2313,6 +2314,7 @@ where
             | TokenKind::Public
             | TokenKind::Protected
             | TokenKind::Private
+            | TokenKind::Readonly
             | TokenKind::Static => self.parse_methodish_or_property_or_const_or_type_const(),
             TokenKind::Async | TokenKind::Final | TokenKind::LessThanLessThan => {
                 // Parse methods, constructors, properties, type constants,

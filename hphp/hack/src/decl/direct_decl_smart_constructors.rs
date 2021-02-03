@@ -301,6 +301,7 @@ struct Modifiers {
     visibility: aast::Visibility,
     is_abstract: bool,
     is_final: bool,
+    is_readonly: bool, // TODO: handle readonly modifiers in direct decl
 }
 
 fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a>>) -> Modifiers {
@@ -309,6 +310,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
         visibility: aast::Visibility::Public,
         is_abstract: false,
         is_final: false,
+        is_readonly: false,
     };
     for modifier in modifiers {
         if let Some(vis) = modifier.as_visibility() {
@@ -318,6 +320,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
             Some(TokenKind::Static) => ret.is_static = true,
             Some(TokenKind::Abstract) => ret.is_abstract = true,
             Some(TokenKind::Final) => ret.is_final = true,
+            Some(TokenKind::Readonly) => ret.is_readonly = true,
             _ => {}
         }
     }

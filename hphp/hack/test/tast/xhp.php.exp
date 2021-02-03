@@ -10,7 +10,7 @@
       c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = (Some { xai_tag = None });
-         cv_abstract = false; cv_visibility = Public;
+         cv_abstract = false; cv_readonly = false; cv_visibility = Public;
          cv_type =
          ((?string),
           (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring))))));

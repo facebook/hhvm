@@ -819,6 +819,7 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     m_static;
     m_tparams;
     m_params;
+    m_readonly_this = _;
     m_variadic;
     m_ret = (_, m_ret);
     m_name = (_, m_name);
@@ -879,7 +880,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                param_name;
                param_annotation;
                param_expr;
-               param_readonly = _;
+               param_readonly;
                param_callconv = _;
                param_user_attributes;
                param_visibility;
@@ -893,6 +894,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                  cv_xhp_attr = None;
                  cv_abstract = false;
                  cv_visibility;
+                 cv_readonly = Option.is_some param_readonly;
                  cv_type = param_type_hint;
                  cv_id = (param_pos, param_name);
                  cv_expr = param_expr;

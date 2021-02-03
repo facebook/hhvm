@@ -1,7 +1,4 @@
 <?hh
-// TODO: this test only ensures that the file currently passes the typechecker
-// over time as we implement typechecker features, it will split into smaller
-// tests that error
 <<file:__EnableUnstableFeatures('readonly')>>
 class Foo {
 }
@@ -49,22 +46,17 @@ async function expressions(readonly Foo $x) : readonly Awaitable<Foo> {
 
 
 class Bar {
-  // TODO: readonly on properties
-  public  /* readonly */  Foo $x;
+  public readonly Foo $x;
 
-
-  // TODO: this readonly applies to the function but not the property yet
   public function __construct(
     public readonly Foo $y,
     ) {
     $this->x = new Foo();
   }
-  // TODO: readonly on methods
-  public /* readonly */ function getFoo() : void {
-    // TODO: readonly annotation on lambda
+  public readonly function getFoo() : void {
     $f = /* <<readonly>> */  (Foo $y) ==> {return $y;};
     // TODO: readonly annotation on anonymous function
-    $z = /* readonly */ function(Foo $f)  : void {
+    $z = readonly function(Foo $f)  : void {
     };
   }
 

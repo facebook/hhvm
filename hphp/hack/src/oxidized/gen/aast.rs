@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<863926b65af64e5fdf1524738d64028c>>
+// @generated SignedSource<<1f3d54b11e6d6665771b8fac35eb0190>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1477,6 +1477,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub final_: bool,
     pub xhp_attr: Option<XhpAttrInfo>,
     pub abstract_: bool,
+    pub readonly: bool,
     pub visibility: Visibility,
     pub type_: TypeHint<Hi>,
     pub id: Sid,
@@ -1508,6 +1509,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub final_: bool,
     pub abstract_: bool,
     pub static_: bool,
+    pub readonly_this: bool,
     pub visibility: Visibility,
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,

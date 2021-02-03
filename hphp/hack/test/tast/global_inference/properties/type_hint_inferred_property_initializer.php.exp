@@ -8,15 +8,15 @@
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-         cv_visibility = Public; cv_type = ((int), None);
-         cv_id = ([4:17-19], "x");
+         cv_readonly = false; cv_visibility = Public;
+         cv_type = ((int), None); cv_id = ([4:17-19], "x");
          cv_expr = (Some (([4:22-23], int), (Int "3")));
          cv_user_attributes = []; cv_doc_comment = None;
          cv_is_promoted_variadic = false; cv_is_static = true;
          cv_span = [4:17-23] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-          cv_visibility = Public; cv_type = ((string), None);
-          cv_id = ([5:10-12], "y");
+          cv_readonly = false; cv_visibility = Public;
+          cv_type = ((string), None); cv_id = ([5:10-12], "y");
           cv_expr = (Some (([5:15-23], string), (String "string")));
           cv_user_attributes = []; cv_doc_comment = None;
           cv_is_promoted_variadic = false; cv_is_static = false;

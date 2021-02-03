@@ -452,6 +452,7 @@ fn make_closure(
         final_: false,
         abstract_: false,
         static_: is_static,
+        readonly_this: false, // readonly on closure_convert
         visibility: Visibility::Public,
         name: Id(fd.name.0.clone(), "__invoke".into()),
         tparams: fun_tparams,
@@ -463,7 +464,7 @@ fn make_closure(
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,
         user_attributes: fd.user_attributes.clone(),
-        readonly_ret: None, // readonly on closure_convert
+        readonly_ret: None, // readonly_ret on closure_convert
         ret: fd.ret.clone(),
         external: false,
         doc_comment: fd.doc_comment.clone(),
@@ -473,6 +474,7 @@ fn make_closure(
         final_: false,
         xhp_attr: None,
         abstract_: false,
+        readonly: false, // readonly on closure_convert
         visibility: Visibility::Private,
         type_: TypeHint((), None),
         id: Id(p.clone(), name.into()),
@@ -1062,6 +1064,7 @@ fn add_reified_property(tparams: &Vec<Tparam>, vars: &mut Vec<ClassVar>) {
                 is_promoted_variadic: false,
                 doc_comment: None,
                 abstract_: false,
+                readonly: false,
                 visibility: Visibility::Private,
                 type_: TypeHint((), Some(hint)),
                 id: Id(p.clone(), string_utils::reified::PROP_NAME.into()),

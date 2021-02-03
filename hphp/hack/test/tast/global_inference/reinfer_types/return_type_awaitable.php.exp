@@ -40,8 +40,8 @@
        c_vars = [];
        c_methods =
        [{ m_span = [8:3-10:4]; m_annotation = (); m_final = false;
-          m_abstract = false; m_static = false; m_visibility = Public;
-          m_name = ([8:25-28], "foo"); m_tparams = [];
+          m_abstract = false; m_static = false; m_readonly_this = false;
+          m_visibility = Public; m_name = ([8:25-28], "foo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
           [{ param_annotation = ([8:33-35], int);

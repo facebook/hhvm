@@ -638,8 +638,15 @@ let error_if_reactive_context env f =
   then
     f ()
 
-let make_depend_on_class env x =
-  let dep = Dep.Class x in
+let make_depend_on_class env class_name =
+  let dep = Dep.Class class_name in
+  Option.iter env.decl_env.droot (fun root ->
+      Typing_deps.add_idep (get_deps_mode env) root dep);
+  ()
+
+let make_depend_on_constructor env class_name =
+  make_depend_on_class env class_name;
+  let dep = Dep.Cstr class_name in
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
   ()
@@ -902,14 +909,10 @@ let suggest_member is_method class_ mid =
 
 let get_construct env class_ =
   if not (Pos.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_class env (Cls.name class_);
-    let add_dep x =
-      let dep = Dep.Cstr x in
-      Option.iter env.decl_env.Decl_env.droot (fun root ->
-          Typing_deps.add_idep (get_deps_mode env) root dep)
-    in
-    add_dep (Cls.name class_);
-    Option.iter (fst (Cls.construct class_)) (fun ce -> add_dep ce.ce_origin)
+    make_depend_on_constructor env (Cls.name class_);
+    Option.iter
+      (fst (Cls.construct class_))
+      (fun ce -> make_depend_on_constructor env ce.ce_origin)
   end;
   Cls.construct class_
 

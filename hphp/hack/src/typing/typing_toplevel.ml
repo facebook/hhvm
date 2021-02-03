@@ -751,10 +751,11 @@ let rec check_implements_or_extends_unique impl =
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
-let check_cstr_dep deps =
+let check_cstr_dep env deps =
   List.iter deps (fun dep ->
       match deref dep with
-      | (_, Tapply _) -> ()
+      | (_, Tapply ((_, class_name), _)) ->
+        Env.make_depend_on_constructor env class_name
       | (r, Tgeneric _) ->
         let p = Typing_reason.to_pos r in
         Errors.expected_class ~suffix:" or interface but got a generic" p
@@ -1366,6 +1367,7 @@ let class_def_ env c tc =
     | Ast_defs.Ctrait -> implements @ req_implements
     | _ -> []
   in
+  let check_cstr_dep = check_cstr_dep env in
   check_implements_or_extends_unique implements;
   check_implements_or_extends_unique extends;
   check_cstr_dep extends;

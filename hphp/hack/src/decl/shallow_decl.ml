@@ -287,38 +287,17 @@ let class_ ctx c =
     let sc_req_extends = List.map ~f:hint req_extends in
     let sc_req_implements = List.map ~f:hint req_implements in
     let sc_implements = List.map ~f:hint c.c_implements in
-    let additional_parents =
-      (* In an abstract class or a trait, we assume the interfaces
-       will be implemented in the future, so we take them as
-       part of the class (as requested by dependency injection implementers) *)
-      match c.c_kind with
-      | Ast_defs.Cabstract -> sc_implements
-      | Ast_defs.Ctrait -> sc_implements @ sc_req_implements
-      | _ -> []
-    in
-    let add_cstr_dep ty =
-      let (_, (_, class_name), _) = Decl_utils.unwrap_class_type ty in
-      Decl_env.add_constructor_dependency env class_name
-    in
     let where_constraints =
       List.map c.c_where_constraints (FunUtils.where_constraint env)
     in
     let enum_type hint e =
-      let et =
-        {
-          te_base = hint e.e_base;
-          te_constraint = Option.map e.e_constraint hint;
-          te_includes = List.map e.e_includes hint;
-          te_enum_class = e.e_enum_class;
-        }
-      in
-      List.iter ~f:add_cstr_dep et.te_includes;
-      et
+      {
+        te_base = hint e.e_base;
+        te_constraint = Option.map e.e_constraint hint;
+        te_includes = List.map e.e_includes hint;
+        te_enum_class = e.e_enum_class;
+      }
     in
-    List.iter ~f:add_cstr_dep sc_extends;
-    List.iter ~f:add_cstr_dep sc_uses;
-    List.iter ~f:add_cstr_dep sc_req_extends;
-    List.iter ~f:add_cstr_dep additional_parents;
     {
       sc_mode = c.c_mode;
       sc_final = c.c_final;

@@ -3,6 +3,7 @@
   (wrapped false)
   (modules filesToIgnore)
   (libraries
+    str
     (select filesToIgnore.ml from
       (facebook -> ../../facebook/ignore/filesToIgnore.ml)
       (-> ../../stubs/filesToIgnore.ml))))

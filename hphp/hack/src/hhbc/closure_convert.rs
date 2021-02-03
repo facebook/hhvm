@@ -936,6 +936,7 @@ fn make_dyn_meth_caller_lambda(
     pos: &Pos,
     cexpr: &Expr,
     fexpr: &Expr,
+    force: bool,
 ) -> Expr_ {
     fn get_scope_fmode(scope: &Scope) -> Mode {
         scope
@@ -974,6 +975,14 @@ fn make_dyn_meth_caller_lambda(
             Some(Expr(pos(), Expr_::Lvar(args_var))),
         ),
     );
+    let attrs = if force {
+        vec![UserAttribute {
+            name: Id(pos(), "__DynamicMethCallerForce".into()),
+            params: vec![],
+        }]
+    } else {
+        vec![]
+    };
 
     let fd = Fun_ {
         span: pos(),
@@ -997,7 +1006,7 @@ fn make_dyn_meth_caller_lambda(
             annotation: (),
         },
         fun_kind: FunKind::FSync,
-        user_attributes: vec![],
+        user_attributes: attrs,
         file_attributes: vec![],
         external: false,
         namespace: RcOc::clone(&st.state.empty_namespace),
@@ -1005,6 +1014,7 @@ fn make_dyn_meth_caller_lambda(
         static_: false,
     };
     let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
+    let force_val = if force { Expr_::True } else { Expr_::False };
     let fun_handle: Expr_ = Expr_::mk_call(
         expr_id("\\__systemlib\\dynamic_meth_caller".into()),
         vec![],
@@ -1012,6 +1022,7 @@ fn make_dyn_meth_caller_lambda(
             cexpr.clone(),
             fexpr.clone(),
             Expr(pos(), Expr_::mk_efun(fd, vec![])),
+            Expr(pos(), force_val),
         ],
         None,
     );
@@ -1235,13 +1246,20 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 if {
                     if let Expr_::Id(ref id) = (x.0).1 {
                         strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller")
+                            || strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
                     } else {
                         false
                     }
                 } =>
             {
+                let force = if let Expr_::Id(ref id) = (x.0).1 {
+                    strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+                } else {
+                    false
+                };
                 if let [cexpr, fexpr] = &mut *x.2 {
-                    let mut res = make_dyn_meth_caller_lambda(env, self, &*pos, &cexpr, &fexpr);
+                    let mut res =
+                        make_dyn_meth_caller_lambda(env, self, &*pos, &cexpr, &fexpr, force);
                     res.recurse(env, self.object())?;
                     res
                 } else {

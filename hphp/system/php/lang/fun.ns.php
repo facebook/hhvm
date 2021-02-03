@@ -71,8 +71,10 @@ namespace __SystemLib {
     }
   }
 
-  function dynamic_meth_caller(string $class, string $method, mixed $lambda) {
-    if (!\__SystemLib\is_dynamically_callable_inst_method($class, $method)) {
+  function dynamic_meth_caller(string $class, string $method, mixed $lambda,
+                               bool $force) {
+    if (!$force &&
+        !\__SystemLib\is_dynamically_callable_inst_method($class, $method)) {
       $level = \ini_get('hhvm.dynamic_meth_caller_level');
       if ($level == 1) {
         \trigger_error(

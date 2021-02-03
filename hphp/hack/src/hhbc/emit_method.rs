@@ -20,7 +20,7 @@ use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::{special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
-use oxidized::ast as T;
+use oxidized::{ast as T, ast_defs};
 
 use itertools::Either;
 use std::borrow::Cow;
@@ -53,6 +53,19 @@ pub fn from_ast<'a>(
         emit_attribute::from_asts(emitter, &class.namespace, &method.user_attributes)?;
     if !is_closure_body {
         attributes.extend(emit_attribute::add_reified_attribute(&method.tparams[..]));
+    };
+    let call_context = if is_closure_body {
+        match &method.user_attributes[..] {
+            [T::UserAttribute {
+                name: ast_defs::Id(_, ref s),
+                params: _,
+            }] if s.eq_ignore_ascii_case("__DynamicMethCallerForce") => {
+                Some("__SystemLib\\DynamicContextOverrideUnsafe".to_string())
+            }
+            _ => None,
+        }
+    } else {
+        None
     };
 
     let is_native = attributes
@@ -206,7 +219,7 @@ pub fn from_ast<'a>(
                 deprecation_info: &deprecation_info,
                 doc_comment: method.doc_comment.clone(),
                 default_dropthrough,
-                call_context: None,
+                call_context,
                 flags,
             },
         )?

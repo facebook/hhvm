@@ -4066,6 +4066,14 @@ void in(ISS& env, const bc::LazyClass&) {
 
 namespace {
 
+const StaticString
+  s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
+
+bool isBadContext(const FCallArgs& fca) {
+  return fca.context() &&
+    fca.context()->isame(s_DynamicContextOverrideUnsafe.get());
+}
+
 Context getCallContext(const ISS& env, const FCallArgs& fca) {
   if (auto const name = fca.context()) {
     auto const rcls = env.index.resolve_class(env.ctx, name);
@@ -4143,6 +4151,12 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     // May only return null, but can't fold as we may still throw.
     assertx(mayUseNullsafe && mayThrowNonObj);
     return unknown();
+  }
+
+  if (isBadContext(op.fca)) {
+    unknown();
+    unreachable(env);
+    return;
   }
 
   auto const ctx = getCallContext(env, op.fca);
@@ -4227,6 +4241,13 @@ template <typename Op, class UpdateBC>
 void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
                         bool dynamic, uint32_t numExtraInputs,
                         UpdateBC updateBC) {
+  if (isBadContext(op.fca)) {
+    for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
+    fcallUnknownImpl(env, op.fca);
+    unreachable(env);
+    return;
+  }
+
   auto const ctx = getCallContext(env, op.fca);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 

@@ -3953,6 +3953,9 @@ OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
 
 namespace {
 
+const StaticString
+  s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
+
 template<bool dynamic>
 void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
                         StringData* methName) {
@@ -3964,6 +3967,12 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   auto cls = obj->getVMClass();
   auto const ctx = [&] {
     if (!fca.context) return arGetContextClass(vmfp());
+    if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
+      if (RO::RepoAuthoritative) {
+        raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
+      }
+      return cls;
+    }
     return Class::load(fca.context);
   }();
   // if lookup throws, obj will be decref'd via stack
@@ -4242,6 +4251,12 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
                         bool logAsDynamicCall = true) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
+    if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
+      if (RO::RepoAuthoritative) {
+        raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
+      }
+      return cls;
+    }
     return Class::load(fca.context);
   }();
   auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;

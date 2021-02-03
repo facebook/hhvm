@@ -56,7 +56,7 @@ Class* getAdapter(const Array& spec) {
     return nullptr;
   }
   const auto adapterNameString = tvCastToString(adapterName);
-  const auto adapter = Class::lookup(adapterNameString.get());
+  const auto adapter = Class::load(adapterNameString.get());
   if (!adapter) {
     thrift_error(
         folly::sformat("adapter class {} doesn't exist", adapterNameString),

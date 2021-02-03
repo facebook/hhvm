@@ -1216,28 +1216,6 @@ std::string hackc_version() {
   return s_manager.get_hackc_pool().getVersionString();
 }
 
-bool startsWith(const char* big, const char* small) {
-  return strncmp(big, small, strlen(small)) == 0;
-}
-
-bool isFileHack(const char* code, size_t codeLen) {
-  // if the file starts with a shebang
-  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
-    // reset code to the next char after the shebang line
-    const char* loc = reinterpret_cast<const char*>(
-        memchr(code, '\n', codeLen));
-    if (!loc) {
-      return false;
-    }
-
-    ptrdiff_t offset = loc - code;
-    code = loc + 1;
-    codeLen -= offset + 1;
-  }
-
-  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
-}
-
 std::unique_ptr<UnitCompiler>
 UnitCompiler::create(const char* code,
                      int codeLen,

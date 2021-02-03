@@ -3,42 +3,20 @@
 [TYPE VIOLATION] RET ret_arr (wanted: HH\AnyArray, got: clsmeth)
 [TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
-}
-[NOTICE] array_map(): Argument #2 should be an array or collection
-NULL
-[TYPE VIOLATION] ARG 1 of args (wanted: HH\AnyArray, got: clsmeth)
-[TYPE VIOLATION] RET ret_varr (wanted: HH\varray, got: clsmeth)
-[TYPE VIOLATION] RET ret_arr (wanted: HH\AnyArray, got: clsmeth)
-[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 [NOTICE] array_map(): Argument #2 should be an array or collection
 NULL
@@ -47,20 +25,42 @@ NULL
 [TYPE VIOLATION] RET ret_arr (wanted: HH\AnyArray, got: clsmeth)
 [TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\AnyArray, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr (wanted: HH\AnyArray, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
 }
 [NOTICE] array_map(): Argument #2 should be an array or collection
 NULL
@@ -69,42 +69,20 @@ NULL
 [TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\AnyArray, got: clsmeth)
 [TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
-}
-[NOTICE] array_map(): Argument #2 should be an array or collection
-NULL
-[TYPE VIOLATION] ARG 1 of args (wanted: HH\AnyArray, got: clsmeth)
-[TYPE VIOLATION] RET ret_varr_dyn (wanted: HH\varray, got: clsmeth)
-[TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\AnyArray, got: clsmeth)
-[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 [NOTICE] array_map(): Argument #2 should be an array or collection
 NULL
@@ -113,20 +91,42 @@ NULL
 [TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\AnyArray, got: clsmeth)
 [TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\AnyArray, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr_dyn (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\AnyArray, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\AnyArray, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
 }
 [NOTICE] array_map(): Argument #2 should be an array or collection
 NULL

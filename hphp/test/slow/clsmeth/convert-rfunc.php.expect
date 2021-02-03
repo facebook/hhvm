@@ -1,126 +1,58 @@
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
-}
-varray(2) {
-  string(3) "Foo"
-  string(3) "bar"
-}
-string(3) "Foo"
-string(3) "bar"
-darray(2) {
-  [0]=>
-  int(42)
-  [1]=>
-  int(42)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
-}
-classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(2) {
   string(3) "Foo"
@@ -135,60 +67,60 @@ darray(2) {
   int(42)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(2) {
   string(3) "Foo"
@@ -203,60 +135,60 @@ darray(2) {
   int(42)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(2) {
   string(3) "Foo"
@@ -271,60 +203,60 @@ darray(2) {
   int(42)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(2) {
   string(3) "Foo"
@@ -339,60 +271,128 @@ darray(2) {
   int(42)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
+}
+varray(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+darray(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
 }
 varray(2) {
   string(3) "Foo"

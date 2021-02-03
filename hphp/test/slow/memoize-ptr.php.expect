@@ -7,13 +7,13 @@ foo(1)
 string(3) "foo"
 foo(2)
 classMeth{
-    class(A)
-    function(b)
+  class(A)
+  function(b)
 }
 A::b(3)
 classMeth{
-    class(A)
-    function(b)
+  class(A)
+  function(b)
 }
 A::b(4)
 varray(2) {

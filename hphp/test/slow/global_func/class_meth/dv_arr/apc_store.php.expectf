@@ -1,4 +1,4 @@
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }

@@ -7,28 +7,28 @@
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -39,28 +39,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -71,28 +71,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -103,140 +103,140 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -247,28 +247,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -279,28 +279,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -311,28 +311,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -343,28 +343,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -375,28 +375,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -407,28 +407,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -439,28 +439,28 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
@@ -471,26 +471,26 @@ classMeth{
 [NOTICE] Cannot use a scalar value as an array
 [NOTICE] Cannot use a scalar value as an array
 classMeth{
-    class(Foo)
-    function(bar)
+  class(Foo)
+  function(bar)
 }
 varray(1) {
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 darray(1) {
   [0]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }
 object(P) (1) {
   ["m"]=>
-classMeth{
+  classMeth{
     class(Foo)
     function(bar)
-}
+  }
 }

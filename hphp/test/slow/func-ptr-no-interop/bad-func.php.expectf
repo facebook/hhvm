@@ -1,7 +1,7 @@
 int(1)
 classMeth{
-    class(A)
-    function(f1)
+  class(A)
+  function(f1)
 }
 int(3)
 

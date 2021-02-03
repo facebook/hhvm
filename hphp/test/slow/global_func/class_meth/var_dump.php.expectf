@@ -9,6 +9,6 @@ varray(2) {
 
 class_meth('A', 'f1')
 classMeth{
-    class(A)
-    function(f1)
+  class(A)
+  function(f1)
 }

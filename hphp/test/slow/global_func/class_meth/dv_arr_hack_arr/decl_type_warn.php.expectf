@@ -1,6 +1,6 @@
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_varray_as_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 16
@@ -39,8 +39,8 @@ vec(2) {
   string(5) "func1"
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 37
@@ -79,8 +79,8 @@ vec(2) {
   string(5) "func1"
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_varray() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 64
@@ -123,24 +123,24 @@ Notice: class_meth Compat: Static property 'B::s_vec_dict_a' declared as type HH
 
 Notice: class_meth Compat: Static property 'B::s_container_a' declared as type HH\Container, clsmeth assigned in %s/decl_type_warn.php on line 111
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 
 Notice: class_meth Compat: Property 'B::v_a' declared as type HH\varray, clsmeth assigned in %s/decl_type_warn.php on line 117
@@ -154,28 +154,28 @@ Notice: class_meth Compat: Property 'B::vec_dict_a' declared as type HH\vec_or_d
 Notice: class_meth Compat: Property 'B::container_a' declared as type HH\Container, clsmeth assigned in %s/decl_type_warn.php on line 121
 object(B) (5) {
   ["v_a"]=>
-classMeth{
+  classMeth{
     class(A)
     function(func1)
-}
+  }
   ["v_d_a"]=>
-classMeth{
+  classMeth{
     class(A)
     function(func1)
-}
+  }
   ["vec_a"]=>
-classMeth{
+  classMeth{
     class(A)
     function(func1)
-}
+  }
   ["vec_dict_a"]=>
-classMeth{
+  classMeth{
     class(A)
     function(func1)
-}
+  }
   ["container_a"]=>
-classMeth{
+  classMeth{
     class(A)
     function(func1)
-}
+  }
 }

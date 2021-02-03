@@ -19,10 +19,10 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-classMeth{
-    class(A)
-    function(f1)
-}
+      classMeth{
+        class(A)
+        function(f1)
+      }
       ["defaultText"]=>
       string(24) "HH\class_meth("A", "f1")"
       ["attributes"]=>

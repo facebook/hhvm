@@ -19,10 +19,10 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-classMeth{
-    class(Foo)
-    function(bar)
-}
+      classMeth{
+        class(Foo)
+        function(bar)
+      }
       ["defaultText"]=>
       string(10) "Foo::bar<>"
       ["attributes"]=>
@@ -65,10 +65,10 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-classMeth{
-    class(Foo)
-    function(bar_with_generic)
-}
+      classMeth{
+        class(Foo)
+        function(bar_with_generic)
+      }
       ["defaultText"]=>
       string(24) "Foo::bar_with_generic<_>"
       ["attributes"]=>
@@ -111,10 +111,10 @@ varray(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-classMeth{
-    class(Foo)
-    function(bar_with_generics)
-}
+      classMeth{
+        class(Foo)
+        function(bar_with_generics)
+      }
       ["defaultText"]=>
       string(34) "Foo::bar_with_generics<_, _, _, _>"
       ["attributes"]=>

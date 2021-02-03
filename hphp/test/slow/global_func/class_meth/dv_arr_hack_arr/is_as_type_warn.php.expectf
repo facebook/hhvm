@@ -40,7 +40,7 @@ bool(true)
 
 Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 28
 classMeth{
-    class(A)
-    function(func1)
+  class(A)
+  function(func1)
 }
 Caught: Expected int, got clsmeth

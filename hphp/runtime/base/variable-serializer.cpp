@@ -1646,11 +1646,19 @@ void VariableSerializer::serializeClsMeth(
   switch (getType()) {
     case Type::DebuggerDump:
     case Type::PrintR:
-      m_buf->append("classMeth{\n    class(");
+      m_buf->append("classMeth{\n");
+      m_indent += 4;
+      indent();
+      m_buf->append("class(");
       m_buf->append(clsName->data());
-      m_buf->append(")\n    function(");
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("function(");
       m_buf->append(funcName->data());
-      m_buf->append(")\n}");
+      m_buf->append(")\n");
+      m_indent -= 4;
+      indent();
+      m_buf->append("}");
       break;
 
     case Type::VarExport:
@@ -1664,11 +1672,20 @@ void VariableSerializer::serializeClsMeth(
 
     case Type::VarDump:
     case Type::DebugDump:
-      m_buf->append("classMeth{\n    class(");
+      indent();
+      m_buf->append("classMeth{\n");
+      m_indent += 2;
+      indent();
+      m_buf->append("class(");
       m_buf->append(clsName->data());
-      m_buf->append(")\n    function(");
+      m_buf->append(")\n");
+      indent();
+      m_buf->append("function(");
       m_buf->append(funcName->data());
-      m_buf->append(")\n}\n");
+      m_buf->append(")\n");
+      m_indent -= 2;
+      indent();
+      m_buf->append("}\n");
       break;
 
     case Type::Serialize:

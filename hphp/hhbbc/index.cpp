@@ -2013,7 +2013,7 @@ void attribute_setter(const Attr& attrs, bool set, Attr attr) {
   attrSetter(const_cast<Attr&>(attrs), set, attr);
 }
 
-void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+void add_unit_to_index(IndexData& index, php::Unit& unit) {
   hphp_hash_map<
     const php::Class*,
     hphp_hash_set<const php::Class*>
@@ -2076,9 +2076,16 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     }
   }
 
-  for (auto& f : unit.funcs) {
+  for (auto i = unit.funcs.begin(); i != unit.funcs.end();) {
+    auto& f = *i;
+    // Deduplicate meth_caller wrappers- We just take the first one we see.
+    if (f->attrs & AttrIsMethCaller && index.funcs.count(f->name)) {
+      unit.funcs.erase(i);
+      continue;
+    }
     if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     add_symbol(index.funcs, f.get(), "function");
+    ++i;
   }
 
   for (auto& ta : unit.typeAliases) {

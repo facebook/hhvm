@@ -78,7 +78,10 @@ impl Operator {
             | PrefixIncrementOperator
             | PrefixDecrementOperator
             | ExponentOperator => 22,
-            PostfixIncrementOperator | PostfixDecrementOperator | AwaitOperator => 23,
+            PostfixIncrementOperator
+            | PostfixDecrementOperator
+            | AwaitOperator
+            | ReadonlyOperator => 23,
             CloneOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
             FunctionCallOperator => 26,
@@ -131,7 +134,7 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | AwaitOperator => Assoc::RightAssociative,
+            | PrintOperator | AwaitOperator | ReadonlyOperator => Assoc::RightAssociative,
         }
     }
 
@@ -153,6 +156,7 @@ impl Operator {
             TokenKind::Require => RequireOperator,
             TokenKind::Require_once => RequireOnceOperator,
             TokenKind::Print => PrintOperator,
+            TokenKind::Readonly => ReadonlyOperator,
             _ => panic!("not a unary operator"),
         }
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<818a3f0726d2ca666d36be39b76fbdcd>>
+// @generated SignedSource<<77a21c5926e59bfe66834a945e484aa4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -663,6 +663,10 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ///
     /// await $foo
     Await(&'a Expr<'a, Ex, Fb, En, Hi>),
+    /// Readonly expression.
+    ///
+    /// readonly $foo
+    ReadonlyExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
     /// List expression, only used in destructuring. Allows any arbitrary
     /// lvalue as a subexpression. May also nest.
     ///

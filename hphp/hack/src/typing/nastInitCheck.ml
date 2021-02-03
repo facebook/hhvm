@@ -628,6 +628,7 @@ and expr_ env acc p e =
   | Collection _ -> acc
   | FunctionPointer _ -> acc
   | ET_Splice e -> expr acc e
+  | ReadonlyExpr e -> expr acc e
 
 and case env acc = function
   | Default (_, b)

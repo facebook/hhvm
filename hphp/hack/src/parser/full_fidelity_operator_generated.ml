@@ -89,6 +89,7 @@ module type Sig = sig
     | IncludeOperator
     | IncludeOnceOperator
     | AwaitOperator
+    | ReadonlyOperator
 end
 
 module Impl : Sig = struct
@@ -164,4 +165,5 @@ module Impl : Sig = struct
     | IncludeOperator
     | IncludeOnceOperator
     | AwaitOperator
+    | ReadonlyOperator
 end

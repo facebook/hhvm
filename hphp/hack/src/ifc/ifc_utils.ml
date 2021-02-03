@@ -116,3 +116,4 @@ let expr_name = function
   | A.ET_Splice _ -> "ET_splice"
   | A.EnumAtom _ -> "EnumAtom"
   | A.Any -> "Any"
+  | A.ReadonlyExpr _ -> "Readonly"

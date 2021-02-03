@@ -623,6 +623,8 @@ module Visitor_DEPRECATED = struct
         'a -> (Pos.t, func_body_ann, unit, unit) function_ptr_id -> 'a
 
       method on_et_splice : 'a -> expr -> 'a
+
+      method on_readonly_expr : 'a -> expr -> 'a
     end
 
   (*****************************************************************************)
@@ -829,6 +831,7 @@ module Visitor_DEPRECATED = struct
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
         | ET_Splice e -> this#on_et_splice acc e
         | EnumAtom sid -> this#on_enum_atom acc sid
+        | ReadonlyExpr e -> this#on_readonly_expr acc e
 
       method on_collection acc tal afl =
         let acc =
@@ -1152,6 +1155,10 @@ module Visitor_DEPRECATED = struct
           | Some e -> this#on_expr acc e
           | None -> acc
         in
+        acc
+
+      method on_readonly_expr acc e =
+        let acc = this#on_expr acc e in
         acc
 
       method on_class_var acc c_var =

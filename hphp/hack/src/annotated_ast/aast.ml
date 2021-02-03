@@ -456,6 +456,10 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Await expression.
 
           await $foo *)
+  | ReadonlyExpr of ('ex, 'fb, 'en, 'hi) expr
+      (** Readonly expression.
+
+          readonly $foo *)
   | List of ('ex, 'fb, 'en, 'hi) expr list
       (** List expression, only used in destructuring. Allows any arbitrary
           lvalue as a subexpression. May also nest.

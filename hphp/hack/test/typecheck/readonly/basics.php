@@ -1,4 +1,7 @@
 <?hh
+// TODO: this test only ensures that the file currently passes the typechecker
+// over time as we implement typechecker features, it will split into smaller
+// tests that error
 <<file:__EnableUnstableFeatures('readonly')>>
 class Foo {
 }

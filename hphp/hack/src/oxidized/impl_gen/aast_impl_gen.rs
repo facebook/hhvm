@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<373a1d1702ab74d2a39de21c122c5227>>
+// @generated SignedSource<<e75b5a3e48918426cf3ef4545680d164>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1017,6 +1017,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_await(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Await(Box::new(p0))
     }
+    pub fn mk_readonly_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
+        Expr_::ReadonlyExpr(Box::new(p0))
+    }
     pub fn mk_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::List(p0)
     }
@@ -1276,6 +1279,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_await(&self) -> bool {
         match self {
             Expr_::Await(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_readonly_expr(&self) -> bool {
+        match self {
+            Expr_::ReadonlyExpr(..) => true,
             _ => false,
         }
     }
@@ -1597,6 +1606,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_await(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Await(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_readonly_expr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ReadonlyExpr(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1961,6 +1976,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_readonly_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ReadonlyExpr(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Expr_::List(p0) => Some(p0),
@@ -2322,6 +2343,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_await_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Await(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_readonly_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ReadonlyExpr(p0) => Some(*p0),
             _ => None,
         }
     }

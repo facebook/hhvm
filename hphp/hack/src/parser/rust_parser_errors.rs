@@ -3001,7 +3001,7 @@ where
     fn unop_allows_await(t: S<'a, Token, Value>) -> bool {
         use TokenKind::*;
         Self::token_kind(t).map_or(false, |t| match t {
-            Exclamation | Tilde | Plus | Minus | At | Clone | Print => true,
+            Exclamation | Tilde | Plus | Minus | At | Clone | Print | Readonly => true,
             _ => false,
         })
     }
@@ -3679,6 +3679,12 @@ where
             PrefixUnaryExpression(x) if Self::token_kind(&x.operator) == Some(TokenKind::Await) => {
                 self.await_as_an_expression_errors(node)
             }
+            PrefixUnaryExpression(x)
+                if Self::token_kind(&x.operator) == Some(TokenKind::Readonly) =>
+            {
+                self.check_can_use_feature(&x.operator, &UnstableFeatures::Readonly)
+            }
+
             // Other kinds of expressions currently produce no expr errors.
             _ => {}
         }

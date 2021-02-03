@@ -89,4 +89,5 @@ let operators =
     make_operator "Include";
     make_operator "IncludeOnce";
     make_operator "Await";
+    make_operator "Readonly";
   ]

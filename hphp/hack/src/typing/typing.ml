@@ -2567,6 +2567,10 @@ and expr_
     in
     let (env, ty) = Async.overload_extract_from_awaitable env p rty in
     make_result env p (Aast.Await te) ty
+  | ReadonlyExpr e ->
+    (* Basically ignore the readonly since it does not affect the type of the result *)
+    let (env, te, rty) = expr ~is_using_clause env e in
+    make_result env p (Aast.ReadonlyExpr te) rty
   | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
     let env = might_throw env in
     let (env, tc, tal, tel, typed_unpack_element, ty, ctor_fty) =

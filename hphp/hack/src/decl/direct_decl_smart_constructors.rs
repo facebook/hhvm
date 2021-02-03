@@ -1106,15 +1106,28 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Varray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany))))
+                let ty_ = if self.array_unification {
+                    Ty_::Tapply(self.alloc((
+                        Id(self.token_pos(t), naming_special_names::collections::VEC),
+                        self.alloc([tany]),
+                    )))
+                } else {
+                    Ty_::Tvarray(tany)
+                };
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
             }
             Node::Token(t) if t.kind() == TokenKind::Darray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                Some(self.alloc(Ty(
-                    self.alloc(Reason::hint(pos)),
-                    Ty_::Tdarray(self.alloc((tany, tany))),
-                )))
+                let ty_ = if self.array_unification {
+                    Ty_::Tapply(self.alloc((
+                        Id(self.token_pos(t), naming_special_names::collections::DICT),
+                        self.alloc([tany, tany]),
+                    )))
+                } else {
+                    Ty_::Tdarray(self.alloc((tany, tany)))
+                };
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
             }
             Node::Token(t) if t.kind() == TokenKind::This => {
                 Some(self.alloc(Ty(self.alloc(Reason::hint(self.token_pos(t))), Ty_::Tthis)))
@@ -4424,7 +4437,17 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         self.hint_ty(
             self.merge_positions(varray_keyword, greater_than),
-            Ty_::Tvarray(tparam),
+            if self.array_unification {
+                Ty_::Tapply(self.alloc((
+                    Id(
+                        self.get_pos(varray_keyword),
+                        naming_special_names::collections::VEC,
+                    ),
+                    self.alloc([tparam]),
+                )))
+            } else {
+                Ty_::Tvarray(tparam)
+            },
         )
     }
 
@@ -4441,7 +4464,20 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let pos = self.merge_positions(darray, greater_than);
         let key_type = self.node_to_ty(key_type).unwrap_or(TANY);
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
-        self.hint_ty(pos, Ty_::Tdarray(self.alloc((key_type, value_type))))
+        self.hint_ty(
+            pos,
+            if self.array_unification {
+                Ty_::Tapply(self.alloc((
+                    Id(
+                        self.get_pos(darray),
+                        naming_special_names::collections::DICT,
+                    ),
+                    self.alloc([key_type, value_type]),
+                )))
+            } else {
+                Ty_::Tdarray(self.alloc((key_type, value_type)))
+            },
+        )
     }
 
     fn make_old_attribute_specification(

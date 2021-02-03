@@ -751,6 +751,10 @@ and try_castable_hint
       ~allow_wildcard
       ~allow_retonly:false
   in
+  let unif env =
+    TypecheckerOptions.array_unification
+      (Provider_context.get_tcopt (fst env).ctx)
+  in
   let canon = String.lowercase x in
   let opt_hint =
     match canon with
@@ -764,11 +768,18 @@ and try_castable_hint
         | [] ->
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
-          N.Hdarray ((p, N.Hany), (p, N.Hany))
+          if unif env then
+            N.Happly ((p, SN.Collections.cDict), [(p, N.Hany); (p, N.Hany)])
+          else
+            N.Hdarray ((p, N.Hany), (p, N.Hany))
         | [_] ->
           Errors.too_few_type_arguments p;
           N.Hany
-        | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
+        | [key_; val_] ->
+          if unif env then
+            N.Happly ((p, SN.Collections.cDict), [hint env key_; hint env val_])
+          else
+            N.Hdarray (hint env key_, hint env val_)
         | _ ->
           Errors.too_many_type_arguments p;
           N.Hany)
@@ -778,8 +789,15 @@ and try_castable_hint
         | [] ->
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
-          N.Hvarray (p, N.Hany)
-        | [val_] -> N.Hvarray (hint env val_)
+          if unif env then
+            N.Happly ((p, SN.Collections.cVec), [(p, N.Hany)])
+          else
+            N.Hvarray (p, N.Hany)
+        | [val_] ->
+          if unif env then
+            N.Happly ((p, SN.Collections.cVec), [hint env val_])
+          else
+            N.Hvarray (hint env val_)
         | _ ->
           Errors.too_many_type_arguments p;
           N.Hany)

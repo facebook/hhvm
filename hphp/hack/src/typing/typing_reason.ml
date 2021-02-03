@@ -94,6 +94,7 @@ type t =
   | Rsplice of Pos.t
   | Ret_boolean of Pos.t
   | Rdefault_capability of Pos.t
+  | Rarray_unification of Pos.t
 
 and arg_position =
   | Aonly
@@ -498,6 +499,8 @@ let rec to_string prefix r =
     ]
   | Rdefault_capability p ->
     [(p, prefix ^ " because the function did not have an explicit context")]
+  | Rarray_unification p ->
+    [(p, prefix ^ " because legacy arrays have been unified with Hack arrays")]
 
 and to_pos r =
   if !Errors.report_pos_from_reason then
@@ -585,6 +588,7 @@ and to_raw_pos r =
   | Rsplice p -> p
   | Ret_boolean p -> p
   | Rdefault_capability p -> p
+  | Rarray_unification p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -702,6 +706,7 @@ let to_constructor_string r =
   | Rsplice _ -> "Rsplice"
   | Ret_boolean _ -> "Ret_boolean"
   | Rdefault_capability _ -> "Rdefault_capability"
+  | Rarray_unification _ -> "Rarray_unification"
 
 let pp fmt r =
   let pos = to_raw_pos r in

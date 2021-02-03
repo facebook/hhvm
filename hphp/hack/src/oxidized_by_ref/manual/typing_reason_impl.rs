@@ -98,6 +98,7 @@ impl<'a> Reason<'a> {
             | Rsplice(p)
             | RetBoolean(p)
             | RdefaultCapability(p) => Some(p),
+            RarrayUnification(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

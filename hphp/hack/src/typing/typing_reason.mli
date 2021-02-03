@@ -113,6 +113,7 @@ type t =
   | Rsplice of Pos.t
   | Ret_boolean of Pos.t
   | Rdefault_capability of Pos.t
+  | Rarray_unification of Pos.t
 [@@deriving eq]
 
 (** Translate a reason to a (pos, string) list, suitable for error_l. This

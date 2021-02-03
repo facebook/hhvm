@@ -1584,11 +1584,20 @@ and expr_
           fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
       | Varray _ ->
+        let unif = TypecheckerOptions.array_unification (Env.get_tcopt env) in
         ( get_varray_inst,
           "varray",
           array_value,
-          (fun th elements -> Aast.Varray (th, elements)),
-          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty) )
+          (fun th elements ->
+            if unif then
+              Aast.ValCollection (Vec, th, elements)
+            else
+              Aast.Varray (th, elements)),
+          fun value_ty ->
+            if unif then
+              MakeType.vec (Reason.Rarray_unification p) value_ty
+            else
+              MakeType.varray (Reason.Rwitness p) value_ty )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -1634,10 +1643,19 @@ and expr_
           (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
         )
       | Darray _ ->
+        let unif = TypecheckerOptions.array_unification (Env.get_tcopt env) in
         ( get_darray_inst p,
           "darray",
-          (fun th pairs -> Aast.Darray (th, pairs)),
-          (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
+          (fun th pairs ->
+            if unif then
+              Aast.KeyValCollection (Dict, th, pairs)
+            else
+              Aast.Darray (th, pairs)),
+          fun k v ->
+            if unif then
+              MakeType.dict (Reason.Rarray_unification p) k v
+            else
+              MakeType.darray (Reason.Rwitness p) k v )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"

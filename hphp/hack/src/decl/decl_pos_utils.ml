@@ -109,6 +109,7 @@ struct
     | Rsplice p -> Rsplice (pos p)
     | Ret_boolean p -> Ret_boolean (pos p)
     | Rdefault_capability p -> Rdefault_capability (pos p)
+    | Rarray_unification p -> Rarray_unification (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

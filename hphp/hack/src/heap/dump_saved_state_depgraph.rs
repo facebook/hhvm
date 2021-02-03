@@ -194,6 +194,7 @@ fn comp_depgraph32(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
         bar.finish_and_clear()
     };
     let digits = (u32::MAX as f32).log10() as usize + 1;
+    let num_edges_missing = missing.len(); // If non-zero, `l` is broken.
     println!("\nResults\n=======");
     println!("Processed {}/{} of nodes in 'l'", lproc, lnum_keys);
     println!("Processed {}/{} of nodes in 'r'", rproc, rnum_keys);
@@ -207,7 +208,18 @@ fn comp_depgraph32(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
     for (key, dst) in extra {
         println!("  {key:>width$}  {}", dst, key = key, width = digits);
     }
-    Ok(())
+
+    if num_edges_missing == 0 {
+        Ok(())
+    } else {
+        // Rust 2018 semantics are such that this will result in a
+        // non-zero error code
+        // (https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/question-mark-in-main-and-tests.html).
+        Err(Error::Other(format!(
+            "{} missing edges detected",
+            num_edges_missing
+        )))
+    }
 }
 
 /// Retrieve the adjacency list for `k` in `g`.
@@ -247,6 +259,7 @@ fn dump_depgraph64(file: &str) -> Result<()> {
 fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()> {
     let lo = depgraph::reader::DepGraphOpener::from_path(lfile)?;
     let ro = depgraph::reader::DepGraphOpener::from_path(rfile)?;
+    let mut num_edges_missing = 0;
     match (|| {
         let (ldg, rdg) = (lo.open()?, ro.open()?);
         let ((), ()) = (ldg.validate_hash_lists()?, rdg.validate_hash_lists()?);
@@ -343,6 +356,7 @@ fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
             bar.finish_and_clear()
         };
         let digits = (u64::MAX as f64).log10() as usize + 1;
+        num_edges_missing = missing.len();
         println!("\nResults\n=======");
         println!("Processed {}/{} of nodes in 'l'", lproc, lnum_keys);
         println!("Processed {}/{} of nodes in 'r'", rproc, rnum_keys);
@@ -358,7 +372,19 @@ fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
         }
         Ok(())
     })() {
-        Ok(()) => Ok(()),
+        Ok(()) => {
+            if num_edges_missing == 0 {
+                Ok(())
+            } else {
+                // Rust 2018 semantics are such that this will result in a
+                // non-zero error code
+                // (https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/question-mark-in-main-and-tests.html).
+                Err(Error::Other(format!(
+                    "{} missing edges detected",
+                    num_edges_missing
+                )))
+            }
+        }
         Err(msg) => Err(Error::DepgraphError(msg)),
     }
 }

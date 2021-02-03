@@ -13,7 +13,6 @@ module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
 open Hh_prelude
 
 type debug_config = {
-  print_ast: bool;
   print_doc: bool;
   print_nesting_graph: bool;
   print_rule_dependencies: bool;
@@ -23,7 +22,6 @@ type debug_config = {
 let debug_config =
   ref
     {
-      print_ast = false;
       print_doc = false;
       print_nesting_graph = false;
       print_rule_dependencies = false;
@@ -32,10 +30,6 @@ let debug_config =
 
 let init_with_options () =
   [
-    ( "--ast",
-      Arg.Unit
-        (fun () -> debug_config := { !debug_config with print_ast = true }),
-      " Print out an ast dump before the formatted result " );
     ( "--doc",
       Arg.Unit
         (fun () -> debug_config := { !debug_config with print_doc = true }),
@@ -130,3 +124,10 @@ let debug_full_text source_text =
 let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n"
   @@ String.sub (SourceText.text source_text) start_char (end_char - start_char)
+
+let debug env ~range source_text doc chunk_groups =
+  if !debug_config.print_doc then ignore (Doc.dump doc);
+  let range =
+    Option.value range ~default:(0, Full_fidelity_source_text.length source_text)
+  in
+  debug_chunk_groups env ~range source_text chunk_groups

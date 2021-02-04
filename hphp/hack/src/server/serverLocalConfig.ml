@@ -1066,9 +1066,10 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let use_direct_decl_parser =
-    bool_if_version
+    bool_if_min_version
       "use_direct_decl_parser"
       ~default:default.use_direct_decl_parser
+      ~current_version
       config
   in
   let profile_type_check_duration_threshold =

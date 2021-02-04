@@ -1099,7 +1099,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Varray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.array_unification {
+                let ty_ = if self.opts.array_unification {
                     Ty_::Tapply(self.alloc((
                         Id(self.token_pos(t), naming_special_names::collections::VEC),
                         self.alloc([tany]),
@@ -1112,7 +1112,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Darray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.array_unification {
+                let ty_ = if self.opts.array_unification {
                     Ty_::Tapply(self.alloc((
                         Id(self.token_pos(t), naming_special_names::collections::DICT),
                         self.alloc([tany, tany]),
@@ -4461,7 +4461,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         self.hint_ty(
             self.merge_positions(varray_keyword, greater_than),
-            if self.array_unification {
+            if self.opts.array_unification {
                 Ty_::Tapply(self.alloc((
                     Id(
                         self.get_pos(varray_keyword),
@@ -4490,7 +4490,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
         self.hint_ty(
             pos,
-            if self.array_unification {
+            if self.opts.array_unification {
                 Ty_::Tapply(self.alloc((
                     Id(
                         self.get_pos(darray),

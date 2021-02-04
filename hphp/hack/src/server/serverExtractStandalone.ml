@@ -208,38 +208,36 @@ end
 
 (* -- Nast helpers ---------------------------------------------------------- *)
 module Nast_helper : sig
-  val get_fun_nast : Provider_context.t -> string -> Nast.fun_ option
+  val get_fun : Provider_context.t -> string -> Nast.fun_ option
 
-  val get_fun_nast_exn : Provider_context.t -> string -> Nast.fun_
+  val get_fun_exn : Provider_context.t -> string -> Nast.fun_
 
-  val get_class_nast : Provider_context.t -> string -> Nast.class_ option
+  val get_class : Provider_context.t -> string -> Nast.class_ option
 
-  val get_class_nast_exn : Provider_context.t -> string -> Nast.class_
+  val get_class_exn : Provider_context.t -> string -> Nast.class_
 
-  val get_typedef_nast : Provider_context.t -> string -> Nast.typedef option
+  val get_typedef : Provider_context.t -> string -> Nast.typedef option
 
-  val get_typedef_nast_exn : Provider_context.t -> string -> Nast.typedef
+  val get_typedef_exn : Provider_context.t -> string -> Nast.typedef
 
-  val get_gconst_nast : Provider_context.t -> string -> Nast.gconst option
+  val get_gconst : Provider_context.t -> string -> Nast.gconst option
 
-  val get_gconst_nast_exn : Provider_context.t -> string -> Nast.gconst
+  val get_gconst_exn : Provider_context.t -> string -> Nast.gconst
 
-  val get_method_nast :
-    Provider_context.t -> string -> string -> Nast.method_ option
+  val get_method : Provider_context.t -> string -> string -> Nast.method_ option
 
-  val get_method_nast_exn :
-    Provider_context.t -> string -> string -> Nast.method_
+  val get_method_exn : Provider_context.t -> string -> string -> Nast.method_
 
-  val get_const_nast :
+  val get_const :
     Provider_context.t -> string -> string -> Nast.class_const option
 
-  val get_typeconst_nast :
+  val get_typeconst :
     Provider_context.t ->
     string ->
     string ->
     (Pos.t, Nast.func_body_ann, unit, unit) Aast.class_typeconst option
 
-  val get_prop_nast :
+  val get_prop :
     Provider_context.t ->
     string ->
     string ->
@@ -264,41 +262,37 @@ end = struct
         nasts := SMap.add name nast !nasts;
         Some nast
 
-  let get_fun_nast =
+  let get_fun =
     make_nast_getter
       ~get_pos:Decl.get_fun_pos
       ~find_in_file:Ast_provider.find_fun_in_file
       ~naming:Naming.fun_
 
-  let get_fun_nast_exn ctx name =
-    value_or_not_found name (get_fun_nast ctx name)
+  let get_fun_exn ctx name = value_or_not_found name (get_fun ctx name)
 
-  let get_class_nast =
+  let get_class =
     make_nast_getter
       ~get_pos:Decl.get_class_pos
       ~find_in_file:Ast_provider.find_class_in_file
       ~naming:Naming.class_
 
-  let get_class_nast_exn ctx name =
-    value_or_not_found name (get_class_nast ctx name)
+  let get_class_exn ctx name = value_or_not_found name (get_class ctx name)
 
-  let get_typedef_nast =
+  let get_typedef =
     make_nast_getter
       ~get_pos:Decl.get_typedef_pos
       ~find_in_file:Ast_provider.find_typedef_in_file
       ~naming:Naming.typedef
 
-  let get_typedef_nast_exn ctx name =
-    value_or_not_found name (get_typedef_nast ctx name)
+  let get_typedef_exn ctx name = value_or_not_found name (get_typedef ctx name)
 
-  let get_gconst_nast =
+  let get_gconst =
     make_nast_getter
       ~get_pos:Decl.get_gconst_pos
       ~find_in_file:Ast_provider.find_gconst_in_file
       ~naming:Naming.global_const
 
-  let get_gconst_nast_exn ctx name =
-    value_or_not_found name (get_gconst_nast ctx name)
+  let get_gconst_exn ctx name = value_or_not_found name (get_gconst ctx name)
 
   let make_class_element_nast_getter ~get_elements ~get_element_name =
     let elements_by_class_name = ref SMap.empty in
@@ -309,7 +303,7 @@ end = struct
           (SMap.find class_name !elements_by_class_name)
       else
         let open Option in
-        get_class_nast ctx class_name >>= fun class_ ->
+        get_class ctx class_name >>= fun class_ ->
         let elements_by_element_name =
           List.fold_left
             (get_elements class_)
@@ -321,78 +315,78 @@ end = struct
           SMap.add class_name elements_by_element_name !elements_by_class_name;
         SMap.find_opt element_name elements_by_element_name
 
-  let get_method_nast =
+  let get_method =
     Aast.(
       make_class_element_nast_getter
         ~get_elements:(fun class_ -> class_.c_methods)
         ~get_element_name:(fun method_ -> snd method_.m_name))
 
-  let get_method_nast_exn ctx class_name method_name =
+  let get_method_exn ctx class_name method_name =
     value_or_not_found
       (class_name ^ "::" ^ method_name)
-      (get_method_nast ctx class_name method_name)
+      (get_method ctx class_name method_name)
 
-  let get_const_nast =
+  let get_const =
     Aast.(
       make_class_element_nast_getter
         ~get_elements:(fun class_ -> class_.c_consts)
         ~get_element_name:(fun const -> snd const.cc_id))
 
-  let get_typeconst_nast =
+  let get_typeconst =
     Aast.(
       make_class_element_nast_getter
         ~get_elements:(fun class_ -> class_.c_typeconsts)
         ~get_element_name:(fun typeconst -> snd typeconst.c_tconst_name))
 
-  let get_prop_nast =
+  let get_prop =
     Aast.(
       make_class_element_nast_getter
         ~get_elements:(fun class_ -> class_.c_vars)
         ~get_element_name:(fun class_var -> snd class_var.cv_id))
 
-  let is_tydef ctx nm = Option.is_some @@ get_typedef_nast ctx nm
+  let is_tydef ctx nm = Option.is_some @@ get_typedef ctx nm
 
   let is_enum ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
         match c_kind with
         | Ast_defs.Cenum -> true
         | _ -> false)
-    @@ get_class_nast ctx nm
+    @@ get_class ctx nm
 
   let is_interface ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
         match c_kind with
         | Ast_defs.Cinterface -> true
         | _ -> false)
-    @@ get_class_nast ctx nm
+    @@ get_class ctx nm
 end
 
 (* -- Typing_deps helpers --------------------------------------------------- *)
 module Dep : sig
   val get_class_name : 'a Typing_deps.Dep.variant -> string option
 
-  val get_dep_relative_path :
+  val get_relative_path :
     Provider_context.t ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     Relative_path.t Hh_prelude.Option.t
 
-  val get_dep_mode :
+  val get_mode :
     Provider_context.t ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     FileInfo.mode Hh_prelude.Option.t
 
-  val get_dep_origin :
+  val get_origin :
     Provider_context.t ->
     Decl_provider.class_key ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     string
 
-  val is_builtin_dep :
+  val is_builtin :
     Provider_context.t ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     bool
 
-  val is_relevant_dependency :
+  val is_relevant :
     Cmd.target -> Typing_deps.Dep.dependent Typing_deps.Dep.variant -> bool
 end = struct
   let get_class_name : type a. a Typing_deps.Dep.variant -> string option =
@@ -438,29 +432,28 @@ end = struct
       Decl.get_gconst_pos ctx name
     | RecordDef _ -> raise Unsupported
 
-  let get_dep_relative_path ctx dep =
+  let get_relative_path ctx dep =
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
 
   let get_fun_mode ctx name =
-    Nast_helper.get_fun_nast ctx name
-    |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
+    Nast_helper.get_fun ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
 
   let get_class_mode ctx name =
-    Nast_helper.get_class_nast ctx name
+    Nast_helper.get_class ctx name
     |> Option.map ~f:(fun class_ -> class_.Aast.c_mode)
 
   let get_typedef_mode ctx name =
-    Nast_helper.get_typedef_nast ctx name
+    Nast_helper.get_typedef ctx name
     |> Option.map ~f:(fun typedef -> typedef.Aast.t_mode)
 
   let get_gconst_mode ctx name =
-    Nast_helper.get_gconst_nast ctx name
+    Nast_helper.get_gconst ctx name
     |> Option.map ~f:(fun gconst -> gconst.Aast.cst_mode)
 
   let get_class_or_typedef_mode ctx name =
     Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
 
-  let get_dep_mode ctx dep =
+  let get_mode ctx dep =
     let open Typing_deps.Dep in
     match dep with
     | Fun name
@@ -481,7 +474,7 @@ end = struct
       get_gconst_mode ctx name
     | RecordDef _ -> raise Unsupported
 
-  let get_dep_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
+  let get_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
     let open Typing_deps.Dep in
     let description = variant_to_string dep in
     let cls =
@@ -516,12 +509,12 @@ end = struct
     | Cstr cls -> cls
     | _ -> raise UnexpectedDependency
 
-  let is_builtin_dep ctx dep =
+  let is_builtin ctx dep =
     let msg = Typing_deps.Dep.variant_to_string dep in
     let pos = value_or_not_found msg @@ get_dep_pos ctx dep in
     Relative_path.(is_hhi @@ prefix @@ Pos.filename pos)
 
-  let is_relevant_dependency
+  let is_relevant
       (target : Cmd.target)
       (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant) =
     Cmd.(
@@ -563,12 +556,10 @@ end = struct
       Cmd.(
         match target with
         | Function name ->
-          let fun_ = Nast_helper.get_fun_nast_exn ctx name in
+          let fun_ = Nast_helper.get_fun_exn ctx name in
           fun_.Aast.f_span
         | Method (class_name, method_name) ->
-          let method_ =
-            Nast_helper.get_method_nast_exn ctx class_name method_name
-          in
+          let method_ = Nast_helper.get_method_exn ctx class_name method_name in
           method_.Aast.m_span)
     in
     SourceText.make filename @@ Pos.get_text_from_pos file_content pos
@@ -596,7 +587,7 @@ end = struct
     if
       (not is_wildcard)
       && (not (HashSet.mem env.dependencies dep))
-      && not (Dep.is_builtin_dep ctx dep)
+      && not (Dep.is_builtin ctx dep)
     then (
       HashSet.add env.dependencies dep;
       add_signature_dependencies ctx env dep
@@ -834,7 +825,7 @@ end = struct
           Typing_deps.Dep.Const (cc_origin, const_name) :: acc)
       @@ Class.get_const cls const_name
     in
-    if Dep.is_builtin_dep ctx (Class ancestor_name) then
+    if Dep.is_builtin ctx (Class ancestor_name) then
       let with_smths =
         List.fold ~init:acc ~f:(fun acc (nm, _) -> add_smethod_impl acc nm)
         @@ Class.smethods ancestor
@@ -914,7 +905,7 @@ end = struct
     let add_dependency
         (root : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
         (obj : Typing_deps.Dep.dependency Typing_deps.Dep.variant) : unit =
-      if Dep.is_relevant_dependency target root then do_add_dep ctx env obj
+      if Dep.is_relevant target root then do_add_dep ctx env obj
     in
     Typing_deps.add_dependency_callback "add_dependency" add_dependency;
     (* Collect dependencies through side effects of typechecking and remove
@@ -1032,7 +1023,7 @@ end = struct
           when String.(name = SN.Classes.cClassname) ->
           Fmt.(suffix (const string "::class") string) ppf class_name
         | Happly ((_, name), hints) ->
-          (match Nast_helper.get_class_nast ctx name with
+          (match Nast_helper.get_class ctx name with
           | Some
               {
                 c_kind = Ast_defs.Cenum;
@@ -1042,7 +1033,7 @@ end = struct
             Fmt.(pair ~sep:dbl_colon string string) ppf (name, const_name)
           | Some _ -> unsupported_hint ()
           | _ ->
-            let typedef = Nast_helper.get_typedef_nast_exn ctx name in
+            let typedef = Nast_helper.get_typedef_exn ctx name in
             let ts =
               List.fold2_exn
                 typedef.t_tparams
@@ -1992,15 +1983,14 @@ end = struct
     let is_interface = Nast_helper.is_interface ctx cls_name in
     Option.value_map ~default:PartIgnore ~f:(fun ast ->
         PartClsElt (cls_name, Class_elt.(mk_method is_interface ast)))
-    @@ Nast_helper.get_method_nast ctx cls_name method_name
+    @@ Nast_helper.get_method ctx cls_name method_name
 
   let of_dep ctx dep =
     Typing_deps.Dep.(
       match dep with
       (* -- Class elements -- *)
       | Const (cls_nm, nm)
-        when String.(
-               cls_nm = Dep.get_dep_origin ctx cls_nm dep && nm <> "class")
+        when String.(cls_nm = Dep.get_origin ctx cls_nm dep && nm <> "class")
              && (not @@ Nast_helper.is_enum ctx cls_nm) ->
         PartClsElt
           ( cls_nm,
@@ -2008,46 +1998,45 @@ end = struct
             @@ Option.(
                  first_some
                    ( map ~f:Class_elt.mk_tyconst
-                   @@ Nast_helper.get_typeconst_nast ctx cls_nm nm )
+                   @@ Nast_helper.get_typeconst ctx cls_nm nm )
                    ( map ~f:Class_elt.(mk_const ctx)
-                   @@ Nast_helper.get_const_nast ctx cls_nm nm )) )
-      | Method (cls_nm, nm)
-        when String.(cls_nm = Dep.get_dep_origin ctx cls_nm dep) ->
+                   @@ Nast_helper.get_const ctx cls_nm nm )) )
+      | Method (cls_nm, nm) when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
+        ->
         of_method ctx cls_nm nm
       | SMethod (cls_nm, nm)
-        when String.(cls_nm = Dep.get_dep_origin ctx cls_nm dep) ->
+        when String.(cls_nm = Dep.get_origin ctx cls_nm dep) ->
         of_method ctx cls_nm nm
-      | Cstr cls_nm when String.(cls_nm = Dep.get_dep_origin ctx cls_nm dep) ->
+      | Cstr cls_nm when String.(cls_nm = Dep.get_origin ctx cls_nm dep) ->
         let nm = "__construct" in
         of_method ctx cls_nm nm
-      | Prop (cls_nm, nm)
-        when String.(cls_nm = Dep.get_dep_origin ctx cls_nm dep) ->
+      | Prop (cls_nm, nm) when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
+        ->
         PartClsElt
           ( cls_nm,
             value_or_not_found (cls_nm ^ "::" ^ nm)
             @@ Option.map ~f:Class_elt.(mk_prop ctx)
-            @@ Nast_helper.get_prop_nast ctx cls_nm nm )
-      | SProp (cls_nm, snm)
-        when String.(cls_nm = Dep.get_dep_origin ctx cls_nm dep) ->
+            @@ Nast_helper.get_prop ctx cls_nm nm )
+      | SProp (cls_nm, snm) when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
+        ->
         let nm = String.lstrip ~drop:(fun c -> Char.equal c '$') snm in
         PartClsElt
           ( cls_nm,
             value_or_not_found (cls_nm ^ "::" ^ nm)
             @@ Option.map ~f:Class_elt.(mk_prop ctx)
-            @@ Nast_helper.get_prop_nast ctx cls_nm nm )
+            @@ Nast_helper.get_prop ctx cls_nm nm )
       (* -- Globals -- *)
       | Fun nm
       | FunName nm ->
-        PartSingle (Single.mk_gfun @@ Nast_helper.get_fun_nast_exn ctx nm)
+        PartSingle (Single.mk_gfun @@ Nast_helper.get_fun_exn ctx nm)
       | GConst nm
       | GConstName nm ->
-        PartSingle
-          (Single.mk_gconst ctx @@ Nast_helper.get_gconst_nast_exn ctx nm)
+        PartSingle (Single.mk_gconst ctx @@ Nast_helper.get_gconst_exn ctx nm)
       (* -- Type defs and Enums -- *)
       | Class nm when Nast_helper.is_tydef ctx nm ->
-        PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_nast_exn ctx nm)
+        PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_exn ctx nm)
       | Class nm when Nast_helper.is_enum ctx nm ->
-        PartSingle (Single.mk_enum ctx @@ Nast_helper.get_class_nast_exn ctx nm)
+        PartSingle (Single.mk_enum ctx @@ Nast_helper.get_class_exn ctx nm)
       (* -- Classes -- *)
       | Class nm -> PartCls nm
       (* -- Ignore -- *)
@@ -2070,7 +2059,7 @@ end = struct
           (function
             | Some (cls_ast, cls_elts) -> Some (cls_ast, cls_elt :: cls_elts)
             | _ ->
-              let cls_ast = Nast_helper.get_class_nast_exn ctx cls_nm in
+              let cls_ast = Nast_helper.get_class_exn ctx cls_nm in
               Some (cls_ast, [cls_elt]))
           grps )
     and insert_cls (sgls, grps) cls_nm =
@@ -2080,7 +2069,7 @@ end = struct
           (function
             | Some _ as data -> data
             | _ ->
-              let cls_ast = Nast_helper.get_class_nast_exn ctx cls_nm in
+              let cls_ast = Nast_helper.get_class_exn ctx cls_nm in
               Some (cls_ast, []))
           grps )
     and insert_single (sgls, grps) single = (Single single :: sgls, grps)
@@ -2098,7 +2087,7 @@ end = struct
                 let elt = Class_elt.mk_target_method ctx tgt in
                 Some (cls_ast, elt :: elts)
               | _ ->
-                let cls_ast = Nast_helper.get_class_nast_exn ctx cls_name
+                let cls_ast = Nast_helper.get_class_exn ctx cls_name
                 and elt = Class_elt.mk_target_method ctx tgt in
                 Some (cls_ast, [elt]))
             grps )
@@ -2262,9 +2251,7 @@ end = struct
         Option.value_map ~default:__UNKNOWN_FILE__ ~f:Relative_path.suffix path;
       mode =
         Option.(
-          List.hd deps
-          >>= Dep.get_dep_mode ctx
-          |> value ~default:FileInfo.Mstrict);
+          List.hd deps >>= Dep.get_mode ctx |> value ~default:FileInfo.Mstrict);
       path;
       content =
         Namespaced.unfold
@@ -2328,7 +2315,7 @@ end = struct
              | Some _ as data -> data
              | _ -> Some (Some target_path, []))
       @@ List.fold_left deps ~init:SMap.empty ~f:(fun acc dep ->
-             let rel_path = Dep.get_dep_relative_path ctx dep in
+             let rel_path = Dep.get_relative_path ctx dep in
              let key =
                Option.value_map
                  ~default:"unknown"

@@ -123,55 +123,6 @@ module Getters = struct
     let key = make_key key ~prefix in
     Option.value_map (SMap.find_opt key config) ~default ~f:(Str.split delim)
 
-  (*
-    Version aware toggling for boolean parameters take in either:
-    - a single boolean, true or false. Then this acts just like bool_
-    - a string list of version hashes, e.g.
-       use_watchman = 8a0f4290c3fd218988864e06b7dea3aaf447efaf, master
-      this would enable watchman for hack versions
-        8a0f4290c3fd218988864e06b7dea3aaf447efaf and master.
-      master is a special string to represent master in fbcode
-      (master's build revision is the empty string, but master is a lot \
-       cleaner to write)
-
-    How this can be used:
-      1) Commit a change that turns on a feature F if its option flag is set to "true"
-      2) Discover that there's a bug in F and it needs to be turned off (set flag to "false")
-      3) Fix the bug
-      4) Wait for the next release to find out its build hash H1
-      5) Update hh.conf in opsfiles to turn on the feature for "H1"
-      6) Wait for the release after that to find out its build hash H2
-      7) Update hh.conf in posfiles to turn the feature for "H1,H2"
-      8) etc., until you're satisfied that nobody is using the release with the broken
-          feature F, so you can change the flag's value back to "true"
-
-    Note: it is the responsibility of the feature author to keep flag values up-to-date,
-    not the Hack Tools or the Hack Release oncall's.
-  *)
-  let bool_if_version key ?(prefix = None) ~default config =
-    let key = make_key key ~prefix in
-    let versions =
-      string_list
-        ~delim:(Str.regexp ",")
-        key
-        ~default:[string_of_bool default]
-        config
-    in
-    match versions with
-    | ["true"] -> true
-    | ["false"] -> false
-    | x ->
-      List.exists
-        ~f:(fun s ->
-          let s =
-            if String.equal s "master" then
-              ""
-            else
-              s
-          in
-          String.equal s Build_id.build_revision)
-        x
-
   let bool_if_min_version key ?(prefix = None) ~default ~current_version config
       : bool =
     let key = make_key key ~prefix in

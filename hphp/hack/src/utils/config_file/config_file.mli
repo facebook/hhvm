@@ -70,18 +70,6 @@ module Getters : sig
     string SMap.t ->
     string list
 
-  (** Version aware toggling for boolean parameters take in either:
-      - a single boolean, true or false. Then this acts just like bool_
-      - a string list of version hashes, e.g.
-        use_watchman = 8a0f4290c3fd218988864e06b7dea3aaf447efaf, master
-        this would enable watchman for hack versions
-          8a0f4290c3fd218988864e06b7dea3aaf447efaf and master.
-        master is a special string to represent master in fbcode
-        (master's build revision is the empty string, but master is a lot \
-        cleaner to write) *)
-  val bool_if_version :
-    string -> ?prefix:string option -> default:bool -> string SMap.t -> bool
-
   val bool_if_min_version :
     string ->
     ?prefix:string option ->

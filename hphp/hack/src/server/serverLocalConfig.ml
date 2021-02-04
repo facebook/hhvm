@@ -761,12 +761,17 @@ let load_ fn ~silent ~current_version overrides =
   in
 
   let use_saved_state =
-    bool_if_version "use_mini_state" ~default:default.use_saved_state config
+    bool_if_min_version
+      "use_mini_state"
+      ~default:default.use_saved_state
+      ~current_version
+      config
   in
   let require_saved_state =
-    bool_if_version
+    bool_if_min_version
       "require_saved_state"
       ~default:default.require_saved_state
+      ~current_version
       config
   in
   let attempt_fix_credentials =
@@ -777,25 +782,39 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let enable_on_nfs =
-    bool_if_version "enable_on_nfs" ~default:default.enable_on_nfs config
+    bool_if_min_version
+      "enable_on_nfs"
+      ~default:default.enable_on_nfs
+      ~current_version
+      config
   in
   let enable_fuzzy_search =
-    bool_if_version
+    bool_if_min_version
       "enable_fuzzy_search"
       ~default:default.enable_fuzzy_search
+      ~current_version
       config
   in
   let force_remote_type_check =
-    bool_if_version
+    bool_if_min_version
       "force_remote_type_check"
       ~default:default.force_remote_type_check
+      ~current_version
       config
   in
   let lazy_parse =
-    bool_if_version "lazy_parse" ~default:default.lazy_parse config
+    bool_if_min_version
+      "lazy_parse"
+      ~default:default.lazy_parse
+      ~current_version
+      config
   in
   let lazy_init =
-    bool_if_version "lazy_init2" ~default:default.lazy_init config
+    bool_if_min_version
+      "lazy_init2"
+      ~default:default.lazy_init
+      ~current_version
+      config
   in
   let max_purgatory_clients =
     int_ "max_purgatory_clients" ~default:default.max_purgatory_clients config
@@ -810,24 +829,27 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let load_state_natively =
-    bool_if_version
+    bool_if_min_version
       "load_state_natively_v4"
       ~default:default.load_state_natively
+      ~current_version
       config
   in
   let load_state_natively_64bit =
-    bool_if_version
+    bool_if_min_version
       "load_state_natively_64bit"
       ~default:default.load_state_natively_64bit
+      ~current_version
       config
   in
   let state_loader_timeouts =
     state_loader_timeouts_ ~default:State_loader_config.default_timeouts config
   in
   let use_dummy_informant =
-    bool_if_version
+    bool_if_min_version
       "use_dummy_informant"
       ~default:default.use_dummy_informant
+      ~current_version
       config
   in
   let informant_min_distance_restart =
@@ -837,9 +859,10 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let informant_use_xdb =
-    bool_if_version
+    bool_if_min_version
       "informant_use_xdb_v5"
       ~default:default.informant_use_xdb
+      ~current_version
       config
   in
   let type_decl_bucket_size =
@@ -860,9 +883,10 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let can_skip_deptable =
-    bool_if_version
+    bool_if_min_version
       "can_skip_deptable"
       ~default:default.can_skip_deptable
+      ~current_version
       config
   in
   let shm_dirs =
@@ -878,64 +902,90 @@ let load_ fn ~silent ~current_version overrides =
     int_ "max_bucket_size" ~default:default.max_bucket_size config
   in
   let interrupt_on_watchman =
-    bool_if_version
+    bool_if_min_version
       "interrupt_on_watchman"
       ~default:default.interrupt_on_watchman
+      ~current_version
       config
   in
   let interrupt_on_client =
-    bool_if_version
+    bool_if_min_version
       "interrupt_on_client"
       ~default:default.interrupt_on_client
+      ~current_version
       config
   in
   let use_full_fidelity_parser =
-    bool_if_version
+    bool_if_min_version
       "use_full_fidelity_parser"
       ~default:default.use_full_fidelity_parser
+      ~current_version
       config
   in
   let trace_parsing =
-    bool_if_version "trace_parsing" ~default:default.trace_parsing config
+    bool_if_min_version
+      "trace_parsing"
+      ~default:default.trace_parsing
+      ~current_version
+      config
   in
   let prechecked_files =
-    bool_if_version "prechecked_files" ~default:default.prechecked_files config
+    bool_if_min_version
+      "prechecked_files"
+      ~default:default.prechecked_files
+      ~current_version
+      config
   in
   let predeclare_ide =
-    bool_if_version "predeclare_ide" ~default:default.predeclare_ide config
+    bool_if_min_version
+      "predeclare_ide"
+      ~default:default.predeclare_ide
+      ~current_version
+      config
   in
   let predeclare_ide_deps =
-    bool_if_version
+    bool_if_min_version
       "predeclare_ide_deps"
       ~default:default.predeclare_ide_deps
+      ~current_version
       config
   in
   let max_typechecker_worker_memory_mb =
     int_opt "max_typechecker_worker_memory_mb" config
   in
   let use_worker_clones =
-    bool_if_version
+    bool_if_min_version
       "use_worker_clones"
       ~default:default.use_worker_clones
+      ~current_version
       config
   in
-  let hg_aware = bool_if_version "hg_aware" ~default:default.hg_aware config in
+  let hg_aware =
+    bool_if_min_version
+      "hg_aware"
+      ~default:default.hg_aware
+      ~current_version
+      config
+  in
   let disable_conservative_redecl =
-    bool_if_version
+    bool_if_min_version
       "disable_conservative_redecl"
       ~default:default.disable_conservative_redecl
+      ~current_version
       config
   in
   let store_decls_in_saved_state =
-    bool_if_version
+    bool_if_min_version
       "store_decls_in_saved_state"
       ~default:default.store_decls_in_saved_state
+      ~current_version
       config
   in
   let load_decls_from_saved_state =
-    bool_if_version
+    bool_if_min_version
       "load_decls_from_saved_state"
       ~default:default.load_decls_from_saved_state
+      ~current_version
       config
   in
   let hg_aware_parsing_restart_threshold =
@@ -957,18 +1007,27 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let ide_parser_cache =
-    bool_if_version "ide_parser_cache" ~default:default.ide_parser_cache config
+    bool_if_min_version
+      "ide_parser_cache"
+      ~default:default.ide_parser_cache
+      ~current_version
+      config
   in
   let ide_tast_cache =
-    bool_if_version "ide_tast_cache" ~default:default.ide_tast_cache config
+    bool_if_min_version
+      "ide_tast_cache"
+      ~default:default.ide_tast_cache
+      ~current_version
+      config
   in
   let idle_gc_slice =
     int_ "idle_gc_slice" ~default:default.idle_gc_slice config
   in
   let shallow_class_decl =
-    bool_if_version
+    bool_if_min_version
       "shallow_class_decl"
       ~default:default.shallow_class_decl
+      ~current_version
       config
   in
   let parallel_type_checking_threshold =
@@ -1047,22 +1106,25 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let symbolindex_quiet =
-    bool_if_version
+    bool_if_min_version
       "symbolindex_quiet"
       ~default:default.symbolindex_quiet
+      ~current_version
       config
   in
   let symbolindex_file = string_opt "symbolindex_file" config in
   let tico_invalidate_files =
-    bool_if_version
+    bool_if_min_version
       "tico_invalidate_files"
       ~default:default.tico_invalidate_files
+      ~current_version
       config
   in
   let tico_invalidate_smart =
-    bool_if_version
+    bool_if_min_version
       "tico_invalidate_smart"
       ~default:default.tico_invalidate_smart
+      ~current_version
       config
   in
   let use_direct_decl_parser =
@@ -1079,9 +1141,10 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let profile_type_check_twice =
-    bool_if_version
+    bool_if_min_version
       "profile_type_check_twice"
       ~default:default.profile_type_check_twice
+      ~current_version
       config
   in
   let profile_decling =
@@ -1101,21 +1164,24 @@ let load_ fn ~silent ~current_version overrides =
     string_ "profile_desc" ~default:default.profile_desc config
   in
   let go_to_implementation =
-    bool_if_version
+    bool_if_min_version
       "go_to_implementation"
       ~default:default.go_to_implementation
+      ~current_version
       config
   in
   let allow_unstable_features =
-    bool_if_version
+    bool_if_min_version
       "allow_unstable_features"
       ~default:default.allow_unstable_features
+      ~current_version
       config
   in
   let save_and_upload_naming_table =
-    bool_if_version
+    bool_if_min_version
       "save_and_upload_naming_table"
       ~default:default.save_and_upload_naming_table
+      ~current_version
       config
   in
   {

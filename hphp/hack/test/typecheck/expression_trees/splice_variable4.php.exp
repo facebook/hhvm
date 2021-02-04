@@ -1,4 +1,4 @@
-File "splice_variable4.php", line 15, characters 5-10:
-You are trying to access the method `__plus` but this is an int (Typing[4062])
-  File "splice_variable4.php", line 10, characters 8-8:
-  Definition is here
+File "splice_variable4.php", line 15, characters 5-6:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "splice_variable4.php", line 13, characters 7-18:
+  Did you mean `$__0` instead?

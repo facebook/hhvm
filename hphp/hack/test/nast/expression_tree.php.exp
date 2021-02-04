@@ -386,7 +386,7 @@
                                                        ([4:8-9], $__0)]
                                                      )));
                                                  ([4:8-19],
-                                                  (Lfun (
+                                                  (Efun (
                                                      { f_span = [4:8-19];
                                                        f_annotation = ();
                                                        f_mode = Mstrict;
@@ -475,9 +475,8 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([4:8-9], $__0);
-                                                       ([4:12-14], $__1);
-                                                       ([4:17-19], $x)]
+                                                     [([Pos.none], $__0);
+                                                       ([Pos.none], $__1)]
                                                      )))
                                                  ],
                                                None))))))
@@ -494,7 +493,7 @@
                                ns_auto_ns_map = []; ns_is_codegen = false;
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
-                           [([4:17-19], $x)]))),
+                           []))),
                        [], [], None)))
                    }))))
           ];

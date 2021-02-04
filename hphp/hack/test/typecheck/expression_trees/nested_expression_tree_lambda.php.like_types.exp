@@ -1,5 +1,9 @@
 File "nested_expression_tree_lambda.php", line 6, characters 22-28:
 Expression trees may not be nested. (Parsing[1002])
+File "nested_expression_tree_lambda.php", line 6, characters 27-27:
+Variable `$__14` is undefined, or not always defined. (Naming[2050])
+  File "nested_expression_tree_lambda.php", line 6, characters 27-27:
+  Did you mean `$__0` instead?
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:

@@ -259,7 +259,7 @@
                                                        f_static = false },
                                                      [])));
                                                  ([5:8-14],
-                                                  (Lfun (
+                                                  (Efun (
                                                      { f_span = [5:8-14];
                                                        f_annotation = ();
                                                        f_mode = Mstrict;
@@ -323,8 +323,8 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([5:8-9], $__0);
-                                                       ([5:13-14], $__1)]
+                                                     [([Pos.none], $__0);
+                                                       ([Pos.none], $__1)]
                                                      )))
                                                  ],
                                                None))))))

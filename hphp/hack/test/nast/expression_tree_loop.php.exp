@@ -560,7 +560,7 @@
                                                        ([4:23-27], $__0)]
                                                      )));
                                                  ([4:8-41],
-                                                  (Lfun (
+                                                  (Efun (
                                                      { f_span = [4:8-41];
                                                        f_annotation = ();
                                                        f_mode = Mstrict;
@@ -723,9 +723,9 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([4:8-41], $__2);
-                                                       ([4:23-27], $__0);
-                                                       ([4:31-36], $__1)]
+                                                     [([Pos.none], $__0);
+                                                       ([Pos.none], $__1);
+                                                       ([Pos.none], $__2)]
                                                      )))
                                                  ],
                                                None))))))

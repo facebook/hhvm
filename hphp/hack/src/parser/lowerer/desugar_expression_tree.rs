@@ -107,7 +107,11 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
         annotation: (),
     };
     let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
-    let typing_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(typing_fun_, vec![]));
+    let spliced_vars = (0..splice_count)
+        .into_iter()
+        .map(|i| ast::Lid(Pos::make_none(), (0, temp_lvar_string(i))))
+        .collect();
+    let typing_lambda = Expr::new(temp_pos.clone(), Expr_::mk_efun(typing_fun_, spliced_vars));
 
     // Make `return Visitor::makeTree(...)`
     let return_stmt = wrap_return(

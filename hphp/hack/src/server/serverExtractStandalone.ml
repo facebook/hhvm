@@ -6,10 +6,8 @@
  *
  *)
 
-open Aast
 open Hh_prelude
-open Typing_defs
-open ServerCommandTypes.Extract_standalone
+module Cmd = ServerCommandTypes.Extract_standalone
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
@@ -40,7 +38,8 @@ module Decl = struct
     value_or_not_found not_found_msg @@ Decl_provider.get_class ctx name
 
   let get_fun_pos ctx name =
-    Decl_provider.get_fun ctx name |> Option.map ~f:(fun decl -> decl.fe_pos)
+    Decl_provider.get_fun ctx name
+    |> Option.map ~f:Typing_defs.((fun decl -> decl.fe_pos))
 
   let get_fun_pos_exn ctx name = value_or_not_found name (get_fun_pos ctx name)
 
@@ -53,7 +52,7 @@ module Decl = struct
 
   let get_typedef_pos ctx name =
     Decl_provider.get_typedef ctx name
-    |> Option.map ~f:(fun decl -> decl.td_pos)
+    |> Option.map ~f:Typing_defs.((fun decl -> decl.td_pos))
 
   let get_gconst_pos ctx name =
     Decl_provider.get_gconst ctx name
@@ -132,9 +131,10 @@ module Nast_helper = struct
         SMap.find_opt element_name elements_by_element_name
 
   let get_method_nast =
-    make_class_element_nast_getter
-      ~get_elements:(fun class_ -> class_.c_methods)
-      ~get_element_name:(fun method_ -> snd method_.m_name)
+    Aast.(
+      make_class_element_nast_getter
+        ~get_elements:(fun class_ -> class_.c_methods)
+        ~get_element_name:(fun method_ -> snd method_.m_name))
 
   let get_method_nast_exn ctx class_name method_name =
     value_or_not_found
@@ -142,19 +142,22 @@ module Nast_helper = struct
       (get_method_nast ctx class_name method_name)
 
   let get_const_nast =
-    make_class_element_nast_getter
-      ~get_elements:(fun class_ -> class_.c_consts)
-      ~get_element_name:(fun const -> snd const.cc_id)
+    Aast.(
+      make_class_element_nast_getter
+        ~get_elements:(fun class_ -> class_.c_consts)
+        ~get_element_name:(fun const -> snd const.cc_id))
 
   let get_typeconst_nast =
-    make_class_element_nast_getter
-      ~get_elements:(fun class_ -> class_.c_typeconsts)
-      ~get_element_name:(fun typeconst -> snd typeconst.c_tconst_name)
+    Aast.(
+      make_class_element_nast_getter
+        ~get_elements:(fun class_ -> class_.c_typeconsts)
+        ~get_element_name:(fun typeconst -> snd typeconst.c_tconst_name))
 
   let get_prop_nast =
-    make_class_element_nast_getter
-      ~get_elements:(fun class_ -> class_.c_vars)
-      ~get_element_name:(fun class_var -> snd class_var.cv_id)
+    Aast.(
+      make_class_element_nast_getter
+        ~get_elements:(fun class_ -> class_.c_vars)
+        ~get_element_name:(fun class_var -> snd class_var.cv_id))
 
   let get_prop_nast_exn ctx class_name prop_name =
     value_or_not_found
@@ -186,24 +189,24 @@ module Dep = struct
       | RecordDef _ -> records_not_supported ())
 
   let global_dep_name dep =
-    Typing_deps.Dep.(
-      match dep with
-      | Fun s
-      | FunName s
-      | Class s
-      | GConst s
-      | GConstName s ->
-        s
-      | Const (_, _)
-      | Method (_, _)
-      | SMethod (_, _)
-      | Prop (_, _)
-      | SProp (_, _)
-      | Cstr _
-      | AllMembers _
-      | Extends _ ->
-        raise UnexpectedDependency
-      | RecordDef _ -> records_not_supported ())
+    let open Typing_deps.Dep in
+    match dep with
+    | Fun s
+    | FunName s
+    | Class s
+    | GConst s
+    | GConstName s ->
+      s
+    | Const (_, _)
+    | Method (_, _)
+    | SMethod (_, _)
+    | Prop (_, _)
+    | SProp (_, _)
+    | Cstr _
+    | AllMembers _
+    | Extends _ ->
+      raise UnexpectedDependency
+    | RecordDef _ -> records_not_supported ()
 
   let get_dep_pos ctx dep =
     let open Typing_deps.Dep in
@@ -227,19 +230,20 @@ module Dep = struct
     | RecordDef _ -> records_not_supported ()
 
   let get_fun_mode ctx name =
-    Nast_helper.get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.f_mode)
+    Nast_helper.get_fun_nast ctx name
+    |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
 
   let get_class_mode ctx name =
     Nast_helper.get_class_nast ctx name
-    |> Option.map ~f:(fun class_ -> class_.c_mode)
+    |> Option.map ~f:(fun class_ -> class_.Aast.c_mode)
 
   let get_typedef_mode ctx name =
     Nast_helper.get_typedef_nast ctx name
-    |> Option.map ~f:(fun typedef -> typedef.t_mode)
+    |> Option.map ~f:(fun typedef -> typedef.Aast.t_mode)
 
   let get_gconst_mode ctx name =
     Nast_helper.get_gconst_nast ctx name
-    |> Option.map ~f:(fun gconst -> gconst.cst_mode)
+    |> Option.map ~f:(fun gconst -> gconst.Aast.cst_mode)
 
   let get_class_or_typedef_mode ctx name =
     Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
@@ -280,28 +284,30 @@ module Dep = struct
     Relative_path.(is_hhi (prefix (Pos.filename pos)))
 
   let is_relevant_dependency
-      (target : target)
+      (target : Cmd.target)
       (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant) =
-    match target with
-    | Function f ->
-      (match dep with
-      | Typing_deps.Dep.Fun g
-      | Typing_deps.Dep.FunName g ->
-        String.equal f g
-      | _ -> false)
-    (* We have to collect dependencies of the entire class because dependency collection is
+    Cmd.(
+      match target with
+      | Function f ->
+        (match dep with
+        | Typing_deps.Dep.Fun g
+        | Typing_deps.Dep.FunName g ->
+          String.equal f g
+        | _ -> false)
+      (* We have to collect dependencies of the entire class because dependency collection is
       coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
       not (cls, member) --> D *)
-    | Method (cls, _) ->
-      Option.equal String.equal (get_class_name dep) (Some cls)
+      | Method (cls, _) ->
+        Option.equal String.equal (get_class_name dep) (Some cls))
 end
 
 module Target = struct
   let get_filename ctx target =
     let pos =
-      match target with
-      | Function name -> Decl.get_fun_pos_exn ctx name
-      | Method (name, _) -> Decl.get_class_pos_exn ctx name
+      Cmd.(
+        match target with
+        | Function name -> Decl.get_fun_pos_exn ctx name
+        | Method (name, _) -> Decl.get_class_pos_exn ctx name)
     in
     Pos.filename pos
 
@@ -310,15 +316,16 @@ module Target = struct
     let abs_filename = Relative_path.to_absolute filename in
     let file_content = In_channel.read_all abs_filename in
     let pos =
-      match target with
-      | Function name ->
-        let fun_ = Nast_helper.get_fun_nast_exn ctx name in
-        fun_.f_span
-      | Method (class_name, method_name) ->
-        let method_ =
-          Nast_helper.get_method_nast_exn ctx class_name method_name
-        in
-        method_.m_span
+      Cmd.(
+        match target with
+        | Function name ->
+          let fun_ = Nast_helper.get_fun_nast_exn ctx name in
+          fun_.Aast.f_span
+        | Method (class_name, method_name) ->
+          let method_ =
+            Nast_helper.get_method_nast_exn ctx class_name method_name
+          in
+          method_.Aast.m_span)
     in
     Pos.get_text_from_pos file_content pos
 end
@@ -365,17 +372,19 @@ module Pretty = struct
 
   let extract_standalone_any = "EXTRACT_STANDALONE_ANY"
 
-  let string_of_tprim = function
-    | Tbool -> "bool"
-    | Tint -> "int"
-    | Tfloat -> "float"
-    | Tnum -> "num"
-    | Tstring -> "string"
-    | Tarraykey -> "arraykey"
-    | Tnull -> "null"
-    | Tvoid -> "void"
-    | Tresource -> "resource"
-    | Tnoreturn -> "noreturn"
+  let string_of_tprim =
+    Aast.(
+      function
+      | Tbool -> "bool"
+      | Tint -> "int"
+      | Tfloat -> "float"
+      | Tnum -> "num"
+      | Tstring -> "string"
+      | Tarraykey -> "arraykey"
+      | Tnull -> "null"
+      | Tvoid -> "void"
+      | Tresource -> "resource"
+      | Tnoreturn -> "noreturn")
 
   let string_of_shape_field_name = function
     | Ast_defs.SFlit_int (_, s) -> s
@@ -383,109 +392,111 @@ module Pretty = struct
     | Ast_defs.SFclass_const ((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s
 
   let string_of_xhp_attr_info xhp_attr_info =
-    match xhp_attr_info.xai_tag with
-    | Some Required -> "@required"
-    | Some LateInit -> "@lateinit"
-    | None -> ""
+    Aast.(
+      match xhp_attr_info.xai_tag with
+      | Some Required -> "@required"
+      | Some LateInit -> "@lateinit"
+      | None -> "")
 
   let rec string_of_hint hint =
-    match snd hint with
-    | Hoption hint -> "?" ^ string_of_hint hint
-    | Hlike hint -> "~" ^ string_of_hint hint
-    | Hfun
-        {
-          hf_reactive_kind = _;
-          hf_param_tys;
-          hf_param_kinds;
-          hf_param_mutability = _;
-          hf_variadic_ty;
-          hf_ctxs = _;
-          (* TODO(vmladenov) support capability types here *)
-          hf_return_ty;
-          hf_is_mutable_return = _;
-        } ->
-      let param_hints = List.map hf_param_tys ~f:string_of_hint in
-      let param_kinds =
-        List.map hf_param_kinds ~f:(function
-            | Some Ast_defs.Pinout -> "inout "
-            | None -> "")
-      in
-      let params = List.map2_exn param_kinds param_hints ~f:( ^ ) in
-      let variadic =
-        match hf_variadic_ty with
-        | Some hint -> [string_of_hint hint ^ "..."]
-        | None -> []
-      in
-      Printf.sprintf
-        "(function(%s) : %s)"
-        (String.concat ~sep:", " (params @ variadic))
-        (string_of_hint hf_return_ty)
-    | Htuple hints ->
-      Printf.sprintf "(%s)" (concat_map ~sep:", " ~f:string_of_hint hints)
-    | Habstr (name, hints)
-    | Happly ((_, name), hints) ->
-      let params =
-        match hints with
-        | [] -> ""
-        | _ ->
-          Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:string_of_hint hints)
-      in
-      name ^ params
-    | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
-      let string_of_shape_field { sfi_optional; sfi_name; sfi_hint } =
-        let optional_prefix =
-          if sfi_optional then
-            "?"
-          else
-            ""
+    Aast.(
+      match snd hint with
+      | Hoption hint -> "?" ^ string_of_hint hint
+      | Hlike hint -> "~" ^ string_of_hint hint
+      | Hfun
+          {
+            hf_reactive_kind = _;
+            hf_param_tys;
+            hf_param_kinds;
+            hf_param_mutability = _;
+            hf_variadic_ty;
+            hf_ctxs = _;
+            (* TODO(vmladenov) support capability types here *)
+            hf_return_ty;
+            hf_is_mutable_return = _;
+          } ->
+        let param_hints = List.map hf_param_tys ~f:string_of_hint in
+        let param_kinds =
+          List.map hf_param_kinds ~f:(function
+              | Some Ast_defs.Pinout -> "inout "
+              | None -> "")
+        in
+        let params = List.map2_exn param_kinds param_hints ~f:( ^ ) in
+        let variadic =
+          match hf_variadic_ty with
+          | Some hint -> [string_of_hint hint ^ "..."]
+          | None -> []
         in
         Printf.sprintf
-          "%s%s => %s"
-          optional_prefix
-          (string_of_shape_field_name sfi_name)
-          (string_of_hint sfi_hint)
-      in
-      let shape_fields = List.map nsi_field_map ~f:string_of_shape_field in
-      let shape_suffix =
-        if nsi_allows_unknown_fields then
-          ["..."]
-        else
-          []
-      in
-      let shape_entries = shape_fields @ shape_suffix in
-      Printf.sprintf "shape(%s)" (String.concat ~sep:", " shape_entries)
-    | Haccess (root, ids) ->
-      String.concat ~sep:"::" (string_of_hint root :: List.map ids ~f:snd)
-    | Hsoft hint -> "@" ^ string_of_hint hint
-    | Hmixed -> "mixed"
-    | Hnonnull -> "nonnull"
-    | Hdarray (khint, vhint) ->
-      Printf.sprintf
-        "darray<%s, %s>"
-        (string_of_hint khint)
-        (string_of_hint vhint)
-    | Hvarray hint -> Printf.sprintf "varray<%s>" (string_of_hint hint)
-    | Hvarray_or_darray (None, vhint) ->
-      Printf.sprintf "varray_or_darray<%s>" (string_of_hint vhint)
-    | Hvarray_or_darray (Some khint, vhint) ->
-      Printf.sprintf
-        "varray_or_darray<%s, %s>"
-        (string_of_hint khint)
-        (string_of_hint vhint)
-    | Hprim prim -> string_of_tprim prim
-    | Hthis -> "this"
-    | Hdynamic -> "dynamic"
-    | Hnothing -> "nothing"
-    | Hunion hints ->
-      Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
-    | Hintersection hints ->
-      Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
-    | Hany -> extract_standalone_any
-    | Herr -> extract_standalone_any
-    | Hfun_context name -> "ctx " ^ name
-    | Hvar name -> name
+          "(function(%s) : %s)"
+          (String.concat ~sep:", " (params @ variadic))
+          (string_of_hint hf_return_ty)
+      | Htuple hints ->
+        Printf.sprintf "(%s)" (concat_map ~sep:", " ~f:string_of_hint hints)
+      | Habstr (name, hints)
+      | Happly ((_, name), hints) ->
+        let params =
+          match hints with
+          | [] -> ""
+          | _ ->
+            Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:string_of_hint hints)
+        in
+        name ^ params
+      | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+        let string_of_shape_field { sfi_optional; sfi_name; sfi_hint } =
+          let optional_prefix =
+            if sfi_optional then
+              "?"
+            else
+              ""
+          in
+          Printf.sprintf
+            "%s%s => %s"
+            optional_prefix
+            (string_of_shape_field_name sfi_name)
+            (string_of_hint sfi_hint)
+        in
+        let shape_fields = List.map nsi_field_map ~f:string_of_shape_field in
+        let shape_suffix =
+          if nsi_allows_unknown_fields then
+            ["..."]
+          else
+            []
+        in
+        let shape_entries = shape_fields @ shape_suffix in
+        Printf.sprintf "shape(%s)" (String.concat ~sep:", " shape_entries)
+      | Haccess (root, ids) ->
+        String.concat ~sep:"::" (string_of_hint root :: List.map ids ~f:snd)
+      | Hsoft hint -> "@" ^ string_of_hint hint
+      | Hmixed -> "mixed"
+      | Hnonnull -> "nonnull"
+      | Hdarray (khint, vhint) ->
+        Printf.sprintf
+          "darray<%s, %s>"
+          (string_of_hint khint)
+          (string_of_hint vhint)
+      | Hvarray hint -> Printf.sprintf "varray<%s>" (string_of_hint hint)
+      | Hvarray_or_darray (None, vhint) ->
+        Printf.sprintf "varray_or_darray<%s>" (string_of_hint vhint)
+      | Hvarray_or_darray (Some khint, vhint) ->
+        Printf.sprintf
+          "varray_or_darray<%s, %s>"
+          (string_of_hint khint)
+          (string_of_hint vhint)
+      | Hprim prim -> string_of_tprim prim
+      | Hthis -> "this"
+      | Hdynamic -> "dynamic"
+      | Hnothing -> "nothing"
+      | Hunion hints ->
+        Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
+      | Hintersection hints ->
+        Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
+      | Hany -> extract_standalone_any
+      | Herr -> extract_standalone_any
+      | Hfun_context name -> "ctx " ^ name
+      | Hvar name -> name)
 
-  let maybe_string_of_user_attribute { ua_name; ua_params } =
+  let maybe_string_of_user_attribute Aast.{ ua_name; ua_params } =
     let name = snd ua_name in
     match ua_params with
     | [] when SMap.mem name SN.UserAttributes.as_map -> Some name
@@ -529,11 +540,12 @@ module Pretty = struct
     let constraints = List.map tp_constraints ~f:string_of_constraint in
     let user_attributes = string_of_user_attributes tp_user_attributes in
     let reified =
-      match tp_reified with
-      | Erased -> ""
-      | SoftReified
-      | Reified ->
-        "reify"
+      Aast.(
+        match tp_reified with
+        | Erased -> ""
+        | SoftReified
+        | Reified ->
+          "reify")
     in
     String.concat
       ~sep:" "
@@ -550,15 +562,16 @@ module Pretty = struct
       Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:string_of_tparam tparams)
 
   let string_of_fun_param
-      {
-        param_type_hint;
-        param_is_variadic;
-        param_name;
-        param_expr;
-        param_callconv;
-        param_user_attributes;
-        _;
-      } =
+      Aast.
+        {
+          param_type_hint;
+          param_is_variadic;
+          param_name;
+          param_expr;
+          param_callconv;
+          param_user_attributes;
+          _;
+        } =
     let user_attributes = string_of_user_attributes param_user_attributes in
     let inout =
       match param_callconv with
@@ -591,22 +604,25 @@ module Pretty = struct
       default
 
   let get_fun_declaration ctx name =
-    let fun_ = Nast_helper.get_fun_nast_exn ctx name in
-    let user_attributes = string_of_user_attributes fun_.f_user_attributes in
-    let tparams = string_of_tparams fun_.f_tparams in
+    let Aast.{ f_user_attributes; f_tparams; f_variadic; f_params; f_ret; _ } =
+      Nast_helper.get_fun_nast_exn ctx name
+    in
+    let user_attributes = string_of_user_attributes f_user_attributes in
+    let tparams = string_of_tparams f_tparams in
     let variadic =
-      match fun_.f_variadic with
-      | FVvariadicArg fp -> [string_of_fun_param fp]
-      | FVellipsis _ -> ["..."]
-      | FVnonVariadic -> []
+      Aast.(
+        match f_variadic with
+        | FVvariadicArg fp -> [string_of_fun_param fp]
+        | FVellipsis _ -> ["..."]
+        | FVnonVariadic -> [])
     in
     let params =
       String.concat
         ~sep:", "
-        (List.map fun_.f_params ~f:string_of_fun_param @ variadic)
+        (List.map f_params ~f:string_of_fun_param @ variadic)
     in
     let ret =
-      match fun_.f_ret with
+      match f_ret with
       | (_, Some hint) -> ": " ^ string_of_hint hint
       | (_, None) -> ""
     in
@@ -641,101 +657,102 @@ module Pretty = struct
         (Aast_defs.show_hint hint);
       raise Unsupported
     in
-    match snd hint with
-    | Hprim prim -> get_init_for_prim prim
-    | Hoption _ -> "null"
-    | Hlike hint -> get_init_from_hint ctx tparams_stack hint
-    | Hdarray _ -> "darray[]"
-    | Hvarray_or_darray _
-    | Hvarray _ ->
-      "varray[]"
-    | Htuple hints ->
-      Printf.sprintf
-        "tuple(%s)"
-        (concat_map ~sep:", " ~f:(get_init_from_hint ctx tparams_stack) hints)
-    | Happly ((_, name), hints) ->
-      (match () with
-      | _
-        when String.equal name SN.Collections.cVec
-             || String.equal name SN.Collections.cKeyset
-             || String.equal name SN.Collections.cDict ->
-        Printf.sprintf "%s[]" (strip_ns name)
-      | _
-        when String.equal name SN.Collections.cVector
-             || String.equal name SN.Collections.cImmVector
-             || String.equal name SN.Collections.cMap
-             || String.equal name SN.Collections.cImmMap
-             || String.equal name SN.Collections.cSet
-             || String.equal name SN.Collections.cImmSet ->
-        Printf.sprintf "%s {}" (strip_ns name)
-      | _ when String.equal name SN.Collections.cPair ->
-        (match hints with
-        | [first; second] ->
-          Printf.sprintf
-            "Pair {%s, %s}"
-            (get_init_from_hint ctx tparams_stack first)
-            (get_init_from_hint ctx tparams_stack second)
-        | _ -> failwith "malformed hint")
-      | _ when String.equal name SN.Classes.cClassname ->
-        (match hints with
-        | [(_, Happly ((_, class_name), _))] ->
-          Printf.sprintf "%s::class" class_name
-        | _ -> raise UnexpectedDependency)
-      | _ ->
-        (match Nast_helper.get_class_nast ctx name with
-        | Some class_ ->
-          (match class_.c_kind with
-          | Ast_defs.Cenum ->
-            let const_name =
-              match class_.c_consts with
-              | [] -> failwith "empty enum"
-              | const :: _ -> snd const.cc_id
-            in
-            Printf.sprintf "%s::%s" name const_name
-          | _ -> unsupported_hint ())
-        | None ->
-          let typedef = Nast_helper.get_typedef_nast_exn ctx name in
-          let tparams =
-            List.fold2_exn
-              typedef.t_tparams
-              hints
-              ~init:SMap.empty
-              ~f:(fun tparams tparam hint ->
-                SMap.add (snd tparam.tp_name) hint tparams)
-          in
-          get_init_from_hint ctx (tparams :: tparams_stack) typedef.t_kind))
-    | Hshape { nsi_field_map; _ } ->
-      let non_optional_fields =
-        List.filter nsi_field_map ~f:(fun shape_field_info ->
-            not shape_field_info.sfi_optional)
-      in
-      let get_init_shape_field { sfi_hint; sfi_name; _ } =
+    Aast.(
+      match snd hint with
+      | Hprim prim -> get_init_for_prim prim
+      | Hoption _ -> "null"
+      | Hlike hint -> get_init_from_hint ctx tparams_stack hint
+      | Hdarray _ -> "darray[]"
+      | Hvarray_or_darray _
+      | Hvarray _ ->
+        "varray[]"
+      | Htuple hints ->
         Printf.sprintf
-          "%s => %s"
-          (string_of_shape_field_name sfi_name)
-          (get_init_from_hint ctx tparams_stack sfi_hint)
-      in
-      Printf.sprintf
-        "shape(%s)"
-        (concat_map ~sep:", " ~f:get_init_shape_field non_optional_fields)
-    | Habstr (name, []) ->
-      (* FIXME: support non-empty type arguments of Habstr here? *)
-      let rec loop tparams_stack =
-        match tparams_stack with
-        | tparams :: tparams_stack' ->
-          (match SMap.find_opt name tparams with
-          | Some hint -> get_init_from_hint ctx tparams_stack' hint
-          | None -> loop tparams_stack')
-        | [] -> unsupported_hint ()
-      in
-      loop tparams_stack
-    | _ -> unsupported_hint ()
+          "tuple(%s)"
+          (concat_map ~sep:", " ~f:(get_init_from_hint ctx tparams_stack) hints)
+      | Happly ((_, name), hints) ->
+        (match () with
+        | _
+          when String.equal name SN.Collections.cVec
+               || String.equal name SN.Collections.cKeyset
+               || String.equal name SN.Collections.cDict ->
+          Printf.sprintf "%s[]" (strip_ns name)
+        | _
+          when String.equal name SN.Collections.cVector
+               || String.equal name SN.Collections.cImmVector
+               || String.equal name SN.Collections.cMap
+               || String.equal name SN.Collections.cImmMap
+               || String.equal name SN.Collections.cSet
+               || String.equal name SN.Collections.cImmSet ->
+          Printf.sprintf "%s {}" (strip_ns name)
+        | _ when String.equal name SN.Collections.cPair ->
+          (match hints with
+          | [first; second] ->
+            Printf.sprintf
+              "Pair {%s, %s}"
+              (get_init_from_hint ctx tparams_stack first)
+              (get_init_from_hint ctx tparams_stack second)
+          | _ -> failwith "malformed hint")
+        | _ when String.equal name SN.Classes.cClassname ->
+          (match hints with
+          | [(_, Happly ((_, class_name), _))] ->
+            Printf.sprintf "%s::class" class_name
+          | _ -> raise UnexpectedDependency)
+        | _ ->
+          (match Nast_helper.get_class_nast ctx name with
+          | Some class_ ->
+            (match class_.c_kind with
+            | Ast_defs.Cenum ->
+              let const_name =
+                match class_.c_consts with
+                | [] -> failwith "empty enum"
+                | const :: _ -> snd const.cc_id
+              in
+              Printf.sprintf "%s::%s" name const_name
+            | _ -> unsupported_hint ())
+          | None ->
+            let typedef = Nast_helper.get_typedef_nast_exn ctx name in
+            let tparams =
+              List.fold2_exn
+                typedef.t_tparams
+                hints
+                ~init:SMap.empty
+                ~f:(fun tparams tparam hint ->
+                  SMap.add (snd tparam.tp_name) hint tparams)
+            in
+            get_init_from_hint ctx (tparams :: tparams_stack) typedef.t_kind))
+      | Hshape { nsi_field_map; _ } ->
+        let non_optional_fields =
+          List.filter nsi_field_map ~f:(fun shape_field_info ->
+              not shape_field_info.sfi_optional)
+        in
+        let get_init_shape_field { sfi_hint; sfi_name; _ } =
+          Printf.sprintf
+            "%s => %s"
+            (string_of_shape_field_name sfi_name)
+            (get_init_from_hint ctx tparams_stack sfi_hint)
+        in
+        Printf.sprintf
+          "shape(%s)"
+          (concat_map ~sep:", " ~f:get_init_shape_field non_optional_fields)
+      | Habstr (name, []) ->
+        (* FIXME: support non-empty type arguments of Habstr here? *)
+        let rec loop tparams_stack =
+          match tparams_stack with
+          | tparams :: tparams_stack' ->
+            (match SMap.find_opt name tparams with
+            | Some hint -> get_init_from_hint ctx tparams_stack' hint
+            | None -> loop tparams_stack')
+          | [] -> unsupported_hint ()
+        in
+        loop tparams_stack
+      | _ -> unsupported_hint ())
 
   let get_init_from_hint ctx hint = get_init_from_hint ctx [] hint
 
   let get_gconst_declaration ctx name =
     let gconst = Nast_helper.get_gconst_nast_exn ctx name in
-    let hint = value_or_not_found ("type of " ^ name) gconst.cst_type in
+    let hint = value_or_not_found ("type of " ^ name) gconst.Aast.cst_type in
     let init = get_init_from_hint ctx hint in
     Printf.sprintf
       "const %s %s = %s;"
@@ -743,21 +760,21 @@ module Pretty = struct
       (strip_ns name)
       init
 
-  let get_const_declaration ctx const =
-    let name = snd const.cc_id in
+  let get_const_declaration ctx Aast.{ cc_id; cc_expr; cc_type; _ } =
+    let name = snd cc_id in
     let abstract =
-      match const.cc_expr with
+      match cc_expr with
       | Some _ -> ""
       | None -> "abstract"
     in
     let (type_, init) =
-      match (const.cc_type, const.cc_expr) with
+      match (cc_type, cc_expr) with
       | (Some hint, _) ->
         (string_of_hint hint, " = " ^ get_init_from_hint ctx hint)
       | (None, Some e) ->
         (match Decl_utils.infer_const e with
         | Some tprim ->
-          let hint = (fst e, Hprim tprim) in
+          let hint = (fst e, Aast.Hprim tprim) in
           ("", " = " ^ get_init_from_hint ctx hint)
         | None -> raise Unsupported)
       | (None, None) -> ("", "")
@@ -776,39 +793,51 @@ module Pretty = struct
       (* No other global declarations *)
       | _ -> raise UnexpectedDependency)
 
-  let get_class_declaration class_ =
-    let name = snd class_.c_name in
-    let user_attributes = string_of_user_attributes class_.c_user_attributes in
+  let get_class_declaration
+      Aast.
+        {
+          c_name;
+          c_user_attributes;
+          c_final;
+          c_kind;
+          c_tparams;
+          c_extends;
+          c_implements;
+          _;
+        } =
+    let name = snd c_name in
+    let user_attributes = string_of_user_attributes c_user_attributes in
     let final =
-      if class_.c_final then
+      if c_final then
         "final"
       else
         ""
     in
     let kind =
-      match class_.c_kind with
-      | Ast_defs.Cabstract -> "abstract class"
-      | Ast_defs.Cnormal -> "class"
-      | Ast_defs.Cinterface -> "interface"
-      | Ast_defs.Ctrait -> "trait"
-      | Ast_defs.Cenum -> "enum"
+      Ast_defs.(
+        match c_kind with
+        | Cabstract -> "abstract class"
+        | Cnormal -> "class"
+        | Cinterface -> "interface"
+        | Ctrait -> "trait"
+        | Cenum -> "enum")
     in
-    let tparams = string_of_tparams class_.c_tparams in
+    let tparams = string_of_tparams c_tparams in
     let extends =
-      match class_.c_extends with
+      match c_extends with
       | [] -> ""
       | _ ->
         Printf.sprintf
           "extends %s"
-          (concat_map ~sep:", " ~f:string_of_hint class_.c_extends)
+          (concat_map ~sep:", " ~f:string_of_hint c_extends)
     in
     let implements =
-      match class_.c_implements with
+      match c_implements with
       | [] -> ""
       | _ ->
         Printf.sprintf
           "implements %s"
-          (concat_map ~sep:", " ~f:string_of_hint class_.c_implements)
+          (concat_map ~sep:", " ~f:string_of_hint c_implements)
     in
     Printf.sprintf
       "%s %s %s %s%s %s %s"
@@ -820,47 +849,63 @@ module Pretty = struct
       extends
       implements
 
-  let get_method_declaration method_ ~from_interface =
+  let get_method_declaration
+      Aast.
+        {
+          m_name;
+          m_tparams;
+          m_params;
+          m_variadic;
+          m_ret;
+          m_static;
+          m_abstract;
+          m_final;
+          m_visibility;
+          m_user_attributes;
+          _;
+        }
+      ~from_interface =
     let abstract =
-      if method_.m_abstract && not from_interface then
+      if m_abstract && not from_interface then
         "abstract"
       else
         ""
     in
     let final =
-      if method_.m_final then
+      if m_final then
         "final"
       else
         ""
     in
-    let visibility = string_of_visibility method_.m_visibility in
+    let visibility = Aast.string_of_visibility m_visibility in
     let static =
-      if method_.m_static then
+      if m_static then
         "static"
       else
         ""
     in
-    let user_attributes = string_of_user_attributes method_.m_user_attributes in
-    let name = strip_ns (snd method_.m_name) in
-    let tparams = string_of_tparams method_.m_tparams in
+    let user_attributes = string_of_user_attributes m_user_attributes in
+    let name = strip_ns (snd m_name) in
+    let tparams = string_of_tparams m_tparams in
     let variadic =
-      match method_.m_variadic with
-      | FVvariadicArg fp -> [string_of_fun_param fp]
-      | FVellipsis _ -> ["..."]
-      | FVnonVariadic -> []
+      Aast.(
+        match m_variadic with
+        | FVvariadicArg fp -> [string_of_fun_param fp]
+        | FVellipsis _ -> ["..."]
+        | FVnonVariadic -> [])
     in
     let params =
       String.concat
         ~sep:", "
-        (List.map method_.m_params ~f:string_of_fun_param @ variadic)
+        (List.map m_params ~f:string_of_fun_param @ variadic)
     in
     let ret =
-      match method_.m_ret with
+      match m_ret with
       | (_, Some hint) -> ": " ^ string_of_hint hint
       | (_, None) -> ""
     in
     let body =
-      if method_.m_abstract || from_interface then
+      if m_abstract || from_interface then
         ";"
       else
         "{throw new \\Exception();}"
@@ -878,11 +923,23 @@ module Pretty = struct
       ret
       body
 
-  let get_prop_declaration ctx prop =
-    let name = snd prop.cv_id in
-    let user_attributes = string_of_user_attributes prop.cv_user_attributes in
+  let get_prop_declaration
+      ctx
+      Aast.
+        {
+          cv_id;
+          cv_user_attributes;
+          cv_type;
+          cv_expr;
+          cv_xhp_attr;
+          cv_visibility;
+          cv_is_static;
+          _;
+        } =
+    let name = snd cv_id in
+    let user_attributes = string_of_user_attributes cv_user_attributes in
     let (type_, init) =
-      match (hint_of_type_hint prop.cv_type, prop.cv_expr) with
+      match (Aast.hint_of_type_hint cv_type, cv_expr) with
       | (Some hint, Some _) ->
         ( string_of_hint hint,
           Printf.sprintf " = %s" (get_init_from_hint ctx hint) )
@@ -891,12 +948,12 @@ module Pretty = struct
       (* Untyped prop, not supported for now *)
       | (None, Some _) -> raise Unsupported
     in
-    match prop.cv_xhp_attr with
+    match cv_xhp_attr with
     | None ->
       (* Ordinary property *)
-      let visibility = string_of_visibility prop.cv_visibility in
+      let visibility = Aast.string_of_visibility cv_visibility in
       let static =
-        if prop.cv_is_static then
+        if cv_is_static then
           "static"
         else
           ""
@@ -919,22 +976,31 @@ module Pretty = struct
         init
         (string_of_xhp_attr_info xhp_attr_info)
 
-  let get_typeconst_declaration typeconst =
+  let get_typeconst_declaration
+      Aast.
+        {
+          c_tconst_abstract;
+          c_tconst_name;
+          c_tconst_type;
+          c_tconst_constraint;
+          _;
+        } =
     let abstract =
-      match typeconst.c_tconst_abstract with
-      | TCAbstract _ -> "abstract"
-      | TCPartiallyAbstract
-      | TCConcrete ->
-        ""
+      Aast.(
+        match c_tconst_abstract with
+        | TCAbstract _ -> "abstract"
+        | TCPartiallyAbstract
+        | TCConcrete ->
+          "")
     in
-    let name = snd typeconst.c_tconst_name in
+    let name = snd c_tconst_name in
     let type_ =
-      match typeconst.c_tconst_type with
+      match c_tconst_type with
       | Some hint -> " = " ^ string_of_hint hint
       | None -> ""
     in
     let constraint_ =
-      match typeconst.c_tconst_constraint with
+      match c_tconst_constraint with
       | Some hint -> " as " ^ string_of_hint hint
       | None -> ""
     in
@@ -949,8 +1015,8 @@ module Pretty = struct
       None
     | _ ->
       let open Option in
-      Nast_helper.get_class_nast ctx class_name >>= fun class_ ->
-      let from_interface = Ast_defs.is_c_interface class_.c_kind in
+      Nast_helper.get_class_nast ctx class_name >>= fun Aast.{ c_kind; _ } ->
+      let from_interface = Ast_defs.is_c_interface c_kind in
       Nast_helper.get_method_nast ctx class_name method_name >>= fun method_ ->
       Some (get_method_declaration method_ ~from_interface)
 
@@ -990,39 +1056,35 @@ module Pretty = struct
       raise UnexpectedDependency
     | RecordDef _ -> records_not_supported ()
 
-  let construct_enum ctx class_ =
-    let name = snd class_.c_name in
-    let enum =
-      match class_.c_enum with
+  let construct_enum ctx Aast.{ c_name; c_enum; c_consts; _ } =
+    let name = snd c_name in
+    let Aast.{ e_constraint; e_base; _ } =
+      match c_enum with
       | Some enum -> enum
-      | None -> failwith ("not an enum: " ^ snd class_.c_name)
+      | None -> failwith ("not an enum: " ^ snd c_name)
     in
     let constraint_ =
-      match enum.e_constraint with
+      match e_constraint with
       | Some hint -> " as " ^ string_of_hint hint
       | None -> ""
     in
-    let string_of_enum_const const =
-      Printf.sprintf
-        "%s = %s;"
-        (snd const.cc_id)
-        (get_init_from_hint ctx enum.e_base)
+    let string_of_enum_const Aast.{ cc_id; _ } =
+      Printf.sprintf "%s = %s;" (snd cc_id) (get_init_from_hint ctx e_base)
     in
     Printf.sprintf
       "enum %s: %s%s {%s}"
       (strip_ns name)
-      (string_of_hint enum.e_base)
+      (string_of_hint e_base)
       constraint_
-      (concat_map ~sep:"\n" ~f:string_of_enum_const class_.c_consts)
+      (concat_map ~sep:"\n" ~f:string_of_enum_const c_consts)
 
-  let get_class_body ctx class_ target class_elts =
-    let name = snd class_.c_name in
+  let get_class_body ctx Aast.{ c_name; c_uses; c_reqs; _ } target class_elts =
+    let name = snd c_name in
     let uses =
-      List.map class_.c_uses ~f:(fun s ->
-          Printf.sprintf "use %s;" (string_of_hint s))
+      List.map c_uses ~f:(fun s -> Printf.sprintf "use %s;" (string_of_hint s))
     in
     let (req_extends, req_implements) =
-      List.partition_map class_.c_reqs ~f:(fun (s, extends) ->
+      List.partition_map c_reqs ~f:(fun (s, extends) ->
           if extends then
             `Fst (Printf.sprintf "require extends %s;" (string_of_hint s))
           else
@@ -1041,7 +1103,7 @@ module Pretty = struct
      here, with stubs of other class elements. *)
     let extracted_method =
       match target with
-      | Method (cls_name, _) when String.equal cls_name name ->
+      | Cmd.Method (cls_name, _) when String.equal cls_name name ->
         [Target.extract_target ctx target]
       | _ -> []
     in
@@ -1054,29 +1116,31 @@ module Pretty = struct
     let body = get_class_body ctx class_ target fields in
     Printf.sprintf "%s {%s}" decl body
 
-  let construct_enum_or_class ctx class_ target fields =
-    match class_.c_kind with
-    | Ast_defs.Cabstract
-    | Ast_defs.Cnormal
-    | Ast_defs.Cinterface
-    | Ast_defs.Ctrait ->
+  let construct_enum_or_class ctx (Aast.{ c_kind; _ } as class_) target fields =
+    let open Ast_defs in
+    match c_kind with
+    | Cabstract
+    | Cnormal
+    | Cinterface
+    | Ctrait ->
       construct_class ctx class_ target fields
-    | Ast_defs.Cenum -> construct_enum ctx class_
+    | Cenum -> construct_enum ctx class_
 
-  let construct_typedef typedef =
-    let name = snd typedef.t_name in
+  let construct_typedef
+      Aast.{ t_name; t_tparams; t_constraint; t_vis; t_kind; _ } =
+    let name = snd t_name in
     let keyword =
-      match typedef.t_vis with
+      match t_vis with
       | Aast_defs.Transparent -> "type"
       | Aast_defs.Opaque -> "newtype"
     in
-    let tparams = string_of_tparams typedef.t_tparams in
+    let tparams = string_of_tparams t_tparams in
     let constraint_ =
-      match typedef.t_constraint with
+      match t_constraint with
       | Some hint -> " as " ^ string_of_hint hint
       | None -> ""
     in
-    let pos = fst typedef.t_name in
+    let pos = fst t_name in
     let hh_fixmes =
       String.concat
         (List.map
@@ -1090,7 +1154,7 @@ module Pretty = struct
       (strip_ns name)
       tparams
       constraint_
-      (string_of_hint typedef.t_kind)
+      (string_of_hint t_kind)
 
   let construct_type_declaration ctx t target fields =
     match Nast_helper.get_class_nast ctx t with
@@ -1129,7 +1193,9 @@ and add_dep ctx env ~this ty : unit =
       method! on_tany _ _ = env.depends_on_any := true
 
       method! on_tfun () r ft =
-        if List.exists ~f:Typing_defs.get_fp_has_default ft.ft_params then
+        if
+          List.exists ~f:Typing_defs.get_fp_has_default ft.Typing_defs.ft_params
+        then
           env.depends_on_make_default := true;
         super#on_tfun () r ft
 
@@ -1144,7 +1210,7 @@ and add_dep ctx env ~this ty : unit =
 
       method! on_tshape _ _ _ fdm =
         Nast.ShapeMap.iter
-          (fun name { sft_ty; _ } ->
+          (fun name Typing_defs.{ sft_ty; _ } ->
             (match name with
             | Ast_defs.SFlit_int _
             | Ast_defs.SFlit_str _ ->
@@ -1161,17 +1227,18 @@ and add_dep ctx env ~this ty : unit =
        *)
       method! on_taccess () r (root, tconst) =
         let rec split_taccess root ids =
-          match Typing_defs.get_node root with
-          | Taccess (root, id) -> split_taccess root (id :: ids)
-          | _ -> (root, ids)
+          Typing_defs.(
+            match get_node root with
+            | Taccess (root, id) -> split_taccess root (id :: ids)
+            | _ -> (root, ids))
         in
         let rec make_taccess r root ids =
           match ids with
           | [] -> root
           | id :: ids ->
             make_taccess
-              Reason.Rnone
-              (mk (r, Typing_defs.Taccess (root, id)))
+              Typing_reason.Rnone
+              Typing_defs.(mk (r, Taccess (root, id)))
               ids
         in
         let (root, tconsts) = split_taccess root [tconst] in
@@ -1185,18 +1252,16 @@ and add_dep ctx env ~this ty : unit =
             do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
             let cls = Decl.get_class_exn ctx class_name in
             (match Decl_provider.Class.get_typeconst cls tconst with
-            | Some typeconst ->
-              Option.iter
-                typeconst.ttc_type
-                ~f:(add_dep ctx ~this:(Some class_name) env);
+            | Some Typing_defs.{ ttc_type; ttc_constraint; _ } ->
+              Option.iter ttc_type ~f:(add_dep ctx ~this:(Some class_name) env);
               if not (List.is_empty tconsts) then (
-                match (typeconst.ttc_type, typeconst.ttc_constraint) with
+                match (ttc_type, ttc_constraint) with
                 | (Some tc_type, _)
                 | (None, Some tc_type) ->
                   (* What does 'this' refer to inside of T? *)
                   let this =
                     match Typing_defs.get_node tc_type with
-                    | Tapply ((_, name), _) -> Some name
+                    | Typing_defs.Tapply ((_, name), _) -> Some name
                     | _ -> this
                   in
                   let taccess = make_taccess r tc_type tconsts in
@@ -1206,140 +1271,155 @@ and add_dep ctx env ~this ty : unit =
             | None -> ())
         in
         match Typing_defs.get_node root with
-        | Taccess (root', tconst) ->
+        | Typing_defs.Taccess (root', tconst) ->
           add_dep ctx ~this env (make_taccess r root' (tconst :: tconsts))
-        | Tapply ((_, name), _) -> expand_type_access name tconsts
-        | Tthis -> expand_type_access (Option.value_exn this) tconsts
+        | Typing_defs.Tapply ((_, name), _) -> expand_type_access name tconsts
+        | Typing_defs.Tthis ->
+          expand_type_access (Option.value_exn this) tconsts
         | _ -> raise UnexpectedDependency
     end
   in
   visitor#on_type () ty
 
 and add_signature_dependencies ctx env obj =
-  let open Typing_deps.Dep in
-  let description = variant_to_string obj in
+  let description = Typing_deps.Dep.variant_to_string obj in
   match Dep.get_class_name obj with
   | Some cls_name ->
     do_add_dep ctx env (Typing_deps.Dep.Class cls_name);
     (match Decl_provider.get_class ctx cls_name with
     | None ->
-      let td =
+      let Typing_defs.{ td_type; td_constraint; _ } =
         value_or_not_found description @@ Decl_provider.get_typedef ctx cls_name
       in
-      add_dep ctx ~this:None env td.td_type;
-      Option.iter td.td_constraint ~f:(add_dep ctx ~this:None env)
+      add_dep ctx ~this:None env td_type;
+      Option.iter td_constraint ~f:(add_dep ctx ~this:None env)
     | Some cls ->
       let add_dep = add_dep ctx env ~this:(Some cls_name) in
-      (match obj with
-      | Prop (_, name) ->
-        let p = value_or_not_found description @@ Class.get_prop cls name in
-        add_dep @@ Lazy.force p.ce_type;
+      Typing_deps.Dep.(
+        (match obj with
+        | Prop (_, name) ->
+          let Typing_defs.{ ce_type; _ } =
+            value_or_not_found description @@ Class.get_prop cls name
+          in
+          add_dep @@ Lazy.force ce_type;
 
-        (* We need to initialize properties in the constructor, add a dependency on it *)
-        do_add_dep ctx env (Cstr cls_name)
-      | SProp (_, name) ->
-        let sp = value_or_not_found description @@ Class.get_sprop cls name in
-        add_dep @@ Lazy.force sp.ce_type
-      | Method (_, name) ->
-        let m = value_or_not_found description @@ Class.get_method cls name in
-        add_dep @@ Lazy.force m.ce_type;
-        Class.all_ancestor_names cls
-        |> List.iter ~f:(fun ancestor_name ->
-               match Decl_provider.get_class ctx ancestor_name with
-               | Some ancestor when Class.has_method ancestor name ->
-                 do_add_dep ctx env (Method (ancestor_name, name))
-               | _ -> ())
-      | SMethod (_, name) ->
-        (match Class.get_smethod cls name with
-        | Some sm ->
-          add_dep @@ Lazy.force sm.ce_type;
+          (* We need to initialize properties in the constructor, add a dependency on it *)
+          do_add_dep ctx env (Cstr cls_name)
+        | SProp (_, name) ->
+          let Typing_defs.{ ce_type; _ } =
+            value_or_not_found description @@ Class.get_sprop cls name
+          in
+          add_dep @@ Lazy.force ce_type
+        | Method (_, name) ->
+          let Typing_defs.{ ce_type; _ } =
+            value_or_not_found description @@ Class.get_method cls name
+          in
+          add_dep @@ Lazy.force ce_type;
           Class.all_ancestor_names cls
           |> List.iter ~f:(fun ancestor_name ->
                  match Decl_provider.get_class ctx ancestor_name with
-                 | Some ancestor when Class.has_smethod ancestor name ->
-                   do_add_dep ctx env (SMethod (ancestor_name, name))
+                 | Some ancestor when Class.has_method ancestor name ->
+                   do_add_dep ctx env (Method (ancestor_name, name))
                  | _ -> ())
-        | None ->
-          (match Class.get_method cls name with
-          | Some _ ->
-            HashSet.remove env.dependencies obj;
-            do_add_dep ctx env (Method (cls_name, name))
-          | None -> raise (DependencyNotFound description)))
-      | Const (_, name) ->
-        (match Class.get_typeconst cls name with
-        | Some tc ->
-          if not (String.equal cls_name tc.ttc_origin) then
-            do_add_dep ctx env (Const (tc.ttc_origin, name));
-          Option.iter tc.ttc_type ~f:add_dep;
-          Option.iter tc.ttc_constraint ~f:add_dep
-        | None ->
-          let c = value_or_not_found description @@ Class.get_const cls name in
-          add_dep c.cc_type)
-      | Cstr _ ->
-        (match Class.construct cls with
-        | (Some constr, _) -> add_dep @@ Lazy.force constr.ce_type
-        | _ -> ())
-      | Class _ ->
-        List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
-        List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
-        Option.iter
-          (Class.enum_type cls)
-          ~f:(fun { te_base; te_constraint; te_includes; te_enum_class = _ } ->
-            add_dep te_base;
-            Option.iter te_constraint ~f:add_dep;
-            List.iter te_includes ~f:add_dep)
-      | AllMembers _ ->
-        (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-        List.iter (Class.consts cls) (fun (name, c) ->
-            if not (String.equal name "class") then add_dep c.cc_type)
-      (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
-      | Extends _ -> ()
-      | _ -> raise UnexpectedDependency))
+        | SMethod (_, name) ->
+          (match Class.get_smethod cls name with
+          | Some Typing_defs.{ ce_type; _ } ->
+            add_dep @@ Lazy.force ce_type;
+            Class.all_ancestor_names cls
+            |> List.iter ~f:(fun ancestor_name ->
+                   match Decl_provider.get_class ctx ancestor_name with
+                   | Some ancestor when Class.has_smethod ancestor name ->
+                     do_add_dep ctx env (SMethod (ancestor_name, name))
+                   | _ -> ())
+          | None ->
+            (match Class.get_method cls name with
+            | Some _ ->
+              HashSet.remove env.dependencies obj;
+              do_add_dep ctx env (Method (cls_name, name))
+            | None -> raise (DependencyNotFound description)))
+        | Const (_, name) ->
+          (match Class.get_typeconst cls name with
+          | Some Typing_defs.{ ttc_type; ttc_constraint; ttc_origin; _ } ->
+            if not (String.equal cls_name ttc_origin) then
+              do_add_dep ctx env (Const (ttc_origin, name));
+            Option.iter ttc_type ~f:add_dep;
+            Option.iter ttc_constraint ~f:add_dep
+          | None ->
+            let Typing_defs.{ cc_type; _ } =
+              value_or_not_found description @@ Class.get_const cls name
+            in
+            add_dep cc_type)
+        | Cstr _ ->
+          (match Class.construct cls with
+          | (Some Typing_defs.{ ce_type; _ }, _) ->
+            add_dep @@ Lazy.force ce_type
+          | _ -> ())
+        | Class _ ->
+          List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
+          List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
+          Option.iter
+            (Class.enum_type cls)
+            ~f:(fun Typing_defs.{ te_base; te_constraint; te_includes; _ } ->
+              add_dep te_base;
+              Option.iter te_constraint ~f:add_dep;
+              List.iter te_includes ~f:add_dep)
+        | AllMembers _ ->
+          (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
+          List.iter
+            (Class.consts cls)
+            ~f:(fun (name, Typing_defs.{ cc_type; _ }) ->
+              if not (String.equal name "class") then add_dep cc_type)
+        (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
+        | Extends _ -> ()
+        | _ -> raise UnexpectedDependency)))
   | None ->
-    (match obj with
-    | Fun f
-    | FunName f ->
-      let func =
-        value_or_not_found description @@ Decl_provider.get_fun ctx f
-      in
-      add_dep ctx ~this:None env @@ func.fe_type
-    | GConst c
-    | GConstName c ->
-      let ty =
-        value_or_not_found description @@ Decl_provider.get_gconst ctx c
-      in
-      add_dep ctx ~this:None env ty
-    | _ -> raise UnexpectedDependency)
+    Typing_deps.Dep.(
+      (match obj with
+      | Fun f
+      | FunName f ->
+        let Typing_defs.{ fe_type; _ } =
+          value_or_not_found description @@ Decl_provider.get_fun ctx f
+        in
+        add_dep ctx ~this:None env @@ fe_type
+      | GConst c
+      | GConstName c ->
+        let ty =
+          value_or_not_found description @@ Decl_provider.get_gconst ctx c
+        in
+        add_dep ctx ~this:None env ty
+      | _ -> raise UnexpectedDependency))
 
 let get_implementation_dependencies ctx env cls_name =
-  let open Decl_provider in
-  match get_class ctx cls_name with
+  match Decl_provider.get_class ctx cls_name with
   | None -> []
   | Some cls ->
-    let open Typing_deps.Dep in
     let add_smethod_impl acc smethod_name =
       match Class.get_smethod cls smethod_name with
-      | Some elt -> SMethod (elt.ce_origin, smethod_name) :: acc
+      | Some Typing_defs.{ ce_origin; _ } ->
+        Typing_deps.Dep.SMethod (ce_origin, smethod_name) :: acc
       | _ -> acc
     in
     let add_method_impl acc method_name =
       match Class.get_method cls method_name with
-      | Some elt -> Method (elt.ce_origin, method_name) :: acc
+      | Some Typing_defs.{ ce_origin; _ } ->
+        Typing_deps.Dep.Method (ce_origin, method_name) :: acc
       | _ -> acc
     in
     let add_typeconst_impl acc typeconst_name =
       match Class.get_typeconst cls typeconst_name with
-      | Some tc -> Const (tc.ttc_origin, typeconst_name) :: acc
+      | Some Typing_defs.{ ttc_origin; _ } ->
+        Typing_deps.Dep.Const (ttc_origin, typeconst_name) :: acc
       | _ -> acc
     in
     let add_const_impl acc const_name =
       match Class.get_const cls const_name with
-      | Some c -> Const (c.cc_origin, const_name) :: acc
+      | Some Typing_defs.{ cc_origin; _ } ->
+        Typing_deps.Dep.Const (cc_origin, const_name) :: acc
       | _ -> acc
     in
     let add_impls acc ancestor_name =
       let ancestor = Decl.get_class_exn ctx ancestor_name in
-      if Dep.is_builtin_dep ctx (Class ancestor_name) then
+      if Dep.is_builtin_dep ctx (Typing_deps.Dep.Class ancestor_name) then
         let acc =
           List.fold
             (Class.smethods ancestor)
@@ -1367,23 +1447,28 @@ let get_implementation_dependencies ctx env cls_name =
         in
         acc
       else
-        HashSet.fold env.dependencies ~init:acc ~f:(fun dep acc ->
-            match dep with
-            | SMethod (class_name, method_name)
-              when String.equal class_name ancestor_name ->
-              add_smethod_impl acc method_name
-            | Method (class_name, method_name)
-              when String.equal class_name ancestor_name ->
-              add_method_impl acc method_name
-            | Const (class_name, name)
-              when String.equal class_name ancestor_name ->
-              if Option.is_some (Class.get_typeconst ancestor name) then
-                add_typeconst_impl acc name
-              else if Option.is_some (Class.get_const ancestor name) then
-                add_const_impl acc name
-              else
-                acc
-            | _ -> acc)
+        HashSet.fold
+          env.dependencies
+          ~init:acc
+          ~f:
+            Typing_deps.Dep.(
+              fun dep acc ->
+                match dep with
+                | SMethod (class_name, method_name)
+                  when String.equal class_name ancestor_name ->
+                  add_smethod_impl acc method_name
+                | Method (class_name, method_name)
+                  when String.equal class_name ancestor_name ->
+                  add_method_impl acc method_name
+                | Const (class_name, name)
+                  when String.equal class_name ancestor_name ->
+                  if Option.is_some (Class.get_typeconst ancestor name) then
+                    add_typeconst_impl acc name
+                  else if Option.is_some (Class.get_const ancestor name) then
+                    add_const_impl acc name
+                  else
+                    acc
+                | _ -> acc)
     in
     let result =
       List.fold ~init:[] ~f:add_impls (Class.all_ancestor_names cls)
@@ -1406,28 +1491,37 @@ let rec add_implementation_dependencies ctx env =
     add_implementation_dependencies ctx env
 
 let get_dependency_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
-  Decl_provider.(
-    Typing_deps.Dep.(
-      let description = variant_to_string dep in
-      let cls = value_or_not_found description @@ get_class ctx cls in
-      match dep with
-      | Prop (_, name) ->
-        let p = value_or_not_found description @@ Class.get_prop cls name in
-        p.ce_origin
-      | SProp (_, name) ->
-        let sp = value_or_not_found description @@ Class.get_sprop cls name in
-        sp.ce_origin
-      | Method (_, name) ->
-        let m = value_or_not_found description @@ Class.get_method cls name in
-        m.ce_origin
-      | SMethod (_, name) ->
-        let sm = value_or_not_found description @@ Class.get_smethod cls name in
-        sm.ce_origin
-      | Const (_, name) ->
-        let c = value_or_not_found description @@ Class.get_const cls name in
-        c.cc_origin
-      | Cstr cls -> cls
-      | _ -> raise UnexpectedDependency))
+  let open Typing_deps.Dep in
+  let description = variant_to_string dep in
+  let cls = value_or_not_found description @@ Decl_provider.get_class ctx cls in
+  match dep with
+  | Prop (_, name) ->
+    let Typing_defs.{ ce_origin; _ } =
+      value_or_not_found description @@ Class.get_prop cls name
+    in
+    ce_origin
+  | SProp (_, name) ->
+    let Typing_defs.{ ce_origin; _ } =
+      value_or_not_found description @@ Class.get_sprop cls name
+    in
+    ce_origin
+  | Method (_, name) ->
+    let Typing_defs.{ ce_origin; _ } =
+      value_or_not_found description @@ Class.get_method cls name
+    in
+    ce_origin
+  | SMethod (_, name) ->
+    let Typing_defs.{ ce_origin; _ } =
+      value_or_not_found description @@ Class.get_smethod cls name
+    in
+    ce_origin
+  | Const (_, name) ->
+    let Typing_defs.{ cc_origin; _ } =
+      value_or_not_found description @@ Class.get_const cls name
+    in
+    cc_origin
+  | Cstr cls -> cls
+  | _ -> raise UnexpectedDependency
 
 let collect_dependencies ctx target =
   let filename = Target.get_filename ctx target in
@@ -1451,14 +1545,14 @@ let collect_dependencies ctx target =
   let () =
     Typing_deps.Dep.(
       match target with
-      | Function func ->
+      | Cmd.Function func ->
         let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
           Typing_check_service.type_fun ctx filename func
         in
         add_implementation_dependencies ctx env;
         HashSet.remove env.dependencies (Fun func);
         HashSet.remove env.dependencies (FunName func)
-      | Method (cls, m) ->
+      | Cmd.Method (cls, m) ->
         let (_
               : (Tast.def * Typing_inference_env.t_global_with_pos list) option)
             =
@@ -1671,13 +1765,13 @@ let get_declarations ctx target class_dependencies global_dependencies =
     |> SMap.fold add_class_declaration partial_class_dependencies
   in
   match target with
-  | Function name ->
+  | Cmd.Function name ->
     let decl = Target.extract_target ctx target in
     if Dep.is_strict_fun ctx name then
       (add_declaration strict_declarations name decl, partial_declarations)
     else
       (strict_declarations, add_declaration partial_declarations name decl)
-  | Method _ -> (strict_declarations, partial_declarations)
+  | Cmd.Method _ -> (strict_declarations, partial_declarations)
 
 let go ctx target =
   try

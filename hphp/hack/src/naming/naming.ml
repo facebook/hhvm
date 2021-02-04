@@ -442,7 +442,10 @@ and hint_
     N.Hlike (hint ~allow_retonly env h)
   | Aast.Hsoft h ->
     let h = hint ~allow_retonly env h in
-    snd h
+    if TypecheckerOptions.interpret_soft_types_as_like_types tcopt then
+      N.Hlike h
+    else
+      snd h
   | Aast.Hfun
       Aast.
         {

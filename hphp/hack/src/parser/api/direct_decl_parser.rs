@@ -35,6 +35,7 @@ pub fn parse_script<'a>(
         mode,
         env.disable_xhp_element_mangling,
         env.array_unification,
+        env.interpret_soft_types_as_like_types,
         auto_namespace_map,
         arena,
     );

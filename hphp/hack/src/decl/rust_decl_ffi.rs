@@ -36,8 +36,8 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
         let include_hash = unsafe { bool::from_ocaml(include_hash).unwrap() };
 
         // SAFETY: We trust we've been handed a valid, immutable OCaml value
-        let (disable_xhp_element_mangling, array_unification) =
-            unsafe { <(bool, bool)>::from_ocaml(bool_opts).unwrap() };
+        let (disable_xhp_element_mangling, array_unification, interpret_soft_types_as_like_types) =
+            unsafe { <(bool, bool, bool)>::from_ocaml(bool_opts).unwrap() };
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
@@ -59,6 +59,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 let (decls, mode) = parse_decls_and_mode(
                     disable_xhp_element_mangling,
                     array_unification,
+                    interpret_soft_types_as_like_types,
                     filename,
                     &text,
                     &ns_map,

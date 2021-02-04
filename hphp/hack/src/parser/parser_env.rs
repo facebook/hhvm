@@ -21,6 +21,7 @@ pub struct ParserEnv {
     pub disallow_hash_comments: bool,
     pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
     pub array_unification: bool,
+    pub interpret_soft_types_as_like_types: bool,
 }
 
 impl From<FullFidelityParserEnv> for ParserEnv {
@@ -37,6 +38,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             disallow_hash_comments: env.disallow_hash_comments,
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
             array_unification: env.array_unification,
+            interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
         }
     }
 }

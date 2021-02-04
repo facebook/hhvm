@@ -142,6 +142,12 @@ let array_unification = GlobalOptions.po_array_unification
 let with_array_unification po b =
   { po with GlobalOptions.po_array_unification = b }
 
+let interpret_soft_types_as_like_types =
+  GlobalOptions.po_interpret_soft_types_as_like_types
+
+let with_interpret_soft_types_as_like_types po b =
+  { po with GlobalOptions.po_interpret_soft_types_as_like_types = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -170,7 +176,8 @@ let make
     ~disable_array_typehint
     ~disallow_hash_comments
     ~disallow_fun_and_cls_meth_pseudo_funcs
-    ~array_unification =
+    ~array_unification
+    ~interpret_soft_types_as_like_types =
   GlobalOptions.
     {
       default with
@@ -203,11 +210,13 @@ let make
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
       po_array_unification = array_unification;
+      po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -252,4 +261,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     allow_unstable_features po,
     disallow_hash_comments po,
     disallow_fun_and_cls_meth_pseudo_funcs po,
-    array_unification po )
+    array_unification po,
+    interpret_soft_types_as_like_types po )

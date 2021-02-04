@@ -67,6 +67,7 @@ pub struct DirectDeclSmartConstructors<'a> {
     pub decls: Decls<'a>,
     pub disable_xhp_element_mangling: bool,
     pub array_unification: bool,
+    pub interpret_soft_types_as_like_types: bool,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -82,6 +83,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         file_mode: Mode,
         disable_xhp_element_mangling: bool,
         array_unification: bool,
+        interpret_soft_types_as_like_types: bool,
         auto_namespace_map: &'a NamespaceMap,
         arena: &'a Bump,
     ) -> Self {
@@ -99,6 +101,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             file_mode,
             disable_xhp_element_mangling,
             array_unification,
+            interpret_soft_types_as_like_types,
             decls: Decls::empty(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
                 auto_namespace_map,
@@ -911,6 +914,7 @@ struct Attributes<'a> {
     external: bool,
     can_call: bool,
     atom: bool,
+    soft: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1201,6 +1205,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             external: false,
             can_call: false,
             atom: false,
+            soft: false,
         };
 
         let nodes = match node {
@@ -1346,6 +1351,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Atom" => {
                         attributes.atom = true;
+                    }
+                    "__Soft" => {
+                        attributes.soft = true;
                     }
                     _ => {}
                 }
@@ -3141,6 +3149,19 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         } else {
             ParamMode::FPnormal
         };
+        let hint = if self.interpret_soft_types_as_like_types {
+            let attributes = self.to_attributes(attributes);
+            if attributes.soft {
+                match hint {
+                    Node::Ty(ty) => self.hint_ty(self.get_pos(hint), Ty_::Tlike(ty)),
+                    _ => hint,
+                }
+            } else {
+                hint
+            }
+        } else {
+            hint
+        };
         Node::FunParam(self.alloc(FunParamDecl {
             attributes,
             visibility,
@@ -3794,6 +3815,20 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         strip_dollar_prefix(name)
                     };
                     let ty = self.node_to_non_ret_ty(hint);
+                    let ty = if self.interpret_soft_types_as_like_types {
+                        if attributes.soft {
+                            ty.map(|t| {
+                                self.alloc(Ty(
+                                    self.alloc(Reason::hint(self.get_pos(hint))),
+                                    Ty_::Tlike(t),
+                                ))
+                            })
+                        } else {
+                            ty
+                        }
+                    } else {
+                        ty
+                    };
                     let needs_init = if self.file_mode == Mode::Mhhi {
                         false
                     } else {
@@ -4863,7 +4898,14 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         // Use the type of the hint as-is (i.e., throw away the knowledge that
         // we had a soft type specifier here--the typechecker does not use it).
         // Replace its Reason with one including the position of the `@` token.
-        self.hint_ty(pos, hint.1)
+        self.hint_ty(
+            pos,
+            if self.interpret_soft_types_as_like_types {
+                Ty_::Tlike(hint)
+            } else {
+                hint.1
+            },
+        )
     }
 
     // A type specifier preceded by an attribute list. At the time of writing,
@@ -4888,7 +4930,15 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     Some(ty) => ty,
                     None => return Node::Ignored(SK::AttributizedSpecifier),
                 };
-                self.hint_ty(self.merge(attributes_pos, hint_pos), hint.1)
+
+                self.hint_ty(
+                    self.merge(attributes_pos, hint_pos),
+                    if self.interpret_soft_types_as_like_types {
+                        Ty_::Tlike(hint)
+                    } else {
+                        hint.1
+                    },
+                )
             }
             _ => hint,
         }

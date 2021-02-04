@@ -17,6 +17,7 @@ use stack_limit::StackLimit;
 pub fn parse_decls_and_mode<'a>(
     disable_xhp_element_mangling: bool,
     array_unification: bool,
+    interpret_soft_types_as_like_types: bool,
     filename: RelativePath,
     text: &'a [u8],
     auto_namespace_map: &'a BTreeMap<String, String>,
@@ -27,6 +28,7 @@ pub fn parse_decls_and_mode<'a>(
     let mut parser_env = ParserEnv::default();
     parser_env.disable_xhp_element_mangling = disable_xhp_element_mangling;
     parser_env.array_unification = array_unification;
+    parser_env.interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
     let (_, _errors, state, mode) =
         direct_decl_parser::parse_script(&text, parser_env, auto_namespace_map, arena, stack_limit);
     (state.decls, mode)
@@ -35,6 +37,7 @@ pub fn parse_decls_and_mode<'a>(
 pub fn parse_decls<'a>(
     disable_xhp_element_mangling: bool,
     array_unification: bool,
+    interpret_soft_types_as_like_types: bool,
     filename: RelativePath,
     text: &'a [u8],
     auto_namespace_map: &'a BTreeMap<String, String>,
@@ -44,6 +47,7 @@ pub fn parse_decls<'a>(
     parse_decls_and_mode(
         disable_xhp_element_mangling,
         array_unification,
+        interpret_soft_types_as_like_types,
         filename,
         text,
         auto_namespace_map,

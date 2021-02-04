@@ -11,12 +11,12 @@ type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 type ns_map = (string * string) list
 
 val parse_decls_ffi :
-  bool -> bool -> Relative_path.t -> string -> ns_map -> decls
+  bool -> bool -> bool -> Relative_path.t -> string -> ns_map -> decls
 
 val decls_hash : decls -> Int64.t
 
 val parse_decls_and_mode_ffi :
-  bool * bool ->
+  bool * bool * bool ->
   Relative_path.t ->
   string ->
   ns_map ->

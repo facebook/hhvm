@@ -297,6 +297,8 @@ type t = {
   po_enable_enum_supertyping: bool;
   (* Treat varray as vec, dict as dict, TODO varray_or_darray as vec_or_dict *)
   po_array_unification: bool;
+  (* <<__Soft>> T -> ~T *)
+  po_interpret_soft_types_as_like_types: bool;
 }
 [@@deriving eq, show]
 
@@ -412,6 +414,7 @@ val make :
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
   ?po_array_unification:bool ->
+  ?po_interpret_soft_types_as_like_types:bool ->
   unit ->
   t
 
@@ -666,3 +669,5 @@ val tco_use_direct_decl_parser : t -> bool
 val po_enable_enum_supertyping : t -> bool
 
 val po_array_unification : t -> bool
+
+val po_interpret_soft_types_as_like_types : t -> bool

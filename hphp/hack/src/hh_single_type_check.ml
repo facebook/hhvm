@@ -278,6 +278,7 @@ let parse_options () =
   let enable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let array_unification = ref false in
+  let interpret_soft_types_as_like_types = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -644,6 +645,10 @@ let parse_options () =
       ( "--array-unification",
         Arg.Set array_unification,
         "Varray and darray become vec and dict." );
+      ( "--interpret-soft-types-as-like-types",
+        Arg.Set interpret_soft_types_as_like_types,
+        "Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -778,6 +783,7 @@ let parse_options () =
       ~po_enable_enum_classes:!enable_enum_classes
       ~po_enable_enum_supertyping:!enable_enum_supertyping
       ~po_array_unification:!array_unification
+      ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ()
   in
   Errors.allowed_fixme_codes_strict :=

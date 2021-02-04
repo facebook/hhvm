@@ -86,9 +86,14 @@ let direct_decl_parse_and_cache ?(decl_hash = false) ctx file =
       ParserOptions.disable_xhp_element_mangling popt
     in
     let array_unification = ParserOptions.array_unification popt in
+    let interpret_soft_types_as_like_types =
+      ParserOptions.interpret_soft_types_as_like_types popt
+    in
     let (decls, mode, hash) =
       Direct_decl_parser.parse_decls_and_mode_ffi
-        (disable_xhp_element_mangling, array_unification)
+        ( disable_xhp_element_mangling,
+          array_unification,
+          interpret_soft_types_as_like_types )
         file
         contents
         ns_map

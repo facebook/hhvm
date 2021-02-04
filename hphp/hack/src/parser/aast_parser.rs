@@ -186,6 +186,9 @@ impl<'src> AastParser {
                 .parser_options
                 .po_disallow_fun_and_cls_meth_pseudo_funcs,
             array_unification: env.parser_options.po_array_unification,
+            interpret_soft_types_as_like_types: env
+                .parser_options
+                .po_interpret_soft_types_as_like_types,
         };
 
         let tree = if quick_mode {

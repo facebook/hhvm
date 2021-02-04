@@ -14,7 +14,8 @@ let popt
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
     ~enable_enum_classes
-    ~array_unification =
+    ~array_unification
+    ~interpret_soft_types_as_like_types =
   let po = ParserOptions.default in
   let po =
     ParserOptions.with_disable_xhp_element_mangling
@@ -27,6 +28,11 @@ let popt
   in
   let po = ParserOptions.with_enable_enum_classes po enable_enum_classes in
   let po = ParserOptions.with_array_unification po array_unification in
+  let po =
+    ParserOptions.with_interpret_soft_types_as_like_types
+      po
+      interpret_soft_types_as_like_types
+  in
   po
 
 let init root popt : Provider_context.t =
@@ -99,10 +105,14 @@ let compare_decls ctx fn text =
     ParserOptions.disable_xhp_element_mangling popt
   in
   let array_unification = ParserOptions.array_unification popt in
+  let interpret_soft_types_as_like_types =
+    ParserOptions.interpret_soft_types_as_like_types popt
+  in
   let decls =
     parse_decls_ffi
       disable_xhp_element_mangling
       array_unification
+      interpret_soft_types_as_like_types
       fn
       text
       auto_namespace_map
@@ -157,6 +167,7 @@ let () =
   let disable_xhp_element_mangling = ref false in
   let enable_enum_classes = ref false in
   let array_unification = ref false in
+  let interpret_soft_types_as_like_types = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -191,6 +202,9 @@ let () =
         Arg.Set array_unification,
         "Treat varray as vec, darray as dict, TODO varray_or_darray as vec_or_dict"
       );
+      ( "--interpret-soft-types-as-like-types",
+        Arg.Set interpret_soft_types_as_like_types,
+        "Interpret <<__Soft>> type hints as like types" );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -260,6 +274,9 @@ let () =
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
         let enable_enum_classes = !enable_enum_classes in
         let array_unification = !array_unification in
+        let interpret_soft_types_as_like_types =
+          !interpret_soft_types_as_like_types
+        in
         let popt =
           popt
             ~auto_namespace_map
@@ -267,6 +284,7 @@ let () =
             ~disable_xhp_element_mangling
             ~enable_enum_classes
             ~array_unification
+            ~interpret_soft_types_as_like_types
         in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in

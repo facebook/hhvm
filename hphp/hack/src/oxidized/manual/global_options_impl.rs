@@ -120,6 +120,7 @@ impl Default for GlobalOptions {
             tco_ifc_enabled: vec![],
             po_enable_enum_supertyping: false,
             po_array_unification: false,
+            po_interpret_soft_types_as_like_types: false,
         }
     }
 }

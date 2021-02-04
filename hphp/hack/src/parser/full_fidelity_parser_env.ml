@@ -26,6 +26,7 @@ type t = {
   disallow_hash_comments: bool;
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
   array_unification: bool;
+  interpret_soft_types_as_like_types: bool;
 }
 [@@deriving show]
 
@@ -49,6 +50,7 @@ let default =
     disallow_hash_comments = false;
     disallow_fun_and_cls_meth_pseudo_funcs = false;
     array_unification = false;
+    interpret_soft_types_as_like_types = false;
   }
 
 let make
@@ -75,6 +77,8 @@ let make
     ?(disallow_fun_and_cls_meth_pseudo_funcs =
       default.disallow_fun_and_cls_meth_pseudo_funcs)
     ?(array_unification = default.array_unification)
+    ?(interpret_soft_types_as_like_types =
+      default.interpret_soft_types_as_like_types)
     () =
   {
     hhvm_compat_mode;
@@ -95,6 +99,7 @@ let make
     disallow_hash_comments;
     disallow_fun_and_cls_meth_pseudo_funcs;
     array_unification;
+    interpret_soft_types_as_like_types;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -135,3 +140,5 @@ let disallow_fun_and_cls_meth_pseudo_funcs e =
   e.disallow_fun_and_cls_meth_pseudo_funcs
 
 let array_unification e = e.array_unification
+
+let interpret_soft_types_as_like_types e = e.interpret_soft_types_as_like_types

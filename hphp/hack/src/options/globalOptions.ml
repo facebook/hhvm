@@ -120,6 +120,7 @@ type t = {
   tco_ifc_enabled: string list;
   po_enable_enum_supertyping: bool;
   po_array_unification: bool;
+  po_interpret_soft_types_as_like_types: bool;
 }
 [@@deriving eq, show]
 
@@ -301,6 +302,7 @@ let default =
     tco_ifc_enabled = [];
     po_enable_enum_supertyping = false;
     po_array_unification = false;
+    po_interpret_soft_types_as_like_types = false;
   }
 
 let make
@@ -434,6 +436,8 @@ let make
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
     ?(po_array_unification = default.po_array_unification)
+    ?(po_interpret_soft_types_as_like_types =
+      default.po_interpret_soft_types_as_like_types)
     () =
   {
     tco_experimental_features;
@@ -548,6 +552,7 @@ let make
     tco_ifc_enabled;
     po_enable_enum_supertyping;
     po_array_unification;
+    po_interpret_soft_types_as_like_types;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -797,3 +802,6 @@ let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
 let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
 
 let po_array_unification t = t.po_array_unification
+
+let po_interpret_soft_types_as_like_types t =
+  t.po_interpret_soft_types_as_like_types

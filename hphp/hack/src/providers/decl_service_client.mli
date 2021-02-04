@@ -14,6 +14,7 @@ val from_raw_client :
   Decl_ipc_ffi_externs.decl_client ->
   bool ->
   bool ->
+  bool ->
   (string * string) list ->
   t
 

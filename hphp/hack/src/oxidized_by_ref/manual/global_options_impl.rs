@@ -122,8 +122,10 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
 };
 
 impl GlobalOptions<'static> {
+    pub const DEFAULT: &'static Self = &DEFAULT;
+
     pub const fn default_ref() -> &'static Self {
-        &DEFAULT
+        Self::DEFAULT
     }
 }
 

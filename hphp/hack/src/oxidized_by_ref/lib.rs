@@ -41,6 +41,7 @@ pub use gen::aast;
 pub use gen::aast_defs;
 pub use gen::ast_defs;
 pub use gen::decl_defs;
+pub use gen::decl_parser_options;
 pub use gen::error_codes;
 pub use gen::errors;
 pub use gen::file_info;

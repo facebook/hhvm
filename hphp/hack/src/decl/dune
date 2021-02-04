@@ -109,6 +109,7 @@
   (name direct_decl_parser)
   (modules direct_decl_parser)
   (libraries
+    decl_parser_options
     shallow_decl_defs
     typing_defs
     decl_rust_ffi)

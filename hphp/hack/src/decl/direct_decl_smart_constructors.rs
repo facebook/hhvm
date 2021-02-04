@@ -23,6 +23,7 @@ use oxidized_by_ref::{
     aast,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_defs::MethodReactivity,
+    decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
     file_info::Mode,
     method_flags::MethodFlags,
@@ -56,8 +57,6 @@ type SK = SyntaxKind;
 
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
-type NamespaceMap = BTreeMap<std::string::String, std::string::String>;
-
 #[derive(Clone)]
 pub struct DirectDeclSmartConstructors<'a> {
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
@@ -65,9 +64,7 @@ pub struct DirectDeclSmartConstructors<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
-    pub disable_xhp_element_mangling: bool,
-    pub array_unification: bool,
-    pub interpret_soft_types_as_like_types: bool,
+    opts: &'a DeclParserOptions<'a>,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -79,12 +76,9 @@ pub struct DirectDeclSmartConstructors<'a> {
 
 impl<'a> DirectDeclSmartConstructors<'a> {
     pub fn new(
+        opts: &'a DeclParserOptions<'a>,
         src: &SourceText<'a>,
         file_mode: Mode,
-        disable_xhp_element_mangling: bool,
-        array_unification: bool,
-        interpret_soft_types_as_like_types: bool,
-        auto_namespace_map: &'a NamespaceMap,
         arena: &'a Bump,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
@@ -97,15 +91,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
             source_text,
             arena,
+            opts,
             filename: arena.alloc(filename),
             file_mode,
-            disable_xhp_element_mangling,
-            array_unification,
-            interpret_soft_types_as_like_types,
             decls: Decls::empty(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
-                auto_namespace_map,
-                disable_xhp_element_mangling,
+                opts.auto_namespace_map,
+                opts.disable_xhp_element_mangling,
                 arena,
             )),
             classish_name_builder: ClassishNameBuilder::new(),
@@ -339,16 +331,10 @@ struct NamespaceBuilder<'a> {
 
 impl<'a> NamespaceBuilder<'a> {
     fn new_in(
-        auto_ns_map: &'a NamespaceMap,
+        auto_ns_map: &'a [(&'a str, &'a str)],
         disable_xhp_element_mangling: bool,
         arena: &'a Bump,
     ) -> Self {
-        let mut arena_ns_map = Vec::with_capacity_in(auto_ns_map.len(), arena);
-        for (k, v) in auto_ns_map.iter() {
-            arena_ns_map.push((k.as_str(), v.as_str()));
-        }
-        let auto_ns_map = arena_ns_map.into_bump_slice();
-
         let mut ns_uses = SMap::empty();
         for &alias in hh_autoimport::NAMESPACES {
             ns_uses = ns_uses.add(arena, alias, concat(arena, "HH\\", alias));
@@ -3149,7 +3135,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         } else {
             ParamMode::FPnormal
         };
-        let hint = if self.interpret_soft_types_as_like_types {
+        let hint = if self.opts.interpret_soft_types_as_like_types {
             let attributes = self.to_attributes(attributes);
             if attributes.soft {
                 match hint {
@@ -3815,7 +3801,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         strip_dollar_prefix(name)
                     };
                     let ty = self.node_to_non_ret_ty(hint);
-                    let ty = if self.interpret_soft_types_as_like_types {
+                    let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {
                             ty.map(|t| {
                                 self.alloc(Ty(
@@ -4900,7 +4886,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         // Replace its Reason with one including the position of the `@` token.
         self.hint_ty(
             pos,
-            if self.interpret_soft_types_as_like_types {
+            if self.opts.interpret_soft_types_as_like_types {
                 Ty_::Tlike(hint)
             } else {
                 hint.1
@@ -4933,7 +4919,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
                 self.hint_ty(
                     self.merge(attributes_pos, hint_pos),
-                    if self.interpret_soft_types_as_like_types {
+                    if self.opts.interpret_soft_types_as_like_types {
                         Ty_::Tlike(hint)
                     } else {
                         hint.1

@@ -46,6 +46,16 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name decl_parser_options)
+  (wrapped false)
+  (modules
+    declParserOptions)
+  (libraries
+    global_options
+    parser_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name symbol_write_options)
   (wrapped false)
   (modules

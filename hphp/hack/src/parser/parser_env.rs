@@ -7,6 +7,7 @@
 use std::convert::From;
 
 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
+use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 
 #[derive(Clone, Debug, Default)]
 pub struct ParserEnv {
@@ -39,6 +40,17 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
             array_unification: env.array_unification,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
+        }
+    }
+}
+
+impl From<&DeclParserOptions<'_>> for ParserEnv {
+    fn from(opts: &DeclParserOptions<'_>) -> Self {
+        Self {
+            array_unification: opts.array_unification,
+            disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
+            ..Default::default()
         }
     }
 }

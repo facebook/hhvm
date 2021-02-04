@@ -102,6 +102,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
+  hphp/hack/src/options/declParserOptions.ml                                  \
   hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \

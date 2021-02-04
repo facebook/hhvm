@@ -44,6 +44,7 @@
     collections
     core_kernel
     decl_ipc_ffi_externs
+    decl_parser_options
     direct_decl_parser
     heap_shared_mem
     marshal_tools
@@ -199,6 +200,7 @@
     collections
     decl_defs
     decl_heap
+    decl_parser_options
     direct_decl_parser
     errors
     file_provider

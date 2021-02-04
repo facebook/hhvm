@@ -100,22 +100,8 @@ let compare_decls ctx fn text =
   let legacy_decls = shallow_declare_ast ctx [] ast in
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
   let popt = Provider_context.get_popt ctx in
-  let auto_namespace_map = ParserOptions.auto_namespace_map popt in
-  let disable_xhp_element_mangling =
-    ParserOptions.disable_xhp_element_mangling popt
-  in
-  let array_unification = ParserOptions.array_unification popt in
-  let interpret_soft_types_as_like_types =
-    ParserOptions.interpret_soft_types_as_like_types popt
-  in
   let decls =
-    parse_decls_ffi
-      disable_xhp_element_mangling
-      array_unification
-      interpret_soft_types_as_like_types
-      fn
-      text
-      auto_namespace_map
+    parse_decls_ffi (DeclParserOptions.from_parser_options popt) fn text
   in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in

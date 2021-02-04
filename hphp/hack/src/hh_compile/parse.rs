@@ -14,7 +14,6 @@ use parser_core_types::{
 use rayon::prelude::*;
 use stack_limit::{StackLimit, KI, MI};
 use std::{
-    collections::BTreeMap,
     io::{stdin, BufRead, BufReader},
     iter::Iterator,
     path::PathBuf,
@@ -94,11 +93,9 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                 }
                 Parser::DirectDecl => {
                     let arena = bumpalo::Bump::new();
-                    let auto_namespace_map = BTreeMap::new();
                     let (_, _, _, _) = direct_decl_parser::parse_script(
+                        Default::default(),
                         &source_text,
-                        env,
-                        &auto_namespace_map,
                         &arena,
                         Some(stack_limit),
                     );

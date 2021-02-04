@@ -2156,6 +2156,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
+ "oxidized_by_ref",
 ]
 
 [[package]]

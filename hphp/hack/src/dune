@@ -111,6 +111,7 @@
   (modules hh_single_decl)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
+    decl_parser_options
     decl_provider
     default_injector_config
     direct_decl_parser

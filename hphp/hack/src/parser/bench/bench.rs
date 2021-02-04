@@ -91,14 +91,7 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
         b.iter(|| {
             for (filename, text) in files {
                 let text = SourceText::make(RcOc::clone(filename), text);
-                let ns_map = std::collections::BTreeMap::new();
-                let _ = direct_decl_parser::parse_script(
-                    &text,
-                    ParserEnv::default(),
-                    &ns_map,
-                    &arena,
-                    None,
-                );
+                let _ = direct_decl_parser::parse_script(Default::default(), &text, &arena, None);
                 arena.reset();
             }
         })

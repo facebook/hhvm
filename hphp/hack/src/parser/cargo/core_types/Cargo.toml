@@ -13,6 +13,7 @@ line_break_map = { path = "../../../utils/line_break_map" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
+oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 itertools = "0.8"

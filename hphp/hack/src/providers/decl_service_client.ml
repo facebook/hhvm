@@ -40,33 +40,24 @@ module Decls =
 
 type t = {
   client: Decl_ipc_ffi_externs.decl_client;
-  ns_map: Direct_decl_parser.ns_map;
+  opts: DeclParserOptions.t;
   mutable current_file_decls: decl SymbolMap.t;
   gconst_path_cache: Relative_path.t option String.Table.t;
   fun_path_cache: Relative_path.t option String.Table.t;
   type_path_and_kind_cache:
     (Relative_path.t * Naming_types.kind_of_type) option String.Table.t;
-  disable_xhp_element_mangling: bool;
-  array_unification: bool;
-  interpret_soft_types_as_like_types: bool;
 }
 
 let from_raw_client
-    (client : Decl_ipc_ffi_externs.decl_client)
-    (disable_xhp_element_mangling : bool)
-    (array_unification : bool)
-    (interpret_soft_types_as_like_types : bool)
-    (ns_map : (string * string) list) : t =
+    (client : Decl_ipc_ffi_externs.decl_client) (opts : DeclParserOptions.t) : t
+    =
   {
     client;
-    ns_map;
+    opts;
     current_file_decls = SymbolMap.empty;
     gconst_path_cache = String.Table.create ();
     fun_path_cache = String.Table.create ();
     type_path_and_kind_cache = String.Table.create ();
-    disable_xhp_element_mangling;
-    array_unification;
-    interpret_soft_types_as_like_types;
   }
 
 (* HACK: The decl service just stores the decl (rather than a decl option),
@@ -247,15 +238,7 @@ let rpc_get_type_canon_name (t : t) (name : string) : string option =
 
 let parse_and_cache_decls_in
     (t : t) (filename : Relative_path.t) (contents : string) : unit =
-  let decls =
-    Direct_decl_parser.parse_decls_ffi
-      t.disable_xhp_element_mangling
-      t.array_unification
-      t.interpret_soft_types_as_like_types
-      filename
-      contents
-      t.ns_map
-  in
+  let decls = Direct_decl_parser.parse_decls_ffi t.opts filename contents in
   t.current_file_decls <-
     List.fold decls ~init:SymbolMap.empty ~f:(fun map (name, decl) ->
         match decl with

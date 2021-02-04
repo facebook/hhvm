@@ -23,8 +23,6 @@ exception DependencyNotFound of string
 
 exception Unsupported
 
-let records_not_supported () = failwith "Records are not supported"
-
 let value_exn ex opt =
   match opt with
   | Some s -> s
@@ -186,7 +184,7 @@ module Dep = struct
       | GConst _
       | GConstName _ ->
         None
-      | RecordDef _ -> records_not_supported ())
+      | RecordDef _ -> raise Unsupported)
 
   let global_dep_name dep =
     let open Typing_deps.Dep in
@@ -206,7 +204,7 @@ module Dep = struct
     | AllMembers _
     | Extends _ ->
       raise UnexpectedDependency
-    | RecordDef _ -> records_not_supported ()
+    | RecordDef _ -> raise Unsupported
 
   let get_dep_pos ctx dep =
     let open Typing_deps.Dep in
@@ -227,7 +225,7 @@ module Dep = struct
     | GConst name
     | GConstName name ->
       Decl.get_gconst_pos ctx name
-    | RecordDef _ -> records_not_supported ()
+    | RecordDef _ -> raise Unsupported
 
   let get_fun_mode ctx name =
     Nast_helper.get_fun_nast ctx name
@@ -267,7 +265,7 @@ module Dep = struct
     | GConst name
     | GConstName name ->
       get_gconst_mode ctx name
-    | RecordDef _ -> records_not_supported ()
+    | RecordDef _ -> raise Unsupported
 
   let is_strict_dep ctx dep =
     match get_dep_mode ctx dep with
@@ -1054,7 +1052,7 @@ module Pretty = struct
     | GConst _
     | GConstName _ ->
       raise UnexpectedDependency
-    | RecordDef _ -> records_not_supported ()
+    | RecordDef _ -> raise Unsupported
 
   let construct_enum ctx Aast.{ c_name; c_enum; c_consts; _ } =
     let name = snd c_name in

@@ -1,7 +1,4 @@
 <?hh
-function with_contra_tparam(): Box<int> {
-  return IntBox::make(42);
-}
 <<__ConsistentConstruct>>
 abstract class Box<+T> {
   final public static function make(T $value): this {
@@ -9,3 +6,6 @@ abstract class Box<+T> {
   }
 }
 class IntBox extends \Box<int> {}
+function with_contra_tparam(): Box<int> {
+  return IntBox::make(42);
+}

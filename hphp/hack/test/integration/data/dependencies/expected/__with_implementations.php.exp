@@ -2,18 +2,18 @@
 abstract class BB {
   abstract public function f(): void;
 }
+interface II {
+  public function g(): this::T;
+  abstract const type T;
+}
 final class CC extends \BB implements \II {
-  const type T = int;
   public function g(): int {
     throw new \Exception();
   }
   public function f(): void {
     throw new \Exception();
   }
-}
-interface II {
-  abstract const type T;
-  public function g(): this::T;
+  const type T = int;
 }
 function with_implementations(BB $b, II $i, CC $c): void {
   $b->f();

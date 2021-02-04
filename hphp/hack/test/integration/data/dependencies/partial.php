@@ -7,6 +7,8 @@ function with_omitted_generics(): void {
   expect_darray(darray['a' => 1, 'b' => 2]);
 }
 
+function respects_newtype_abstraction (Point $p) : void {}
+
 function with_default_and_anonymous_variadic(float $x, ?string $y = null, ...): void {}
 
 function call_with_default_and_anonymous_variadic(string $s): void {

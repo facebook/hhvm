@@ -1,10 +1,4 @@
-//// strict_toplevel.php
-<?hh
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;
-
-//// partial_toplevel.php
+//// partial.php
 <?hh // partial
 function expect_darray(
   darray<EXTRACT_STANDALONE_ANY, EXTRACT_STANDALONE_ANY> $_,
@@ -14,3 +8,9 @@ function expect_darray(
 function with_omitted_generics(): void {
   expect_darray(darray['a' => 1, 'b' => 2]);
 }
+
+//// __extract_standalone__.php
+<?hh
+/* HH_FIXME[4101] */
+type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
+type EXTRACT_STANDALONE_ANY_<T> = T;

@@ -1,16 +1,20 @@
+//// classes-interfaces.php
 <?hh
 interface BaseInterface {}
-class Implementing extends \AbstractBase implements \DerivedInterface {}
-class DerivedImplementing extends \Implementing implements \SimpleInterface {
-  use \RequiringTrait;
-}
+interface DerivedInterface extends \BaseInterface {}
 interface SimpleInterface {
   require extends \AbstractBase;
 }
-function with_requiring_trait(DerivedImplementing $arg): void {}
-abstract class AbstractBase {}
 trait RequiringTrait {
   require implements \BaseInterface;
   require implements \SimpleInterface;
 }
-interface DerivedInterface extends \BaseInterface {}
+class Implementing extends \AbstractBase implements \DerivedInterface {}
+class DerivedImplementing extends \Implementing implements \SimpleInterface {
+  use \RequiringTrait;
+}
+function with_requiring_trait(DerivedImplementing $arg): void {}
+
+//// classes.php
+<?hh
+abstract class AbstractBase {}

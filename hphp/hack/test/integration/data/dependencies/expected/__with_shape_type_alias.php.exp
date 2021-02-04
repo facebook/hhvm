@@ -2,5 +2,5 @@
 class WithConst {
   const string CSTRING = "";
 }
-function with_shape_type_alias(SomeShape $_): void {}
 type SomeShape = shape(\WithConst::CSTRING => mixed);
+function with_shape_type_alias(SomeShape $_): void {}

@@ -1,12 +1,12 @@
 <?hh
+interface SealedInterface {
+  public function method(): void;
+}
 trait SealedTrait {
   require implements \SealedInterface;
   public function method(): void {
     throw new \Exception();
   }
-}
-interface SealedInterface {
-  public function method(): void;
 }
 final class Mumble implements \SealedInterface {
   use \SealedTrait;

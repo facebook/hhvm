@@ -1,17 +1,10 @@
-//// strict_toplevel.php
+//// toplevel.php
 <?hh
 function with_mapped_namespace(): void {
   PHP\ini_set('foo', 'bar');
 }
-<<__Rx>>
-function extract_standalone_make_default(): nothing {
-  throw new \Exception();
-}
-/* HH_FIXME[4101] */
-type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
-type EXTRACT_STANDALONE_ANY_<T> = T;
 
-//// partial_namespaces.php
+//// builtins.php
 <?hh // partial
 namespace HH {
   namespace Lib {
@@ -25,3 +18,13 @@ namespace HH {
     }
   }
 }
+
+//// __extract_standalone__.php
+<?hh
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}
+/* HH_FIXME[4101] */
+type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
+type EXTRACT_STANDALONE_ANY_<T> = T;

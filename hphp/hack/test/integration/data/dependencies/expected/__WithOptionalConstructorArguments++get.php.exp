@@ -1,3 +1,4 @@
+//// classes-interfaces.php
 <?hh
 <<__ConsistentConstruct>>
 interface IWithNullaryConstructor {
@@ -16,6 +17,9 @@ class WithOptionalConstructorArguments implements \IWithNullaryConstructor {
     return new static();
   }
 }
+
+//// __extract_standalone__.php
+<?hh
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new \Exception();

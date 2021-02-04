@@ -17,7 +17,6 @@ class E<T> extends D<T, int> {}
 
 type Complex = shape('first' => int, 'second' => B);
 
-// TODO: check that the type alias is opaque
 newtype Point = shape('x' => int, 'y' => int);
 
 function generic<T>(): int {

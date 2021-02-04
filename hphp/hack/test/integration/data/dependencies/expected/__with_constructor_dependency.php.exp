@@ -1,11 +1,11 @@
 <?hh
+class Fred {}
 class Thud {
-  public int $n;
   public function __construct(\Fred $_) {
     throw new \Exception();
   }
+  public int $n;
 }
-class Fred {}
 function with_constructor_dependency(Thud $x): int {
   return $x->n;
 }

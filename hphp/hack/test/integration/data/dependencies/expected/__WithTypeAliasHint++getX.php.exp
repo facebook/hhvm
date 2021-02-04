@@ -1,4 +1,5 @@
 <?hh
+type Option<T> = \Id<?T>;
 type Id<T> = T;
 class WithTypeAliasHint {
   private \Option<int> $x = null;
@@ -6,4 +7,3 @@ class WithTypeAliasHint {
     return $this->x;
   }
 }
-type Option<T> = \Id<?T>;

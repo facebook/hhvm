@@ -199,6 +199,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_reified_generics",
             "\\SealedInterface::method",
             "\\WithTypeAliasHint::getX",
+            "\\respects_newtype_abstraction",
         ]
 
         for function_name in function_names:

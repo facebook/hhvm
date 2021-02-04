@@ -1,22 +1,25 @@
 <?hh
-class Universe implements \IUniverse {
-  const type TContext = \IContext;
-}
+interface IContext {}
 interface IUniverse {
   abstract const type TContext as \IContext;
 }
-trait TFrobQuery {
-  require extends \BaseQuery<\Frob::TContext>;
+class Universe implements \IUniverse {
+  const type TContext = \IContext;
 }
-abstract class BaseQuery<TContext> {}
 interface ICreation {
   const type TContext = this::TUniverse::TContext;
   abstract const type TUniverse as \IUniverse;
 }
-interface IContext {}
+abstract class BaseQuery<TContext> {}
 abstract class Query extends \BaseQuery<this::TContext> {
   const type TContext = this::TCreation::TContext;
   abstract const type TCreation as \ICreation;
+}
+class Frob implements \ICreation {
+  const type TUniverse = \Universe;
+}
+trait TFrobQuery {
+  require extends \BaseQuery<\Frob::TContext>;
 }
 final class FrobQuery extends \Query {
   use \TFrobQuery;
@@ -24,7 +27,4 @@ final class FrobQuery extends \Query {
 }
 function frob_query(): FrobQuery {
   return new FrobQuery();
-}
-class Frob implements \ICreation {
-  const type TUniverse = \Universe;
 }

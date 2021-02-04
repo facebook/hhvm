@@ -1,0 +1,7 @@
+//// partial.php
+<?hh
+function respects_newtype_abstraction(Point $p): void {}
+
+//// toplevel.php
+<?hh
+newtype Point = shape('x' => int, 'y' => int);

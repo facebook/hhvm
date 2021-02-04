@@ -264,6 +264,7 @@ prefixed_flags!(
     DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
     DISALLOW_FUNC_PTRS_IN_CONSTANTS,
     DISALLOW_HASH_COMMENTS,
+    DISALLOW_DYNAMIC_METH_CALLER_ARGS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
     ENABLE_ENUM_CLASSES,
@@ -730,6 +731,9 @@ mod tests {
   "hhvm.hack.lang.disable_xhp_element_mangling": {
     "global_value": false
   },
+  "hhvm.hack.lang.disallow_dynamic_meth_caller_args": {
+    "global_value": false
+  },
   "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs": {
     "global_value": false
   },
@@ -1175,5 +1179,6 @@ bitflags! {
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
+        const DISALLOW_DYNAMIC_METH_CALLER_ARGS = 1 << 59;
     }
 }

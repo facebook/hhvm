@@ -21,7 +21,7 @@ use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{unrecoverable, Error, Result};
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use ocamlrep::rc::RcOc;
-use options::{CompilerFlags, HhvmFlags, Options};
+use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -1288,6 +1288,12 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     }
                 } =>
             {
+                let strict = env
+                    .options
+                    .hhvm
+                    .hack_lang
+                    .flags
+                    .contains(LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS);
                 if let [Expr(pc, cls), Expr(pf, func)] = &mut *x.2 {
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(fname))
@@ -1340,6 +1346,26 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                                 "Class must be a Class or string type",
                             ));
                         }
+                        (Expr_::ClassConst(cc), None)
+                            if string_utils::is_class(&(cc.1).1) && strict =>
+                        {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pf,
+                                "Method name must be a literal string",
+                            ));
+                        }
+                        (Expr_::ClassConst(_), _) if strict => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pc,
+                                "Class must be a Class or string type",
+                            ));
+                        }
+                        (Expr_::String(_), None) if strict => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pf,
+                                "Method name must be a literal string",
+                            ));
+                        }
                         (Expr_::String(cls_name), Some(fname)) => convert_meth_caller_to_func_ptr(
                             env,
                             self,
@@ -1354,8 +1380,82 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                             unsafe { std::str::from_utf8_unchecked(fname.as_slice().into()) },
                         ),
 
+                        (_, _) if strict => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pf,
+                                "Method name must be a literal string",
+                            ));
+                        }
                         // For other cases, fallback to create __SystemLib\MethCallerHelper
                         _ => Expr_::Call(x),
+                    }
+                } else {
+                    let mut res = Expr_::Call(x);
+                    res.recurse(env, self.object())?;
+                    res
+                }
+            }
+            Expr_::Call(mut x)
+                if {
+                    if let Expr_::Id(ref id) = (x.0).1 {
+                        let name = strip_id(id);
+                        ["hh\\meth_caller", "meth_caller"]
+                            .iter()
+                            .any(|n| n.eq_ignore_ascii_case(name))
+                            && env
+                                .options
+                                .hhvm
+                                .hack_lang
+                                .flags
+                                .contains(LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS)
+                    } else {
+                        false
+                    }
+                } =>
+            {
+                if let [Expr(pc, cls), Expr(pf, func)] = &mut *x.2 {
+                    match (&cls, func.as_string()) {
+                        (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
+                            let mut cls_const = cls.as_class_const_mut();
+                            let cid = match cls_const {
+                                None => unreachable!(),
+                                Some((ref mut cid, (_, _))) => cid,
+                            };
+                            if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(false, |id| {
+                                !(string_utils::is_self(id)
+                                    || string_utils::is_parent(id)
+                                    || string_utils::is_static(id))
+                            }) {
+                                let mut res = Expr_::Call(x);
+                                res.recurse(env, self.object())?;
+                                res
+                            } else {
+                                return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
+                            }
+                        }
+                        (Expr_::String(_), Some(_)) => {
+                            let mut res = Expr_::Call(x);
+                            res.recurse(env, self.object())?;
+                            res
+                        }
+                        (Expr_::ClassConst(cc), None) if string_utils::is_class(&(cc.1).1) => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pf,
+                                "Method name must be a literal string",
+                            ));
+                        }
+                        (Expr_::String(_), None) => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pf,
+                                "Method name must be a literal string",
+                            ));
+                        }
+                        (_, _) => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pc,
+                                "Class must be a Class or string type",
+                            ));
+                        }
                     }
                 } else {
                     let mut res = Expr_::Call(x);

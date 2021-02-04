@@ -3844,9 +3844,13 @@ let subtype_funs
     (ft_super : locl_fun_type)
     env : env =
   let old_env = env in
+  (* This is used for checking subtyping of function types for method override
+   * (see Typing_subtype_method) so types are fully-explicit and therefore we
+   * permit subtyping to dynamic when --enable-sound-dynamic-type is true
+   *)
   let (env, prop) =
     simplify_subtype_funs
-      ~subtype_env:(make_subtype_env on_error)
+      ~subtype_env:(make_subtype_env ~coerce:(Some TL.CoerceToDynamic) on_error)
       ~check_return
       ~extra_info
       r_sub

@@ -2833,35 +2833,31 @@ and expr_
         (* First check that arities match up *)
         check_lambda_arity p (get_pos ty) declared_ft expected_ft;
         (* Use declared types for parameters in preference to those determined
-         * by the context: they might be more general. *)
-        let rec replace_non_declared_types
-            params declared_ft_params expected_ft_params =
-          match (params, declared_ft_params, expected_ft_params) with
-          | ( param :: params,
-              declared_ft_param :: declared_ft_params,
+         * by the context (expected parameters): they might be more general. *)
+        let rec replace_non_declared_types declared_ft_params expected_ft_params
+            =
+          match (declared_ft_params, expected_ft_params) with
+          | ( declared_ft_param :: declared_ft_params,
               expected_ft_param :: expected_ft_params ) ->
             let rest =
-              replace_non_declared_types
-                params
-                declared_ft_params
-                expected_ft_params
+              replace_non_declared_types declared_ft_params expected_ft_params
             in
+            (* If the type parameter did not have a type hint, it is Tany and
+            we use the expected type instead. Otherwise, declared type takes
+            precedence. *)
             let resolved_ft_param =
-              if Option.is_some (hint_of_type_hint param.param_type_hint) then
-                declared_ft_param
-              else
+              if TUtils.is_any env declared_ft_param.fp_type.et_type then
                 { declared_ft_param with fp_type = expected_ft_param.fp_type }
+              else
+                declared_ft_param
             in
             resolved_ft_param :: rest
-          | (_ :: params, declared_ft_param :: declared_ft_params, []) ->
-            let rest =
-              replace_non_declared_types
-                params
-                declared_ft_params
-                expected_ft_params
-            in
-            declared_ft_param :: rest
-          | (_, _, _) ->
+          | (_, []) ->
+            (* Morally, this case should match on ([],[]) because we already
+            check arity mismatch between declared and expected types. We
+            handle it more generally here to be graceful. *)
+            declared_ft_params
+          | ([], _) ->
             (* This means the expected_ft params list can have more parameters
              * than declared parameters in the lambda. For variadics, this is OK.
              *)
@@ -2889,7 +2885,6 @@ and expr_
                 expected_ft.ft_arity;
             ft_params =
               replace_non_declared_types
-                f.f_params
                 declared_ft.ft_params
                 expected_ft.ft_params;
             ft_implicit_params = declared_ft.ft_implicit_params;

@@ -1,0 +1,20 @@
+File "potential_void_return.php", line 17, characters 12-20:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 40, characters 41-79:
+  But got `dynamic` because it is an unenforceable type
+File "potential_void_return.php", line 19, characters 16-40:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 48, characters 6-34:
+  But got `dynamic` because it is an unenforceable type
+File "potential_void_return.php", line 33, characters 12-20:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 40, characters 41-79:
+  But got `dynamic` because it is an unenforceable type
+File "potential_void_return.php", line 35, characters 16-40:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 48, characters 6-34:
+  But got `dynamic` because it is an unenforceable type
+File "potential_void_return.php", line 39, characters 7-13:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 40, characters 41-79:
+  But got `dynamic` because it is an unenforceable type

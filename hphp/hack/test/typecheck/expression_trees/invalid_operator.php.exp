@@ -26,7 +26,7 @@ Typing error (Typing[4110])
   Expected `int` because this is used in an arithmetic operation
   File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`
 File "invalid_operator.php", line 13, characters 13-18:
 Typing error (Typing[4110])
@@ -34,7 +34,7 @@ Typing error (Typing[4110])
   Expected `int` because this is used in an arithmetic operation
   File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`
 File "invalid_operator.php", line 19, characters 13-24:
 You are trying to access the method `__plus` but this is an int (Typing[4062])
@@ -46,5 +46,5 @@ Typing error (Typing[4110])
   Expected `num` because this is used in an arithmetic operation
   File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`

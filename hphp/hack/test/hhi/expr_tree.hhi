@@ -37,6 +37,9 @@ class Code {
   public static function nullLiteral(): ExprTree<Code, Code::TAst, null> {
     throw new Exception();
   }
+  public static function voidLiteral(): ExprTree<Code, Code::TAst, ExampleVoid> {
+    throw new Exception();
+  }
 
   // Symbols
   public static function symbol<T>(
@@ -197,3 +200,5 @@ abstract class ExampleString extends ExampleMixed {}
 abstract class ExampleFloat extends ExampleMixed {}
 
 final class ExampleContext {}
+
+abstract class ExampleVoid {}

@@ -4,41 +4,11 @@ File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:
   Invalid argument
-  File "expr_tree.hhi", line 138, characters 5-10:
+  File "expr_tree.hhi", line 141, characters 5-10:
   Expected `string`
   File "expr_tree.hhi", line 33, characters 32-44:
   But got `ExampleString`
-  File "expr_tree.hhi", line 150, characters 44-49:
-    via this generic `TInfer`
-File "nested_expression_tree_lambda.php", line 5, characters 1-59:
-There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-  File "", line 0, characters 0-0:
-  Invalid argument
-  File "expr_tree.hhi", line 166, characters 13-15:
-  Expected `int`
-  File "expr_tree.hhi", line 19, characters 33-42:
-  But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
-    via this generic `TInfer`
-File "nested_expression_tree_lambda.php", line 5, characters 1-59:
-There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-  File "", line 0, characters 0-0:
-  Invalid argument
-  File "expr_tree.hhi", line 167, characters 13-15:
-  Expected `int`
-  File "expr_tree.hhi", line 19, characters 33-42:
-  But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
-    via this generic `TInfer`
-File "nested_expression_tree_lambda.php", line 5, characters 1-59:
-There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-  File "", line 0, characters 0-0:
-  Invalid argument
-  File "expr_tree.hhi", line 168, characters 13-15:
-  Expected `int`
-  File "expr_tree.hhi", line 19, characters 33-42:
-  But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
@@ -48,7 +18,37 @@ There is an error somewhere in this definition. However the type checker reports
   Expected `int`
   File "expr_tree.hhi", line 19, characters 33-42:
   But got `ExampleInt`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "expr_tree.hhi", line 170, characters 13-15:
+  Expected `int`
+  File "expr_tree.hhi", line 19, characters 33-42:
+  But got `ExampleInt`
+  File "expr_tree.hhi", line 153, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "expr_tree.hhi", line 171, characters 13-15:
+  Expected `int`
+  File "expr_tree.hhi", line 19, characters 33-42:
+  But got `ExampleInt`
+  File "expr_tree.hhi", line 153, characters 44-49:
+    via this generic `TInfer`
+File "nested_expression_tree_lambda.php", line 5, characters 1-59:
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+  File "", line 0, characters 0-0:
+  Invalid argument
+  File "expr_tree.hhi", line 172, characters 13-15:
+  Expected `int`
+  File "expr_tree.hhi", line 19, characters 33-42:
+  But got `ExampleInt`
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
@@ -58,17 +58,17 @@ There is an error somewhere in this definition. However the type checker reports
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "expr_tree.hhi", line 33, characters 32-44:
   But got `ExampleString`
-  File "expr_tree.hhi", line 150, characters 44-49:
+  File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Invalid argument (Typing[4041])
   File "expr_tree.hhi", line 6, characters 26-33:
   Too many mandatory arguments (expected 1 but got 5)
-  File "expr_tree.hhi", line 44, characters 5-72:
+  File "expr_tree.hhi", line 47, characters 5-72:
   Because of this definition
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Invalid argument (Typing[4110])
   File "expr_tree.hhi", line 18, characters 5-7:
   Expected `int`
-  File "expr_tree.hhi", line 44, characters 15-28:
+  File "expr_tree.hhi", line 47, characters 15-28:
   But got `ExampleContext`

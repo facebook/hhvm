@@ -1,12 +1,12 @@
-File "mismatched_types.php", line 6, characters 13-54:
+File "nonvoid_return.php", line 10, characters 16-16:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 19, characters 6-43:
   But got `dynamic` because it is an unenforceable type
-File "mismatched_types.php", line 7, characters 10-16:
+File "nonvoid_return.php", line 12, characters 16-16:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 33, characters 5-45:
+  File "expr_tree.hhi", line 19, characters 6-43:
   But got `dynamic` because it is an unenforceable type
-File "mismatched_types.php", line 8, characters 10-10:
+File "nonvoid_return.php", line 19, characters 14-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "expr_tree.hhi", line 19, characters 6-43:
   But got `dynamic` because it is an unenforceable type

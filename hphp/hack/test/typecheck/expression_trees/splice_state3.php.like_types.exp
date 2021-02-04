@@ -15,3 +15,7 @@ Typing error (Typing[4110])
   File "splice_state3.php", line 20, characters 15-147:
   All the local information about `$x->x` has been invalidated by this lambda function.
 This is a limitation of the type-checker; use a local if that's the problem.
+File "splice_state3.php", line 24, characters 7-13:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 40, characters 41-79:
+  But got `dynamic` because it is an unenforceable type

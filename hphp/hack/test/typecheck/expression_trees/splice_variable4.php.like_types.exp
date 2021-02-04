@@ -10,3 +10,7 @@ File "splice_variable4.php", line 15, characters 10-10:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "expr_tree.hhi", line 19, characters 6-43:
   But got `dynamic` because it is an unenforceable type
+File "splice_variable4.php", line 16, characters 5-11:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "expr_tree.hhi", line 40, characters 41-79:
+  But got `dynamic` because it is an unenforceable type

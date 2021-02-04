@@ -3,7 +3,7 @@ use bstr::BString;
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
-    aast_visitor::{AstParams, NodeMut, VisitorMut},
+    aast_visitor::{visit, AstParams, Node, NodeMut, Visitor, VisitorMut},
     ast,
     ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Stmt, Stmt_},
     ast_defs::*,
@@ -34,6 +34,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
 
     let mut e = e.clone();
     let mut e = virtualize_expr_types(visitor_name.to_string(), &mut e);
+    let mut e = virtualize_void_returns(visitor_name.to_string(), &mut e);
     let e = virtualize_expr_calls(visitor_name.to_string(), &mut e);
     let (e, extracted_splices) = extract_and_replace_splices(&e);
     let splice_count = extracted_splices.len();
@@ -469,6 +470,130 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
             // Do not want to recurse into splices
             ETSplice(_) => {}
             _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+}
+
+struct VoidReturnCheck {
+    only_void_return: bool,
+}
+
+impl<'ast> Visitor<'ast> for VoidReturnCheck {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<Pos, (), (), ()>) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        match &e.1 {
+            // Don't recurse into splices or LFuns
+            ETSplice(_) | Lfun(_) => Ok(()),
+            // TODO: Do we even recurse on expressions?
+            _ => e.recurse(env, self),
+        }
+    }
+
+    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<Pos, (), (), ()>) -> Result<(), ()> {
+        use aast::Stmt_::*;
+
+        match &s.1 {
+            Return(e) => {
+                if (*e).is_some() {
+                    self.only_void_return = false;
+                }
+                Ok(())
+            }
+            _ => s.recurse(env, self),
+        }
+    }
+}
+
+fn only_void_return(lfun_body: &ast::Block) -> bool {
+    let mut checker = VoidReturnCheck {
+        only_void_return: true,
+    };
+    visit(&mut checker, &mut (), lfun_body).unwrap();
+    checker.only_void_return
+}
+
+fn virtualize_void_returns(visitor_name: String, mut e: &mut Expr) -> &mut Expr {
+    let mut visitor = ReturnVirtualizer { visitor_name };
+    visitor.visit_expr(&mut (), &mut e).unwrap();
+    e
+}
+
+struct ReturnVirtualizer {
+    visitor_name: String,
+}
+
+impl<'ast> VisitorMut<'ast> for ReturnVirtualizer {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        let should_append_return = match &e.1 {
+            Lfun(lf) => only_void_return(&lf.0.body.ast),
+            _ => false,
+        };
+
+        match &mut e.1 {
+            Lfun(ref mut lf) if should_append_return => {
+                // If the body of a lambda doesn't have a return as the last statement
+                if lf.0.body.ast.is_empty() {
+                    lf.0.body.ast =
+                        vec![Stmt::new(e.0.clone(), ast::Stmt_::Return(Box::new(None)))];
+                } else {
+                    // If the body of a lambda doesn't have a return as the last statement
+                    match lf.0.body.ast[lf.0.body.ast.len() - 1].1 {
+                        ast::Stmt_::Return(_) => {}
+                        _ => {
+                            lf.0.body
+                                .ast
+                                .push(Stmt::new(e.0.clone(), ast::Stmt_::Return(Box::new(None))))
+                        }
+                    }
+                }
+                e.recurse(env, self.object())?
+            }
+            // Do not recurse into splices
+            ETSplice(_) => {}
+            _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+
+    fn visit_stmt(&mut self, env: &mut (), s: &mut Stmt) -> Result<(), ()> {
+        let pos = s.0.clone();
+
+        let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
+
+        match s.1 {
+            Stmt_::Return(ref mut e) => {
+                if None == **e {
+                    // Virtualize void returns to client void
+                    *s = Stmt::new(
+                        s.0.clone(),
+                        Stmt_::Return(Box::new(Some(mk_splice(static_meth_call(
+                            &self.visitor_name,
+                            "voidLiteral",
+                            vec![],
+                            &pos,
+                        ))))),
+                    )
+                } else {
+                    s.recurse(env, self.object())?
+                }
+            }
+            _ => s.recurse(env, self.object())?,
         }
         Ok(())
     }

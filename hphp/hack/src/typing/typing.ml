@@ -2929,6 +2929,38 @@ and expr_
              * Note: we should be using 'nothing' to type the arguments. *)
             Typing_log.increment_feature_count env FL.Lambda.untyped_context;
             check_body_under_known_params env declared_ft
+          | Some ExpectedTy.{ ty = { et_type; _ }; _ }
+            when TUtils.is_mixed env et_type || TUtils.is_dynamic env et_type ->
+            (* If the expected type of a lambda is mixed or dynamic, we
+             * decompose the expected type into a function type where the
+             * undeclared parameters and the return type are set to the expected
+             * type of lambda, i.e., mixed or dynamic.
+             *
+             * For an expected mixed type, one could argue that the lambda
+             * doesn't even need to be checked as it can't be called (there is
+             * no downcast to function type). Thus, we should be using nothing
+             * to type the arguments. But generally users are very confused by
+             * the use of nothing and would expect the lambda body to be
+             * checked as though it could be called.
+             *)
+            let replace_non_declared_type declared_ft_param =
+              let is_undeclared =
+                TUtils.is_any env declared_ft_param.fp_type.et_type
+              in
+              if is_undeclared then
+                let enforced_ty = { et_enforced = false; et_type } in
+                { declared_ft_param with fp_type = enforced_ty }
+              else
+                declared_ft_param
+            in
+            let expected_ft =
+              let ft_params =
+                List.map ~f:replace_non_declared_type declared_ft.ft_params
+              in
+              { declared_ft with ft_params }
+            in
+            let ret_ty = et_type in
+            check_body_under_known_params env ~ret_ty expected_ft
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway.

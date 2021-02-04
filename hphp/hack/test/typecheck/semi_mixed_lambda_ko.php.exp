@@ -1,0 +1,6 @@
+File "semi_mixed_lambda_ko.php", line 10, characters 29-34:
+Typing error (Typing[4110])
+  File "semi_mixed_lambda_ko.php", line 10, characters 29-30:
+  Expected `num` because this is used in an arithmetic operation
+  File "semi_mixed_lambda_ko.php", line 10, characters 14-19:
+  But got `string`

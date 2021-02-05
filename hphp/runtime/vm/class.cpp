@@ -2199,6 +2199,86 @@ void Class::setRTAttributes() {
   }
 }
 
+void Class::importTraitConsts(ConstMap::Builder& builder) {
+  auto importConst = [&] (const Const& tConst, bool isFromInterface) {
+    auto const existing = builder.find(tConst.name);
+    if (existing == builder.end()) {
+      builder.add(tConst.name, tConst);
+      return;
+    }
+    auto& existingConst = builder[existing->second];
+    
+    if (tConst.isType() != existingConst.isType()) {
+      raise_error("%s cannot inherit the %sconstant %s from %s, because it "
+                  "was previously inherited as a %sconstant from %s",
+                  m_preClass->name()->data(),
+                  tConst.isType() ? "type " : "",
+                  tConst.name->data(),
+                  tConst.cls->name()->data(),
+                  tConst.isType() ? "" : "type ",
+                  existingConst.cls->name()->data());
+    }
+
+    if (tConst.isAbstract()) {
+      return;
+    }
+
+    if (existingConst.isAbstract()) {
+      existingConst.cls = tConst.cls;
+      existingConst.val = tConst.val;
+      return;
+    }
+
+    // Constants in interfaces implemented by traits don't fatal with constants
+    // in declInterfaces
+    if (isFromInterface) { return; }
+
+    if (existingConst.cls != tConst.cls) {
+
+      // Constants in traits conflict with constants in declared interfaces
+      if (existingConst.cls->attrs() & AttrInterface) {
+        for (auto const& interface : m_declInterfaces) {
+          auto iface = existingConst.cls;
+          if (interface.get() == iface) {
+            raise_error("%s cannot inherit the %sconstant %s, because "
+                        "it was previously inherited from %s",
+                        m_preClass->name()->data(),
+                        tConst.isType() ? "type " : "",
+                        tConst.name->data(),
+                        existingConst.cls->name()->data());
+          }
+        }
+      }
+    }
+  };
+
+  if (attrs() & AttrNoExpandTrait) {
+    // If we flatten, we need to check implemented interfaces for constants
+    for (auto const& traitName : m_preClass->usedTraits()) {
+      auto const trait = Class::lookup(traitName);
+      assertx(trait->attrs() & AttrTrait);
+      int numIfcs = trait->m_interfaces.size();
+
+      for (int i = 0; i < numIfcs; i++) {
+        auto interface = trait->m_interfaces[i];
+        for (Slot slot = 0; slot < interface->m_constants.size(); ++slot) {
+          auto const tConst = interface->m_constants[slot];
+          importConst(tConst, true);
+        }
+      }
+    }
+  } else if (m_extra) {
+    for (auto const& t : m_extra->m_usedTraits) {
+      auto trait = t.get();
+      for (Slot slot = 0; slot < trait->m_constants.size(); ++slot) {
+        auto const tConst = trait->m_constants[slot];
+        importConst(tConst, tConst.cls->attrs() & AttrInterface);
+      }
+    }
+  }
+}
+
+
 void Class::setConstants() {
   ConstMap::Builder builder;
 
@@ -2237,8 +2317,8 @@ void Class::setConstants() {
   }
 
   // Copy in interface constants.
-  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
-    const Class* iface = m_interfaces[i];
+  for (int i = 0, size = m_declInterfaces.size(); i < size; ++i) {
+    auto const iface = m_declInterfaces[i].get();
 
     for (Slot slot = 0; slot < iface->m_constants.size(); ++slot) {
       auto const iConst = iface->m_constants[slot];
@@ -2276,22 +2356,19 @@ void Class::setConstants() {
       }
 
       if (existingConst.cls != iConst.cls) {
-        // It's only an error if the constant comes from the declared
-        // interfaces.
-        for (auto const& interface : m_declInterfaces) {
-          if (interface.get() == iface) {
-            raise_error("%s cannot inherit the %sconstant %s from %s, because "
-                        "it was previously inherited from %s",
-                        m_preClass->name()->data(),
-                        iConst.isType() ? "type " : "",
-                        iConst.name->data(),
-                        iConst.cls->name()->data(),
-                        existingConst.cls->name()->data());
-          }
-        }
+        raise_error("%s cannot inherit the %sconstant %s from %s, because "
+                    "it was previously inherited from %s",
+                    m_preClass->name()->data(),
+                    iConst.isType() ? "type " : "",
+                    iConst.name->data(),
+                    iConst.cls->name()->data(),
+                    existingConst.cls->name()->data());
       }
     }
   }
+  
+  // Copy in trait constants.
+  importTraitConsts(builder);
 
   for (Slot i = 0, sz = m_preClass->numConstants(); i < sz; ++i) {
     const PreClass::Const* preConst = &m_preClass->constants()[i];

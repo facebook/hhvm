@@ -1638,6 +1638,7 @@ private:
                              Slot& staticSerializationIdx,
                              std::vector<bool>& staticSerializationVisited);
   void addTraitPropInitializers(std::vector<const Func*>&, Attr which);
+  void importTraitConsts(ConstMap::Builder& constMap);
 
   void checkInterfaceMethods();
   void checkInterfaceConstraints();

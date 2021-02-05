@@ -303,6 +303,7 @@ dependencies = [
  "anyhow",
  "atty",
  "compile_rust",
+ "cpp_helper",
  "libc",
  "log",
  "ocamlrep",
@@ -344,6 +345,13 @@ name = "core_utils_rust"
 version = "0.0.0"
 dependencies = [
  "pretty_assertions",
+]
+
+[[package]]
+name = "cpp_helper"
+version = "0.0.0"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
@@ -2513,8 +2521,10 @@ dependencies = [
 name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
+ "cpp_helper",
  "facts_rust",
  "hhbc_string_utils_rust",
+ "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",

@@ -11,6 +11,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 compile_rust = { path = "../compile" }
+cpp_helper = { path = "../../../utils/cpp_helper" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

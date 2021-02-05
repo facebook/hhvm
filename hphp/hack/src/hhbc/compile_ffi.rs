@@ -41,33 +41,6 @@ impl<'content> FromOcamlRep for OcamlStr<'content> {
     }
 }
 
-// C `char*` conversions.
-mod cstr {
-    use libc::{c_char, c_int};
-
-    // `char*` to `&[u8]`.
-    pub fn to_u8<'a>(s: *const c_char) -> &'a [u8] {
-        unsafe { std::slice::from_raw_parts(s as *const u8, libc::strlen(s)) }
-    }
-    // `char*` to `&mut [u8]`.
-    pub fn to_mut_u8<'a>(buf: *mut c_char, buf_len: c_int) -> &'a mut [u8] {
-        unsafe { std::slice::from_raw_parts_mut(buf as *mut u8, buf_len as usize) }
-    }
-    // `char*` to `&str`.
-    pub fn to_str<'a>(s: *const c_char) -> &'a str {
-        unsafe { std::str::from_utf8_unchecked(to_u8(s)) }
-    }
-    // `char**` to `Vec<&str>`.
-    pub fn to_vec<'a>(cstrs: *const *const c_char, num_cstrs: usize) -> std::vec::Vec<&'a str> {
-        unsafe {
-            std::slice::from_raw_parts(cstrs, num_cstrs)
-                .iter()
-                .map(|&s| to_str(s))
-                .collect()
-        }
-    }
-}
-
 #[repr(C)]
 struct COutputConfig {
     include_header: bool,
@@ -80,7 +53,9 @@ impl std::convert::From<&COutputConfig> for RustOutputConfig {
             output_file: if output_config.output_file.is_null() {
                 None
             } else {
-                Some(String::from(cstr::to_str(output_config.output_file)))
+                Some(String::from(cpp_helper::cstr::to_str(
+                    output_config.output_file,
+                )))
             },
         }
     }
@@ -100,32 +75,18 @@ impl<'a> std::convert::From<&CEnv> for compile::Env<&'a str> {
         compile::Env {
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
-                std::path::PathBuf::from(cstr::to_str(env.filepath)),
+                std::path::PathBuf::from(cpp_helper::cstr::to_str(env.filepath)),
             ),
-            config_jsons: cstr::to_vec(env.config_jsons, env.num_config_jsons),
-            config_list: cstr::to_vec(env.config_list, env.num_config_list),
+            config_jsons: cpp_helper::cstr::to_vec(env.config_jsons, env.num_config_jsons),
+            config_list: cpp_helper::cstr::to_vec(env.config_list, env.num_config_list),
             flags: compile::EnvFlags::from_bits(env.flags).unwrap(),
         }
     }
 }
 
-#[repr(C)]
-pub struct CBuf {
-    buf: *mut c_char,
-    buf_len: c_int,
-}
-
-// Utility for raw pointer conversions.
-fn from_ptr<'a, T: 'a, U, F: FnOnce(&'a T) -> U>(p: usize, f: F) -> std::option::Option<U> {
-    match p {
-        0 => None,
-        _ => Some(f(unsafe { &*(p as *const T) })),
-    }
-}
-
-// Return a string to Rust.
+// Return a result of `compile_from_text_cpp_ffi` to Rust.
 #[no_mangle]
-extern "C" fn compile_free_string_cpp_ffi(s: *mut c_char) {
+extern "C" fn compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
     let _ = unsafe { std::ffi::CString::from_raw(s) };
 }
 
@@ -137,15 +98,16 @@ extern "C" fn compile_from_text_cpp_ffi(
     output_cfg: usize,
     err_buf: usize,
 ) -> *const c_char {
-    let err_buf: &CBuf = from_ptr(err_buf, std::convert::identity).unwrap();
+    let err_buf: &cpp_helper::CBuf = cpp_helper::from_ptr(err_buf, std::convert::identity).unwrap();
     let buf_len: c_int = err_buf.buf_len;
-    let buf: &mut [u8] = cstr::to_mut_u8(err_buf.buf, buf_len);
-    let _output_config: RustOutputConfig = from_ptr(output_cfg, RustOutputConfig::from).unwrap();
-    let text: &[u8] = cstr::to_u8(source_text);
+    let buf: &mut [u8] = cpp_helper::cstr::to_mut_u8(err_buf.buf, buf_len);
+    let _output_config: RustOutputConfig =
+        cpp_helper::from_ptr(output_cfg, RustOutputConfig::from).unwrap();
+    let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
 
     let job_builder = move || {
         move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-            let env = from_ptr(env, compile::Env::<&str>::from).unwrap();
+            let env = cpp_helper::from_ptr(env, compile::Env::<&str>::from).unwrap();
             let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
             let mut w = String::new();
             match compile::from_text_(&env, stack_limit, &mut w, source_text) {
@@ -164,7 +126,7 @@ extern "C" fn compile_from_text_cpp_ffi(
         // Not always printing warning here because this would fail
         // some HHVM tests.
         if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            let env = from_ptr(env, compile::Env::<&str>::from).unwrap();
+            let env = cpp_helper::from_ptr(env, compile::Env::<&str>::from).unwrap();
             eprintln!(
                 "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
                 (stack_size_tried - stack_slack(stack_size_tried)) / KI,

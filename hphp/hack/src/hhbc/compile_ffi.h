@@ -46,7 +46,7 @@ char const* compile_from_text_cpp_ffi(
      , output_config const* config
      , buf_t* error_buf );
 
-void compile_free_string_cpp_ffi(char const*);
+void compile_from_text_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
 #  endif /*defined(__cplusplus)*/

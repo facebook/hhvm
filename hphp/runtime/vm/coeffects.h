@@ -134,55 +134,10 @@ struct CoeffectRule final {
   { assertx(ctx_name); }
 
 
-  std::string getDirectiveString() const {
-    switch (m_type) {
-      case Type::ConditionalReactiveImplements:
-        return folly::sformat(".rx_cond_implements \"{}\";",
-                              folly::cEscape<std::string>(
-                                m_name->toCppString()));
-      case Type::ConditionalReactiveArgImplements:
-        return folly::sformat(".rx_cond_implements_arg {} \"{}\";",
-                              m_index,
-                              folly::cEscape<std::string>(
-                                m_name->toCppString()));
-      case Type::FunParam:
-        return folly::sformat(".coeffects_fun_param {};", m_index);
-      case Type::CCParam:
-        return folly::sformat(".coeffects_cc_param {} {};", m_index,
-                              folly::cEscape<std::string>(
-                                m_name->toCppString()));
-      case Type::CCThis:
-        return folly::sformat(".coeffects_cc_this {};",
-                              folly::cEscape<std::string>(
-                                m_name->toCppString()));
-      case Type::Invalid:
-        always_assert(false);
-    }
-    not_reached();
-  }
+  std::string getDirectiveString() const;
 
   template<class SerDe>
-  void serde(SerDe& sd) {
-    sd(m_type)
-      (m_index)
-      (m_name)
-    ;
-
-    if (SerDe::deserializing) {
-      switch (m_type) {
-        case Type::ConditionalReactiveImplements:
-        case Type::ConditionalReactiveArgImplements:
-          m_ne = NamedEntity::get(m_name);
-          break;
-        case Type::FunParam:
-        case Type::CCParam:
-        case Type::CCThis:
-          break;
-        case Type::Invalid:
-          always_assert(false);
-      }
-    }
-  }
+  void serde(SerDe&);
 
 private:
   enum class Type {

@@ -187,7 +187,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.GenericTypeSpecifier _
     | Syntax.NullableTypeSpecifier _
     | Syntax.LikeTypeSpecifier _
-    | Syntax.FunctionCtxTypeSpecifier _
     | Syntax.SoftTypeSpecifier _
     | Syntax.ListItem _ ->
       transform_simple env node
@@ -553,7 +552,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           contexts_types = tys;
           contexts_right_bracket = rb;
         } ->
-      Concat [t env lb; t env tys; t env rb]
+      transform_argish env lb tys rb
+    | Syntax.FunctionCtxTypeSpecifier
+        { function_ctx_type_keyword = kw; function_ctx_type_variable = var } ->
+      Concat [t env kw; Space; t env var]
     | Syntax.MethodishDeclaration
         {
           methodish_attribute = attr;

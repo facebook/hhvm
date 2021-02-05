@@ -115,10 +115,20 @@ let apply_patches_to_file_contents file_contents patches =
   in
   SMap.mapi apply file_contents
 
+let plural count one many =
+  let obj =
+    if count = 1 then
+      one
+    else
+      many
+  in
+  string_of_int count ^ " " ^ obj
+
 let apply_patches patches =
   let file_map = list_to_file_map patches in
   SMap.iter apply_patches_to_file file_map;
-  print_endline ("Rewrote " ^ string_of_int (SMap.cardinal file_map) ^ " files.")
+  print_endline
+    ("Rewrote " ^ plural (SMap.cardinal file_map) "file" "files" ^ ".")
 
 let patch_to_json res =
   let (type_, replacement) =

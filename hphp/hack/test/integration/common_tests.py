@@ -321,7 +321,7 @@ class CommonTestDriver(TestDriver):
 
         self.check_cmd(["No errors!"])
 
-        # trigger rechecking of all 11 files, and make one of them loop
+        # trigger rechecking of all 11 file, and make one of them loop
         # until cancelled
         with open(os.path.join(self.repo_dir, "__hh_loop_forever_foo.php"), "w") as f:
             f.write(
@@ -1023,7 +1023,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server(changed_files=["foo_4.php"])
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":84,"char_end":85,"line":4,"col_start":33,'
@@ -1034,7 +1034,7 @@ class CommonTests(BarebonesTests):
             options=["--refactor", "Method", "Bar::f", "Bar::wat"],
         )
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":125,"char_end":126,"line":5,"col_start":33,'
@@ -1112,7 +1112,7 @@ class CommonTests(BarebonesTests):
             options=["--refactor", "Class", "Foo", "Qux"],
         )
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":34,"char_end":37,"line":3,"col_start":19,'
@@ -1189,7 +1189,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server(changed_files=["foo_4.php"])
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":132,"char_end":135,"line":8,"col_start":22,'
@@ -1259,7 +1259,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server(changed_files=["foo_4.php"])
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":36,"char_end":43,"line":3,"col_start":21,'
@@ -1272,7 +1272,7 @@ class CommonTests(BarebonesTests):
         )
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["Rewrote 1 files."],
+            ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
                 '"char_start":69,"char_end":73,"line":4,"col_start":18,'

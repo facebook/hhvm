@@ -14,11 +14,7 @@ let handler =
     method! at_class_ env c =
       let tcopt = Nast_check_env.get_tcopt env in
       let enabled = tcopt.GlobalOptions.po_enable_enum_classes in
-      let is_enum_class =
-        match c.Aast.c_enum with
-        | Some enum_ -> enum_.Aast.e_enum_class
-        | None -> false
-      in
+      let is_enum_class = Aast.is_enum_class c in
       let pos = fst c.Aast.c_name in
       if (not enabled) && is_enum_class then
         Errors.enum_classes_reserved_syntax pos

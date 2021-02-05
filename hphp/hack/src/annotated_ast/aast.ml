@@ -1081,3 +1081,8 @@ let enum_includes_map ?(default = []) ~f includes =
   match includes with
   | None -> default
   | Some includes -> f includes
+
+let is_enum_class c =
+  match (c.c_kind, c.c_enum) with
+  | (Ast_defs.Cenum, Some enum_) -> enum_.e_enum_class
+  | (_, _) -> false

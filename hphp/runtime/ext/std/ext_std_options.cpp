@@ -64,107 +64,11 @@ namespace HPHP {
 // MacOS: /var/tmp
 const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
 
-const int64_t k_ASSERT_ACTIVE      = 1;
-const int64_t k_ASSERT_BAIL        = 3;
-const int64_t k_ASSERT_WARNING     = 4;
-const int64_t k_ASSERT_EXCEPTION   = 6;
-
 ///////////////////////////////////////////////////////////////////////////////
 
-struct OptionData final : RequestEventHandler {
-  void requestInit() override {
-    assertActive = 1;
-    assertException = 0;
-    assertWarning = 1;
-    assertBail = 0;
-  }
+void StandardExtension::requestInitOptions() {}
 
-  void requestShutdown() override {}
-
-  int assertActive;
-  int assertException;
-  int assertWarning;
-  int assertBail;
-};
-
-IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
-
-/////////////////////////////////////////////////////////////////////////////
-
-void StandardExtension::requestInitOptions() {
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.active", "1", &s_option_data->assertActive);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.exception", "0", &s_option_data->assertException);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.warning", "1", &s_option_data->assertWarning);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.bail", "0", &s_option_data->assertBail);
-}
-
-static Variant HHVM_FUNCTION(assert_options,
-                             int64_t what, const Variant& value /*=null */) {
-  if (what == k_ASSERT_ACTIVE) {
-    int oldValue = s_option_data->assertActive;
-    if (!value.isNull()) s_option_data->assertActive = value.toInt64();
-    return oldValue;
-  }
-  if (what == k_ASSERT_WARNING) {
-    int oldValue = s_option_data->assertWarning;
-    if (!value.isNull()) s_option_data->assertWarning = value.toInt64();
-    return oldValue;
-  }
-  if (what == k_ASSERT_BAIL) {
-    int oldValue = s_option_data->assertBail;
-    if (!value.isNull()) s_option_data->assertBail = value.toInt64();
-    return oldValue;
-  }
-  if (what == k_ASSERT_EXCEPTION) {
-    int oldValue = s_option_data->assertException;
-    if (!value.isNull()) s_option_data->assertException = value.toBoolean();
-    return Variant(oldValue);
-  }
-  raise_invalid_argument_warning("assert option %ld is not supported", (long)what);
-  return false;
-}
-
-static Variant HHVM_FUNCTION(assert, const Variant& assertion,
-                             const Variant& message /* = null */) {
-  auto const warning = "assert() is deprecated and subject"
-    " to removal from the Hack language";
-  switch (RuntimeOption::DisableAssert) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-
-  if (!s_option_data->assertActive) return true;
-
-  if (assertion.toBoolean()) return true;
-
-  if (s_option_data->assertException) {
-    if (message.isObject()) {
-      Object exn = message.toObject();
-      if (exn.instanceof(SystemLib::s_AssertionErrorClass)) {
-        throw_object(exn);
-      }
-    }
-
-    SystemLib::throwExceptionObject(message.toString());
-  }
-  if (s_option_data->assertWarning) {
-    String name(message.isNull() ? "Assertion" : message.toString());
-    auto const str = !assertion.isString()
-      ? " failed"
-      : concat3(" \"",  assertion.toString(), "\" failed");
-    raise_warning("assert(): %s%s", name.data(),  str.data());
-  }
-  if (s_option_data->assertBail) {
-    throw ExitException(1);
-  }
-
-  return init_null();
-}
+///////////////////////////////////////////////////////////////////////////////
 
 static bool HHVM_FUNCTION(extension_loaded, const String& name) {
   return ExtensionRegistry::isLoaded(name);
@@ -1201,8 +1105,6 @@ Variant HHVM_FUNCTION(version_compare,
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initOptions() {
-  HHVM_FE(assert_options);
-  HHVM_FE(assert);
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);
   HHVM_FE(get_extension_funcs);
@@ -1257,11 +1159,6 @@ void StandardExtension::initOptions() {
   HHVM_RC_INT(INFO_VARIABLES, 1 << 0);
   HHVM_RC_INT(INFO_LICENSE, 1 << 0);
   HHVM_RC_INT(INFO_ALL, 0x7FFFFFFF);
-
-  HHVM_RC_INT(ASSERT_ACTIVE, k_ASSERT_ACTIVE);
-  HHVM_RC_INT(ASSERT_BAIL, k_ASSERT_BAIL);
-  HHVM_RC_INT(ASSERT_WARNING, k_ASSERT_WARNING);
-  HHVM_RC_INT(ASSERT_EXCEPTION, k_ASSERT_EXCEPTION);
 
   loadSystemlib("std_options");
 }

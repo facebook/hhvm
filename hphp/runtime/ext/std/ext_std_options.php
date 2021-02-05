@@ -2,27 +2,6 @@
 
 namespace {
 
-/* Set the various assert() control options or just query their current
- * settings.
- */
-<<__Native>>
-function assert_options(int $what,
-                        mixed $value = null): mixed;
-
-/* assert() will check the given assertion and take appropriate action if its
- * result is FALSE.  Assertions should be used as a debugging feature only. You
- * may use them for sanity-checks that test for conditions that should always
- * be TRUE and that indicate some programming errors if not or to check for
- * the presence of certain features like extension functions or certain system
- * limits and features.  Assertions should not be used for normal runtime
- * operations like input parameter checks. As a rule of thumb your code should
- * always be able to work correctly if assertion checking is not activated.
- * The behavior of assert() may be configured by assert_options() or by
- * .ini-settings described in that functions manual page.
- */
-<<__Native>>
-function assert(mixed $assertion, mixed $message = null): mixed;
-
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
  * or not. This works on both built-in extensions and dynamically loaded ones

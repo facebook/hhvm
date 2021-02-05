@@ -1,5 +1,0 @@
-
-Warning: assert(): asserting that false is true failed in %s on line %i
-
-Warning: assert(): This doesn't make any sense.
-" failed in %s on line %i

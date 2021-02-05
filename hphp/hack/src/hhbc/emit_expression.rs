@@ -1670,15 +1670,11 @@ fn emit_call(
         Some(ast_defs::Id(_, id)) => {
             let fq = function::Type::from_ast_name(id);
             let lower_fq_name = fq.to_raw_string();
-            if lower_fq_name == "assert" {
-                emit_special_function_assert(e, env, pos, expr, targs, args, uarg, fcall_args)
-            } else {
-                emit_special_function(e, env, pos, args, uarg, lower_fq_name)
-                    .transpose()
-                    .unwrap_or_else(|| {
-                        emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
-                    })
-            }
+            emit_special_function(e, env, pos, args, uarg, lower_fq_name)
+                .transpose()
+                .unwrap_or_else(|| {
+                    emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
+                })
         }
     }
 }
@@ -1717,37 +1713,6 @@ fn emit_call_default(
             instr::empty(),
         ))
     })
-}
-
-fn emit_special_function_assert(
-    e: &mut Emitter,
-    env: &Env,
-    pos: &Pos,
-    expr: &tast::Expr,
-    targs: &[tast::Targ],
-    args: &[tast::Expr],
-    uarg: Option<&tast::Expr>,
-    fcall_args: FcallArgs,
-) -> Result {
-    let l0 = e.label_gen_mut().next_regular();
-    let l1 = e.label_gen_mut().next_regular();
-    Ok(InstrSeq::gather(vec![
-        instr::nulluninit(),
-        instr::nulluninit(),
-        instr::string("zend.assertions"),
-        instr::fcallfuncd(
-            FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
-            function::from_raw_string("ini_get"),
-        ),
-        instr::int(0),
-        instr::gt(),
-        instr::jmpz(l0.clone()),
-        emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)?,
-        instr::jmp(l1.clone()),
-        instr::label(l0),
-        instr::true_(),
-        instr::label(l1),
-    ]))
 }
 
 pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast::Hint]) -> Result {
@@ -2450,10 +2415,6 @@ fn emit_special_function(
                 instr::null(),
             ])))
         }
-        ("assert", _) => Err(unrecoverable(concat!(
-            "emit_special_function assert case:",
-            "should've been handled by emit_special_function_assert"
-        ))),
         ("HH\\sequence", &[]) => Ok(Some(instr::null())),
         ("HH\\sequence", args) => Ok(Some(InstrSeq::gather(
             args.iter()

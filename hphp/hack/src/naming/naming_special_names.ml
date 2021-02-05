@@ -414,14 +414,10 @@ module SpecialFunctions = struct
 
   let echo = "echo" (* pseudo-function *)
 
-  let assert_ = "assert"
-
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
-    let all_special_functions =
-      HashSet.of_list [tuple; echo; assert_; hhas_adata]
-    in
+    let all_special_functions = HashSet.of_list [tuple; echo; hhas_adata] in
     (fun x -> HashSet.mem all_special_functions x)
 end
 
@@ -476,8 +472,6 @@ module PseudoFunctions = struct
 
   let hh_loop_forever = "\\hh_loop_forever"
 
-  let assert_ = "\\assert"
-
   let echo = "\\echo"
 
   let empty = "\\empty"
@@ -496,7 +490,6 @@ module PseudoFunctions = struct
         hh_log_level;
         hh_force_solve;
         hh_loop_forever;
-        assert_;
         echo;
         empty;
         exit;

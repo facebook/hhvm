@@ -62,9 +62,6 @@ bool(false)
 Warning: Invalid argument: type: INVALID_TYPE in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
 
-Warning: Invalid argument: assert option -1 is not supported in %s/test/slow/invalid_argument/1381.php on line %d
-bool(false)
-
 Warning: Invalid argument: class not found: INVALID_CLASS in %s/test/slow/invalid_argument/1381.php on line %d
 NULL
 

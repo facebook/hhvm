@@ -31,7 +31,7 @@ function main(): void {
         ($mode === FB_SERIALIZE_HACK_ARRAYS && $mark_legacy)
         ? dict($vec_original)
         : $vec_original;
-      assert($vec_expected === $vec_roundtrip);
+      invariant($vec_expected === $vec_roundtrip, "");
 
       $dict_original = dict['1' => 'a', 'x' => 'y'];
       $dict_roundtrip = round_trip(
@@ -45,7 +45,7 @@ function main(): void {
       $dict_expected = $mode != FB_SERIALIZE_HACK_ARRAYS
         ? intish_cast($dict_original)
         : $dict_original;
-      assert($dict_expected === $dict_roundtrip);
+      invariant($dict_expected === $dict_roundtrip, "");
     }
   }
 }

@@ -15,7 +15,7 @@ async function bbThrow() { await block(); await bThrow(); }
 function verify($a, $e) {
   try { \HH\Asio\result($a); }
   catch (Exception $ae) {}
-  assert($ae->getMessage() == $e->getMessage());
+  invariant($ae->getMessage() == $e->getMessage(), "");
   var_dump($e->getMessage());
 }
 
@@ -50,9 +50,6 @@ async function asyncCatch() {
 
 <<__EntryPoint>>
 function main_exceptions() {
-assert_options(ASSERT_ACTIVE, 1);
-assert_options(ASSERT_WARNING, 1);
-;
 
 normalCatch();
 echo "---\n";

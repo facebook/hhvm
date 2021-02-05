@@ -238,7 +238,6 @@ struct RuntimeOption {
   static bool AllowRunAsRoot; // Allow running hhvm as root.
 
   static int  MaxSerializedStringSize;
-  static bool AssertEmitted;
   static int64_t NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int64_t WarningFrequency;
   static int RaiseDebuggingFrequency;
@@ -624,10 +623,6 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableConstant;
-  // Disables PHP's assert() function
-  // valid values are 0 => enabled (default)
-  // 1 => warning, 2 => error
-  static uint64_t DisableAssert;
   // Disables non-top-level declarations
   // true => error, false => default behaviour
   static bool DisableNontoplevelDeclarations;

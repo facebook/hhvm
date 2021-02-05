@@ -439,7 +439,6 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;
-  int64_t m_zendAssertions;
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
   int64_t m_zstdLevel;

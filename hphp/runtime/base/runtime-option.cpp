@@ -566,7 +566,6 @@ std::string RuntimeOption::ServerUser;
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
-bool RuntimeOption::AssertEmitted = true;
 int64_t RuntimeOption::NoticeFrequency = 1;
 int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
@@ -857,7 +856,6 @@ int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
-uint64_t RuntimeOption::DisableAssert = 0;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
@@ -1745,9 +1743,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableCallUserFuncArray, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFuncArray",
                  DisableCallUserFuncArray);
-    Config::Bind(DisableAssert, ini, config,
-                 "Hack.Lang.Phpism.DisableAssert",
-                 DisableAssert);
     Config::Bind(DisableNontoplevelDeclarations, ini, config,
                  "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
                  DisableNontoplevelDeclarations);
@@ -2710,16 +2705,6 @@ void RuntimeOption::Load(
     // Profiling
     Config::Bind(SetProfileNullThisObject, ini, config,
                  "SetProfile.NullThisObject", true);
-  }
-  {
-    // We directly read zend.assertions here, so that we can get its INI value
-    // in order to know how we should emit bytecode. We don't actually Bind the
-    // option here though, since its runtime value can be changed and is per
-    // request. (We prevent its value from changing at runtime between values
-    // that would affect byecode emission.)
-    Variant v;
-    bool b = IniSetting::GetSystem("zend.assertions", v);
-    if (b) RuntimeOption::AssertEmitted = v.toInt64() >= 0;
   }
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");

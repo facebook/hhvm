@@ -14,10 +14,6 @@ const int CLOCK_REALTIME = 0;
 const int CLOCK_THREAD_CPUTIME_ID = 3;
 
 <<__PHPStdLib>>
-function assert_options(int $what, $value = null);
-<<__PHPStdLib>>
-function assert($assertion);
-<<__PHPStdLib>>
 function dl(string $_library);
 <<__PHPStdLib>>
 function extension_loaded(string $name);

@@ -3,7 +3,6 @@
 
 <<__EntryPoint>>
 function main_ext_options() {
-assert_options(1);
 var_dump(dl(""));
 
 var_dump(extension_loaded("bcmath"));

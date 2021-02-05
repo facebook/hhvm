@@ -442,16 +442,12 @@ pub mod special_functions {
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
-    pub const ASSERT_: &str = "assert";
-
     pub const HHAS_ADATA: &str = "__hhas_adata";
 
     pub fn is_special_function(x: &str) -> bool {
         lazy_static! {
             static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
-                vec![TUPLE, ECHO, ASSERT_, HHAS_ADATA,]
-                    .into_iter()
-                    .collect();
+                vec![TUPLE, ECHO, HHAS_ADATA,].into_iter().collect();
         }
         ALL_SPECIAL_FUNCTIONS.contains(&x)
     }
@@ -508,8 +504,6 @@ pub mod pseudo_functions {
 
     pub const HH_LOOP_FOREVER: &str = "\\hh_loop_forever";
 
-    pub const ASSERT: &str = "\\assert";
-
     pub const ECHO: &str = "\\echo";
 
     pub const ECHO_NO_NS: &str = "echo";
@@ -528,7 +522,6 @@ pub mod pseudo_functions {
         HH_LOG_LEVEL,
         HH_FORCE_SOLVE,
         HH_LOOP_FOREVER,
-        ASSERT,
         ECHO,
         EMPTY,
         EXIT,

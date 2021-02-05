@@ -86,20 +86,13 @@ let process_member_id
 
 let process_class_id
     target_class
-    cid
-    mid_option
+    (pos, class_name)
     (class_id_type : SymbolOccurrence.class_id_type)
     (include_all_ci_types : bool) =
-  if String.equal target_class (snd cid) then
+  if String.equal target_class class_name then
     match (include_all_ci_types, class_id_type) with
     | (false, SymbolOccurrence.Other) -> Pos.Map.empty
-    | _ ->
-      let class_name =
-        match mid_option with
-        | None -> snd cid
-        | Some n -> snd cid ^ "::" ^ snd n
-      in
-      Pos.Map.singleton (fst cid) class_name
+    | _ -> Pos.Map.singleton pos class_name
   else
     Pos.Map.empty
 
@@ -243,10 +236,10 @@ let fold_one_tast ctx target acc symbol =
   | (IFunction fun_name, SO.Function) -> process_fun_id fun_name (pos, name)
   | (IClass c, SO.Class class_id_type) ->
     let include_all_ci_types = true in
-    process_class_id c (pos, name) None class_id_type include_all_ci_types
+    process_class_id c (pos, name) class_id_type include_all_ci_types
   | (IExplicitClass c, SO.Class class_id_type) ->
     let include_all_ci_types = false in
-    process_class_id c (pos, name) None class_id_type include_all_ci_types
+    process_class_id c (pos, name) class_id_type include_all_ci_types
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 

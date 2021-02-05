@@ -71,7 +71,7 @@
                               ([5:20-21], "f")))),
                           [],
                           [(([5:22-24], string), (Lvar ([5:22-24], $x)))],
-                          None))))))
+                          None, None))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
@@ -117,7 +117,7 @@
                         (Obj_get ((([4:10-12], B), (Lvar ([4:10-12], $b))),
                            (([4:14-15], (function(string $x): string)),
                             (Id ([4:14-15], "f"))),
-                           OG_nullthrows, false))),
+                           OG_nullthrows, false, None))),
                        [],
                        [(([4:16-25], string),
                          (Call (
@@ -126,10 +126,11 @@
                                 (([4:16-18], A), (Lvar ([4:16-18], $a))),
                                 (([4:20-21], (function(string $x): string)),
                                  (Id ([4:20-21], "f"))),
-                                OG_nullthrows, false))),
-                            [], [(([4:22-24], string), (String ""))], None)))
+                                OG_nullthrows, false, None))),
+                            [], [(([4:22-24], string), (String ""))], None,
+                            None)))
                          ],
-                       None))))))
+                       None, None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

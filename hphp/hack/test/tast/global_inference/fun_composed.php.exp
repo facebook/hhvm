@@ -103,11 +103,12 @@
                               (Call (
                                  (([4:16-18], (function(int $x): int)),
                                   (Id ([4:16-18], "\\g1"))),
-                                 [], [(([4:19-20], int), (Int "0"))], None)))
+                                 [], [(([4:19-20], int), (Int "0"))], None,
+                                 None)))
                               ],
-                            None)))
+                            None, None)))
                          ],
-                       None))))))
+                       None, None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

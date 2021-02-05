@@ -404,7 +404,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
         match &mut e.1 {
             // Convert `foo(...)` to `__splice__(Visitor::symbol('foo', foo<>))(...)`
             Call(ref mut call) => {
-                let (ref recv, ref mut targs, ref mut args, ref mut variadic) = **call;
+                let (ref recv, ref mut targs, ref mut args, ref mut variadic, _) = **call;
                 match &recv.1 {
                     Id(sid) => {
                         let fn_name = string_literal(&*sid.1);
@@ -430,7 +430,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
 
                         let args = std::mem::replace(args, vec![]);
                         let variadic = variadic.take();
-                        e.1 = Call(Box::new((callee, vec![], args, variadic)))
+                        e.1 = Call(Box::new((callee, vec![], args, variadic, None)))
                     }
                     // Convert `Foo::bar(...)` to `${ Visitor::symbol('Foo::bar', Foo::bar<>) }(...)`
                     ClassConst(cc) => {
@@ -466,7 +466,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
 
                         let args = std::mem::replace(args, vec![]);
                         let variadic = variadic.take();
-                        e.1 = Call(Box::new((callee, vec![], args, variadic)))
+                        e.1 = Call(Box::new((callee, vec![], args, variadic, None)))
                     }
                     _ => e.recurse(env, self.object())?,
                 }
@@ -639,13 +639,13 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Expr {
             )
         }
         Call(call) => {
-            let (recv, _, args, _) = &**call;
+            let (recv, _, args, _, _) = &**call;
             match &recv.1 {
                 // Convert `$foo->bar(args)` to
                 // `$v->methCall(new ExprPos(...), $foo, 'bar', vec[args])`
                 // Parenthesized expressions e.g. `($foo->bar)(args)` unsupported.
                 ObjGet(objget) if !objget.as_ref().3 => {
-                    let (receiver, meth, _, _) = &**objget;
+                    let (receiver, meth, _, _, _) = &**objget;
                     match &meth.1 {
                         Id(sid) => {
                             let fn_name = string_literal(&*sid.1);
@@ -880,10 +880,12 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
                 meth,
                 OgNullFlavor::OGNullthrows,
                 false,
+                None,
             ))),
         ),
         vec![],
         args,
+        None,
         None,
     )));
     Expr::new(pos.clone(), c)
@@ -903,10 +905,12 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
                 meth,
                 OgNullFlavor::OGNullthrows,
                 false,
+                None,
             ))),
         ),
         vec![],
         args,
+        None,
         None,
     )));
     Expr::new(pos.clone(), c)
@@ -929,7 +933,7 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
     );
     Expr::new(
         pos.clone(),
-        Expr_::Call(Box::new((callee, vec![], args, None))),
+        Expr_::Call(Box::new((callee, vec![], args, None, None))),
     )
 }
 
@@ -1069,6 +1073,6 @@ fn immediately_invoked_lambda<TF>(env: &Env<TF>, pos: &Pos, stmts: Vec<Stmt>) ->
 
     Expr::new(
         pos.clone(),
-        Expr_::Call(Box::new((lambda_expr, vec![], vec![], None))),
+        Expr_::Call(Box::new((lambda_expr, vec![], vec![], None, None))),
     )
 }

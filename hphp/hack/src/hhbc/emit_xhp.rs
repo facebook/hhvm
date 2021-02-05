@@ -92,6 +92,7 @@ pub fn from_attribute_declaration<'a>(
         vec![],
         vec![],
         None,
+        None, //readonly
     ))];
     for xua in xual.iter() {
         match xua.1.as_happly() {
@@ -111,6 +112,7 @@ pub fn from_attribute_declaration<'a>(
                     vec![],
                     vec![],
                     None,
+                    None, //readonly
                 ));
                 args.push(arg);
             }
@@ -123,6 +125,7 @@ pub fn from_attribute_declaration<'a>(
         vec![],
         args,
         None,
+        None, // readonly
     ));
     let set_cache = mk_stmt(Stmt_::mk_expr(mk_expr(Expr_::mk_binop(
         Bop::Eq(None),

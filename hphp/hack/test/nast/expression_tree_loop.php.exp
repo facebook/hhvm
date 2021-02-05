@@ -31,7 +31,7 @@
                                       (Call (
                                          ([4:31-34],
                                           (Id ([4:31-34], "\\foo"))),
-                                         [], [], None)))))
+                                         [], [], None, None)))))
                                   ]
                                 )))
                              ];
@@ -74,7 +74,8 @@
                                                 ([4:23-27],
                                                  (CI ([4:23-27], "\\Code"))),
                                                 ([4:23-27], "boolLiteral")))),
-                                            [], [([4:23-27], True)], None)))
+                                            [], [([4:23-27], True)], None,
+                                            None)))
                                         )))));
                                  ([4:31-36],
                                   (Expr
@@ -96,7 +97,7 @@
                                                       ([4:31-34], "\\foo")),
                                                    [])))
                                                ],
-                                             None)))
+                                             None, None)))
                                          )))));
                                  ([4:8-41],
                                   (Expr
@@ -110,7 +111,7 @@
                                                  ([4:8-41],
                                                   (CI ([4:8-41], "\\Code"))),
                                                  ([4:8-41], "voidLiteral")))),
-                                             [], [], None)))
+                                             [], [], None, None)))
                                          )))));
                                  ([4:8-41],
                                   (Return
@@ -218,7 +219,8 @@
                                                                     ([4:8-41],
                                                                     "lambdaLiteral"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                  [],
                                                                  [([4:8-41],
                                                                    (New (
@@ -262,7 +264,8 @@
                                                                     ([4:17-39],
                                                                     "whileStatement"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:17-39],
                                                                     (New (
@@ -295,7 +298,8 @@
                                                                     ([4:23-27],
                                                                     "methCall"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:23-27],
                                                                     (New (
@@ -328,7 +332,8 @@
                                                                     ([4:23-27],
                                                                     "splice"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:23-27],
                                                                     (New (
@@ -355,6 +360,7 @@
                                                                     (Lvar
                                                                     ([4:23-27],
                                                                     $__0)))],
+                                                                    None,
                                                                     None)));
                                                                     ([Pos.none],
                                                                     (String
@@ -364,6 +370,7 @@
                                                                     Vec,
                                                                     None, 
                                                                     [])))],
+                                                                    None,
                                                                     None)));
                                                                     ([4:31-36],
                                                                     (ValCollection (
@@ -382,7 +389,8 @@
                                                                     ([4:31-36],
                                                                     "call"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:31-36],
                                                                     (New (
@@ -415,7 +423,8 @@
                                                                     ([4:31-36],
                                                                     "splice"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:31-36],
                                                                     (New (
@@ -442,14 +451,17 @@
                                                                     (Lvar
                                                                     ([4:31-36],
                                                                     $__1)))],
+                                                                    None,
                                                                     None)));
                                                                     ([Pos.none],
                                                                     (ValCollection (
                                                                     Vec,
                                                                     None, 
                                                                     [])))],
+                                                                    None,
                                                                     None)))]
                                                                     )))],
+                                                                    None,
                                                                     None)));
                                                                     ([4:8-41],
                                                                     (Call (
@@ -464,7 +476,8 @@
                                                                     ([4:8-41],
                                                                     "returnStatement"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:8-41],
                                                                     (New (
@@ -497,7 +510,8 @@
                                                                     ([4:8-41],
                                                                     "splice"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:8-41],
                                                                     (New (
@@ -524,11 +538,13 @@
                                                                     (Lvar
                                                                     ([4:8-41],
                                                                     $__2)))],
+                                                                    None,
                                                                     None)))],
+                                                                    None,
                                                                     None)))]
                                                                     )))
                                                                    ],
-                                                                 None))))))
+                                                                 None, None))))))
                                                            ];
                                                          fb_annotation =
                                                          Named };
@@ -628,10 +644,11 @@
                                                                     ([4:23-27],
                                                                     "__bool"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [], 
-                                                                    [], None
-                                                                    ))),
+                                                                    [], None,
+                                                                    None))),
                                                                     [([4:31-37],
                                                                     (Expr
                                                                     ([4:31-36],
@@ -643,8 +660,9 @@
                                                                     ([4:31-36],
                                                                     $__1))))),
                                                                     [], 
-                                                                    [], None
-                                                                    )))))])));
+                                                                    [], None,
+                                                                    None)))))
+                                                                    ])));
                                                                     ([4:8-41],
                                                                     (Return
                                                                     (Some (
@@ -728,7 +746,7 @@
                                                        ([Pos.none], $__2)]
                                                      )))
                                                  ],
-                                               None))))))
+                                               None, None))))))
                                  ];
                                fb_annotation = Named };
                              f_fun_kind = FSync; f_user_attributes = [];
@@ -743,7 +761,7 @@
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
                            []))),
-                       [], [], None)))
+                       [], [], None, None)))
                    }))))
           ];
         fb_annotation = Named };

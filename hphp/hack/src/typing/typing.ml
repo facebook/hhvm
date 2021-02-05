@@ -1529,7 +1529,8 @@ and expr_
       e
       explicit_targs
       el
-      unpacked_element =
+      unpacked_element
+      ro =
     let (env, te, ty) =
       dispatch_call
         ~is_using_clause
@@ -1541,6 +1542,7 @@ and expr_
         explicit_targs
         el
         unpacked_element
+        ro
     in
     let env = forget_fake_members env p e in
     let env =
@@ -2162,7 +2164,7 @@ and expr_
         ty2
     in
     make_result env p (Aast.Array_get (te1, Some te2)) ty
-  | Call ((pos_id, Id ((_, s) as id)), [], el, None)
+  | Call ((pos_id, Id ((_, s) as id)), [], el, None, ro)
     when Hash_set.mem typing_env_pseudofunctions s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
@@ -2193,9 +2195,10 @@ and expr_
          ( Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
            [],
            tel,
-           None ))
+           None,
+           ro ))
       ty
-  | Call (e, explicit_targs, el, unpacked_element) ->
+  | Call (e, explicit_targs, el, unpacked_element, ro) ->
     let env =
       match snd e with
       | Id (pos, f) when String.equal f SN.SpecialFunctions.echo ->
@@ -2213,6 +2216,7 @@ and expr_
       explicit_targs
       el
       unpacked_element
+      ro
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in
@@ -2432,7 +2436,7 @@ and expr_
    *)
   | Class_get (_, CGexpr _, _) ->
     failwith "AST should not have any CGexprs after naming"
-  | Obj_get (e, (pid, Id (py, y)), nf, in_parens)
+  | Obj_get (e, (pid, Id (py, y)), nf, in_parens, ro)
     when Env.FakeMembers.is_valid env e y ->
     let env = might_throw env in
     let (env, local) = Env.FakeMembers.make env e y p in
@@ -2440,9 +2444,9 @@ and expr_
     let (env, _, ty) = expr env local in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
     let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
-    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, in_parens)) ty
+    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, in_parens, ro)) ty
   (* Statically-known instance property access e.g. $x->f *)
-  | Obj_get (e1, (pm, Id m), nullflavor, in_parens) ->
+  | Obj_get (e1, (pm, Id m), nullflavor, in_parens, ro) ->
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
@@ -2507,10 +2511,11 @@ and expr_
          ( te1,
            Tast.make_typed_expr pm result_ty (Aast.Id m),
            nullflavor,
-           in_parens ))
+           in_parens,
+           ro ))
       result_ty
   (* Dynamic instance property access e.g. $x->$f *)
-  | Obj_get (e1, e2, nullflavor, in_parens) ->
+  | Obj_get (e1, e2, nullflavor, in_parens, ro) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, te2, _) = expr env e2 in
     let ty =
@@ -2522,7 +2527,7 @@ and expr_
     let ((pos, _), te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
-    make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
+    make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens, ro)) ty
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
     let (env, send) = Env.fresh_type env p in
@@ -4066,7 +4071,7 @@ and assign_ p ur env e1 ty2 =
     (* If we ever extend fake members from $x->a to more complicated lvalues
       such as $x->a->b, we would need to call forget_prefixed_members on
       other lvalues as well. *)
-    | (_, Obj_get (_, (_, Id (_, property)), _, _)) ->
+    | (_, Obj_get (_, (_, Id (_, property)), _, _, _)) ->
       Env.forget_suffixed_members env property Reason.(Blame (p, BSassignment))
     | _ -> env
   in
@@ -4094,8 +4099,8 @@ and assign_ p ur env e1 ty2 =
     in
     make_result env (fst e1) (Aast.List (List.rev reversed_tel)) ty2
   | ( pobj,
-      Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor, in_parens) )
-    ->
+      Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor, in_parens, ro)
+    ) ->
     let lenv = env.lenv in
     let nullsafe =
       match nullflavor with
@@ -4128,7 +4133,8 @@ and assign_ p ur env e1 ty2 =
            ( tobj,
              Tast.make_typed_expr pm result (Aast.Id m),
              nullflavor,
-             in_parens ))
+             in_parens,
+             ro ))
     in
     let env = { env with lenv } in
     begin
@@ -4381,11 +4387,13 @@ and dispatch_call
     ((fpos, fun_expr) as e)
     explicit_targs
     el
-    unpacked_element =
+    unpacked_element
+    ro =
   let expr = expr ~allow_awaitable:(*?*) false in
   let exprs = exprs ~allow_awaitable:(*?*) false in
   let make_call env te tal tel typed_unpack_element ty =
-    make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
+    (* The call's RO never changes, so capture it from outer value *)
+    make_result env p (Aast.Call (te, tal, tel, typed_unpack_element, ro)) ty
   in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
@@ -4595,7 +4603,7 @@ and dispatch_call
             env
         in
         (match el with
-        | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
+        | [(p, Obj_get (_, _, OG_nullsafe, _, _))] ->
           Errors.nullsafe_property_write_context p;
           make_call_special_from_def env id tel (TUtils.terr env)
         | _ -> make_call_special_from_def env id tel MakeType.void)
@@ -4985,7 +4993,7 @@ and dispatch_call
   (* Calling parent / class method *)
   | Class_const (class_id, m) -> dispatch_class_const env class_id m
   (* Call instance method *)
-  | Obj_get (e1, (pos_id, Id m), nullflavor, false)
+  | Obj_get (e1, (pos_id, Id m), nullflavor, false, ro)
     when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
@@ -5033,13 +5041,14 @@ and dispatch_call
             ( te1,
               Tast.make_typed_expr pos_id tfty (Aast.Id m),
               nullflavor,
-              false )))
+              false,
+              ro )))
       tal
       tel
       typed_unpack_element
       ty
   (* Call instance method using new method call inference *)
-  | Obj_get (receiver, (pos_id, Id meth), nullflavor, false) ->
+  | Obj_get (receiver, (pos_id, Id meth), nullflavor, false, ro) ->
     (*****
       Typecheck `Obj_get` by enforcing that:
       - `<instance_type>` <: `Thas_member(m, #1)`
@@ -5150,7 +5159,8 @@ and dispatch_call
             ( typed_receiver,
               Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
               nullflavor,
-              false )))
+              false,
+              ro )))
       typed_targs
       typed_params
       typed_unpack_element
@@ -6668,8 +6678,8 @@ and make_a_local_of env e =
     (env, Some (p, local))
   | ( p,
       Obj_get
-        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _) )
-    ->
+        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _, _)
+    ) ->
     let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, Some (p, local))
   | (_, Lvar x)
@@ -6712,6 +6722,7 @@ and condition_nullity ~nonnull (env : env) te =
         ( (_, Aast.Class_const ((_, Aast.CI (_, shapes)), (_, idx))),
           _,
           [shape; field],
+          _,
           _ ) )
     when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
     ->
@@ -6749,12 +6760,12 @@ and condition
   | Aast.True when not tparamet ->
     (LEnv.drop_cont env C.Next, Local_id.Set.empty)
   | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
-  | Aast.Call ((_, Aast.Id (_, func)), _, [param], None)
+  | Aast.Call ((_, Aast.Id (_, func)), _, [param], None, _)
     when String.equal SN.PseudoFunctions.isset func
          && tparamet
          && not (Env.is_strict env) ->
     condition_isset env param
-  | Aast.Call ((_, Aast.Id (_, func)), _, [te], None)
+  | Aast.Call ((_, Aast.Id (_, func)), _, [te], None, _)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, Aast.Null), e)
@@ -6832,23 +6843,24 @@ and condition
           condition env tparamet e2)
     in
     (env, Local_id.Set.union lset1 lset2)
-  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None, _)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
     safely_refine_is_array env `HackDictOrDArray p f lv
-  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None, _)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
     safely_refine_is_array env `HackVecOrVArray p f lv
-  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None, _)
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
     safely_refine_is_array env `AnyArray p f lv
-  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None, _)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
   | Aast.Call
       ( (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
         _,
         [shape; field],
-        None )
+        None,
+        _ )
     when tparamet
          && String.equal class_name SN.Shapes.cShapes
          && String.equal method_name SN.Shapes.keyExists ->
@@ -7042,8 +7054,8 @@ and safely_refine_class_type
 
 and is_instance_var = function
   | (_, (Lvar _ | This | Dollardollar _)) -> true
-  | (_, Obj_get ((_, This), (_, Id _), _, _)) -> true
-  | (_, Obj_get ((_, Lvar _), (_, Id _), _, _)) -> true
+  | (_, Obj_get ((_, This), (_, Id _), _, _, _)) -> true
+  | (_, Obj_get ((_, Lvar _), (_, Id _), _, _, _)) -> true
   | (_, Class_get (_, _, _)) -> true
   | _ -> false
 
@@ -7053,8 +7065,8 @@ and get_instance_var env = function
     (env, (p, local))
   | ( p,
       Obj_get
-        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _) )
-    ->
+        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _, _)
+    ) ->
     let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, (p, local))
   | (_, Dollardollar (p, x))

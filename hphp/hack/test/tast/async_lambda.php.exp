@@ -68,7 +68,7 @@
                                            [],
                                            [(([7:28-33], string),
                                              (String "foo"))],
-                                           None)))))
+                                           None, None)))))
                                    )))))
                             ];
                           fb_annotation = () };
@@ -126,7 +126,7 @@
                                             [],
                                             [(([10:28-30], string),
                                               (Lvar ([10:28-30], $x)))],
-                                            None)))))
+                                            None, None)))))
                                     )))))
                              ];
                            fb_annotation = () };

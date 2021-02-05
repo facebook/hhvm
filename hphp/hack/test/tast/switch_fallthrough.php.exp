@@ -34,7 +34,8 @@ File "switch_fallthrough.php", line 37, characters 3-13:
            (Expr
               (([6:3-14], void),
                (Call ((([6:3-10], _), (Id ([6:3-10], "\\hh_show"))), 
-                  [], [(([6:11-13], int), (Lvar ([6:11-13], $x)))], None)))));
+                  [], [(([6:11-13], int), (Lvar ([6:11-13], $x)))], None,
+                  None)))));
           ([7:3-35:4],
            (Switch ((([7:11-13], int), (Lvar ([7:11-13], $x))),
               [(Case ((([8:10-11], int), (Int "0")), []));
@@ -46,7 +47,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                             (([12:7-14], _), (Id ([12:7-14], "\\hh_show"))),
                             [],
                             [(([12:15-17], int), (Lvar ([12:15-17], $x)))],
-                            None)))));
+                            None, None)))));
                      ([14:7-15],
                       (Expr
                          (([14:7-14], string),
@@ -61,7 +62,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                              [],
                              [(([15:15-17], string), (Lvar ([15:15-17], $x)))
                                ],
-                             None)))));
+                             None, None)))));
                      ([Pos.none], Fallthrough)]
                    ));
                 (Case ((([17:10-11], int), (Int "3")),
@@ -73,7 +74,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                             [],
                             [(([19:15-17], (int | string)),
                               (Lvar ([19:15-17], $x)))],
-                            None)))));
+                            None, None)))));
                      ([20:7-17],
                       (Expr
                          (([20:7-16], bool),
@@ -87,7 +88,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                              (([22:7-14], _), (Id ([22:7-14], "\\hh_show"))),
                              [],
                              [(([22:15-17], bool), (Lvar ([22:15-17], $x)))],
-                             None)))));
+                             None, None)))));
                      ([Pos.none], Fallthrough)]
                    ));
                 (Case ((([24:10-11], int), (Int "4")),
@@ -99,7 +100,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                             [],
                             [(([26:15-17], (int | bool)),
                               (Lvar ([26:15-17], $x)))],
-                            None)))));
+                            None, None)))));
                      ([27:7-13], Break)]
                    ));
                 (Case ((([28:10-11], int), (Int "4")),
@@ -110,7 +111,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                             (([30:7-14], _), (Id ([30:7-14], "\\hh_show"))),
                             [],
                             [(([30:15-17], int), (Lvar ([30:15-17], $x)))],
-                            None)))));
+                            None, None)))));
                      ([32:7-16],
                       (Expr
                          (([32:7-15], float),
@@ -124,7 +125,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                              (([33:7-14], _), (Id ([33:7-14], "\\hh_show"))),
                              [],
                              [(([33:15-17], float), (Lvar ([33:15-17], $x)))],
-                             None)))));
+                             None, None)))));
                      ([34:7-13], Break)]
                    ))
                 ]
@@ -135,7 +136,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                (Call ((([37:3-10], _), (Id ([37:3-10], "\\hh_show"))), 
                   [],
                   [(([37:11-13], (bool | num)), (Lvar ([37:11-13], $x)))],
-                  None)))))
+                  None, None)))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

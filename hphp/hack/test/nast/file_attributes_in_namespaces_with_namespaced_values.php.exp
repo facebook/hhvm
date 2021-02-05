@@ -42,7 +42,7 @@
                     ([5:47-58],
                      (Obj_get (([5:47-58], This),
                         ([5:47-58], (Id ([5:47-58], "attr_value"))),
-                        OG_nullthrows, false))),
+                        OG_nullthrows, false, None))),
                     ([5:47-58], (Lvar ([5:47-58], $attr_value))))))));
              ([Pos.none], Noop)];
            fb_annotation = Named };

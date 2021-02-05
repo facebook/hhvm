@@ -11,7 +11,7 @@ include TM.Shared (Env)
 
 let expr_is_valid_owned_arg (e : expr) : bool =
   match snd e with
-  | Call ((_, Id (_, id)), _, _, _) ->
+  | Call ((_, Id (_, id)), _, _, _, _) ->
     String.equal id SN.Rx.mutable_ || String.equal id SN.Rx.move
   | _ -> false
 
@@ -87,7 +87,7 @@ let rec is_valid_mutable_subscript_expression_target env v =
   | ((_, ty), Array_get (e, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && is_valid_mutable_subscript_expression_target env e
-  | ((_, ty), Obj_get (e, _, _, _)) ->
+  | ((_, ty), Obj_get (e, _, _, _, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && ( is_valid_mutable_subscript_expression_target env e
        || expr_is_valid_borrowed_arg env e )
@@ -115,7 +115,7 @@ let check_assignment_or_unset_target
     let p = get_position te1 in
     match snd te1 with
     (* Setting mutable locals is okay *)
-    | Obj_get (e1, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
+    | Obj_get (e1, _, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
     | Array_get (e1, i)
       when is_assignment && not (is_valid_append_target env (get_type e1)) ->
       Errors.CoeffectEnforcedOp.nonreactive_indexing
@@ -368,8 +368,8 @@ let check_rx_mutable_arguments (p : Pos.t) (env : Env.env) (tel : expr list) =
 
 let enforce_mutable_call (env : Env.env) (te : expr) =
   match snd te with
-  | Call ((_, Id ((_, s) as id)), _, el, _)
-  | Call ((_, Fun_id ((_, s) as id)), _, el, _)
+  | Call ((_, Id ((_, s) as id)), _, el, _, _)
+  | Call ((_, Fun_id ((_, s) as id)), _, el, _, _)
     when String.( <> ) s SN.Rx.move && String.( <> ) s SN.Rx.freeze ->
     begin
       match Env.get_fun env (snd id) with
@@ -378,12 +378,12 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
       | _ -> ()
     end
   (* static methods/lambdas *)
-  | Call (((_, fun_ty), Class_const _), _, el, _)
-  | Call (((_, fun_ty), Lvar _), _, el, _) ->
+  | Call (((_, fun_ty), Class_const _), _, el, _, _)
+  | Call (((_, fun_ty), Lvar _), _, el, _, _) ->
     let (env, efun_ty) = Env.expand_type env fun_ty in
     check_mutability_fun_params env Borrowable_args.empty efun_ty el
   (* $x->method() where method is mutable *)
-  | Call (((pos, fun_ty), Obj_get (expr, _, _, _)), _, el, _) ->
+  | Call (((pos, fun_ty), Obj_get (expr, _, _, _, _)), _, el, _, _) ->
     let (env, efun_ty) = Env.expand_type env fun_ty in
     begin
       match get_node efun_ty with
@@ -717,7 +717,7 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call ((_, Id (_, f)), _, el, None))
+            | (_, Call ((_, Id (_, f)), _, el, None, _))
               when String.equal f SN.PseudoFunctions.unset ->
               List.iter
                 el
@@ -725,17 +725,17 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call ((_, Id (_, f)), _, el, None))
+            | (_, Call ((_, Id (_, f)), _, el, None, _))
               when String.equal f SN.Rx.mutable_ ->
               check_rx_mutable_arguments (get_position expr) env el;
               super#on_expr (env, ctx) expr
-            | (_, Call ((_, Id (p, f)), _, _, None))
+            | (_, Call ((_, Id (p, f)), _, _, None, _))
               when String.equal f SN.SpecialFunctions.echo ->
               if not (TypecheckerOptions.local_coeffects (Env.get_tcopt env))
               then
                 Errors.CoeffectEnforcedOp.output p;
               super#on_expr (env, ctx) expr
-            | (_, Call (f, _, _, _)) ->
+            | (_, Call (f, _, _, _, _)) ->
               enforce_mutable_call env expr;
               ( if not is_expr_statement then
                 let (_env, fun_ty) = Env.expand_type env (get_type f) in

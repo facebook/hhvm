@@ -798,11 +798,13 @@ module Visitor_DEPRECATED = struct
         | Await e -> this#on_await acc e
         | List el -> this#on_list acc el
         | Clone e -> this#on_clone acc e
-        | Obj_get (e1, e2, _, _) -> this#on_obj_get acc e1 e2
+        (* Ignores readonlyness because this visitor is deprecated *)
+        | Obj_get (e1, e2, _, _, _) -> this#on_obj_get acc e1 e2
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e, _) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
-        | Call (e, _, el, unpacked_element) ->
+        (* Ignores readonlyness because this visitor is deprecated *)
+        | Call (e, _, el, unpacked_element, _) ->
           this#on_call acc e el unpacked_element
         | FunctionPointer (fpid, targs) ->
           this#on_function_pointer acc fpid targs

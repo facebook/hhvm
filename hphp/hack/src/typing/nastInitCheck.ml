@@ -387,7 +387,7 @@ and assign _env acc x = S.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
-  | (_, Obj_get ((_, This), (_, Id (_, y)), _, false)) -> assign env acc y
+  | (_, Obj_get ((_, This), (_, Id (_, y)), _, false, _)) -> assign env acc y
   | (_, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
 
@@ -397,7 +397,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match snd st with
-  | Expr (_, Call ((_, Class_const ((_, CIparent), (_, m))), _, el, _uel))
+  | Expr (_, Call ((_, Class_const ((_, CIparent), (_, m))), _, el, _uel, _))
     when String.equal m SN.Members.__construct ->
     let acc = List.fold_left ~f:expr ~init:acc el in
     assign env acc DeferredMembers.parent_init_prop
@@ -513,14 +513,14 @@ and expr_ env acc p e =
   | Lplaceholder _
   | Dollardollar _ ->
     acc
-  | Obj_get ((_, This), (_, Id ((_, vx) as v)), _, false) ->
+  | Obj_get ((_, This), (_, Id ((_, vx) as v)), _, false, _) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
     ) else
       acc
   | Clone e -> expr acc e
-  | Obj_get (e1, e2, _, false) ->
+  | Obj_get (e1, e2, _, false, _) ->
     let acc = expr acc e1 in
     expr acc e2
   | Obj_get _ -> acc
@@ -532,7 +532,7 @@ and expr_ env acc p e =
   | Class_const _
   | Class_get _ ->
     acc
-  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _, false)), _, _, _) ->
+  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _, false, _)), _, _, _, _) ->
     let method_ = Env.get_method env f in
     (match method_ with
     | None ->
@@ -545,7 +545,7 @@ and expr_ env acc p e =
         method_ := Done;
         let fb = Nast.assert_named_body b in
         toplevel env acc fb.fb_ast))
-  | Call (e, _, el, unpacked_element) ->
+  | Call (e, _, el, unpacked_element, _) ->
     let el =
       match e with
       | (_, Id (_, fun_name)) when is_whitelisted fun_name ->

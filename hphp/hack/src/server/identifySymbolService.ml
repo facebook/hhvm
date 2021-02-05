@@ -186,7 +186,7 @@ let visitor =
       let acc =
         match snd expr with
         | Aast.New (((p, ty), _), _, _, _, _) -> typed_constructor env ty p
-        | Aast.Obj_get (((_, ty), _), (_, Aast.Id mid), _, _) ->
+        | Aast.Obj_get (((_, ty), _), (_, Aast.Id mid), _, _, _) ->
           typed_property env ty mid
         | Aast.Class_const (((_, ty), _), mid) -> typed_const env ty mid
         | Aast.Class_get (((_, ty), _), Aast.CGstring mid, _) ->
@@ -228,7 +228,7 @@ let visitor =
         self#on_expr env expr
       | _ -> typed_class_id env ty p
 
-    method! on_Call env e tal el unpacked_element =
+    method! on_Call env e tal el unpacked_element _ro =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a
        * property, class const, or global const access instead of a method call.
@@ -238,7 +238,7 @@ let visitor =
       let ea =
         match snd e with
         | Aast.Id id -> process_fun_id id
-        | Aast.Obj_get ((((_, ty), _) as obj), (_, Aast.Id mid), _, _) ->
+        | Aast.Obj_get ((((_, ty), _) as obj), (_, Aast.Id mid), _, _, _) ->
           self#on_expr env obj + typed_method env ty mid
         | Aast.Class_const ((((_, ty), _) as cid), mid) ->
           self#on_class_id env cid + typed_method env ty mid
@@ -322,14 +322,14 @@ let visitor =
       let acc = process_global_const id in
       self#plus acc (super#on_Id env id)
 
-    method! on_Obj_get env obj member ognf in_parens =
+    method! on_Obj_get env obj member ognf in_parens ro =
       match snd member with
       | Aast.Id _ ->
         (* Don't visit this Id, since we would record it as a gconst access. *)
         let obja = self#on_expr env obj in
         let ognfa = self#on_og_null_flavor env ognf in
         self#plus obja ognfa
-      | _ -> super#on_Obj_get env obj member ognf in_parens
+      | _ -> super#on_Obj_get env obj member ognf in_parens ro
 
     method! on_SFclass_const env cid mid =
       let ( + ) = Result_set.union in

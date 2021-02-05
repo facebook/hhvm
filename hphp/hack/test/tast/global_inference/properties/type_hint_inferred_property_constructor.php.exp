@@ -38,7 +38,7 @@
                     (([4:38-40], int),
                      (Obj_get ((([4:38-40], this), This),
                         (([4:38-40], int), (Id ([4:38-40], "x"))),
-                        OG_nullthrows, false))),
+                        OG_nullthrows, false, None))),
                     (([4:38-40], int), (Lvar ([4:38-40], $x))))))));
              ([Pos.none], Noop)];
            fb_annotation = () };
@@ -103,7 +103,7 @@
                    (([11:8-15], int),
                     (Obj_get ((([11:8-12], A), (Lvar ([11:8-12], $obj))),
                        (([11:14-15], int), (Id ([11:14-15], "x"))),
-                       OG_nullthrows, false)))
+                       OG_nullthrows, false, None)))
                    )))));
            ([12:3-11],
             (Expr
@@ -111,7 +111,8 @@
                 (Call (
                    (([12:3-6], (function(int $_): void)),
                     (Id ([12:3-6], "\\foo"))),
-                   [], [(([12:7-9], int), (Lvar ([12:7-9], $x)))], None)))))
+                   [], [(([12:7-9], int), (Lvar ([12:7-9], $x)))], None, None
+                   )))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

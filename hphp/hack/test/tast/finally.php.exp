@@ -66,7 +66,7 @@ Errors:
                             (Call (
                                (([13:16-31], (function(): Awaitable<shape()>)),
                                 (Id ([13:16-31], "\\gen_empty_shape"))),
-                               [], [], None)))))
+                               [], [], None, None)))))
                        )))));
                 ([14:5-28],
                  (Expr
@@ -80,7 +80,7 @@ Errors:
                         [],
                         [(([14:17-19], shape()), (Lvar ([14:17-19], $s)));
                           (([14:21-26], string), (String "foo"))],
-                        None)))))
+                        None, None)))))
                 ]
               )))
            ];

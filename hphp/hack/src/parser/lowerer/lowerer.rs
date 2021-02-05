@@ -1499,10 +1499,10 @@ where
                 let recv = Self::p_expr(recv, e)?;
                 let recv = match (&recv.1, pos_if_has_parens) {
                     (E_::ObjGet(t), Some(ref _p)) => {
-                        let (a, b, c, _false) = &**t;
+                        let (a, b, c, _false, _) = &**t;
                         E::new(
                             recv.0.clone(),
-                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
+                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true, None),
                         )
                     }
                     (E_::ClassGet(c), Some(ref _p)) => {
@@ -1512,7 +1512,8 @@ where
                     _ => recv,
                 };
                 let (args, varargs) = split_args_vararg(args, e)?;
-                Ok(E_::mk_call(recv, vec![], args, varargs))
+                let readonly = None; // readonlyKind filled after lowering
+                Ok(E_::mk_call(recv, vec![], args, varargs, readonly))
             };
         let p_obj_get = |
             recv: S<'a, T, V>,
@@ -1526,7 +1527,8 @@ where
             let recv = Self::p_expr(recv, e)?;
             let name = Self::p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
             let op = Self::p_null_flavor(op, e)?;
-            Ok(E_::mk_obj_get(recv, name, op, false))
+            let readonly = None; // readonlykind set after lowering
+            Ok(E_::mk_obj_get(recv, name, op, false, readonly))
         };
         let pos = match parent_pos {
             None => Self::p_pos(node, env),
@@ -1714,6 +1716,7 @@ where
                             vec![],
                             vec![E::new(literal_expression_pos, E_::String(s.into()))],
                             None,
+                            None, // ReadonlyKind is filled after lowering
                         ))
                     }
                     None => {
@@ -1738,10 +1741,10 @@ where
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.1, pos_if_has_parens) {
                             (E_::ObjGet(t), Some(ref _p)) => {
-                                let (a, b, c, _false) = &**t;
+                                let (a, b, c, _false, _None) = &**t;
                                 E::new(
                                     recv.0.clone(),
-                                    E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
+                                    E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true, None),
                                 )
                             }
                             (E_::ClassGet(c), Some(ref _p)) => {
@@ -1751,7 +1754,9 @@ where
                             _ => recv,
                         };
                         let (args, varargs) = split_args_vararg(args, env)?;
-                        Ok(E_::mk_call(recv, targs, args, varargs))
+                        // ReadonlyKind is filled after lowering
+                        let readonlykind = None;
+                        Ok(E_::mk_call(recv, targs, args, varargs, readonlykind))
                     }
                 }
             }
@@ -1868,6 +1873,7 @@ where
                             vec![],
                             vec![expr],
                             None,
+                            None, // ReadonlyKind is filled after lowering
                         )),
                         Some(TK::Dollar) => {
                             Self::raise_parsing_error(
@@ -1951,6 +1957,7 @@ where
                         .map(|x| Self::p_expr(x, env))
                         .collect::<std::result::Result<Vec<_>, _>>()?,
                     None,
+                    None, // ReadonlyKind is filled after lowering
                 ))
             }
             ScopeResolutionExpression(c) => {
@@ -2214,6 +2221,7 @@ where
                     vec![],
                     vec![],
                     None,
+                    None, // ReadonlyKind is filled after lowering
                 ))
             }
             XHPExpression(c) if c.open.is_xhp_open() => {
@@ -2253,10 +2261,10 @@ where
                     raise("Invalid lvalue")
                 } else {
                     match og.as_ref() {
-                        (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
+                        (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe, _, _) => {
                             raise("?-> syntax is not supported for lvalues")
                         }
-                        (_, ast::Expr(_, Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
+                        (_, ast::Expr(_, Id(sid)), _, _, _) if sid.1.as_bytes()[0] == b':' => {
                             raise("->: syntax is not supported for lvalues")
                         }
                         _ => {}
@@ -2899,7 +2907,10 @@ where
                     let args = Self::could_map(Self::p_expr, &c.expressions, e)?;
                     Ok(new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(echo, vec![], args, None))),
+                        S_::mk_expr(ast::Expr::new(
+                            pos,
+                            E_::mk_call(echo, vec![], args, None, None),
+                        )),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
@@ -2920,7 +2931,10 @@ where
                     };
                     Ok(new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(unset, vec![], args, None))),
+                        S_::mk_expr(ast::Expr::new(
+                            pos,
+                            E_::mk_call(unset, vec![], args, None, None),
+                        )),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
@@ -4331,6 +4345,7 @@ where
                                     e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                     ast::OgNullFlavor::OGNullthrows,
                                     false,
+                                    None, // readonlykind set after lowering
                                 )),
                                 e(E_::mk_lvar(lid(&param.name))),
                             ))),

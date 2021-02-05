@@ -41,7 +41,7 @@ let is_dynamic_call func_expr =
   (* regular function call, e.g. func() *)
   | Id _ -> false
   (* instance method call, e.g. $x->method() *)
-  | Obj_get (_, (_, Id _), _, false) -> false
+  | Obj_get (_, (_, Id _), _, false, _) -> false
   (* static method call, e.g. Foo::method() *)
   | Class_const (_, _) -> false
   (* everything else *)

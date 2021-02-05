@@ -36,7 +36,7 @@
                (Call (
                   (([6:3-15], (function(string $s): void)),
                    (Id ([6:3-15], "\\takes_string"))),
-                  [], [(([6:16-23], string), (String "hello"))], None)))))
+                  [], [(([6:16-23], string), (String "hello"))], None, None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

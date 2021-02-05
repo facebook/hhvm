@@ -840,6 +840,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         vec![],
         vec![Expr(pos(), Expr_::mk_string(mangle_name.clone().into()))],
         None,
+        None,
     );
     if st.state.named_hoisted_functions.contains_key(&mangle_name) {
         return fun_handle;
@@ -863,6 +864,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                             Expr(pc.clone(), Expr_::String(cls.into())),
                         ],
                         None,
+                        None,
                     ),
                 ),
                 Expr(
@@ -870,6 +872,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                     Expr_::String(format!("object must be an instance of ({})", cls).into()),
                 ),
             ],
+            None,
             None,
         ),
     );
@@ -886,11 +889,13 @@ fn convert_meth_caller_to_func_ptr<'a>(
                     Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
                     OgNullFlavor::OGNullthrows,
                     false,
+                    None,
                 ))),
             ),
             vec![],
             vec![],
             Some(Expr(pos(), Expr_::Lvar(args_var))),
+            None,
         ),
     );
 
@@ -970,11 +975,13 @@ fn make_dyn_meth_caller_lambda(
                     meth_lvar,
                     OgNullFlavor::OGNullthrows,
                     false,
+                    None,
                 ))),
             ),
             vec![],
             vec![],
             Some(Expr(pos(), Expr_::Lvar(args_var))),
+            None,
         ),
     );
     let attrs = if force {
@@ -1026,6 +1033,7 @@ fn make_dyn_meth_caller_lambda(
             Expr(pos(), Expr_::mk_efun(fd, vec![])),
             Expr(pos(), force_val),
         ],
+        None,
         None,
     );
     fun_handle
@@ -1595,7 +1603,7 @@ fn extract_debugger_main(
                 p(),
                 Stmt_::mk_expr(Expr(
                     p(),
-                    Expr_::mk_call(id("unset"), vec![], vec![lv(&name)], None),
+                    Expr_::mk_call(id("unset"), vec![], vec![lv(&name)], None, None),
                 )),
             );
             Stmt(
@@ -1621,7 +1629,10 @@ fn extract_debugger_main(
         .iter()
         .map(|name| {
             let checkfunc = id("\\__systemlib\\__debugger_is_uninit");
-            let isuninit = Expr(p(), Expr_::mk_call(checkfunc, vec![], vec![lv(name)], None));
+            let isuninit = Expr(
+                p(),
+                Expr_::mk_call(checkfunc, vec![], vec![lv(name)], None, None),
+            );
             let obj = Expr(
                 p(),
                 Expr_::mk_new(

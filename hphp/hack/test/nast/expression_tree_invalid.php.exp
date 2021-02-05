@@ -41,8 +41,8 @@
                                                 ([5:8-9],
                                                  (CI ([5:8-9], "\\Code"))),
                                                 ([5:8-9], "intLiteral")))),
-                                            [], [([5:8-9], (Int "1"))], None
-                                            )))
+                                            [], [([5:8-9], (Int "1"))], None,
+                                            None)))
                                         )))));
                                  ([5:13-14],
                                   (Expr
@@ -57,7 +57,7 @@
                                                   (CI ([5:13-14], "\\Code"))),
                                                  ([5:13-14], "intLiteral")))),
                                              [], [([5:13-14], (Int "2"))],
-                                             None)))
+                                             None, None)))
                                          )))));
                                  ([5:8-14],
                                   (Return
@@ -230,7 +230,8 @@
                                                                     false },
                                                                     []))),
                                                                  [], 
-                                                                 [], None))))))
+                                                                 [], None,
+                                                                 None))))))
                                                            ];
                                                          fb_annotation =
                                                          Named };
@@ -327,7 +328,7 @@
                                                        ([Pos.none], $__1)]
                                                      )))
                                                  ],
-                                               None))))))
+                                               None, None))))))
                                  ];
                                fb_annotation = Named };
                              f_fun_kind = FSync; f_user_attributes = [];
@@ -342,7 +343,7 @@
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
                            []))),
-                       [], [], None)))
+                       [], [], None, None)))
                    }))))
           ];
         fb_annotation = Named };

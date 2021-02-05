@@ -807,7 +807,7 @@ let assign_helper
     in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
-  | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
+  | A.Obj_get (obj, (_, A.Id (_, property)), _, _, _) ->
     let (env, obj_pty) = expr env obj in
     let obj_pol = (receiver_of_obj_get pos obj_pty property).c_self in
     let lhs_pty = property_ptype pos renv obj_pty property lhs_ty in
@@ -1220,7 +1220,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         expr env e
     end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
-  | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
+  | A.Obj_get (obj, (_, A.Id (_, property)), _, _, _) ->
     let (env, obj_ptype) = expr env obj in
     let prop_pty = property_ptype pos renv obj_ptype property ety in
     let prefix = "." ^ property in
@@ -1238,7 +1238,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   | A.ExpressionTree { A.et_src_expr = e; _ } ->
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
-  | A.Call (e, _type_args, args, _extra_args) ->
+  | A.Call (e, _type_args, args, _extra_args, _) ->
     let fty = Tast.get_type e in
     let (env, args_pty) = funargs env args in
     let ret_pty = Lift.ty ~prefix:"ret" renv ety in
@@ -1252,7 +1252,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         let call_id = Decl.make_callable_name ~is_static:false None name in
         call env (Cglobal (call_id, fty)) None
       (* Regular method call *)
-      | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _, _)) ->
+      | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _, _, _)) ->
         let (env, obj_pty) = expr env obj in
         begin
           match obj_pty with

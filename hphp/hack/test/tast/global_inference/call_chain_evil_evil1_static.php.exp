@@ -72,7 +72,7 @@
                               ([5:15-16], "f")))),
                           [],
                           [(([5:17-19], string), (Lvar ([5:17-19], $x)))],
-                          None))))))
+                          None, None))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
@@ -110,9 +110,10 @@
                              (Class_const (
                                 (([4:15-16], A), (CI ([4:15-16], "\\A"))),
                                 ([4:18-19], "f")))),
-                            [], [(([4:20-22], string), (String ""))], None)))
+                            [], [(([4:20-22], string), (String ""))], None,
+                            None)))
                          ],
-                       None))))))
+                       None, None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

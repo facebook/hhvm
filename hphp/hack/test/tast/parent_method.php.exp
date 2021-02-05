@@ -59,7 +59,7 @@
                      (([8:5-14], (function(int $i): void)),
                       (Class_const ((([8:5-11], this), CIparent),
                          ([8:13-14], "f")))),
-                     [], [(([8:15-16], int), (Int "3"))], None)))))
+                     [], [(([8:15-16], int), (Int "3"))], None, None)))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;

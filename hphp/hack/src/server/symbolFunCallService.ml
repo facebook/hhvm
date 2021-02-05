@@ -121,12 +121,12 @@ class visitor =
       let ( + ) = self#plus in
       special_fun_acc + acc + super#on_expr env expr
 
-    method! on_Call env e hl el unpacked_element =
+    method! on_Call env e hl el unpacked_element ro =
       let acc =
         match snd e with
         | Tast.Id (pos, name) -> self#fun_call env Function name pos
         | Tast.Class_const (((_, ty), _), mid)
-        | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _, _) ->
+        | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _, _, _) ->
           let target_type =
             if String.equal (snd mid) SN.Members.__construct then
               Constructor
@@ -138,7 +138,7 @@ class visitor =
           |> List.fold ~init:self#zero ~f:self#plus
         | _ -> self#zero
       in
-      self#plus acc (super#on_Call env e hl el unpacked_element)
+      self#plus acc (super#on_Call env e hl el unpacked_element ro)
   end
 
 let find_fun_calls ctx tasts =

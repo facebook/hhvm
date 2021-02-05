@@ -76,7 +76,7 @@ class virtual iter =
 
     method! on_expr env e =
       match e with
-      | (_, Call (((_, Id (_, cn)) as e1), ta, el, unpacked_element))
+      | (_, Call (((_, Id (_, cn)) as e1), ta, el, unpacked_element, ro))
         when String.equal cn SN.Rx.move ->
         self#on_Call
           { env with rx_move_allowed = false }
@@ -84,13 +84,15 @@ class virtual iter =
           ta
           el
           unpacked_element
-      | (_, Call (e1, ta, el, unpacked_element)) ->
+          ro
+      | (_, Call (e1, ta, el, unpacked_element, ro)) ->
         self#on_Call
           { env with rx_move_allowed = true }
           e1
           ta
           el
           unpacked_element
+          ro
       | (_, Binop (Ast_defs.Eq None, e1, rhs)) ->
         self#on_Binop
           { env with rx_move_allowed = true }

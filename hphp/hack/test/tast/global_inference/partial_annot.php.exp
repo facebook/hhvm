@@ -23,8 +23,8 @@
                            (([5:10-12], A<string>), (Lvar ([5:10-12], $x))),
                            (([5:14-17], (function(): ?string)),
                             (Id ([5:14-17], "get"))),
-                           OG_nullthrows, false))),
-                       [], [], None))))))
+                           OG_nullthrows, false, None))),
+                       [], [], None, None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

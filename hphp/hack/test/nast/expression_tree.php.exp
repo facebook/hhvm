@@ -44,8 +44,8 @@
                                                 ([4:8-9],
                                                  (CI ([4:8-9], "\\Code"))),
                                                 ([4:8-9], "intLiteral")))),
-                                            [], [([4:8-9], (Int "4"))], None
-                                            )))
+                                            [], [([4:8-9], (Int "4"))], None,
+                                            None)))
                                         )))));
                                  ([4:12-14],
                                   (Expr
@@ -60,7 +60,7 @@
                                                   (CI ([4:12-14], "\\Code"))),
                                                  ([4:12-14], "intLiteral")))),
                                              [], [([4:12-14], (Int "10"))],
-                                             None)))
+                                             None, None)))
                                          )))));
                                  ([4:8-19],
                                   (Return
@@ -163,7 +163,8 @@
                                                                     ([4:8-19],
                                                                     "methCall"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                  [],
                                                                  [([4:8-19],
                                                                    (New (
@@ -197,7 +198,8 @@
                                                                     ([4:8-14],
                                                                     "methCall"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:8-14],
                                                                     (New (
@@ -230,7 +232,8 @@
                                                                     ([4:8-9],
                                                                     "splice"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:8-9],
                                                                     (New (
@@ -256,6 +259,7 @@
                                                                     (Lvar
                                                                     ([4:8-9],
                                                                     $__0)))],
+                                                                    None,
                                                                     None)));
                                                                     ([Pos.none],
                                                                     (String
@@ -277,7 +281,8 @@
                                                                     ([4:12-14],
                                                                     "splice"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:12-14],
                                                                     (New (
@@ -304,8 +309,10 @@
                                                                     (Lvar
                                                                     ([4:12-14],
                                                                     $__1)))],
+                                                                    None,
                                                                     None)))]
                                                                     )))],
+                                                                    None,
                                                                     None)));
                                                                    ([Pos.none],
                                                                     (
@@ -329,7 +336,8 @@
                                                                     ([4:17-19],
                                                                     "localVar"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:17-19],
                                                                     (New (
@@ -352,10 +360,11 @@
                                                                     ([Pos.none],
                                                                     (String
                                                                     "$x"))],
+                                                                    None,
                                                                     None)))]
                                                                     )))
                                                                    ],
-                                                                 None))))))
+                                                                 None, None))))))
                                                            ];
                                                          fb_annotation =
                                                          Named };
@@ -427,7 +436,8 @@
                                                                     ([4:8-14],
                                                                     "__plus"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                     [],
                                                                     [([4:12-14],
                                                                     (ET_Splice
@@ -435,20 +445,22 @@
                                                                     (Lvar
                                                                     ([4:12-14],
                                                                     $__1)))))
-                                                                    ], None))),
+                                                                    ], None,
+                                                                    None))),
                                                                     ([4:8-19],
                                                                     (Id
                                                                     ([4:8-19],
                                                                     "__plus"))),
                                                                     OG_nullthrows,
-                                                                    false))),
+                                                                    false,
+                                                                    None))),
                                                                  [],
                                                                  [([4:17-19],
                                                                    (Lvar
                                                                     ([4:17-19],
                                                                     $x)))
                                                                    ],
-                                                                 None))))))
+                                                                 None, None))))))
                                                            ];
                                                          fb_annotation =
                                                          Named };
@@ -479,7 +491,7 @@
                                                        ([Pos.none], $__1)]
                                                      )))
                                                  ],
-                                               None))))))
+                                               None, None))))))
                                  ];
                                fb_annotation = Named };
                              f_fun_kind = FSync; f_user_attributes = [];
@@ -494,7 +506,7 @@
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
                            []))),
-                       [], [], None)))
+                       [], [], None, None)))
                    }))))
           ];
         fb_annotation = Named };

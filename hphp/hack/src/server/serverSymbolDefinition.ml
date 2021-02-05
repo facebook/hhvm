@@ -165,7 +165,7 @@ let go ctx ast result =
   | SymbolOccurrence.GConst ->
     get_gconst_by_name ctx result.SymbolOccurrence.name >>= fun cst ->
     Some (FileOutline.summarize_gconst cst)
-  | SymbolOccurrence.Class ->
+  | SymbolOccurrence.Class _ ->
     summarize_class_typedef ctx result.SymbolOccurrence.name
   | SymbolOccurrence.Record ->
     summarize_class_typedef ctx result.SymbolOccurrence.name

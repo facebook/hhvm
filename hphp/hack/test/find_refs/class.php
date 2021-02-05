@@ -16,6 +16,10 @@ abstract class Foo {
     }
   }
   public static function staticMethod() {}
+  public static function anotherStaticMethod() {
+    self::staticMethod();
+    self::$static_prop = "bbb";
+  }
 }
 
 function might_throw(): void {}
@@ -26,7 +30,11 @@ trait T {
   require extends Foo;
 }
 
-abstract class C extends Foo {}
+abstract class C extends Foo {
+  public static function yetAnotherStaticMethod() {
+    parent::staticMethod();
+  }
+}
 
 function test<T as Foo>(
   Foo $c

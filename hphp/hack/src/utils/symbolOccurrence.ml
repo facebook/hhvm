@@ -14,8 +14,13 @@ type override_info = {
 }
 [@@deriving ord, eq]
 
+type class_id_type =
+  | ClassId
+  | Other
+[@@deriving ord, eq]
+
 type kind =
-  | Class
+  | Class of class_id_type
   | Record
   | Function
   | Method of string * string
@@ -40,7 +45,7 @@ type 'a t = {
 let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 
 let kind_to_string = function
-  | Class -> "type_id"
+  | Class _ -> "type_id"
   | Record -> "record"
   | Method _ -> "method"
   | Function -> "function"
@@ -64,10 +69,9 @@ let get_class_name occurrence =
   match enclosing_class occurrence with
   | Some _ as res -> res
   | None ->
-    if occurrence.type_ = Class then
-      Some occurrence.name
-    else
-      None
+    (match occurrence.type_ with
+    | Class _ -> Some occurrence.name
+    | _ -> None)
 
 let is_constructor occurrence =
   match occurrence.type_ with
@@ -77,5 +81,5 @@ let is_constructor occurrence =
 
 let is_class occurrence =
   match occurrence.type_ with
-  | Class -> true
+  | Class _ -> true
   | _ -> false

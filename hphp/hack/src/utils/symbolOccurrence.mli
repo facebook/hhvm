@@ -20,8 +20,13 @@ type override_info = {
 }
 [@@deriving eq]
 
+type class_id_type =
+  | ClassId
+  | Other
+[@@deriving ord, eq]
+
 type kind =
-  | Class
+  | Class of class_id_type
   | Record
   | Function
   | Method of string * string

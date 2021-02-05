@@ -45,7 +45,7 @@ let identify_symbol_response_to_json results =
   let result_type x =
     SymbolOccurrence.(
       match x.type_ with
-      | Class -> "class"
+      | Class _ -> "class"
       | Method _ -> "method"
       | Record -> "record"
       | Function -> "function"

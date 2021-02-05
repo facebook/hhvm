@@ -1045,6 +1045,57 @@ class CommonTests(BarebonesTests):
             ],
             options=["--refactor", "Method", "Bar::g", "Bar::overrideMe"],
         )
+
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php")) as f:
+            out = f.read()
+            self.assertEqual(
+                out,
+                """<?hh //partial
+
+            class Bar extends Foo {
+                public function wat() {}
+                public function overrideMe() {}
+            }
+
+            class Baz extends Bar {
+                public function overrideMe() {
+                    $this->wat();
+                }
+            }
+            """,
+            )
+
+    def test_refactor_classes(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
+            f.write(
+                """<?hh //partial
+
+            class Bar extends Foo {
+                const int FOO = 42;
+
+                private static int $val = 0;
+
+                public function f() {}
+                public function g() {}
+                public static function h() {}
+                public static function i() {
+                    self::h();
+                    self::$val = 1;
+                    static::$val = 2;
+                    $x = self::FOO;
+                }
+            }
+
+            class Baz extends Bar {
+                public function g() {
+                    $this->f();
+                    parent::g();
+                }
+            }
+            """
+            )
+        self.test_driver.start_hh_server(changed_files=["foo_4.php"])
+
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 2 files."],
             [
@@ -1060,6 +1111,17 @@ class CommonTests(BarebonesTests):
             ],
             options=["--refactor", "Class", "Foo", "Qux"],
         )
+        self.test_driver.check_cmd_and_json_cmd(
+            ["Rewrote 1 files."],
+            [
+                '[{{"filename":"{root}foo_4.php","patches":[{{'
+                '"char_start":34,"char_end":37,"line":3,"col_start":19,'
+                '"col_end":21,"patch_type":"replace","replacement":"Quux"}},'
+                '{{"char_start":508,"char_end":511,"line":19,"col_start":31,'
+                '"col_end":33,"patch_type":"replace","replacement":"Quux"}}]}}]'
+            ],
+            options=["--refactor", "Class", "Bar", "Quux"],
+        )
 
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php")) as f:
             out = f.read()
@@ -1067,14 +1129,26 @@ class CommonTests(BarebonesTests):
                 out,
                 """<?hh //partial
 
-            class Bar extends Qux {
-                public function wat() {}
-                public function overrideMe() {}
+            class Quux extends Qux {
+                const int FOO = 42;
+
+                private static int $val = 0;
+
+                public function f() {}
+                public function g() {}
+                public static function h() {}
+                public static function i() {
+                    self::h();
+                    self::$val = 1;
+                    static::$val = 2;
+                    $x = self::FOO;
+                }
             }
 
-            class Baz extends Bar {
-                public function overrideMe() {
-                    $this->wat();
+            class Baz extends Quux {
+                public function g() {
+                    $this->f();
+                    parent::g();
                 }
             }
             """,

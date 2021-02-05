@@ -406,7 +406,8 @@ let go ctx action genv env =
   let module Types = ServerCommandTypes.Find_refs in
   let (find_refs_action, new_name) =
     match action with
-    | ClassRename (old_name, new_name) -> (Types.Class old_name, new_name)
+    | ClassRename (old_name, new_name) ->
+      (Types.ExplicitClass old_name, new_name)
     | ClassConstRename (class_name, old_name, new_name) ->
       (Types.Member (class_name, Types.Class_const old_name), new_name)
     | MethodRename { class_name; old_name; new_name; _ } ->

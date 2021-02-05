@@ -705,7 +705,7 @@ module Full = struct
     let body =
       SymbolOccurrence.(
         match (occurrence, get_node x) with
-        | ({ type_ = Class; name; _ }, _) ->
+        | ({ type_ = Class _; name; _ }, _) ->
           Concat [text "class"; Space; text_strip_ns name]
         | ({ type_ = Function; name; _ }, Tfun ft)
         | ({ type_ = Method (_, name); _ }, Tfun ft) ->

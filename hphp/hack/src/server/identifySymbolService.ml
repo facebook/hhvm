@@ -21,8 +21,10 @@ let is_target target_line target_char { pos; _ } =
   let (l, start, end_) = Pos.info_pos pos in
   l = target_line && start <= target_char && target_char - 1 <= end_
 
-let process_class_id ?(is_declaration = false) (pos, cid) =
-  Result_set.singleton { name = cid; type_ = Class; is_declaration; pos }
+let process_class_id
+    ?(is_declaration = false) ?(class_id_type = ClassId) (pos, cid) =
+  Result_set.singleton
+    { name = cid; type_ = Class class_id_type; is_declaration; pos }
 
 let process_attribute (pos, name) class_name method_ =
   let type_ =
@@ -152,9 +154,9 @@ let typed_property = typed_member_id ~is_method:false ~is_const:false
 let typed_constructor env ty pos =
   typed_method env ty (pos, SN.Members.__construct)
 
-let typed_class_id env ty pos =
+let typed_class_id ?(class_id_type = ClassId) env ty pos =
   Tast_env.get_class_ids env ty
-  |> List.map ~f:(fun cid -> process_class_id (pos, cid))
+  |> List.map ~f:(fun cid -> process_class_id ~class_id_type (pos, cid))
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
 (* When we detect a function reference encapsulated in a string,
@@ -226,7 +228,15 @@ let visitor =
          `Foo`. Since the class ID and the inner expression have the same span,
          it is not easy to distinguish them later. *)
         self#on_expr env expr
-      | _ -> typed_class_id env ty p
+      | Aast.CIparent
+      | Aast.CIself
+      | Aast.CIstatic ->
+        (* We want to special case these because we want to keep track of the
+         original class id type. This information is useful in some cases, for
+         instance when refactoring class names, because we want to avoid
+         refactoring `self`, `static`, and `parent` class ids. *)
+        typed_class_id ~class_id_type:Other env ty p
+      | Aast.CI _ -> typed_class_id env ty p
 
     method! on_Call env e tal el unpacked_element _ro =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to

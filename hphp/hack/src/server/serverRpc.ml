@@ -198,7 +198,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let name = Utils.add_ns name in
         List.concat
           [
-            get_def_opt SymbolOccurrence.Class name;
+            get_def_opt (SymbolOccurrence.Class SymbolOccurrence.ClassId) name;
             (* SymbolOccurrence.Record and Class find the same things *)
             get_def_opt SymbolOccurrence.Function name;
             get_def_opt SymbolOccurrence.GConst name;

@@ -20,6 +20,7 @@ type member_class =
 
 type action_internal =
   | IClass of string
+  | IExplicitClass of string
   | IRecord of string
   | IMember of member_class * member
   | IFunction of string
@@ -33,6 +34,7 @@ let member_class_to_string (mc : member_class) : string =
 let action_internal_to_string (action : action_internal) : string =
   match action with
   | IClass s -> "IClass " ^ s
+  | IExplicitClass s -> "IExplicitClass " ^ s
   | IRecord s -> "IRecord " ^ s
   | IFunction s -> "IFunction " ^ s
   | IGConst s -> "IGConst " ^ s
@@ -82,14 +84,22 @@ let process_member_id
   else
     Pos.Map.empty
 
-let process_class_id target_class cid mid_option =
+let process_class_id
+    target_class
+    cid
+    mid_option
+    (class_id_type : SymbolOccurrence.class_id_type)
+    (include_all_ci_types : bool) =
   if String.equal target_class (snd cid) then
-    let class_name =
-      match mid_option with
-      | None -> snd cid
-      | Some n -> snd cid ^ "::" ^ snd n
-    in
-    Pos.Map.singleton (fst cid) class_name
+    match (include_all_ci_types, class_id_type) with
+    | (false, SymbolOccurrence.Other) -> Pos.Map.empty
+    | _ ->
+      let class_name =
+        match mid_option with
+        | None -> snd cid
+        | Some n -> snd cid ^ "::" ^ snd n
+      in
+      Pos.Map.singleton (fst cid) class_name
   else
     Pos.Map.empty
 
@@ -231,7 +241,12 @@ let fold_one_tast ctx target acc symbol =
     in
     process_member_id ctx classes member c_name mid ~is_method ~is_const
   | (IFunction fun_name, SO.Function) -> process_fun_id fun_name (pos, name)
-  | (IClass c, SO.Class) -> process_class_id c (pos, name) None
+  | (IClass c, SO.Class class_id_type) ->
+    let include_all_ci_types = true in
+    process_class_id c (pos, name) None class_id_type include_all_ci_types
+  | (IExplicitClass c, SO.Class class_id_type) ->
+    let include_all_ci_types = false in
+    process_class_id c (pos, name) None class_id_type include_all_ci_types
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 
@@ -339,6 +354,7 @@ let get_definitions ctx = function
           let acc = add_class_const (Cls.get_const class_) acc in
           acc
         | None -> acc)
+  | IExplicitClass class_name
   | IClass class_name ->
     Option.value
       ~default:[]

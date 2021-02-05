@@ -136,8 +136,14 @@ let search_gconst ctx cst_name include_defs genv env =
   in
   search ctx (FindRefsService.IGConst cst_name) include_defs files genv
 
-let search_class ctx class_name include_defs genv env =
+let search_class ctx class_name include_defs include_all_ci_types genv env =
   let class_name = add_ns class_name in
+  let target =
+    if include_all_ci_types then
+      FindRefsService.IClass class_name
+    else
+      FindRefsService.IExplicitClass class_name
+  in
   let deps_mode = Provider_context.get_deps_mode ctx in
   handle_prechecked_files
     ctx
@@ -152,7 +158,7 @@ let search_class ctx class_name include_defs genv env =
       (SSet.singleton class_name)
     |> Relative_path.Set.elements
   in
-  search ctx (FindRefsService.IClass class_name) include_defs files genv
+  search ctx target include_defs files genv
 
 let search_record ctx record_name include_defs genv env =
   let record_name = add_ns record_name in
@@ -187,7 +193,12 @@ let go ctx action include_defs genv env =
     search_member ctx class_name member include_defs genv env
   | Function function_name ->
     search_function ctx function_name include_defs genv env
-  | Class class_name -> search_class ctx class_name include_defs genv env
+  | Class class_name ->
+    let include_all_ci_types = true in
+    search_class ctx class_name include_defs include_all_ci_types genv env
+  | ExplicitClass class_name ->
+    let include_all_ci_types = false in
+    search_class ctx class_name include_defs include_all_ci_types genv env
   | Record record_name -> search_record ctx record_name include_defs genv env
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
@@ -207,7 +218,7 @@ let to_ide symbol_name res =
 let get_action symbol (filename, file_content, line, char) =
   let name = symbol.SymbolOccurrence.name in
   match symbol.SymbolOccurrence.type_ with
-  | SymbolOccurrence.Class -> Some (Class name)
+  | SymbolOccurrence.Class _ -> Some (Class name)
   | SymbolOccurrence.Function -> Some (Function name)
   | SymbolOccurrence.Method (class_name, method_name) ->
     Some (Member (class_name, Method method_name))

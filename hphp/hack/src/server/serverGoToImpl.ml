@@ -178,7 +178,9 @@ let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     ServerEnv.env * server_result_or_retry =
   let ctx = Provider_utils.ctx_from_server_env env in
   match action with
-  | Class class_name -> search_class ctx class_name genv env
+  | Class class_name
+  | ExplicitClass class_name ->
+    search_class ctx class_name genv env
   | Member (class_name, member) -> search_member ctx class_name member genv env
   | Function _
   | Record _

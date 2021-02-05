@@ -14,7 +14,7 @@ let get_target symbol =
     let module Types = ServerCommandTypes.Find_refs in
     FindRefsService.(
       match symbol.type_ with
-      | SymbolOccurrence.Class -> Some (IClass symbol.name)
+      | SymbolOccurrence.Class _ -> Some (IClass symbol.name)
       | SymbolOccurrence.Function -> Some (IFunction symbol.name)
       | SymbolOccurrence.Method (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Method member_name))

@@ -1741,7 +1741,7 @@ where
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.1, pos_if_has_parens) {
                             (E_::ObjGet(t), Some(ref _p)) => {
-                                let (a, b, c, _false, _None) = &**t;
+                                let (a, b, c, _false, _none) = &**t;
                                 E::new(
                                     recv.0.clone(),
                                     E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true, None),

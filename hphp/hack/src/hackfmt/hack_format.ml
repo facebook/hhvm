@@ -1495,6 +1495,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             TokenKind.(
               (match Token.kind x with
               | Await
+              | Readonly
               | Clone ->
                 Space
               | Print ->

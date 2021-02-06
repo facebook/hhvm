@@ -2506,8 +2506,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env name;
           Space;
           t env equal_;
-          Space;
-          t env initial_value;
+          Nest [Space; SplitWith Cost.Base; t env initial_value];
           t env semicolon;
           Newline;
         ]

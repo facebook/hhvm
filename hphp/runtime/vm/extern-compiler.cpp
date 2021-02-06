@@ -22,6 +22,7 @@
 #include <signal.h>
 #include <sstream>
 #include <stdio.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -31,6 +32,7 @@
 #include <folly/FileUtil.h>
 #include <folly/system/ThreadName.h>
 
+#include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -54,6 +56,8 @@ namespace HPHP {
 TRACE_SET_MOD(extern_compiler);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
+static std::string s_bound_config;
+static std::string s_misc_config;
 
 namespace {
 
@@ -615,6 +619,58 @@ ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
     CompileAbortMode::Never);
 }
 
+namespace {
+CompilerResult assemble_string_handle_errors(const char* code,
+                                             const std::string& hhas,
+                                             const char* filename,
+                                             const SHA1& sha1,
+                                             const Native::FuncTable& nativeFuncs,
+                                             bool& internal_error,
+                                             CompileAbortMode mode) {
+  try {
+    return assemble_string(hhas.data(),
+                           hhas.length(),
+                           filename,
+                           sha1,
+                           nativeFuncs,
+                           false);  /* swallow errors */ 
+  } catch (const FatalErrorException&) {
+    throw;
+  } catch (const AssemblerFatal& ex) {
+    // Assembler returned an error when building this unit
+    if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
+    return ex.what();
+  } catch (const AssemblerUnserializationError& ex) {
+    // Variable unserializer threw when called from the assembler, treat it
+    // as an internal error.
+    internal_error = true;
+    return ex.what();
+  } catch (const AssemblerError& ex) {
+    if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
+
+    if (RuntimeOption::EvalHackCompilerVerboseErrors) {
+      auto const msg = folly::sformat(
+        "{}\n"
+        "========== PHP Source ==========\n"
+        "{}\n"
+        "========== ExternCompiler Result ==========\n"
+        "{}\n",
+        ex.what(),
+        code,
+        hhas
+      );
+      Logger::FError("ExternCompiler Generated a bad unit: {}", msg);
+      return msg;
+    } else {
+      return ex.what();
+    }
+  } catch (const std::exception& ex) {
+    internal_error = true;
+    return ex.what();
+  }
+} 
+}
+
 CompilerResult CompilerPool::compile(const char* code,
                                      int len,
                                      const char* filename,
@@ -631,13 +687,11 @@ CompilerResult CompilerPool::compile(const char* code,
     m_options.maxRetries,
     m_options.verboseErrors,
     [&] (const CompilerGuard& c) {
-      return c->compile(
-        filename,
-        sha1,
-        folly::StringPiece(code, len),
-        forDebuggerEval,
-        options
-      );
+      return c->compile(filename,
+                        sha1,
+                        folly::StringPiece(code, len),
+                        forDebuggerEval,
+                        options);
     },
     internal_error,
     mode
@@ -646,49 +700,13 @@ CompilerResult CompilerPool::compile(const char* code,
   return match<CompilerResult>(
     hhas,
     [&] (const ExternCompiler::Hhas& s) -> CompilerResult {
-      try {
-        return assemble_string(
-          s.s.data(),
-          s.s.length(),
-          filename,
-          sha1,
-          nativeFuncs,
-          false /* swallow errors */
-        );
-      } catch (const FatalErrorException&) {
-        throw;
-      } catch (const AssemblerFatal& ex) {
-        // Assembler returned an error when building this unit
-        if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
-        return ex.what();
-      } catch (const AssemblerUnserializationError& ex) {
-        // Variable unserializer threw when called from the assembler, treat it
-        // as an internal error.
-        internal_error = true;
-        return ex.what();
-      } catch (const AssemblerError& ex) {
-        if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
-
-        if (m_options.verboseErrors) {
-          auto const msg = folly::sformat(
-            "{}\n"
-            "========== PHP Source ==========\n"
-            "{}\n"
-            "========== ExternCompiler Result ==========\n"
-            "{}\n",
-            ex.what(),
-            code,
-            s.s
-          );
-          Logger::FError("ExternCompiler Generated a bad unit: {}", msg);
-          return msg;
-        } else {
-          return ex.what();
-        }
-      } catch (const std::exception& ex) {
-        internal_error = true;
-        return ex.what();
-      }
+      return assemble_string_handle_errors(code,
+                                           s.s,
+                                           filename,
+                                           sha1,
+                                           nativeFuncs,
+                                           internal_error,
+                                           mode);
     },
     [] (std::string s) { return s; }
   );
@@ -842,30 +860,9 @@ struct ConfigBuilder {
 };
 
 void ExternCompiler::writeConfigs() {
-  static const std::string boundConfig = [this] () -> std::string {
-    if (m_options.inheritConfig) {
-      // necessary to initialize zend-strtod, which is used to serialize
-      // boundConfig to JSON (!)
-      zend_get_bigint_data();
-      return IniSetting::GetAllAsJSON();
-    }
-    return "";
-  }();
-
-  // Some configs, like IncludeRoots, can't easily be Config::Bind(ed), so here
-  // we create a place to dump miscellaneous config values HackC might want.
-  static const std::string miscConfig = [this] () -> std::string {
-    if (m_options.inheritConfig) {
-      return ConfigBuilder()
-        .addField("hhvm.include_roots", RuntimeOption::IncludeRoots)
-        .toString();
-    }
-    return "";
-  }();
-
   folly::dynamic header = folly::dynamic::object("type", "config");
-  writeMessage(header, boundConfig);
-  writeMessage(header, miscConfig);
+  writeMessage(header, s_bound_config);
+  writeMessage(header, s_misc_config);
 }
 
 void ExternCompiler::writeProgram(
@@ -1077,19 +1074,63 @@ CompilerResult hackc_compile(
   const RepoOptions& options,
   CompileAbortMode mode
 ) {
-  return s_manager.get_hackc_pool().compile(
-    code,
-    len,
-    filename,
-    sha1,
-    nativeFuncs,
-    forDebuggerEval,
-    internal_error,
-    options,
-    mode
-  );
+  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {  
+    return s_manager.get_hackc_pool().compile(
+      code,
+      len,
+      filename,
+      sha1,
+      nativeFuncs,
+      forDebuggerEval,
+      internal_error,
+      options,
+      mode
+    );
+  } else {
+    std::uint8_t flags = 0;
+    if(forDebuggerEval) {
+      flags |= FOR_DEBUGGER_EVAL;
+    }
+    if(!SystemLib::s_inited) {
+      flags |= IS_SYSTEMLIB;
+    }	
+    flags |= DUMP_SYMBOL_REFS;
+    
+    std::vector<const char*> config_jsons;
+    config_jsons.push_back(s_bound_config.c_str());
+    config_jsons.push_back(s_misc_config.c_str());
+    
+    std::string json_header = folly::toJson(options.toDynamic());
+    config_jsons.push_back(json_header.c_str());
+    
+    output_config const output{true, nullptr};
+    environment const env{
+      filename
+      , config_jsons.data()
+      , config_jsons.size()
+      , nullptr // config_list.data()
+      , 0       // config_list.size()
+      , flags
+    };
+    
+    std::array<char, 256> buf;
+    buf.fill(0);
+    buf_t error_buf {buf.data(), buf.size()};
+    
+    auto const hhas = compile_from_text_cpp_ffi(&env, code, &output, &error_buf);
+    if (hhas) { 
+      return assemble_string_handle_errors(code,
+                                           hhas,
+                                           filename,
+                                           sha1,
+                                           nativeFuncs,
+                                           internal_error,
+                                           mode);
+    } else {
+      throwErrno(buf.data());
+    }
+  }
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -1101,6 +1142,25 @@ void CompilerManager::ensure_started() {
   if (m_started.load(std::memory_order_relaxed)) {
     return;
   }
+  s_bound_config = []() -> std::string {
+    if (RuntimeOption::EvalHackCompilerInheritConfig) {
+      // necessary to initialize zend-strtod, which is used to serialize
+      // boundConfig to JSON (!)
+      zend_get_bigint_data();
+      return IniSetting::GetAllAsJSON();
+    }
+    return "";
+  }();
+  // Some configs, like IncludeRoots, can't easily be Config::Bind(ed), so here
+  // we create a place to dump miscellaneous config values HackC might want.
+  s_misc_config = []() -> std::string {
+    if (RuntimeOption::EvalHackCompilerInheritConfig) {
+      return ConfigBuilder()
+        .addField("hhvm.include_roots", RuntimeOption::IncludeRoots)
+        .toString();
+    }
+    return "";
+  }();
 
   m_delegate = LightProcess::createDelegate();
   if (m_delegate != kInvalidPid && m_username) {

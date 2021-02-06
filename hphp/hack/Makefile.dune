@@ -33,7 +33,8 @@ build-hack$(2):
 		src/hh_parse.$(1) \
 		src/generate_full_fidelity.$(1) \
 		src/hh_single_compile.$(1) \
-		src/hh_fanout/hh_fanout.$(1)
+		src/hh_fanout/hh_fanout.$(1) \
+		src/hhbc/libcompile_ffi_stubs.a
 
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
@@ -44,7 +45,8 @@ copy-hack$(2)-files: build-hack$(2)
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_compile.$(1)" "$(HACK_BIN_DIR)/hh_single_compile$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"	
+	cp "$(DUNE_BUILD_DIR)/default/src/hhbc/libcompile_ffi_stubs.a" "$(DUNE_BUILD_DIR)/libcompile_ffi_stubs.a$(ext)"
 endef
 
 # Define rules for normal build / debug build

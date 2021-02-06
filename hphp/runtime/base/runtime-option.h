@@ -722,6 +722,8 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
+  /* Use compiler pool to get hhas from hh_single_compile process */    \
+  F(bool, HackCompilerUseCompilerPool, true)                            \
   /* When using embedded data, extract it to the ExtractPath or the
    * ExtractFallback. */                                                \
   F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \

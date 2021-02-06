@@ -43,6 +43,9 @@ endif()
 hphp_link(hhvm)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hhvm)
 
+# These mocks need to be added for the rust/ocaml FFI to work properly
+target_sources(hhvm PUBLIC ../hack/src/utils/ocaml_ffi_mock/ocaml.c)
+
 if (ENABLE_SPLIT_DWARF)
   if (NOT GOLD_FOUND)
     message(FATAL_ERROR "ENABLE_SPLIT_DWARF was specified but the gold linker was not found")

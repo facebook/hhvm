@@ -860,7 +860,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           context_const_ctx_keyword = ctx_kw;
           context_const_name = name;
           context_const_type_parameters = type_params;
-          context_const_constraint = constraint_;
+          context_const_constraint = constraint_list;
           context_const_equal = eq;
           context_const_ctx_list = ctx_list;
           context_const_semicolon = semi;
@@ -875,8 +875,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env name;
           t env type_params;
-          when_present constraint_ space;
-          t env constraint_;
+          when_present constraint_list space;
+          handle_possible_list
+            env
+            ~after_each:(fun is_last ->
+              if is_last then
+                Nothing
+              else
+                Space)
+            constraint_list;
           when_present eq space;
           t env eq;
           when_present ctx_list (fun _ ->

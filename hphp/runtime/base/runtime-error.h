@@ -215,7 +215,8 @@ enum class SerializationSite {
 };
 
 void raise_array_serialization_notice(SerializationSite src,
-                                      const ArrayData* arr);
+                                      const ArrayData* arr,
+                                      const char* detail = nullptr);
 
 [[noreturn]] void raise_use_of_specialized_array();
 

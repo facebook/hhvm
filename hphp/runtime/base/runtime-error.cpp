@@ -270,7 +270,8 @@ const char* srcName(SerializationSite src) {
 } // namespace
 
 void raise_array_serialization_notice(SerializationSite src,
-                                      const ArrayData* arr) {
+                                      const ArrayData* arr,
+                                      const char* detail /* = nullptr */) {
   assertx(arr->isDVArray());
   assertx(raiseArraySerializationNotices());
 
@@ -281,6 +282,7 @@ void raise_array_serialization_notice(SerializationSite src,
   }
 
   const char* array_type = arr->isVArray() ? "varray" : "darray";
+  detail = detail ? detail : "";
 
   if (RO::EvalArrayProvenance) {
     static auto const sampl_threshold =
@@ -289,21 +291,23 @@ void raise_array_serialization_notice(SerializationSite src,
     auto const tag = arrprov::getTag(arr);
     auto const list = !arr->empty() && arr->isVectorData();
     raise_dynamically_sampled_notice(
-      "Observing {}{}{} in {} from {}",
+      "Observing {}{}{} in {}{} from {}",
       arr->isStatic() ? "static " : "",
       (arr->empty() ? "empty " : list ? "list-like " : "map-like "),
       array_type,
       srcName(src),
+      detail,
       tag.toString()
     );
   } else {
     auto const list = !arr->empty() && arr->isVectorData();
     raise_notice(
-      "Hack Array Compat: Observing %s%s%s in %s with provenance disabled",
+      "Hack Array Compat: Observing %s%s%s in %s%s with provenance disabled",
       arr->isStatic() ? "static " : "",
       (arr->empty() ? "empty " : list ? "list-like " : "map-like "),
       array_type,
-      srcName(src)
+      srcName(src),
+      detail
     );
   }
 }

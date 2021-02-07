@@ -510,7 +510,7 @@ bool Package::parseImpl(const std::string* fileName) {
 
   auto report = [&] (int lines) {
     struct stat fst;
-    // @lint-ignore HOWTOEVEN1
+    // @lint-ignore CLANGTIDY
     stat(fullPath.c_str(), &fst);
 
     Lock lock(m_mutex);

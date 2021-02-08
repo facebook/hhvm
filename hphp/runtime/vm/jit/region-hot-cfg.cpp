@@ -75,6 +75,10 @@ struct DFS {
            head, m_cfg.weight(head), m_minBlockWeight, m_minArcProb);
     Trace::Indent indent;
     visit(head);
+    // If we couldn't add the head block (due to exceeding the bytecode budget),
+    // return an empty region instead of one with a different entry.
+    if (m_region->empty()) return m_region;
+
     // now visit potential retranslations for the head block
     DEBUG_ONLY auto const entrySrcKey = m_profData->transRec(head)->srcKey();
     for (auto bid : m_entries) {

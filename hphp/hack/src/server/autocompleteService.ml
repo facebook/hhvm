@@ -243,6 +243,60 @@ let autocomplete_member ~is_static env class_ cid id =
     )
   )
 
+let autocomplete_xhp_enum_value
+    (attr_name : string) id_id env xhp_class_ xhp_cid =
+  if is_auto_complete (snd id_id) then
+    let get_class_name (ty : Typing_defs.decl_ty) : string option =
+      let get_name = function
+        | Tapply ((_, name), _) -> Some name
+        | _ -> None
+      in
+      let (_, ty_) = Typing_defs_core.deref ty in
+      match ty_ with
+      | Toption ty -> get_name (get_node ty)
+      | _ -> get_name ty_
+    in
+
+    let get_enum_constants (class_decl : Decl_provider.class_decl) :
+        (string * Typing_defs.class_const) list =
+      let all_consts = Cls.consts class_decl in
+      let is_correct_class = function
+        | Some name -> String.equal name (Cls.name class_decl)
+        | None -> false
+      in
+      all_consts
+      |> List.filter ~f:(fun (_, class_const) ->
+             is_correct_class (get_class_name class_const.cc_type))
+    in
+
+    let attr_type =
+      get_class_elt_types env xhp_class_ xhp_cid (Cls.props xhp_class_)
+      |> List.find ~f:(fun (id, _) ->
+             String.equal (Utils.strip_xhp_ns id) attr_name)
+    in
+
+    let attr_type_name =
+      Option.bind attr_type ~f:(fun ty -> get_class_name (snd ty))
+    in
+
+    attr_type_name
+    |> Option.iter ~f:(fun class_name ->
+           let enum_class = Tast_env.get_enum env class_name in
+
+           let enum_constants =
+             Option.value
+               ~default:[]
+               (Option.map enum_class ~f:get_enum_constants)
+           in
+
+           enum_constants
+           |> List.iter ~f:(fun (const_name, ty) ->
+                  add_partial_result
+                    (Utils.strip_ns class_name ^ "::" ^ const_name)
+                    (Phase.decl ty.cc_type)
+                    SearchUtils.SI_Enum
+                    enum_class))
+
 let autocomplete_lvar id env =
   (* This is used for "$|" and "$x = $|" local variables. *)
   let text = Local_id.get_name (snd id) in
@@ -464,9 +518,16 @@ let visitor =
       autocomplete_id trimmed_sid env;
       let cid = Nast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
-      |> Option.iter ~f:(fun c ->
+      |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function
-                 | Tast.Xhp_simple (id, _) ->
+                 | Tast.Xhp_simple (id, value) ->
+                   (match value with
+                   | (_, Tast.Id id_id) ->
+                     (* This handles the situation
+                          <foo:bar my-attribute={AUTO332}
+                        *)
+                     autocomplete_xhp_enum_value (snd id) id_id env c (Some cid)
+                   | _ -> ());
                    autocomplete_member ~is_static:false env c (Some cid) id
                  | Tast.Xhp_spread _ -> ()));
       super#on_Xml env sid attrs el

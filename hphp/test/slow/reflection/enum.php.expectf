@@ -80,7 +80,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(true)
+bool(false)
 darray(2) {
   ["FOO"]=>
   int(2)

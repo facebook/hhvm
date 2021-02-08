@@ -570,7 +570,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
         .map(|(p, c)| (p, c.iter().map(|x| &x.1).collect()));
 
     let is_abstract = ast_class.kind == tast::ClassKind::Cabstract;
-    let is_final = ast_class.final_ || is_trait || enum_type.is_some();
+    let is_final = ast_class.final_ || is_trait;
     let is_sealed = hhas_attribute::has_sealed(&attributes);
 
     let tparams: Vec<&str> = ast_class

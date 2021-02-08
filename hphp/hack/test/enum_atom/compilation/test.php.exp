@@ -116,7 +116,7 @@
   }
 }
 
-.class {} [enum final enum_class "__EnumClass"("""y:0:{}""")] E (16,19) extends HH\BuiltinEnumClass {
+.class {} [enum enum_class "__EnumClass"("""y:0:{}""")] E (16,19) extends HH\BuiltinEnumClass {
   .enum_ty <"I" extended_hint>;
   .const A = uninit;
   .const B = uninit;
@@ -181,7 +181,7 @@
   }
 }
 
-.class {} [enum final enum_class "__EnumClass"("""y:0:{}""")] F (25,27) extends HH\BuiltinEnumClass enum_includes (E) {
+.class {} [enum enum_class "__EnumClass"("""y:0:{}""")] F (25,27) extends HH\BuiltinEnumClass enum_includes (E) {
   .enum_ty <"I" extended_hint>;
   .const C = uninit;
   .method {}{} [private static no_injection] (25,27) 86cinit($constName) {

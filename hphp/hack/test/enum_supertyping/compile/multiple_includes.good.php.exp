@@ -3,15 +3,15 @@
 .filepath "multiple_includes.good.php";
 
 
-.class {} [enum final] E1 (4,4) extends HH\BuiltinEnum {
+.class {} [enum] E1 (4,4) extends HH\BuiltinEnum {
   .enum_ty <"HH\\int" extended_hint>;
 }
 
-.class {} [enum final] E2 (6,6) extends HH\BuiltinEnum {
+.class {} [enum] E2 (6,6) extends HH\BuiltinEnum {
   .enum_ty <"HH\\int" extended_hint>;
 }
 
-.class {} [enum final] F (8,10) extends HH\BuiltinEnum enum_includes (E1 E2) {
+.class {} [enum] F (8,10) extends HH\BuiltinEnum enum_includes (E1 E2) {
   .enum_ty <"HH\\int" extended_hint>;
 }
 

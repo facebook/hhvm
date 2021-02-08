@@ -3,11 +3,11 @@
 .filepath "single_includes.good.php";
 
 
-.class {} [enum final] E (4,4) extends HH\BuiltinEnum {
+.class {} [enum] E (4,4) extends HH\BuiltinEnum {
   .enum_ty <"HH\\int" extended_hint>;
 }
 
-.class {} [enum final] F (6,8) extends HH\BuiltinEnum enum_includes (E) {
+.class {} [enum] F (6,8) extends HH\BuiltinEnum enum_includes (E) {
   .enum_ty <"HH\\int" extended_hint>;
 }
 

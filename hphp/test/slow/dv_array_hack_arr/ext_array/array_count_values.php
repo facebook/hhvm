@@ -48,7 +48,7 @@ function array_count_values_test_cases(
       ],
     ),
     tuple(
-      __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[null, 0, false, 0.2]),
+      darray(vec[null, 0, false, 0.2]),
       dict[0 => 1],
     )
   ];

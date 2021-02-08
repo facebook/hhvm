@@ -50,7 +50,7 @@ function foo($x) {
   var_dump($e);
 
   // casts to d/varray
-  $a = darray(vec[]);
+  $a = darray[];
   var_dump(HH\is_array_marked_legacy($a));
   var_dump($a);
   $b = darray(vec[1, 2]);

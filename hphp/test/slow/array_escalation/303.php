@@ -7,7 +7,7 @@ function main_303() {
   $a[2] = 'test';
   var_dump($a);
 
-  $a = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray['test']);
+  $a = darray(varray['test']);
   $a[2] = 'test';
   var_dump($a);
 }

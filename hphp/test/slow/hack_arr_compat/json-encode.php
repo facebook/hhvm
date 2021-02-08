@@ -4,11 +4,11 @@
 function literals() {
   echo "================== literals ==================\n";
   json_encode(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
+    darray[],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]),
+    darray(vec[1, 2, 3, 4]),
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -37,7 +37,7 @@ function literals() {
   );
 
   json_encode(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]),
+    darray(vec[darray(vec[1, 2]), darray(vec[3, 4])]),
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -50,15 +50,15 @@ function literals() {
   );
 
   json_encode(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
+    darray(vec[1, vec[2, 3, 4], darray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
 }
 
 function test($name, $options) {
   echo "==================== $name =========================\n";
-  var_dump(json_encode(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $options));
-  var_dump(json_encode(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]), $options));
+  var_dump(json_encode(darray[], $options));
+  var_dump(json_encode(darray(vec[1, 2, 3, 4]), $options));
   var_dump(json_encode(vec[], $options));
   var_dump(json_encode(vec[1, 2, 3, 4], $options));
   var_dump(json_encode(dict[], $options));
@@ -70,7 +70,7 @@ function test($name, $options) {
   var_dump(json_encode(keyset[], $options));
   var_dump(json_encode(keyset['a', 'b', 'c'], $options));
 
-  var_dump(json_encode(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]), $options));
+  var_dump(json_encode(darray(vec[darray(vec[1, 2]), darray(vec[3, 4])]), $options));
   var_dump(json_encode(vec[vec[1, 2], vec[3, 4]], $options));
   var_dump(json_encode(
     dict['a' => dict['c' => 1, 'd' => 2], 'b' => dict['e' => 3, 'f' => 4]],
@@ -78,12 +78,12 @@ function test($name, $options) {
   ));
 
   var_dump(json_encode(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
+    darray(vec[1, vec[2, 3, 4], darray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
     $options
   ));
 
   $obj = new stdclass();
-  $obj->a = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]);
+  $obj->a = darray(vec[1, 2, 3]);
   $obj->b = vec[1, 2, 3];
   $obj->c = dict['a' => 1, 'b' => 2];
   $obj->d = keyset['a', 'b', 'c'];

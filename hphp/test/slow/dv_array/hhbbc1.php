@@ -17,7 +17,7 @@ function get() {
 
 function foo() {
   $x = get();
-  if ($x === __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])) return varray[];
+  if ($x === darray[]) return varray[];
   return varray['a', 'b', 'c'];
 }
 

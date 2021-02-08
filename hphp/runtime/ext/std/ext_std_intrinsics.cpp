@@ -77,35 +77,6 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
   return tvReturn(ArrayData::CreateKeyset());
 }
 
-TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
-  if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
-  }
-  auto const& arr = var.asCArrRef();
-  if (arr->isPHPArrayType() && arr->isNotDVArray()) {
-    return tvReturn(arr.get());
-  }
-  return make_array_like_tv(arr.toPHPArray().detach());
-}
-
-TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Variant& var) {
-  if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
-  }
-  auto const& arr = var.asCArrRef();
-  if (arr->isDArray()) return tvReturn(arr.get());
-  return make_array_like_tv(arr.toDArray().detach());
-}
-
-TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Variant& var) {
-  if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
-  }
-  auto const& arr = var.asCArrRef();
-  if (arr->isVArray()) return tvReturn(arr.get());
-  return make_array_like_tv(arr.toVArray().detach());
-}
-
 Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {
   if (arr.isDict()) return arr;
   return Array::CreateDict();
@@ -427,13 +398,6 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
               dummy_arraylike_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
-
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofarray,
-              dummy_cast_to_kindofarray);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofdarray,
-              dummy_cast_to_kindofdarray);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofvarray,
-              dummy_cast_to_kindofvarray);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);

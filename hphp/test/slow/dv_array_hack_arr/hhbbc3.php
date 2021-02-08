@@ -21,8 +21,8 @@ class A {
 function main_hhbbc3() {
 var_dump(
   A::foo(
-    __hhvm_intrinsics\launder_value(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec['a', 'b', 'c'])),
-    __hhvm_intrinsics\launder_value(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]))
+    __hhvm_intrinsics\launder_value(darray(vec['a', 'b', 'c'])),
+    __hhvm_intrinsics\launder_value(darray[])
   )
 );
 }

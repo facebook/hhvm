@@ -93,7 +93,7 @@ $values = vec[
   123,
   '123',
   3.14,
-  __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]),
+  darray[],
   varray[1, 2, 3, 4],
   darray['a' => 100, 'b' => 200, 'c' => 300],
   vec[],

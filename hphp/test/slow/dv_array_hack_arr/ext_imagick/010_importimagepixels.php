@@ -5,11 +5,11 @@
 $count = 2000 * 3;
 $pixels = varray(
   array_merge(
-    array_pad(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $count, 0),
-    array_pad(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $count, 255),
-    array_pad(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $count, 0),
-    array_pad(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $count, 255),
-    array_pad(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $count, 0)
+    array_pad(darray[], $count, 0),
+    array_pad(darray[], $count, 255),
+    array_pad(darray[], $count, 0),
+    array_pad(darray[], $count, 255),
+    array_pad(darray[], $count, 0)
   )
 );
 

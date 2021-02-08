@@ -16,8 +16,8 @@ function test($x) {
 
 <<__EntryPoint>>
 function main_variadics() {
-test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
-test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4, 5]));
+test(darray[]);
+test(darray(vec[3, 4, 5]));
 test(vec[]);
 test(vec[3, 4, 5]);
 test(dict['a' => 3, 'b' => 4, 'c' => 5]);

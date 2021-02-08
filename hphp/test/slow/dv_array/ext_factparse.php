@@ -208,7 +208,7 @@ function entrypoint_ext_factparse(): void {
     var_dump($e->getMessage());
   }
   try {
-    HH\facts_parse(null, varray[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])], null, null);
+    HH\facts_parse(null, varray[darray[]], null, null);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

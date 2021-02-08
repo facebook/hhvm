@@ -39,15 +39,6 @@ function dummy_varr_or_darr_builtin(varray_or_darray $x): varray_or_darray;
 function dummy_arraylike_builtin(AnyArray $x): AnyArray;
 
 <<__Native, __HipHopSpecific>>
-function dummy_cast_to_kindofarray(AnyArray $value): mixed;
-
-<<__Native, __HipHopSpecific>>
-function dummy_cast_to_kindofdarray(AnyArray $value): mixed;
-
-<<__Native, __HipHopSpecific>>
-function dummy_cast_to_kindofvarray(AnyArray $value): mixed;
-
-<<__Native, __HipHopSpecific>>
 function dummy_dict_builtin(dict $x): dict;
 
 <<__Native, __HipHopSpecific>>

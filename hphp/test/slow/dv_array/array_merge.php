@@ -14,7 +14,7 @@ function test($a, $b) {
 
 function test_all() {
   $vals = vec[
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]),
+    darray[],
     varray['a', 'b', 'c'],
     darray[10 => 'a', 20 => 'b', 30 => 'c'],
     darray['a' => 123, 'b' => 456, 'c' => 789],

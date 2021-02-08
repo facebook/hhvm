@@ -57,7 +57,7 @@ function test_casting($a) {
 }
 
 function run_tests() {
-  $arr = $x ==> __hhvm_intrinsics\dummy_cast_to_kindofarray($x);
+  $arr = $x ==> darray($x);
 
   echo "\n******* ad-hoc tests ********************************\n";
   test($arr(varray[]), '10');

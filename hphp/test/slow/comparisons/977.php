@@ -142,14 +142,14 @@ $i = 0;
  print "\n";
  print ++$i;
  print "\t";
- try { P(varray[darray['a' => 1]]<__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])); } catch (Throwable $_) { print 'E'; }
+ try { P(varray[darray['a' => 1]]<darray[]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = varray[darray['a' => 1]];
- try { P($a <__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])); } catch (Throwable $_) { print 'E'; }
+ try { P($a <darray[]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
+ $b = darray[];
  try { P(varray[darray['a' => 1]]<$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";

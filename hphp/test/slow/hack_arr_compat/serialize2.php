@@ -4,11 +4,11 @@
 function literals() {
   echo "================== literals ==================\n";
   HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
+    darray[],
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
   HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]),
+    darray(vec[1, 2, 3, 4]),
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
   HH\serialize_with_options(
@@ -37,7 +37,7 @@ function literals() {
   );
 
   HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]),
+    darray(vec[darray(vec[1, 2]), darray(vec[3, 4])]),
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
   HH\serialize_with_options(
@@ -50,15 +50,15 @@ function literals() {
   );
 
   HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
+    darray(vec[1, vec[2, 3, 4], darray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
 }
 
 function test($name, $options) {
   echo "==================== $name =========================\n";
-  var_dump(HH\serialize_with_options(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $options));
-  var_dump(HH\serialize_with_options(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]), $options));
+  var_dump(HH\serialize_with_options(darray[], $options));
+  var_dump(HH\serialize_with_options(darray(vec[1, 2, 3, 4]), $options));
   var_dump(HH\serialize_with_options(vec[], $options));
   var_dump(HH\serialize_with_options(vec[1, 2, 3, 4], $options));
   var_dump(HH\serialize_with_options(dict[], $options));
@@ -66,7 +66,7 @@ function test($name, $options) {
   var_dump(HH\serialize_with_options(keyset[], $options));
   var_dump(HH\serialize_with_options(keyset['a', 'b', 'c'], $options));
 
-  var_dump(HH\serialize_with_options(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[3, 4])]), $options));
+  var_dump(HH\serialize_with_options(darray(vec[darray(vec[1, 2]), darray(vec[3, 4])]), $options));
   var_dump(HH\serialize_with_options(vec[vec[1, 2], vec[3, 4]], $options));
   var_dump(HH\serialize_with_options(
     dict['a' => dict['c' => 1, 'd' => 2], 'b' => dict['e' => 3, 'f' => 4]],
@@ -74,12 +74,12 @@ function test($name, $options) {
   ));
 
   var_dump(HH\serialize_with_options(
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, vec[2, 3, 4], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
+    darray(vec[1, vec[2, 3, 4], darray(vec[5, 6, 7]), keyset[8, 9, 10], dict['a' => 11, 'b' => 12]]),
     $options
   ));
 
   $obj = new stdclass();
-  $obj->a = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]);
+  $obj->a = darray(vec[1, 2, 3]);
   $obj->b = vec[1, 2, 3];
   $obj->c = dict['a' => 1, 'b' => 2];
   $obj->d = keyset['a', 'b', 'c'];

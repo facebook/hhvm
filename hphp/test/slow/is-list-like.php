@@ -15,22 +15,22 @@ function test($x) {
   test('abc');
   test(new stdclass);
 
-  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  test(darray[]);
   test(varray[]);
   test(darray[]);
   test(vec[]);
   test(dict[]);
   test(keyset[]);
 
-  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]));
-  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[0 => 'a', 1 => 'b']));
+  test(darray(vec[1, 2, 3]));
+  test(darray(dict[0 => 'a', 1 => 'b']));
   test(varray['a', 'b', 'c']);
   test(darray[0 => 'a', 1 => 'b']);
   test(vec['a', 'b', 'c']);
   test(dict[0 => 'a', 1 => 'b']);
   test(keyset[0, 1]);
 
-  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => 100, 'b' => 200]));
+  test(darray(dict['a' => 100, 'b' => 200]));
   test(darray['a' => 100, 'b' => 200]);
   test(dict['a' => 100, 'b' => 200]);
   test(keyset[0, 100]);

@@ -118,6 +118,9 @@ let enable_enum_classes = GlobalOptions.po_enable_enum_classes
 let with_enable_enum_classes po b =
   { po with GlobalOptions.po_enable_enum_classes = b }
 
+let with_enable_enum_supertyping po b =
+  { po with GlobalOptions.po_enable_enum_supertyping = b }
+
 let disable_modes = GlobalOptions.po_disable_modes
 
 let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error

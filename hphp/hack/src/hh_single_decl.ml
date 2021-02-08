@@ -14,6 +14,7 @@ let popt
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
     ~enable_enum_classes
+    ~enable_enum_supertyping
     ~array_unification
     ~interpret_soft_types_as_like_types =
   let po = ParserOptions.default in
@@ -27,6 +28,9 @@ let popt
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
   in
   let po = ParserOptions.with_enable_enum_classes po enable_enum_classes in
+  let po =
+    ParserOptions.with_enable_enum_supertyping po enable_enum_supertyping
+  in
   let po = ParserOptions.with_array_unification po array_unification in
   let po =
     ParserOptions.with_interpret_soft_types_as_like_types
@@ -152,6 +156,7 @@ let () =
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
   let enable_enum_classes = ref false in
+  let enable_enum_supertyping = ref false in
   let array_unification = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
@@ -184,6 +189,9 @@ let () =
       ( "--enable-enum-classes",
         Arg.Set enable_enum_classes,
         "Enable the enum classes extension." );
+      ( "--enable-enum-supertyping",
+        Arg.Set enable_enum_supertyping,
+        "Enable the enum supertyping extension." );
       ( "--array-unification",
         Arg.Set array_unification,
         "Treat varray as vec, darray as dict, TODO varray_or_darray as vec_or_dict"
@@ -259,6 +267,7 @@ let () =
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
         let enable_enum_classes = !enable_enum_classes in
+        let enable_enum_supertyping = !enable_enum_supertyping in
         let array_unification = !array_unification in
         let interpret_soft_types_as_like_types =
           !interpret_soft_types_as_like_types
@@ -269,6 +278,7 @@ let () =
             ~enable_xhp_class_modifier
             ~disable_xhp_element_mangling
             ~enable_enum_classes
+            ~enable_enum_supertyping
             ~array_unification
             ~interpret_soft_types_as_like_types
         in

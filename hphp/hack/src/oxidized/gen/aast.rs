@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be34e09e98f9fc6de3c2ca9c3f00259d>>
+// @generated SignedSource<<e1527192ecd96f4095e18ebe667f34e2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1433,7 +1433,7 @@ pub enum TypeconstAbstractKind {
 pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub abstract_: TypeconstAbstractKind,
     pub name: Sid,
-    pub constraint: Option<Hint>,
+    pub as_constraint: Option<Hint>,
     pub type_: Option<Hint>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub span: Pos,

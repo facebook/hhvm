@@ -194,7 +194,7 @@ let typeconst_structure mro class_name stc =
 let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   let {
     stc_abstract;
-    stc_constraint;
+    stc_as_constraint;
     stc_name = ttc_name;
     stc_type;
     stc_enforceable = ttc_enforceable;
@@ -202,11 +202,11 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   } =
     stc
   in
-  let constraint_ =
+  let as_constraint =
     if String.equal child_class mro.mro_name then
-      stc_constraint
+      stc_as_constraint
     else
-      Option.map stc_constraint (Decl_instantiate.instantiate subst)
+      Option.map stc_as_constraint (Decl_instantiate.instantiate subst)
   in
   let ty =
     if String.equal child_class mro.mro_name then
@@ -227,7 +227,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       {
         ttc_abstract = TCConcrete;
         ttc_name;
-        ttc_constraint = None;
+        ttc_as_constraint = None;
         ttc_type = Some default;
         ttc_origin = mro.mro_name;
         ttc_enforceable;
@@ -237,7 +237,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       {
         ttc_abstract = abstract;
         ttc_name;
-        ttc_constraint = constraint_;
+        ttc_as_constraint = as_constraint;
         ttc_type = ty;
         ttc_origin = mro.mro_name;
         ttc_enforceable;

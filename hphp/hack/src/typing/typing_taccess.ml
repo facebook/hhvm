@@ -145,13 +145,13 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       let ety_env = { ety_env with quiet = true } in
       (match typeconst with
       (* Concrete type constants *)
-      | { ttc_type = Some ty; ttc_constraint = None; _ } ->
+      | { ttc_type = Some ty; ttc_as_constraint = None; _ } ->
         let (env, ty) = Phase.localize ~ety_env env ty in
         let ty = map_reason ty ~f:(make_reason env id root) in
         (env, Exact ty)
       (* A type constant with default can be seen as abstract or exact, depending
      on the root and base of the access. *)
-      | { ttc_type = Some ty; ttc_constraint = Some _; _ } ->
+      | { ttc_type = Some ty; ttc_as_constraint = Some _; _ } ->
         let (env, ty) = Phase.localize ~ety_env env ty in
         let ty = map_reason ty ~f:(make_reason env id root) in
         if Cls.final class_ || Option.is_none ctx.base then
@@ -159,9 +159,9 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         else
           (env, make_abstract env (TySet.singleton ty))
       (* Abstract type constants with constraint *)
-      | { ttc_constraint = Some cstr; _ } ->
-        let (env, cstr) = Phase.localize ~ety_env env cstr in
-        (env, make_abstract env (TySet.singleton cstr))
+      | { ttc_as_constraint = Some ty_upper; _ } ->
+        let (env, ty_upper) = Phase.localize ~ety_env env ty_upper in
+        (env, make_abstract env (TySet.singleton ty_upper))
       (* Abstract type constant without constraint. *)
       | _ -> (env, make_abstract env TySet.empty)))
 

@@ -1553,7 +1553,7 @@ module PrintClass = struct
       {
         ttc_abstract = _;
         ttc_name = tc_name;
-        ttc_constraint = tc_constraint;
+        ttc_as_constraint = as_constraint;
         ttc_type = tc_type;
         ttc_origin = origin;
         ttc_enforceable = (_, enforceable);
@@ -1561,8 +1561,8 @@ module PrintClass = struct
       } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl ctx x in
-    let constraint_ =
-      match tc_constraint with
+    let as_constraint =
+      match as_constraint with
       | None -> ""
       | Some x -> " as " ^ ty x
     in
@@ -1572,7 +1572,7 @@ module PrintClass = struct
       | Some x -> " = " ^ ty x
     in
     name
-    ^ constraint_
+    ^ as_constraint
     ^ type_
     ^ " (origin:"
     ^ origin

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a9264b9a983c299244c1ec80beefa493>>
+// @generated SignedSource<<a241ff886885b5b34b468ac698bcbd2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -366,7 +366,7 @@ impl<P: Params> NodeMut<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.abstract_.accept(c, v)?;
         self.name.accept(c, v)?;
-        self.constraint.accept(c, v)?;
+        self.as_constraint.accept(c, v)?;
         self.type_.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.span.accept(c, v)?;

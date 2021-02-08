@@ -43,5 +43,5 @@ let handler =
       let on_hint = visitor#on_hint (env, state) in
       List.iter c.c_typeconsts (fun t ->
           Option.iter t.c_tconst_type on_hint;
-          Option.iter t.c_tconst_constraint on_hint)
+          Option.iter t.c_tconst_as_constraint on_hint)
   end

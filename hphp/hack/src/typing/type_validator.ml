@@ -48,7 +48,7 @@ class virtual type_validator =
 
     method on_typeconst acc _ typeconst =
       let acc =
-        Option.fold ~f:this#on_type ~init:acc typeconst.ttc_constraint
+        Option.fold ~f:this#on_type ~init:acc typeconst.ttc_as_constraint
       in
       let acc = Option.fold ~f:this#on_type ~init:acc typeconst.ttc_type in
       acc

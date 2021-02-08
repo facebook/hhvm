@@ -60,7 +60,7 @@
       c_typeconsts =
       [{ c_tconst_abstract = TCConcrete;
          c_tconst_name = ([3:14-26], "MISSING_TYPE");
-         c_tconst_constraint = None;
+         c_tconst_as_constraint = None;
          c_tconst_type =
          (Some ([3:29-49],
                 (Happly (([3:29-49], "\\UNSAFE_TYPE_HH_FIXME"), []))));

@@ -861,7 +861,7 @@ and typeconst_abstract_kind =
 and ('ex, 'fb, 'en, 'hi) class_typeconst = {
   c_tconst_abstract: typeconst_abstract_kind;
   c_tconst_name: sid;
-  c_tconst_constraint: hint option;
+  c_tconst_as_constraint: hint option;
   c_tconst_type: hint option;
   c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   c_tconst_span: pos;

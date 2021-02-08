@@ -662,12 +662,12 @@ end = struct
               do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
               let cls = Decl.get_class_exn ctx class_name in
               (match Decl_provider.Class.get_typeconst cls tconst with
-              | Some Typing_defs.{ ttc_type; ttc_constraint; _ } ->
+              | Some Typing_defs.{ ttc_type; ttc_as_constraint; _ } ->
                 Option.iter
                   ttc_type
                   ~f:(add_dep ctx ~this:(Some class_name) env);
                 if not (List.is_empty tconsts) then (
-                  match (ttc_type, ttc_constraint) with
+                  match (ttc_type, ttc_as_constraint) with
                   | (Some tc_type, _)
                   | (None, Some tc_type) ->
                     (* What does 'this' refer to inside of T? *)
@@ -752,11 +752,11 @@ end = struct
               | None -> raise (DependencyNotFound description)))
           | Const (_, name) ->
             (match Class.get_typeconst cls name with
-            | Some Typing_defs.{ ttc_type; ttc_constraint; ttc_origin; _ } ->
+            | Some Typing_defs.{ ttc_type; ttc_as_constraint; ttc_origin; _ } ->
               if not (String.equal cls_name ttc_origin) then
                 do_add_dep ctx env (Const (ttc_origin, name));
               Option.iter ttc_type ~f:add_dep;
-              Option.iter ttc_constraint ~f:add_dep
+              Option.iter ttc_as_constraint ~f:add_dep
             | None ->
               let Typing_defs.{ cc_type; _ } =
                 value_or_not_found description @@ Class.get_const cls name
@@ -1600,7 +1600,7 @@ end = struct
             c_tconst_abstract;
             c_tconst_name = (pos, name);
             c_tconst_type;
-            c_tconst_constraint;
+            c_tconst_as_constraint;
             _;
           } =
       let is_abstract =
@@ -1615,7 +1615,7 @@ end = struct
           line = Pos.line pos;
           is_abstract;
           type_ = c_tconst_type;
-          constraint_ = c_tconst_constraint;
+          constraint_ = c_tconst_as_constraint;
         }
 
     let mk_method from_interface (Aast.{ m_name = (pos, _); _ } as method_) =

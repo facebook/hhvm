@@ -1392,14 +1392,14 @@ and typeconst env t =
       Aast.TCAbstract (Some (hint env default))
     | _ -> t.Aast.c_tconst_abstract
   in
-  let constr = Option.map t.Aast.c_tconst_constraint (hint env) in
+  let as_constraint = Option.map t.Aast.c_tconst_as_constraint (hint env) in
   let type_ = Option.map t.Aast.c_tconst_type (hint env) in
   let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
   N.
     {
       c_tconst_abstract = abstract;
       c_tconst_name = t.Aast.c_tconst_name;
-      c_tconst_constraint = constr;
+      c_tconst_as_constraint = as_constraint;
       c_tconst_type = type_;
       c_tconst_user_attributes = attrs;
       c_tconst_span = t.Aast.c_tconst_span;

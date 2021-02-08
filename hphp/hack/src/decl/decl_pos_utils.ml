@@ -209,7 +209,7 @@ struct
     {
       ttc_abstract = typeconst_abstract_kind tc.ttc_abstract;
       ttc_name = string_id tc.ttc_name;
-      ttc_constraint = ty_opt tc.ttc_constraint;
+      ttc_as_constraint = ty_opt tc.ttc_as_constraint;
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
@@ -328,7 +328,7 @@ struct
   and shallow_typeconst stc =
     {
       stc_abstract = typeconst_abstract_kind stc.stc_abstract;
-      stc_constraint = Option.map stc.stc_constraint ty;
+      stc_as_constraint = Option.map stc.stc_as_constraint ty;
       stc_name = string_id stc.stc_name;
       stc_type = Option.map stc.stc_type ty;
       stc_enforceable = (pos (fst stc.stc_enforceable), snd stc.stc_enforceable);

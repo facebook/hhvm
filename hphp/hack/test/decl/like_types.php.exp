@@ -90,7 +90,7 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-           stc_constraint =
+           stc_as_constraint =
            (Some (Rhint (root|like_types.php line 11, characters 28-31),
                   (Tlike
                      (Rhint (root|like_types.php line 11, characters 29-31),

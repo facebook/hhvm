@@ -336,7 +336,7 @@ and synthesize_defaults
       {
         tc with
         ttc_abstract = TCConcrete;
-        ttc_constraint = None;
+        ttc_as_constraint = None;
         ttc_type = Some default;
       }
     in
@@ -808,7 +808,7 @@ and typeconst_fold
       {
         ttc_abstract = stc.stc_abstract;
         ttc_name = stc.stc_name;
-        ttc_constraint = stc.stc_constraint;
+        ttc_as_constraint = stc.stc_as_constraint;
         ttc_type = stc.stc_type;
         ttc_origin = c_name;
         ttc_enforceable = enforceable;

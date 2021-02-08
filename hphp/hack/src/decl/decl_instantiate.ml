@@ -152,13 +152,13 @@ let instantiate_cc subst ({ cc_type = x; _ } as cc) =
   { cc with cc_type = x }
 
 let instantiate_typeconst
-    subst ({ ttc_abstract = abs; ttc_constraint = x; ttc_type = y; _ } as tc) =
+    subst ({ ttc_abstract = abs; ttc_type; ttc_as_constraint; _ } as tc) =
   let abs =
     match abs with
     | TCAbstract default_opt ->
       TCAbstract (Option.map default_opt (instantiate subst))
     | _ -> abs
   in
-  let x = Option.map x (instantiate subst) in
-  let y = Option.map y (instantiate subst) in
-  { tc with ttc_abstract = abs; ttc_constraint = x; ttc_type = y }
+  let ttc_as_constraint = Option.map ttc_as_constraint (instantiate subst) in
+  let ttc_type = Option.map ttc_type (instantiate subst) in
+  { tc with ttc_abstract = abs; ttc_type; ttc_as_constraint }

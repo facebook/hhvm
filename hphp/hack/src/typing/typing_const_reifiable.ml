@@ -24,7 +24,7 @@ let check_reifiable env tc attr_pos =
     | None -> ()
   in
   check_impl "type" tc.ttc_type;
-  check_impl "constraint" tc.ttc_constraint;
+  check_impl "constraint" tc.ttc_as_constraint;
   match tc.ttc_abstract with
   | TCAbstract default_ty -> check_impl "type" default_ty
   | _ -> ()

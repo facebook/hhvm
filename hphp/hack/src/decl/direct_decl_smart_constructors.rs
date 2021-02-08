@@ -4741,7 +4741,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _type_keyword: Self::R,
         name: Self::R,
         _type_parameters: Self::R,
-        constraint: Self::R,
+        as_constraint: Self::R,
         _equal: Self::R,
         type_: Self::R,
         _semicolon: Self::R,
@@ -4750,19 +4750,19 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let has_abstract_keyword = modifiers
             .iter()
             .any(|node| node.is_token(TokenKind::Abstract));
-        let constraint = match constraint {
+        let as_constraint = match as_constraint {
             Node::TypeConstraint(innards) => self.node_to_ty(innards.1),
             _ => None,
         };
         let type_ = self.node_to_ty(type_);
-        let has_constraint = constraint.is_some();
+        let has_as_constraint = as_constraint.is_some();
         let has_type = type_.is_some();
-        let (type_, abstract_) = match (has_abstract_keyword, has_constraint, has_type) {
+        let (type_, abstract_) = match (has_abstract_keyword, has_as_constraint, has_type) {
             // Has no assigned type. Technically illegal, so if the constraint
-            // is present, proceed as if the constraint was the assigned type.
+            // is present, proceed as if the as-constraint was the assigned type.
             //     const type TFoo;
             //     const type TFoo as OtherType;
-            (false, _, false) => (constraint, TypeconstAbstractKind::TCConcrete),
+            (false, _, false) => (as_constraint, TypeconstAbstractKind::TCConcrete),
             // Has no constraint, but does have an assigned type.
             //     const type TFoo = SomeType;
             (false, false, true) => (type_, TypeconstAbstractKind::TCConcrete),
@@ -4784,7 +4784,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         Node::TypeConstant(self.alloc(ShallowTypeconst {
             abstract_,
-            constraint,
+            as_constraint,
             name,
             type_,
             enforceable: match attributes.enforceable {
@@ -4802,7 +4802,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _ctx_keyword: Self::R,
         name: Self::R,
         _type_parameters: Self::R,
-        _constraint: Self::R,
+        _as_constraint: Self::R,
         _equal: Self::R,
         ctx_list: Self::R,
         _semicolon: Self::R,
@@ -4824,7 +4824,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::TypeConstant(self.alloc(ShallowTypeconst {
             abstract_,
             name,
-            constraint: None,
+            as_constraint: None,
             type_: context,
             enforceable: (Pos::none(), false),
             reifiable: None,

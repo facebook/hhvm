@@ -1134,7 +1134,7 @@ module Visitor_DEPRECATED = struct
       method on_class_typeconst acc t =
         let acc = this#on_id acc t.c_tconst_name in
         let acc =
-          match t.c_tconst_constraint with
+          match t.c_tconst_as_constraint with
           | Some h -> this#on_hint acc h
           | None -> acc
         in

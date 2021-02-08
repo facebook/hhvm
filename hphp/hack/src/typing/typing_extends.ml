@@ -686,14 +686,14 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     let child_cstr =
       match child_typeconst.ttc_abstract with
       | TCAbstract _ ->
-        Some (Option.value child_typeconst.ttc_constraint ~default)
-      | _ -> child_typeconst.ttc_constraint
+        Some (Option.value child_typeconst.ttc_as_constraint ~default)
+      | _ -> child_typeconst.ttc_as_constraint
     in
     let env =
       Option.value ~default:env
       @@ Option.map2
            child_cstr
-           parent_typeconst.ttc_constraint
+           parent_typeconst.ttc_as_constraint
            ~f:
              (Typing_ops.sub_type_decl_on_error
                 pos
@@ -707,7 +707,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
       Option.value ~default:env
       @@ Option.map2
            child_typeconst.ttc_type
-           parent_typeconst.ttc_constraint
+           parent_typeconst.ttc_as_constraint
            ~f:
              (Typing_ops.sub_type_decl_on_error
                 pos

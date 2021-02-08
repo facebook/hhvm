@@ -8,7 +8,7 @@
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = TCConcrete; c_tconst_name = ([6:13-14], "C");
-         c_tconst_constraint = None;
+         c_tconst_as_constraint = None;
          c_tconst_type =
          (Some ([6:17-27],
                 (Hintersection
@@ -20,7 +20,7 @@
          c_tconst_user_attributes = []; c_tconst_span = [6:3-28];
          c_tconst_doc_comment = None; c_tconst_is_ctx = true };
         { c_tconst_abstract = TCConcrete; c_tconst_name = ([7:14-16], "C1");
-          c_tconst_constraint = None;
+          c_tconst_as_constraint = None;
           c_tconst_type =
           (Some ([7:19-64],
                  (Hintersection

@@ -8,13 +8,13 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-          stc_constraint = None; stc_name = ([4:14-15], "T");
+          stc_as_constraint = None; stc_name = ([4:14-15], "T");
           stc_type =
           (Some (Rhint (root|self_in_type_constant.php line 4, characters 18-20),
                  (Tprim Tint)));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
          { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_constraint = None; stc_name = ([5:14-15], "U");
+           stc_as_constraint = None; stc_name = ([5:14-15], "U");
            stc_type =
            (Some (Rhint (root|self_in_type_constant.php line 5, characters 18-24),
                   (Taccess
@@ -36,13 +36,13 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_constraint = None; stc_name = ([9:14-15], "V");
+           stc_as_constraint = None; stc_name = ([9:14-15], "V");
            stc_type =
            (Some (Rhint (root|self_in_type_constant.php line 9, characters 18-20),
                   (Tprim Tint)));
            stc_enforceable = ([Pos.none], false); stc_reifiable = None };
           { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-            stc_constraint = None; stc_name = ([10:14-15], "W");
+            stc_as_constraint = None; stc_name = ([10:14-15], "W");
             stc_type =
             (Some (Rhint (root|self_in_type_constant.php line 10, characters 18-24),
                    (Taccess

@@ -1022,7 +1022,7 @@ let typeconst_def
     {
       c_tconst_abstract;
       c_tconst_name = (pos, _) as id;
-      c_tconst_constraint;
+      c_tconst_as_constraint;
       c_tconst_type = hint;
       c_tconst_user_attributes;
       c_tconst_span;
@@ -1042,7 +1042,9 @@ let typeconst_def
       Errors.cannot_declare_constant kind pos cls.c_name
     | _ -> ()
   end;
-  let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
+  let (env, cstr) =
+    opt Phase.localize_hint_with_self env c_tconst_as_constraint
+  in
   let (env, ty) =
     match hint with
     | None -> (env, None)
@@ -1082,7 +1084,7 @@ let typeconst_def
     {
       Aast.c_tconst_abstract;
       Aast.c_tconst_name = id;
-      Aast.c_tconst_constraint;
+      Aast.c_tconst_as_constraint;
       Aast.c_tconst_type = hint;
       Aast.c_tconst_user_attributes = user_attributes;
       Aast.c_tconst_span;

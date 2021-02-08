@@ -8,7 +8,7 @@
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = (TCAbstract None);
-         c_tconst_name = ([4:22-24], "C1"); c_tconst_constraint = None;
+         c_tconst_name = ([4:22-24], "C1"); c_tconst_as_constraint = None;
          c_tconst_type = None; c_tconst_user_attributes = [];
          c_tconst_span = [4:3-25]; c_tconst_doc_comment = None;
          c_tconst_is_ctx = true };
@@ -18,7 +18,7 @@
                     (Hintersection
                        [([5:28-30],
                          (Happly (([5:28-30], "\\HH\\Contexts\\io"), [])))]))));
-          c_tconst_name = ([5:22-24], "C2"); c_tconst_constraint = None;
+          c_tconst_name = ([5:22-24], "C2"); c_tconst_as_constraint = None;
           c_tconst_type = None; c_tconst_user_attributes = [];
           c_tconst_span = [5:3-32]; c_tconst_doc_comment = None;
           c_tconst_is_ctx = true }

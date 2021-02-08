@@ -8,7 +8,7 @@
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = TCConcrete; c_tconst_name = ([4:13-15], "C5");
-         c_tconst_constraint = None;
+         c_tconst_as_constraint = None;
          c_tconst_type =
          (Some ([4:35-39],
                 (Hintersection

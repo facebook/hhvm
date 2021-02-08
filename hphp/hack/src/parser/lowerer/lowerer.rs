@@ -4196,17 +4196,20 @@ where
                     .map(|hint| Self::soften_hint(&user_attributes, hint));
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
                 let name = Self::pos_name(&c.name, env)?;
-                let constraint =
+                let as_constraint =
                     Self::mp_optional(Self::p_tconstraint_ty, &c.type_constraint, env)?;
                 let span = Self::p_pos(node, env);
                 let has_abstract = kinds.has(modifier::ABSTRACT);
-                let (type_, abstract_kind) = match (has_abstract, &constraint, &type__) {
+                let (type_, abstract_kind) = match (has_abstract, &as_constraint, &type__) {
                     (false, _, None) => {
                         Self::raise_hh_error(
                             env,
                             NastCheck::not_abstract_without_typeconst(name.0.clone()),
                         );
-                        (constraint.clone(), ast::TypeconstAbstractKind::TCConcrete)
+                        (
+                            as_constraint.clone(),
+                            ast::TypeconstAbstractKind::TCConcrete,
+                        )
                     }
                     (false, None, Some(_)) => (type__, ast::TypeconstAbstractKind::TCConcrete),
                     (false, Some(_), Some(_)) => {
@@ -4221,7 +4224,7 @@ where
                 Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
-                    constraint,
+                    as_constraint,
                     type_,
                     user_attributes,
                     span,
@@ -4263,7 +4266,7 @@ where
                 Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
-                    constraint: None,
+                    as_constraint: None,
                     type_: context,
                     user_attributes: vec![],
                     span,

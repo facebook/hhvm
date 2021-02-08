@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e50ec7b10301cbbcb6d157eb0028f9ac>>
+// @generated SignedSource<<bdd8d83909a635c8b5f4ecf34bc3124b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -275,7 +275,7 @@ impl<'a> TrivialDrop for TypeconstAbstractKind<'a> {}
 pub struct TypeconstType<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub name: nast::Sid<'a>,
-    pub constraint: Option<&'a Ty<'a>>,
+    pub as_constraint: Option<&'a Ty<'a>>,
     pub type_: Option<&'a Ty<'a>>,
     pub origin: &'a str,
     pub enforceable: (&'a pos::Pos<'a>, bool),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d40e4cb59460b278c7a5ff569c7d61df>>
+// @generated SignedSource<<f742844a7455f2f56186b9fe8e0e57dc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -757,7 +757,7 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
         match self {
             ShallowTypeconst {
                 abstract_: ref __binding_0,
-                constraint: ref __binding_1,
+                as_constraint: ref __binding_1,
                 name: ref __binding_2,
                 type_: ref __binding_3,
                 enforceable: ref __binding_4,

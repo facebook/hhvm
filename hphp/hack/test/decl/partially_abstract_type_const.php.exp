@@ -8,7 +8,7 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCPartiallyAbstract;
-          stc_constraint =
+          stc_as_constraint =
           (Some (Rhint (root|partially_abstract_type_const.php line 4, characters 19-23),
                  Tmixed));
           stc_name = ([4:14-15], "T");

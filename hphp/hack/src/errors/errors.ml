@@ -5013,7 +5013,8 @@ let exception_occurred pos e =
     (Typing.err_code Typing.ExceptionOccurred)
     pos
     (Printf.sprintf
-       "An exception occurred while typechecking this. %s"
+       "An exception occurred while typechecking this. Please try %s. %s"
+       (Markdown_lite.md_codify "hh restart")
        Error_message_sentinel.please_file_a_bug_message)
 
 let redundant_covariant pos msg suggest =

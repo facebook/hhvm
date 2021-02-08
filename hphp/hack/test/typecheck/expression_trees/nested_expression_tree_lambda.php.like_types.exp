@@ -5,13 +5,13 @@ Variable `$__14` is undefined, or not always defined. (Naming[2050])
   File "nested_expression_tree_lambda.php", line 6, characters 27-27:
   Did you mean `$__0` instead?
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
-There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. If restarting doesn't work, please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 19, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
-There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. If restarting doesn't work, please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "expr_tree.hhi", line 33, characters 5-45:

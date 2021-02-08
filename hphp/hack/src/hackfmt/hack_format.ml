@@ -537,7 +537,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env where;
           Space;
-          handle_possible_list env constraints ~after_each:(fun _ -> Space);
+          handle_possible_list env constraints ~after_each:(fun is_last ->
+              if is_last then
+                Nothing
+              else
+                Space);
         ]
     | Syntax.WhereConstraint
         {

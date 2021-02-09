@@ -373,7 +373,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
                 auto const lval = return_value.asArrRef().lval(key);
                 if (!isArrayLikeType(lval.type())) {
                   auto const tv = make_array_like_tv(
-                    tvCastToArrayLikeData(lval.tv())
+                    tvCastToArrayLikeData<IntishCast::None>(lval.tv())
                   );
                   tvMove(tv, lval);
                 }

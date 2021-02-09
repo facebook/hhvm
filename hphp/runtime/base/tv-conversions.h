@@ -78,7 +78,6 @@ template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
-StringData* tvCastToStringData(TypedValue c);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);

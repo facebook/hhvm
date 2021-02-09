@@ -25,9 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Forward declare to avoid including tv-conversions.h and creating a cycle.
-ObjectData* tvCastToObjectData(TypedValue tv);
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
@@ -197,11 +194,6 @@ private:
 ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
   assertx(tvIsObject(tv));
   return reinterpret_cast<const Object&>(val(tv).pobj);
-}
-
-ALWAYS_INLINE Object toObject(tv_rval tv) {
-  if (tvIsObject(tv)) return Object{assert_not_null(val(tv).pobj)};
-  return Object::attach(tvCastToObjectData(*tv));
 }
 
 }

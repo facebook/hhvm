@@ -85,9 +85,18 @@ public:
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
   auto toDouble()  const { return tvCastToDouble(*m_val); }
-  auto toString()  const { return HPHP::toString(m_val); }
-  auto toArray()   const { return HPHP::toArray(m_val); }
-  auto toObject()  const { return HPHP::toObject(m_val); }
+  auto toString() const {
+    if (isStringType(type(m_val))) return String{val(m_val).pstr};
+    return String::attach(tvCastToStringData(*m_val));
+  }
+  auto toArray() const {
+    if (isArrayLikeType(type(m_val))) return Array{val(m_val).parr};
+    return Array::attach(tvCastToArrayLikeData<IntishCast::None>(*m_val));
+  }
+  auto toObject() const {
+    if (isObjectType(type(m_val))) return Object{val(m_val).pobj};
+    return Object::attach(tvCastToObjectData(*m_val));
+  }
 
   auto& asCStrRef() const { return HPHP::asCStrRef(m_val); }
   auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
@@ -954,7 +963,8 @@ struct Variant : private TypedValue {
   }
 
   String toString() const& {
-    return HPHP::toString(asTypedValue());
+    if (isStringType(m_type)) return String{m_data.pstr};
+    return String::attach(tvCastToStringData(*this));
   }
 
   String toString() && {
@@ -970,14 +980,16 @@ struct Variant : private TypedValue {
   // PHP array.
   template <IntishCast IC = IntishCast::None>
   Array toArray() const {
-    return HPHP::toArray<IC>(asTypedValue());
+    if (isArrayLikeType(m_type)) return Array{m_data.parr};
+    return Array::attach(tvCastToArrayLikeData<IC>(*this));
   }
   Array toPHPArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);
     return toPHPArrayHelper();
   }
   Object toObject() const {
-    return HPHP::toObject(asTypedValue());
+    if (isObjectType(m_type)) return Object{m_data.pobj};
+    return Object::attach(tvCastToObjectData(*this));
   }
   Resource toResource() const {
     if (m_type == KindOfResource) return Resource{m_data.pres};

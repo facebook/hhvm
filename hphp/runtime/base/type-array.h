@@ -30,10 +30,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Forward declare to avoid including tv-conversions.h and creating a cycle.
-template <IntishCast IC = IntishCast::None>
-ArrayData* tvCastToArrayLikeData(TypedValue tv);
-
 struct ArrayIter;
 struct VariableUnserializer;
 
@@ -614,14 +610,6 @@ ALWAYS_INLINE Array& asArrRef(tv_lval tv) {
 ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
   assertx(tvIsArrayLike(tv));
   return *reinterpret_cast<const Array*>(&val(tv).parr);
-}
-
-template <IntishCast IC = IntishCast::None>
-ALWAYS_INLINE Array toArray(tv_rval rval) {
-  if (isArrayLikeType(type(rval))) {
-    return Array{assert_not_null(val(rval).parr)};
-  }
-  return Array::attach(tvCastToArrayLikeData<IC>(*rval));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -324,6 +324,10 @@ void scheduleSerializeOptProf() {
   }
 }
 
+#ifdef __linux__
+  extern "C" void __gcov_reset() __attribute__((__weak__));
+#endif
+
 /*
  * This is the main driver for the profile-guided retranslation of all the
  * functions being PGO'd, which enables controlling the order in which the
@@ -437,6 +441,16 @@ void retranslateAll() {
   if (serializeOpt) {
     scheduleSerializeOptProf();
   }
+
+#ifdef __linux__
+  if (__gcov_reset) {
+    if (serverMode) {
+      Logger::Info("Calling __gcov_reset (retranslateAll finished)");
+    }
+    __gcov_reset();
+  }
+#endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

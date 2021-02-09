@@ -3097,7 +3097,10 @@ and looks_bad_in_non_parental_braces item =
   | Syntax.FieldInitializer _
   | Syntax.ElementInitializer _
   | Syntax.LambdaExpression _
-  | Syntax.XHPExpression _ ->
+  | Syntax.XHPExpression _
+  | Syntax.IsExpression _
+  | Syntax.AsExpression _
+  | Syntax.NullableAsExpression _ ->
     true
   | _ -> false
 

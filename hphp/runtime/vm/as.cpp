@@ -1871,15 +1871,6 @@ void parse_declvars(AsmState& as) {
   as.in.expectWs(';');
 }
 
-StaticCoeffects coeffectFromName(AsmState& as, std::string name) {
-  auto const result = CoeffectsConfig::fromName(name);
-
-  if (result.isAnyRx) as.fe->attrs |= AttrRxBody;
-  if (result.isPure) as.fe->attrs |= AttrPureBody;
-
-  return result.value;
-}
-
 /*
  * directive-coeffects_static : coeffect-name* ';'
  *                            ;
@@ -1889,7 +1880,9 @@ void parse_coeffects_static(AsmState& as) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
-    as.fe->staticCoeffects |= coeffectFromName(as, name);
+    as.fe->staticCoeffects |= CoeffectsConfig::fromName(name);
+    if (CoeffectsConfig::isPure(name)) as.fe->attrs |= AttrPureBody;
+    if (CoeffectsConfig::isAnyRx(name)) as.fe->attrs |= AttrRxBody;
   }
   as.in.expectWs(';');
 }
@@ -3048,7 +3041,7 @@ void parse_context_constant(AsmState& as) {
     as.in.skipWhitespace();
     std::string coeffect;
     if (!as.in.readword(name)) break;
-    coeffects |= CoeffectsConfig::fromName(name).value;
+    coeffects |= CoeffectsConfig::fromName(name);
   }
 
   // TODO: Add this to class

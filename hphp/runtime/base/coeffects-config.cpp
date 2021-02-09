@@ -302,22 +302,19 @@ std::string CoeffectsConfig::mangle() {
   );
 }
 
+bool CoeffectsConfig::isPure(const std::string& name) {
+  return name == C::s_pure;
+}
 
-CoeffectsConfig::FromNameResult
-CoeffectsConfig::fromName(const std::string& coeffect) {
+bool CoeffectsConfig::isAnyRx(const std::string& name) {
+  return name == C::s_rx ||
+         name == C::s_rx_shallow ||
+         name == C::s_rx_local;
+}
+
+StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
   storage_t result = 0;
-  bool isPure = false;
-  bool isAnyRx = false;
-
-  if (coeffect == C::s_pure) isPure = true;
-
-#define X(x) if (coeffect == C::s_##x) isAnyRx = true;
-  RX_COEFFECTS
-#undef X
-
-  auto const finish = [&] {
-    return FromNameResult{StaticCoeffects::fromValue(result), isPure, isAnyRx};
-  };
+  auto const finish = [&] { return StaticCoeffects::fromValue(result); };
 
   if (!CoeffectsConfig::enabled()) return finish();
 

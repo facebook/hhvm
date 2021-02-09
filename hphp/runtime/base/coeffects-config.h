@@ -62,12 +62,9 @@ struct CoeffectsConfig {
     return s_instance->m_numUsedBits;
   }
 
-  struct FromNameResult {
-    StaticCoeffects value;
-    bool isPure : 1;
-    bool isAnyRx : 1;
-  };
-  static FromNameResult fromName(const std::string&);
+  static bool isPure(const std::string&);
+  static bool isAnyRx(const std::string&);
+  static StaticCoeffects fromName(const std::string&);
   static StaticCoeffects combine(const StaticCoeffects, const StaticCoeffects);
   static std::vector<std::string> toStringList(const StaticCoeffects data);
   static std::string mangle();

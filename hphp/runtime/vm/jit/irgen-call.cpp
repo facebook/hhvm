@@ -1007,7 +1007,13 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
 void emitResolveMethCaller(IRGS& env, const StringData* name) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
   auto func = lookup.func;
-  assertx(func && func->isMethCaller());
+
+  // We de-duplicate meth_caller across the repo which may lead to the resolved
+  // meth caller being in a different unit (and therefore unavailable at this
+  // point). The interpreter will perform the load.
+  if (!func) return interpOne(env);
+
+  assertx(func->isMethCaller());
 
   auto const className = func->methCallerClsName();
   auto const methodName = func->methCallerMethName();

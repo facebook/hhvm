@@ -136,8 +136,11 @@ let neutral : unit -> typing_result =
 let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     =
  fun pos f ->
-  try f ()
-  with e ->
+  try f () with
+  | WorkerCancel.Worker_should_exit as e ->
+    (* Cancellation requests must be re-raised *)
+    raise e
+  | e ->
     Errors.exception_occurred pos (Exception.wrap e);
     None
 
@@ -284,7 +287,11 @@ let process_file
             global_tvenvs;
         { errors = Errors.merge errors' errors; deferred_decls = [] }
       | Error deferred_decls -> { errors; deferred_decls }
-    with e ->
+    with
+    | WorkerCancel.Worker_should_exit as e ->
+      (* Cancellation requests must be re-raised *)
+      raise e
+    | e ->
       let stack = Caml.Printexc.get_raw_backtrace () in
       let () =
         prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn)
@@ -333,7 +340,7 @@ let profile_log
   if should_log then (
     let filesize_opt =
       try Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
-      with _ -> None
+      with Unix.Unix_error _ -> None
     in
     let deferment_telemetry =
       Telemetry.create ()

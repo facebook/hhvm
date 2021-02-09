@@ -360,13 +360,12 @@ let rec array_get
         (* requires integer literal *)
         (match e2 with
         | (p, Int n) ->
-          (try
-             let idx = int_of_string n in
-             let nth = List.nth_exn tyl idx in
-             (env, nth)
-           with _ ->
-             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
-             (env, err_witness env p))
+          let idx = int_of_string_opt n in
+          (match Option.bind idx ~f:(List.nth tyl) with
+          | Some nth -> (env, nth)
+          | None ->
+            Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
+            (env, err_witness env p))
         | (p, _) ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
           (env, err_witness env p))
@@ -383,14 +382,13 @@ let rec array_get
         (* requires integer literal *)
         (match e2 with
         | (p, Int n) ->
-          (try
-             let idx = int_of_string n in
-             let nth = List.nth_exn [ty1; ty2] idx in
-             (env, nth)
-           with _ ->
-             Errors.typing_error p
-             @@ Reason.string_of_ureason (Reason.index_class cn);
-             (env, err_witness env p))
+          let idx = int_of_string_opt n in
+          (match Option.bind ~f:(List.nth [ty1; ty2]) idx with
+          | Some nth -> (env, nth)
+          | None ->
+            Errors.typing_error p
+            @@ Reason.string_of_ureason (Reason.index_class cn);
+            (env, err_witness env p))
         | (p, _) ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URpair_access);
           (env, err_witness env p))
@@ -779,13 +777,11 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         begin
           match key with
           | (_, Int n) ->
-            (try
-               let idx = int_of_string n in
-               match List.split_n tyl idx with
-               | (tyl', _ :: tyl'') ->
-                 (env, MakeType.tuple r (tyl' @ (ty2 :: tyl'')))
-               | _ -> fail Reason.index_tuple
-             with _ -> fail Reason.index_tuple)
+            let idx = int_of_string_opt n in
+            (match Option.map ~f:(List.split_n tyl) idx with
+            | Some (tyl', _ :: tyl'') ->
+              (env, MakeType.tuple r (tyl' @ (ty2 :: tyl'')))
+            | _ -> fail Reason.index_tuple)
           | _ -> fail Reason.URtuple_access
         end
       | Tshape (shape_kind, fdm) ->

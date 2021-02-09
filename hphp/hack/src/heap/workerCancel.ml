@@ -7,6 +7,7 @@
  *
  *)
 
+(* Please read the documentation in the .mli file. *)
 exception Worker_should_exit
 
 let () = Callback.register_exception "worker_should_exit" Worker_should_exit

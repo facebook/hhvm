@@ -57,7 +57,11 @@ let write_json
       let elapsed = Unix.gettimeofday () -. start_time in
       let time = Unix.gmtime elapsed in
       Hh_logger.log "Processed batch in %dm%ds" time.tm_min time.tm_sec
-  with e ->
+  with
+  | WorkerCancel.Worker_should_exit as e ->
+    (* Cancellation requests must be re-raised *)
+    raise e
+  | e ->
     Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e)
 
 let recheck_job

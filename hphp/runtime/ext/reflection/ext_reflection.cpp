@@ -882,24 +882,27 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
   return arr.toArray();
 }
 
+const StaticString s_pure("pure");
+const StaticString s_defaults("defaults");
+
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  std::vector<std::string> result;
-  for (auto& name : func->staticCoeffectNames()) {
-    if (name == "pure") continue;
+  std::vector<LowStringPtr> result;
+  for (auto const& name : func->staticCoeffectNames()) {
+    if (name->equal(s_pure.get())) continue;
     result.push_back(name);
   }
-  if (func->staticCoeffectNames().empty()) result.push_back("defaults");
+  if (func->staticCoeffectNames().empty()) {
+    result.push_back(makeStaticString(s_defaults.get()));
+  }
   if (func->hasCoeffectRules()) {
     for (auto const& rule : func->getCoeffectRules()) {
       auto const name = rule.toString(func);
-      if (name) result.push_back(*name);
+      if (name) result.push_back(makeStaticString(*name));
     }
   }
   VecInit arr(result.size());
-  for (auto& name : result) {
-    arr.append(make_tv<KindOfString>(StringData::Make(name)));
-  }
+  for (auto& name : result) arr.append(make_tv<KindOfPersistentString>(name));
   return arr.toArray();
 }
 

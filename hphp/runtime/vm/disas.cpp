@@ -426,7 +426,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   }
   auto const coeffects = func->staticCoeffectNames();
   if (!coeffects.empty()) {
-    out.fmtln(".static_coeffects {};", folly::join(" ", coeffects));
+    std::vector<std::string> names;
+    for (auto const& name : coeffects) names.push_back(name->toCppString());
+    out.fmtln(".static_coeffects {};", folly::join(" ", names));
   }
   if (func->hasCoeffectRules()) {
     for (auto const& rule : func->getCoeffectRules()) {

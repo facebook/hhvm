@@ -76,7 +76,7 @@ struct FuncEmitter {
   typedef std::vector<EHEnt> EHEntVec;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
-  using StaticCoeffectsVec = std::vector<std::string>;
+  using StaticCoeffectsVec = std::vector<LowStringPtr>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.

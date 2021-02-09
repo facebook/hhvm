@@ -402,7 +402,7 @@ struct Func : FuncBase {
   /*
    * Lists of all static coeffect names and coeffect rules
    */
-  CompactVector<std::string> staticCoeffects;
+  CompactVector<LowStringPtr> staticCoeffects;
   CompactVector<CoeffectRule> coeffectRules;
 };
 

@@ -62,8 +62,8 @@ struct CoeffectsConfig {
     return s_instance->m_numUsedBits;
   }
 
-  static bool isPure(const std::string&);
-  static bool isAnyRx(const std::string&);
+  static bool isPure(const StringData*);
+  static bool isAnyRx(const StringData*);
   static StaticCoeffects fromName(const std::string&);
   static StaticCoeffects combine(const StaticCoeffects, const StaticCoeffects);
   static std::vector<std::string> toStringList(const StaticCoeffects data);

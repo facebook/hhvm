@@ -302,7 +302,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   auto coeffects = StaticCoeffects::none();
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);
-    coeffects |= CoeffectsConfig::fromName(name);
+    coeffects |= CoeffectsConfig::fromName(name->toCppString());
   }
   f->m_staticCoeffects = coeffects;
 

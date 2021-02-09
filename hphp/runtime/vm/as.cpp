@@ -1884,7 +1884,7 @@ void parse_coeffects_static(AsmState& as) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
-    as.fe->staticCoeffects.push_back(name);
+    as.fe->staticCoeffects.push_back(makeStaticString(name));
   }
   as.in.expectWs(';');
 }

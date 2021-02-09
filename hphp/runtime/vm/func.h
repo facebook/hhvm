@@ -65,7 +65,7 @@ using ArFunction = TypedValue* (*)(ActRec* ar);
 struct NativeArgs; // never defined
 using NativeFunction = void(*)(NativeArgs*);
 
-using StaticCoeffectNamesMap = CompactVector<std::string>;
+using StaticCoeffectNamesMap = CompactVector<LowStringPtr>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.

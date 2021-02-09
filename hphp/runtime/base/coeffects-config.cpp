@@ -302,11 +302,12 @@ std::string CoeffectsConfig::mangle() {
   );
 }
 
-bool CoeffectsConfig::isPure(const std::string& name) {
-  return name == C::s_pure;
+bool CoeffectsConfig::isPure(const StringData* name) {
+  return name->toCppString() == C::s_pure;
 }
 
-bool CoeffectsConfig::isAnyRx(const std::string& name) {
+bool CoeffectsConfig::isAnyRx(const StringData* sd) {
+  auto const name = sd->toCppString();
   return name == C::s_rx ||
          name == C::s_rx_shallow ||
          name == C::s_rx_local;

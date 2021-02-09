@@ -882,6 +882,27 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
   return arr.toArray();
 }
 
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  std::vector<std::string> result;
+  for (auto& name : func->staticCoeffectNames()) {
+    if (name == "pure") continue;
+    result.push_back(name);
+  }
+  if (func->staticCoeffectNames().empty()) result.push_back("defaults");
+  if (func->hasCoeffectRules()) {
+    for (auto const& rule : func->getCoeffectRules()) {
+      auto const name = rule.toString(func);
+      if (name) result.push_back(*name);
+    }
+  }
+  VecInit arr(result.size());
+  for (auto& name : result) {
+    arr.append(make_tv<KindOfString>(StringData::Make(name)));
+  }
+  return arr.toArray();
+}
+
 ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
   auto userAttrs = func->userAttributes();
@@ -2121,6 +2142,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getAttributesNamespaced);
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
     HHVM_ME(ReflectionFunctionAbstract, getReifiedTypeParamInfo);
+    HHVM_ME(ReflectionFunctionAbstract, getCoeffects);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);

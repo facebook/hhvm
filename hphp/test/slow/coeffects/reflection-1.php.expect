@@ -1,0 +1,16 @@
+vec(0) {
+}
+vec(3) {
+  string(2) "rx"
+  string(11) "write_props"
+  string(3) "lol"
+}
+vec(1) {
+  string(8) "defaults"
+}
+vec(4) {
+  string(2) "IO"
+  string(7) "ctx $x2"
+  string(6) "$x1::C"
+  string(7) "this::C"
+}

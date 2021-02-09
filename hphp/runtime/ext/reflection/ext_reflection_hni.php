@@ -233,6 +233,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native, __Pure, __MaybeMutable>>
   public function getReifiedTypeParamInfo(): varray;
 
+  <<__Native, __Pure, __MaybeMutable>>
+  public function getCoeffects(): vec;
+
   /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.hasreturntype.php

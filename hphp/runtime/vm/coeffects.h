@@ -134,6 +134,7 @@ struct CoeffectRule final {
   { assertx(ctx_name); }
 
 
+  folly::Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;
 
   template<class SerDe>

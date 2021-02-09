@@ -230,6 +230,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getReturnType()[]: ?ReflectionType;
   <<__Pure, __MaybeMutable>>
   public function getReifiedTypeParamInfo()[]: varray<darray<string, bool>>;
+  <<__Pure, __MaybeMutable>>
+  public function getCoeffects()[]: vec<string>;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {

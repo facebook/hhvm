@@ -71,6 +71,27 @@ StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
   return (*this = CoeffectsConfig::combine(*this, o));
 }
 
+folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
+  switch (m_type) {
+    case Type::ConditionalReactiveImplements:
+    case Type::ConditionalReactiveArgImplements:
+      return folly::none;
+    case Type::FunParam:
+      return folly::to<std::string>("ctx $",
+                                    f->localVarName(m_index)->toCppString());
+    case Type::CCParam:
+      return folly::to<std::string>("$",
+                                    f->localVarName(m_index)->toCppString(),
+                                    "::",
+                                    m_name->toCppString());
+    case Type::CCThis:
+      return folly::to<std::string>("this::", m_name->toCppString());
+    case Type::Invalid:
+      always_assert(false);
+  }
+  not_reached();
+}
+
 std::string CoeffectRule::getDirectiveString() const {
   switch (m_type) {
     case Type::ConditionalReactiveImplements:

@@ -60,8 +60,11 @@ extern "C" fn parse_positioned_cpp_ffi(
         std::path::PathBuf::from(cpp_helper::cstr::to_str(filename)),
     );
     let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
-    let env: parser_core_types::parser_env::ParserEnv =
-        unsafe { parser_core_types::parser_env::ParserEnv::from(&*(env as *const CParserEnv)) };
+    let env: parser_core_types::parser_env::ParserEnv = cpp_helper::from_ptr(
+        env,
+        <parser_core_types::parser_env::ParserEnv as std::convert::From<&CParserEnv>>::from,
+    )
+    .unwrap();
     let source: parser_core_types::source_text::SourceText =
         parser_core_types::source_text::SourceText::make(ocamlrep::rc::RcOc::new(filepath), text);
     let stack_limit: std::option::Option<&stack_limit::StackLimit> = None;

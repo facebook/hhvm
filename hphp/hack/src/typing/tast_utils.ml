@@ -184,6 +184,9 @@ let rec truthiness env ty =
   | Ttuple _
   | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
+  | Tvec_or_dict _ ->
+    (* TODO(T69768816) determine which variant is correct for vec_or_dict *)
+    Unknown
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
@@ -256,6 +259,7 @@ let rec find_sketchy_types env acc ty =
   | Tvar _
   | Tvarray _
   | Tdarray _
+  | Tvec_or_dict _
   | Tvarray_or_darray _
   | Tunapplied_alias _
   | Taccess _ ->

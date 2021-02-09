@@ -107,7 +107,9 @@ let is_enforceable (env : env) (ty : decl_ty) =
     | Tdarray _ -> false
     | Tvarray _ -> false
     (* With no parameters, we enforce varray_or_darray just like array *)
-    | Tvarray_or_darray (_, ty) -> is_any ty
+    | Tvec_or_dict (_, ty)
+    | Tvarray_or_darray (_, ty) ->
+      is_any ty
     | Toption ty -> is_enforceable env visited ty
     (* TODO(T36532263) make sure that this is what we want *)
   in

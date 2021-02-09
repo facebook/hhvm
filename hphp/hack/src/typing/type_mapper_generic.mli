@@ -123,6 +123,13 @@ class type ['env] type_mapper_type =
       Typing_defs.locl_ty ->
       'env * Typing_defs.locl_ty
 
+    method on_tvec_or_dict :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.locl_ty ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs.locl_ty
+
     method on_taccess :
       'env ->
       Typing_reason.t ->

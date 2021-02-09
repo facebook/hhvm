@@ -24,6 +24,9 @@ class type ['a] decl_type_visitor_type =
     method on_tvarray_or_darray :
       'a -> Typing_reason.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty -> 'a
 
+    method on_tvec_or_dict :
+      'a -> Typing_reason.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty -> 'a
+
     method on_tvarray : 'a -> Typing_reason.t -> Typing_defs.decl_ty -> 'a
 
     method on_tdarray :
@@ -123,6 +126,9 @@ class type ['a] locl_type_visitor_type =
     method on_tobject : 'a -> Typing_reason.t -> 'a
 
     method on_tvarray_or_darray :
+      'a -> Typing_reason.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> 'a
+
+    method on_tvec_or_dict :
       'a -> Typing_reason.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> 'a
 
     method on_tvarray : 'a -> Typing_reason.t -> Typing_defs.locl_ty -> 'a

@@ -103,6 +103,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Tvarray _
   | Tdarray _
   | Tvarray_or_darray _
+  | Tvec_or_dict _
   | Tclass _
   | Toption _
   | Tprim _

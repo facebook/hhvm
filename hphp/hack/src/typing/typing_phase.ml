@@ -155,6 +155,11 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     (env, MakeType.varray_or_darray r tk tv)
+  | (r, Tvec_or_dict (tk, tv)) ->
+    let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
+    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
+    let ty = Tvec_or_dict (tk, tv) in
+    (env, mk (r, ty))
   | (r, Tgeneric (x, targs)) ->
     let localize_tgeneric ?replace_with name r =
       match (targs, replace_with, Env.get_pos_and_kind_of_generic env name) with

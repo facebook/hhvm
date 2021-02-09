@@ -82,6 +82,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Tvarray _
   | Tdarray _
   | Tvarray_or_darray _
+  | Tvec_or_dict _
   | Toption _
   | Tprim _
   | Tvar _

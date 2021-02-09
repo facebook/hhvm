@@ -256,6 +256,10 @@ and simplify_union_ env ty1 ty2 r =
       let (env, tk) = union env tk1 tk2 in
       let (env, tv) = union env tv1 tv2 in
       (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
+    | ((_, Tvec_or_dict (tk1, tv1)), (_, Tvec_or_dict (tk2, tv2))) ->
+      let (env, tk) = union env tk1 tk2 in
+      let (env, tv) = union env tv1 tv2 in
+      (env, Some (mk (r, Tvec_or_dict (tk, tv))))
     | ((_, Tdependent (dep1, tcstr1)), (_, Tdependent (dep2, tcstr2)))
       when equal_dependent_type dep1 dep2 ->
       let (env, tcstr) = union env tcstr1 tcstr2 in
@@ -292,8 +296,8 @@ and simplify_union_ env ty1 ty2 r =
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
           | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
-          | Tvarray _ | Tdarray _
-          | Tvarray_or_darray _
+          | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+          | Tvec_or_dict _
           (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
            * to say whether a given T can be null - e.g. opaque newtypes, dependent
            * types, etc. - so for now we leave it here.

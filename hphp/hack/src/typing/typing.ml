@@ -5586,8 +5586,8 @@ and class_get_
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-      | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Taccess _
-        ) ) ->
+      | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject
+      | Tshape _ | Taccess _ ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -5866,8 +5866,8 @@ and static_class_id
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-          | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tnewtype _ | Tdependent _
-          | Tobject | Tshape _ | Taccess _ ) ) ->
+          | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _
+          | Tnewtype _ | Tdependent _ | Tobject | Tshape _ | Taccess _ ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;

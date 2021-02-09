@@ -251,6 +251,8 @@ and _ ty_ =
   | Tvarray : 'phase ty -> 'phase ty_  (** Tvarray (ty) => "varray<ty>" *)
   | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
       (** Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
+  | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
+      (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
       (** Name of class, name of type const, remaining names of type consts *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
@@ -578,6 +580,12 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tvarray_or_darray (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tvarray_or_darray@ ";
+      pp_ty fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_ty fmt a1;
+      Format.fprintf fmt "@])"
+    | Tvec_or_dict (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tvec_or_dict@ ";
       pp_ty fmt a0;
       Format.fprintf fmt ",@ ";
       pp_ty fmt a1;

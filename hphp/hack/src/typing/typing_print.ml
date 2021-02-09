@@ -323,6 +323,7 @@ module Full = struct
     | Tdarray (x, y) -> tdarray k x y
     | Tvarray x -> tvarray k x
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
+    | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric (s, []) -> to_doc s
     | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
@@ -385,6 +386,7 @@ module Full = struct
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
+    | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
     | Tvarray x -> tvarray k x
     | Tdarray (x, y) -> tdarray k x y
     | Tclass ((_, s), Exact, []) when !debug_mode ->
@@ -776,6 +778,7 @@ module ErrorString = struct
     | Tintersection [] -> "a mixed value"
     | Tintersection l -> intersection env l
     | Tvarray_or_darray _ -> varray_or_darray
+    | Tvec_or_dict _ -> "a vec_or_dict"
     | Tvarray _ -> varray
     | Tdarray (_, _) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
@@ -999,6 +1002,8 @@ module Json = struct
       obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
     | (p, Tvarray_or_darray (ty1, ty2)) ->
       obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
+    | (p, Tvec_or_dict (ty1, ty2)) ->
+      obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
     | (p, Tdarray (ty1, ty2)) -> obj @@ kind p "darray" @ args [ty1; ty2]
     | (p, Tvarray ty) -> obj @@ kind p "varray" @ args [ty]
     (* TODO akenn *)

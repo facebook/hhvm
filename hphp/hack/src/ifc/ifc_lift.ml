@@ -85,6 +85,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
         a_length = get_policy ~prefix:"len" lump renv;
       }
   | T.Tvarray_or_darray (key_ty, value_ty)
+  | T.Tvec_or_dict (key_ty, value_ty)
   | T.Tdarray (key_ty, value_ty)
   | T.Tclass ((_, "\\HH\\ConstMap"), _, [key_ty; value_ty])
   | T.Tclass ((_, "\\HH\\ImmMap"), _, [key_ty; value_ty])

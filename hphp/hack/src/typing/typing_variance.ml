@@ -500,6 +500,7 @@ let rec get_typarams tenv root env (ty : decl_ty) =
   | Tdarray (ty1, ty2) ->
     union (get_typarams tenv root env ty1) (get_typarams tenv root env ty2)
   | Tvarray ty -> get_typarams tenv root env ty
+  | Tvec_or_dict (ty1, ty2)
   | Tvarray_or_darray (ty1, ty2) ->
     union (get_typarams tenv root env ty1) (get_typarams tenv root env ty2)
 

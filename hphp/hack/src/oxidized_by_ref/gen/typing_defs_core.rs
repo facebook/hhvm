@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<59f8b7b81a3a304c5165664bdd3bc2bb>>
+// @generated SignedSource<<829aa8f8f0855546aeac8c6571271cdd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -479,6 +479,8 @@ pub enum Ty_<'a> {
     Tvarray(&'a Ty<'a>),
     /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
     TvarrayOrDarray(&'a (&'a Ty<'a>, &'a Ty<'a>)),
+    /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
+    TvecOrDict(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Name of class, name of type const, remaining names of type consts
     Taccess(&'a TaccessType<'a>),
     /// This represents a type alias that lacks necessary type arguments. Given

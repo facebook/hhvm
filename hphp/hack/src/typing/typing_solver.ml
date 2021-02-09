@@ -147,6 +147,10 @@ let rec freshen_inside_ty env ty =
     let (env, ty1) = freshen_ty env ty1 in
     let (env, ty2) = freshen_ty env ty2 in
     (env, mk (r, Tvarray_or_darray (ty1, ty2)))
+  | Tvec_or_dict (ty1, ty2) ->
+    let (env, ty1) = freshen_ty env ty1 in
+    let (env, ty2) = freshen_ty env ty2 in
+    (env, mk (r, Tvec_or_dict (ty1, ty2)))
   | Tdarray (ty1, ty2) ->
     let (env, ty1) = freshen_ty env ty1 in
     let (env, ty2) = freshen_ty env ty2 in
@@ -564,6 +568,7 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
     | Tvarray _
     | Tdarray _
     | Tvarray_or_darray _
+    | Tvec_or_dict _
     | Ttuple _
     | Tshape _
     | Tfun _

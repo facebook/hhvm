@@ -59,6 +59,10 @@ module Locl_Inst = struct
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
       Tvarray_or_darray (ty1, ty2)
+    | Tvec_or_dict (ty1, ty2) ->
+      let ty1 = instantiate subst ty1 in
+      let ty2 = instantiate subst ty2 in
+      Tvec_or_dict (ty1, ty2)
     | (Tobject | Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as x ->
       x
     | Ttuple tyl ->
@@ -352,6 +356,7 @@ module Simple = struct
       check tk;
       check tv
     | Tvarray tv -> check tv
+    | Tvec_or_dict (tk, tv)
     | Tvarray_or_darray (tk, tv) ->
       check tk;
       check tv

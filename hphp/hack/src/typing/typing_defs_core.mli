@@ -248,6 +248,8 @@ and _ ty_ =
   | Tvarray : 'phase ty -> 'phase ty_
   (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
   | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
+  (* Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
+  | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : 'phase taccess_type -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)

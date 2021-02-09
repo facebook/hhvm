@@ -86,6 +86,8 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       "varray_or_darray<%s, %s>"
       (print_ty_exn ty1)
       (print_ty_exn ty2)
+  | Tvec_or_dict (ty1, ty2) ->
+    Printf.sprintf "vec_or_dict<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Tdarray (ty1, ty2) ->
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Taccess (ty, id) -> Printf.sprintf "%s::%s" (print_ty_exn ty) (snd id)

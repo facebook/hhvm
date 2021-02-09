@@ -315,6 +315,7 @@ let rec expand ctx env root : _ * result =
     end
   | Tvarray _
   | Tdarray _
+  | Tvec_or_dict _
   | Tvarray_or_darray _ ->
     let { id = (_, tconst); _ } = ctx in
     (match tconst with

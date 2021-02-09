@@ -143,6 +143,7 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(tk)
                 .field(tv)
                 .finish(),
+            TvecOrDict((tk, tv)) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),
             Tnewtype((name, tys, constraint)) => f
                 .debug_tuple("Tnewtype")
                 .field(name)

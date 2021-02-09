@@ -73,6 +73,9 @@ class type ['env] type_mapper_type =
     method on_tvarray_or_darray :
       'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
 
+    method on_tvec_or_dict :
+      'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
+
     method on_taccess :
       'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
 
@@ -130,6 +133,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tvarray_or_darray env r ty1 ty2 =
       (env, mk (r, Tvarray_or_darray (ty1, ty2)))
 
+    method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
+
     method on_taccess env r ty id = (env, mk (r, Taccess (ty, id)))
 
     method on_type env ty =
@@ -155,6 +160,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tvarray ty -> this#on_tvarray env r ty
       | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2
       | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray env r ty1 ty2
+      | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
 

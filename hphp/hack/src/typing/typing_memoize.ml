@@ -58,6 +58,7 @@ let check_param : env -> Nast.fun_param -> unit =
       List.iter tyl (check_memoizable env)
     | Tvarray ty
     | Tdarray (_, ty)
+    | Tvec_or_dict (_, ty)
     | Tvarray_or_darray (_, ty) ->
       check_memoizable env ty
     | Tshape (_, fdm) ->

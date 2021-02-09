@@ -120,6 +120,7 @@ struct
     | Tdarray (ty1, ty2) -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty -> Tvarray (ty root_ty)
     | Tvarray_or_darray (ty1, ty2) -> Tvarray_or_darray (ty ty1, ty ty2)
+    | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ty)
     | Ttuple tyl -> Ttuple (List.map tyl ty)

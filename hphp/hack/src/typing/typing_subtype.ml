@@ -1134,7 +1134,8 @@ and simplify_subtype_i
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
                 | Tobject | Tclass _ | Tvarray _ | Tdarray _
-                | Tvarray_or_darray _ | Tany _ | Terr | Taccess _ ) ),
+                | Tvarray_or_darray _ | Tvec_or_dict _ | Tany _ | Terr
+                | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
@@ -1325,6 +1326,7 @@ and simplify_subtype_i
           default_subtype env
         | (_, Tdarray (_, ty))
         | (_, Tvarray ty)
+        | (_, Tvec_or_dict (_, ty))
         | (_, Tvarray_or_darray (_, ty)) ->
           simplify_subtype ~subtype_env ty ty_super env
         | (_, Toption ty) ->
@@ -1469,7 +1471,8 @@ and simplify_subtype_i
             (r_sub, shape_kind_sub, fdm_sub)
             (r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
-    | (_, (Tvarray _ | Tdarray _ | Tvarray_or_darray _)) ->
+    | (_, (Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _)) ->
+      (* TODO(vec_or_dict) spell out subtyping rules *)
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->

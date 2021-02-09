@@ -308,6 +308,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tdarray _
   | Tunapplied_alias _
   | Tvarray_or_darray _
+  | Tvec_or_dict _
   | Taccess _ ->
     false
 
@@ -426,6 +427,7 @@ let ty_con_ordinal ty_ =
   | Tvarray_or_darray _ -> 22
   | Tunapplied_alias _ -> 23
   | Taccess _ -> 24
+  | Tvec_or_dict _ -> 25
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =
@@ -452,6 +454,7 @@ let decl_ty_con_ordinal ty_ =
   | Tvar _ -> 19
   | Tunion _ -> 20
   | Tintersection _ -> 21
+  | Tvec_or_dict _ -> 22
 
 let reactivity_ordinal r =
   match r with
@@ -554,15 +557,15 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tobject, Tobject) -> 0
     | (Terr, Terr) -> 0
     | ( ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-        | Tfun _ | Tintersection _ | Tunion _ | Ttuple _ | Tgeneric _
-        | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
+        | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
+        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
         | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
         | Tany _ ),
         _ )
     | ( _,
         ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-        | Tfun _ | Tintersection _ | Tunion _ | Ttuple _ | Tgeneric _
-        | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
+        | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
+        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
         | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
         | Tany _ ) ) ->
       ty_con_ordinal ty_1 - ty_con_ordinal ty_2
@@ -944,6 +947,8 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tvarray ty1, Tvarray ty2) -> equal_decl_ty ty1 ty2
   | (Tvarray_or_darray (tk1, tv1), Tvarray_or_darray (tk2, tv2)) ->
     equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
+  | (Tvec_or_dict (tk1, tv1), Tvec_or_dict (tk2, tv2)) ->
+    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
   | (Tlike ty1, Tlike ty2) -> equal_decl_ty ty1 ty2
   | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
   | (Toption ty, Toption ty2) -> equal_decl_ty ty ty2
@@ -969,6 +974,7 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tdarray _, _)
   | (Tvarray _, _)
   | (Tvarray_or_darray _, _)
+  | (Tvec_or_dict _, _)
   | (Tmixed, _)
   | (Tlike _, _)
   | (Tnonnull, _)

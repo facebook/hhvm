@@ -34,6 +34,7 @@ let rec strip_ty ty =
     | Tvarray ty -> Tvarray (strip_ty ty)
     | Tvarray_or_darray (ty1, ty2) ->
       Tvarray_or_darray (strip_ty ty1, strip_ty ty2)
+    | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (strip_ty ty1, strip_ty ty2)
     | Ttuple tyl -> Ttuple (strip_tyl tyl)
     | Toption ty -> Toption (strip_ty ty)
     | Tnewtype (name, tparams, ty) ->

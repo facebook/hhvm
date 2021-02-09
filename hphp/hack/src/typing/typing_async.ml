@@ -54,6 +54,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Tvarray _
     | Tdarray _
     | Tvarray_or_darray _
+    | Tvec_or_dict _
     | Tnonnull
     | Tprim _
     | Tvar _
@@ -79,6 +80,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Tvarray _
         | Tdarray _
         | Tvarray_or_darray _
+        | Tvec_or_dict _
         | Tprim _
         | Tvar _
         | Tfun _

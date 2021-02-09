@@ -156,6 +156,8 @@ struct FuncChecker {
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
   Id m_last_rpo_id; // rpo_id of the last block visited
+  bool m_verify_pure;
+  bool m_verify_rx;
 };
 
 const StaticString s_invoke("__invoke");
@@ -266,6 +268,18 @@ FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
 , m_graph(0)
 , m_instrs(m_arena, f->past - f->base + 1)
 , m_errmode(mode) {
+  auto& coeffects = f->staticCoeffects;
+  auto const isPureBody =
+    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isPure);
+  auto const isRxBody =
+    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isAnyRx);
+  m_verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
+                isRxBody &&
+                // defer this to next check
+                !isPureBody &&
+                !m_func->isRxDisabled;
+  m_verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
+                  isPureBody;
 }
 
 FuncChecker::~FuncChecker() {
@@ -1916,19 +1930,6 @@ bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
 
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
-  auto& coeffects = m_func->staticCoeffects;
-  bool isPureBody =
-    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isPure);
-  bool isRxBody =
-    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isAnyRx);
-
-  auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
-                         isRxBody &&
-                         // defer this to next check
-                         !isPureBody &&
-                         !m_func->isRxDisabled;
-  auto const verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
-                           isPureBody;
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, m_func) << std::endl;
   }
@@ -1949,8 +1950,8 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
-    if (verify_rx) ok &= checkRxOp(&cur, pc, op, false);
-    if (verify_pure) ok &= checkRxOp(&cur, pc, op, true);
+    if (m_verify_rx) ok &= checkRxOp(&cur, pc, op, false);
+    if (m_verify_pure) ok &= checkRxOp(&cur, pc, op, true);
     prev_pc = pc;
   }
   ok &= checkSuccEdges(b, &cur);

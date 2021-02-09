@@ -11,6 +11,8 @@ const FB_SERIALIZE_HACK_ARRAYS = 0;
 const FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS = 0;
 const FB_SERIALIZE_VARRAY_DARRAY = 0;
 
+const FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS = 0;
+
 const XHPROF_FLAGS_NO_BUILTINS = 0;
 const XHPROF_FLAGS_CPU = 0;
 const XHPROF_FLAGS_MEMORY = 0;
@@ -37,7 +39,7 @@ function fb_serialize($thing, int $options = 0)[];
 <<__PHPStdLib>>
 function fb_unserialize($thing, inout $success, int $options = 0);
 <<__PHPStdLib, __Pure>>
-function fb_compact_serialize($thing)[];
+function fb_compact_serialize($thing, int $options = 0)[];
 <<__PHPStdLib>>
 function fb_compact_unserialize($thing, inout $success, inout $errcode);
 <<__PHPStdLib>>

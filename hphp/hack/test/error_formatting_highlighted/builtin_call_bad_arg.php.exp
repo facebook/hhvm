@@ -8,7 +8,7 @@ builtin_call_bad_arg.php:4:22
 [1]  4 |   xhprof_frame_begin(3);
      5 | }
 
-builtins_fb.hhi:70:29
-[2] 70 | No source found
+builtins_fb.hhi:72:29
+[2] 72 | No source found
 
 1 error found.

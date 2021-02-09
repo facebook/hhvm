@@ -1,0 +1,24 @@
+
+==============================================================
+test([]):
+Hack arrays (flag off): fafc
+Hack arrays (flag on):  fbfc
+Legacy-marked arrays:   fbfc
+
+==============================================================
+test([[]]):
+Hack arrays (flag off): fafafcfc
+Hack arrays (flag on):  fafbfcfc
+Legacy-marked arrays:   fafbfcfc
+
+==============================================================
+test({"0":17,"1":34}):
+Hack arrays (flag off): fb00110122fc
+Hack arrays (flag on):  fa1122fc
+Legacy-marked arrays:   fa1122fc
+
+==============================================================
+test([{"0":17,"1":34}]):
+Hack arrays (flag off): fafb00110122fcfc
+Hack arrays (flag on):  fafa1122fcfc
+Legacy-marked arrays:   fafa1122fcfc

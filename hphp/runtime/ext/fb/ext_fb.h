@@ -31,7 +31,8 @@ Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
                       bool& success,
                       int64_t options = 0);
-Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
+Variant HHVM_FUNCTION(
+    fb_compact_serialize, const Variant& thing, int64_t options = 0);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, bool& success,
                       Variant& errcode);
@@ -66,7 +67,7 @@ Variant fb_unserialize(const char* str,
                        int len,
                        bool& success,
                        int64_t options);
-String fb_compact_serialize(const Variant& thing);
+String fb_compact_serialize(const Variant& thing, int64_t options);
 Variant fb_compact_unserialize(const char* str, int len,
                                bool& success,
                                Variant& errcode);

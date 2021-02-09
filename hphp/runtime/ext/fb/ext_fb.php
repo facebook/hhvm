@@ -41,10 +41,15 @@ function fb_unserialize(mixed $thing,
  * &$a) will become array($a, $a).
  * @param mixed $thing - What to serialize. Note that objects are not
  * supported.
+ * @param options bitmask of options:
+ *  - FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS: use the legacy encoding format
+ *    for vecs and dicts, matching varrays and darrays. This format is always
+ *    more compact than the Hack array format, and produces the same darray
+ *    results on deserialization, so we want to make it the new default.
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native, __Pure>>
-function fb_compact_serialize(mixed $thing): mixed;
+function fb_compact_serialize(mixed $thing, int $options = 0): mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.
  * @param mixed $thing - What to unserialize.

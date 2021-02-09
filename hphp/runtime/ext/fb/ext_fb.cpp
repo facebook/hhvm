@@ -58,6 +58,9 @@ const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
 const int64_t k_FB_SERIALIZE_VARRAY_DARRAY = 1<<2;
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS = 1<<3;
 
+// fb_compact_serialize options
+const int64_t FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS = 1 << 0;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
@@ -384,8 +387,30 @@ static void fb_compact_serialize_string(StringBuffer& sb, const String& str) {
   }
 }
 
-static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit) {
-  index_limit = arr.size();
+static bool fb_compact_serialize_is_list(
+    const Array& arr, int64_t& index_limit, int64_t options) {
+  index_limit = arr->size();
+  auto const dt = arr->toDataType();
+  assertx(isVecOrVArrayType(dt) || isDictOrDArrayType(dt));
+  auto const is_php_array = isPHPArrayType(dt);
+
+  // fb_compact_serialize has slightly different formats for dicts and darrays,
+  // and for vecs and varrays. We can address these format differences either
+  // by monomorphizing the sink (via the option) or by marking the input array.
+  auto const force_legacy_format =
+    (options & FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS) ||
+    arr->isLegacyArray();
+  if (!force_legacy_format && is_php_array) {
+    maybe_raise_array_serialization_notice(
+      SerializationSite::FBCompactSerialize, arr.get());
+  }
+
+  if (isVecOrVArrayType(dt)) {
+    // Encode empty vecs as lists and empty varrays as maps. It doesn't affect
+    // the encoding size or the decoding result so it doesn't matter too much.
+    return !arr->empty() || !(force_legacy_format || is_php_array);
+  }
+
   int64_t max_index = 0;
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
@@ -407,18 +432,19 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
   }
 
   index_limit = max_index + 1;
-  return true;
+  return force_legacy_format || is_php_array;
 }
 
 static int fb_compact_serialize_variant(
-  StringBuffer& sd, const Variant& var, int depth);
+  StringBuffer& sd, const Variant& var, int depth, int64_t options);
 
 static void fb_compact_serialize_array_as_list_map(
-    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
+    StringBuffer& sb, const Array& arr, int64_t index_limit,
+    int depth, int64_t options) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sb, arr[i], depth + 1);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1, options);
     } else {
       fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
@@ -426,20 +452,8 @@ static void fb_compact_serialize_array_as_list_map(
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
-static void fb_compact_serialize_vec(
-    StringBuffer& sb, const Array& arr, int depth) {
-  fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
-  IterateV(
-    arr.get(),
-    [&](TypedValue v) {
-      fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
-    }
-  );
-  fb_compact_serialize_code(sb, FB_CS_STOP);
-}
-
 static void fb_compact_serialize_array_as_map(
-    StringBuffer& sb, const Array& arr, int depth) {
+    StringBuffer& sb, const Array& arr, int depth, int64_t options) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   IterateKV(
     arr.get(),
@@ -450,7 +464,7 @@ static void fb_compact_serialize_array_as_map(
         assertx(isIntType(k.m_type));
         fb_compact_serialize_int64(sb, k.m_data.num);
       }
-      fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
+      fb_compact_serialize_variant(sb, VarNR(v), depth + 1, options);
     }
   );
   fb_compact_serialize_code(sb, FB_CS_STOP);
@@ -476,7 +490,7 @@ static void fb_compact_serialize_keyset(
 }
 
 static int fb_compact_serialize_variant(
-    StringBuffer& sb, const Variant& var, int depth) {
+    StringBuffer& sb, const Variant& var, int depth, int64_t options) {
   if (depth > 256) {
     return 1;
   }
@@ -514,22 +528,6 @@ static int fb_compact_serialize_variant(
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
-    case KindOfPersistentVec:
-    case KindOfVec: {
-      Array arr = var.toArray();
-      assertx(arr->isVecType());
-      fb_compact_serialize_vec(sb, std::move(arr), depth);
-      return 0;
-    }
-
-    case KindOfPersistentDict:
-    case KindOfDict: {
-      Array arr = var.toArray();
-      assertx(arr->isDictType());
-      fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
-      return 0;
-    }
-
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       Array arr = var.toArray();
@@ -541,33 +539,25 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray: {
+    case KindOfVArray:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentVec:
+    case KindOfVec: {
       Array arr = var.toArray();
-      assertx(arr->isPHPArrayType());
       int64_t index_limit;
-      maybe_raise_array_serialization_notice(
-        SerializationSite::FBCompactSerialize, arr.get());
-      if (fb_compact_serialize_is_list(arr, index_limit)) {
+      if (fb_compact_serialize_is_list(arr, index_limit, options)) {
         fb_compact_serialize_array_as_list_map(
-          sb, std::move(arr), index_limit, depth);
+          sb, std::move(arr), index_limit, depth, options);
       } else {
-        fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
+        fb_compact_serialize_array_as_map(sb, std::move(arr), depth, options);
       }
       return 0;
     }
 
     case KindOfClsMeth: {
       Array arr = var.toArray();
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecType());
-        fb_compact_serialize_vec(sb, std::move(arr), depth);
-      } else {
-        assertx(arr->isPHPArrayType());
-        int64_t index_limit;
-        fb_compact_serialize_is_list(arr, index_limit);
-        fb_compact_serialize_array_as_list_map(
-          sb, std::move(arr), index_limit, depth);
-      }
+      fb_compact_serialize_variant(sb, VarNR(arr), depth, options);
       return 0;
     }
 
@@ -597,7 +587,7 @@ static int fb_compact_serialize_variant(
   return 1;
 }
 
-String fb_compact_serialize(const Variant& thing) {
+String fb_compact_serialize(const Variant& thing, int64_t options) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -618,15 +608,16 @@ String fb_compact_serialize(const Variant& thing) {
   }
 
   StringBuffer sb;
-  if (fb_compact_serialize_variant(sb, thing, 0)) {
+  if (fb_compact_serialize_variant(sb, thing, 0, options)) {
     return String();
   }
 
   return sb.detach();
 }
 
-Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing) {
-  return fb_compact_serialize(thing);
+Variant HHVM_FUNCTION(
+    fb_compact_serialize, const Variant& thing, int64_t options) {
+  return fb_compact_serialize(thing, options);
 }
 
 /* Check if there are enough bytes left in the buffer */
@@ -1318,6 +1309,8 @@ struct FBExtension : Extension {
     HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS,
                 k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+
+    HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

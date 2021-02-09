@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
 
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -1915,13 +1916,19 @@ bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
 
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
+  auto& coeffects = m_func->staticCoeffects;
+  bool isPureBody =
+    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isPure);
+  bool isRxBody =
+    std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isAnyRx);
+
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
-                         (m_func->attrs & AttrRxBody) &&
+                         isRxBody &&
                          // defer this to next check
-                         !(m_func->attrs & AttrPureBody) &&
+                         !isPureBody &&
                          !m_func->isRxDisabled;
   auto const verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
-                           (m_func->attrs & AttrPureBody);
+                           isPureBody;
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, m_func) << std::endl;
   }

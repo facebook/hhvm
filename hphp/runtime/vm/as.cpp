@@ -682,9 +682,13 @@ struct AsmState {
   }
 
   void finishFunction() {
-    if (fe->isRxDisabled &&
-        (!(fe->attrs & AttrRxBody) || (fe->attrs & AttrPureBody))) {
-      error("isRxDisabled on non-rx func");
+    if (fe->isRxDisabled) {
+      auto& coeffects = fe->staticCoeffects;
+      bool isPureBody =
+        std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isPure);
+      bool isRxBody =
+        std::any_of(coeffects.begin(), coeffects.end(), CoeffectsConfig::isAnyRx);
+      if (!isRxBody || isPureBody) error("isRxDisabled on non-rx func");
     }
 
     finishSection();
@@ -1880,9 +1884,7 @@ void parse_coeffects_static(AsmState& as) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
-    as.fe->staticCoeffects |= CoeffectsConfig::fromName(name);
-    if (CoeffectsConfig::isPure(name)) as.fe->attrs |= AttrPureBody;
-    if (CoeffectsConfig::isAnyRx(name)) as.fe->attrs |= AttrRxBody;
+    as.fe->staticCoeffects.push_back(name);
   }
   as.in.expectWs(';');
 }

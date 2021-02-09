@@ -76,6 +76,7 @@ struct FuncEmitter {
   typedef std::vector<EHEnt> EHEntVec;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
+  using StaticCoeffectsVec = std::vector<std::string>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -296,13 +297,13 @@ public:
   Attr attrs;
 
   ParamInfoVec params;
-  StaticCoeffects staticCoeffects{StaticCoeffects::none()};
   int16_t maxStackCells{0};
 
   MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
   UpperBoundVec retUpperBounds;
+  StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 
   EHEntVec ehtab;

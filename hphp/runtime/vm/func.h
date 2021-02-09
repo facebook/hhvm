@@ -65,6 +65,8 @@ using ArFunction = TypedValue* (*)(ActRec* ar);
 struct NativeArgs; // never defined
 using NativeFunction = void(*)(NativeArgs*);
 
+using StaticCoeffectNamesMap = CompactVector<std::string>;
+
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
 
@@ -799,6 +801,12 @@ struct Func final {
   // Coeffects.                                                        [const]
 
   /*
+   * Names of the static coeffects on the function
+   * Used for reflection
+   */
+  StaticCoeffectNamesMap staticCoeffectNames() const;
+
+  /*
    * Is this the version of the function body with reactivity disabled via
    * if (Rx\IS_ENABLED) ?
    */
@@ -1241,6 +1249,7 @@ private:
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
     EHEntVec m_ehtab;
+    StaticCoeffectNamesMap m_staticCoeffectNames;
 
     /*
      * Up to 16 bits.

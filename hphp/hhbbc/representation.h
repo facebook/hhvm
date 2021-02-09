@@ -285,7 +285,6 @@ struct Func : FuncBase {
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;
-  StaticCoeffects staticCoeffects{StaticCoeffects::none()};
 
   /*
    * Parameters and locals.
@@ -401,8 +400,9 @@ struct Func : FuncBase {
   UserAttributeMap userAttributes;
 
   /*
-   * List of all coeffect rules
+   * Lists of all static coeffect names and coeffect rules
    */
+  CompactVector<std::string> staticCoeffects;
   CompactVector<CoeffectRule> coeffectRules;
 };
 

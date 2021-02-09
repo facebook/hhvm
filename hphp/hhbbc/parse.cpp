@@ -671,7 +671,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   ret->attrs              = static_cast<Attr>((fe.attrs & ~AttrNoOverride) |
                                               AttrUnique | AttrPersistent);
-  ret->staticCoeffects    = fe.staticCoeffects;
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;
@@ -697,6 +696,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     return false;
   }();
 
+  for (auto& name : fe.staticCoeffects) ret->staticCoeffects.push_back(name);
   for (auto& rule : fe.coeffectRules) ret->coeffectRules.push_back(rule);
 
   ret->sampleDynamicCalls = [&] {

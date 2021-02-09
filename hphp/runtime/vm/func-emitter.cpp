@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/func-emitter.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
 
@@ -255,7 +256,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
   f->m_isPreFunc = !!preClass;
-  f->m_staticCoeffects = staticCoeffects;
 
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
@@ -298,6 +298,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
       f->shared()->m_allFlags.m_hasCoeffectRules = true;
     }
   }
+
+  auto coeffects = StaticCoeffects::none();
+  for (auto const& name : staticCoeffects) {
+    f->shared()->m_staticCoeffectNames.push_back(name);
+    coeffects |= CoeffectsConfig::fromName(name);
+  }
+  f->m_staticCoeffects = coeffects;
+
 
   std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < params.size(); ++i) {

@@ -424,8 +424,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
-  if (auto const coeffect = func->staticCoeffects().toString()) {
-    out.fmtln(".static_coeffects {};", *coeffect);
+  auto const coeffects = func->staticCoeffectNames();
+  if (!coeffects.empty()) {
+    out.fmtln(".static_coeffects {};", folly::join(" ", coeffects));
   }
   if (func->hasCoeffectRules()) {
     for (auto const& rule : func->getCoeffectRules()) {

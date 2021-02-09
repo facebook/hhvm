@@ -1136,9 +1136,9 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isRxDisabled = func.isRxDisabled;
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
   fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
-  fe.staticCoeffects = func.staticCoeffects;
 
-  for (auto& rule : func.coeffectRules) fe.coeffectRules.push_back(rule);
+  for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
+  for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(BBottom)) {

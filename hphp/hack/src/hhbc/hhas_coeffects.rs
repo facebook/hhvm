@@ -66,6 +66,7 @@ pub struct HhasCtxConstant {
 #[derive(Clone, Debug, Default, ToOcamlRep, FromOcamlRep)]
 pub struct HhasCoeffects {
     static_coeffects: Vec<Ctx>,
+    unenforced_static_coeffects: Vec<String>,
     fun_param: Vec<usize>,
     cc_param: Vec<(usize, String)>,
     cc_this: Vec<String>,
@@ -83,11 +84,17 @@ impl HhasCoeffects {
 
     pub fn coeffects_to_hhas(coeffects: &Self) -> Vec<String> {
         let mut results = vec![];
-        if let Some(str) =
-            HhasCoeffects::vec_to_string(coeffects.get_static_coeffects(), |c| c.to_string())
-        {
-            results.push(format!(".coeffects_static {};", str));
-        }
+        let static_coeffect =
+            HhasCoeffects::vec_to_string(coeffects.get_static_coeffects(), |c| c.to_string());
+        let unenforced_static_coeffects =
+            HhasCoeffects::vec_to_string(coeffects.get_unenforced_static_coeffects(), |c| {
+                c.to_string()
+            });
+        match (static_coeffect, unenforced_static_coeffects) {
+            (None, None) => {}
+            (Some(s), None) | (None, Some(s)) => results.push(format!(".coeffects_static {};", s)),
+            (Some(s1), Some(s2)) => results.push(format!(".coeffects_static {} {};", s1, s2)),
+        };
         if let Some(str) =
             HhasCoeffects::vec_to_string(coeffects.get_fun_param(), |c| c.to_string())
         {
@@ -149,6 +156,7 @@ impl HhasCoeffects {
         params: impl AsRef<[a::FunParam<Ex, Fb, En, Hi>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
+        let mut unenforced_static_coeffects = vec![];
         let mut fun_param = vec![];
         let mut cc_param = vec![];
         let mut cc_this = vec![];
@@ -192,6 +200,8 @@ impl HhasCoeffects {
                     Hint_::Happly(Id(_, id), _) => {
                         if let Some(c) = HhasCoeffects::from_type_static(ctx) {
                             static_coeffects.push(c)
+                        } else {
+                            unenforced_static_coeffects.push(strip_ns(id.as_str()).to_string());
                         }
                         if let c::RX_LOCAL | c::RX_SHALLOW | c::RX = strip_ns(id.as_str()) {
                             is_any_rx = true;
@@ -220,6 +230,7 @@ impl HhasCoeffects {
 
         Self {
             static_coeffects,
+            unenforced_static_coeffects,
             fun_param,
             cc_param,
             cc_this,
@@ -230,6 +241,10 @@ impl HhasCoeffects {
 
     pub fn get_static_coeffects(&self) -> &[Ctx] {
         self.static_coeffects.as_slice()
+    }
+
+    pub fn get_unenforced_static_coeffects(&self) -> &[String] {
+        self.unenforced_static_coeffects.as_slice()
     }
 
     pub fn get_fun_param(&self) -> &[usize] {

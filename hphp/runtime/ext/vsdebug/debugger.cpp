@@ -1738,20 +1738,20 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
       !bpMgr->warningSentForBp(bpId)) {
 
     compilationUnit->forEachFunc([&](const Func* func) {
-      if (functionName == "" &&
-          func != nullptr &&
+      if (func != nullptr &&
           func->name() != nullptr &&
           func->line1() <= lines.first &&
           func->line2() >= lines.second) {
-
-          std::string cls =
-            func->cls() != nullptr && func->cls()->name() != nullptr
-              ? std::string(func->cls()->name()->data()) + "::"
-              : "";
-          functionName = cls;
-          functionName += func->name()->data();
-          function = func;
+        std::string cls =
+          func->cls() != nullptr && func->cls()->name() != nullptr
+            ? std::string(func->cls()->name()->data()) + "::"
+            : "";
+        functionName = cls;
+        functionName += func->name()->data();
+        function = func;
+        return true;
       }
+      return false;
     });
 
     if (function != nullptr &&
@@ -1799,25 +1799,28 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
   };
 
   std::set<SourceLoc, sourceLocCompare> candidateLocations;
-  const auto& table = SourceLocation::getLocTable(unit);
-  for (auto const& tableEntry : table) {
-    const SourceLoc& sourceLocation = tableEntry.val();
+  unit->forEachFunc([&](const Func* func) {
+    const auto& table = func->getLocTable();
+    for (auto const& tableEntry : table) {
+      const SourceLoc& sourceLocation = tableEntry.val();
 
-    // If this source location is invalid, ends before the line we are
-    // looking for, or starts before the line we are looking for there
-    // is no match. Exception: if it is a multi-line statement that begins
-    // before the target line and ends ON the target line, that is a match
-    // to allow, for example, setting a breakpoint on the line containing
-    // a closing paren for a multi-line function call.
-    if (!sourceLocation.valid() ||
-        sourceLocation.line1 < bpLine ||
-        (sourceLocation.line0 < bpLine && sourceLocation.line1 != bpLine)) {
+      // If this source location is invalid, ends before the line we are
+      // looking for, or starts before the line we are looking for there
+      // is no match. Exception: if it is a multi-line statement that begins
+      // before the target line and ends ON the target line, that is a match
+      // to allow, for example, setting a breakpoint on the line containing
+      // a closing paren for a multi-line function call.
+      if (!sourceLocation.valid() ||
+          sourceLocation.line1 < bpLine ||
+          (sourceLocation.line0 < bpLine && sourceLocation.line1 != bpLine)) {
 
-      continue;
+        continue;
+      }
+
+      candidateLocations.insert(sourceLocation);
     }
-
-    candidateLocations.insert(sourceLocation);
-  }
+    return false;
+  });
 
   if (candidateLocations.size() > 0) {
     const auto it = candidateLocations.begin();

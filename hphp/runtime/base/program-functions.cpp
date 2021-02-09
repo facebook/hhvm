@@ -1438,22 +1438,27 @@ static void set_stack_size() {
 
 std::vector<int> get_executable_lines(const Unit* compiled) {
   std::vector<int> lines;
-  auto loadedTable = LineTable{};
-  auto lineTable = SourceLocation::getLineTable(compiled);
 
-  if (!lineTable) {
-    // If it's not in the repo we have no line information to return.
-    if (compiled->repoID() == RepoIdInvalid) return lines;
+  compiled->forEachFunc([&](const Func* func) {
+    auto loadedTable = LineTable{};
+    auto lineTable = func->getLineTable();
 
-    // Don't do loadLineTable here to avoid storing the line table in the cache,
-    // we likely won't access it again.
-    auto& urp = Repo::get().urp();
-    urp.getUnitLineTable[compiled->repoID()].get(compiled->sn(), loadedTable);
-    lineTable = &loadedTable;
-  }
+    if (!lineTable) {
+      // If it's not in the repo we have no line information for this func so just continue.
+      if (compiled->repoID() == RepoIdInvalid) return false;
 
-  lines.reserve(lineTable->size());
-  for (auto& ent : *lineTable) lines.push_back(ent.val());
+      // Don't do loadLineTable here to avoid storing the line table in the cache,
+      // we likely won't access it again.
+      auto& frp = Repo::get().frp();
+      frp.getFuncLineTable[compiled->repoID()].get(compiled->sn(), func->sn(), loadedTable);
+      lineTable = &loadedTable;
+    }
+
+    lines.reserve(lines.size() + lineTable->size());
+    for (auto& ent : *lineTable) lines.push_back(ent.val());
+    return false;
+  });
+
   std::sort(lines.begin(), lines.end());
   auto const last = std::unique(lines.begin(), lines.end());
   lines.erase(last, lines.end());

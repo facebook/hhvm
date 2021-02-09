@@ -1628,7 +1628,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* Record source location. */                                      \
-    as.ue->recordSourceLocation(as.srcLoc, curOpcodeOff);              \
+    as.fe->recordSourceLocation(as.srcLoc, curOpcodeOff);              \
                                                                        \
     /* Retain stack depth after calls to exit */                       \
     if ((instrFlags(thisOpcode) & InstrFlags::TF) &&                   \

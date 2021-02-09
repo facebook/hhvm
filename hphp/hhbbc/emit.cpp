@@ -253,7 +253,7 @@ ExnNodeId commonParent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
 const StaticString
   s_hhbbc_fail_verification("__hhvm_intrinsics\\hhbbc_fail_verification");
 
-EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue,
+EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& fe,
                          const php::WideFunc& func) {
   EmitBcInfo ret = {};
   auto& blockInfo = ret.blockInfo;
@@ -382,7 +382,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue,
       auto const loc = sl.isValid() ?
         Location::Range(sl.start.line, sl.start.col, sl.past.line, sl.past.col)
         : Location::Range(-1,-1,-1,-1);
-      ue.recordSourceLocation(loc, startOffset);
+      fe.recordSourceLocation(loc, startOffset);
     };
 
     auto pop = [&] (int32_t n) {
@@ -1218,7 +1218,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   renumber_locals(f);
   emit_init_func(fe, f);
   auto func = php::WideFunc::mut(&f);
-  auto const info = emit_bytecode(state, ue, func);
+  auto const info = emit_bytecode(state, ue, fe, func);
   emit_finish_func(state, fe, func, info);
 }
 

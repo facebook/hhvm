@@ -366,21 +366,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
 
-  /*
-   * Get the line number corresponding to `pc'.
-   *
-   * Return -1 if not found.
-   */
-  int getLineNumberHelper(Offset pc) const;
-
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
-
-  /*
-   * Get next line with executable code starting from input `line'.
-   *
-   * Return -1 if not found.
-   */
-  int getNearestLineWithCode(int line) const;
 
   /*
    * Return the Func* for the code at offset `pc'.
@@ -782,7 +768,6 @@ private:
   SHA1 m_sha1;
   SHA1 m_bcSha1;
   VMFixedVector<const ArrayData*> m_arrays;
-  mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};

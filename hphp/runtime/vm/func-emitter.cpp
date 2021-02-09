@@ -92,6 +92,72 @@ FuncEmitter::~FuncEmitter() {
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Source locations.
+
+SourceLocTable FuncEmitter::createSourceLocTable() const {
+  assertx(m_sourceLocTab.size() != 0);
+  SourceLocTable locations;
+  for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
+    Offset endOff = i < m_sourceLocTab.size() - 1
+      ? m_sourceLocTab[i + 1].first
+      : past;
+    locations.push_back(SourceLocEntry(endOff, m_sourceLocTab[i].second));
+  }
+  return locations;
+}
+
+namespace {
+
+using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;
+
+/*
+ * Create a LineTable from `srcLoc'.
+ */
+LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
+  LineTable lines;
+  if (srcLoc.empty()) {
+    return lines;
+  }
+
+  auto prev = srcLoc.begin();
+  for (auto it = prev + 1; it != srcLoc.end(); ++it) {
+    if (prev->second.line1 != it->second.line1) {
+      lines.push_back(LineEntry(it->first, prev->second.line1));
+      prev = it;
+    }
+  }
+
+  lines.push_back(LineEntry(bclen, prev->second.line1));
+  return lines;
+}
+
+}
+
+void FuncEmitter::recordSourceLocation(const Location::Range& sLoc,
+                                       Offset start) {
+  // Some byte codes, such as for the implicit "return 0" at the end of a
+  // a source file do not have valid source locations. This check makes
+  // sure we don't record a (dummy) source location in this case.
+  if (start > base && sLoc.line0 == -1) return;
+  SourceLoc newLoc(sLoc);
+  if (!m_sourceLocTab.empty()) {
+    if (m_sourceLocTab.back().second == newLoc) {
+      // Combine into the interval already at the back of the vector.
+      assertx(start >= m_sourceLocTab.back().first);
+      return;
+    }
+    assertx(m_sourceLocTab.back().first < start &&
+           "source location offsets must be added to UnitEmitter in "
+           "increasing order");
+  } else {
+    // First record added should be for bytecode offset zero or very rarely one
+    // when the source starts with a label and a Nop is inserted.
+    assertx(start == base || start == base + 1);
+  }
+  m_sourceLocTab.push_back(std::make_pair(start, newLoc));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
 void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_,
@@ -110,19 +176,37 @@ void FuncEmitter::finish(Offset past_) {
   sortEHTab();
 }
 
-void FuncEmitter::commit(RepoTxn& txn) const {
+void FuncEmitter::commit(RepoTxn& txn) {
   Repo& repo = Repo::get();
   FuncRepoProxy& frp = repo.frp();
   int repoId = m_ue.m_repoId;
   int64_t usn = m_ue.m_sn;
 
+  if (!m_sourceLocTab.empty()) {
+    m_lineTable = createLineTable(m_sourceLocTab, past);
+  }
+
   frp.insertFunc[repoId]
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name);
+
+  frp.insertFuncLineTable[repoId].insert(txn, usn, m_sn, m_lineTable);
+
+  if (RuntimeOption::RepoDebugInfo) {
+    for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
+      SourceLoc& e = m_sourceLocTab[i].second;
+      Offset endOff = i < m_sourceLocTab.size() - 1
+                          ? m_sourceLocTab[i + 1].first
+                          : past;
+
+      frp.insertFuncSourceLoc[repoId]
+          .insert(txn, usn, m_sn, endOff, e.line0, e.char0, e.line1, e.char1);
+    }
+  }
 }
 
 const StaticString s_DynamicallyCallable("__DynamicallyCallable");
 
-Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
+Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool saveLineTable) const {
   bool isGenerated = isdigit(name->data()[0]);
 
   auto attrs = fix_attrs(this->attrs);
@@ -272,6 +356,30 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     assertx(tvIsHAMSafeVArray(tv));
     f->extShared()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  }
+
+  /*
+   * What's going on is we're going to have a m_lineTable if this FuncEmitter
+   * was loaded from the repo, and no m_sourceLocTab (it's demand-loaded by
+   * func.cpp because it's only used for the debugger).  Don't bother creating
+   * the line table here, because we can retrieve it from the repo later.
+   *
+   * On the other hand, if this unit was just created by parsing a php file (or
+   * whatnot) which was not committed to the repo, we'll have a m_sourceLocTab.
+   * In this case we should populate m_lineTable (otherwise we might lose line
+   * info altogether, since it may not be backed by a repo).
+   */
+  if (m_sourceLocTab.size() != 0) {
+    f->stashLineTable(createLineTable(m_sourceLocTab, past));
+    // If the debugger is enabled, or we plan to dump hhas we will
+    // need the extended line table information in the output, and if
+    // we're not writing the repo, stashing it here is necessary for
+    // it to make it through.
+    if (needs_extended_line_table()) {
+      f->stashExtendedLineTable(createSourceLocTable());
+    }
+  } else if (saveLineTable) {
+    f->stashLineTable(m_lineTable);
   }
 
   if (isNative) {
@@ -564,19 +672,40 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
 FuncRepoProxy::FuncRepoProxy(Repo& repo)
     : RepoProxy(repo),
       insertFunc{InsertFuncStmt(repo, 0), InsertFuncStmt(repo, 1)},
-      getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)}
+      getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)},
+      insertFuncLineTable{InsertFuncLineTableStmt(repo, 0), InsertFuncLineTableStmt(repo, 1)},
+      getFuncLineTable{GetFuncLineTableStmt(repo, 0), GetFuncLineTableStmt(repo, 1)},
+      insertFuncSourceLoc{InsertFuncSourceLocStmt(repo, 0), InsertFuncSourceLocStmt(repo, 1)},
+      getSourceLocTab{GetSourceLocTabStmt(repo, 0), GetSourceLocTabStmt(repo, 1)}
 {}
 
 FuncRepoProxy::~FuncRepoProxy() {
 }
 
 void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  auto createQuery = folly::sformat(
-    "CREATE TABLE {} "
-    "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
-    " extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
-    m_repo.table(repoId, "Func"));
-  txn.exec(createQuery);
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
+      " extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
+      m_repo.table(repoId, "Func"));
+    txn.exec(createQuery);
+  }
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, funcSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
+      " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
+      " PRIMARY KEY (unitSn, funcSn, pastOffset));",
+      m_repo.table(repoId, "FuncSourceLoc"));
+    txn.exec(createQuery);
+  }
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} (unitSn INTEGER, funcSn INTEGER, data BLOB, PRIMARY KEY (unitSn, funcSn));",
+      m_repo.table(repoId, "FuncLineTable"));
+    txn.exec(createQuery);
+  }
 }
 
 void FuncRepoProxy::InsertFuncStmt
@@ -607,10 +736,12 @@ void FuncRepoProxy::GetFuncsStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT funcSn, preClassId, name, extraData "
-      "FROM {} "
-      "WHERE unitSn == @unitSn ORDER BY funcSn ASC;",
-      m_repo.table(m_repoId, "Func"));
+      "SELECT f.funcSn, f.preClassId, f.name, f.extraData, l.data as lineData "
+      "FROM {} AS f "
+      "LEFT JOIN {} as l ON f.unitSn = l.unitSn AND f.funcSn = l.funcSn "
+      "WHERE f.unitSn == @unitSn ORDER BY f.funcSn ASC;",
+      m_repo.table(m_repoId, "Func"),
+      m_repo.table(m_repoId, "FuncLineTable"));
     txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
@@ -641,11 +772,141 @@ void FuncRepoProxy::GetFuncsStmt
           assertx(fe->attrs & AttrUnique);
         }
       }
+
+      BlobDecoder dataBlob = query.getBlob(4, false);
+      dataBlob(
+        fe->m_lineTable,
+        [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
+          return LineEntry {
+            delta.pastOffset() + prev.pastOffset(),
+            delta.val() + prev.val()
+          };
+        }
+      );
+
       fe->setEHTabIsSorted();
       fe->finish(fe->past);
     }
   } while (!query.done());
   txn.commit();
+}
+
+void FuncRepoProxy::InsertFuncLineTableStmt
+                  ::insert(RepoTxn& txn,
+                           int64_t unitSn,
+                           int64_t funcSn,
+                           LineTable& lineTable) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@unitSn, @funcSn, @data);",
+      m_repo.table(m_repoId, "FuncLineTable"));
+    txn.prepare(*this, insertQuery);
+  }
+
+  BlobEncoder dataBlob{false};
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@funcSn", funcSn);
+  dataBlob(
+    lineTable,
+    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
+      return LineEntry {
+        cur.pastOffset() - prev.pastOffset(),
+        cur.val() - prev.val()
+      };
+    }
+  );
+
+  query.bindBlob("@data", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void FuncRepoProxy::GetFuncLineTableStmt::get(int64_t unitSn, int64_t funcSn,
+                                              LineTable& lineTable) {
+  auto txn = RepoTxn{m_repo.begin()};
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT data FROM {} WHERE unitSn == @unitSn AND funcSn == @funcSn;",
+      m_repo.table(m_repoId, "FuncLineTable"));
+    txn.prepare(*this, selectQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@funcSn", funcSn);
+  query.step();
+  if (query.row()) {
+    BlobDecoder dataBlob = query.getBlob(0, false);
+    dataBlob(
+      lineTable,
+      [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
+        return LineEntry {
+          delta.pastOffset() + prev.pastOffset(),
+          delta.val() + prev.val()
+        };
+      }
+    );
+  }
+  txn.commit();
+}
+
+void FuncRepoProxy::InsertFuncSourceLocStmt
+                  ::insert(RepoTxn& txn, int64_t unitSn, int64_t funcSn, Offset pastOffset,
+                           int line0, int char0, int line1, int char1) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} "
+      "VALUES(@unitSn, @funcSn, @pastOffset, @line0, @char0, @line1, @char1);",
+      m_repo.table(m_repoId, "FuncSourceLoc"));
+    txn.prepare(*this, insertQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@funcSn", funcSn);
+  query.bindOffset("@pastOffset", pastOffset);
+  query.bindInt("@line0", line0);
+  query.bindInt("@char0", char0);
+  query.bindInt("@line1", line1);
+  query.bindInt("@char1", char1);
+  query.exec();
+}
+
+RepoStatus
+FuncRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn, int64_t funcSn,
+                                        SourceLocTable& sourceLocTab) {
+  try {
+    auto txn = RepoTxn{m_repo.begin()};
+    if (!prepared()) {
+      auto selectQuery = folly::sformat(
+        "SELECT pastOffset, line0, char0, line1, char1 "
+        "FROM {} "
+        "WHERE unitSn == @unitSn AND funcSn = @funcSn "
+        "ORDER BY pastOffset ASC;",
+        m_repo.table(m_repoId, "FuncSourceLoc"));
+      txn.prepare(*this, selectQuery);
+    }
+    RepoTxnQuery query(txn, *this);
+    query.bindInt64("@unitSn", unitSn);
+    query.bindInt64("@funcSn", funcSn);
+    do {
+      query.step();
+      if (!query.row()) {
+        return RepoStatus::error;
+      }
+      Offset pastOffset;
+      query.getOffset(0, pastOffset);
+      SourceLoc sLoc;
+      query.getInt(1, sLoc.line0);
+      query.getInt(2, sLoc.char0);
+      query.getInt(3, sLoc.line1);
+      query.getInt(4, sLoc.char1);
+      SourceLocEntry entry(pastOffset, sLoc);
+      sourceLocTab.push_back(entry);
+    } while (!query.done());
+    txn.commit();
+  } catch (RepoExc& re) {
+    return RepoStatus::error;
+  }
+  return RepoStatus::success;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

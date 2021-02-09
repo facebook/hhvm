@@ -147,8 +147,6 @@ Unit::~Unit() {
     data_map::deregister(this);
   }
 
-  SourceLocation::removeUnit(this);
-
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
       // poison released bytecode
@@ -201,82 +199,23 @@ void Unit::operator delete(void* p, size_t /*sz*/) {
   low_free(p);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
-int Unit::getLineNumberHelper(Offset pc) const {
-  if (UNLIKELY(m_repoId == RepoIdInvalid)) {
-    auto const lineTable = SourceLocation::getLineTable(this);
-    return lineTable ? SourceLocation::getLineNumber(*lineTable, pc) : -1;
-  }
-
-  auto findLine = [&] {
-    // lineMap is an atomically acquired bitwise copy of m_lineMap,
-    // with no destructor
-    auto lineMap(m_lineMap.get());
-    if (lineMap->empty()) return INT_MIN;
-    auto const it = std::upper_bound(
-      lineMap->begin(), lineMap->end(),
-      pc,
-      [] (Offset info, const LineInfo& elm) {
-        return info < elm.first.past;
-      }
-    );
-    if (it != lineMap->end() && it->first.base <= pc) return it->second;
-    return INT_MIN;
-  };
-
-  auto line = findLine();
-  if (line != INT_MIN) return line;
-
-  // Updating m_lineMap while coverage is enabled can cause the treadmill to
-  // fill with an enormous number of resized maps.
-  if (UNLIKELY(g_context && (isCoverageEnabled() || RID().getCoverage()))) {
-    return SourceLocation::getLineNumber(SourceLocation::loadLineTable(this), pc);
-  }
-
-  m_lineMap.lock_for_update();
-  try {
-    line = findLine();
-    if (line != INT_MIN) {
-      m_lineMap.unlock();
-      return line;
-    }
-
-    auto const info = SourceLocation::getLineInfo(SourceLocation::loadLineTable(this), pc);
-    auto copy = m_lineMap.copy();
-    auto const it = std::upper_bound(
-      copy.begin(), copy.end(),
-      info,
-      [&] (const LineInfo& a, const LineInfo& b) {
-        return a.first.base < b.first.past;
-      }
-    );
-    assertx(it == copy.end() || (it->first.past > pc && it->first.base > pc));
-    copy.insert(it, info);
-    auto old = m_lineMap.update_and_unlock(std::move(copy));
-    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
-    return info.second;
-  } catch (...) {
-    m_lineMap.unlock();
-    throw;
-  }
-}
-
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   assertx(offsets.size() == 0);
-  auto map = SourceLocation::getLineToOffsetRangeVecMap(this);
-  auto it = map.find(line);
-  if (it == map.end()) return false;
-  offsets = it->second;
-  return true;
-}
+  forEachFunc([&](const Func* func) {
+    // Quickly ignore functions that can't have that line in them
+    if (line < func->line1() || line > func->line2()) return false;
 
-int Unit::getNearestLineWithCode(int line) const {
-  auto map = SourceLocation::getLineToOffsetRangeVecMap(this);
-  auto it = map.lower_bound(line);
-  return it == map.end() ? -1 : it->first;
+    auto map = func->getLineToOffsetRangeVecMap();
+    auto it = map.find(line);
+    if (it != map.end()) {
+      offsets.insert(offsets.end(), it->second.begin(), it->second.end());
+    }
+    return false;
+  });
+  return offsets.size() != 0;
 }
 
 const Func* Unit::getFunc(Offset pc) const {

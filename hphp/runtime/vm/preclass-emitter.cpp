@@ -258,7 +258,7 @@ const StaticString
   s_nativedata("__nativedata"),
   s_DynamicallyConstructible("__DynamicallyConstructible");
 
-PreClass* PreClassEmitter::create(Unit& unit) const {
+PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
       !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
@@ -324,7 +324,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
-    Func* f = (*it)->create(unit, pc.get());
+    Func* f = (*it)->create(unit, pc.get(), saveLineTable);
     if (f->attrs() & AttrTrait) {
       if (pc->m_numDeclMethods == -1) {
         pc->m_numDeclMethods = it - m_methods.begin();

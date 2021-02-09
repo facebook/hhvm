@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/type-string.h"
@@ -50,6 +51,7 @@ struct NativeFunctionInfo;
  * Bag of Func's fields used to emit Funcs.
  */
 struct FuncEmitter {
+  friend struct FuncRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -93,15 +95,16 @@ struct FuncEmitter {
   /*
    * Commit this function to a repo.
    */
-  void commit(RepoTxn& txn) const; // throws(RepoExc)
+  void commit(RepoTxn& txn); // throws(RepoExc)
 
   /*
    * Instantiate a runtime Func*.
    */
-  Func* create(Unit& unit, PreClass* preClass = nullptr) const;
+  Func* create(Unit& unit, PreClass* preClass = nullptr, bool saveLineTable = false) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
+  template<class SerDe> void serdeLineTable(SerDe&);
 
   /////////////////////////////////////////////////////////////////////////////
   // Metadata.
@@ -238,6 +241,37 @@ public:
   Offset offsetOf(const unsigned char* pc) const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Source locations.
+
+  /*
+   * Return a copy of the SrcLocTable for the Func, if it has one; otherwise,
+   * return an empty table.
+   */
+  SourceLocTable createSourceLocTable() const;
+
+  /*
+   * Does this Func contain full source location information?
+   *
+   * Generally, FuncEmitters loaded from a production repo will have a
+   * LineTable only instead of a full SourceLocTable.
+   */
+  bool hasSourceLocInfo() const;
+
+  /*
+   * Const reference to the Func's LineTable.
+   */
+  const LineTable& lineTable() const;
+
+  /*
+   * Record source location information for the last chunk of bytecode added to
+   * this FuncEmitter.
+   *
+   * Adjacent regions associated with the same source line will be collapsed as
+   * this is created.
+   */
+  void recordSourceLocation(const Location::Range& sLoc, Offset start);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 private:
@@ -311,6 +345,21 @@ private:
   Id m_numIterators;
   Id m_nextFreeIterator;
   bool m_ehTabSorted;
+
+  /*
+   * Source location tables.
+   *
+   * Each entry encodes an open-closed range of bytecode offsets.
+   *
+   * The m_sourceLocTab is keyed by the start of each half-open range.  This is
+   * to allow appending new bytecode offsets that are part of the same range to
+   * coalesce.
+   *
+   * The m_lineTable is keyed by the past-the-end offset.  This is the
+   * format we'll want it in when we go to create a Unit.
+   */
+  std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
+  LineTable m_lineTable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -338,8 +387,34 @@ struct FuncRepoProxy : public RepoProxy {
     void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
+  struct InsertFuncLineTableStmt : public RepoProxy::Stmt {
+    InsertFuncLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn,
+                int64_t unitSn,
+                int64_t funcSn,
+                LineTable& lineTable); // throws(RepoExc)
+  };
+  struct GetFuncLineTableStmt : public RepoProxy::Stmt {
+    GetFuncLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(int64_t unitSn, int64_t funcSn, LineTable& lineTable);
+  };
+
+  struct InsertFuncSourceLocStmt : public RepoProxy::Stmt {
+    InsertFuncSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn, int64_t funcSn, Offset pastOffset, int line0,
+                int char0, int line1, int char1); // throws(RepoExc)
+  };
+  struct GetSourceLocTabStmt : public RepoProxy::Stmt {
+    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    RepoStatus get(int64_t unitSn, int64_t funcSn, SourceLocTable& sourceLocTab);
+  };
+
   InsertFuncStmt insertFunc[RepoIdCount];
   GetFuncsStmt getFuncs[RepoIdCount];
+  InsertFuncLineTableStmt insertFuncLineTable[RepoIdCount];
+  GetFuncLineTableStmt getFuncLineTable[RepoIdCount];
+  InsertFuncSourceLocStmt insertFuncSourceLoc[RepoIdCount];
+  GetSourceLocTabStmt getSourceLocTab[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

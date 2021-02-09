@@ -652,6 +652,12 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                       php::Unit* unit,
                                       php::Class* cls,
                                       const FuncEmitter& fe) {
+  if (fe.hasSourceLocInfo()) {
+    puState.srcLocInfo = fe.createSourceLocTable();
+  } else {
+    puState.srcLocInfo = fe.lineTable();
+  }
+
   FTRACE(2, "  func: {}\n",
     fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
 
@@ -1105,11 +1111,6 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   }
 
   ParseUnitState puState{ prog.nextFuncId };
-  if (ue.hasSourceLocInfo()) {
-    puState.srcLocInfo = ue.createSourceLocTable();
-  } else {
-    puState.srcLocInfo = ue.lineTable();
-  }
 
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {
     auto cls = parse_class(puState, ret.get(), *ue.pce(i));

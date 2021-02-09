@@ -18,107 +18,16 @@
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/util/functional.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * We store 'detailed' line number information on a table on the side, because
- * in production modes for HHVM it's generally not useful (which keeps Unit
- * smaller in that case)---this stuff is only used for the debugger, where we
- * can afford the lookup here.  The normal Unit m_lineMap is capable of
- * producing enough line number information for things needed in production
- * modes (backtraces, warnings, etc).
- */
-
-struct ExtendedLineInfo {
-  SourceLocTable sourceLocTable;
-
-  /*
-   * Map from source lines to a collection of all the bytecode ranges the line
-   * encompasses.
-   *
-   * The value type of the map is a list of offset ranges, so a single line
-   * with several sub-statements may correspond to the bytecodes of all of the
-   * sub-statements.
-   *
-   * May not be initialized.  Lookups need to check if it's empty() and if so
-   * compute it from sourceLocTable.
-   */
-  LineToOffsetRangeVecMap lineToOffsetRange;
-};
-
-using ExtendedLineInfoCache = tbb::concurrent_hash_map<
-  const Unit*,
-  ExtendedLineInfo,
-  pointer_hash<Unit>
->;
-ExtendedLineInfoCache s_extendedLineInfo;
-
-using LineTableStash = tbb::concurrent_hash_map<
-  const Unit*,
-  LineTable,
-  pointer_hash<Unit>
->;
-LineTableStash s_lineTables;
-
-struct LineCacheEntry {
-  LineCacheEntry(const Unit* unit, LineTable&& table)
-    : unit{unit}
-    , table{std::move(table)}
-  {}
-  const Unit* unit;
-  LineTable table;
-};
-std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 namespace SourceLocation {
 
 //////////////////////////////////////////////////////////////////////
-
-static SourceLocTable loadLocTable(const Unit* unit) {
-  auto ret = SourceLocTable{};
-  if (unit->repoID() == RepoIdInvalid) return ret;
-
-  Lock lock(g_classesMutex);
-  auto& urp = Repo::get().urp();
-  urp.getSourceLocTab[unit->repoID()].get(unit->sn(), ret);
-  return ret;
-}
-
-/*
- * Return the Unit's SourceLocTable, extracting it from the repo if
- * necessary.
- */
-const SourceLocTable& getLocTable(const Unit* unit) {
-  {
-    ExtendedLineInfoCache::const_accessor acc;
-    if (s_extendedLineInfo.find(acc, unit)) {
-      return acc->second.sourceLocTable;
-    }
-  }
-
-  // Try to load it while we're not holding the lock.
-  auto newTable = loadLocTable(unit);
-  ExtendedLineInfoCache::accessor acc;
-  if (s_extendedLineInfo.insert(acc, unit)) {
-    acc->second.sourceLocTable = std::move(newTable);
-  }
-  return acc->second.sourceLocTable;
-}
 
 /**
  * Generate line->vector<OffsetRange> reverse map from SourceLocTable.
@@ -133,13 +42,12 @@ const SourceLocTable& getLocTable(const Unit* unit) {
  * By doing this we ensure the outer LineRange's vector<OffsetRange> will not be
  * added for inner lines.
  */
-static void generateLineToOffsetRangesMap(
-  const Unit* unit,
+void generateLineToOffsetRangesMap(
+  const SourceLocTable& srcLocTable,
+  Offset baseOff,
   LineToOffsetRangeVecMap& map
 ) {
   // First generate an OffsetRange for each SourceLoc.
-  auto const& srcLocTable = getLocTable(unit);
-
   struct LineRange {
     LineRange(int start, int end)
     : line0(start), line1(end)
@@ -154,7 +62,6 @@ static void generateLineToOffsetRangesMap(
 
   using LineRangeOffsetRangePair = std::pair<LineRange, OffsetRange>;
   std::vector<LineRangeOffsetRangePair> lineRangesTable;
-  Offset baseOff = 0;
   for (const auto& sourceLoc: srcLocTable) {
     Offset pastOff = sourceLoc.pastOffset();
     OffsetRange offsetRange(baseOff, pastOff);
@@ -218,82 +125,6 @@ static void generateLineToOffsetRangesMap(
   }
 }
 
-/*
- * Return a copy of the Unit's line to OffsetRangeVec table.
- */
-LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
-  {
-    ExtendedLineInfoCache::const_accessor acc;
-    if (s_extendedLineInfo.find(acc, unit)) {
-      if (!acc->second.lineToOffsetRange.empty()) {
-        return acc->second.lineToOffsetRange;
-      }
-    }
-  }
-
-  LineToOffsetRangeVecMap map;
-  generateLineToOffsetRangesMap(unit, map);
-
-  ExtendedLineInfoCache::accessor acc;
-  if (!s_extendedLineInfo.find(acc, unit)) {
-    always_assert_flog(0, "ExtendedLineInfoCache was not found when it should "
-      "have been");
-  }
-  if (acc->second.lineToOffsetRange.empty()) {
-    acc->second.lineToOffsetRange = std::move(map);
-  }
-  return acc->second.lineToOffsetRange;
-}
-
-const LineTable* getLineTable(const Unit* unit) {
-  LineTableStash::accessor acc;
-  if (s_lineTables.find(acc, unit)) {
-    return &acc->second;
-  }
-  return nullptr;
-}
-
-const LineTable& loadLineTable(const Unit* unit) {
-  assertx(unit->repoID() != RepoIdInvalid);
-  if (!RO::RepoAuthoritative) {
-    LineTableStash::const_accessor acc;
-    if (s_lineTables.find(acc, unit)) {
-      return acc->second;
-    }
-  }
-
-  auto const hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
-  auto& entry = s_lineCache[hash];
-  if (auto const p = entry.load(std::memory_order_acquire)) {
-    if (p->unit == unit) return p->table;
-  }
-
-  // We already hold a lock on the unit in Unit::getLineNumber below,
-  // so nobody else is going to be reading the line table while we are
-  // (this is only an efficiency concern).
-  auto& urp = Repo::get().urp();
-  auto table = LineTable{};
-  urp.getUnitLineTable[unit->repoID()].get(unit->sn(), table);
-
-  // Loading line tables for each unseen line while coverage is enabled can
-  // cause the treadmill to to carry an enormous number of discarded
-  // LineTables, so instead cache the table permanently in s_lineTables.
-  if (UNLIKELY(g_context &&
-               (unit->isCoverageEnabled() || RID().getCoverage()))) {
-    LineTableStash::accessor acc;
-    if (s_lineTables.insert(acc, unit)) {
-      acc->second = std::move(table);
-    }
-    return acc->second;
-  }
-
-  auto const p = new LineCacheEntry(unit, std::move(table));
-  if (auto const old = entry.exchange(p, std::memory_order_release)) {
-    Treadmill::enqueue([old] { delete old; });
-  }
-  return p->table;
-}
-
 LineInfo getLineInfo(const LineTable& table, Offset pc) {
   auto const it =
     std::upper_bound(begin(table), end(table), LineEntry{ pc, -1 });
@@ -331,35 +162,6 @@ bool getLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
     return true;
   }
   return false;
-}
-
-void stashLineTable(const Unit* unit, LineTable table) {
-  LineTableStash::accessor acc;
-  if (s_lineTables.insert(acc, unit)) {
-    acc->second = std::move(table);
-  }
-}
-
-void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
-  ExtendedLineInfoCache::accessor acc;
-  if (s_extendedLineInfo.insert(acc, unit)) {
-    acc->second.sourceLocTable = std::move(table);
-  }
-}
-
-void removeUnit(const Unit* unit) {
-  s_extendedLineInfo.erase(unit);
-  s_lineTables.erase(unit);
-
-  auto const hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
-  auto& entry = s_lineCache[hash];
-  if (auto lce = entry.load(std::memory_order_acquire)) {
-    if (lce->unit == unit &&
-        entry.compare_exchange_strong(lce, nullptr,
-                                      std::memory_order_release)) {
-      Treadmill::enqueue([lce] { delete lce; });
-    }
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

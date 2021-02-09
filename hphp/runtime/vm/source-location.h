@@ -22,10 +22,6 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct Unit;
-
-///////////////////////////////////////////////////////////////////////////////
 // Location tables.
 
 /*
@@ -154,17 +150,14 @@ namespace SourceLocation {
  */
 int getLineNumber(const LineTable& table, Offset pc);
 bool getLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
-void stashLineTable(const Unit* unit, LineTable table);
-void stashExtendedLineTable(const Unit* unit, SourceLocTable table);
 
-const SourceLocTable& getLocTable(const Unit*);
-
-void removeUnit(const Unit* unit);
-const LineTable& loadLineTable(const Unit* unit);
-const LineTable* getLineTable(const Unit* unit);
 LineInfo getLineInfo(const LineTable& table, Offset pc);
 
-LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit);
+void generateLineToOffsetRangesMap(
+  const SourceLocTable& srcLocTable,
+  Offset baseOff,
+  LineToOffsetRangeVecMap& map
+);
 
 }
 

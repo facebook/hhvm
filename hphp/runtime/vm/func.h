@@ -1293,7 +1293,7 @@ private:
 
     std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
     uint32_t m_cti_size; // size of cti code
-    // 32 bits free here.
+    mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   };
 
   /*
@@ -1337,6 +1337,46 @@ private:
   const ExtendedSharedData* extShared() const;
         ExtendedSharedData* extShared();
 
+  /*
+  * We store 'detailed' line number information on a table on the side, because
+  * in production modes for HHVM it's generally not useful (which keeps Func
+  * smaller in that case)---this stuff is only used for the debugger, where we
+  * can afford the lookup here.  The normal Func m_lineMap is capable of
+  * producing enough line number information for things needed in production
+  * modes (backtraces, warnings, etc).
+  */
+
+  struct ExtendedLineInfo {
+    SourceLocTable sourceLocTable;
+
+    /*
+    * Map from source lines to a collection of all the bytecode ranges the line
+    * encompasses.
+    *
+    * The value type of the map is a list of offset ranges, so a single line
+    * with several sub-statements may correspond to the bytecodes of all of the
+    * sub-statements.
+    *
+    * May not be initialized.  Lookups need to check if it's empty() and if so
+    * compute it from sourceLocTable.
+    */
+    LineToOffsetRangeVecMap lineToOffsetRange;
+  };
+
+  using ExtendedLineInfoCache = tbb::concurrent_hash_map<
+    const SharedData*,
+    ExtendedLineInfo,
+    pointer_hash<SharedData>
+  >;
+  using LineTableStash = tbb::concurrent_hash_map<
+    const SharedData*,
+    LineTable,
+    pointer_hash<SharedData>
+  >;
+
+  static ExtendedLineInfoCache s_extendedLineInfo;
+
+  static LineTableStash s_lineTables;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -1533,6 +1573,20 @@ public:
    * Return false if not found, else true.
    */
   bool getOffsetRange(Offset offset, OffsetRange& range) const;
+
+  void stashLineTable(LineTable table) const;
+
+  void stashExtendedLineTable(SourceLocTable table) const;
+
+  const SourceLocTable& getLocTable() const;
+
+  LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
+
+  const LineTable* getLineTable() const;
+
+private:
+  const LineTable& loadLineTable() const;
+  void cleanupLocationCache() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constants.

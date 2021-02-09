@@ -292,72 +292,6 @@ Id UnitEmitter::addConstant(const Constant& c) {
   return id;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Source locations.
-
-SourceLocTable UnitEmitter::createSourceLocTable() const {
-  assertx(m_sourceLocTab.size() != 0);
-  SourceLocTable locations;
-  for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
-    Offset endOff = i < m_sourceLocTab.size() - 1
-      ? m_sourceLocTab[i + 1].first
-      : m_bclen;
-    locations.push_back(SourceLocEntry(endOff, m_sourceLocTab[i].second));
-  }
-  return locations;
-}
-
-namespace {
-
-using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;
-
-/*
- * Create a LineTable from `srcLoc'.
- */
-LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
-  LineTable lines;
-  if (srcLoc.empty()) {
-    return lines;
-  }
-
-  auto prev = srcLoc.begin();
-  for (auto it = prev + 1; it != srcLoc.end(); ++it) {
-    if (prev->second.line1 != it->second.line1) {
-      lines.push_back(LineEntry(it->first, prev->second.line1));
-      prev = it;
-    }
-  }
-
-  lines.push_back(LineEntry(bclen, prev->second.line1));
-  return lines;
-}
-
-}
-
-void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
-                                       Offset start) {
-  // Some byte codes, such as for the implicit "return 0" at the end of a
-  // a source file do not have valid source locations. This check makes
-  // sure we don't record a (dummy) source location in this case.
-  if (start > 0 && sLoc.line0 == -1) return;
-  SourceLoc newLoc(sLoc);
-  if (!m_sourceLocTab.empty()) {
-    if (m_sourceLocTab.back().second == newLoc) {
-      // Combine into the interval already at the back of the vector.
-      assertx(start >= m_sourceLocTab.back().first);
-      return;
-    }
-    assertx(m_sourceLocTab.back().first < start &&
-           "source location offsets must be added to UnitEmitter in "
-           "increasing order");
-  } else {
-    // First record added should be for bytecode offset zero or very rarely one
-    // when the source starts with a label and a Nop is inserted.
-    assertx(start == 0 || start == 1);
-  }
-  m_sourceLocTab.push_back(std::make_pair(start, newLoc));
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Mergeables.
@@ -423,15 +357,9 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
   m_repoId = repoId;
 
   try {
-    {
-      if (!m_sourceLocTab.empty()) {
-        m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
-      }
-      urp.insertUnit[repoId].insert(*this, txn, m_sn, m_sha1, m_bc,
-                                    m_bclen, usePreAllocatedUnitSn);
-    }
+    urp.insertUnit[repoId].insert(*this, txn, m_sn, m_sha1, m_bc,
+                                  m_bclen, usePreAllocatedUnitSn);
     int64_t usn = m_sn;
-    urp.insertUnitLineTable[repoId].insert(txn, usn, m_lineTable);
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
@@ -483,17 +411,6 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
             m_mergeableStmts[i].first, m_mergeableStmts[i].second);
           break;
         }
-      }
-    }
-    if (RuntimeOption::RepoDebugInfo) {
-      for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
-        SourceLoc& e = m_sourceLocTab[i].second;
-        Offset endOff = i < m_sourceLocTab.size() - 1
-                            ? m_sourceLocTab[i + 1].first
-                            : m_bclen;
-
-        urp.insertUnitSourceLoc[repoId]
-           .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
     return RepoStatus::success;
@@ -602,7 +519,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bcSha1 = m_bcSha1;
   u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
-    u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
+    u->m_preClasses.push_back(PreClassPtr(pce->create(*u, saveLineTable)));
   }
   for (auto const& re : m_reVec) {
     u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
@@ -621,7 +538,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
   for (auto& fe : m_fes) {
-    auto const func = fe->create(*u);
+    auto const func = fe->create(*u, nullptr, saveLineTable);
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
@@ -650,30 +567,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   }
   assertx(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)MergeKind::Done;
-
-  /*
-   * What's going on is we're going to have a m_lineTable if this UnitEmitter
-   * was loaded from the repo, and no m_sourceLocTab (it's demand-loaded by
-   * unit.cpp because it's only used for the debugger).  Don't bother creating
-   * the line table here, because we can retrieve it from the repo later.
-   *
-   * On the other hand, if this unit was just created by parsing a php file (or
-   * whatnot) which was not committed to the repo, we'll have a m_sourceLocTab.
-   * In this case we should populate m_lineTable (otherwise we might lose line
-   * info altogether, since it may not be backed by a repo).
-   */
-  if (m_sourceLocTab.size() != 0) {
-    SourceLocation::stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
-    // If the debugger is enabled, or we plan to dump hhas we will
-    // need the extended line table information in the output, and if
-    // we're not writing the repo, stashing it here is necessary for
-    // it to make it through.
-    if (needs_extended_line_table()) {
-      SourceLocation::stashExtendedLineTable(u.get(), createSourceLocTable());
-    }
-  } else if (saveLineTable) {
-    SourceLocation::stashLineTable(u.get(), m_lineTable);
-  }
 
   if (u->m_extended) {
     auto ux = u->getExtended();
@@ -896,24 +789,6 @@ void UnitEmitter::serde(SerDe& sd) {
     }
   );
 
-  // Line table
-  sd(
-    m_lineTable,
-    [&] (const LineEntry& prev, const LineEntry& curDelta) {
-      if (SerDe::deserializing) {
-        return LineEntry {
-          curDelta.pastOffset() + prev.pastOffset(),
-          curDelta.val() + prev.val()
-        };
-      } else {
-        return LineEntry {
-          curDelta.pastOffset() - prev.pastOffset(),
-          curDelta.val() - prev.val()
-        };
-      }
-    }
-  );
-
   // Mergeables (we cannot just serde the vector because some of the
   // entries are populated when creating PreClassEmitters).
   if constexpr (SerDe::deserializing) {
@@ -997,6 +872,7 @@ void UnitEmitter::serde(SerDe& sd) {
       }
       assertx(fe->sn() == i);
       fe->serdeMetaData(sd);
+      fe->serdeLineTable(sd);
       fe->setEHTabIsSorted();
       fe->finish(fe->past);
     }
@@ -1009,15 +885,13 @@ void UnitEmitter::serde(SerDe& sd) {
       sd(pceId);
       sd(fe->name);
       fe->serdeMetaData(sd);
+      fe->serdeLineTable(sd);
     };
     for (auto const& fe : m_fes) write(fe.get(), -1);
     for (auto const pce : m_pceVec) {
       for (auto const fe : pce->methods()) write(fe, pce->id());
     }
   }
-
-  // Source location table
-  sd(m_sourceLocTab);
 
   // Bytecode
   if constexpr (SerDe::deserializing) {
@@ -1121,21 +995,6 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
       m_repo.table(repoId, "UnitMergeables"));
     txn.exec(createQuery);
   }
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} "
-      "(unitSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
-      " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
-      " PRIMARY KEY (unitSn, pastOffset));",
-      m_repo.table(repoId, "UnitSourceLoc"));
-    txn.exec(createQuery);
-  }
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} (unitSn INTEGER PRIMARY KEY, data BLOB);",
-      m_repo.table(repoId, "UnitLineTable"));
-    txn.exec(createQuery);
-  }
 }
 
 std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
@@ -1169,8 +1028,8 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     getUnitTypeAliases[repoId].get(*ue);
     getUnitConstants[repoId].get(*ue);
     getUnitMergeables[repoId].get(*ue);
-    getUnitLineTable[repoId].get(ue->m_sn, ue->m_lineTable);
     m_repo.frp().getFuncs[repoId].get(*ue);
+
   } catch (RepoExc& re) {
     TRACE(0,
           "Repo error loading '%s' (0x%s) from '%s': %s\n",
@@ -1488,61 +1347,6 @@ void UnitRepoProxy::GetUnitMergeablesStmt
   txn.commit();
 }
 
-void UnitRepoProxy::InsertUnitLineTableStmt
-                  ::insert(RepoTxn& txn,
-                           int64_t unitSn,
-                           LineTable& lineTable) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(@unitSn, @data);",
-      m_repo.table(m_repoId, "UnitLineTable"));
-    txn.prepare(*this, insertQuery);
-  }
-
-  BlobEncoder dataBlob{false};
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  dataBlob(
-    lineTable,
-    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
-      return LineEntry {
-        cur.pastOffset() - prev.pastOffset(),
-        cur.val() - prev.val()
-      };
-    }
-  );
-
-  query.bindBlob("@data", dataBlob, /* static */ true);
-  query.exec();
-}
-
-void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
-                                              LineTable& lineTable) {
-  auto txn = RepoTxn{m_repo.begin()};
-  if (!prepared()) {
-    auto selectQuery = folly::sformat(
-      "SELECT data FROM {} WHERE unitSn == @unitSn;",
-      m_repo.table(m_repoId, "UnitLineTable"));
-    txn.prepare(*this, selectQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.step();
-  if (query.row()) {
-    BlobDecoder dataBlob = query.getBlob(0, false);
-    dataBlob(
-      lineTable,
-      [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
-        return LineEntry {
-          delta.pastOffset() + prev.pastOffset(),
-          delta.val() + prev.val()
-        };
-      }
-    );
-  }
-  txn.commit();
-}
-
 void UnitRepoProxy::InsertUnitTypeAliasStmt
                   ::insert(const UnitEmitter& ue,
                            RepoTxn& txn,
@@ -1650,64 +1454,6 @@ void UnitRepoProxy::GetUnitConstantsStmt::get(UnitEmitter& ue) {
     }
   } while (!query.done());
   txn.commit();
-}
-
-void UnitRepoProxy::InsertUnitSourceLocStmt
-                  ::insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset,
-                           int line0, int char0, int line1, int char1) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} "
-      "VALUES(@unitSn, @pastOffset, @line0, @char0, @line1, @char1);",
-      m_repo.table(m_repoId, "UnitSourceLoc"));
-    txn.prepare(*this, insertQuery);
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindOffset("@pastOffset", pastOffset);
-  query.bindInt("@line0", line0);
-  query.bindInt("@char0", char0);
-  query.bindInt("@line1", line1);
-  query.bindInt("@char1", char1);
-  query.exec();
-}
-
-RepoStatus
-UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
-                                        SourceLocTable& sourceLocTab) {
-  try {
-    auto txn = RepoTxn{m_repo.begin()};
-    if (!prepared()) {
-      auto selectQuery = folly::sformat(
-        "SELECT pastOffset, line0, char0, line1, char1 "
-        "FROM {} "
-        "WHERE unitSn == @unitSn "
-        "ORDER BY pastOffset ASC;",
-        m_repo.table(m_repoId, "UnitSourceLoc"));
-      txn.prepare(*this, selectQuery);
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    do {
-      query.step();
-      if (!query.row()) {
-        return RepoStatus::error;
-      }
-      Offset pastOffset;
-      query.getOffset(0, pastOffset);
-      SourceLoc sLoc;
-      query.getInt(1, sLoc.line0);
-      query.getInt(2, sLoc.char0);
-      query.getInt(3, sLoc.line1);
-      query.getInt(4, sLoc.char1);
-      SourceLocEntry entry(pastOffset, sLoc);
-      sourceLocTab.push_back(entry);
-    } while (!query.done());
-    txn.commit();
-  } catch (RepoExc& re) {
-    return RepoStatus::error;
-  }
-  return RepoStatus::success;
 }
 
 std::unique_ptr<UnitEmitter>

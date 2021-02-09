@@ -263,7 +263,7 @@ struct PreClassEmitter {
 
   void commit(RepoTxn& txn) const; // throws(RepoExc)
 
-  PreClass* create(Unit& unit) const;
+  PreClass* create(Unit& unit, bool saveLineTable = false) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 

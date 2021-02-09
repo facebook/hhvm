@@ -5446,7 +5446,6 @@ void recordCodeCoverage(PC /*pc*/) {
 
   int line = func->getLineNumber(pcOff());
   assertx(line != -1);
-
   if (unit != s_prev_unit || line != s_prev_line) {
     s_prev_unit = unit;
     s_prev_line = line;

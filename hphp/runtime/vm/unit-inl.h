@@ -315,12 +315,16 @@ inline folly::Range<const PreRecordDescPtr*> Unit::prerecords() const {
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {
   for (auto& func : funcs()) {
-    fn(func);
+    if (fn(func)) {
+      return;
+    }
   }
   for (auto& c : preclasses()) {
     auto methods = FuncRange{c->methods(), c->methods() + c->numMethods()};
     for (auto& method : methods) {
-      fn(method);
+      if (fn(method)) {
+        return;
+      }
     }
   }
 }

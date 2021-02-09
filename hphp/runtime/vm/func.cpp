@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
@@ -128,9 +129,12 @@ Func::Func(
 }
 
 Func::~Func() {
+  cleanupLocationCache();
+
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
+
   // Should've deregistered in Func::destroy() or Func::freeClone()
   assertx(!m_registeredInDataMap);
 #ifndef NDEBUG
@@ -763,6 +767,8 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
 }
 
 Func::SharedData::~SharedData() {
+  Func::s_extendedLineInfo.erase(this);
+  Func::s_lineTables.erase(this);
   free(m_inoutBitPtr);
   if (m_cti_base) free_cti(m_cti_base, m_cti_size);
 }
@@ -921,24 +927,238 @@ void Func::bind(Func *func) {
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
+namespace {
+
+struct LineCacheEntry {
+  LineCacheEntry(const Func* func, LineTable&& table)
+    : func{func}
+    , table{std::move(table)}
+  {}
+  const Func* func;
+  LineTable table;
+};
+std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
+
+}
+
+Func::ExtendedLineInfoCache Func::s_extendedLineInfo;
+Func::LineTableStash Func::s_lineTables;
+
+void Func::stashLineTable(LineTable table) const {
+  LineTableStash::accessor acc;
+  if (s_lineTables.insert(acc, shared())) {
+    acc->second = std::move(table);
+  }
+}
+
+void Func::stashExtendedLineTable(SourceLocTable table) const {
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, shared())) {
+    acc->second.sourceLocTable = std::move(table);
+  }
+}
+
+void Func::cleanupLocationCache() const {
+  auto const hash = pointer_hash<Func>{}(this) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto lce = entry.load(std::memory_order_acquire)) {
+    if (lce->func == this &&
+        entry.compare_exchange_strong(lce, nullptr,
+                                      std::memory_order_release)) {
+      Treadmill::enqueue([lce] { delete lce; });
+    }
+  }
+}
+
+static SourceLocTable loadLocTable(const Func* func) {
+  auto ret = SourceLocTable{};
+  auto unit = func->unit();
+  if (unit->repoID() == RepoIdInvalid) return ret;
+
+  Lock lock(g_classesMutex);
+  auto& frp = Repo::get().frp();
+  frp.getSourceLocTab[unit->repoID()].get(unit->sn(), func->sn(), ret);
+  return ret;
+}
+
+/*
+ * Return the Unit's SourceLocTable, extracting it from the repo if
+ * necessary.
+ */
+const SourceLocTable& Func::getLocTable() const {
+  auto const sharedData = shared();
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, sharedData)) {
+      return acc->second.sourceLocTable;
+    }
+  }
+
+  // Try to load it while we're not holding the lock.
+  auto newTable = loadLocTable(this);
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, sharedData)) {
+    acc->second.sourceLocTable = std::move(newTable);
+  }
+  return acc->second.sourceLocTable;
+}
+
+
+/*
+ * Return a copy of the Func's line to OffsetRangeVec table.
+ */
+LineToOffsetRangeVecMap Func::getLineToOffsetRangeVecMap() const {
+  auto const sharedData = shared();
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, sharedData)) {
+      if (!acc->second.lineToOffsetRange.empty()) {
+        return acc->second.lineToOffsetRange;
+      }
+    }
+  }
+
+  LineToOffsetRangeVecMap map;
+  auto const& srcLocTable = getLocTable();
+  SourceLocation::generateLineToOffsetRangesMap(srcLocTable, base(), map);
+
+  ExtendedLineInfoCache::accessor acc;
+  if (!s_extendedLineInfo.find(acc, sharedData)) {
+    always_assert_flog(0, "ExtendedLineInfoCache was not found when it should "
+      "have been");
+  }
+  if (acc->second.lineToOffsetRange.empty()) {
+    acc->second.lineToOffsetRange = std::move(map);
+  }
+  return acc->second.lineToOffsetRange;
+}
+
+const LineTable* Func::getLineTable() const {
+  LineTableStash::accessor acc;
+  if (s_lineTables.find(acc, shared())) {
+    return &acc->second;
+  }
+  return nullptr;
+}
+
+const LineTable& Func::loadLineTable() const {
+  auto const sharedData = shared();
+  assertx(m_unit->repoID() != RepoIdInvalid);
+  if (!RO::RepoAuthoritative) {
+    LineTableStash::const_accessor acc;
+    if (s_lineTables.find(acc, sharedData)) {
+      return acc->second;
+    }
+  }
+
+  auto const hash = pointer_hash<Func>{}(this) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto const p = entry.load(std::memory_order_acquire)) {
+    if (p->func == this) return p->table;
+  }
+
+  // We already hold a lock on the unit in Unit::getLineNumber below,
+  // so nobody else is going to be reading the line table while we are
+  // (this is only an efficiency concern).
+  auto& frp = Repo::get().frp();
+  auto table = LineTable{};
+  frp.getFuncLineTable[m_unit->repoID()].get(m_unit->sn(), sn(), table);
+
+  // Loading line tables for each unseen line while coverage is enabled can
+  // cause the treadmill to to carry an enormous number of discarded
+  // LineTables, so instead cache the table permanently in s_lineTables.
+  if (UNLIKELY(g_context &&
+               (m_unit->isCoverageEnabled() || RID().getCoverage()))) {
+    LineTableStash::accessor acc;
+    if (s_lineTables.insert(acc, sharedData)) {
+      acc->second = std::move(table);
+    }
+    return acc->second;
+  }
+
+  auto const p = new LineCacheEntry(this, std::move(table));
+  if (auto const old = entry.exchange(p, std::memory_order_release)) {
+    Treadmill::enqueue([old] { delete old; });
+  }
+  return p->table;
+}
+
 int Func::getLineNumber(Offset offset) const {
-  return unit()->getLineNumberHelper(offset);
+  if (UNLIKELY(m_unit->repoID() == RepoIdInvalid)) {
+    auto const lineTable = getLineTable();
+    return lineTable ? SourceLocation::getLineNumber(*lineTable, offset) : -1;
+  }
+
+  auto findLine = [&] {
+    // lineMap is an atomically acquired bitwise copy of m_lineMap,
+    // with no destructor
+    auto lineMap(shared()->m_lineMap.get());
+    if (lineMap->empty()) return INT_MIN;
+    auto const it = std::upper_bound(
+      lineMap->begin(), lineMap->end(),
+      offset,
+      [] (Offset info, const LineInfo& elm) {
+        return info < elm.first.past;
+      }
+    );
+    if (it != lineMap->end() && it->first.base <= offset) return it->second;
+    return INT_MIN;
+  };
+
+  auto line = findLine();
+  if (line != INT_MIN) return line;
+
+  // Updating m_lineMap while coverage is enabled can cause the treadmill to
+  // fill with an enormous number of resized maps.
+  if (UNLIKELY(g_context && (m_unit->isCoverageEnabled() || RID().getCoverage()))) {
+    return SourceLocation::getLineNumber(loadLineTable(), offset);
+  }
+
+  shared()->m_lineMap.lock_for_update();
+  try {
+    line = findLine();
+    if (line != INT_MIN) {
+      shared()->m_lineMap.unlock();
+      return line;
+    }
+
+    auto const info = SourceLocation::getLineInfo(loadLineTable(), offset);
+    auto copy = shared()->m_lineMap.copy();
+    auto const it = std::upper_bound(
+      copy.begin(), copy.end(),
+      info,
+      [&] (const LineInfo& a, const LineInfo& b) {
+        return a.first.base < b.first.past;
+      }
+    );
+    assertx(it == copy.end() || (it->first.past > offset && it->first.base > offset));
+    copy.insert(it, info);
+    auto old = shared()->m_lineMap.update_and_unlock(std::move(copy));
+    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+    return info.second;
+  } catch (...) {
+    shared()->m_lineMap.unlock();
+    throw;
+  }
 }
 
 bool Func::getSourceLoc(Offset offset, SourceLoc& sLoc) const {
-  auto const& sourceLocTable = SourceLocation::getLocTable(unit());
+  auto const& sourceLocTable = getLocTable();
   return SourceLocation::getLoc(sourceLocTable, offset, sLoc);
 }
 
 bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
-  OffsetRangeVec offsets;
   auto line = getLineNumber(offset);
-  unit()->getOffsetRanges(line, offsets);
+  if (line == -1) return false;
 
-  for (auto o: offsets) {
-    if (offset >= o.base && offset < o.past) {
-      range = o;
-      return true;
+  auto map = getLineToOffsetRangeVecMap();
+  auto it = map.find(line);
+  if (it != map.end()) {
+    for (auto o : it->second) {
+      if (offset >= o.base && offset < o.past) {
+        range = o;
+        return true;
+      }
     }
   }
   return false;

@@ -93,17 +93,6 @@ inline const std::vector<Constant>& UnitEmitter::constants() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Source locations.
-
-inline bool UnitEmitter::hasSourceLocInfo() const {
-  return !m_sourceLocTab.empty();
-}
-
-inline const LineTable& UnitEmitter::lineTable() const {
-  return m_lineTable;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Bytecode emit.
 
 inline void UnitEmitter::emitOp(Op op) {

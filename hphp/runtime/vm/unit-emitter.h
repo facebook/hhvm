@@ -299,38 +299,6 @@ struct UnitEmitter {
   Id addConstant(const Constant& c);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Source locations.
-
-  /*
-   * Return a copy of the SrcLocTable for the Unit, if it has one; otherwise,
-   * return an empty table.
-   */
-  SourceLocTable createSourceLocTable() const;
-
-  /*
-   * Does this Unit contain full source location information?
-   *
-   * Generally, UnitEmitters loaded from a production repo will have a
-   * LineTable only instead of a full SourceLocTable.
-   */
-  bool hasSourceLocInfo() const;
-
-  /*
-   * Const reference to the Unit's LineTable.
-   */
-  const LineTable& lineTable() const;
-
-  /*
-   * Record source location information for the last chunk of bytecode added to
-   * this UnitEmitter.
-   *
-   * Adjacent regions associated with the same source line will be collapsed as
-   * this is created.
-   */
-  void recordSourceLocation(const Location::Range& sLoc, Offset start);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Mergeables.
   //
   // See unit.h for documentation of Unit merging.
@@ -480,21 +448,6 @@ private:
    * Mergeables tables.
    */
   std::vector<std::pair<Unit::MergeKind, Id>> m_mergeableStmts;
-
-  /*
-   * Source location tables.
-   *
-   * Each entry encodes an open-closed range of bytecode offsets.
-   *
-   * The m_sourceLocTab is keyed by the start of each half-open range.  This is
-   * to allow appending new bytecode offsets that are part of the same range to
-   * coalesce.
-   *
-   * The m_lineTable is keyed by the past-the-end offset.  This is the
-   * format we'll want it in when we go to create a Unit.
-   */
-  std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
-  LineTable m_lineTable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -514,17 +467,6 @@ struct UnitRepoProxy : public RepoProxy {
   std::unique_ptr<UnitEmitter> loadEmitter(const folly::StringPiece name,
                                            const SHA1& sha1,
                                            const Native::FuncTable&);
-
-  struct InsertUnitLineTableStmt : public RepoProxy::Stmt {
-    InsertUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn,
-                int64_t unitSn,
-                LineTable& lineTable); // throws(RepoExc)
-  };
-  struct GetUnitLineTableStmt : public RepoProxy::Stmt {
-    GetUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(int64_t unitSn, LineTable& lineTable);
-  };
 
   struct InsertUnitTypeAliasStmt : public RepoProxy::Stmt {
     InsertUnitTypeAliasStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -603,23 +545,12 @@ struct UnitRepoProxy : public RepoProxy {
     GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue); // throws(RepoExc)
   };
-  struct InsertUnitSourceLocStmt : public RepoProxy::Stmt {
-    InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
-                int char0, int line1, int char1); // throws(RepoExc)
-  };
-  struct GetSourceLocTabStmt : public RepoProxy::Stmt {
-    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(int64_t unitSn, SourceLocTable& sourceLocTab);
-  };
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
 #define URP_GOP(o) URP_OP(Get##o, get##o)
 #define URP_OPS \
   URP_IOP(Unit) \
   URP_GOP(Unit) \
-  URP_IOP(UnitLineTable) \
-  URP_GOP(UnitLineTable) \
   URP_IOP(UnitTypeAlias) \
   URP_GOP(UnitTypeAliases) \
   URP_IOP(UnitLitstr) \
@@ -631,9 +562,7 @@ struct UnitRepoProxy : public RepoProxy {
   URP_IOP(UnitConstant) \
   URP_GOP(UnitConstants) \
   URP_IOP(UnitMergeable) \
-  URP_GOP(UnitMergeables) \
-  URP_IOP(UnitSourceLoc) \
-  URP_GOP(SourceLocTab)
+  URP_GOP(UnitMergeables)
 
 #define URP_OP(c, o) \
   c##Stmt o[RepoIdCount];

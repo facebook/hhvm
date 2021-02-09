@@ -124,12 +124,47 @@ inline void FuncEmitter::setLocation(int l1, int l2) {
   line2 = l2;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Source locations.
+
+inline bool FuncEmitter::hasSourceLocInfo() const {
+  return !m_sourceLocTab.empty();
+}
+
+inline const LineTable& FuncEmitter::lineTable() const {
+  return m_lineTable;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 
 inline Offset FuncEmitter::offsetOf(const unsigned char* pc) const {
   return pc - ue().bc();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Serialization/Deserialization
+
+template<class SerDe>
+void FuncEmitter::serdeLineTable(SerDe& sd) {
+  sd(
+    m_lineTable,
+    [&] (const LineEntry& prev, const LineEntry& curDelta) {
+      if (SerDe::deserializing) {
+        return LineEntry {
+          curDelta.pastOffset() + prev.pastOffset(),
+          curDelta.val() + prev.val()
+        };
+      } else {
+        return LineEntry {
+          curDelta.pastOffset() - prev.pastOffset(),
+          curDelta.val() - prev.val()
+        };
+      }
+    }
+  );
+
+  sd(m_sourceLocTab);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

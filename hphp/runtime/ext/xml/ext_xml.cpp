@@ -1014,26 +1014,17 @@ String HHVM_FUNCTION(utf8_decode,
 
 String HHVM_FUNCTION(utf8_encode,
                      const String& data) {
-  auto const maxSize = safe_cast<size_t>(data.size()) * 4;
+  auto const maxSize = safe_cast<size_t>(data.size()) * 2;
   String str = String(maxSize, ReserveString);
   char *newbuf = str.mutableData();
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; pos--, s++) {
-    unsigned int c = (unsigned char)(*s);
+    auto c = (unsigned char)(*s);
     if (c < 0x80) {
       newbuf[newlen++] = (char) c;
-    } else if (c < 0x800) {
+    } else {
       newbuf[newlen++] = (0xc0 | (c >> 6));
-      newbuf[newlen++] = (0x80 | (c & 0x3f));
-    } else if (c < 0x10000) {
-      newbuf[newlen++] = (0xe0 | (c >> 12));
-      newbuf[newlen++] = (0xc0 | ((c >> 6) & 0x3f));
-      newbuf[newlen++] = (0x80 | (c & 0x3f));
-    } else if (c < 0x200000) {
-      newbuf[newlen++] = (0xf0 | (c >> 18));
-      newbuf[newlen++] = (0xe0 | ((c >> 12) & 0x3f));
-      newbuf[newlen++] = (0xc0 | ((c >> 6) & 0x3f));
       newbuf[newlen++] = (0x80 | (c & 0x3f));
     }
   }

@@ -34,6 +34,7 @@ let validate_classname (pos, hint) =
   | Aast.Hdarray _
   | Aast.Hvarray _
   | Aast.Hvarray_or_darray _
+  | Aast.Hvec_or_dict _
   | Aast.Hprim _
   | Aast.Hoption _
   | Aast.Hfun _
@@ -69,6 +70,7 @@ let rec check_hint env (pos, hint) =
     check_hint env h2
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids
+  | Aast.Hvec_or_dict (hopt1, h2)
   | Aast.Hvarray_or_darray (hopt1, h2) ->
     Option.iter hopt1 (check_hint env);
     check_hint env h2

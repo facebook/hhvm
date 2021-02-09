@@ -86,6 +86,7 @@ type t =
   | Ris of Pos.t
   | Ras of Pos.t
   | Rvarray_or_darray_key of Pos.t
+  | Rvec_or_dict_key of Pos.t
   | Rusing of Pos.t
   | Rdynamic_prop of Pos.t
   | Rdynamic_call of Pos.t

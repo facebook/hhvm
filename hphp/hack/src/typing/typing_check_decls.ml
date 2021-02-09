@@ -214,6 +214,7 @@ and hint_ ~is_atom env p h_ =
   | Hdarray (ty1, ty2) ->
     hint env ty1;
     hint env ty2
+  | Hvec_or_dict (ty1, ty2)
   | Hvarray_or_darray (ty1, ty2) ->
     maybe hint env ty1;
     hint env ty2

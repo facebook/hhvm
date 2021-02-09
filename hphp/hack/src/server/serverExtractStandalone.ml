@@ -978,6 +978,7 @@ end = struct
         | Hoption _ -> Fmt.string ppf "null"
         | Hlike hint -> pp tparams ppf hint
         | Hdarray _ -> Fmt.string ppf "darray[]"
+        | Hvec_or_dict _
         | Hvarray_or_darray _
         | Hvarray _ ->
           Fmt.string ppf "varray[]"
@@ -1138,6 +1139,15 @@ end = struct
     | Aast.Hvarray_or_darray (Some khint, vhint) ->
       Fmt.(
         prefix (const string "varray_or_darray")
+        @@ angles
+        @@ pair ~sep:comma pp_hint pp_hint)
+        ppf
+        (khint, vhint)
+    | Aast.Hvec_or_dict (None, vhint) ->
+      Fmt.(prefix (const string "vec_or_dict") @@ angles pp_hint) ppf vhint
+    | Aast.Hvec_or_dict (Some khint, vhint) ->
+      Fmt.(
+        prefix (const string "vec_or_dict")
         @@ angles
         @@ pair ~sep:comma pp_hint pp_hint)
         ppf

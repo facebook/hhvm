@@ -76,6 +76,7 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
         | Hint_::Hdarray(_, _)
         | Hint_::Hvarray(_)
         | Hint_::HvarrayOrDarray(_, _)
+        | Hint_::HvecOrDict(_, _)
         | Hint_::Hthis
         | Hint_::Hnothing
         | Hint_::Hdynamic
@@ -125,6 +126,7 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hdarray(_, _)
         | Hint_::Hvarray(_)
         | Hint_::HvarrayOrDarray(_, _)
+        | Hint_::HvecOrDict(_, _)
         | Hint_::Hprim(_)
         | Hint_::Hthis
         | Hint_::Hnothing
@@ -213,6 +215,7 @@ pub(crate) fn remove_erased_generics(env: &Env, h: aast::Hint) -> aast::Hint {
             | Hint_::Hdarray(_, _)
             | Hint_::Hvarray(_)
             | Hint_::HvarrayOrDarray(_, _)
+            | Hint_::HvecOrDict(_, _)
             | Hint_::Hprim(_)
             | Hint_::Hthis
             | Hint_::Hnothing

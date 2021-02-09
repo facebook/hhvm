@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf62bccb687612cb1d8ab596570cfe33>>
+// @generated SignedSource<<a34cef9b9b264a97d926f78c8c2ab7dc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -92,6 +92,7 @@ pub enum Reason<'a> {
     Ris(&'a pos::Pos<'a>),
     Ras(&'a pos::Pos<'a>),
     RvarrayOrDarrayKey(&'a pos::Pos<'a>),
+    RvecOrDictKey(&'a pos::Pos<'a>),
     Rusing(&'a pos::Pos<'a>),
     RdynamicProp(&'a pos::Pos<'a>),
     RdynamicCall(&'a pos::Pos<'a>),

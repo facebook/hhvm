@@ -564,6 +564,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hdarray (hk, hv) ->
     hint env variance hk;
     hint env variance hv
+  | Hvec_or_dict (hk, hv)
   | Hvarray_or_darray (hk, hv) ->
     Option.iter hk ~f:(hint env variance);
     hint env variance hv

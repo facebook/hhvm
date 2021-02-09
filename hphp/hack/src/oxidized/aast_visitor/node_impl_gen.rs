@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a37e11a72765de6f228f017ac890a494>>
+// @generated SignedSource<<52cc567317d7ab260cc2a9bb49544f05>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1297,6 +1297,11 @@ impl<P: Params> Node<P> for Hint_ {
                 Ok(())
             }
             Hint_::HvarrayOrDarray(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)?;
+                Ok(())
+            }
+            Hint_::HvecOrDict(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)?;
                 Ok(())

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4734db79dad2127e47c85c2bb6b9136a>>
+// @generated SignedSource<<c0d6239832e14844cff61bbd15797c2e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -311,6 +311,9 @@ impl Hint_ {
     pub fn mk_hvarray_or_darray(p0: Option<Hint>, p1: Hint) -> Self {
         Hint_::HvarrayOrDarray(p0, p1)
     }
+    pub fn mk_hvec_or_dict(p0: Option<Hint>, p1: Hint) -> Self {
+        Hint_::HvecOrDict(p0, p1)
+    }
     pub fn mk_hprim(p0: Tprim) -> Self {
         Hint_::Hprim(p0)
     }
@@ -428,6 +431,12 @@ impl Hint_ {
     pub fn is_hvarray_or_darray(&self) -> bool {
         match self {
             Hint_::HvarrayOrDarray(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_hvec_or_dict(&self) -> bool {
+        match self {
+            Hint_::HvecOrDict(..) => true,
             _ => false,
         }
     }
@@ -551,6 +560,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hvec_or_dict(&self) -> Option<(&Option<Hint>, &Hint)> {
+        match self {
+            Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_hprim(&self) -> Option<&Tprim> {
         match self {
             Hint_::Hprim(p0) => Some(p0),
@@ -653,6 +668,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hvec_or_dict_mut(&mut self) -> Option<(&mut Option<Hint>, &mut Hint)> {
+        match self {
+            Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_hprim_mut(&mut self) -> Option<&mut Tprim> {
         match self {
             Hint_::Hprim(p0) => Some(p0),
@@ -752,6 +773,12 @@ impl Hint_ {
     pub fn as_hvarray_or_darray_into(self) -> Option<(Option<Hint>, Hint)> {
         match self {
             Hint_::HvarrayOrDarray(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_hvec_or_dict_into(self) -> Option<(Option<Hint>, Hint)> {
+        match self {
+            Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

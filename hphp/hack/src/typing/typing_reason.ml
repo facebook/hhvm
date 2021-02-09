@@ -67,6 +67,7 @@ type t =
   | Ris of Pos.t
   | Ras of Pos.t
   | Rvarray_or_darray_key of Pos.t
+  | Rvec_or_dict_key of Pos.t
   | Rusing of Pos.t
   | Rdynamic_prop of Pos.t
   | Rdynamic_call of Pos.t
@@ -387,6 +388,8 @@ let rec to_string prefix r =
         "This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)"
       );
     ]
+  | Rvec_or_dict_key _ ->
+    [(p, "This is vec_or_dict, which requires keys that have type arraykey")]
   | Rusing p -> [(p, prefix ^ " because it was assigned in a `using` clause")]
   | Rdynamic_prop p ->
     [(p, prefix ^ ", the result of accessing a property of a `dynamic` type")]
@@ -556,6 +559,7 @@ and to_raw_pos r =
   | Ris p -> p
   | Ras p -> p
   | Rvarray_or_darray_key p -> p
+  | Rvec_or_dict_key p -> p
   | Rusing p -> p
   | Rdynamic_prop p -> p
   | Rdynamic_call p -> p
@@ -673,6 +677,7 @@ let to_constructor_string r =
   | Ris _ -> "Ris"
   | Ras _ -> "Ras"
   | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
+  | Rvec_or_dict_key _ -> "Rvec_or_dict_key"
   | Rusing _ -> "Rusing"
   | Rdynamic_prop _ -> "Rdynamic_prop"
   | Rdynamic_call _ -> "Rdynamic_call"

@@ -577,6 +577,8 @@ module Typehints = struct
 
   let varray_or_darray = "varray_or_darray"
 
+  let vec_or_dict = "vec_or_dict"
+
   let callable = "callable"
 
   let wildcard = "_"
@@ -603,6 +605,7 @@ module Typehints = struct
           darray;
           varray;
           varray_or_darray;
+          vec_or_dict;
           callable;
           wildcard;
         ]

@@ -68,6 +68,7 @@ impl<'a> Reason<'a> {
             | Ris(p)
             | Ras(p)
             | RvarrayOrDarrayKey(p)
+            | RvecOrDictKey(p)
             | Rusing(p)
             | RdynamicProp(p)
             | RdynamicCall(p)

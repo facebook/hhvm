@@ -624,6 +624,7 @@ and hint_
   | Aast.Hdarray _
   | Aast.Hvarray _
   | Aast.Hvarray_or_darray _
+  | Aast.Hvec_or_dict _
   | Aast.Hprim _
   | Aast.Hthis
   | Aast.Hdynamic
@@ -811,12 +812,36 @@ and try_castable_hint
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
 
-          (* Warning: These Hanys are here because they produce subtle
-              errors because of interaction with tco_experimental_isarray
-              if you change them to Herr *)
-          N.Hvarray_or_darray (None, (p, N.Hany))
-        | [val_] -> N.Hvarray_or_darray (None, hint env val_)
-        | [key; val_] -> N.Hvarray_or_darray (Some (hint env key), hint env val_)
+          if unif env then
+            N.Hvec_or_dict (None, (p, N.Hany))
+          else
+            (* Warning: These Hanys are here because they produce subtle
+                errors because of interaction with tco_experimental_isarray
+                if you change them to Herr *)
+            N.Hvarray_or_darray (None, (p, N.Hany))
+        | [val_] ->
+          if unif env then
+            N.Hvec_or_dict (None, hint env val_)
+          else
+            N.Hvarray_or_darray (None, hint env val_)
+        | [key; val_] ->
+          if unif env then
+            N.Hvec_or_dict (Some (hint env key), hint env val_)
+          else
+            N.Hvarray_or_darray (Some (hint env key), hint env val_)
+        | _ ->
+          Errors.too_many_type_arguments p;
+          N.Hany)
+    | nm when String.equal nm SN.Typehints.vec_or_dict ->
+      Some
+        (match hl with
+        | [] ->
+          if Partial.should_check_error (fst env).in_mode 2071 then
+            Errors.too_few_type_arguments p;
+
+          N.Hvec_or_dict (None, (p, N.Hany))
+        | [val_] -> N.Hvec_or_dict (None, hint env val_)
+        | [key; val_] -> N.Hvec_or_dict (Some (hint env key), hint env val_)
         | _ ->
           Errors.too_many_type_arguments p;
           N.Hany)

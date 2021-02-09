@@ -76,6 +76,7 @@ struct
     | Ris p -> Ris (pos p)
     | Ras p -> Ras (pos p)
     | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos p)
+    | Rvec_or_dict_key p -> Rvec_or_dict_key (pos p)
     | Rusing p -> Rusing (pos p)
     | Rdynamic_prop p -> Rdynamic_prop (pos p)
     | Rdynamic_call p -> Rdynamic_call (pos p)

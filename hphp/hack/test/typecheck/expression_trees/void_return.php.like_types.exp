@@ -1,48 +1,48 @@
 File "void_return.php", line 7, characters 8-29:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 10, characters 27-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 13, characters 30-36:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 16, characters 8-80:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 18, characters 14-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 23, characters 8-97:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 24, characters 5-26:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 25, characters 27-33:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 31, characters 14-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 33, characters 14-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 39, characters 12-12:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "void_return.php", line 45, characters 5-11:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type

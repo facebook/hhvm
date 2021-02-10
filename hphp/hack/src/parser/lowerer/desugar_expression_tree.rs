@@ -91,27 +91,22 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let visitor_fun_ = wrap_fun_(visitor_body, vec![param], temp_pos.clone(), env);
     let visitor_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
 
-    // Make anonymous function for typing purposes
-    let typing_fun = if env.codegen {
-        // throw new Exception("");
-        Stmt::new(
-            temp_pos.clone(),
-            Stmt_::Throw(Box::new(new_exception(&temp_pos, ""))),
-        )
+    let inferred_type = if env.codegen {
+        // null
+        dummy_expr()
     } else {
-        // The original expression to be inferred
-        wrap_return(e, &temp_pos.clone())
+        // Make anonymous function for typing purposes
+        let typing_fun_body = ast::FuncBody {
+            ast: vec![wrap_return(e, &temp_pos)],
+            annotation: (),
+        };
+        let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
+        let spliced_vars = (0..splice_count)
+            .into_iter()
+            .map(|i| ast::Lid(Pos::make_none(), (0, temp_lvar_string(i))))
+            .collect();
+        Expr::new(temp_pos.clone(), Expr_::mk_efun(typing_fun_, spliced_vars))
     };
-    let typing_fun_body = ast::FuncBody {
-        ast: vec![typing_fun],
-        annotation: (),
-    };
-    let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
-    let spliced_vars = (0..splice_count)
-        .into_iter()
-        .map(|i| ast::Lid(Pos::make_none(), (0, temp_lvar_string(i))))
-        .collect();
-    let typing_lambda = Expr::new(temp_pos.clone(), Expr_::mk_efun(typing_fun_, spliced_vars));
 
     // Make `return Visitor::makeTree(...)`
     let return_stmt = wrap_return(
@@ -123,7 +118,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
                 Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
                 spliced_dict,
                 visitor_lambda,
-                typing_lambda,
+                inferred_type,
             ],
             &temp_pos.clone(),
         ),

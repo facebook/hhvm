@@ -8,35 +8,35 @@ File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. If restarting doesn't work, please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 5, characters 1-59:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. If restarting doesn't work, please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 33, characters 5-45:
+  File "expr_tree.hhi", line 35, characters 5-45:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 6, characters 8-31:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 48, characters 6-34:
+  File "expr_tree.hhi", line 50, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Invalid argument (Typing[4041])
-  File "expr_tree.hhi", line 6, characters 26-33:
+  File "expr_tree.hhi", line 8, characters 26-33:
   Too many mandatory arguments (expected 1 but got 5)
-  File "expr_tree.hhi", line 47, characters 5-72:
+  File "expr_tree.hhi", line 49, characters 5-72:
   Because of this definition
 File "nested_expression_tree_lambda.php", line 6, characters 27-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 18, characters 5-7:
+  File "expr_tree.hhi", line 20, characters 5-7:
   Expected `int`
-  File "expr_tree.hhi", line 47, characters 15-28:
+  File "expr_tree.hhi", line 49, characters 15-28:
   But got `ExampleContext`

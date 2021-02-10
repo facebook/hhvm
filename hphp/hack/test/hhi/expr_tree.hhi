@@ -1,5 +1,7 @@
 <?hh
 
+type ExprTreeInferredType<T> = ?(function(): T);
+
 class Code {
   const type TAst = mixed;
 
@@ -8,7 +10,7 @@ class Code {
     string $filepath,
     dict<string, mixed> $spliced_values,
     (function(TVisitor): Code::TAst) $ast,
-    (function(): TInfer) $err,
+    ExprTreeInferredType<TInfer> $null,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
     throw new Exception();
   }

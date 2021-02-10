@@ -12,5 +12,5 @@ Invalid return type (Typing[4336])
   But got `void` because this function does not always return a value
 File "void_return_errors3.php", line 8, characters 14-14:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 19, characters 6-43:
+  File "expr_tree.hhi", line 21, characters 6-43:
   But got `dynamic` because it is an unenforceable type

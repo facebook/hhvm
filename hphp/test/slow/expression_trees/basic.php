@@ -25,7 +25,7 @@ final class MyVisitor {
     ?string $filepath,
     dict<string, mixed> $cached_dict,
     (function(MyVisitor): mixed) $ast,
-    (function(): TInfer) $err,
+    ?(function(): TInfer) $err,
   ): ExprTree<MyVisitor, mixed, TInfer> {
     return new ExprTree($pos, $filepath, $cached_dict, $ast, $err);
   }

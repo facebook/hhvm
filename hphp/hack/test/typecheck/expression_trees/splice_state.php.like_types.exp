@@ -13,5 +13,5 @@ Typing error (Typing[4110])
 This is a limitation of the type-checker; use a local if that's the problem.
 File "splice_state.php", line 26, characters 7-13:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 40, characters 41-79:
+  File "expr_tree.hhi", line 42, characters 41-79:
   But got `dynamic` because it is an unenforceable type

@@ -1215,6 +1215,8 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
 void emit_func(EmitUnitState& state, UnitEmitter& ue,
                FuncEmitter& fe, php::Func& f) {
   FTRACE(2,  "    func {}\n", f.name->data());
+  assertx(f.attrs & AttrUnique);
+  assertx(f.attrs & AttrPersistent);
   renumber_locals(f);
   emit_init_func(fe, f);
   auto func = php::WideFunc::mut(&f);
@@ -1223,6 +1225,8 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
 }
 
 void emit_record(UnitEmitter& ue, const php::Record& rec) {
+  assertx(rec.attrs & AttrUnique);
+  assertx(rec.attrs & AttrPersistent);
   auto const re = ue.newRecordEmitter(rec.name->toCppString());
   re->init(
       std::get<0>(rec.srcInfo.loc),
@@ -1251,6 +1255,8 @@ void emit_record(UnitEmitter& ue, const php::Record& rec) {
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
                 Offset offset, php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
+  assertx(cls.attrs & AttrUnique);
+  assertx(cls.attrs & AttrPersistent);
   pce->init(
     std::get<0>(cls.srcInfo.loc),
     std::get<1>(cls.srcInfo.loc),
@@ -1375,6 +1381,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
 }
 
 void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
+  assertx(alias.attrs & AttrUnique);
+  assertx(alias.attrs & AttrPersistent);
   auto const te = ue.newTypeAliasEmitter(alias.name->toCppString());
   te->init(
       std::get<0>(alias.srcInfo.loc),
@@ -1392,6 +1400,8 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
 }
 
 void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
+  assertx(constant.attrs & AttrUnique);
+  assertx(constant.attrs & AttrPersistent);
   Constant c {
     constant.name,
     constant.val,

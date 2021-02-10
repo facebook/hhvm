@@ -919,6 +919,7 @@ const StaticString
   s_BAD_ARG_ON_MC_GET_METH(
     "Argument 1 passed to meth_caller_get_method() must be a MethCaller"),
   s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
+  s_dyn_meth_caller_cls("__SystemLib\\DynMethCallerHelper"),
   s_cls_prop("class"),
   s_meth_prop("method");
 const Slot s_cls_idx{0};
@@ -976,18 +977,27 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
       return ret;
     };
 
+    auto const check = [&] (const Class* cls, Block* taken) -> SSATmp* {
+      auto isMC = gen(env, EqCls, cns(env, cls), gen(env, LdObjClass, value));
+      gen(env, JmpZero, taken, isMC);
+      return nullptr;
+    };
+
     auto const mcCls = Class::lookup(s_meth_caller_cls.get());
+    auto const dynMcCls = Class::lookup(s_dyn_meth_caller_cls.get());
     assertx(mcCls && meth_caller_has_expected_prop(mcCls));
-    return cond(
-      env,
-      [&] (Block* taken) {
-        auto isMC = gen(
-          env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
-        gen(env, JmpZero, taken, isMC);
-      },
-      [&] {
-        if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
-            RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
+    assertx(dynMcCls && meth_caller_has_expected_prop(dynMcCls));
+
+    MultiCond mc{env};
+    mc.ifThen(
+      [&] (Block* taken) { return check(dynMcCls, taken); },
+      [&] (SSATmp*) { return loadProp(dynMcCls, isCls, value); }
+    );
+    mc.ifThen(
+      [&] (Block* taken) { return check(mcCls, taken); },
+      [&] (SSATmp*) {
+        if (RO::EvalEmitMethCallerFuncPointers &&
+            RO::EvalNoticeOnMethCallerHelperUse) {
           updateMarker(env);
           env.irb->exceptionStackBoundary();
           auto const msg = cns(env, isCls ?
@@ -995,8 +1005,10 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
           gen(env, RaiseNotice, msg);
         }
         return loadProp(mcCls, isCls, value);
-      },
-      [&] { // Taken: src is not a meth_caller
+      }
+    );
+    return mc.elseDo(
+      [&] { // src is not a meth_caller
         hint(env, Block::Hint::Unlikely);
         updateMarker(env);
         env.irb->exceptionStackBoundary();
@@ -1098,8 +1110,13 @@ SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
   }
   if (value->isA(TObj)) {
     auto const mcCls = Class::lookup(s_meth_caller_cls.get());
+    auto const dynMcCls = Class::lookup(s_dyn_meth_caller_cls.get());
     assertx(mcCls);
-    return gen(env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
+    assertx(dynMcCls);
+    auto const cls = gen(env, LdObjClass, value);
+    auto const isMC = gen(env, EqCls, cns(env, mcCls), cls);
+    auto const isDMC = gen(env, EqCls, cns(env, dynMcCls), cls);
+    return gen(env, XorBool, isMC, isDMC);
   }
   return nullptr;
 }

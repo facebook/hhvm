@@ -770,11 +770,8 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
     if (ad2->isVArray()) throw_varray_compare_exception();
     if (ad2->isDArray()) throw_darray_compare_exception();
     always_assert(false);
-  } else if (!ad1->isVArray()) {
-    if (ad1->isDArray()) throw_darray_compare_exception();
-    if (checkHACCompare()) {
-      raise_hackarr_compat_notice("Comparing two plain arrays relationally");
-    }
+  } else if (ad1->isDArray()) {
+    throw_darray_compare_exception();
   }
 
   auto const size1 = ad1->size();

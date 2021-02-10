@@ -492,7 +492,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function set(int $k, Tv $v)[]: Vector<Tv>;
+  public function set(int $k, Tv $v)[write_props]: Vector<Tv>;
 
   /**
    * For every element in the provided `Traversable`, stores a value into the
@@ -512,7 +512,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<int, Tv> $it)[]: Vector<Tv>;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<int, Tv> $it)[write_props]: Vector<Tv>;
 
   /**
    * Removes all the elements from the current `Vector`.
@@ -523,7 +523,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function clear()[]: Vector<Tv>;
+  public function clear()[write_props]: Vector<Tv>;
 
   /**
    * Determines if the specified key is in the current `Vector`.
@@ -556,7 +556,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add(Tv $value)[]: Vector<Tv>;
+  public function add(Tv $value)[write_props]: Vector<Tv>;
 
   /**
    * For every element in the provided `Traversable`, append a value into this
@@ -573,7 +573,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[]: Vector<Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[write_props]: Vector<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Vector`.
@@ -591,7 +591,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf(
     ?KeyedContainer<Tv,mixed> $container,
-  )[]: Vector<Tv> where Tv as arraykey;
+  )[write_props]: Vector<Tv> where Tv as arraykey;
 
   /**
    * Removes the key/value pair with the specified key from the current
@@ -613,7 +613,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function removeKey(int $k)[]: Vector<Tv>;
+  public function removeKey(int $k)[write_props]: Vector<Tv>;
 
   /**
    * Remove the last element of the current `Vector` and return it.
@@ -627,7 +627,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @return - The value of the last element.
    */
   <<__Pure, __Mutable>>
-  public function pop()[]: Tv;
+  public function pop()[write_props]: Tv;
 
   /**
    * Resize the current `Vector`.
@@ -647,7 +647,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *                 size of the current `Vector`.
    */
   <<__Pure, __Mutable>>
-  public function resize(int $sz, Tv $value)[]: void;
+  public function resize(int $sz, Tv $value)[write_props]: void;
 
   /**
    * Reserves enough memory to accommodate a given number of elements.
@@ -676,7 +676,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * Reverse the elements of the current `Vector` in place.
    */
   <<__Pure, __Mutable>>
-  public function reverse()[]: void;
+  public function reverse()[write_props]: void;
 
   /**
    * Splice the current `Vector` in place.
@@ -700,7 +700,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @link http://php.net/manual/en/function.array-splice.php
    */
   <<__Pure, __Mutable>>
-  public function splice(int $offset, ?int $len = null)[]: void;
+  public function splice(int $offset, ?int $len = null)[write_props]: void;
 
   /**
    * Returns the index of the first element that matches the search value.
@@ -721,7 +721,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * Shuffles the values of the current `Vector` randomly in place.
    */
   <<__Pure, __Mutable>>
-  public function shuffle()[]: void;
+  public function shuffle()[write_props]: void;
 
   /**
    * Returns a `Vector` containing the values from the specified `array`.
@@ -812,9 +812,9 @@ class VectorIterator<+Tv> implements HH\Rx\KeyedIterator<int, Tv> {
   <<__Pure, __MaybeMutable>>
   public function valid()[]: bool;
   <<__Pure, __Mutable>>
-  public function next()[]: void;
+  public function next()[write_props]: void;
   <<__Pure, __Mutable>>
-  public function rewind()[]: void;
+  public function rewind()[write_props]: void;
 }
 
 } // namespace

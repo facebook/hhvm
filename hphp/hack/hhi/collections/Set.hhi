@@ -282,7 +282,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
+  public function retain(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn, write_props]: Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -303,7 +303,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
+  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn, write_props]: Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is
@@ -494,7 +494,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function clear()[]: Set<Tv>;
+  public function clear()[write_props]: Set<Tv>;
 
   /**
    * Determines if the specified value is in the current `Set`.
@@ -520,7 +520,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add(Tv $v)[]: Set<Tv>;
+  public function add(Tv $v)[write_props]: Set<Tv>;
 
   /**
    * For every element in the provided `Traversable`, add the value into the
@@ -535,7 +535,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[]: Set<Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[write_props]: Set<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Set` as new
@@ -551,7 +551,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf(
     ?KeyedContainer<Tv,mixed> $container,
-  )[]: Set<Tv>;
+  )[write_props]: Set<Tv>;
 
   /**
    * Reserves enough memory to accommodate a given number of elements.
@@ -575,7 +575,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function remove(Tv $v)[]: Set<Tv>;
+  public function remove(Tv $v)[write_props]: Set<Tv>;
 
   /**
    * Removes the values in the current `Set` that are also in the `Traversable`.
@@ -592,7 +592,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $other)[]: Set<Tv>;
+  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $other)[write_props]: Set<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `Set`.
@@ -697,9 +697,9 @@ class SetIterator<+Tv> implements HH\Rx\KeyedIterator<arraykey, Tv> {
   <<__Pure, __MaybeMutable>>
   public function valid()[]: bool;
   <<__Pure, __Mutable>>
-  public function next()[]: void;
+  public function next()[write_props]: void;
   <<__Pure, __Mutable>>
-  public function rewind()[]: void;
+  public function rewind()[write_props]: void;
 }
 
 } // namespace

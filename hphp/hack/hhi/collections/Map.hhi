@@ -480,7 +480,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function set(Tk $k, Tv $v)[]: Map<Tk, Tv>;
+  public function set(Tk $k, Tv $v)[write_props]: Map<Tk, Tv>;
 
   /**
    * For every element in the provided `Traversable`, stores a value into the
@@ -501,7 +501,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it)[]: Map<Tk, Tv>;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it)[write_props]: Map<Tk, Tv>;
 
   /**
    * Remove all the elements from the current `Map`.
@@ -512,7 +512,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function clear()[]: Map<Tk, Tv>;
+  public function clear()[write_props]: Map<Tk, Tv>;
 
   /**
    * Determines if the specified key is in the current `Map`.
@@ -561,7 +561,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add(Pair<Tk, Tv> $p)[]: Map<Tk, Tv>;
+  public function add(Pair<Tk, Tv> $p)[write_props]: Map<Tk, Tv>;
 
   /**
    * For every element in the provided `Traversable`, add a key/value pair into
@@ -580,7 +580,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it)[]: Map<Tk, Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it)[write_props]: Map<Tk, Tv>;
 
   /**
    * Reserves enough memory to accommodate a given number of elements.
@@ -715,9 +715,9 @@ class MapIterator<Tk, +Tv> implements HH\Rx\KeyedIterator<Tk, Tv> {
   <<__Pure, __MaybeMutable>>
   public function valid()[]: bool;
   <<__Pure, __Mutable>>
-  public function next()[]: void;
+  public function next()[write_props]: void;
   <<__Pure, __Mutable>>
-  public function rewind()[]: void;
+  public function rewind()[write_props]: void;
 }
 
 } // namespace

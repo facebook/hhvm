@@ -48,14 +48,14 @@ interface Iterator<+Tv> extends namespace\Traversable<Tv>, \HH\Iterator<Tv> {
    *
    */
   <<__Pure, __Mutable>>
-  public function next()[]: void;
+  public function next()[write_props]: void;
   /**
    * Rewind the iterator position to its beginning.
    *
    * This rewinds back to the first element of the `Iterator`.
    */
   <<__Pure, __Mutable>>
-  public function rewind()[]: void;
+  public function rewind()[write_props]: void;
   /**
    * Checks to see if the current iterator position is valid.
    *
@@ -96,7 +96,7 @@ interface AsyncIterator<+Tv> extends \HH\AsyncIterator<Tv> {
    * @return - The next `Awaitable` in the iterator sequence.
    */
   <<__Pure, __Mutable>>
-  public function next()[]: Awaitable<?(mixed, Tv)>;
+  public function next()[write_props]: Awaitable<?(mixed, Tv)>;
 }
 
 /* See documentation for \AsyncKeyedIterator */
@@ -114,7 +114,7 @@ interface AsyncKeyedIterator<+Tk, +Tv>
    * @return - The next `Awaitable` in the iterator sequence.
    */
   <<__Pure, __Mutable>>
-  public function next()[]: Awaitable<?(Tk, Tv)>;
+  public function next()[write_props]: Awaitable<?(Tk, Tv)>;
 }
 
 /* See documentation for \IteratorAggregate */

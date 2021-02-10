@@ -3052,12 +3052,16 @@ void parse_context_constant(AsmState& as) {
   while (true) {
     as.in.skipWhitespace();
     std::string coeffect;
-    if (!as.in.readword(name)) break;
-    coeffects |= CoeffectsConfig::fromName(name);
+    if (!as.in.readword(coeffect)) break;
+    auto const result = CoeffectsConfig::fromName(coeffect);
+    coeffects |= result;
   }
 
-  // TODO: Add this to class
   as.in.expectWs(';');
+
+  DEBUG_ONLY auto added =
+    as.pce->addContextConstant(makeStaticString(name), coeffects);
+  assertx(added);
 }
 
 /*

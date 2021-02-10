@@ -655,10 +655,18 @@ std::string member_tv_initializer(TypedValue cell) {
 }
 
 void print_class_constant(Output& out, const PreClass::Const* cns) {
+  if (cns->kind() == ConstModifiers::Kind::Context) {
+    auto const coeffect_str = cns->coeffects().toString();
+    out.fmtln(".ctx {} {};",
+              cns->name(),
+              coeffect_str ? *coeffect_str : std::string("defaults"));
+    return;
+  }
   auto const kind = [&] {
     switch (cns->kind()) {
-      case ConstModifiers::Kind::Value: return "";
-      case ConstModifiers::Kind::Type:  return " isType";
+      case ConstModifiers::Kind::Value:   return "";
+      case ConstModifiers::Kind::Type:    return " isType";
+      case ConstModifiers::Kind::Context: not_reached();
     }
     not_reached();
   }();

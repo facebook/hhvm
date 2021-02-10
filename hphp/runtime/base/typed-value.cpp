@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/util/trace.h"
 
@@ -30,6 +31,16 @@ std::string TypedValue::pretty() const {
   char buf[20];
   snprintf(buf, sizeof(buf), "0x%lx", long(m_data.num));
   return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
+}
+
+StaticCoeffects ConstModifiers::getCoeffects() const {
+  assertx(kind() == ConstModifiers::Kind::Context);
+  return StaticCoeffects::fromValue(rawData >> ConstModifiers::kDataShift);
+}
+
+void ConstModifiers::setCoeffects(StaticCoeffects coeffects) {
+  rawData = (uintptr_t)(coeffects.value() << ConstModifiers::kDataShift)
+              | (rawData & ~ConstModifiers::kMask);
 }
 
 //////////////////////////////////////////////////////////////////////

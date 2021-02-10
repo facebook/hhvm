@@ -39,6 +39,7 @@ struct Class;
 struct Func;
 struct ObjectData;
 struct NamedEntity;
+struct StaticCoeffects;
 struct StringData;
 struct Unit;
 
@@ -168,6 +169,7 @@ struct PreClass : AtomicCountable {
     const StringData* phpCode()  const { return m_phpCode; }
     bool isAbstract()      const { return m_val.constModifiers().isAbstract(); }
     ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
+    StaticCoeffects coeffects()  const;
 
     template<class SerDe> void serde(SerDe& sd);
 

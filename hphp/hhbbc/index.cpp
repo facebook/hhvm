@@ -5270,8 +5270,9 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
     if (!it->second->val.has_value() ||
+        it->second->kind == ConstModifiers::Kind::Context ||
         (!allow_tconst && it->second->kind == ConstModifiers::Kind::Type)) {
-      // This is an abstract class constant or typeconstant
+      // This is an abstract class constant, context constant or type constant
       return nullptr;
     }
     if (it->second->val.value().m_type == KindOfUninit) {

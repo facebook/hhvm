@@ -129,14 +129,16 @@ struct PreClassEmitter {
       , m_typeConstraint(nullptr)
       , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
+      , m_coeffects(StaticCoeffects::none())
       , m_kind(ConstModifiers::Kind::Value)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode,
-          const ConstModifiers::Kind kind)
+          const StaticCoeffects coeffects, const ConstModifiers::Kind kind)
       : m_name(n)
       , m_typeConstraint(typeConstraint)
       , m_phpCode(phpCode)
+      , m_coeffects(coeffects)
       , m_kind(kind) {
       if (!val) {
         m_val.reset();
@@ -151,13 +153,15 @@ struct PreClassEmitter {
     const TypedValue& val() const { return m_val.value(); }
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
-    bool isAbstract()       const { return !m_val.has_value(); }
+    bool isAbstract() const { return !m_val.has_value(); }
+    StaticCoeffects coeffects() const { return m_coeffects; }
     ConstModifiers::Kind kind() const { return m_kind; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
         (m_val)
         (m_phpCode)
+        (m_coeffects)
         (m_kind);
     }
 
@@ -166,6 +170,7 @@ struct PreClassEmitter {
     LowStringPtr m_typeConstraint;
     folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
+    StaticCoeffects m_coeffects;
     ConstModifiers::Kind m_kind;
   };
 
@@ -237,6 +242,7 @@ struct PreClassEmitter {
                    const ConstModifiers::Kind kind =
                      ConstModifiers::Kind::Value,
                    const Array& typeStructure = Array{});
+  bool addContextConstant(const StringData* n, StaticCoeffects coeffects);
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const ConstModifiers::Kind kind =

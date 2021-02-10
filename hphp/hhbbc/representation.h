@@ -455,6 +455,8 @@ struct Const {
   LSString phpCode;
   LSString typeConstraint;
 
+  StaticCoeffects coeffects;
+
   ConstModifiers::Kind kind;
   bool isNoOverride : 1;
 };

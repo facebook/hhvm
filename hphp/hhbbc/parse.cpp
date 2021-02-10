@@ -963,6 +963,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         cconst.valOption(),
         cconst.phpCode(),
         cconst.typeConstraint(),
+        cconst.coeffects(),
         cconst.kind(),
         true // NoOverride
       }
@@ -982,6 +983,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
             tvaux,
             staticEmptyString(),
             staticEmptyString(),
+            StaticCoeffects::none(),
             ConstModifiers::Kind::Value
           }
         );

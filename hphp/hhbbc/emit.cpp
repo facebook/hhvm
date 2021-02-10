@@ -1285,7 +1285,9 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     if (nativeConsts && nativeConsts->count(cconst.name)) {
       break;
     }
-    if (!cconst.val.has_value()) {
+    if (cconst.kind == ConstModifiers::Kind::Context) {
+      pce->addContextConstant(cconst.name, cconst.coeffects);
+    } else if (!cconst.val.has_value()) {
       pce->addAbstractConstant(
         cconst.name,
         cconst.typeConstraint,

@@ -1479,6 +1479,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         }
         break;
       }
+      case ConstModifiers::Kind::Context:
+        raise_error("Cannot load context constants");
     }
   }
 

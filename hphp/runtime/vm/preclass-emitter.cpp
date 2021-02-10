@@ -200,7 +200,20 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr, kind);
+  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr,
+                             StaticCoeffects::none(), kind);
+  m_constMap.add(cns.name(), cns);
+  return true;
+}
+
+bool PreClassEmitter::addContextConstant(const StringData* n,
+                                         StaticCoeffects coeffects) {
+  auto it = m_constMap.find(n);
+  if (it != m_constMap.end()) {
+    return false;
+  }
+  PreClassEmitter::Const cns(n, nullptr, nullptr, nullptr,
+                             coeffects, ConstModifiers::Kind::Context);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -225,7 +238,8 @@ bool PreClassEmitter::addConstant(const StringData* n,
   } else {
     tvVal = *val;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, kind);
+  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode,
+                             StaticCoeffects::none(), kind);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -361,12 +375,17 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
     const Const& const_ = m_constMap[i];
     TypedValueAux tvaux;
     tvaux.constModifiers() = {};
-    if (const_.isAbstract()) {
-      tvWriteUninit(tvaux);
-      tvaux.constModifiers().setIsAbstract(true);
-    } else {
-      tvCopy(const_.val(), tvaux);
+    if (const_.kind() == ConstModifiers::Kind::Context) {
       tvaux.constModifiers().setIsAbstract(false);
+      tvaux.constModifiers().setCoeffects(const_.coeffects());
+    } else {
+      if (const_.isAbstract()) {
+        tvWriteUninit(tvaux);
+        tvaux.constModifiers().setIsAbstract(true);
+      } else {
+        tvCopy(const_.val(), tvaux);
+        tvaux.constModifiers().setIsAbstract(false);
+      }
     }
 
     tvaux.constModifiers().setKind(const_.kind());

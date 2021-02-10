@@ -69,7 +69,7 @@ fn count_key_vertex(db: &rusqlite::Connection) -> Result<usize> {
 /// Print an ASCII representation of a 32-bit depgraph to stdout.
 fn dump_depgraph32(file: &str) -> Result<()> {
     let db = rusqlite::Connection::open(file)?;
-    let mut stmt = db.prepare("select * from deptable limit 10")?;
+    let mut stmt = db.prepare("select * from deptable")?;
     let mut rows = stmt.query(rusqlite::NO_PARAMS)?;
     let digits = (u32::MAX as f32).log10() as usize + 1;
     while let Some(row) = rows.next()? {
@@ -91,10 +91,10 @@ fn add_edges<T: Ord + Clone>(es: &mut Vec<(T, T)>, k: T, vs: &std::collections::
 ///
 /// Calculate the edges in `rfile` not in `lfile` (missing edges) and
 /// the edges in `lfile` not in `rfile` (extraneous edges).
-fn comp_depgraph32(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()> {
+fn comp_depgraph32(no_progress_bar: bool, test_file: &str, control_file: &str) -> Result<()> {
     let (ldb, rdb) = (
-        rusqlite::Connection::open(lfile)?,
-        rusqlite::Connection::open(rfile)?,
+        rusqlite::Connection::open(test_file)?,
+        rusqlite::Connection::open(control_file)?,
     );
     let (mut lstmt, mut rstmt) = (
         ldb.prepare("select * from deptable")?,
@@ -196,15 +196,21 @@ fn comp_depgraph32(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
     let digits = (u32::MAX as f32).log10() as usize + 1;
     let num_edges_missing = missing.len(); // If non-zero, `l` is broken.
     println!("\nResults\n=======");
-    println!("Processed {}/{} of nodes in 'l'", lproc, lnum_keys);
-    println!("Processed {}/{} of nodes in 'r'", rproc, rnum_keys);
-    println!("Edges in 'l': {}", ledge_count);
-    println!("Edges in 'r': {}", redge_count);
-    println!("Edges in 'r' missing in 'l' (there are {}):", missing.len());
+    println!("Processed {}/{} of nodes in 'test'", lproc, lnum_keys);
+    println!("Processed {}/{} of nodes in 'control'", rproc, rnum_keys);
+    println!("Edges in 'test': {}", ledge_count);
+    println!("Edges in 'control': {}", redge_count);
+    println!(
+        "Edges in 'control' missing in 'test' (there are {}):",
+        missing.len()
+    );
     for (key, dst) in missing {
         println!("  {key:>width$}  {}", dst, key = key, width = digits);
     }
-    println!("Edges in 'l' missing in 'r' (there are {}):", extra.len());
+    println!(
+        "Edges in 'test' missing in 'control' (there are {}):",
+        extra.len()
+    );
     for (key, dst) in extra {
         println!("  {key:>width$}  {}", dst, key = key, width = digits);
     }
@@ -254,11 +260,11 @@ fn dump_depgraph64(file: &str) -> Result<()> {
 
 /// Compare two 64-bit dependency graphs.
 ///
-/// Calculate the edges in `rfile` not in `lfile` (missing edges) and
-/// the edges in `lfile` not in `rfile` (extraneous edges).
-fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()> {
-    let lo = depgraph::reader::DepGraphOpener::from_path(lfile)?;
-    let ro = depgraph::reader::DepGraphOpener::from_path(rfile)?;
+/// Calculate the edges in `control_file` not in `test_file` (missing edges) and
+/// the edges in `test_file` not in `control_file` (extraneous edges).
+fn comp_depgraph64(no_progress_bar: bool, test_file: &str, control_file: &str) -> Result<()> {
+    let lo = depgraph::reader::DepGraphOpener::from_path(test_file)?;
+    let ro = depgraph::reader::DepGraphOpener::from_path(control_file)?;
     let mut num_edges_missing = 0;
     match (|| {
         let (ldg, rdg) = (lo.open()?, ro.open()?);
@@ -358,15 +364,21 @@ fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
         let digits = (u64::MAX as f64).log10() as usize + 1;
         num_edges_missing = missing.len();
         println!("\nResults\n=======");
-        println!("Processed {}/{} of nodes in 'l'", lproc, lnum_keys);
-        println!("Processed {}/{} of nodes in 'r'", rproc, rnum_keys);
-        println!("Edges in 'l': {}", ledge_count);
-        println!("Edges in 'r': {}", redge_count);
-        println!("Edges in 'r' missing in 'l' (there are {}):", missing.len());
+        println!("Processed {}/{} of nodes in 'test'", lproc, lnum_keys);
+        println!("Processed {}/{} of nodes in 'control'", rproc, rnum_keys);
+        println!("Edges in 'test': {}", ledge_count);
+        println!("Edges in 'control': {}", redge_count);
+        println!(
+            "Edges in 'control' missing in 'test' (there are {}):",
+            missing.len()
+        );
         for (key, dst) in missing {
             println!("  {key:>width$}  {}", dst, key = key, width = digits);
         }
-        println!("Edges in 'l' missing in 'r' (there are {}):", extra.len());
+        println!(
+            "Edges in 'test' missing in 'control' (there are {}):",
+            extra.len()
+        );
         for (key, dst) in extra {
             println!("  {key:>width$}  {}", dst, key = key, width = digits);
         }
@@ -391,45 +403,65 @@ fn comp_depgraph64(no_progress_bar: bool, lfile: &str, rfile: &str) -> Result<()
 
 use structopt::StructOpt;
 #[derive(Debug, structopt::StructOpt)]
-#[structopt(name = "options", about = "Allow options")]
+#[structopt(
+    name = "dump_saved_state_depgraph",
+    about = "
+Common usage is to provide two file arguments to compare, 'test' and 'control'.
+
+Example invocation:
+
+  dump_saved_state_depgraph --bitness 32 \\
+      --test path/to/test.bin --control path/to/control.bin
+
+Exit code will be 0 if 'test' >= 'control' and 1 if 'test' < 'control'."
+)]
 struct Opt {
-    #[structopt(long = "with-progress-bar", help = "Enable graphical output")]
+    #[structopt(long = "with-progress-bar", help = "Enable progress bar display")]
     with_progress_bar: bool,
 
-    #[structopt(long = "dump32", help = "Render 32-bit depgraph as text")]
-    dump32: Option<String>,
+    #[structopt(long = "bitness", help = "mode", required = true, possible_values(&["32", "64"]))]
+    bitness: i8,
 
-    #[structopt(
-        long = "compare32",
-        help = "Compare two 32-bit depgraphs",
-        min_values = 2,
-        max_values = 2
-    )]
-    compare32: Option<Vec<String>>,
+    #[structopt(long = "dump", help = "graph to render as text")]
+    dump: Option<String>,
 
-    #[structopt(long = "dump64", help = "Render 64-bit depgraph as text")]
-    dump64: Option<String>,
+    #[structopt(long = "test", help = "'test' graph")]
+    test: Option<String>,
 
-    #[structopt(
-        long = "compare64",
-        help = "Compare two 64-bit depgraphs",
-        min_values = 2,
-        max_values = 2
-    )]
-    compare64: Option<Vec<String>>,
+    #[structopt(long = "control", help = "'control' graph")]
+    control: Option<String>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
-    let no_progress_bar = !opt.with_progress_bar;
-    match match (opt.dump32, opt.compare32, opt.dump64, opt.compare64) {
-        (Some(file), _, _, _) => dump_depgraph32(&file),
-        (None, Some(files), _, _) => comp_depgraph32(no_progress_bar, &files[0], &files[1]),
-        (None, None, Some(file), _) => dump_depgraph64(&file),
-        (None, None, None, Some(files)) => comp_depgraph64(no_progress_bar, &files[0], &files[1]),
+    match match opt {
+        Opt {
+            bitness: 32,
+            dump: Some(file),
+            ..
+        } => dump_depgraph32(&file),
+        Opt {
+            bitness: 64,
+            dump: Some(file),
+            ..
+        } => dump_depgraph64(&file),
+        Opt {
+            with_progress_bar,
+            bitness: 32,
+            test: Some(test),
+            control: Some(control),
+            ..
+        } => comp_depgraph32(!with_progress_bar, &test, &control),
+        Opt {
+            with_progress_bar,
+            bitness: 64,
+            test: Some(test),
+            control: Some(control),
+            ..
+        } => comp_depgraph64(!with_progress_bar, &test, &control),
         _ => Ok(()),
     } {
-        Ok(x) => Ok(x),
+        Ok(()) => Ok(()),
         Err(e) => Err(Box::new(e)),
     }
 }

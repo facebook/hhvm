@@ -709,8 +709,8 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
         auto const cnst = env.index.lookup_class_const_ptr(env.ctx, *rcls,
                                                            cnsName.m_data.pstr,
                                                            true);
-        if (!cnst || !cnst->val || !cnst->isTypeconst ||
-            !tvIsHAMSafeDArray(&*cnst->val)) {
+        if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type
+            || !tvIsHAMSafeDArray(&*cnst->val)) {
           return nullptr;
         }
         if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {

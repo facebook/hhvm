@@ -70,24 +70,34 @@ union Value {
 };
 
 struct ConstModifiers {
+  // Note that cgCheckSubClsCns relies on Value being 0.
+  enum class Kind : uint8_t { Value = 0, Type = 1 };
   uint32_t rawData;
 
   static uint32_t constexpr kMask = (uint32_t)-1UL << 2;
-  static uint32_t constexpr kTypeMask = 1;
+  static uint32_t constexpr kKindMask = 1;
 
   StringData* getPointedClsName() const {
     assertx(use_lowptr);
     return (StringData*)(uintptr_t)(rawData & kMask);
   }
-  bool isAbstract()      const { return rawData & 2; }
-  bool isType()          const { return rawData & kTypeMask; }
+  bool isAbstract() const { return rawData & 2; }
+  Kind kind() const { return static_cast<Kind>(rawData & kKindMask); }
 
   void setPointedClsName (StringData* clsName) {
     assertx(use_lowptr);
     rawData = (uintptr_t)clsName | (rawData & ~kMask);
   }
   void setIsAbstract(bool isAbstract) { rawData |= (isAbstract ? 2 : 0); }
-  void setIsType    (bool isType)     { rawData |= (isType ? kTypeMask : 0); }
+  void setKind (Kind kind) { rawData |= (uint32_t(kind) & kKindMask); }
+
+  static const char* show(Kind t) {
+    switch (t) {
+      case Kind::Value: return "constant";
+      case Kind::Type:  return "type constant";
+    }
+    not_reached();
+  }
 };
 
 /*

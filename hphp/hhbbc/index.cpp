@@ -1522,13 +1522,15 @@ bool build_class_constants(BuildClsInfo& info,
     // Same constant (from an interface via two different paths) is ok
     if (existing->cls == rparent->cls) continue;
 
-    if (existing->isTypeconst != c.isTypeconst) {
+    if (existing->kind != c.kind) {
       ITRACE(2,
              "build_cls_info_rec failed for `{}' because `{}' was defined by "
-             "`{}' as a {}constant and by `{}' as a {}constant\n",
+             "`{}' as a {} and by `{}' as a {}\n",
              info.rleaf->cls->name, c.name,
-             rparent->cls->name, c.isTypeconst ? "type " : "",
-             existing->cls->name, existing->isTypeconst ? "type " : "");
+             rparent->cls->name,
+             ConstModifiers::show(c.kind),
+             existing->cls->name,
+             ConstModifiers::show(existing->kind));
       return false;
     }
 
@@ -1544,7 +1546,7 @@ bool build_class_constants(BuildClsInfo& info,
 
       // A constant from an interface or from an included enum collides
       // with an existing constant.
-      if (rparent->cls->attrs & (AttrInterface | AttrEnum) && !c.isTypeconst) {
+      if (rparent->cls->attrs & (AttrInterface | AttrEnum)) {
         ITRACE(2,
                "build_cls_info_rec failed for `{}' because "
                "`{}' was defined by both `{}' and `{}'\n",
@@ -5268,7 +5270,7 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
     if (!it->second->val.has_value() ||
-        (!allow_tconst && it->second->isTypeconst)) {
+        (!allow_tconst && it->second->kind == ConstModifiers::Kind::Type)) {
       // This is an abstract class constant or typeconstant
       return nullptr;
     }

@@ -3018,13 +3018,15 @@ void parse_class_constant(AsmState& as) {
   }
 
   bool isType = as.in.tryConsume("isType");
+  auto const kind =
+    isType ? ConstModifiers::Kind::Type : ConstModifiers::Kind::Value;
   as.in.skipWhitespace();
 
   if (as.in.peek() == ';') {
     as.in.getc();
     as.pce->addAbstractConstant(makeStaticString(name),
                                 staticEmptyString(),
-                                isType);
+                                kind);
     return;
   }
 
@@ -3032,7 +3034,7 @@ void parse_class_constant(AsmState& as) {
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
                       staticEmptyString(),
-                      isType);
+                      kind);
 }
 
 /*

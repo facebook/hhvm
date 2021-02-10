@@ -1289,7 +1289,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       pce->addAbstractConstant(
         cconst.name,
         cconst.typeConstraint,
-        cconst.isTypeconst
+        cconst.kind
       );
     } else {
       needs86cinit |= cconst.val->m_type == KindOfUninit;
@@ -1299,7 +1299,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.typeConstraint,
         &cconst.val.value(),
         cconst.phpCode,
-        cconst.isTypeconst
+        cconst.kind
       );
     }
   }

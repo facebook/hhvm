@@ -179,7 +179,8 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
     discard(env);
     exactClsCns(env, cls, cnsNameStr, cls->name());
   } else {
-    auto const slot = cls->clsCnsSlot(cnsNameStr, false, true);
+    auto const slot =
+      cls->clsCnsSlot(cnsNameStr, ConstModifiers::Kind::Value, true);
     if (slot == kInvalidSlot) return interpOne(env);
     loadSlot(slot);
   }

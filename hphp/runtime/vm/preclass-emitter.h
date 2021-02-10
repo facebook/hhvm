@@ -129,13 +129,15 @@ struct PreClassEmitter {
       , m_typeConstraint(nullptr)
       , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
-      , m_typeconst(false)
+      , m_kind(ConstModifiers::Kind::Value)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode,
-          const bool typeconst)
-      : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode),
-        m_typeconst(typeconst) {
+          const ConstModifiers::Kind kind)
+      : m_name(n)
+      , m_typeConstraint(typeConstraint)
+      , m_phpCode(phpCode)
+      , m_kind(kind) {
       if (!val) {
         m_val.reset();
       } else {
@@ -150,13 +152,13 @@ struct PreClassEmitter {
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
     bool isAbstract()       const { return !m_val.has_value(); }
-    bool isTypeconst() const { return m_typeconst; }
+    ConstModifiers::Kind kind() const { return m_kind; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
         (m_val)
         (m_phpCode)
-        (m_typeconst);
+        (m_kind);
     }
 
    private:
@@ -164,7 +166,7 @@ struct PreClassEmitter {
     LowStringPtr m_typeConstraint;
     folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
-    bool m_typeconst;
+    ConstModifiers::Kind m_kind;
   };
 
   typedef IndexedStringMap<Prop, true, Slot> PropMap;
@@ -232,11 +234,13 @@ struct PreClassEmitter {
                    UserAttributeMap);
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
-                   const bool typeConst = false,
+                   const ConstModifiers::Kind kind =
+                     ConstModifiers::Kind::Value,
                    const Array& typeStructure = Array{});
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
-                           const bool typeConst = false);
+                           const ConstModifiers::Kind kind =
+                             ConstModifiers::Kind::Value);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

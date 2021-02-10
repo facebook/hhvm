@@ -247,8 +247,12 @@ PreClass::Const::Const(const StringData* name,
 
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
-  if (isType()) {
-    out << "Type ";
+  switch (kind()) {
+    case ConstModifiers::Kind::Value:
+      break;
+    case ConstModifiers::Kind::Type:
+      out << "Type ";
+      break;
   }
   if (isAbstract()) {
     out << "Constant (abstract) "

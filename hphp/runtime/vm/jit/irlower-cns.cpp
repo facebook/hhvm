@@ -282,16 +282,18 @@ void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
   static_assert(sizeof(ConstModifiers::rawData) == 4);
 
   auto const sf2 = v.makeReg();
-  auto const isTypeOffset =
+  auto const kindOffset =
     constOffset +
     offsetof(Class::Const, val) +
     TypedValueAux::auxOffset +
     offsetof(AuxUnion, u_constModifiers) +
     offsetof(ConstModifiers, rawData);
 
+  static_assert((int)ConstModifiers::Kind::Value == 0);
+
   v << testlim{
-    safe_cast<int32_t>(ConstModifiers::kTypeMask),
-    tmp[isTypeOffset],
+    safe_cast<int32_t>(ConstModifiers::kKindMask),
+    tmp[kindOffset],
     sf2
   };
   fwdJcc(v, env, CC_NZ, sf2, inst->taken());

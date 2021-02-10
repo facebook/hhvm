@@ -1450,8 +1450,8 @@ void addClassConstantNames(const Class* cls,
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].cls == cls && !consts[i].isAbstract() &&
-        !consts[i].isType()) {
+    if (consts[i].cls == cls && !consts[i].isAbstract()
+        && consts[i].kind() == ConstModifiers::Kind::Value) {
       st->add(const_cast<StringData*>(consts[i].name.get()));
     }
   }
@@ -1526,7 +1526,7 @@ static Array HHVM_STATIC_METHOD(
   return orderedConstantsHelper(
     get_class_from_name(clsname),
     [](Class::Const c) -> bool {
-      return c.isAbstract() && !c.isType();
+      return c.isAbstract() && c.kind() == ConstModifiers::Kind::Value;
     }
   );
 }
@@ -1538,7 +1538,9 @@ static Array HHVM_STATIC_METHOD(
 ) {
   return orderedConstantsHelper(
     get_class_from_name(clsname),
-    [](Class::Const c) -> bool { return c.isType(); }
+    [](Class::Const c) -> bool {
+      return c.kind() == ConstModifiers::Kind::Type;
+    }
   );
 }
 
@@ -1719,7 +1721,8 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
   const Class::Const* consts = cls->constants();
 
   for (size_t i = 0; i < numConsts; i++) {
-    if (const_name.same(consts[i].name) && consts[i].isType()) {
+    if (const_name.same(consts[i].name)
+        && consts[i].kind() == ConstModifiers::Kind::Type) {
       auto handle = ReflectionConstHandle::Get(this_);
       handle->setConst(&consts[i]);
       handle->setClass(cls);
@@ -1756,7 +1759,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     // the original assigned type text
     auto const preCls = cls->preClass();
     auto typeCns = preCls->lookupConstant(cns->name);
-    assertx(typeCns->isType());
+    assertx(typeCns->kind() == ConstModifiers::Kind::Type);
     assertx(!typeCns->isAbstract());
     assertx(isArrayLikeType(typeCns->val().m_type));
     return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr),

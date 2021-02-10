@@ -254,7 +254,7 @@ struct Class : AtomicCountable {
 #endif
 
     bool isAbstract() const { return val.constModifiers().isAbstract(); }
-    bool isType()     const { return val.constModifiers().isType(); }
+    ConstModifiers::Kind kind() const { return val.constModifiers().kind(); }
 
     StringData* getPointedClsName() const {
 #ifndef USE_LOWPTR
@@ -1093,8 +1093,8 @@ public:
    * Get the slot for a constant with name, which can optionally be abstract and
    * either must be or must not be a type constant.
    */
-  Slot clsCnsSlot(
-    const StringData* name, bool wantTypeCns, bool allowAbstract) const;
+  Slot clsCnsSlot(const StringData* name, ConstModifiers::Kind want,
+                  bool allowAbstract) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

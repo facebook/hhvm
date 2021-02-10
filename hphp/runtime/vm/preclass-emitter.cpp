@@ -193,12 +193,14 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
                                           const StringData* typeConstraint,
-                                          const bool typeconst) {
+                                          const ConstModifiers::Kind kind) {
+  assertx(kind == ConstModifiers::Kind::Value ||
+          kind == ConstModifiers::Kind::Type);
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr, typeconst);
+  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr, kind);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -207,21 +209,23 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
                                   const TypedValue* val,
                                   const StringData* phpCode,
-                                  const bool typeconst,
+                                  const ConstModifiers::Kind kind,
                                   const Array& typeStructure) {
+  assertx(kind == ConstModifiers::Kind::Value ||
+          kind == ConstModifiers::Kind::Type);
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   TypedValue tvVal;
-  if (typeconst && !typeStructure.empty())  {
+  if (kind == ConstModifiers::Kind::Type && !typeStructure.empty())  {
     assertx(typeStructure.isHAMSafeDArray());
     tvVal = make_persistent_array_like_tv(typeStructure.get());
     assertx(tvIsPlausible(tvVal));
   } else {
     tvVal = *val;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, typeconst);
+  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, kind);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -365,7 +369,7 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
       tvaux.constModifiers().setIsAbstract(false);
     }
 
-    tvaux.constModifiers().setIsType(const_.isTypeconst());
+    tvaux.constModifiers().setKind(const_.kind());
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,

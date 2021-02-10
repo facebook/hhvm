@@ -552,7 +552,8 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
   if (!clsTmp->type().clsSpec()) return nullptr;
   auto const cls = clsTmp->type().clsSpec().cls();
 
-  auto const cnsSlot = cls->clsCnsSlot(cnsName, true, true);
+  auto const cnsSlot =
+    cls->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true);
   if (cnsSlot == kInvalidSlot) return nullptr;
 
   auto const data = LdSubClsCnsData { cnsName, cnsSlot };

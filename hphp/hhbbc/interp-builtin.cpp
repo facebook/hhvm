@@ -305,7 +305,7 @@ ArrayData* impl_type_structure_opts(ISS& env,
                           bool check_lsb) -> ArrayData* {
     auto const cnst =
       env.index.lookup_class_const_ptr(env.ctx, rcls, cns, true);
-    if (!cnst || !cnst->val || !cnst->isTypeconst) {
+    if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type) {
       if (check_lsb && (!cnst || !cnst->val)) return nullptr;
       // Either the const does not exist, it is abstract or is not a type const
       return fail();

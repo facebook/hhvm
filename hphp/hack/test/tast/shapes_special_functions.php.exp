@@ -50,7 +50,7 @@
                   [(([6:15-17], shape('x' => int, ?'y' => int)),
                     (Lvar ([6:15-17], $p)));
                     (([6:19-22], string), (String "x"))],
-                  None, None)))));
+                  None)))));
            ([7:3-27],
             (Expr
                (([7:3-26], int),
@@ -64,7 +64,7 @@
                      (Lvar ([7:15-17], $p)));
                      (([7:19-22], string), (String "x"));
                      (([7:24-25], int), (Int "3"))],
-                   None, None)))));
+                   None)))));
            ([8:3-30],
             (Expr
                (([8:3-29], bool),
@@ -77,7 +77,7 @@
                    [(([8:21-23], shape('x' => int, ?'y' => int)),
                      (Lvar ([8:21-23], $p)));
                      (([8:25-28], string), (String "y"))],
-                   None, None)))));
+                   None)))));
            ([9:3-36],
             (Expr
                (([9:3-35], void),
@@ -94,7 +94,7 @@
                          (Lvar ([9:27-29], $p)))
                         )));
                      (([9:31-34], string), (String "y"))],
-                   None, None)))));
+                   None)))));
            ([10:3-23],
             (Expr
                (([10:3-22], darray<string, int>),
@@ -106,7 +106,7 @@
                    [],
                    [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))
                      ],
-                   None, None)))))
+                   None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

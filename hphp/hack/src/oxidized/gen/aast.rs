@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1527192ecd96f4095e18ebe667f34e2>>
+// @generated SignedSource<<30b64dc237cd3a552557ebe2a16bd1b7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -535,7 +535,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Expr<Ex, Fb, En, Hi>,
             OgNullFlavor,
             bool,
-            Option<ast_defs::ReadonlyKind>,
         )>,
     ),
     /// Static property access.
@@ -576,7 +575,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
             Option<Expr<Ex, Fb, En, Hi>>,
-            Option<ast_defs::ReadonlyKind>,
         )>,
     ),
     /// A reference to a function or method.

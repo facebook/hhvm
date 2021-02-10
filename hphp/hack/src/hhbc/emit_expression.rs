@@ -221,7 +221,7 @@ mod inout_locals {
         ) -> std::result::Result<(), ()> {
             // f(inout $v) or f(&$v)
             if let tast::Expr_::Call(expr) = p {
-                let (_, _, args, uarg, _) = &**expr;
+                let (_, _, args, uarg) = &**expr;
                 args.iter()
                     .for_each(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
                 uarg.as_ref()
@@ -443,13 +443,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
                 // Case ($x->foo).
                 let e = tast::Expr(
                     pos.clone(),
-                    Expr_::ObjGet(Box::new((
-                        e.0.clone(),
-                        e.1.clone(),
-                        e.2.clone(),
-                        false,
-                        e.4.clone(),
-                    ))),
+                    Expr_::ObjGet(Box::new((e.0.clone(), e.1.clone(), e.2.clone(), false))),
                 );
                 emit_expr(emitter, env, &e)
             } else {
@@ -799,7 +793,7 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     match e.as_call() {
-        Some((tast::Expr(_, tast::Expr_::Id(id)), _, args, None, None))
+        Some((tast::Expr(_, tast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
@@ -1523,7 +1517,7 @@ fn emit_call_isset_expr(e: &mut Emitter, env: &Env, outer_pos: &Pos, expr: &tast
     if let Some((cid, id, _)) = expr.1.as_class_get() {
         return emit_class_get(e, env, QueryOp::Isset, cid, id);
     }
-    if let Some((expr_, prop, nullflavor, _, _ro)) = expr.1.as_obj_get() {
+    if let Some((expr_, prop, nullflavor, _)) = expr.1.as_obj_get() {
         return Ok(emit_obj_get(e, env, pos, QueryOp::Isset, expr_, prop, nullflavor, false)?.0);
     }
     if let Some(lid) = expr.1.as_lvar() {
@@ -1861,13 +1855,7 @@ fn emit_call_lhs_and_fcall(
                 // Case ($x->foo)(...).
                 let expr = E(
                     pos.clone(),
-                    E_::ObjGet(Box::new((
-                        o.0.clone(),
-                        o.1.clone(),
-                        o.2.clone(),
-                        false,
-                        o.4.clone(),
-                    ))),
+                    E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
                 );
                 emit_fcall_func(e, env, &expr, fcall_args)
             } else {
@@ -1889,7 +1877,7 @@ fn emit_call_lhs_and_fcall(
                         ))
                     };
                 match o.as_ref() {
-                    (obj, E(_, E_::String(id)), null_flavor, _, _) => {
+                    (obj, E(_, E_::String(id)), null_flavor, _) => {
                         emit_id(
                             e,
                             obj,
@@ -1900,7 +1888,7 @@ fn emit_call_lhs_and_fcall(
                             fcall_args,
                         )
                     }
-                    (E(pos, E_::New(new_exp)), E(_, E_::Id(id)), null_flavor, _, _)
+                    (E(pos, E_::New(new_exp)), E(_, E_::Id(id)), null_flavor, _)
                         if fcall_args.1 == 0 =>
                     {
                         let cexpr = ClassExpr::class_id_to_class_expr(
@@ -1952,10 +1940,10 @@ fn emit_call_lhs_and_fcall(
                             _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                         }
                     }
-                    (obj, E(_, E_::Id(id)), null_flavor, _, _) => {
+                    (obj, E(_, E_::Id(id)), null_flavor, _) => {
                         emit_id(e, obj, &id.1, null_flavor, fcall_args)
                     }
-                    (obj, method_expr, null_flavor, _, _) => {
+                    (obj, method_expr, null_flavor, _) => {
                         let obj = emit_object_expr(e, env, obj)?;
                         let tmp = e.local_gen_mut().get_unnamed();
                         let null_flavor = from_ast_null_flavor(*null_flavor);
@@ -2403,7 +2391,7 @@ fn emit_special_function(
             );
             let call = tast::Expr(
                 pos.clone(),
-                tast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned(), None),
+                tast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
             let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
             Ok(Some(InstrSeq::gather(vec![
@@ -3014,12 +3002,11 @@ fn emit_call_expr(
     env: &Env,
     pos: &Pos,
     async_eager_label: Option<Label>,
-    (expr, targs, args, uarg, _ro): &(
+    (expr, targs, args, uarg): &(
         tast::Expr,
         Vec<tast::Targ>,
         Vec<tast::Expr>,
         Option<tast::Expr>,
-        Option<tast::ReadonlyKind>, // TODO(readonly emitter)
     ),
 ) -> Result {
     let jit_enable_rename_function = e
@@ -3495,7 +3482,6 @@ fn emit_xhp_obj_get(
             ),
             nullflavor.clone(),
             false,
-            None, // readonly
         ),
     );
     let args = vec![E(pos.clone(), E_::mk_string(string_utils::clean(s).into()))];
@@ -4989,7 +4975,7 @@ fn emit_base_(
             if x.as_ref().3 {
                 emit_expr_default(e, env, expr)
             } else {
-                let (base_expr, prop_expr, null_flavor, _, _readonly) = &**x;
+                let (base_expr, prop_expr, null_flavor, _) = &**x;
                 Ok(match prop_expr.1.as_id() {
                     Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
                         let base_instrs =
@@ -5523,7 +5509,7 @@ pub fn emit_lval_op_nonlist_steps(
                 }
             },
             E_::ObjGet(x) if !x.as_ref().3 => {
-                let (e1, e2, nullflavor, _, _) = &**x;
+                let (e1, e2, nullflavor, _) = &**x;
                 if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
                     return Err(emit_fatal::raise_fatal_parse(
                         pos,

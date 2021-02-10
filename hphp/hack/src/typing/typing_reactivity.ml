@@ -497,7 +497,7 @@ let check_awaitable_immediately_awaited env ty pos ~allow_awaitable =
 let expr_is_valid_owned_arg e : bool =
   let open Aast in
   match snd e with
-  | Call ((_, Id (_, id)), _, _, _, _) ->
+  | Call ((_, Id (_, id)), _, _, _) ->
     String.equal id SN.Rx.mutable_ || String.equal id SN.Rx.move
   | _ -> false
 
@@ -577,7 +577,7 @@ let rec is_valid_mutable_subscript_expression_target env v =
   | ((_, ty), Array_get (e, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && is_valid_mutable_subscript_expression_target env e
-  | ((_, ty), Obj_get (e, _, _, _, _)) ->
+  | ((_, ty), Obj_get (e, _, _, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && ( is_valid_mutable_subscript_expression_target env e
        || expr_is_valid_borrowed_arg env e )
@@ -617,7 +617,7 @@ let check_assignment_or_unset_target
   let open Aast in
   match snd te1 with
   (* Setting mutable locals is okay *)
-  | Obj_get (e1, _, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
+  | Obj_get (e1, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
   | Array_get (((_, ty1), _), i)
     when is_assignment && not (is_valid_append_target env ty1) ->
     let is_append = Option.is_none i in

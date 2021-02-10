@@ -44,7 +44,7 @@
                     (([8:5-13], string),
                      (Obj_get ((([8:5-10], this), This),
                         (([8:12-13], string), (Id ([8:12-13], "y"))),
-                        OG_nullthrows, false, None))),
+                        OG_nullthrows, false))),
                     (([8:16-18], string), (Lvar ([8:16-18], $y))))))))
              ];
            fb_annotation = () };

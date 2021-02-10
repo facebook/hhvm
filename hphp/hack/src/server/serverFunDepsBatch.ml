@@ -58,18 +58,18 @@ let collect_in_decl =
 
     method plus a b = Results.union a b
 
-    method! on_Call env e h el unpacked_element ro =
+    method! on_Call env e h el unpacked_element =
       let ( + ) = self#plus in
       let acc =
         match snd e with
-        | T.Obj_get (((_, ty), _), (_, T.Id mid), _, _, _) ->
+        | T.Obj_get (((_, ty), _), (_, T.Id mid), _, _) ->
           process_method env ty mid
         | T.Id id -> process_function id
         | T.Class_const (((_, ty), _), mid) -> process_method env ty mid
         | T.Lvar (pos, id) -> process_local (pos, Local_id.get_name id)
         | _ -> self#zero
       in
-      acc + super#on_Call env e h el unpacked_element ro
+      acc + super#on_Call env e h el unpacked_element
 
     method! on_New env (((p, ty), _) as c) targs el unpacked_element ctor_annot
         =

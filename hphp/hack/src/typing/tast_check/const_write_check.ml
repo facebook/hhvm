@@ -66,7 +66,7 @@ let rec check_expr env (_, e) =
         Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
-  | Obj_get (((_, cty), _), (_, Id id), _, _, _) ->
+  | Obj_get (((_, cty), _), (_, Id id), _, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with
@@ -80,7 +80,7 @@ let rec check_expr env (_, e) =
         end
       | _ -> ()
     end
-  | Call ((_, Id (_, f)), _, el, None, _)
+  | Call ((_, Id (_, f)), _, el, None)
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with

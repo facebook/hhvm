@@ -24,7 +24,7 @@ let handler =
 
     method! at_expr env =
       function
-      | ((p, _), Obj_get (((_, ty), _), _, OG_nullsafe, _, _))
+      | ((p, _), Obj_get (((_, ty), _), _, OG_nullsafe, _))
         when Utils.type_non_nullable env ty ->
         let (_, ty) = Env.expand_type env ty in
         Errors.nullsafe_not_needed

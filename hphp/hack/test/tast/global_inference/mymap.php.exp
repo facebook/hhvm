@@ -24,11 +24,11 @@
                      (([5:3-5], MyMap<string, int>), (Lvar ([5:3-5], $m))),
                      (([5:7-10], (function(string $x, int $y): void)),
                       (Id ([5:7-10], "add"))),
-                     OG_nullthrows, false, None))),
+                     OG_nullthrows, false))),
                  [],
                  [(([5:11-16], string), (String "hey"));
                    (([5:18-20], int), (Int "40"))],
-                 None, None)))));
+                 None)))));
           ([6:3-24],
            (Return
               (Some (([6:10-23], ?int),
@@ -39,9 +39,8 @@
                              (Lvar ([6:10-12], $m))),
                             (([6:14-17], (function(string $x): ?int)),
                              (Id ([6:14-17], "get"))),
-                            OG_nullthrows, false, None))),
-                        [], [(([6:18-22], string), (String "ho"))], None,
-                        None))))))
+                            OG_nullthrows, false))),
+                        [], [(([6:18-22], string), (String "ho"))], None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

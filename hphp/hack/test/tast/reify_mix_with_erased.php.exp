@@ -55,7 +55,7 @@ Errors:
                    (Id ([8:3-4], "\\f"))),
                   [((int), ([8:5-8], (Hprim Tint)));
                     ((string), ([8:10-16], (Hprim Tstring)))],
-                  [(([8:18-20], int), (Int "42"))], None, None)))))
+                  [(([8:18-20], int), (Int "42"))], None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

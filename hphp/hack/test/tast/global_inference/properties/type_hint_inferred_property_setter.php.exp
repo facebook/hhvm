@@ -37,7 +37,7 @@
                     (([7:5-13], int),
                      (Obj_get ((([7:5-10], this), This),
                         (([7:12-13], int), (Id ([7:12-13], "x"))),
-                        OG_nullthrows, false, None))),
+                        OG_nullthrows, false))),
                     (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
              ];
            fb_annotation = () };
@@ -57,7 +57,7 @@
                  (Some (([13:12-20], int),
                         (Obj_get ((([13:12-17], this), This),
                            (([13:19-20], int), (Id ([13:19-20], "x"))),
-                           OG_nullthrows, false, None))))))
+                           OG_nullthrows, false))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;

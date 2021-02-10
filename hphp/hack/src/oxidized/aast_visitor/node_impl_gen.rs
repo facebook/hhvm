@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<52cc567317d7ab260cc2a9bb49544f05>>
+// @generated SignedSource<<7293ec30d05a8f993388d553ba4059a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -741,7 +741,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
-                a.4.accept(c, v)?;
                 Ok(())
             }
             Expr_::ClassGet(a) => {
@@ -760,7 +759,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
-                a.4.accept(c, v)?;
                 Ok(())
             }
             Expr_::FunctionPointer(a) => {

@@ -160,13 +160,12 @@ impl<'ast> Visitor<'ast> for Checker {
             // Allow simple function calls.
             Call(call) => match &**call {
                 // Ban variadic calls foo(...$x);
-                (_, _, _, _, Some(_)) => Some("Expression trees do not support readonly."),
-                (_, _, _, Some(_), _) => Some("Expression trees do not support variadic calls."),
+                (_, _, _, Some(_)) => Some("Expression trees do not support variadic calls."),
                 // Ban generic type arguments foo<X, Y>();
-                (_, targs, _, _, _) if !targs.is_empty() => {
+                (_, targs, _, _) if !targs.is_empty() => {
                     Some("Expression trees do not support function calls with generics.")
                 }
-                (recv, _targs, args, _variadic, _ro) => {
+                (recv, _targs, args, _variadic) => {
                     // Only allow direct function calls, so allow
                     // foo(), but don't allow (foo())().
                     match &recv.1 {

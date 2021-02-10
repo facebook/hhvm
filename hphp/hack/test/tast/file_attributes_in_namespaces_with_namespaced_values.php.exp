@@ -45,7 +45,7 @@ Errors:
                     (([5:47-58], string),
                      (Obj_get ((([5:47-58], this), This),
                         (([5:47-58], string), (Id ([5:47-58], "attr_value"))),
-                        OG_nullthrows, false, None))),
+                        OG_nullthrows, false))),
                     (([5:47-58], string), (Lvar ([5:47-58], $attr_value))))))));
              ([Pos.none], Noop)];
            fb_annotation = () };

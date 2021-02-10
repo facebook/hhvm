@@ -38,7 +38,7 @@
                      (Call (
                         (([5:10-12], (function(int): int)),
                          (Lvar ([5:10-12], $f))),
-                        [], [(([5:13-14], int), (Int "1"))], None, None))))))
+                        [], [(([5:13-14], int), (Int "1"))], None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

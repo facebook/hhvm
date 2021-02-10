@@ -41,7 +41,7 @@ Errors:
                         ([7:8-15], (Happly (([Pos.none], "_"), []))))],
                       [(([7:16-18], HH\Lib\Regex\Pattern<shape(0 => string)>),
                         (Lvar ([7:16-18], $x)))],
-                      None, None)))
+                      None)))
                   )))));
           ([12:3-16],
            (Expr

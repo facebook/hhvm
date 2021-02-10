@@ -85,8 +85,7 @@ let handler =
             ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name)],
-              None,
-              _ ) )
+              None ) )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
         trivial_shapes_key_exists_check p env shape (pos, field_name)
@@ -95,15 +94,13 @@ let handler =
             ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name); _],
-              None,
-              _ ) )
+              None ) )
       | ( (p, _),
           Call
             ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name)],
-              None,
-              _ ) )
+              None ) )
         when String.equal class_name SN.Shapes.cShapes
              && ( String.equal method_name SN.Shapes.idx
                 || String.equal method_name SN.Shapes.at ) ->

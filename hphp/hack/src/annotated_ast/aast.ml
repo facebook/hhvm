@@ -352,8 +352,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr
       * og_null_flavor
       * (* is_prop_call *) bool
-      * (* readonly_get *)
-      Ast_defs.readonly_kind option
       (** Instance property or method access.  is_prop_call is always
           false, except when inside a call is accessing a property.
 
@@ -395,8 +393,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       ('ex, 'fb, 'en, 'hi) expr list
       * (* unpacked arg *)
       ('ex, 'fb, 'en, 'hi) expr option
-      * (* Accepts readonly return *)
-      Ast_defs.readonly_kind option
       (** Function or method call.
 
           foo()
@@ -407,7 +403,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           async { return 1; }
           // lowered to:
           (async () ==> { return 1; })() *)
-  (* Accepts readonly  *)
   | FunctionPointer of ('ex, 'fb, 'en, 'hi) function_ptr_id * 'hi targ list
       (** A reference to a function or method.
 

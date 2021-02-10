@@ -82,7 +82,7 @@
                   [((_), ([13:3-15], (Happly (([Pos.none], "_"), []))))],
                   [(([13:16-30], varray_or_darray<arraykey, _>),
                     (Lvar ([13:16-30], $untyped_array)))],
-                  None, None)))));
+                  None)))));
           ([14:3-31],
            (Expr
               (([14:3-30], varray<string>),
@@ -93,7 +93,7 @@
                     ],
                   [(([14:16-29], varray<?string>),
                     (Lvar ([14:16-29], $vector_array)))],
-                  None, None)))));
+                  None)))));
           ([15:3-28],
            (Expr
               (([15:3-27], darray<arraykey, string>),
@@ -104,7 +104,7 @@
                     ],
                   [(([15:16-26], Container<?string>),
                     (Lvar ([15:16-26], $container)))],
-                  None, None)))));
+                  None)))));
           ([16:3-34],
            (Expr
               (([16:3-33], darray<int, string>),
@@ -115,7 +115,7 @@
                     ],
                   [(([16:16-32], KeyedContainer<int, ?string>),
                     (Lvar ([16:16-32], $keyed_container)))],
-                  None, None)))));
+                  None)))));
           ([17:3-26],
            (Expr
               (([17:3-25], _),
@@ -123,8 +123,7 @@
                   (([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)),
                    (Id ([17:3-15], "\\array_filter"))),
                   [((_), ([17:3-15], (Happly (([Pos.none], "_"), []))))],
-                  [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))], None,
-                  None)))));
+                  [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))], None)))));
           ([18:3-29],
            (Expr
               (([18:3-28], darray<arraykey, string>),
@@ -135,7 +134,7 @@
                     ],
                   [(([18:16-27], Container<?string>),
                     (Lvar ([18:16-27], $unresolved)))],
-                  None, None)))));
+                  None)))));
           ([20:3-36],
            (Expr
               (([20:3-35], (function(?string $x): bool)),
@@ -192,7 +191,7 @@
                     (([22:32-34], (function(?string $x): bool)),
                      (Lvar ([22:32-34], $f)))
                     ],
-                  None, None)))));
+                  None)))));
           ([23:3-35],
            (Expr
               (([23:3-34], varray<?string>),
@@ -206,7 +205,7 @@
                     (([23:31-33], (function(?string $x): bool)),
                      (Lvar ([23:31-33], $f)))
                     ],
-                  None, None)))));
+                  None)))));
           ([24:3-32],
            (Expr
               (([24:3-31], darray<arraykey, ?string>),
@@ -220,7 +219,7 @@
                     (([24:28-30], (function(?string $x): bool)),
                      (Lvar ([24:28-30], $f)))
                     ],
-                  None, None)))));
+                  None)))));
           ([25:3-38],
            (Expr
               (([25:3-37], darray<int, ?string>),
@@ -234,7 +233,7 @@
                     (([25:34-36], (function(?string $x): bool)),
                      (Lvar ([25:34-36], $f)))
                     ],
-                  None, None)))));
+                  None)))));
           ([26:3-30],
            (Expr
               (([26:3-29], _),
@@ -246,7 +245,7 @@
                     (([26:26-28], (function(?string $x): bool)),
                      (Lvar ([26:26-28], $f)))
                     ],
-                  None, None)))));
+                  None)))));
           ([27:3-33],
            (Expr
               (([27:3-32], darray<arraykey, ?string>),
@@ -260,7 +259,7 @@
                     (([27:29-31], (function(?string $x): bool)),
                      (Lvar ([27:29-31], $f)))
                     ],
-                  None, None)))))
+                  None)))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

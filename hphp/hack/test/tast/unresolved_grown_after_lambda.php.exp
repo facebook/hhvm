@@ -95,7 +95,7 @@ Errors:
                      (Call (
                         (([14:10-12], (function(): int)),
                          (Lvar ([14:10-12], $f))),
-                        [], [], None, None))))))
+                        [], [], None))))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

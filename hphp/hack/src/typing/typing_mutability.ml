@@ -45,12 +45,12 @@ module Shared (Env : Env_S) = struct
     in
     match snd e with
     (* Function call *)
-    | T.Call ((_, T.Id id), _, _, _, _)
-    | T.Call ((_, T.Fun_id id), _, _, _, _) ->
+    | T.Call ((_, T.Id id), _, _, _)
+    | T.Call ((_, T.Fun_id id), _, _, _) ->
       fun_returns_mutable id
-    | T.Call (((_, fun_ty), T.Obj_get _), _, _, _, _)
-    | T.Call (((_, fun_ty), T.Class_const _), _, _, _, _)
-    | T.Call (((_, fun_ty), T.Lvar _), _, _, _, _) ->
+    | T.Call (((_, fun_ty), T.Obj_get _), _, _, _)
+    | T.Call (((_, fun_ty), T.Class_const _), _, _, _)
+    | T.Call (((_, fun_ty), T.Lvar _), _, _, _) ->
       let (_, efun_ty) = Env.expand_type env fun_ty in
       fun_ty_returns_mutable efun_ty
     | _ -> false
@@ -99,8 +99,7 @@ let handle_value_in_return
     | T.New _
     | T.Xml _ ->
       env
-    | T.Call ((_, T.Id (_, id)), _, _, _, _) when String.equal id SN.Rx.mutable_
-      ->
+    | T.Call ((_, T.Id (_, id)), _, _, _) when String.equal id SN.Rx.mutable_ ->
       (* ok to return result of Rx\mutable - implicit Rx\move *)
       env
     | T.Pipe (_, _, r) ->
@@ -200,7 +199,7 @@ let move_local (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list) :
 
 let rec is_move_or_mutable_call ?(allow_move = true) te =
   match te with
-  | T.Call ((_, T.Id (_, n)), _, _, _, _) ->
+  | T.Call ((_, T.Id (_, n)), _, _, _) ->
     String.equal n SN.Rx.mutable_ || (allow_move && String.equal n SN.Rx.move)
   | T.Pipe (_, _, (_, r)) -> is_move_or_mutable_call ~allow_move:false r
   | _ -> false

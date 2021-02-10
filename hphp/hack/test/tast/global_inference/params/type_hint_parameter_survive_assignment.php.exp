@@ -25,8 +25,7 @@
                (Call (
                   (([5:5-8], (function(int $_): void)),
                    (Id ([5:5-8], "\\bar"))),
-                  [], [(([5:9-11], int), (Lvar ([5:9-11], $y)))], None, None
-                  )))))
+                  [], [(([5:9-11], int), (Lvar ([5:9-11], $y)))], None)))))
           ];
         fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

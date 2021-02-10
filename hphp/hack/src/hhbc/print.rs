@@ -2735,7 +2735,7 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, e2)
         }
         E_::Call(c) => {
-            let (e, _, es, unpacked_element, _ro) = &**c;
+            let (e, _, es, unpacked_element) = &**c;
             match e.as_id() {
                 Some(ast_defs::Id(_, call_id)) => {
                     w.write(lstrip(adjust_id(env, &call_id).as_ref(), "\\\\"))?

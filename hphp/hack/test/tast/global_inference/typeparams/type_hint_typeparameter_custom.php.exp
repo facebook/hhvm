@@ -46,7 +46,7 @@ Errors:
                     (([6:5-13], T),
                      (Obj_get ((([6:5-10], this), This),
                         (([6:12-13], T), (Id ([6:12-13], "y"))),
-                        OG_nullthrows, false, None))),
+                        OG_nullthrows, false))),
                     (([6:16-18], T), (Lvar ([6:16-18], $x))))))))
              ];
            fb_annotation = () };
@@ -86,7 +86,7 @@ Errors:
                   (([11:3-8], int),
                    (Obj_get ((([11:3-5], C<int>), (Lvar ([11:3-5], $x))),
                       (([11:7-8], int), (Id ([11:7-8], "y"))), OG_nullthrows,
-                      false, None))),
+                      false))),
                   (([11:11-12], int), (Int "4")))))))
            ];
          fb_annotation = () };

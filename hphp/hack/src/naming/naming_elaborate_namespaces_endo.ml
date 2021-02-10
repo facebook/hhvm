@@ -85,22 +85,18 @@ let extend_tparams env tparaml =
  *)
 let handle_special_calls env call =
   match call with
-  | Call (((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs, ro)
+  | Call (((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     (* Functions referenced by fun() are always fully-qualified *)
     let fn = Utils.add_ns fn in
-    Call (id, targs, [(p, String fn)], uargs, ro)
+    Call (id, targs, [(p, String fn)], uargs)
   | Call
-      ( ((_, Id (_, cn)) as id),
-        targs,
-        [(p1, String cl); meth],
-        unpacked_element,
-        ro )
+      (((_, Id (_, cn)) as id), targs, [(p1, String cl); meth], unpacked_element)
     when ( String.equal cn SN.AutoimportedFunctions.meth_caller
          || String.equal cn SN.AutoimportedFunctions.class_meth )
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
-    Call (id, targs, [(p1, String cl); meth], unpacked_element, ro)
+    Call (id, targs, [(p1, String cl); meth], unpacked_element)
   | _ -> call
 
 let contexts_ns =
@@ -251,23 +247,21 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
       match expr with
-      | Call ((p, Id (p2, cn)), targs, el, uarg, ro)
+      | Call ((p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn ->
         Call
           ( (p, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
-            Option.map uarg ~f:(self#on_expr env),
-            ro )
-      | Call ((p, Aast.Id id), tal, el, unpacked_element, ro) ->
+            Option.map uarg ~f:(self#on_expr env) )
+      | Call ((p, Aast.Id id), tal, el, unpacked_element) ->
         let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
             ( (p, Id new_id),
               List.map tal ~f:(self#on_targ env),
               List.map el ~f:(self#on_expr env),
-              Option.map unpacked_element ~f:(self#on_expr env),
-              ro )
+              Option.map unpacked_element ~f:(self#on_expr env) )
         in
         handle_special_calls env renamed_call
       | FunctionPointer (FP_id fn, targs) ->
@@ -280,8 +274,8 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer
           (FP_class_const ((p1, CIexpr (p2, Id name)), meth_name), targs)
-      | Obj_get (e1, (p, Id x), null_safe, in_parens, ro) ->
-        Obj_get (self#on_expr env e1, (p, Id x), null_safe, in_parens, ro)
+      | Obj_get (e1, (p, Id x), null_safe, in_parens) ->
+        Obj_get (self#on_expr env e1, (p, Id x), null_safe, in_parens)
       | Id ((_, name) as sid) ->
         if
           (String.equal name "NAN" || String.equal name "INF") && in_codegen env

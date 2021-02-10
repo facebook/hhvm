@@ -64,7 +64,7 @@ let handler =
              && not (Option.equal String.equal env.function_name (Some m_name))
         ->
         Errors.magic mid
-      | Obj_get (_, (_, Id s), _, _, _) when is_magic s -> Errors.magic s
+      | Obj_get (_, (_, Id s), _, _) when is_magic s -> Errors.magic s
       | _ -> ()
 
     method! at_fun_ _ f =

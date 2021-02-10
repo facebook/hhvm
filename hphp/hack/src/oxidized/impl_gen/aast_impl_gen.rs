@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c654f17eca8a068ab4d77d33e074fddd>>
+// @generated SignedSource<<e75b5a3e48918426cf3ef4545680d164>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -972,9 +972,8 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p1: Expr<Ex, Fb, En, Hi>,
         p2: OgNullFlavor,
         p3: bool,
-        p4: Option<ast_defs::ReadonlyKind>,
     ) -> Self {
-        Expr_::ObjGet(Box::new((p0, p1, p2, p3, p4)))
+        Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_class_get(
         p0: ClassId<Ex, Fb, En, Hi>,
@@ -991,9 +990,8 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p1: Vec<Targ<Hi>>,
         p2: Vec<Expr<Ex, Fb, En, Hi>>,
         p3: Option<Expr<Ex, Fb, En, Hi>>,
-        p4: Option<ast_defs::ReadonlyKind>,
     ) -> Self {
-        Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
+        Expr_::Call(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_function_pointer(p0: FunctionPtrId<Ex, Fb, En, Hi>, p1: Vec<Targ<Hi>>) -> Self {
         Expr_::FunctionPointer(Box::new((p0, p1)))
@@ -1526,10 +1524,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         &Expr<Ex, Fb, En, Hi>,
         &OgNullFlavor,
         &bool,
-        &Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3, &p0.4)),
+            Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
@@ -1558,10 +1555,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         &Vec<Targ<Hi>>,
         &Vec<Expr<Ex, Fb, En, Hi>>,
         &Option<Expr<Ex, Fb, En, Hi>>,
-        &Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3, &p0.4)),
+            Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
@@ -1893,10 +1889,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         &mut Expr<Ex, Fb, En, Hi>,
         &mut OgNullFlavor,
         &mut bool,
-        &mut Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::ObjGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3, &mut p0.4)),
+            Expr_::ObjGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
         }
     }
@@ -1925,10 +1920,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         &mut Vec<Targ<Hi>>,
         &mut Vec<Expr<Ex, Fb, En, Hi>>,
         &mut Option<Expr<Ex, Fb, En, Hi>>,
-        &mut Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::Call(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3, &mut p0.4)),
+            Expr_::Call(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
         }
     }
@@ -2269,10 +2263,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr<Ex, Fb, En, Hi>,
         OgNullFlavor,
         bool,
-        Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3, (*p0).4)),
+            Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }
@@ -2297,10 +2290,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Vec<Targ<Hi>>,
         Vec<Expr<Ex, Fb, En, Hi>>,
         Option<Expr<Ex, Fb, En, Hi>>,
-        Option<ast_defs::ReadonlyKind>,
     )> {
         match self {
-            Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3, (*p0).4)),
+            Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }

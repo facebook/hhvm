@@ -39,7 +39,7 @@
                     (([16:5-13], Vector<T>),
                      (Obj_get ((([16:5-10], this), This),
                         (([16:12-13], Vector<T>), (Id ([16:12-13], "x"))),
-                        OG_nullthrows, false, None))),
+                        OG_nullthrows, false))),
                     (([16:16-25], Vector<T>),
                      (ValCollection (Vector, None, [])))
                     )))))
@@ -73,7 +73,7 @@
                          (([20:5-13], Vector<T>),
                           (Obj_get ((([20:5-10], this), This),
                              (([20:12-13], Vector<T>), (Id ([20:12-13], "x"))),
-                             OG_nullthrows, false, None))),
+                             OG_nullthrows, false))),
                          None))),
                      (([20:18-20], T), (Lvar ([20:18-20], $x))))))))
               ];
@@ -105,7 +105,7 @@
                             (Obj_get ((([24:12-17], this), This),
                                (([24:19-20], Vector<T>),
                                 (Id ([24:19-20], "x"))),
-                               OG_nullthrows, false, None))),
+                               OG_nullthrows, false))),
                            (Some (([24:21-22], int), (Int "0")))))))))
               ];
             fb_annotation = () };
@@ -219,13 +219,13 @@
                        (([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))),
                        (([34:7-10], (function(X $x): void)),
                         (Id ([34:7-10], "add"))),
-                       OG_nullthrows, false, None))),
+                       OG_nullthrows, false))),
                    [],
                    [(([34:11-18], B),
                      (New ((([34:15-16], B), (CI ([34:15-16], "\\B"))), 
                         [], [], None, ([34:15-16], _))))
                      ],
-                   None, None)))));
+                   None)))));
            ([35:3-20],
             (Expr
                (([35:3-19], void),
@@ -235,13 +235,13 @@
                        (([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))),
                        (([35:7-10], (function(X $x): void)),
                         (Id ([35:7-10], "add"))),
-                       OG_nullthrows, false, None))),
+                       OG_nullthrows, false))),
                    [],
                    [(([35:11-18], A),
                      (New ((([35:15-16], A), (CI ([35:15-16], "\\A"))), 
                         [], [], None, ([35:15-16], _))))
                      ],
-                   None, None)))));
+                   None)))));
            ([36:3-12],
             (Expr
                (([36:3-11], void),
@@ -250,7 +250,7 @@
                     (Id ([36:3-7], "\\test"))),
                    [],
                    [(([36:8-10], MyPhonyVector<X>), (Lvar ([36:8-10], $x)))],
-                   None, None)))))
+                   None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

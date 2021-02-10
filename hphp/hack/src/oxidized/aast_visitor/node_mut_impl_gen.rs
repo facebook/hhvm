@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f74bd1ad462ba256a6ed9a3203fe3e01>>
+// @generated SignedSource<<0350963dbc2785d0ee1226080d0eb13b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -741,7 +741,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
-                a.4.accept(c, v)?;
                 Ok(())
             }
             Expr_::ClassGet(a) => {
@@ -760,7 +759,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
-                a.4.accept(c, v)?;
                 Ok(())
             }
             Expr_::FunctionPointer(a) => {

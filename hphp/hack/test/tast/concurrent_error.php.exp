@@ -46,7 +46,7 @@ Errors:
                  (Call (
                     (([9:17-24], (function(): Awaitable<int>)),
                      (Id ([9:17-24], "\\gen_int"))),
-                    [], [], None, None))))
+                    [], [], None))))
                 ],
               [([10:5-21],
                 (Expr
@@ -57,7 +57,7 @@ Errors:
                         (Call (
                            (([10:11-18], (function(): Awaitable<int>)),
                             (Id ([10:11-18], "\\gen_int"))),
-                           [], [], None, None)))
+                           [], [], None)))
                        )))));
                 ([9:5-27],
                  (Expr

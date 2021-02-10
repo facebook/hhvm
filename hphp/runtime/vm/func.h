@@ -93,6 +93,9 @@ struct EHEnt {
   template<class SerDe> void serde(SerDe& sd);
 };
 
+template <typename T, size_t Expected, size_t Actual = sizeof(T)>
+constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Metadata about a PHP function or method.
@@ -1304,6 +1307,7 @@ private:
     uint16_t m_numIterators;
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   };
+  static_assert(CheckSize<SharedData, use_lowptr ? 144 : 176>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1333,6 +1337,7 @@ private:
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     int64_t m_dynCallSampleRate;
   };
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 272 : 304>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1674,6 +1679,9 @@ private:
   // should not be inherited from.
   AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
+static constexpr size_t kFuncSize = debug ? (use_lowptr ? 88 : 112)
+                                          : (use_lowptr ? 80 : 104);
+static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

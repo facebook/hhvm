@@ -1,0 +1,6 @@
+File "sealed.bad.php", line 3, characters 12-20:
+Unbound name: `ChildBase` (an object type) (Naming[2049])
+File "sealed.bad.php", line 7, characters 12-14:
+You cannot extend sealed enum class `Base` (Typing[4238])
+  File "sealed.bad.php", line 4, characters 12-15:
+  Declaration is here

@@ -207,6 +207,8 @@ module AttributeKinds = struct
 
   let lambda = "\\HH\\LambdaAttribute"
 
+  let enumcls = "\\HH\\EnumClassAttribute"
+
   let plain_english_map =
     List.fold_left
       ~init:SMap.empty
@@ -224,6 +226,7 @@ module AttributeKinds = struct
         (file, "a file");
         (typeconst, "a type constant");
         (lambda, "a lambda expression");
+        (enumcls, "an enum class");
       ]
 end
 
@@ -365,7 +368,7 @@ module UserAttributes = struct
           (uaShallowReactive, [fn; mthd; lambda]);
           (uaOnlyRxIfImpl, [parameter; mthd]);
           (uaLSB, [staticProperty]);
-          (uaSealed, [cls]);
+          (uaSealed, [cls; enumcls; enum]);
           (uaReturnsVoidToRx, [fn; mthd; lambda]);
           (uaMaybeMutable, [mthd; parameter]);
           (uaLateInit, [instProperty; staticProperty]);
@@ -386,7 +389,7 @@ module UserAttributes = struct
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
           (uaEnableUnstableFeatures, [file]);
-          (uaEnumClass, [cls; enum]);
+          (uaEnumClass, [cls; enumcls]);
           (uaPolicied, [fn; mthd; instProperty; parameter]);
           (uaInferFlows, [fn; mthd]);
           (uaExternal, [parameter]);

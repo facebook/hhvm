@@ -1,0 +1,4 @@
+File "enum.php", line 11, characters 6-6:
+You cannot use sealed enum `A` (Typing[4238])
+  File "enum.php", line 5, characters 6-6:
+  Declaration is here

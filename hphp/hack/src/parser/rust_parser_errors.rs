@@ -5032,10 +5032,7 @@ where
     fn enum_decl_errors(&mut self, node: S<'a, Token, Value>) {
         if let EnumDeclaration(x) = &node.children {
             let attrs = &x.attribute_spec;
-            if self.attr_spec_contains_sealed(attrs) {
-                self.errors
-                    .push(Self::make_error_from_node(node, errors::sealed_enum))
-            } else if self.attr_spec_contains_const(attrs) {
+            if self.attr_spec_contains_const(attrs) {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::no_const_interfaces_traits_enums,

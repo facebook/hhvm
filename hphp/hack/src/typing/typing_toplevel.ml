@@ -692,7 +692,7 @@ let check_parent env class_def class_type =
       Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   | None -> ()
 
-let check_parent_sealed child_type parent_type =
+let check_parent_sealed ~(is_enum_class : bool) child_type parent_type =
   match Cls.sealed_whitelist parent_type with
   | None -> ()
   | Some whitelist ->
@@ -712,18 +712,24 @@ let check_parent_sealed child_type parent_type =
       | (Ast_defs.Cabstract, _)
       | (Ast_defs.Cnormal, _) ->
         check "class" "extend"
-      | (Ast_defs.Cenum, _) -> ()
+      | (Ast_defs.Cenum, _) when is_enum_class -> check "enum class" "extend"
+      | (Ast_defs.Cenum, _) -> check "enum" "use"
     end
 
 let check_parents_sealed env child_def child_type =
   let parents =
-    child_def.c_extends @ child_def.c_implements @ child_def.c_uses
+    match child_def.c_enum with
+    | Some enum -> enum.e_includes
+    | None -> child_def.c_extends
   in
+  let parents = parents @ child_def.c_implements @ child_def.c_uses in
+  let is_enum_class = Aast.is_enum_class child_def in
   List.iter parents (function
       | (_, Happly ((_, name), _)) ->
         begin
           match Env.get_class_dep env name with
-          | Some parent_type -> check_parent_sealed child_type parent_type
+          | Some parent_type ->
+            check_parent_sealed ~is_enum_class child_type parent_type
           | None -> ()
         end
       | _ -> ())
@@ -1307,7 +1313,10 @@ let class_def_ env c tc =
   let env =
     let kind =
       match c.c_kind with
-      | Ast_defs.Cenum -> SN.AttributeKinds.enum
+      | Ast_defs.Cenum ->
+        (match c.c_enum with
+        | Some enum when enum.e_enum_class -> SN.AttributeKinds.enumcls
+        | _ -> SN.AttributeKinds.enum)
       | _ -> SN.AttributeKinds.cls
     in
     Typing.attributes_check_def env kind c.c_user_attributes

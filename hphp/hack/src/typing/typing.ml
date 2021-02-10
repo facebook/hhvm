@@ -3058,7 +3058,7 @@ and expr_
           let (env, te, _) = expr env e in
           (env, te))
     in
-    let txml = Aast.Xml (sid, typed_attrs, List.rev tel) in
+    let txml = Aast.Xml (sid, typed_attrs, tel) in
     (match class_info with
     | None -> make_result env p txml (mk (Reason.Runknown_class p, Tobject))
     | Some class_info ->

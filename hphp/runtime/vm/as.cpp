@@ -702,6 +702,14 @@ struct AsmState {
       fe->allocUnnamedLocal();
     }
 
+    if (fe->numLocals() > std::numeric_limits<uint16_t>::max()) {
+      error("too many locals");
+    }
+
+    if (fe->numIterators() > std::numeric_limits<uint16_t>::max()) {
+      error("too many iterators");
+    }
+
     auto const maxStackCells =
       fe->numLocals() +
       fe->numIterators() * kNumIterCells;

@@ -73,6 +73,7 @@ struct FuncChecker {
   bool checkOffsets();
   bool checkFlow();
   bool checkDef();
+  bool checkInfo();
 
  private:
   struct unknown_length : std::runtime_error {
@@ -213,7 +214,8 @@ bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
     }
   }
   FuncChecker v(func, mode);
-  return v.checkDef() &&
+  return v.checkInfo() &&
+         v.checkDef() &&
          v.checkOffsets() &&
          v.checkFlow();
 }
@@ -301,6 +303,18 @@ Offset findSection(SectionMap& sections, Offset off) {
   SectionMap::iterator i = sections.upper_bound(off);
   --i;
   return i->first;
+}
+
+bool FuncChecker::checkInfo() {
+  if (numLocals() > std::numeric_limits<uint16_t>::max()) {
+    error("too many locals: %d", numLocals());
+    return false;
+  }
+  if (numIters() > std::numeric_limits<uint16_t>::max()) {
+    error("too many iterators: %d", numIters());
+    return false;
+  }
+  return true;
 }
 
 /**

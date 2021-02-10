@@ -737,13 +737,13 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
                              const StringData* docComment)
   : m_base(base)
   , m_preClass(preClass)
-  , m_numLocals(0)
-  , m_numIterators(0)
   , m_line1(line1)
   , m_docComment(docComment)
   , m_inoutBitPtr(0)
   , m_originalFilename(nullptr)
   , m_cti_base(0)
+  , m_numLocals(0)
+  , m_numIterators(0)
 {
   m_allFlags.m_isClosureBody = false;
   m_allFlags.m_isAsync = false;

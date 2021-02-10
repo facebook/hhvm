@@ -1239,8 +1239,6 @@ private:
     // (There's a 32-bit integer in the AtomicCountable base class here.)
     Offset m_base;
     PreClass* m_preClass;
-    Id m_numLocals;
-    Id m_numIterators;
     int m_line1;
     LowStringPtr m_docComment;
     // Bits 64 and up of the inout-ness guards (the first 64 bits are in
@@ -1302,6 +1300,8 @@ private:
 
     std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
     uint32_t m_cti_size; // size of cti code
+    uint16_t m_numLocals;
+    uint16_t m_numIterators;
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   };
 

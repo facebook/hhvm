@@ -65,3 +65,8 @@ let enforce_awaitable_immediately_awaited =
   enforce_local_capability
     Capabilities.(mk accessStaticVariable)
     "Not immediately `await`ing `Awaitable`-typed values"
+
+let enforce_enum_class_variant =
+  enforce_local_capability
+    Capabilities.(mk writeProperty)
+    "Accessing an enum class constant"

@@ -3155,6 +3155,12 @@ and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
   let (env, _tal, ce, cty) =
     static_class_id ~check_constraints:true cpos env [] cid
   in
+  let env =
+    match get_node cty with
+    | Tclass ((_, n), _, _) when Env.is_enum_class env n ->
+      Typing_local_ops.enforce_enum_class_variant p env
+    | _ -> env
+  in
   let (env, (const_ty, _tal)) =
     class_get
       ~is_method:false

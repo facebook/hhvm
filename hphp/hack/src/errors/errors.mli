@@ -1496,3 +1496,10 @@ val enum_supertyping_reserved_syntax : Pos.t -> unit
 val readonly_modified : ?reason:Pos.t * string -> Pos.t -> unit
 
 val var_readonly_mismatch : Pos.t -> string -> Pos.t -> string -> unit
+
+val readonly_mismatch :
+  string ->
+  Pos.t ->
+  reason_sub:(Pos.t * string) list ->
+  reason_super:(Pos.t * string) list ->
+  unit

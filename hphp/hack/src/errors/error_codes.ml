@@ -683,6 +683,7 @@ module Typing = struct
     | EnumSupertypingReservedSyntax [@value 4408]
     | ReadonlyValueModified [@value 4409]
     | ReadonlyVarMismatch [@value 4410]
+    | ReadonlyMismatch [@value 4411]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

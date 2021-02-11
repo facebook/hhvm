@@ -19,9 +19,9 @@ type rty =
 type ctx = {
   lenv: rty SMap.t;
   (* whether the method/function returns readonly, and a Pos.t for error messages *)
-  ret_ty: rty option;
+  ret_ty: (rty * Pos.t) option;
   (* Whether $this is readonly and a Pos.t for error messages *)
-  this_ty: rty option;
+  this_ty: (rty * Pos.t) option;
 }
 
 let empty_ctx = { lenv = SMap.empty; ret_ty = None; this_ty = None }
@@ -43,6 +43,14 @@ let get_local lenv id =
   | Some r -> r
   | None -> Mut
 
+(* Returns true if rty_sub is a subtype of rty_sup.
+TODO: Later, we'll have to consider the regular type as well, for example
+we could allow readonly int as equivalent to an int for devX purposes *)
+let subtype_rty rty_sub rty_sup =
+  match (rty_sub, rty_sup) with
+  | (Readonly, Mut) -> false
+  | _ -> true
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
@@ -52,7 +60,10 @@ let check =
     method ty_expr (e : Tast.expr) : rty =
       match e with
       | (_, ReadonlyExpr _) -> Readonly
-      | (_, This) -> Option.value ctx.this_ty ~default:Mut
+      | (_, This) ->
+        (match ctx.this_ty with
+        | Some (r, _) -> r
+        | None -> Mut)
       | (_, Lvar (_, lid)) ->
         let varname = Local_id.to_string lid in
         get_local ctx.lenv varname
@@ -99,16 +110,18 @@ let check =
       | _ -> ()
 
     method! on_method_ env m =
+      let method_pos = fst m.m_name in
+      let ret_pos = Typing_defs.get_pos (fst m.m_ret) in
       let this_ty =
         if m.m_readonly_this then
-          Some Readonly
+          Some (Readonly, method_pos)
         else
-          Some Mut
+          Some (Mut, method_pos)
       in
       let new_ctx =
         {
           this_ty;
-          ret_ty = Some (readonly_kind_to_rty m.m_readonly_ret);
+          ret_ty = Some (readonly_kind_to_rty m.m_readonly_ret, ret_pos);
           lenv = lenv_from_params m.m_params;
         }
       in
@@ -117,7 +130,8 @@ let check =
 
     method! on_fun_ env f =
       (* TODO: handle lambdas, which capture values. Const lambdas should make every value captured readonly. *)
-      let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret) in
+      let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
+      let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos) in
       let new_ctx =
         { this_ty = None; ret_ty; lenv = lenv_from_params f.f_params }
       in
@@ -132,6 +146,21 @@ let check =
         self#assign lval rval;
         super#on_expr env e
       | _ -> super#on_expr env e
+
+    method! on_stmt_ env s =
+      (match s with
+      | Return (Some e) ->
+        (match ctx.ret_ty with
+        | Some (ret_ty, pos) when not (subtype_rty (self#ty_expr e) ret_ty) ->
+          Errors.readonly_mismatch
+            "Invalid return"
+            (Tast.get_position e)
+            ~reason_sub:[(Tast.get_position e, "This expression is readonly")]
+            ~reason_super:[(pos, "But this function does not return readonly.")]
+        (* If we don't have a ret ty we're not in a function, must have errored somewhere else *)
+        | _ -> ())
+      | _ -> ());
+      super#on_stmt_ env s
   end
 
 let handler =

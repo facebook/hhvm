@@ -5629,6 +5629,12 @@ let var_readonly_mismatch pos var_ro rval_pos rval_ro =
       );
     ]
 
+let readonly_mismatch prefix pos ~reason_sub ~reason_super =
+  add_list
+    (Typing.err_code Typing.ReadonlyMismatch)
+    (pos, prefix)
+    (reason_sub @ reason_super)
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -1,0 +1,6 @@
+File "return.php", line 15, characters 10-27:
+Invalid return (Typing[4411])
+  File "return.php", line 15, characters 10-27:
+  This expression is readonly
+  File "return.php", line 14, characters 24-26:
+  But this function does not return readonly.

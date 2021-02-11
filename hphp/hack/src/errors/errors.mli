@@ -1492,3 +1492,7 @@ val nonsense_member_selection : Pos.t -> string -> unit
 val consider_meth_caller : Pos.t -> string -> string -> unit
 
 val enum_supertyping_reserved_syntax : Pos.t -> unit
+
+val readonly_modified : ?reason:Pos.t * string -> Pos.t -> unit
+
+val var_readonly_mismatch : Pos.t -> string -> Pos.t -> string -> unit

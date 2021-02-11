@@ -681,6 +681,8 @@ module Typing = struct
     | NonsenseMemberSelection [@value 4406]
     | ConsiderMethCaller [@value 4407]
     | EnumSupertypingReservedSyntax [@value 4408]
+    | ReadonlyValueModified [@value 4409]
+    | ReadonlyVarMismatch [@value 4410]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

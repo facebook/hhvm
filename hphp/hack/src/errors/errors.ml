@@ -5603,6 +5603,32 @@ let enum_supertyping_reserved_syntax pos =
     ( "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
     ^ "Enable it with the enable_enum_supertyping option in .hhconfig" )
 
+let readonly_modified ?reason pos =
+  match reason with
+  | Some (rpos, rmsg) ->
+    add_list
+      (Typing.err_code Typing.ReadonlyValueModified)
+      (pos, "This value is readonly, its properties cannot be modified")
+      [(rpos, rmsg)]
+  | None ->
+    add
+      (Typing.err_code Typing.ReadonlyValueModified)
+      pos
+      "This value is readonly, its properties cannot be modified"
+
+let var_readonly_mismatch pos var_ro rval_pos rval_ro =
+  add_list
+    (Typing.err_code Typing.ReadonlyVarMismatch)
+    (pos, "This variable is " ^ var_ro)
+    [
+      ( rval_pos,
+        "But it's being assigned to an expression which is "
+        ^ rval_ro
+        ^ "."
+        ^ "\n For now, variables can only be assigned the same readonlyness within the body of a function."
+      );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

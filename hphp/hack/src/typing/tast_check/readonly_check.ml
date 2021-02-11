@@ -30,6 +30,10 @@ let readonly_kind_to_rty = function
   | Some Ast_defs.Readonly -> Readonly
   | _ -> Mut
 
+let rty_to_str = function
+  | Readonly -> "readonly"
+  | Mut -> "mutable"
+
 let lenv_from_params (params : Tast.fun_param list) : rty SMap.t =
   let result = SMap.empty in
   List.fold_left
@@ -50,6 +54,12 @@ let subtype_rty rty_sub rty_sup =
   match (rty_sub, rty_sup) with
   | (Readonly, Mut) -> false
   | _ -> true
+
+let param_to_rty param =
+  if Typing_defs.get_fp_readonly param then
+    Readonly
+  else
+    Mut
 
 let check =
   object (self)
@@ -109,6 +119,72 @@ let check =
       (* TODO: vecs, collections, array accesses *)
       | _ -> ()
 
+    (* Checks related to calling a function or method
+      is_readonly is true when the call is allowed to return readonly
+      TODO: handle inout
+    *)
+    method call
+        ~is_readonly
+        (caller : Tast.expr)
+        (args : Tast.expr list)
+        (unpacked_arg : Tast.expr option) =
+      let open Typing_defs in
+      (* Check that function calls which return readonly are wrapped in readonly *)
+      let check_readonly_call caller is_readonly =
+        match get_node (Tast.get_type caller) with
+        | Tfun fty when get_ft_returns_readonly fty ->
+          if not is_readonly then
+            Errors.explicit_readonly_cast
+              "function call"
+              (Tast.get_position caller)
+        | _ -> ()
+      in
+      (* Check that readonly arguments match their parameters *)
+      let check_args caller args unpacked_arg =
+        match get_node (Tast.get_type caller) with
+        | Tfun fty ->
+          let unpacked_rty = Option.to_list unpacked_arg in
+          let args = args @ unpacked_rty in
+          (* If the args are unequal length, we errored elsewhere so this does not care *)
+          let _ =
+            List.iter2 fty.ft_params args ~f:(fun param arg ->
+                let param_rty = param_to_rty param in
+                let arg_rty = self#ty_expr arg in
+                if not (subtype_rty arg_rty param_rty) then
+                  Errors.readonly_mismatch
+                    "Invalid argument"
+                    (Tast.get_position arg)
+                    ~reason_sub:
+                      [
+                        ( Tast.get_position arg,
+                          "This expression is " ^ rty_to_str arg_rty );
+                      ]
+                    ~reason_super:
+                      [
+                        ( param.fp_pos,
+                          "It is incompatible with this parameter, which is "
+                          ^ rty_to_str param_rty );
+                      ])
+          in
+          ()
+        | _ -> ()
+      in
+      (* Check that a RO expression can only call RO methods *)
+      let check_method_call caller =
+        match caller with
+        (* Method call checks *)
+        | ((_, ty), Obj_get (e1, _, _, (* is_prop_call *) false)) ->
+          let receiver_rty = self#ty_expr e1 in
+          (match (receiver_rty, get_node ty) with
+          | (Readonly, Tfun fty) when not (get_ft_readonly_this fty) ->
+            Errors.readonly_method_call (Tast.get_position e1) (get_pos ty)
+          | _ -> ())
+        | _ -> ()
+      in
+      check_readonly_call caller is_readonly;
+      check_args caller args unpacked_arg;
+      check_method_call caller
+
     method! on_method_ env m =
       let method_pos = fst m.m_name in
       let ret_pos = Typing_defs.get_pos (fst m.m_ret) in
@@ -138,12 +214,21 @@ let check =
       ctx <- new_ctx;
       super#on_fun_ env f
 
+    (* TODO: property accesses *)
+    (* TODO: lambda expressions *)
     method! on_expr env e =
-      (* TODO: Handle RO_EXPLICIT_CAST (funs and props returning readonly require explicit cast) *)
-      (* TODO: Handle RO_METHOD (method calls on readonly things) *)
       match e with
       | (_, Binop (Ast_defs.Eq _, lval, rval)) ->
         self#assign lval rval;
+        super#on_expr env e
+      (* Readonly calls *)
+      | (_, ReadonlyExpr (_, Call (caller, targs, args, unpacked_arg))) ->
+        self#call ~is_readonly:true caller args unpacked_arg;
+        (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
+        self#on_Call env caller targs args unpacked_arg
+      (* Non readonly calls *)
+      | (_, Call (caller, _, args, unpacked_arg)) ->
+        self#call ~is_readonly:false caller args unpacked_arg;
         super#on_expr env e
       | _ -> super#on_expr env e
 

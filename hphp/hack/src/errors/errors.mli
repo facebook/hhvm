@@ -1503,3 +1503,7 @@ val readonly_mismatch :
   reason_sub:(Pos.t * string) list ->
   reason_super:(Pos.t * string) list ->
   unit
+
+val explicit_readonly_cast : string -> Pos.t -> unit
+
+val readonly_method_call : Pos.t -> Pos.t -> unit

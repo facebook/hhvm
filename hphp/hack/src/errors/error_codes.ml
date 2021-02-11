@@ -684,6 +684,8 @@ module Typing = struct
     | ReadonlyValueModified [@value 4409]
     | ReadonlyVarMismatch [@value 4410]
     | ReadonlyMismatch [@value 4411]
+    | ExplicitReadonlyCast [@value 4412]
+    | ReadonlyMethodCall [@value 4413]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

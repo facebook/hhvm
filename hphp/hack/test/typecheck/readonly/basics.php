@@ -26,7 +26,7 @@ async function expressions(readonly Foo $x) : readonly Awaitable<Foo> {
   };
 
   $r = readonly new Foo();
-  $w = $z(readonly $r);
+  $w = readonly $z(readonly $r);
   $readonly_first = readonly await returns_normal();
   $await_readonly = await readonly returns_readonly();
 

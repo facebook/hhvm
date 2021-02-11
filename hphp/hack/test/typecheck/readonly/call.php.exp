@@ -1,0 +1,4 @@
+File "call.php", line 21, characters 3-4:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "call.php", line 8, characters 19-21:
+  This method is not readonly

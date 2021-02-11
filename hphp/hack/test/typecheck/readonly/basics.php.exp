@@ -1,1 +1,2 @@
-No errors
+File "basics.php", line 36, characters 45-60:
+This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])

@@ -196,6 +196,13 @@ pub enum TypestructResolveOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ReadonlyOp {
+    Readonly,
+    Mutable,
+    Any,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
@@ -353,7 +360,7 @@ pub enum InstructGet {
     CUGetL(local::Type),
     PushL(local::Type),
     CGetG,
-    CGetS,
+    CGetS(ReadonlyOp),
     ClassGetC,
     ClassGetTS,
 }
@@ -443,17 +450,17 @@ pub enum InstructMutator {
     /// PopL is put in mutators since it behaves as SetL + PopC
     PopL(local::Type),
     SetG,
-    SetS,
+    SetS(ReadonlyOp),
     SetOpL(local::Type, EqOp),
     SetOpG(EqOp),
-    SetOpS(EqOp),
+    SetOpS(EqOp, ReadonlyOp),
     IncDecL(local::Type, IncdecOp),
     IncDecG(IncdecOp),
-    IncDecS(IncdecOp),
+    IncDecS(IncdecOp, ReadonlyOp),
     UnsetL(local::Type),
     UnsetG,
     CheckProp(PropId),
-    InitProp(PropId, InitpropOp),
+    InitProp(PropId, InitpropOp, ReadonlyOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -485,7 +492,7 @@ pub enum InstructCall {
 pub enum InstructBase {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(local::Type, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode),
+    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadonlyOp),
     BaseL(local::Type, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
@@ -499,7 +506,7 @@ pub enum InstructFinal {
     IncDecM(NumParams, IncdecOp, MemberKey),
     SetOpM(NumParams, EqOp, MemberKey),
     UnsetM(NumParams, MemberKey),
-    SetRangeM(NumParams, SetrangeOp, isize),
+    SetRangeM(NumParams, isize, SetrangeOp, ReadonlyOp),
 }
 
 #[derive(Clone, Debug)]

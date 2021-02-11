@@ -11,7 +11,7 @@ use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, Env};
 use hhas_property_rust::{HhasProperty, HhasPropertyFlags};
 use hhas_type::{constraint, Info as TypeInfo};
-use hhbc_ast_rust::InitpropOp;
+use hhbc_ast_rust::{InitpropOp, ReadonlyOp};
 use hhbc_id_rust::{prop, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
@@ -118,7 +118,7 @@ pub fn from_ast<'a>(
                             instr::empty(),
                             emit_pos::emit_pos_then(
                                 &class.span,
-                                instr::initprop(pid.clone(), InitpropOp::Static),
+                                instr::initprop(pid.clone(), InitpropOp::Static, ReadonlyOp::Any),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -126,7 +126,11 @@ pub fn from_ast<'a>(
                             instr::empty(),
                             emit_pos::emit_pos_then(
                                 &class.span,
-                                instr::initprop(pid.clone(), InitpropOp::NonStatic),
+                                instr::initprop(
+                                    pid.clone(),
+                                    InitpropOp::NonStatic,
+                                    ReadonlyOp::Any,
+                                ),
                             ),
                         )
                     } else {
@@ -138,7 +142,11 @@ pub fn from_ast<'a>(
                             ]),
                             InstrSeq::gather(vec![
                                 emit_pos::emit_pos(&class.span),
-                                instr::initprop(pid.clone(), InitpropOp::NonStatic),
+                                instr::initprop(
+                                    pid.clone(),
+                                    InitpropOp::NonStatic,
+                                    ReadonlyOp::Any,
+                                ),
                                 instr::label(label),
                             ]),
                         )

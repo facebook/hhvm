@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/member-key.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -997,6 +998,12 @@ static const char* SpecialClsRef_names[] = {
 #undef REF
 };
 
+static const char* ReadonlyOp_names[] = {
+#define OP(x) #x,
+  READONLY_OPS
+#undef OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1070,6 +1077,7 @@ X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
+X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

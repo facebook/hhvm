@@ -56,6 +56,17 @@ enum MemberCode : uint8_t {
   MW,
 };
 
+#define READONLY_OPS    \
+  OP(Readonly)          \
+  OP(Mutable)           \
+  OP(Any)         
+
+enum class ReadonlyOp : uint8_t {
+#define OP(name) name,
+  READONLY_OPS
+#undef OP
+};
+
 constexpr size_t NumMemberCodes = MW + 1;
 
 /*
@@ -126,4 +137,3 @@ inline bool operator!=(MemberKey a, MemberKey b) {
 std::string show(MemberKey);
 
 }
-

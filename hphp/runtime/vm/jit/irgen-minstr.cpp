@@ -1578,7 +1578,11 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   baseGImpl(env, name, mode);
 }
 
-void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
+void emitBaseSC(IRGS& env,
+                uint32_t propIdx,
+                uint32_t clsIdx,
+                MOpMode mode,
+                ReadonlyOp /*op*/) {
   auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
   if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
 
@@ -1719,7 +1723,11 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitSetRangeM(IRGS& env, uint32_t nDiscard, SetRangeOp op, uint32_t size) {
+void emitSetRangeM(IRGS& env,
+                   uint32_t nDiscard,
+                   uint32_t size,
+                   SetRangeOp op,
+                   ReadonlyOp /*rop*/) {
   auto const count = gen(env, ConvTVToInt, topC(env));
   auto const src = topC(env, BCSPRelOffset{1});
   auto const offset = gen(env, ConvTVToInt, topC(env, BCSPRelOffset{2}));

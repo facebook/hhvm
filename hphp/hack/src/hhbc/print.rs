@@ -1395,7 +1395,10 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
                 print_local(w, id)
             }
             IG::CGetG => w.write("CGetG"),
-            IG::CGetS => w.write("CGetS"),
+            IG::CGetS(op) => {
+                w.write("CGetS ")?;
+                print_readonly_op(w, op)
+            }
             IG::ClassGetC => w.write("ClassGetC"),
             IG::ClassGetTS => w.write("ClassGetTS"),
         }
@@ -1455,13 +1458,15 @@ fn print_base<W: Write>(w: &mut W, i: &InstructBase) -> Result<(), W::Error> {
             w.write(" ")?;
             print_member_opmode(w, m)
         }
-        I::BaseSC(si1, si2, m) => {
+        I::BaseSC(si1, si2, m, op) => {
             w.write("BaseSC ")?;
             print_stack_index(w, si1)?;
             w.write(" ")?;
             print_stack_index(w, si2)?;
             w.write(" ")?;
-            print_member_opmode(w, m)
+            print_member_opmode(w, m)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
         I::BaseL(id, m) => {
             w.write("BaseL ")?;
@@ -1636,16 +1641,18 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal) -> Result<(), W::Error> {
             w.write(" ")?;
             print_member_key(w, mk)
         }
-        F::SetRangeM(i, op, s) => {
+        F::SetRangeM(i, s, op, rop) => {
             w.write("SetRangeM ")?;
             print_int(w, i)?;
+            w.write(" ")?;
+            print_int(w, &(*s as usize))?;
             w.write(" ")?;
             w.write(match op {
                 SetrangeOp::Forward => "Forward",
                 SetrangeOp::Reverse => "Reverse",
             })?;
             w.write(" ")?;
-            print_int(w, &(*s as usize))
+            print_readonly_op(w, rop)
         }
     }
 }
@@ -1723,7 +1730,10 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             print_local(w, id)
         }
         M::SetG => w.write("SetG"),
-        M::SetS => w.write("SetS"),
+        M::SetS(op) => {
+            w.write("SetS ")?;
+            print_readonly_op(w, op)
+        }
         M::SetOpL(id, op) => {
             w.write("SetOpL ")?;
             print_local(w, id)?;
@@ -1734,9 +1744,11 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("SetOpG ")?;
             print_eq_op(w, op)
         }
-        M::SetOpS(op) => {
+        M::SetOpS(op, rop) => {
             w.write("SetOpS ")?;
-            print_eq_op(w, op)
+            print_eq_op(w, op)?;
+            w.write(" ")?;
+            print_readonly_op(w, rop)
         }
         M::IncDecL(id, op) => {
             w.write("IncDecL ")?;
@@ -1748,9 +1760,11 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("IncDecG ")?;
             print_incdec_op(w, op)
         }
-        M::IncDecS(op) => {
+        M::IncDecS(op, rop) => {
             w.write("IncDecS ")?;
-            print_incdec_op(w, op)
+            print_incdec_op(w, op)?;
+            w.write(" ")?;
+            print_readonly_op(w, rop)
         }
         M::UnsetL(id) => {
             w.write("UnsetL ")?;
@@ -1761,14 +1775,16 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator) -> Result<(), W
             w.write("CheckProp ")?;
             print_prop_id(w, id)
         }
-        M::InitProp(id, op) => {
+        M::InitProp(id, op, rop) => {
             w.write("InitProp ")?;
             print_prop_id(w, id)?;
             w.write(" ")?;
             match op {
                 InitpropOp::Static => w.write("Static"),
                 InitpropOp::NonStatic => w.write("NonStatic"),
-            }
+            }?;
+            w.write(" ")?;
+            print_readonly_op(w, rop)
         }
     }
 }
@@ -1790,6 +1806,14 @@ fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
         EqOp::PlusEqualO => "PlusEqualO",
         EqOp::MinusEqualO => "MinusEqualO",
         EqOp::MulEqualO => "MulEqualO",
+    })
+}
+
+fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<(), W::Error> {
+    w.write(match op {
+        ReadonlyOp::Readonly => "Readonly",
+        ReadonlyOp::Mutable => "Mutable",
+        ReadonlyOp::Any => "Any",
     })
 }
 

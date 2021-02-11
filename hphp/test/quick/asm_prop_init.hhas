@@ -31,7 +31,7 @@
 
   .method [static public] 86sinit() {
     String "default ::foo value"
-    InitProp "foo" Static
+    InitProp "foo" Static Any
 
     Null
     RetC
@@ -41,7 +41,7 @@
     CheckProp "nonstat"
     JmpNZ isset
     String "code-created prop value"
-    InitProp "nonstat" NonStatic
+    InitProp "nonstat" NonStatic Any
 
   isset:
     Null
@@ -61,7 +61,7 @@
   String "foo"
   CGetL $who
   ClassGetC
-  CGetS
+  CGetS Any
   String "\n"
   Concat
   Print

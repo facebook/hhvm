@@ -3878,7 +3878,7 @@ fn emit_class_get(
     Ok(InstrSeq::gather(vec![
         InstrSeq::from(emit_class_expr(e, env, cexpr, prop)?),
         match query_op {
-            QueryOp::CGet => instr::cgets(),
+            QueryOp::CGet => instr::cgets(ReadonlyOp::Any),
             QueryOp::Isset => instr::issets(),
             QueryOp::CGetQuiet => return Err(Unrecoverable("emit_class_get: CGetQuiet".into())),
             QueryOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
@@ -4570,8 +4570,9 @@ pub fn emit_set_range_expr(
             (base_stack + cls_stack)
                 .try_into()
                 .expect("StackIndex overflow"),
-            kind.op,
             kind.size.try_into().expect("Setrange size overflow"),
+            kind.op,
+            ReadonlyOp::Any,
         ))),
     ]))
 }
@@ -5049,7 +5050,7 @@ fn emit_base_(
                     e,
                     cexpr_begin,
                     cexpr_end,
-                    instr::basesc(base_offset + 1, rhs_stack_size, base_mode),
+                    instr::basesc(base_offset + 1, rhs_stack_size, base_mode, ReadonlyOp::Any),
                     1,
                     1,
                 ))
@@ -5388,9 +5389,9 @@ fn emit_final_member_op(stack_size: usize, op: LValOp, mk: MemberKey) -> InstrSe
 fn emit_final_static_op(cid: &tast::ClassId, prop: &tast::ClassGetExpr, op: LValOp) -> Result {
     use LValOp as L;
     Ok(match op {
-        L::Set => instr::sets(),
-        L::SetOp(op) => instr::setops(op),
-        L::IncDec(op) => instr::incdecs(op),
+        L::Set => instr::sets(ReadonlyOp::Any),
+        L::SetOp(op) => instr::setops(op, ReadonlyOp::Any),
+        L::IncDec(op) => instr::incdecs(op, ReadonlyOp::Any),
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))

@@ -173,3 +173,6 @@ let array_unification = GlobalOptions.po_array_unification
 
 let interpret_soft_types_as_like_types =
   GlobalOptions.po_interpret_soft_types_as_like_types
+
+let enable_strict_string_concat_interp =
+  GlobalOptions.tco_enable_strict_string_concat_interp

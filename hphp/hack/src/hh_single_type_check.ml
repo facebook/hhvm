@@ -279,6 +279,7 @@ let parse_options () =
   let enable_enum_supertyping = ref false in
   let array_unification = ref false in
   let interpret_soft_types_as_like_types = ref false in
+  let enable_strict_string_concat_interp = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -649,6 +650,11 @@ let parse_options () =
         Arg.Set interpret_soft_types_as_like_types,
         "Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
       );
+      ( "--enable-strict-string-concat-interp",
+        Arg.Set enable_strict_string_concat_interp,
+        "Require arguments are arraykey types in string concatenation and
+        interpolation."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -784,6 +790,8 @@ let parse_options () =
       ~po_enable_enum_supertyping:!enable_enum_supertyping
       ~po_array_unification:!array_unification
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
+      ~tco_enable_strict_string_concat_interp:
+        !enable_strict_string_concat_interp
       ()
   in
   Errors.allowed_fixme_codes_strict :=

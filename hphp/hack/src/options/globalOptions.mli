@@ -299,6 +299,8 @@ type t = {
   po_array_unification: bool;
   (* <<__Soft>> T -> ~T *)
   po_interpret_soft_types_as_like_types: bool;
+  (* Restricts string concatenation and interpolation to arraykeys *)
+  tco_enable_strict_string_concat_interp: bool;
 }
 [@@deriving eq, show]
 
@@ -415,6 +417,7 @@ val make :
   ?po_enable_enum_supertyping:bool ->
   ?po_array_unification:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
+  ?tco_enable_strict_string_concat_interp:bool ->
   unit ->
   t
 
@@ -671,3 +674,5 @@ val po_enable_enum_supertyping : t -> bool
 val po_array_unification : t -> bool
 
 val po_interpret_soft_types_as_like_types : t -> bool
+
+val tco_enable_strict_string_concat_interp : t -> bool

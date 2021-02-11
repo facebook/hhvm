@@ -121,6 +121,7 @@ impl Default for GlobalOptions {
             po_enable_enum_supertyping: false,
             po_array_unification: false,
             po_interpret_soft_types_as_like_types: false,
+            tco_enable_strict_string_concat_interp: false,
         }
     }
 }

@@ -435,6 +435,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?po_array_unification:(bool_opt "array_unification" config)
       ?po_interpret_soft_types_as_like_types:
         (bool_opt "interpret_soft_types_as_like_types" config)
+      ?tco_enable_strict_string_concat_interp:
+        (bool_opt "enable_strict_string_concat_interp" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -274,9 +274,9 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
-  auto const wrapped_lstat = [&](const char* path, struct stat* st) {
-    if (wrapper) return wrapper->lstat(path, st);
-    return lstat(path, st);
+  auto const wrapped_stat = [&](const char* path, struct stat* st) {
+    if (wrapper) return wrapper->stat(path, st);
+    return ::stat(path, st);
   };
 
   auto const wrapped_open = [&](const char* path) -> folly::Optional<String> {
@@ -314,7 +314,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
       if (isParentOf(opts->path(), fpath)) {
         struct stat st;
-        if (wrapped_lstat(opts->path().data(), &st) == 0) {
+        if (wrapped_stat(opts->path().data(), &st) == 0) {
           if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
         }
       }
@@ -342,7 +342,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     if (!s_repoOptionCache.find(rpathAcc, key)) return nullptr;
-    if (wrapped_lstat(path.data(), &st) != 0) {
+    if (wrapped_stat(path.data(), &st) != 0) {
       s_repoOptionCache.erase(rpathAcc);
       return nullptr;
     }
@@ -376,7 +376,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
   walkDirTree(fpath, [&] (const std::string& path) {
     struct stat st;
-    if (wrapped_lstat(path.data(), &st) != 0) return false;
+    if (wrapped_stat(path.data(), &st) != 0) return false;
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     s_repoOptionCache.insert(rpathAcc, key);

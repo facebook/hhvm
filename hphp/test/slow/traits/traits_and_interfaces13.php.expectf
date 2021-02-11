@@ -1,0 +1,1 @@
+Fatal error: Cannot override previously defined constant I2::FOO in I in %s on line %d

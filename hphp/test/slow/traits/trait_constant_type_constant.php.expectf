@@ -1,0 +1,1 @@
+Fatal error: A cannot inherit the constant FOO from T2, because it was previously inherited as a type constant from T1 in %s/trait_constant_type_constant.php on line 11

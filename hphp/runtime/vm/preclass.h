@@ -160,13 +160,15 @@ struct PreClass : AtomicCountable {
   struct Const {
     Const(const StringData* name,
           const TypedValueAux& val,
-          const StringData* phpCode);
+          const StringData* phpCode,
+          const bool fromTrait);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()     const { return m_name; }
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
+    bool isFromTrait()     const { return m_fromTrait; }
     bool isAbstract()      const { return m_val.constModifiers().isAbstract(); }
     ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
     StaticCoeffects coeffects()  const;
@@ -180,6 +182,7 @@ struct PreClass : AtomicCountable {
      * statically available (e.g. "const X = self::Y + 5;") */
     TypedValueAux m_val;
     LowStringPtr m_phpCode;
+    bool m_fromTrait : 1;
   };
 
   /*
@@ -484,4 +487,3 @@ typedef AtomicSharedPtr<PreClass> PreClassPtr;
 #define incl_HPHP_VM_PRECLASS_INL_H_
 #include "hphp/runtime/vm/preclass-inl.h"
 #undef incl_HPHP_VM_PRECLASS_INL_H_
-

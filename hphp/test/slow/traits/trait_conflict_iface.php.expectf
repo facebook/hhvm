@@ -1,0 +1,1 @@
+Fatal error: A cannot inherit the constant FOO, because it was previously inherited from I in %s on line %d

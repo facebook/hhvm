@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait T {
   abstract const X;

@@ -1286,12 +1286,13 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       break;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
-      pce->addContextConstant(cconst.name, cconst.coeffects);
+      pce->addContextConstant(cconst.name, cconst.coeffects, cconst.isFromTrait);
     } else if (!cconst.val.has_value()) {
       pce->addAbstractConstant(
         cconst.name,
         cconst.typeConstraint,
-        cconst.kind
+        cconst.kind,
+        cconst.isFromTrait
       );
     } else {
       needs86cinit |= cconst.val->m_type == KindOfUninit;
@@ -1301,7 +1302,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.typeConstraint,
         &cconst.val.value(),
         cconst.phpCode,
-        cconst.kind
+        cconst.kind,
+        cconst.isFromTrait
       );
     }
   }

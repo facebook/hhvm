@@ -193,27 +193,30 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
                                           const StringData* typeConstraint,
-                                          const ConstModifiers::Kind kind) {
+                                          const ConstModifiers::Kind kind,
+                                          const bool fromTrait) {
   assertx(kind == ConstModifiers::Kind::Value ||
           kind == ConstModifiers::Kind::Type);
+
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr,
-                             StaticCoeffects::none(), kind);
+                             StaticCoeffects::none(), kind, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
 
 bool PreClassEmitter::addContextConstant(const StringData* n,
-                                         StaticCoeffects coeffects) {
+                                         StaticCoeffects coeffects,
+                                         bool fromTrait) {
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   PreClassEmitter::Const cns(n, nullptr, nullptr, nullptr,
-                             coeffects, ConstModifiers::Kind::Context);
+                             coeffects, ConstModifiers::Kind::Context, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -223,6 +226,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const TypedValue* val,
                                   const StringData* phpCode,
                                   const ConstModifiers::Kind kind,
+                                  const bool fromTrait,
                                   const Array& typeStructure) {
   assertx(kind == ConstModifiers::Kind::Value ||
           kind == ConstModifiers::Kind::Type);
@@ -239,7 +243,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
     tvVal = *val;
   }
   PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode,
-                             StaticCoeffects::none(), kind);
+                             StaticCoeffects::none(), kind, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -392,7 +396,8 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,
-                                                  const_.phpCode()));
+                                                  const_.phpCode(),
+                                                  const_.isFromTrait()));
   }
   if (auto nativeConsts = Native::getClassConstants(m_name)) {
     for (auto cnsMap : *nativeConsts) {
@@ -401,7 +406,8 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
       tvaux.constModifiers() = {};
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
                                                    tvaux,
-                                                   staticEmptyString()));
+                                                   staticEmptyString(),
+                                                   false));
     }
   }
 

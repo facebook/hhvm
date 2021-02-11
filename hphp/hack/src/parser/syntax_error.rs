@@ -744,7 +744,6 @@ pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name:
         line_num.to_string(),
     ))
 }
-pub const const_in_trait: Error = Cow::Borrowed("Traits cannot have constants");
 pub const sealed_val_not_classname: Error =
     Cow::Borrowed("Values in sealed whitelist must be classname constants.");
 pub const sealed_qualifier_invalid: Error =

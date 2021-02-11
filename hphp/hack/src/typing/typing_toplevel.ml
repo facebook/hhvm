@@ -1115,11 +1115,6 @@ let is_literal_expr e =
 
 let class_const_def ~in_enum_class c env cc =
   let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
-  begin
-    match c.c_kind with
-    | Ast_defs.Ctrait -> Errors.cannot_declare_constant `trait (fst id) c.c_name
-    | _ -> ()
-  end;
   let (env, ty, opt_expected) =
     match h with
     | None ->

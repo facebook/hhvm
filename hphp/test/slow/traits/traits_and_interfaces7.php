@@ -8,11 +8,14 @@ interface J extends I {
   const ABC = 'const from J';
 }
 
-trait MyTrait implements J {}
+trait MyTrait implements J {
+  const ONE = 'const from MyTrait';
+}
 
 class C {
   use MyTrait;
   function f() {
+    echo self::ONE, "\n";
     echo self::ABC, "\n";
     echo self::XYZ, "\n";
   }

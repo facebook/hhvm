@@ -1,0 +1,1 @@
+Fatal error: T1 cannot inherit the constant FOO from I2, because it was previously inherited from I1 in %s on line %d

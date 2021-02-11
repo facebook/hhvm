@@ -239,10 +239,12 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
 
 PreClass::Const::Const(const StringData* name,
                        const TypedValueAux& val,
-                       const StringData* phpCode)
+                       const StringData* phpCode,
+                       const bool fromTrait)
   : m_name(name)
   , m_val(val)
   , m_phpCode(phpCode)
+  , m_fromTrait(fromTrait)
 {}
 
 void PreClass::Const::prettyPrint(std::ostream& out,

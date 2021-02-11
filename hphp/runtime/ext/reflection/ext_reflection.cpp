@@ -1455,6 +1455,13 @@ void addClassConstantNames(const Class* cls,
       st->add(const_cast<StringData*>(consts[i].name.get()));
     }
   }
+
+  auto const& allTraits = cls->usedTraitClasses();
+  auto const numTraits = allTraits.size();
+  for (int i = 0; i < numTraits && (st->size() < limit); ++i) {
+    addClassConstantNames(allTraits[i].get(), st, limit);
+  }
+
   if ((st->size() < limit) && cls->parent()) {
     addClassConstantNames(cls->parent(), st, limit);
   }

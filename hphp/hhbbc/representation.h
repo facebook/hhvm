@@ -458,6 +458,7 @@ struct Const {
   StaticCoeffects coeffects;
 
   ConstModifiers::Kind kind;
+  bool isFromTrait  : 1;
   bool isNoOverride : 1;
 };
 

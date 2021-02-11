@@ -3026,7 +3026,8 @@ void parse_class_constant(AsmState& as) {
     as.in.getc();
     as.pce->addAbstractConstant(makeStaticString(name),
                                 staticEmptyString(),
-                                kind);
+                                kind,
+                                false);
     return;
   }
 
@@ -3034,7 +3035,8 @@ void parse_class_constant(AsmState& as) {
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
                       staticEmptyString(),
-                      kind);
+                      kind,
+                      false);
 }
 
 /*

@@ -1284,11 +1284,6 @@ where
             .is_some()
     }
 
-    // Tests if the immediate classish parent is a trait.
-    fn is_inside_trait(&self) -> bool {
-        self.first_parent_classish_node(TokenKind::Trait).is_some()
-    }
-
     fn is_abstract_and_async_method(md_node: S<'a, Token, Value>) -> bool {
         Self::is_abstract_declaration(md_node)
             && Self::extract_keyword(|x| x.is_async(), md_node).is_some()
@@ -4210,10 +4205,6 @@ where
 
     // Checks for modifiers on class constants
     fn class_constant_modifier_errors(&mut self, node: S<'a, Token, Value>) {
-        if self.is_inside_trait() {
-            self.errors
-                .push(Self::make_error_from_node(node, errors::const_in_trait))
-        }
         self.invalid_modifier_errors("Constants", node, |kind| kind == TokenKind::Abstract);
     }
 

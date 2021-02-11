@@ -511,6 +511,11 @@ struct ClassInfo {
   CompactVector<php::Prop> traitProps;
 
   /*
+   * A list of extra consts supplied by this class's used traits.
+   */
+  CompactVector<php::Const> traitConsts;
+
+  /*
    * A (case-insensitive) map from class method names to the php::Func
    * associated with it.  This map is flattened across the inheritance
    * hierarchy.
@@ -1538,6 +1543,25 @@ bool build_class_constants(BuildClsInfo& info,
     if (!c.val) continue;
 
     if (existing->val) {
+      
+      // A constant from a declared interface collides with a constant 
+      // (Excluding constants from interfaces a trait implements)
+      // Need this check otherwise constants from traits that conflict with
+      // declared interfaces will silently lose and not conflict in the runtime
+      if (existing->cls->attrs & AttrInterface &&
+        !(c.cls->attrs & AttrInterface && fromTrait)) {
+        for (auto const& interface : info.rleaf->declInterfaces) {
+          if (existing->cls == interface->cls) {
+            ITRACE(2,
+               "build_cls_info_rec failed for `{}' because "
+               "`{}' was defined by both `{}' and `{}'\n",
+               info.rleaf->cls->name, c.name,
+               rparent->cls->name, existing->cls->name);
+            return false;
+          }
+        }
+      }
+
       // Constants from traits silently lose
       if (fromTrait) {
         removeNoOverride(&c);
@@ -1833,6 +1857,9 @@ bool build_cls_info_rec(BuildClsInfo& info,
     }
   }
 
+  // Need to add current class constants before looking at used traits
+  if (!build_class_constants(info, rparent, fromTrait)) return false;
+
   for (auto const trait : rparent->usedTraits) {
     if (!enforce_in_maybe_sealed_parent_whitelist(rparent, trait)) {
       return false;
@@ -1866,8 +1893,6 @@ bool build_cls_info_rec(BuildClsInfo& info,
       if (!build_class_methods(info)) return false;
     }
   }
-
-  if (!build_class_constants(info, rparent, fromTrait)) return false;
 
   return true;
 }
@@ -1904,6 +1929,30 @@ bool enforce_in_maybe_sealed_parent_whitelist(
 bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
   auto info = BuildClsInfo{ index, cinfo };
   if (!build_cls_info_rec(info, cinfo, false)) return false;
+
+  auto const addConst = [&] (const php::Const& c) {
+    /* Only copy in constants that win. Otherwise, in the runtime, if we have
+     * a constant from an interface implemented by a trait that wins over this
+     * fromTrait constant, we won't know which trait it came from, and therefore
+     * won't know which constant should win.
+     * Dropping losing constants here works because if they fatal with constants in
+     * declared interfaces, we catch that below in build_class_constants().
+     */
+    auto const& existing = cinfo->clsConstants.find(c.name);
+    if (existing->second->cls == c.cls) {
+      info.rleaf->traitConsts.push_back(c);
+      info.rleaf->traitConsts.back().isFromTrait = true;
+    }
+  };
+
+  for (auto t : cinfo->usedTraits) {
+    for (auto const& c : t->cls->constants) {
+      addConst(c);
+    }
+    for (auto const& c : t->traitConsts) {
+      addConst(c);
+    }
+  }
   return true;
 }
 
@@ -2260,48 +2309,12 @@ std::unique_ptr<php::Func> clone_meth(php::Class* newContext,
                            nextFuncId, nextClass, clonedClosures);
 }
 
-bool merge_xinits(Attr attr,
-                  std::vector<std::unique_ptr<php::Func>>& clones,
-                  ClassInfo* cinfo,
-                  std::atomic<uint32_t>& nextFuncId,
-                  uint32_t& nextClass,
-                  ClonedClosureMap& clonedClosures) {
+bool merge_inits(std::vector<std::unique_ptr<php::Func>>& clones,
+              ClassInfo* cinfo,
+              std::atomic<uint32_t>& nextFuncId,
+              uint32_t& nextClass,
+              ClonedClosureMap& clonedClosures, SString xinitName) {
   auto const cls = const_cast<php::Class*>(cinfo->cls);
-  auto const xinitName = [&]() {
-    switch (attr) {
-    case AttrNone  : return s_86pinit.get();
-    case AttrStatic: return s_86sinit.get();
-    case AttrLSB   : return s_86linit.get();
-    default: always_assert(false);
-    }
-  }();
-
-  auto const xinitMatch = [&](Attr prop_attrs) {
-    auto mask = AttrStatic | AttrLSB;
-    switch (attr) {
-    case AttrNone: return (prop_attrs & mask) == AttrNone;
-    case AttrStatic: return (prop_attrs & mask) == AttrStatic;
-    case AttrLSB: return (prop_attrs & mask) == mask;
-    default: always_assert(false);
-    }
-  };
-
-  auto const needsXinit = [&] {
-    for (auto const& p : cinfo->traitProps) {
-      if (xinitMatch(p.attrs) &&
-          p.val.m_type == KindOfUninit &&
-          !(p.attrs & AttrLateInit)) {
-        ITRACE(5, "merge_xinits: {}: Needs merge for {}{}prop `{}'\n",
-               cls->name, attr & AttrStatic ? "static " : "",
-               attr & AttrLSB ? "lsb " : "", p.name);
-        return true;
-      }
-    }
-    return false;
-  }();
-
-  if (!needsXinit) return true;
-
   std::unique_ptr<php::Func> empty;
   auto& xinit = [&] () -> std::unique_ptr<php::Func>& {
     for (auto& m : cls->methods) {
@@ -2321,7 +2334,11 @@ bool merge_xinits(Attr attr,
 
     ITRACE(5, "  - appending {}::{} into {}::{}\n",
            func->cls->name, func->name, cls->name, xinitName);
-    return append_func(xinit.get(), *func);
+    if (xinitName == s_86cinit.get()) {
+      return append_86cinit(xinit.get(), *func);
+    } else {
+      return append_func(xinit.get(), *func);
+    }
   };
 
   for (auto t : cinfo->usedTraits) {
@@ -2343,6 +2360,61 @@ bool merge_xinits(Attr attr,
     clones.push_back(std::move(xinit));
   }
 
+  return true;
+}
+
+
+bool merge_xinits(Attr attr,
+                  std::vector<std::unique_ptr<php::Func>>& clones,
+                  ClassInfo* cinfo,
+                  std::atomic<uint32_t>& nextFuncId,
+                  uint32_t& nextClass,
+                  ClonedClosureMap& clonedClosures) {
+  auto const xinitName = [&]() {
+    switch (attr) {
+    case AttrNone  : return s_86pinit.get();
+    case AttrStatic: return s_86sinit.get();
+    case AttrLSB   : return s_86linit.get();
+    default: always_assert(false);
+    }
+  }();
+
+  auto const xinitMatch = [&](Attr prop_attrs) {
+    auto mask = AttrStatic | AttrLSB;
+    switch (attr) {
+    case AttrNone: return (prop_attrs & mask) == AttrNone;
+    case AttrStatic: return (prop_attrs & mask) == AttrStatic;
+    case AttrLSB: return (prop_attrs & mask) == mask;
+    default: always_assert(false);
+    }
+  };
+
+  for (auto const& p : cinfo->traitProps) {
+    if (xinitMatch(p.attrs) &&
+        p.val.m_type == KindOfUninit &&
+        !(p.attrs & AttrLateInit)) {
+      ITRACE(5, "merge_xinits: {}: Needs merge for {}{}prop `{}'\n",
+              cinfo->cls->name, attr & AttrStatic ? "static " : "",
+              attr & AttrLSB ? "lsb " : "", p.name);
+      return merge_inits(clones, cinfo, nextFuncId,
+                         nextClass, clonedClosures, xinitName);
+    }
+  }
+  return true;
+}
+
+bool merge_cinits(std::vector<std::unique_ptr<php::Func>>& clones,
+                  ClassInfo* cinfo,
+                  std::atomic<uint32_t>& nextFuncId,
+                  uint32_t& nextClass,
+                  ClonedClosureMap& clonedClosures) {
+  auto const xinitName = s_86cinit.get();
+  for (auto const& c : cinfo->traitConsts) {
+    if (c.val && c.val->m_type == KindOfUninit) {
+      return merge_inits(clones, cinfo, nextFuncId,
+                         nextClass, clonedClosures, xinitName);
+    }
+  }
   return true;
 }
 
@@ -2439,7 +2511,17 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     }
   }
 
-  // We're now committed to flattening.
+  // flatten initializers for constants in traits
+  if (cinfo->traitConsts.size()) {
+    if (!merge_cinits(clones, cinfo, env.program->nextFuncId, nextClassId,
+                      clonedClosures)) {
+      ITRACE(5, "Not flattening {} because we couldn't merge the 86cinits\n",
+             cls->name);
+      return;
+    }
+  }
+
+ // We're now committed to flattening.
   ITRACE(3, "Flattening {}\n", cls->name);
   if (it != env.index.classExtraMethodMap.end()) it->second.clear();
   for (auto const& p : cinfo->traitProps) {
@@ -2448,6 +2530,14 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
     cls->properties.back().attrs |= AttrTrait;
   }
   cinfo->traitProps.clear();
+
+  for (auto const& c : cinfo->traitConsts) {
+    ITRACE(5, "  - const {}\n", c.name);
+    cls->constants.push_back(c);
+    cinfo->clsConstants[c.name].cls = cls;
+    cinfo->clsConstants[c.name].idx = cls->constants.size()-1;
+  }
+  cinfo->traitConsts.clear();
 
   if (clones.size()) {
     auto cinit = cls->methods.size() &&
@@ -2464,6 +2554,10 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
       }
       ITRACE(5, "  - meth {}\n", clone->name);
       cinfo->methods.find(clone->name)->second.func = clone.get();
+      if (clone->name == s_86cinit.get()) {
+        cinit = std::move(clone);
+        continue;
+      }
       cls->methods.push_back(std::move(clone));
     }
     if (cinit) cls->methods.push_back(std::move(cinit));

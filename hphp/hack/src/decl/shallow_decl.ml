@@ -20,7 +20,7 @@ let class_const env c cc =
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
   let pos = fst name in
   match c.c_kind with
-  | Ast_defs.Ctrait -> None
+  | Ast_defs.Ctrait
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract
   | Ast_defs.Cinterface

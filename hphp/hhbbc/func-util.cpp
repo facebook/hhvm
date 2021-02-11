@@ -137,6 +137,40 @@ bool append_func(php::Func* dst, const php::Func& src) {
   return true;
 }
 
+bool append_86cinit(php::Func* dst, const php::Func& src) {
+  if (src.numIters) return false;
+  if (src.locals.size() != 1 || dst->locals.size() != 1) return false;
+  if (src.exnNodes.size() || dst->exnNodes.size()) return false;
+
+  auto dst_func = php::WideFunc::mut(dst);
+  auto const src_func = php::WideFunc::cns(&src);
+
+  auto const& dst_switch_blk = dst_func.blocks()[0].mutate();
+  always_assert(dst_switch_blk->hhbcs.back().op == Op::SSwitch);
+  auto const& src_switch_blk = src_func.blocks()[0];
+  always_assert(src_switch_blk->hhbcs.back().op == Op::SSwitch);
+  auto& dst_cases = dst_switch_blk->hhbcs.back().SSwitch.targets;
+  dst_cases.pop_back();
+  dst_func.blocks().pop_back();
+  auto const delta = dst_cases.size();
+  auto const& src_cases = src_switch_blk->hhbcs.back().SSwitch.targets;
+
+  for (auto const& src_case : src_cases) {
+    dst_cases.push_back(std::make_pair(src_case.first, src_case.second + delta));
+    auto src_block = src_func.blocks()[src_case.second];
+    auto dst_block = src_block.mutate();
+    for (auto& bc : dst_block->hhbcs) {
+      // When merging functions (used for 86xints) we have to drop the srcLoc,
+      // because it might reference a different unit. Since these functions
+      // are generated, the srcLoc isn't that meaningful anyway.
+      bc.srcLoc = -1;
+    }
+    dst_func.blocks().push_back(std::move(src_block));
+  }
+
+  return true;
+}
+
 BlockId make_block(php::WideFunc& func, const php::Block* srcBlk) {
   auto newBlk    = copy_ptr<php::Block>{php::Block{}};
   auto const blk = newBlk.mutate();

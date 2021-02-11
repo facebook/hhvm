@@ -10,3 +10,12 @@ trait Tr2 {
   abstract const X;
 }
 
+class C {
+  use Tr2;
+  const X = 10;
+}
+
+<<__EntryPoint>>
+function main() {
+  var_dump(C::X);
+}

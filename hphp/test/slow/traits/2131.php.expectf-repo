@@ -1,0 +1,1 @@
+Fatal error: A cannot inherit the constant FOO from I, because it was previously inherited from B in %s/2131.php on line %d

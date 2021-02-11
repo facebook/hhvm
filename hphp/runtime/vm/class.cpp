@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/collections.h"
@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/server/memory-stats.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -2260,6 +2261,18 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
   };
 
   if (attrs() & AttrNoExpandTrait) {
+    Slot traitIdx = m_preClass->numConstants();
+    while (traitIdx && m_preClass->constants()[traitIdx - 1].isFromTrait()) {
+      traitIdx--;
+    }
+    for (Slot i = traitIdx; i < m_preClass->numConstants(); i++) {
+        auto const* preConst = &m_preClass->constants()[i];
+        Const tConst;
+        tConst.cls = this;
+        tConst.name = preConst->name();
+        tConst.val = preConst->val();
+        importConst(tConst, false);
+    }
     // If we flatten, we need to check implemented interfaces for constants
     for (auto const& traitName : m_preClass->usedTraits()) {
       auto const trait = Class::lookup(traitName);
@@ -2322,7 +2335,7 @@ void Class::setConstants() {
       }
     }
   }
-
+  
   // Copy in interface constants.
   for (int i = 0, size = m_declInterfaces.size(); i < size; ++i) {
     auto const iface = m_declInterfaces[i].get();

@@ -86,7 +86,8 @@
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
-                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false
+                   ~readonly:false);
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
@@ -101,7 +102,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false);
+                ~returns_mutable:false ~returns_void_to_rx:false
+                ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-16]; fe_php_std_lib = false }))
   ]

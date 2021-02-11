@@ -26,11 +26,13 @@ bitflags! {
 
         const INSTANTIATED_TARGS     = 1 << 8;
         const IS_FUNCTION_POINTER    = 1 << 9;
+        const RETURNS_READONLY       = 1 << 10;
+        const READONLY_THIS          = 1 << 11;
     }
 }
 
 bitflags! {
-    pub struct FunParamFlags: u8 {
+    pub struct FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
         const HAS_DEFAULT            = 1 << 2;
@@ -43,6 +45,8 @@ bitflags! {
         const MUTABLE_FLAGS_BORROWED = 1 << 7;
         const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
         const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
+
+        const READONLY       = 1 << 8;
     }
 }
 
@@ -129,7 +133,7 @@ impl no_pos_hash::NoPosHash for FunParamFlags {
 
 impl serde::Serialize for FunParamFlags {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_u8(self.bits())
+        serializer.serialize_u16(self.bits())
     }
 }
 
@@ -140,9 +144,9 @@ impl<'de> serde::Deserialize<'de> for FunParamFlags {
             type Value = FunParamFlags;
 
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                write!(formatter, "a u8 for FunParamFlags")
+                write!(formatter, "a u16 for FunParamFlags")
             }
-            fn visit_u8<E: serde::de::Error>(self, value: u8) -> Result<Self::Value, E> {
+            fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(value))
             }
         }

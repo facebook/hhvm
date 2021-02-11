@@ -123,7 +123,8 @@ let prop env cv =
         ~lsb:false
         ~needs_init:(Option.is_none cv.cv_expr)
         ~abstract:cv.cv_abstract
-        ~php_std_lib;
+        ~php_std_lib
+        ~readonly:cv.cv_readonly;
   }
 
 and static_prop env cv =
@@ -154,7 +155,8 @@ and static_prop env cv =
         ~lsb
         ~needs_init:(Option.is_none cv.cv_expr)
         ~abstract:cv.cv_abstract
-        ~php_std_lib;
+        ~php_std_lib
+        ~readonly:cv.cv_readonly;
   }
 
 let method_type env m =
@@ -207,7 +209,9 @@ let method_type env m =
         mut
         ~returns_mutable
         ~return_disposable
-        ~returns_void_to_rx;
+        ~returns_void_to_rx
+        ~returns_readonly:(Option.is_some m.m_readonly_ret)
+        ~readonly_this:m.m_readonly_this;
     ft_ifc_decl = ifc_decl;
   }
 

@@ -398,6 +398,10 @@ module Flags = struct
 
   let get_ft_returns_mutable ft = is_set ft.ft_flags ft_flags_returns_mutable
 
+  let get_ft_returns_readonly ft = is_set ft.ft_flags ft_flags_returns_readonly
+
+  let get_ft_readonly_this ft = is_set ft.ft_flags ft_flags_readonly_this
+
   let get_ft_is_coroutine ft = is_set ft.ft_flags ft_flags_is_coroutine
 
   let get_ft_async ft = is_set ft.ft_flags ft_flags_async
@@ -466,6 +470,8 @@ module Flags = struct
 
   let get_fp_is_atom fp = is_set fp.fp_flags fp_flags_atom
 
+  let get_fp_readonly fp = is_set fp.fp_flags fp_flags_readonly
+
   let fun_kind_to_flags kind =
     match kind with
     | Ast_defs.FSync -> 0
@@ -474,14 +480,21 @@ module Flags = struct
     | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
 
   let make_ft_flags
-      kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx
-      =
+      kind
+      param_mutable
+      ~return_disposable
+      ~returns_mutable
+      ~returns_void_to_rx
+      ~returns_readonly
+      ~readonly_this =
     let flags =
       Int.bit_or (to_mutable_flags param_mutable) (fun_kind_to_flags kind)
     in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
     let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
     let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
+    let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
+    let flags = set_bit ft_flags_readonly_this readonly_this flags in
     flags
 
   let mode_to_flags mode =
@@ -496,7 +509,8 @@ module Flags = struct
       ~has_default
       ~ifc_external
       ~ifc_can_call
-      ~is_atom =
+      ~is_atom
+      ~readonly =
     let flags = mode_to_flags mode in
     let flags = Int.bit_or (to_mutable_flags mutability) flags in
     let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
@@ -504,6 +518,7 @@ module Flags = struct
     let flags = set_bit fp_flags_ifc_external ifc_external flags in
     let flags = set_bit fp_flags_ifc_can_call ifc_can_call flags in
     let flags = set_bit fp_flags_atom is_atom flags in
+    let flags = set_bit fp_flags_readonly readonly flags in
     flags
 
   let get_fp_accept_disposable fp =
@@ -890,6 +905,16 @@ module Pp = struct
       Format.fprintf fmt "@[~%s:" "returns_void_to_rx";
       Format.fprintf fmt "%B" (get_ft_returns_void_to_rx ft);
       Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "returns_readonly";
+      Format.fprintf fmt "%B" (get_ft_returns_readonly ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "readonly_this";
+      Format.fprintf fmt "%B" (get_ft_readonly_this ft);
+      Format.fprintf fmt "@]";
 
       Format.fprintf fmt ")@]"
     in
@@ -964,6 +989,11 @@ module Pp = struct
 
       Format.fprintf fmt "@[~%s:" "is_atom";
       Format.fprintf fmt "%B" (get_fp_is_atom fp);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "readonly";
+      Format.fprintf fmt "%B" (get_fp_readonly fp);
       Format.fprintf fmt "@]";
       Format.fprintf fmt ")@]"
     in

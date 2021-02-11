@@ -37,7 +37,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive =
                  Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-35),
                             (Tapply (([6:26-29], "\\IRx"), [])))};

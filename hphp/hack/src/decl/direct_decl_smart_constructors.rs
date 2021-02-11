@@ -535,6 +535,7 @@ pub struct FunParamDecl<'a> {
     attributes: Node<'a>,
     visibility: Node<'a>,
     kind: ParamMode,
+    readonly: bool,
     hint: Node<'a>,
     pos: &'a Pos<'a>,
     name: Option<&'a str>,
@@ -550,6 +551,7 @@ pub struct FunctionHeader<'a> {
     param_list: Node<'a>,
     capability: Node<'a>,
     ret_hint: Node<'a>,
+    readonly_return: Node<'a>,
     where_constraints: Node<'a>,
 }
 
@@ -1483,6 +1485,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             .modifiers
             .iter()
             .any(|n| n.is_token(TokenKind::Async));
+        let readonly = header
+            .modifiers
+            .iter()
+            .any(|n| n.is_token(TokenKind::Readonly));
+
         let fun_kind = if body.iter().any(|node| node.is_token(TokenKind::Yield)) {
             if async_ {
                 FunKind::FAsyncGenerator
@@ -1518,6 +1525,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_void_to_rx {
             flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
+        if header.readonly_return.is_token(TokenKind::Readonly) {
+            flags |= FunTypeFlags::RETURNS_READONLY;
+        }
+        if readonly {
+            flags |= FunTypeFlags::READONLY_THIS
+        }
+
         let ifc_decl = attributes.ifc_attribute;
 
         flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
@@ -1567,6 +1581,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             attributes,
                             visibility,
                             kind,
+                            readonly,
                             hint,
                             pos,
                             name,
@@ -1653,12 +1668,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if attributes.atom {
                                 flags |= FunParamFlags::ATOM
                             }
+                            if readonly {
+                                flags |= FunParamFlags::READONLY
+                            }
                             match kind {
                                 ParamMode::FPinout => {
                                     flags |= FunParamFlags::INOUT;
                                 }
                                 ParamMode::FPnormal => {}
                             };
+
                             if initializer.is_present() {
                                 flags |= FunParamFlags::HAS_DEFAULT;
                             }
@@ -3108,7 +3127,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         attributes: Self::R,
         visibility: Self::R,
         inout: Self::R,
-        _readonly: Self::R, // TODO: handle readonly in declarations
+        readonly: Self::R, // TODO: handle readonly in declarations
         hint: Self::R,
         name: Self::R,
         initializer: Self::R,
@@ -3135,6 +3154,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         } else {
             ParamMode::FPnormal
         };
+        let is_readonly = readonly.is_token(TokenKind::Readonly);
         let hint = if self.opts.interpret_soft_types_as_like_types {
             let attributes = self.to_attributes(attributes);
             if attributes.soft {
@@ -3152,6 +3172,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             attributes,
             visibility,
             kind,
+            readonly: is_readonly,
             hint,
             pos,
             name,
@@ -3166,6 +3187,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 attributes: Node::Ignored(SK::Missing),
                 visibility: Node::Ignored(SK::Missing),
                 kind: ParamMode::FPnormal,
+                readonly: false,
                 hint,
                 pos: self
                     .get_pos_opt(hint)
@@ -3301,7 +3323,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _right_paren: Self::R,
         capability: Self::R,
         _colon: Self::R,
-        _readonly_return: Self::R, // TODO, declare readonly return
+        readonly_return: Self::R,
         ret_hint: Self::R,
         where_constraints: Self::R,
     ) -> Self::R {
@@ -3314,6 +3336,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             param_list,
             capability,
             ret_hint,
+            readonly_return,
             where_constraints,
         }))
     }
@@ -3826,6 +3849,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     flags.set(PropFlags::LSB, attributes.lsb);
                     flags.set(PropFlags::NEEDS_INIT, needs_init);
                     flags.set(PropFlags::ABSTRACT, modifiers.is_abstract);
+                    flags.set(PropFlags::READONLY, modifiers.is_readonly);
                     flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
                     Some(ShallowProp {
                         xhp_attr: None,
@@ -4726,6 +4750,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             visibility: Node::Ignored(SK::Missing),
             kind,
             hint,
+            readonly: false,
             pos: self.get_pos(hint),
             name: Some(""),
             variadic: false,

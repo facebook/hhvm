@@ -1,0 +1,152 @@
+[("\\Foo",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }));
+  ("\\returns_readonly",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|readonly.php line 6, characters 16-31),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [6:16-32]) };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|readonly.php line 6, characters 46-59),
+                 (Tapply (([6:46-55], "\\HH\\Awaitable"),
+                    [(Rhint (root|readonly.php line 6, characters 56-58),
+                      (Tapply (([6:56-59], "\\Foo"), [])))]
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FAsync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false
+                ~returns_readonly:true ~readonly_this:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [6:16-32]; fe_php_std_lib = false }));
+  ("\\returns_normal",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|readonly.php line 10, characters 16-29),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [10:16-30]) };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|readonly.php line 10, characters 34-47),
+                 (Tapply (([10:34-43], "\\HH\\Awaitable"),
+                    [(Rhint (root|readonly.php line 10, characters 44-46),
+                      (Tapply (([10:44-47], "\\Foo"), [])))]
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FAsync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [10:16-30]; fe_php_std_lib = false }));
+  ("\\Bar",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([14:7-10], "\\Bar"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = [];
+        sc_props =
+        [{ Shallow_decl_defs.sp_name = ([15:23-25], "x"); sp_xhp_attr = None;
+           sp_type =
+           (Some (Rhint (root|readonly.php line 15, characters 19-21),
+                  (Tapply (([15:19-22], "\\Foo"), []))));
+           sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([18:25-27], "y");
+            sp_xhp_attr = None;
+            sp_type =
+            (Some (Rhint (root|readonly.php line 18, characters 21-23),
+                   (Tapply (([18:21-24], "\\Foo"), []))));
+            sp_visibility = Public; sp_flags = needs_init }
+          ];
+        sc_sprops = [];
+        sc_constructor =
+        (Some { Shallow_decl_defs.sm_name = ([17:19-30], "__construct");
+                sm_reactivity = None;
+                sm_type =
+                (Rwitness (root|readonly.php line 17, characters 19-29),
+                 (Tfun
+                    { ft_arity = (Fstandard ()); ft_tparams = [];
+                      ft_where_constraints = [];
+                      ft_params =
+                      [{ fp_pos = [18:25-27]; fp_name = (Some "$y");
+                         fp_type =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|readonly.php line 18, characters 21-23),
+                            (Tapply (([18:21-24], "\\Foo"), [])))
+                           };
+                         fp_rx_annotation = None;
+                         fp_flags =
+                         (make_fp_flags ~mutability:None
+                           ~accept_disposable:false ~has_default:false
+                           ~mode:Typing_defs_core.FPnormal
+                           ~ifc_external:false ~ifc_can_call:false
+                           ~is_atom:false ~readonly:true);
+                          }
+                        ];
+                      ft_implicit_params =
+                      { capability = (CapDefaults [17:19-30]) };
+                      ft_ret =
+                      { et_enforced = false;
+                        et_type =
+                        (Rwitness (root|readonly.php line 17, characters 19-29),
+                         (Tprim Tvoid))
+                        };
+                      ft_flags =
+                      (make_ft_flags FSync None ~return_disposable:false
+                        ~returns_mutable:false ~returns_void_to_rx:false
+                        ~returns_readonly:false ~readonly_this:false);
+                      ft_reactive = Nonreactive;
+                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                sm_visibility = Public; sm_deprecated = None;
+                sm_flags = (empty) });
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([22:28-34], "getFoo");
+           sm_reactivity = None;
+           sm_type =
+           (Rwitness (root|readonly.php line 22, characters 28-33),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [22:28-34]) };
+                 ft_ret =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|readonly.php line 22, characters 39-42),
+                    (Tprim Tvoid))
+                   };
+                 ft_flags =
+                 (make_ft_flags FSync None ~return_disposable:false
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:true);
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }))
+  ]
+
+They matched!

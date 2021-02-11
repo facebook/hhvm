@@ -99,7 +99,10 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 None
                 ~returns_mutable
                 ~return_disposable
-                ~returns_void_to_rx;
+                ~returns_void_to_rx
+                ~returns_readonly:(Option.is_some f.f_readonly_ret)
+                ~readonly_this:false;
+            (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )
   in

@@ -24,7 +24,8 @@
                   };
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false);
+                  ~returns_mutable:false ~returns_void_to_rx:false
+                  ~returns_readonly:false ~readonly_this:false);
                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
@@ -45,7 +46,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
@@ -83,7 +85,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
@@ -104,7 +107,8 @@
                     };
                   ft_flags =
                   (make_ft_flags FSync None ~return_disposable:false
-                    ~returns_mutable:false ~returns_void_to_rx:false);
+                    ~returns_mutable:false ~returns_void_to_rx:false
+                    ~returns_readonly:false ~readonly_this:false);
                   ft_reactive = Nonreactive;
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
@@ -139,7 +143,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
@@ -178,7 +183,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
@@ -216,7 +222,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
@@ -257,7 +264,8 @@
                    };
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false);
+                   ~returns_mutable:false ~returns_void_to_rx:false
+                   ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }

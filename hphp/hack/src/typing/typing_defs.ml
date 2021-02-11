@@ -1146,6 +1146,8 @@ let get_ce_const ce = is_set ce_flags_const ce.ce_flags
 
 let get_ce_lateinit ce = is_set ce_flags_lateinit ce.ce_flags
 
+let get_ce_readonly_prop ce = is_set ce_flags_readonly_prop ce.ce_flags
+
 let get_ce_dynamicallycallable ce =
   is_set ce_flags_dynamicallycallable ce.ce_flags
 
@@ -1192,7 +1194,8 @@ let make_ce_flags
     ~synthesized
     ~const
     ~lateinit
-    ~dynamicallycallable =
+    ~dynamicallycallable
+    ~readonly_prop =
   let flags = 0 in
   let flags = set_bit ce_flags_abstract abstract flags in
   let flags = set_bit ce_flags_final final flags in
@@ -1203,6 +1206,7 @@ let make_ce_flags
   let flags = set_bit ce_flags_lateinit lateinit flags in
   let flags = set_bit ce_flags_dynamicallycallable dynamicallycallable flags in
   let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
+  let flags = set_bit ce_flags_readonly_prop readonly_prop flags in
   flags
 
 (** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.

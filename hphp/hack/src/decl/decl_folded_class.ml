@@ -615,7 +615,8 @@ and build_constructor
           ~lsb:false
           ~synthesized:false
           ~override:false
-          ~dynamicallycallable:false;
+          ~dynamicallycallable:false
+          ~readonly_prop:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_reactivity = None;
@@ -692,7 +693,8 @@ and prop_decl
           ~const:(sp_const sp)
           ~lateinit:(sp_lateinit sp)
           ~abstract:(sp_abstract sp)
-          ~dynamicallycallable:false;
+          ~dynamicallycallable:false
+          ~readonly_prop:(sp_readonly sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
@@ -728,7 +730,8 @@ and static_prop_decl
           ~override:false
           ~abstract:(sp_abstract sp)
           ~synthesized:false
-          ~dynamicallycallable:false;
+          ~dynamicallycallable:false
+          ~readonly_prop:(sp_readonly sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
@@ -867,7 +870,8 @@ and method_decl_acc
           ~lsb:false
           ~const:false
           ~lateinit:false
-          ~dynamicallycallable:(sm_dynamicallycallable m);
+          ~dynamicallycallable:(sm_dynamicallycallable m)
+          ~readonly_prop:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = m.sm_reactivity;

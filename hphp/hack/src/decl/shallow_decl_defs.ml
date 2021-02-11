@@ -31,6 +31,7 @@ module PropFlags = struct
   let lsb_bit         = 1 lsl 3
   let needs_init_bit  = 1 lsl 4
   let php_std_lib_bit = 1 lsl 5
+  let readonly_bit    = 1 lsl 6
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
@@ -38,6 +39,7 @@ module PropFlags = struct
   let get_lsb         = is_set lsb_bit
   let get_needs_init  = is_set needs_init_bit
   let get_php_std_lib = is_set php_std_lib_bit
+  let get_readonly = is_set readonly_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
@@ -45,6 +47,7 @@ module PropFlags = struct
   let set_lsb         = set_bit lsb_bit
   let set_needs_init  = set_bit needs_init_bit
   let set_php_std_lib = set_bit php_std_lib_bit
+  let set_readonly    = set_bit readonly_bit
 
   let make
       ~abstract
@@ -53,6 +56,7 @@ module PropFlags = struct
       ~lsb
       ~needs_init
       ~php_std_lib
+      ~readonly
       =
     empty
     |> set_abstract abstract
@@ -61,6 +65,7 @@ module PropFlags = struct
     |> set_lsb lsb
     |> set_needs_init needs_init
     |> set_php_std_lib php_std_lib
+    |> set_readonly readonly
 
   let pp fmt t =
     if t = empty then
@@ -221,6 +226,8 @@ let sp_lsb sp = PropFlags.get_lsb sp.sp_flags
 let sp_needs_init sp = PropFlags.get_needs_init sp.sp_flags
 
 let sp_php_std_lib sp = PropFlags.get_php_std_lib sp.sp_flags
+
+let sp_readonly sp = PropFlags.get_readonly sp.sp_flags
 
 let sm_abstract sm = MethodFlags.get_abstract sm.sm_flags
 

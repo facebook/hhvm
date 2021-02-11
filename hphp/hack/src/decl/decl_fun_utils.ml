@@ -254,7 +254,8 @@ let make_param_ty env ~is_lambda param =
         ~has_default:(Option.is_some param.param_expr)
         ~ifc_external:(has_external_attribute param.param_user_attributes)
         ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
-        ~is_atom:(has_atom_attribute param.param_user_attributes);
+        ~is_atom:(has_atom_attribute param.param_user_attributes)
+        ~readonly:(Option.is_some param.param_readonly);
     fp_rx_annotation = rx_annotation;
   }
 
@@ -274,7 +275,8 @@ let make_ellipsis_param_ty pos =
         ~has_default:false
         ~ifc_external:false
         ~ifc_can_call:false
-        ~is_atom:false;
+        ~is_atom:false
+        ~readonly:false;
     fp_rx_annotation = None;
   }
 

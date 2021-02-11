@@ -583,7 +583,8 @@ let default_constructor_ce class_ =
         ~override:false
         ~lsb:false
         ~synthesized:true
-        ~dynamicallycallable:false;
+        ~dynamicallycallable:false
+        ~readonly_prop:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

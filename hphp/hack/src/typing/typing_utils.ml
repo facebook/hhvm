@@ -596,7 +596,8 @@ let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
         ~has_default:false
         ~ifc_external:false
         ~ifc_can_call:false
-        ~is_atom:false;
+        ~is_atom:false
+        ~readonly:false;
     fp_rx_annotation = None;
   }
 

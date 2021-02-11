@@ -120,7 +120,10 @@ and hint_ p env = function
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
             ~ifc_can_call:false
-            ~is_atom:false;
+            ~is_atom:
+              false
+              (* TODO: support readonly on parameters of function parameters *)
+            ~readonly:false;
         fp_rx_annotation = None;
       }
     in
@@ -157,7 +160,10 @@ and hint_ p env = function
             None
             ~return_disposable:false
             ~returns_void_to_rx:false
-            ~returns_mutable:mut_ret;
+            ~returns_mutable:mut_ret
+            ~returns_readonly:
+              false (* TODO: support readonly on function type hints *)
+            ~readonly_this:false;
         ft_reactive = reactivity;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;

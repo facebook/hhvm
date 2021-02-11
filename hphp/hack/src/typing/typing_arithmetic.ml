@@ -366,9 +366,24 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
      *)
-    let env = Typing_substring.sub_string p1 env ty1 in
-    let env = Typing_substring.sub_string p2 env ty2 in
-    make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
+    if TypecheckerOptions.enable_strict_string_concat_interp (Env.get_tcopt env)
+    then
+      let sub_arraykey env p ty =
+        Typing_ops.sub_type
+          p
+          Reason.URstr_concat
+          env
+          ty
+          (MakeType.arraykey (Reason.Rconcat_operand p))
+          Errors.strict_str_concat_type_mismatch
+      in
+      let env = sub_arraykey env p1 ty1 in
+      let env = sub_arraykey env p2 ty2 in
+      make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
+    else
+      let env = Typing_substring.sub_string p1 env ty1 in
+      let env = Typing_substring.sub_string p2 env ty2 in
+      make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
   | Ast_defs.Barbar
   | Ast_defs.Ampamp
   | Ast_defs.LogXor ->

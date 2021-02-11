@@ -115,6 +115,8 @@ type t =
   | Ret_boolean of Pos.t
   | Rdefault_capability of Pos.t
   | Rarray_unification of Pos.t
+  | Rconcat_operand of Pos.t
+  | Rinterp_operand of Pos.t
 [@@deriving eq]
 
 (** Translate a reason to a (pos, string) list, suitable for error_l. This
@@ -166,6 +168,8 @@ type ureason =
   | URsubsume_tconst_assign
   | URclone
   | URusing
+  | URstr_concat
+  | URstr_interp
 [@@deriving show]
 
 val index_array : ureason

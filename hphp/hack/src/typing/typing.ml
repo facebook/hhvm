@@ -7170,8 +7170,23 @@ and string2 env idl =
     List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
         let (env, te, ty) = expr env x ~allow_awaitable:(*?*) false in
         let p = fst x in
-        let env = Typing_substring.sub_string p env ty in
-        (env, te :: tel))
+        if
+          TypecheckerOptions.enable_strict_string_concat_interp
+            (Env.get_tcopt env)
+        then
+          let env =
+            Typing_ops.sub_type
+              p
+              Reason.URstr_interp
+              env
+              ty
+              (MakeType.arraykey (Reason.Rinterp_operand p))
+              Errors.strict_str_interp_type_mismatch
+          in
+          (env, te :: tel)
+        else
+          let env = Typing_substring.sub_string p env ty in
+          (env, te :: tel))
   in
   (env, List.rev tel)
 

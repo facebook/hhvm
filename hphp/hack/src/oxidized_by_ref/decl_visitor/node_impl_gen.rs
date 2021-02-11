@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<45453b1ff1a06d4ac25600fa4635e226>>
+// @generated SignedSource<<afae5c9e1718c4dcb4d081eeea09da16>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -502,6 +502,8 @@ impl<'a> Node<'a> for Reason<'a> {
             Reason::RetBoolean(ref __binding_0) => __binding_0.accept(v),
             Reason::RdefaultCapability(ref __binding_0) => __binding_0.accept(v),
             Reason::RarrayUnification(ref __binding_0) => __binding_0.accept(v),
+            Reason::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
+            Reason::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

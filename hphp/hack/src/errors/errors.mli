@@ -662,6 +662,10 @@ val xhp_attribute_does_not_match_hint : typing_error_callback
 
 val record_init_value_does_not_match_hint : typing_error_callback
 
+val strict_str_concat_type_mismatch : typing_error_callback
+
+val strict_str_interp_type_mismatch : typing_error_callback
+
 val using_error : Pos.t -> bool -> typing_error_callback
 
 val static_redeclared_as_dynamic :

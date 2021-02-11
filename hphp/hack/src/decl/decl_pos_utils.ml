@@ -111,6 +111,8 @@ struct
     | Ret_boolean p -> Ret_boolean (pos p)
     | Rdefault_capability p -> Rdefault_capability (pos p)
     | Rarray_unification p -> Rarray_unification (pos p)
+    | Rconcat_operand p -> Rconcat_operand (pos p)
+    | Rinterp_operand p -> Rinterp_operand (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

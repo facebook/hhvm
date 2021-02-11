@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a34cef9b9b264a97d926f78c8c2ab7dc>>
+// @generated SignedSource<<325a550a952253895baa659d87b8d315>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -121,6 +121,8 @@ pub enum Reason<'a> {
     RetBoolean(&'a pos::Pos<'a>),
     RdefaultCapability(&'a pos::Pos<'a>),
     RarrayUnification(&'a pos::Pos<'a>),
+    RconcatOperand(&'a pos::Pos<'a>),
+    RinterpOperand(&'a pos::Pos<'a>),
 }
 impl<'a> TrivialDrop for Reason<'a> {}
 
@@ -261,5 +263,7 @@ pub enum Ureason<'a> {
     URsubsumeTconstAssign,
     URclone,
     URusing,
+    URstrConcat,
+    URstrInterp,
 }
 impl<'a> TrivialDrop for Ureason<'a> {}

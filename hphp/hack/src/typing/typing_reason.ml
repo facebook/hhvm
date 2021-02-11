@@ -96,6 +96,8 @@ type t =
   | Ret_boolean of Pos.t
   | Rdefault_capability of Pos.t
   | Rarray_unification of Pos.t
+  | Rconcat_operand of Pos.t
+  | Rinterp_operand of Pos.t
 
 and arg_position =
   | Aonly
@@ -504,6 +506,8 @@ let rec to_string prefix r =
     [(p, prefix ^ " because the function did not have an explicit context")]
   | Rarray_unification p ->
     [(p, prefix ^ " because legacy arrays have been unified with Hack arrays")]
+  | Rconcat_operand p -> [(p, "Expected `string` or `int`")]
+  | Rinterp_operand p -> [(p, "Expected `string` or `int`")]
 
 and to_pos r =
   if !Errors.report_pos_from_reason then
@@ -593,6 +597,8 @@ and to_raw_pos r =
   | Ret_boolean p -> p
   | Rdefault_capability p -> p
   | Rarray_unification p -> p
+  | Rconcat_operand p -> p
+  | Rinterp_operand p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -712,6 +718,8 @@ let to_constructor_string r =
   | Ret_boolean _ -> "Ret_boolean"
   | Rdefault_capability _ -> "Rdefault_capability"
   | Rarray_unification _ -> "Rarray_unification"
+  | Rconcat_operand _ -> "Rconcat_operand"
+  | Rinterp_operand _ -> "Rinterp_operand"
 
 let pp fmt r =
   let pos = to_raw_pos r in
@@ -758,6 +766,8 @@ type ureason =
   | URsubsume_tconst_assign
   | URclone
   | URusing
+  | URstr_concat
+  | URstr_interp
 [@@deriving show]
 
 let index_array = URindex "array"
@@ -809,6 +819,10 @@ let string_of_ureason = function
     "The assigned type of this type constant is inconsistent with its parent"
   | URclone -> "Clone cannot be called on non-object"
   | URusing -> "Using cannot be used on non-disposable expression"
+  | URstr_concat ->
+    "String concatenation can only be performed on string and int arguments"
+  | URstr_interp ->
+    "Only string and int values can be used in string interpolation"
 
 let compare r1 r2 =
   let get_pri = function

@@ -3724,6 +3724,12 @@ let xhp_attribute_does_not_match_hint =
 let record_init_value_does_not_match_hint =
   maybe_unify_error Typing.RecordInitValueDoesNotMatchHint
 
+let strict_str_concat_type_mismatch =
+  maybe_unify_error Typing.StrictStrConcatTypeMismatch
+
+let strict_str_interp_type_mismatch =
+  maybe_unify_error Typing.StrictStrInterpTypeMismatch
+
 let using_error pos has_await ?code:_ msg _list =
   let (note, cls) =
     if has_await then

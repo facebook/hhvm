@@ -277,9 +277,9 @@ let rec expand ctx env root : _ * result =
     Errors.non_object_member_read
       ~kind:`class_typeconst
       tconst
-      (get_pos root)
-      ty
       pos
+      ty
+      (get_pos root)
       ctx.on_error
   in
 

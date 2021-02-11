@@ -463,18 +463,18 @@ static size_t s_bits_to_go;
 
 void processInit() {
   assertx(!s_local_base);
-  if (RuntimeOption::EvalJitTargetCacheSize > 1u << 30) {
+  if (RuntimeOption::EvalRDSSize > 1u << 30) {
     // The encoding of RDS handles require that the normal and local regions
     // together be smaller than 1G.
-    RuntimeOption::EvalJitTargetCacheSize = 1u << 30;
+    RuntimeOption::EvalRDSSize = 1u << 30;
   }
-  s_local_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
+  s_local_base = RuntimeOption::EvalRDSSize * 3 / 4;
   s_local_frontier = s_local_base;
 
 #if RDS_FIXED_PERSISTENT_BASE
   auto constexpr allocSize = kPersistentChunkSize;
 #else
-  auto const allocSize = RuntimeOption::EvalJitTargetCacheSize / 4;
+  auto const allocSize = RuntimeOption::EvalRDSSize / 4;
 #endif
   addNewPersistentChunk(allocSize),
 

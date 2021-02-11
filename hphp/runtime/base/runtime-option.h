@@ -788,7 +788,7 @@ struct RuntimeOption {
   F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
   F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
-  F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
+  F(uint32_t, RDSSize,                 64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \

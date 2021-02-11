@@ -1472,7 +1472,6 @@ and simplify_subtype_i
             (r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
     | (_, (Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _)) ->
-      (* TODO(vec_or_dict) spell out subtyping rules *)
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
@@ -1481,12 +1480,26 @@ and simplify_subtype_i
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
         | ( Tvarray_or_darray (tk_sub, tv_sub),
             Tvarray_or_darray (tk_super, tv_super) )
+        | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super))
         | (Tdarray (tk_sub, tv_sub), Tdarray (tk_super, tv_super))
         | (Tdarray (tk_sub, tv_sub), Tvarray_or_darray (tk_super, tv_super)) ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | ( Tclass ((_, n), _, [tk_sub; tv_sub]),
+            Tvec_or_dict (tk_super, tv_super) )
+          when String.equal n SN.Collections.cDict ->
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
         | (Tvarray tv_sub, Tvarray_or_darray (tk_super, tv_super)) ->
+          let pos = get_pos lty in
+          let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | (Tclass ((_, n), _, [tv_sub]), Tvec_or_dict (tk_super, tv_super))
+          when String.equal n SN.Collections.cVec ->
           let pos = get_pos lty in
           let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
           env
@@ -1721,7 +1734,11 @@ and simplify_subtype_i
                     env
                 else
                   invalid_env env))
-        | (r_sub, (Tvarray tv | Tdarray (_, tv) | Tvarray_or_darray (_, tv))) ->
+        | ( r_sub,
+            ( Tvarray tv
+            | Tdarray (_, tv)
+            | Tvarray_or_darray (_, tv)
+            | Tvec_or_dict (_, tv) ) ) ->
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
@@ -1749,6 +1766,7 @@ and simplify_subtype_i
                    tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
             | Tvarray_or_darray (tk, _)
+            | Tvec_or_dict (tk, _)
             | Tdarray (tk, _) ->
               env
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super

@@ -1,0 +1,12 @@
+File "vec_or_dict2.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_or_dict2.php", line 3, characters 39-44:
+  Expected `string`
+  File "vec_or_dict2.php", line 3, characters 13-20:
+  But got `int` because only `int` can be used to index into a `Vector` or `vec`.
+File "vec_or_dict2.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_or_dict2.php", line 7, characters 39-44:
+  Expected `string`
+  File "vec_or_dict2.php", line 7, characters 17-19:
+  But got `int`

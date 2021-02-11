@@ -1,0 +1,12 @@
+File "vec_or_dict1.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_or_dict1.php", line 3, characters 50-55:
+  Expected `string`
+  File "vec_or_dict1.php", line 3, characters 18-25:
+  But got `arraykey`
+File "vec_or_dict1.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_or_dict1.php", line 7, characters 50-55:
+  Expected `string`
+  File "vec_or_dict1.php", line 7, characters 28-30:
+  But got `int`

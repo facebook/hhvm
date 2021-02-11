@@ -997,6 +997,10 @@ void setCentralRepoFileMode(const std::string& path) {
 }
 }
 
+namespace {
+  std::mutex s_sqliteCreateMutex;
+}
+
 RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
   std::string repoPath = rawPath;
   replacePlaceholders(repoPath);
@@ -1017,12 +1021,16 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
     flags |= SQLITE_OPEN_READONLY;
   }
 
-  if (int err = sqlite3_open_v2(repoPath.c_str(), &m_dbc, flags, nullptr)) {
-    TRACE(1, "Repo::%s() failed to open candidate central repo '%s'\n",
-             __func__, repoPath.c_str());
-    errorMsg = folly::format("Failed to open {}: {} - {}",
-                             repoPath, err, sqlite3_errmsg(m_dbc)).str();
-    return RepoStatus::error;
+  {
+    // sqlite can't handle concurrent SQLITE_OPEN_CREATEs
+    std::lock_guard<std::mutex> l(s_sqliteCreateMutex);
+    if (int err = sqlite3_open_v2(repoPath.c_str(), &m_dbc, flags, nullptr)) {
+      TRACE(1, "Repo::%s() failed to open candidate central repo '%s'\n",
+               __func__, repoPath.c_str());
+      errorMsg = folly::format("Failed to open {}: {} - {}",
+                               repoPath, err, sqlite3_errmsg(m_dbc)).str();
+      return RepoStatus::error;
+    }
   }
 
   if (RuntimeOption::RepoBusyTimeoutMS) {

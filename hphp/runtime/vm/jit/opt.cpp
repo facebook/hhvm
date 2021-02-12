@@ -253,9 +253,6 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   if (kind == TransKind::Optimize) {
     doPass(unit, selectiveWeakenDecRefs, DCE::None);
-    if (allowBespokeArrayLikes()) {
-      doPass(unit, optimizeVanillaChecks, DCE::None);
-    }
   }
   printUnit(6, unit, " after optimize ");
 }

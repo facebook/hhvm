@@ -526,7 +526,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckCold:
   case CheckDictKeys:
   case CheckDictOffset:
-  case CheckDictOffsetLA:
   case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
@@ -548,7 +547,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckType:
   case CheckTypeMem:
   case CheckVecBounds:
-  case CheckVecBoundsLA:
   case ChrInt:
   case CmpBool:
   case CmpDbl:

@@ -408,11 +408,7 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
     // array-likes, m_extra is always 0, and for bespoke array-likes, the full
     // quadword is always a negative int64_t.
     auto const sf = v.makeReg();
-    if (inst->is(CheckDictOffsetLA)) {
-      v << cmpqim{safe_cast<int32_t>(pos), arr[ArrayData::offsetofSize()], sf};
-    } else {
-      v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
-    }
+    v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
     ifThen(v, CC_LE, sf, branch);
   }
   { // Fail if the Elm key value doesn't match.
@@ -462,10 +458,6 @@ void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
-  implCheckMixedArrayLikeOffset(env, inst, getKeyType(inst->src(1)));
-}
-
-void cgCheckDictOffsetLA(IRLS& env, const IRInstruction* inst) {
   implCheckMixedArrayLikeOffset(env, inst, getKeyType(inst->src(1)));
 }
 

@@ -51,51 +51,39 @@ struct APCArray {
   static APCHandle* MakeUncountedKeyset(
       ArrayData* dict, DataWalker::PointerMap* m);
 
-  static APCHandle::Pair MakeSharedEmptyArray();
+  static APCHandle::Pair MakeSharedEmptyVArray();
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedArray ||
-           handle->kind() == APCKind::SharedPackedArray ||
-           handle->kind() == APCKind::SharedVArray ||
-           handle->kind() == APCKind::SharedMarkedVArray ||
-           handle->kind() == APCKind::SharedDArray ||
-           handle->kind() == APCKind::SharedMarkedDArray ||
-           handle->kind() == APCKind::SharedVec ||
-           handle->kind() == APCKind::SharedLegacyVec ||
-           handle->kind() == APCKind::SharedDict ||
-           handle->kind() == APCKind::SharedLegacyDict ||
-           handle->kind() == APCKind::SharedKeyset);
+    assertx(handle->kind() == APCKind::SharedVArray ||
+            handle->kind() == APCKind::SharedMarkedVArray ||
+            handle->kind() == APCKind::SharedDArray ||
+            handle->kind() == APCKind::SharedMarkedDArray ||
+            handle->kind() == APCKind::SharedVec ||
+            handle->kind() == APCKind::SharedLegacyVec ||
+            handle->kind() == APCKind::SharedDict ||
+            handle->kind() == APCKind::SharedLegacyDict ||
+            handle->kind() == APCKind::SharedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedArray ||
-           handle->kind() == APCKind::SharedPackedArray ||
-           handle->kind() == APCKind::SharedVArray ||
-           handle->kind() == APCKind::SharedMarkedVArray ||
-           handle->kind() == APCKind::SharedDArray ||
-           handle->kind() == APCKind::SharedMarkedDArray ||
-           handle->kind() == APCKind::SharedVec ||
-           handle->kind() == APCKind::SharedLegacyVec ||
-           handle->kind() == APCKind::SharedDict ||
-           handle->kind() == APCKind::SharedLegacyDict ||
-           handle->kind() == APCKind::SharedKeyset);
+    assertx(handle->kind() == APCKind::SharedVArray ||
+            handle->kind() == APCKind::SharedMarkedVArray ||
+            handle->kind() == APCKind::SharedDArray ||
+            handle->kind() == APCKind::SharedMarkedDArray ||
+            handle->kind() == APCKind::SharedVec ||
+            handle->kind() == APCKind::SharedLegacyVec ||
+            handle->kind() == APCKind::SharedDict ||
+            handle->kind() == APCKind::SharedLegacyDict ||
+            handle->kind() == APCKind::SharedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  ArrayData* toLocalArray() const {
-    // We don't have direct constructors for "plain" PHP arrays, so convert a
-    // Hack array of the appropriate type instead. Since it has refcount 1,
-    // we'll do the conversion in place rather than making a copy.
-    auto const ad = isPacked() ? PackedArray::MakeVecFromAPC(this)
-                               : MixedArray::MakeDictFromAPC(this);
-    return ad->toPHPArray(/*copy=*/false);
-  }
   ArrayData* toLocalVArray() const {
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return PackedArray::MakeVArrayFromAPC(this);
@@ -162,7 +150,6 @@ struct APCArray {
   bool isPacked() const {
     auto const k = m_handle.kind();
     return
-      k == APCKind::SharedPackedArray ||
       k == APCKind::SharedVArray ||
       k == APCKind::SharedMarkedVArray ||
       k == APCKind::SharedVec ||
@@ -173,7 +160,6 @@ struct APCArray {
   bool isHashed() const {
     auto const k = m_handle.kind();
     return
-      k == APCKind::SharedArray ||
       k == APCKind::SharedDArray ||
       k == APCKind::SharedMarkedDArray ||
       k == APCKind::SharedDict ||
@@ -183,8 +169,6 @@ struct APCArray {
   bool isPHPArray() const {
     auto const k = m_handle.kind();
     return
-      k == APCKind::SharedArray ||
-      k == APCKind::SharedPackedArray ||
       k == APCKind::SharedVArray ||
       k == APCKind::SharedMarkedVArray ||
       k == APCKind::SharedDArray ||

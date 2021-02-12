@@ -112,8 +112,6 @@ size_t getMemSize(const APCHandle* handle) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getKeysetData());
 
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
@@ -641,8 +639,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::SerializedKeyset:
       return m_serKeyset;
 
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
     case APCKind::SharedVArray:
     case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:

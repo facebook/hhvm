@@ -153,8 +153,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::APCDict;
     case APCKind::SharedKeyset:
       return EntryInfo::Type::APCKeyset;
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
     case APCKind::SharedVArray:
     case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:

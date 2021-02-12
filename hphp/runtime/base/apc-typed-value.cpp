@@ -97,8 +97,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::RFunc:
     case APCKind::RClsMeth:
     case APCKind::SharedString:
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SharedVec:

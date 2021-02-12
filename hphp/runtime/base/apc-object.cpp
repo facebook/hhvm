@@ -296,7 +296,7 @@ Object APCObject::createObject() const {
     auto dynProps = apcProp[numProps];
     assertx(dynProps->kind() == APCKind::StaticArray ||
            dynProps->kind() == APCKind::UncountedArray ||
-           dynProps->kind() == APCKind::SharedArray);
+           dynProps->kind() == APCKind::SharedDArray);
     obj->setDynProps(dynProps->toLocal().asCArrRef());
   }
 

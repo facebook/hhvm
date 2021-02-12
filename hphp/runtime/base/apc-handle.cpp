@@ -160,7 +160,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       // TODO Task #2661075: Here and elsewhere in the runtime, we convert
       // Resources to the empty array during various serialization operations,
       // which does not match Zend behavior. We should fix this.
-      return APCArray::MakeSharedEmptyArray();
+      return APCArray::MakeSharedEmptyVArray();
     case KindOfClsMeth: {
       if (RO::EvalAPCSerializeClsMeth) {
         auto const meth = val(cell).pclsmeth;
@@ -252,11 +252,6 @@ Variant APCHandle::toLocalHelper() const {
       assertx(v.isKeyset());
       return v;
     }
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalArray()
-      );
     case APCKind::SharedVArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       return Variant::attach(
@@ -360,8 +355,6 @@ void APCHandle::deleteShared() {
     case APCKind::SharedDArray:
     case APCKind::SharedMarkedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
-    case APCKind::SharedPackedArray:
-    case APCKind::SharedArray:
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
@@ -459,8 +452,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::RFunc:
     case APCKind::RClsMeth:
     case APCKind::SharedString:
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:

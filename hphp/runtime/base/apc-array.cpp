@@ -111,8 +111,8 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
                                      APCKind::SharedMarkedVArray :
                                      APCKind::SharedVArray,
                                    unserializeObj));
-      }
-      if (arr->isDArray()) {
+      } else {
+        assertx(arr->isDArray());
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return add_prov(MakeHash(arr,
                                  arr->isLegacyArray() ?
@@ -120,9 +120,6 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
                                    APCKind::SharedDArray,
                                  unserializeObj));
       }
-      return arr->isVectorData()
-        ? MakePacked(arr, APCKind::SharedPackedArray, unserializeObj)
-        : MakeHash(arr, APCKind::SharedArray, unserializeObj);
     },
     [&](DataWalker::PointerMap* m) { return MakeUncountedArray(arr, m); },
     [&](StringData* s) { return APCString::MakeSerializedArray(s); }
@@ -190,10 +187,10 @@ APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
   );
 }
 
-APCHandle::Pair APCArray::MakeSharedEmptyArray() {
+APCHandle::Pair APCArray::MakeSharedEmptyVArray() {
   void* p = apc_malloc(sizeof(APCArray));
   APCArray* arr = new (p) APCArray(PackedCtor{},
-                                   APCKind::SharedPackedArray,
+                                   APCKind::SharedVArray,
                                    0);
   return {arr->getHandle(), sizeof(APCArray)};
 }

@@ -459,7 +459,7 @@ fn make_closure(
         where_constraints: fd.where_constraints.clone(),
         variadic: fd.variadic.clone(),
         params: fd.params.clone(),
-        ctxs: None,        // TODO(T70095684)
+        ctxs: fd.ctxs.clone(),
         unsafe_ctxs: None, // TODO(T70095684)
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,

@@ -2335,7 +2335,7 @@ void Class::setConstants() {
       }
     }
   }
-  
+
   // Copy in interface constants.
   for (int i = 0, size = m_declInterfaces.size(); i < size; ++i) {
     auto const iface = m_declInterfaces[i].get();
@@ -4676,6 +4676,10 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
         if (!enumBaseTy ||
             (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
           return nullptr;
+        }
+        for (auto it = preClass->includedEnums().begin();
+                   it != preClass->includedEnums().end(); ++it) {
+          if (!Class::get(*it, false)) return nullptr;
         }
       }
     }

@@ -55,9 +55,8 @@ let typeconst_abstract_kind env = function
 
 let typeconst env c tc =
   match c.c_kind with
+  | Ast_defs.Cenum -> None
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum ->
-    None
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
   | Ast_defs.Cnormal ->

@@ -1046,19 +1046,8 @@ let typeconst_def
       c_tconst_doc_comment;
       c_tconst_is_ctx;
     } =
-  begin
-    match cls.c_kind with
-    | Ast_defs.Ctrait
-    | Ast_defs.Cenum ->
-      let kind =
-        match cls.c_kind with
-        | Ast_defs.Ctrait -> `trait
-        | Ast_defs.Cenum -> `enum
-        | _ -> assert false
-      in
-      Errors.cannot_declare_constant kind pos cls.c_name
-    | _ -> ()
-  end;
+  if Ast_defs.is_c_enum cls.c_kind then
+    Errors.cannot_declare_constant `enum pos cls.c_name;
   let (env, cstr) =
     opt Phase.localize_hint_with_self env c_tconst_as_constraint
   in

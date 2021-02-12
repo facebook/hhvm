@@ -249,18 +249,10 @@ module Nast_helper : sig
 
   val is_interface : Provider_context.t -> string -> bool
 end = struct
-  let make_nast_getter ~get_pos ~find_in_file ~naming =
-    let nasts = ref SMap.empty in
-    fun ctx name ->
-      if SMap.mem name !nasts then
-        Some (SMap.find name !nasts)
-      else
-        let open Option in
-        get_pos ctx name >>= fun pos ->
-        find_in_file ctx (Pos.filename pos) name >>= fun nast ->
-        let nast = naming ctx nast in
-        nasts := SMap.add name nast !nasts;
-        Some nast
+  let make_nast_getter ~get_pos ~find_in_file ~naming ctx name =
+    Option.(
+      get_pos ctx name >>= fun pos ->
+      find_in_file ctx (Pos.filename pos) name |> map ~f:(naming ctx))
 
   let get_fun =
     make_nast_getter

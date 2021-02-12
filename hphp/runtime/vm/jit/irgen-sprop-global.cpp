@@ -170,7 +170,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env, ReadonlyOp /*op*/) {
+void emitCGetS(IRGS& env, ReadOnlyOp /*op*/) {
   auto const ssaCls      = topC(env);
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
@@ -186,7 +186,7 @@ void emitCGetS(IRGS& env, ReadonlyOp /*op*/) {
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env, ReadonlyOp /*op*/) {
+void emitSetS(IRGS& env, ReadOnlyOp /*op*/) {
   auto const ssaCls      = topC(env, BCSPRelOffset{1});
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
@@ -218,7 +218,7 @@ void emitSetS(IRGS& env, ReadonlyOp /*op*/) {
   bindMem(env, lookup.propPtr, value);
 }
 
-void emitSetOpS(IRGS& env, SetOpOp op, ReadonlyOp /*rop*/) {
+void emitSetOpS(IRGS& env, SetOpOp op, ReadOnlyOp /*rop*/) {
   auto const ssaCls      = topC(env, BCSPRelOffset{1});
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
@@ -294,7 +294,7 @@ void emitIssetS(IRGS& env) {
   push(env, ret);
 }
 
-void emitIncDecS(IRGS& env, IncDecOp subop, ReadonlyOp /*op*/) {
+void emitIncDecS(IRGS& env, IncDecOp subop, ReadOnlyOp /*op*/) {
   auto const ssaCls      = topC(env);
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
@@ -409,7 +409,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
   push(env, gen(env, IsNType, TUninit, curVal));
 }
 
-void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadonlyOp /*rop*/) {
+void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnlyOp /*rop*/) {
   auto val = popC(env);
   auto const ctx = curClass(env);
 

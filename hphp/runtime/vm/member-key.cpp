@@ -44,6 +44,16 @@ const char* memberCodeString(MemberCode mcode) {
   return memberNames[mcode];
 }
 
+const char* const readOnlyNames[] = { "Any", "ReadOnly", "Mutable"};
+
+const char* readOnlyString(ReadOnlyOp op) {
+  static_assert(
+    std::is_same<typename std::underlying_type<ReadOnlyOp>::type,uint8_t>::value,
+    "Subops are all expected to be single-bytes"
+  );
+  return readOnlyNames[static_cast<uint8_t>(op)];
+}
+
 folly::Optional<MemberCode> parseMemberCode(const char* s) {
   for (auto i = 0; i < memberNamesCount; i++) {
     if (!strcmp(memberNames[i], s)) {
@@ -55,21 +65,22 @@ folly::Optional<MemberCode> parseMemberCode(const char* s) {
 
 std::string show(MemberKey mk) {
   std::string ret = memberCodeString(mk.mcode);
+  auto const op = readOnlyString(mk.rop);
 
   switch (mk.mcode) {
     case MEC: case MPC:
-      folly::toAppend(':', mk.iva, &ret);
+      folly::toAppend(':', mk.iva, " ", op, &ret);
       break;
     case MEL: case MPL:
-      folly::toAppend(':', mk.local.name, ':', mk.local.id, &ret);
+      folly::toAppend(':', mk.local.name, ':', mk.local.id, " ", op, &ret);
       break;
     case MEI:
-      folly::toAppend(':', mk.int64, &ret);
+      folly::toAppend(':', mk.int64, " ", op, &ret);
       break;
     case MET: case MPT: case MQT:
       folly::toAppend(
         ":\"", escapeStringForCPP(mk.litstr->data(), mk.litstr->size()), '"',
-        &ret
+        " ", op, &ret
       );
       break;
     case MW:

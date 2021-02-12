@@ -1300,7 +1300,7 @@ MemberKey read_member_key(AsmState& as) {
   if (mcode != MW && as.in.getc() != ':') {
     as.error("expected `:' after member code `" + word + "'");
   }
-
+  
   switch (mcode) {
     case MW:
       return MemberKey{};
@@ -1310,14 +1310,24 @@ MemberKey read_member_key(AsmState& as) {
         as.error("couldn't read name for local variable in member key");
       }
       int32_t lid = as.getLocalId(name);
-      return MemberKey{mcode, NamedLocal{lid, lid}};
+      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      return MemberKey{mcode, NamedLocal{lid, lid}, op};
     }
-    case MEC: case MPC:
-      return MemberKey{mcode, read_opcode_arg<int32_t>(as)};
-    case MEI:
-      return MemberKey{mcode, read_opcode_arg<int64_t>(as)};
-    case MET: case MPT: case MQT:
-      return MemberKey{mcode, read_litstr(as)};
+    case MEC: case MPC: {
+      auto const i = read_opcode_arg<int32_t>(as);
+      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      return MemberKey{mcode, i, op};
+    }
+    case MEI: {
+      auto const i = read_opcode_arg<int64_t>(as);
+      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      return MemberKey{mcode, i, op};
+    }
+    case MET: case MPT: case MQT: {
+      auto const litstr = read_litstr(as);
+      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      return MemberKey{mcode, litstr, op};
+    }
   }
   not_reached();
 }

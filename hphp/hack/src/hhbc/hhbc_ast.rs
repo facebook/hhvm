@@ -170,14 +170,14 @@ pub enum FatalOp {
 
 #[derive(Clone, Debug)]
 pub enum MemberKey {
-    EC(StackIndex),
-    EL(local::Type),
-    ET(String),
-    EI(i64),
-    PC(StackIndex),
-    PL(local::Type),
-    PT(PropId),
-    QT(PropId),
+    EC(StackIndex, ReadOnlyOp),
+    EL(local::Type, ReadOnlyOp),
+    ET(String, ReadOnlyOp),
+    EI(i64, ReadOnlyOp),
+    PC(StackIndex, ReadOnlyOp),
+    PL(local::Type, ReadOnlyOp),
+    PT(PropId, ReadOnlyOp),
+    QT(PropId, ReadOnlyOp),
     W,
 }
 
@@ -196,8 +196,8 @@ pub enum TypestructResolveOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ReadonlyOp {
-    Readonly,
+pub enum ReadOnlyOp {
+    ReadOnly,
     Mutable,
     Any,
 }
@@ -360,7 +360,7 @@ pub enum InstructGet {
     CUGetL(local::Type),
     PushL(local::Type),
     CGetG,
-    CGetS(ReadonlyOp),
+    CGetS(ReadOnlyOp),
     ClassGetC,
     ClassGetTS,
 }
@@ -450,17 +450,17 @@ pub enum InstructMutator {
     /// PopL is put in mutators since it behaves as SetL + PopC
     PopL(local::Type),
     SetG,
-    SetS(ReadonlyOp),
+    SetS(ReadOnlyOp),
     SetOpL(local::Type, EqOp),
     SetOpG(EqOp),
-    SetOpS(EqOp, ReadonlyOp),
+    SetOpS(EqOp, ReadOnlyOp),
     IncDecL(local::Type, IncdecOp),
     IncDecG(IncdecOp),
-    IncDecS(IncdecOp, ReadonlyOp),
+    IncDecS(IncdecOp, ReadOnlyOp),
     UnsetL(local::Type),
     UnsetG,
     CheckProp(PropId),
-    InitProp(PropId, InitpropOp, ReadonlyOp),
+    InitProp(PropId, InitpropOp, ReadOnlyOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -492,7 +492,7 @@ pub enum InstructCall {
 pub enum InstructBase {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(local::Type, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadonlyOp),
+    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
     BaseL(local::Type, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
@@ -506,7 +506,7 @@ pub enum InstructFinal {
     IncDecM(NumParams, IncdecOp, MemberKey),
     SetOpM(NumParams, EqOp, MemberKey),
     UnsetM(NumParams, MemberKey),
-    SetRangeM(NumParams, isize, SetrangeOp, ReadonlyOp),
+    SetRangeM(NumParams, isize, SetrangeOp, ReadOnlyOp),
 }
 
 #[derive(Clone, Debug)]

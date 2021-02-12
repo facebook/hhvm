@@ -1231,7 +1231,7 @@ struct Bytecode {
   {                                             \
     new (&opcode) bc::opcode(std::move(data));  \
   }
-
+  
   OPCODES
 
 #undef O
@@ -1415,4 +1415,3 @@ auto visit(const Bytecode& b, Visit v) {
 }
 
 }
-

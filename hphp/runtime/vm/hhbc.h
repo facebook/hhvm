@@ -635,7 +635,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CGetL2,          ONE(NLA),         ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetS,           ONE(OA(ReadonlyOp)),                               \
+  O(CGetS,           ONE(OA(ReadOnlyOp)),                               \
                      TWO(CV,CV),      ONE(CV),    NF) \
   O(ClassGetC,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
@@ -652,17 +652,17 @@ constexpr uint32_t kMaxConcatN = 4;
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetS,            ONE(OA(ReadonlyOp)),                               \
+  O(SetS,            ONE(OA(ReadOnlyOp)),                               \
                                        THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetOpS,          TWO(OA(SetOpOp), OA(ReadonlyOp)),                  \
+  O(SetOpS,          TWO(OA(SetOpOp), OA(ReadOnlyOp)),                  \
                                        THREE(CV,CV,CV), ONE(CV),    NF) \
   O(IncDecL,         TWO(NLA, OA(IncDecOp)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IncDecS,         TWO(OA(IncDecOp), OA(ReadonlyOp)),                 \
+  O(IncDecS,         TWO(OA(IncDecOp), OA(ReadOnlyOp)),                 \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
@@ -759,7 +759,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ArrayUnmarkLegacy,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(TagProvenanceHere,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(InitProp,        THREE(SA, OA(InitPropOp), OA(ReadonlyOp)),         \
+  O(InitProp,        THREE(SA, OA(InitPropOp), OA(ReadOnlyOp)),         \
                                        ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
@@ -770,7 +770,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadonlyOp)),       \
+  O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadOnlyOp)),       \
                                        NOV,             NOV,        NF) \
   O(BaseL,           TWO(NLA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
@@ -782,7 +782,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(SetM,            TWO(IVA, KA),     C_MFINAL(1),     ONE(CV),    NF) \
-  O(SetRangeM,       FOUR(IVA, IVA, OA(SetRangeOp), OA(ReadonlyOp)),    \
+  O(SetRangeM,       FOUR(IVA, IVA, OA(SetRangeOp), OA(ReadOnlyOp)),    \
                                        C_MFINAL(3),     NOV,        NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
@@ -948,7 +948,7 @@ const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
-const char* subopToName(ReadonlyOp);
+const char* subopToName(ReadOnlyOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

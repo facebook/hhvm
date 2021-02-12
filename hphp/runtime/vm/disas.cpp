@@ -303,7 +303,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   auto print_mk = [&] (MemberKey m) {
     if (m.mcode == MEL || m.mcode == MPL) {
       std::string ret = memberCodeString(m.mcode);
-      folly::toAppend(':', loc_name(finfo, m.iva), &ret);
+      folly::toAppend(':', loc_name(finfo, m.iva), " ", subopToName(m.rop), &ret);
       return ret;
     }
     return show(m);

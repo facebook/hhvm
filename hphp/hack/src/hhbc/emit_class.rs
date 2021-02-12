@@ -26,7 +26,7 @@ use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
-use hhbc_ast_rust::{FatalOp, FcallArgs, FcallFlags, SpecialClsRef};
+use hhbc_ast_rust::{FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef};
 use hhbc_id_rust::r#const;
 use hhbc_id_rust::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
@@ -361,7 +361,7 @@ fn emit_reified_init_body<'a>(
             instr::checkthis(),
             instr::cgetl(local::Type::Named(INIT_METH_PARAM_NAME.into())),
             instr::baseh(),
-            instr::setm_pt(0, prop::from_raw_string(PROP_NAME)),
+            instr::setm_pt(0, prop::from_raw_string(PROP_NAME), ReadOnlyOp::Any),
             instr::popc(),
         ])
     };

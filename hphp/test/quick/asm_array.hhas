@@ -29,7 +29,7 @@
     CGetL $x
     ClassGetC
     BaseSC 2 0 Warn Any
-    QueryM 3 CGet EC:1
+    QueryM 3 CGet EC:1 Any
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
@@ -48,7 +48,7 @@
   PopC
 
   BaseL $arr Warn
-  QueryM 0 CGet ET:"foo"
+  QueryM 0 CGet ET:"foo" Any
   String "\n"
   Concat
   Print
@@ -56,11 +56,11 @@
 
   String "one"
   BaseL $arr Define
-  SetM 0 EI:1
+  SetM 0 EI:1 Any
   PopC
 
   BaseL $arr Warn
-  QueryM 0 CGet EI:1
+  QueryM 0 CGet EI:1 Any
   String "\n"
   Concat
   Print
@@ -70,12 +70,12 @@
   SetL $key
   PopC
   BaseL $arr Unset
-  UnsetM 0 EL:$key
+  UnsetM 0 EL:$key Any
 
   # Test that it's unset
   CGetL $arr
   BaseC 0 Warn
-  QueryM 1 Isset EL:$key
+  QueryM 1 Isset EL:$key Any
   JmpZ unset_label
 
   String "This should be impossible...\n"

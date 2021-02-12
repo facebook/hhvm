@@ -12,14 +12,14 @@
   SetL $t
   PopC
   BaseL $baz Warn
-  QueryM 0 CGet EL:$t
+  QueryM 0 CGet EL:$t Any
   Int 12
   BaseL $foo Define
-  Dim Define ET:"x"
-  Dim Define ET:"y"
-  Dim Define PT:"bar"
-  Dim Define ET:"q"
-  SetM 0 PC:2
+  Dim Define ET:"x" Any
+  Dim Define ET:"y" Any
+  Dim Define PT:"bar" Any
+  Dim Define ET:"q" Any
+  SetM 0 PC:2 Any
   PopC
   NullUninit
   NullUninit

@@ -56,18 +56,18 @@ enum MemberCode : uint8_t {
   MW,
 };
 
-#define READONLY_OPS    \
-  OP(Readonly)          \
-  OP(Mutable)           \
-  OP(Any)         
+constexpr size_t NumMemberCodes = MW + 1;
 
-enum class ReadonlyOp : uint8_t {
+#define READONLY_OPS    \
+  OP(Any)               \
+  OP(ReadOnly)          \
+  OP(Mutable)                  
+
+enum class ReadOnlyOp : uint8_t {
 #define OP(name) name,
   READONLY_OPS
 #undef OP
 };
-
-constexpr size_t NumMemberCodes = MW + 1;
 
 /*
  * Returns string representation of `mc'. Pointer to internal static data, does
@@ -95,30 +95,36 @@ constexpr bool mcodeIsElem(MemberCode mcode) {
 struct MemberKey {
   MemberKey()
     : mcode{MW}
+    , rop{ReadOnlyOp::Any}
     , int64{0}
   {}
 
-  MemberKey(MemberCode mcode, NamedLocal loc)
+  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop = ReadOnlyOp::Any)
     : mcode{mcode}
+    , rop{rop}
     , local{loc}
   {}
 
-  MemberKey(MemberCode mcode, int32_t iva)
+  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop = ReadOnlyOp::Any)
     : mcode{mcode}
+    , rop{rop}
     , iva{iva}
   {}
 
-  MemberKey(MemberCode mcode, int64_t int64)
+  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop = ReadOnlyOp::Any)
     : mcode{mcode}
+    , rop{rop}
     , int64{int64}
   {}
 
-  MemberKey(MemberCode mcode, const StringData* litstr)
+  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop = ReadOnlyOp::Any)
     : mcode{mcode}
+    , rop{rop}
     , litstr{litstr}
   {}
 
   MemberCode mcode;
+  ReadOnlyOp rop;
   union {
     NamedLocal local;
     int32_t iva;

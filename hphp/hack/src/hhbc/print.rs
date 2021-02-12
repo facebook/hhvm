@@ -1508,34 +1508,52 @@ fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<(), W::E
 fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey) -> Result<(), W::Error> {
     use MemberKey as M;
     match mk {
-        M::EC(si) => {
+        M::EC(si, op) => {
             w.write("EC:")?;
-            print_stack_index(w, si)
+            print_stack_index(w, si)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::EL(local) => {
+        M::EL(local, op) => {
             w.write("EL:")?;
-            print_local(w, local)
+            print_local(w, local)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::ET(s) => {
+        M::ET(s, op) => {
             w.write("ET:")?;
-            quotes(w, |w| w.write(escape(s)))
+            quotes(w, |w| w.write(escape(s)))?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::EI(i) => concat_str(w, ["EI:", i.to_string().as_ref()]),
-        M::PC(si) => {
+        M::EI(i, op) => {
+            concat_str(w, ["EI:", i.to_string().as_ref()])?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
+        }
+        M::PC(si, op) => {
             w.write("PC:")?;
-            print_stack_index(w, si)
+            print_stack_index(w, si)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::PL(local) => {
+        M::PL(local, op) => {
             w.write("PL:")?;
-            print_local(w, local)
+            print_local(w, local)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::PT(id) => {
+        M::PT(id, op) => {
             w.write("PT:")?;
-            print_prop_id(w, id)
+            print_prop_id(w, id)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
-        M::QT(id) => {
+        M::QT(id, op) => {
             w.write("QT:")?;
-            print_prop_id(w, id)
+            print_prop_id(w, id)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
         M::W => w.write("W"),
     }
@@ -1809,11 +1827,11 @@ fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
     })
 }
 
-fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<(), W::Error> {
+fn print_readonly_op<W: Write>(w: &mut W, op: &ReadOnlyOp) -> Result<(), W::Error> {
     w.write(match op {
-        ReadonlyOp::Readonly => "Readonly",
-        ReadonlyOp::Mutable => "Mutable",
-        ReadonlyOp::Any => "Any",
+        ReadOnlyOp::ReadOnly => "ReadOnly",
+        ReadOnlyOp::Mutable => "Mutable",
+        ReadOnlyOp::Any => "Any",
     })
 }
 

@@ -193,7 +193,7 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
+inline const char* prettytype(ReadOnlyOp) { return "ReadOnlyOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -2572,7 +2572,7 @@ SpropState::~SpropState() {
   tvDecRefGen(oldNameCell);
 }
 
-OPTBLD_INLINE void iopCGetS(ReadonlyOp /*op*/) {
+OPTBLD_INLINE void iopCGetS(ReadOnlyOp /*op*/) {
   SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -2617,7 +2617,7 @@ OPTBLD_INLINE void iopBaseGL(tv_lval loc, MOpMode mode) {
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
                              uint32_t clsIdx,
                              MOpMode mode,
-                             ReadonlyOp /*op*/) {
+                             ReadOnlyOp /*op*/) {
   auto& mstate = vmMInstrState();
   auto const clsCell = vmStack().indC(clsIdx);
   auto const key = vmStack().indTV(keyIdx);
@@ -2839,7 +2839,7 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
 }
 
 OPTBLD_INLINE void iopSetRangeM(
-  uint32_t nDiscard, uint32_t size, SetRangeOp op, ReadonlyOp /*rop*/
+  uint32_t nDiscard, uint32_t size, SetRangeOp op, ReadOnlyOp /*rop*/
 ) {
   auto& mstate = vmMInstrState();
   auto const count = tvCastToInt64(*vmStack().indC(0));
@@ -3436,7 +3436,7 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS(ReadonlyOp /*op*/) {
+OPTBLD_INLINE void iopSetS(ReadOnlyOp /*op*/) {
   TypedValue* tv1 = vmStack().topTV();
   TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -3502,7 +3502,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(SetOpOp op, ReadonlyOp /*op*/) {
+OPTBLD_INLINE void iopSetOpS(SetOpOp op, ReadOnlyOp /*op*/) {
   TypedValue* fr = vmStack().topC();
   TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -3571,7 +3571,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   tvCopy(IncDecBody(op, gbl), *nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecS(IncDecOp op, ReadonlyOp /*rop*/) {
+OPTBLD_INLINE void iopIncDecS(IncDecOp op, ReadOnlyOp /*rop*/) {
   SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -5290,7 +5290,7 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
 
 OPTBLD_INLINE void iopInitProp(const StringData* propName,
                                InitPropOp propOp,
-                               ReadonlyOp /*op*/) {
+                               ReadOnlyOp /*op*/) {
   auto* cls = vmfp()->getClass();
 
   auto* ctx = arGetContextClass(vmfp());

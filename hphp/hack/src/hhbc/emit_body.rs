@@ -26,7 +26,8 @@ use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{
-    ClassKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId, QueryOp,
+    ClassKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
+    QueryOp, ReadOnlyOp,
 };
 use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
@@ -714,7 +715,10 @@ fn atom_instrs(
                                                     instr::querym(
                                                         1,
                                                         QueryOp::CGetQuiet,
-                                                        MemberKey::ET("classname".into()),
+                                                        MemberKey::ET(
+                                                            "classname".into(),
+                                                            ReadOnlyOp::Any,
+                                                        ),
                                                     ),
                                                     instr::dup(),
                                                     instr::istypec(IstypeOp::OpNull),
@@ -754,7 +758,7 @@ fn atom_instrs(
                                                         )?,
                                                         instr::combine_and_resolve_type_struct(1),
                                                         instr::basec(0, MemberOpMode::ModeNone),
-                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into())),
+                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into(), ReadOnlyOp::Any)),
                                                         instr::dup(),
                                                         instr::istypec(IstypeOp::OpNull),
                                                         instr::jmpnz(label_not_a_class.clone()),

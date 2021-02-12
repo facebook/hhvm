@@ -1201,7 +1201,7 @@ fn emit_load_list_element(
     let query_value = |path| {
         InstrSeq::gather(vec![
             InstrSeq::gather(path),
-            instr::querym(0, QueryOp::CGet, MemberKey::EI(i as i64)),
+            instr::querym(0, QueryOp::CGet, MemberKey::EI(i as i64, ReadOnlyOp::Any)),
         ])
     };
     Ok(match &elem.1 {
@@ -1214,7 +1214,8 @@ fn emit_load_list_element(
             (vec![], vec![load_value])
         }
         tast::Expr_::List(es) => {
-            let instr_dim = instr::dim(MemberOpMode::Warn, MemberKey::EI(i as i64));
+            let instr_dim =
+                instr::dim(MemberOpMode::Warn, MemberKey::EI(i as i64, ReadOnlyOp::Any));
             path.push(instr_dim);
             emit_load_list_elements(e, env, path, es)?
         }

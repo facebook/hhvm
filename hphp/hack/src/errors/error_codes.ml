@@ -688,6 +688,7 @@ module Typing = struct
     | ReadonlyMethodCall [@value 4413]
     | StrictStrConcatTypeMismatch [@value 4414]
     | StrictStrInterpTypeMismatch [@value 4415]
+    | InvalidMethCallerCallingConvention [@value 4416]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

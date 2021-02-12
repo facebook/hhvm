@@ -1513,3 +1513,5 @@ val explicit_readonly_cast : string -> Pos.t -> unit
 val readonly_method_call : Pos.t -> Pos.t -> unit
 
 val enum_inclusion_unsupported_ordering : Pos.t -> string -> string -> unit
+
+val invalid_meth_caller_calling_convention : Pos.t -> Pos.t -> string -> unit

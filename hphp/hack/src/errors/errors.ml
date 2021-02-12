@@ -5668,6 +5668,18 @@ let enum_inclusion_unsupported_ordering dest_pos dest_name src_name =
       ^ " because it precedes it in the same file" )
     []
 
+let invalid_meth_caller_calling_convention call_pos param_pos convention =
+  add_list
+    (Typing.err_code Typing.InvalidMethCallerCallingConvention)
+    ( call_pos,
+      "`meth_caller` does not support methods with the "
+      ^ convention
+      ^ " calling convention" )
+    [
+      ( param_pos,
+        "This is why I think this method uses the `inout` calling convention" );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

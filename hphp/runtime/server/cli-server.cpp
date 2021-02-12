@@ -133,6 +133,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -156,6 +157,7 @@ way to determine how much progress the server made.
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
+#include "hphp/zend/zend-strtod.h"
 
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
@@ -1328,6 +1330,7 @@ folly::Optional<int> cli_process_command_loop(int fd) {
     cli_read(fd, cmd);
   }
 
+  cli_server_init();
   for (;; cli_read(fd, cmd)) {
     FTRACE(2, "cli_process_command_loop({}): got command: {}\n", fd, cmd);
 
@@ -1627,11 +1630,8 @@ folly::Optional<int> run_client(const char* sock_path,
     getcwd(cwd, PATH_MAX);
     cli_write(fd, cwd);
 
-    hphp_session_init(Treadmill::SessionKind::CLIServer);
-    SCOPE_EXIT {
-      hphp_context_exit();
-      hphp_session_exit();
-    };
+    zend_get_bigint_data();
+    tl_heap.getCheck()->init();
     auto settings = IniSetting::GetAllAsJSON();
     cli_write(fd, settings);
 

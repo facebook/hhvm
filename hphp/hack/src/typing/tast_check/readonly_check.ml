@@ -252,7 +252,17 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_method_ env m = check#on_method_ env m
+    method! at_method_ env m =
+      let tcopt = Tast_env.get_tcopt env in
+      if TypecheckerOptions.readonly tcopt then
+        check#on_method_ env m
+      else
+        ()
 
-    method! at_fun_ env f = check#on_fun_ env f
+    method! at_fun_ env f =
+      let tcopt = Tast_env.get_tcopt env in
+      if TypecheckerOptions.readonly tcopt then
+        check#on_fun_ env f
+      else
+        ()
   end

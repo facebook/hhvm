@@ -816,6 +816,8 @@ module UnstableFeatures = struct
   let coeffects_provisional = "coeffects_provisional"
 
   let ifc = "ifc"
+
+  let readonly = "readonly"
 end
 
 module Coeffects = struct

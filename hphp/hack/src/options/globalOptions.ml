@@ -122,6 +122,7 @@ type t = {
   po_array_unification: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
+  tco_readonly: bool;
 }
 [@@deriving eq, show]
 
@@ -305,6 +306,7 @@ let default =
     po_array_unification = false;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
+    tco_readonly = false;
   }
 
 let make
@@ -442,6 +444,7 @@ let make
       default.po_interpret_soft_types_as_like_types)
     ?(tco_enable_strict_string_concat_interp =
       default.tco_enable_strict_string_concat_interp)
+    ?(tco_readonly = default.tco_readonly)
     () =
   {
     tco_experimental_features;
@@ -558,6 +561,7 @@ let make
     po_array_unification;
     po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp;
+    tco_readonly;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -758,6 +762,10 @@ let symbol_write_include_hhi t = t.symbol_write_include_hhi
 let set_global_inference t = { t with tco_global_inference = true }
 
 let set_ordered_solving t b = { t with tco_ordered_solving = b }
+
+let set_tco_readonly t b = { t with tco_readonly = b }
+
+let tco_readonly t = t.tco_readonly
 
 let po_parser_errors_only t = t.po_parser_errors_only
 

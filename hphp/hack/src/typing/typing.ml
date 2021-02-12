@@ -249,6 +249,8 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
         match snd feature with
         | Aast.String s when s = SN.UnstableFeatures.ifc ->
           Env.map_tcopt ~f:TypecheckerOptions.enable_ifc env
+        | Aast.String s when s = SN.UnstableFeatures.readonly ->
+          Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_readonly t true) env
         | _ -> env)
 
 (* Given a localized parameter type and parameter information, infer

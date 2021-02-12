@@ -59,7 +59,7 @@ function fun(string $func_name); // becomes:
 * to an instance method on the specified class.  This method can then be used
 * to execute across a collection of objects of that class.
 *
-* To identify the class for the fucntion, use a class reference of the format
+* To identify the class for the function, use a class reference of the format
 * `MyClassName::class`.
 *
 * Hack provides a variety of methods that allow you to construct references to

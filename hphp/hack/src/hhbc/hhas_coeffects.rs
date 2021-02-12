@@ -228,6 +228,14 @@ impl HhasCoeffects {
             }
         }
 
+        // If there are no static coeffects but there are coeffect rules, then
+        // the static coeffects are pure
+        if static_coeffects.is_empty()
+            && (!fun_param.is_empty() || !cc_param.is_empty() || !cc_this.is_empty())
+        {
+            static_coeffects.push(Ctx::Pure);
+        }
+
         Self {
             static_coeffects,
             unenforced_static_coeffects,

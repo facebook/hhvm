@@ -4,7 +4,7 @@
 interface ExBox<T> {}
 
 class Box<T> implements ExBox<T> {
-  public function __construct(public T $data) {}
+  public function __construct(public T $data)[] {}
 }
 
 // only types without parameters are allowed

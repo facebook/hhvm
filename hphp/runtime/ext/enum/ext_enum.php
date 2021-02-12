@@ -93,7 +93,7 @@ abstract class BuiltinEnumClass<+T> {
    * @return array ('CONST_NAME' => $value, ....)
    */
   <<__Native, __Pure>>
-  final public static function getValues(): darray<string, T>;
+  final public static function getValues()[write_props]: darray<string, T>;
 }
 
 

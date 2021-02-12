@@ -4,11 +4,11 @@
 interface ExBox {}
 
 class Box<T> implements ExBox {
-  public function __construct(public T $data) {}
+  public function __construct(public T $data)[] {}
 }
 
 class IBox extends Box<int> {
-  public function add(int $x): void {
+  public function add(int $x)[write_props]: void {
     $this->data = $this->data + $x;
   }
 }

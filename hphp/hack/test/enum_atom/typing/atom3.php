@@ -2,7 +2,7 @@
 <<file:__EnableUnstableFeatures('enum_atom')>>
 
 class Box<T> {
-  public function __construct(public T $x) {}
+  public function __construct(public T $x)[] {}
 }
 
 enum class Foo: mixed {

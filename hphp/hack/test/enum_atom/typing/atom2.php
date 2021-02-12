@@ -3,7 +3,7 @@
 
 interface I {}
 class C implements I {
-  public function __construct(public string $name) {}
+  public function __construct(public string $name)[] {}
 }
 
 enum class E : I {

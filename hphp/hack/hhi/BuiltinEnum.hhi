@@ -86,7 +86,7 @@ newtype MemberOf<-TEnumClass, +TType> as TType = TType;
  * needed.
  */
 final class SwitchableClass<+T> {
-  public function __construct(private T $data) {}
+  public function __construct(private T $data)[] {}
 
   <<__Pure>>
   public function data()[]: T {
@@ -112,7 +112,7 @@ abstract class BuiltinEnumClass<+T> {
    * @return array ('CONST_NAME' => $value, ....)
    */
   <<__Pure>>
-  final public static function getValues()[]: darray<string, T>;
+  final public static function getValues()[write_props]: darray<string, T>;
 }
 
 }

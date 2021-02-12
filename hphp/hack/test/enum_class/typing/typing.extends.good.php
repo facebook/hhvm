@@ -9,17 +9,17 @@ function expect_num(num $_): void {}
 interface ExBox {}
 
 class Box<T> implements ExBox {
-  public function __construct(public T $data) {}
+  public function __construct(public T $data)[] {}
 }
 
 class IBox extends Box<int> {
-  public function add(int $x): void {
+  public function add(int $x)[write_props]: void {
     $this->data = $this->data + $x;
   }
 }
 
 abstract final class Helper {
-  public static function ibox(): IBox {
+  public static function ibox()[]: IBox {
     return new IBox(42);
   }
 }

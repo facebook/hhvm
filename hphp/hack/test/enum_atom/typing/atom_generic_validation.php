@@ -3,7 +3,7 @@
 
 interface I {}
 class C implements I {
-  public function __construct(public int $x) {}
+  public function __construct(public int $x)[] {}
 }
 
 enum class E: I {

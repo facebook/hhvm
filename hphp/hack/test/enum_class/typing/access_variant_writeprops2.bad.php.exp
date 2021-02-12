@@ -1,0 +1,18 @@
+File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

@@ -13,7 +13,7 @@ function f(<<__Atom>> E $x): int {
 
 interface I {}
 class Box implements I {
-  public function __construct(public int $x) {}
+  public function __construct(public int $x)[] {}
 }
 
 enum class EE : I {

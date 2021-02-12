@@ -203,20 +203,22 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
     return false;
   }
   PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr,
-                             StaticCoeffects::none(), kind, fromTrait);
+                             StaticCoeffects::none(), kind, true, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
 
 bool PreClassEmitter::addContextConstant(const StringData* n,
                                          StaticCoeffects coeffects,
-                                         bool fromTrait) {
+                                         const bool isAbstract,
+                                         const bool fromTrait) {
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   PreClassEmitter::Const cns(n, nullptr, nullptr, nullptr,
-                             coeffects, ConstModifiers::Kind::Context, fromTrait);
+                             coeffects, ConstModifiers::Kind::Context,
+                             isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -243,7 +245,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
     tvVal = *val;
   }
   PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode,
-                             StaticCoeffects::none(), kind, fromTrait);
+                             StaticCoeffects::none(), kind, false, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -380,7 +382,7 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
     TypedValueAux tvaux;
     tvaux.constModifiers() = {};
     if (const_.kind() == ConstModifiers::Kind::Context) {
-      tvaux.constModifiers().setIsAbstract(false);
+      tvaux.constModifiers().setIsAbstract(const_.isAbstract());
       tvaux.constModifiers().setCoeffects(const_.coeffects());
     } else {
       if (const_.isAbstract()) {

@@ -1538,9 +1538,9 @@ bool build_class_constants(BuildClsInfo& info,
              ConstModifiers::show(existing->kind));
       return false;
     }
-
+    
     // Ignore abstract constants
-    if (!c.val) continue;
+    if (c.isAbstract) continue;
 
     if (existing->val) {
       

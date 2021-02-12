@@ -131,17 +131,19 @@ struct PreClassEmitter {
       , m_phpCode(nullptr)
       , m_coeffects(StaticCoeffects::none())
       , m_kind(ConstModifiers::Kind::Value)
+      , m_isAbstract(false)
       , m_fromTrait(false)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode,
           const StaticCoeffects coeffects, const ConstModifiers::Kind kind,
-          const bool fromTrait)
+          const bool isAbstract, const bool fromTrait)
       : m_name(n)
       , m_typeConstraint(typeConstraint)
       , m_phpCode(phpCode)
       , m_coeffects(coeffects)
       , m_kind(kind)
+      , m_isAbstract(isAbstract)
       , m_fromTrait(fromTrait) {
       if (!val) {
         m_val.reset();
@@ -156,7 +158,7 @@ struct PreClassEmitter {
     const TypedValue& val() const { return m_val.value(); }
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
-    bool isAbstract() const { return !m_val.has_value(); }
+    bool isAbstract() const { return m_isAbstract; }
     StaticCoeffects coeffects() const { return m_coeffects; }
     ConstModifiers::Kind kind() const { return m_kind; }
     bool isFromTrait() const { return m_fromTrait; }
@@ -167,6 +169,7 @@ struct PreClassEmitter {
         (m_phpCode)
         (m_coeffects)
         (m_kind)
+        (m_isAbstract)
         (m_fromTrait);
     }
 
@@ -177,6 +180,7 @@ struct PreClassEmitter {
     LowStringPtr m_phpCode;
     StaticCoeffects m_coeffects;
     ConstModifiers::Kind m_kind;
+    bool m_isAbstract;
     bool m_fromTrait;
   };
 
@@ -250,7 +254,7 @@ struct PreClassEmitter {
                    const bool fromTrait = false,
                    const Array& typeStructure = Array{});
   bool addContextConstant(const StringData* n, StaticCoeffects coeffects,
-                          const bool fromTrait = false);
+                          const bool isAbstract, const bool fromTrait = false);
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const ConstModifiers::Kind kind =

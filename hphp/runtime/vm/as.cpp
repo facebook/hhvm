@@ -3061,10 +3061,13 @@ void parse_context_constant(AsmState& as) {
   }
 
   auto coeffects = StaticCoeffects::none();
+  auto isAbstract = true;
+  
   while (true) {
     as.in.skipWhitespace();
     std::string coeffect;
     if (!as.in.readword(coeffect)) break;
+    isAbstract = false;
     auto const result = CoeffectsConfig::fromName(coeffect);
     coeffects |= result;
   }
@@ -3072,7 +3075,7 @@ void parse_context_constant(AsmState& as) {
   as.in.expectWs(';');
 
   DEBUG_ONLY auto added =
-    as.pce->addContextConstant(makeStaticString(name), coeffects);
+    as.pce->addContextConstant(makeStaticString(name), coeffects, isAbstract);
   assertx(added);
 }
 

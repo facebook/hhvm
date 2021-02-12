@@ -32,7 +32,6 @@ let check_foreach_collection env p ty =
     ()
   else
     match Env.env_reactivity env with
-    | Local _ -> ()
     | r when not (any_reactive r) -> ()
     | _ ->
       let rec check ty =

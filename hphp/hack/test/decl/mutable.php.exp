@@ -18,21 +18,21 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [6:45-47]; fp_name = (Some "$a");
+              [{ fp_pos = [6:47-49]; fp_name = (Some "$a");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|mutable.php line 6, characters 12-43),
+                   (Rhint (root|mutable.php line 6, characters 12-45),
                     (Tfun
                        { ft_arity = (Fstandard ()); ft_tparams = [];
                          ft_where_constraints = [];
                          ft_params =
-                         [{ fp_pos = [6:33-34]; fp_name = None;
+                         [{ fp_pos = [6:35-36]; fp_name = None;
                             fp_type =
                             { et_enforced = false;
                               et_type =
-                              (Rhint (root|mutable.php line 6, characters 33-33),
-                               (Tapply (([6:33-34], "\\A"), [])))
+                              (Rhint (root|mutable.php line 6, characters 35-35),
+                               (Tapply (([6:35-36], "\\A"), [])))
                               };
                             fp_rx_annotation = None;
                             fp_flags =
@@ -45,18 +45,18 @@
                              }
                            ];
                          ft_implicit_params =
-                         { capability = (CapDefaults [6:12-44]) };
+                         { capability = (CapDefaults [6:12-46]) };
                          ft_ret =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|mutable.php line 6, characters 38-41),
+                           (Rhint (root|mutable.php line 6, characters 40-43),
                             (Tprim Tvoid))
                            };
                          ft_flags =
                          (make_ft_flags FSync None ~return_disposable:false
                            ~returns_mutable:false ~returns_void_to_rx:false
                            ~returns_readonly:false ~readonly_this:false);
-                         ft_reactive = Reactive {};
+                         ft_reactive = Pure {};
                          ft_ifc_decl = FDPolicied {PUBLIC} }))
                    };
                  fp_rx_annotation = None;
@@ -71,14 +71,14 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|mutable.php line 6, characters 50-53),
+                (Rhint (root|mutable.php line 6, characters 52-55),
                  (Tprim Tvoid))
                 };
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [6:10-11]; fe_php_std_lib = false }));
   ("\\g",
    (Shallow_decl_defs.Fun
@@ -89,21 +89,21 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [9:50-52]; fp_name = (Some "$a");
+              [{ fp_pos = [9:52-54]; fp_name = (Some "$a");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|mutable.php line 9, characters 12-48),
+                   (Rhint (root|mutable.php line 9, characters 12-50),
                     (Tfun
                        { ft_arity = (Fstandard ()); ft_tparams = [];
                          ft_where_constraints = [];
                          ft_params =
-                         [{ fp_pos = [9:38-39]; fp_name = None;
+                         [{ fp_pos = [9:40-41]; fp_name = None;
                             fp_type =
                             { et_enforced = false;
                               et_type =
-                              (Rhint (root|mutable.php line 9, characters 38-38),
-                               (Tapply (([9:38-39], "\\A"), [])))
+                              (Rhint (root|mutable.php line 9, characters 40-40),
+                               (Tapply (([9:40-41], "\\A"), [])))
                               };
                             fp_rx_annotation = None;
                             fp_flags =
@@ -116,18 +116,18 @@
                              }
                            ];
                          ft_implicit_params =
-                         { capability = (CapDefaults [9:12-49]) };
+                         { capability = (CapDefaults [9:12-51]) };
                          ft_ret =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|mutable.php line 9, characters 43-46),
+                           (Rhint (root|mutable.php line 9, characters 45-48),
                             (Tprim Tvoid))
                            };
                          ft_flags =
                          (make_ft_flags FSync None ~return_disposable:false
                            ~returns_mutable:false ~returns_void_to_rx:false
                            ~returns_readonly:false ~readonly_this:false);
-                         ft_reactive = Reactive {};
+                         ft_reactive = Pure {};
                          ft_ifc_decl = FDPolicied {PUBLIC} }))
                    };
                  fp_rx_annotation = None;
@@ -142,14 +142,14 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|mutable.php line 9, characters 55-58),
+                (Rhint (root|mutable.php line 9, characters 57-60),
                  (Tprim Tvoid))
                 };
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:10-11]; fe_php_std_lib = false }));
   ("\\h",
    (Shallow_decl_defs.Fun
@@ -160,21 +160,21 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [12:50-52]; fp_name = (Some "$a");
+              [{ fp_pos = [12:52-54]; fp_name = (Some "$a");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|mutable.php line 12, characters 12-48),
+                   (Rhint (root|mutable.php line 12, characters 12-50),
                     (Tfun
                        { ft_arity = (Fstandard ()); ft_tparams = [];
                          ft_where_constraints = [];
                          ft_params =
-                         [{ fp_pos = [12:38-39]; fp_name = None;
+                         [{ fp_pos = [12:40-41]; fp_name = None;
                             fp_type =
                             { et_enforced = false;
                               et_type =
-                              (Rhint (root|mutable.php line 12, characters 38-38),
-                               (Tapply (([12:38-39], "\\A"), [])))
+                              (Rhint (root|mutable.php line 12, characters 40-40),
+                               (Tapply (([12:40-41], "\\A"), [])))
                               };
                             fp_rx_annotation = None;
                             fp_flags =
@@ -187,18 +187,18 @@
                              }
                            ];
                          ft_implicit_params =
-                         { capability = (CapDefaults [12:12-49]) };
+                         { capability = (CapDefaults [12:12-51]) };
                          ft_ret =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|mutable.php line 12, characters 43-46),
+                           (Rhint (root|mutable.php line 12, characters 45-48),
                             (Tprim Tvoid))
                            };
                          ft_flags =
                          (make_ft_flags FSync None ~return_disposable:false
                            ~returns_mutable:false ~returns_void_to_rx:false
                            ~returns_readonly:false ~readonly_this:false);
-                         ft_reactive = Reactive {};
+                         ft_reactive = Pure {};
                          ft_ifc_decl = FDPolicied {PUBLIC} }))
                    };
                  fp_rx_annotation = None;
@@ -213,14 +213,14 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|mutable.php line 12, characters 55-58),
+                (Rhint (root|mutable.php line 12, characters 57-60),
                  (Tprim Tvoid))
                 };
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:10-11]; fe_php_std_lib = false }));
   ("\\i",
    (Shallow_decl_defs.Fun
@@ -231,27 +231,27 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [15:46-48]; fp_name = (Some "$a");
+              [{ fp_pos = [15:48-50]; fp_name = (Some "$a");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|mutable.php line 15, characters 12-44),
+                   (Rhint (root|mutable.php line 15, characters 12-46),
                     (Tfun
                        { ft_arity = (Fstandard ()); ft_tparams = [];
                          ft_where_constraints = []; ft_params = [];
                          ft_implicit_params =
-                         { capability = (CapDefaults [15:12-45]) };
+                         { capability = (CapDefaults [15:12-47]) };
                          ft_ret =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|mutable.php line 15, characters 41-41),
-                            (Tapply (([15:41-42], "\\A"), [])))
+                           (Rhint (root|mutable.php line 15, characters 43-43),
+                            (Tapply (([15:43-44], "\\A"), [])))
                            };
                          ft_flags =
                          (make_ft_flags FSync None ~return_disposable:false
                            ~returns_mutable:true ~returns_void_to_rx:false
                            ~returns_readonly:false ~readonly_this:false);
-                         ft_reactive = Reactive {};
+                         ft_reactive = Pure {};
                          ft_ifc_decl = FDPolicied {PUBLIC} }))
                    };
                  fp_rx_annotation = None;
@@ -266,14 +266,14 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|mutable.php line 15, characters 51-54),
+                (Rhint (root|mutable.php line 15, characters 53-56),
                  (Tprim Tvoid))
                 };
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:10-11]; fe_php_std_lib = false }))
   ]
 

@@ -4,7 +4,7 @@ class GlobalClassName {
 
 }
 
-<<__Rx>>
+
 function fooLambda(): void {
   $x = <<__NonRx>>() ==> {
     return GlobalClassName::$x + 1;

@@ -91,20 +91,12 @@ function with_built_in_constant(): int {
   return PHP_INT_MAX;
 }
 
-<<__Rx>>
+<<__Pure>>
 function reactive(mixed $x = null): void {}
 
-<<__Rx>>
+<<__Pure>>
 function call_reactive(): void {
   reactive();
-}
-
-<<__RxShallow>>
-function shallow_reactive(): void {}
-
-<<__RxShallow>>
-function call_shallow_reactive(): void {
-  shallow_reactive();
 }
 
 class Fred {}

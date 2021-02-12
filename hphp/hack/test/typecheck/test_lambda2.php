@@ -4,7 +4,7 @@ function normal(string $s): int {
   return 1;
 }
 
-<<__Rx>>
+<<__Pure>>
 function rx(): void {
   $l = <<__NonRx>>() ==> {
     normal("text");

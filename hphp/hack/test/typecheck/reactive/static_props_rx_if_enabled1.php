@@ -4,7 +4,7 @@ class C {
 }
 
 class A {
-  <<__Rx>>
+
   public function f(): int {
     if (Rx\IS_ENABLED) {
       return 1;

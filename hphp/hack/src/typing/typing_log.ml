@@ -467,9 +467,6 @@ let rec reactivity_to_string env r =
   in
   match r with
   | Nonreactive -> "normal"
-  | Local opt_ty -> from_decl opt_ty "local"
-  | Shallow opt_ty -> from_decl opt_ty "shallow"
-  | Reactive opt_ty -> from_decl opt_ty "reactive"
   | Pure opt_ty -> from_decl opt_ty "pure"
   | MaybeReactive r -> "maybereactive " ^ reactivity_to_string env r
   | RxVar opt_r ->
@@ -491,7 +488,6 @@ let rec reactivity_to_string env r =
     | None -> ""
     | Some s -> "(" ^ s ^ ")")
   | CippGlobal -> "cipp_global"
-  | CippRx -> "cipp_rx"
 
 let lenv_as_value env lenv =
   let { per_cont_env; local_using_vars; local_reactive; local_mutability } =

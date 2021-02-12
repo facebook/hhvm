@@ -2343,7 +2343,7 @@ end = struct
 
   let __DEPS_ON_DEFAULT__ =
     Format.sprintf
-      {|<<__Rx>>@.function %s(): nothing {@.  throw new \Exception();@.}|}
+      {|<<__Pure>>@.function %s(): nothing {@.  throw new \Exception();@.}|}
       __FN_MAKE_DEFAULT__
 
   let __DEPS_ON_ANY__ =

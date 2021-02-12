@@ -1,6 +1,6 @@
 <?hh // strict
 
-<<__Rx, __AtMostRxAsArgs>>
+<<__Pure, __AtMostRxAsArgs>>
 function map<Tv1, Tv2>(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<Tv1> $traversable,
   <<__AtMostRxAsFunc>>(function(Tv1): Tv2) $value_func,
@@ -12,10 +12,10 @@ function map<Tv1, Tv2>(
   return $result;
 }
 
-<<__Rx, __AtMostRxAsArgs>>
+<<__Pure, __AtMostRxAsArgs>>
 function func(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<int> $traversable,
 ): void {
   // OK
-  map($traversable, <<__Rx>> $element ==> {});
+  map($traversable, $element ==> {});
 }

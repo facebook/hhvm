@@ -1,6 +1,6 @@
 <?hh
 class MyParent {
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+
   public function foo(): this {
     return $this;
   }
@@ -15,7 +15,7 @@ function f(): void {
   $a(new MyParent());
 }
 
-<<__Rx>>
+
 function g(): void {
   $a = <<__NonRx>>(MyParent $p) ==> {
     // OK: lambda is non-rx but is is not called

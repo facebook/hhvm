@@ -2,7 +2,7 @@
 class A {
 }
 
-<<__Rx, __MutableReturn>>
+
 function g(): A {
   return new A();
 }

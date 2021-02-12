@@ -1,5 +1,6 @@
 <?hh // partial
-<<__Rx, __AtMostRxAsArgs>>
+
+<<__Pure, __AtMostRxAsArgs>>
 function varray_map<Tv1, Tv2>(
   <<__AtMostRxAsFunc>>(function(Tv1): Tv2) $value_func,
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<Tv1> $traversable,
@@ -11,8 +12,8 @@ function varray_map<Tv1, Tv2>(
   return $result;
 }
 
-<<__Rx>>
+<<__Pure>>
 function f(varray<int> $x) {
   // OK
-  varray_map(<<__Rx>> $v ==> $v, $x);
+  varray_map($v ==> $v, $x);
 }

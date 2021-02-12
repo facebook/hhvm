@@ -1,7 +1,7 @@
 <?hh // strict
 
-<<__Rx>>
-function f()[rx]: void {
+<<__Pure>>
+function f()[]: void {
   // should be error
   print 1;
 }

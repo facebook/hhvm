@@ -37,11 +37,7 @@ let type_to_str env ty =
 
 let rec condition_type_from_reactivity r =
   match r with
-  | Pure (Some t)
-  | Reactive (Some t)
-  | Shallow (Some t)
-  | Local (Some t) ->
-    Some t
+  | Pure (Some t) -> Some t
   | MaybeReactive r -> condition_type_from_reactivity r
   | RxVar v -> Option.bind v condition_type_from_reactivity
   | _ -> None
@@ -65,9 +61,6 @@ let get_associated_condition_type env ~is_self ty =
 let rec strip_conditional_reactivity r =
   match r with
   | Pure (Some _) -> Pure None
-  | Reactive (Some _) -> Reactive None
-  | Shallow (Some _) -> Shallow None
-  | Local (Some _) -> Local None
   | MaybeReactive r -> MaybeReactive (strip_conditional_reactivity r)
   | RxVar v -> RxVar (Option.map v strip_conditional_reactivity)
   | r -> r
@@ -173,27 +166,12 @@ let check_reactivity_matches
       match (caller_reactivity, callee_reactivity) with
       (* Pure functions can only call pure functions *)
       | ( (MaybeReactive (Pure _) | Pure _),
-          ( MaybeReactive (Reactive _ | Shallow _ | Local _ | Nonreactive)
-          | Reactive _ | Shallow _ | Local _ | Nonreactive ) ) ->
+          (MaybeReactive Nonreactive | Nonreactive) ) ->
         Errors.nonpure_function_call
           pos
           (Reason.to_pos reason)
           (TU.reactivity_to_string env callee_reactivity)
       (* Reactive functions can only call reactive or pure functions *)
-      | ( (MaybeReactive (Reactive _) | Reactive _),
-          ( MaybeReactive (Shallow _ | Local _ | Nonreactive)
-          | Shallow _ | Local _ | Nonreactive ) ) ->
-        Errors.nonreactive_function_call
-          pos
-          (Reason.to_pos reason)
-          (TU.reactivity_to_string env callee_reactivity)
-          cause_pos
-      | ((MaybeReactive (Shallow _) | Shallow _), Nonreactive) ->
-        Errors.nonreactive_call_from_shallow
-          pos
-          (Reason.to_pos reason)
-          (TU.reactivity_to_string env callee_reactivity)
-          cause_pos
       | ((Cipp _ | CippGlobal | CippLocal _), _)
       | (_, (Cipp _ | CippGlobal | CippLocal _)) ->
         Errors.callsite_cipp_mismatch
@@ -254,15 +232,6 @@ let check_call env method_info pos reason ft arg_types =
         | Pure (Some _)
         | MaybeReactive (Pure (Some _)) ->
           MaybeReactive (Pure None)
-        | Reactive (Some _)
-        | MaybeReactive (Reactive (Some _)) ->
-          MaybeReactive (Reactive None)
-        | Shallow (Some _)
-        | MaybeReactive (Shallow (Some _)) ->
-          MaybeReactive (Shallow None)
-        | Local (Some _)
-        | MaybeReactive (Local (Some _)) ->
-          MaybeReactive (Local None)
         | MaybeReactive (RxVar (Some v)) -> MaybeReactive (RxVar (Some (go v)))
         | r -> r
       in
@@ -278,15 +247,9 @@ let check_call env method_info pos reason ft arg_types =
           | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
           | _ -> false)
     in
-    let do_conditional_check =
-      any_reactive (env_reactivity env)
-      &&
-      match env_reactivity env with
-      | Local _ -> false
-      | _ -> true
-    in
     let env =
-      if callee_is_conditionally_reactive && do_conditional_check then
+      if callee_is_conditionally_reactive && any_reactive (env_reactivity env)
+      then
         (* check that condition for receiver is met *)
         let env =
           match

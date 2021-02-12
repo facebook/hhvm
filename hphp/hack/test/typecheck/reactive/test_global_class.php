@@ -4,7 +4,7 @@ class GlobalClassName {
 
 }
 
-<<__Rx>>
+
 function foo()[rx]: void {
   $y = GlobalClassName::$x + 1;
 }

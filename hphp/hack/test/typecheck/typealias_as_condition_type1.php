@@ -1,6 +1,6 @@
 <?hh // strict
 
-<<__Rx, __AtMostRxAsArgs>>
+<<__Pure, __AtMostRxAsArgs>>
 function test<T>(<<__AtMostRxAsFunc>>Predicate<int> $predicate): void {
   // OK
   $predicate(0);

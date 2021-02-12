@@ -68,7 +68,7 @@ function h(): void {
 interface IA {}
 
 class A {
-  <<__Rx, __OnlyRxIfImpl(IA::class)>>
+  <<__Pure, __OnlyRxIfImpl(IA::class)>>
   public function g(): int {
     return 1;
   }
@@ -77,12 +77,12 @@ class A {
 class B extends A implements IA {
 }
 
-<<__RxShallow>>
+<<__Pure>>
 function rxshallow1(): int {
   return 3;
 }
 
-<<__Rx>>
+<<__Pure>>
 function rx1(): int {
   return 4;
 }
@@ -203,7 +203,7 @@ let tests =
     );
     (* should find reactive function *)
     ( (fst f3, 41, 10),
-      {|{"position":{"file":"/f3.php","line":41,"character":10},"deps":[{"name":"rx1","kind":"function","position":{"filename":"/f3.php","line":37,"char_start":10,"char_end":12},"reactivity":["reactive"]},{"name":"rxshallow1","kind":"function","position":{"filename":"/f3.php","line":32,"char_start":10,"char_end":19},"reactivity":["shallow"]},{"name":"A::g","kind":"method","position":{"filename":"/f3.php","line":23,"char_start":19,"char_end":19},"reactivity":["only_rx_if_impl","reactive"]}]}|}
+      {|{"position":{"file":"/f3.php","line":41,"character":10},"deps":[{"name":"rx1","kind":"function","position":{"filename":"/f3.php","line":37,"char_start":10,"char_end":12}},{"name":"rxshallow1","kind":"function","position":{"filename":"/f3.php","line":32,"char_start":10,"char_end":19}},{"name":"A::g","kind":"method","position":{"filename":"/f3.php","line":23,"char_start":19,"char_end":19},"reactivity":["only_rx_if_impl"]}]}|}
     );
     (* should find static method*)
     ( (fst f4, 8, 21),

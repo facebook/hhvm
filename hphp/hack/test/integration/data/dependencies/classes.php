@@ -116,20 +116,12 @@ function with_parent_constructor_call(): void {
 }
 
 class WithReactiveMethods {
-  <<__Rx>>
+  <<__Pure>>
   public function reactive(): void {}
 
-  <<__Rx>>
+  <<__Pure>>
   public function call_reactive(): void {
     $this->reactive();
-  }
-
-  <<__RxShallow>>
-  public function shallow_reactive(): void {}
-
-  <<__RxShallow>>
-  public function call_shallow_reactive(): void {
-    $this->shallow_reactive();
   }
 }
 

@@ -16,7 +16,7 @@ final class Foobar {
 
 }
 
-<<__Rx, __ProvenanceSkipFrame>>
+
 function other_hgoldstein(): vec<int> {
   return vec[1, 2, 3];
 }

@@ -21,7 +21,7 @@ function test(C $c): void {
   invariant_violation('foo');
 }
 
-<<__Rx>>
+<<__Pure>>
 function rx_test(): void {
   $c = \HH\Rx\mutable(new C());
   $c1 = \HH\Rx\freeze($c);

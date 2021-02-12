@@ -1,8 +1,8 @@
 <?hh
-<<__RxShallow>>
+
 function rxshallow(): void {}
 
-<<__RxLocal>>
+
 function rxlocal(): void {}
 
 function nonreactive(): void {}

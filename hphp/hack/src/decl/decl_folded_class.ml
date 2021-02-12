@@ -836,14 +836,11 @@ and method_decl_acc
   let get_reactivity t =
     match get_node t with
     | Tfun { ft_reactive; _ } -> ft_reactive
-    | _ -> Local None
+    | _ -> Nonreactive
   in
   let condition_types =
     match get_reactivity m.sm_type with
-    | Pure (Some ty)
-    | Reactive (Some ty)
-    | Shallow (Some ty)
-    | Local (Some ty) ->
+    | Pure (Some ty) ->
       begin
         match get_node ty with
         | Tapply ((_, cls), []) -> SSet.add cls condition_types

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<829aa8f8f0855546aeac8c6571271cdd>>
+// @generated SignedSource<<37bcda8641b1297cc17414e2137c1b29>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -577,16 +577,12 @@ impl<'a> TrivialDrop for TaccessType<'a> {}
 )]
 pub enum Reactivity<'a> {
     Nonreactive,
-    Local(Option<&'a Ty<'a>>),
-    Shallow(Option<&'a Ty<'a>>),
-    Reactive(Option<&'a Ty<'a>>),
     Pure(Option<&'a Ty<'a>>),
     MaybeReactive(&'a Reactivity<'a>),
     RxVar(Option<&'a Reactivity<'a>>),
     Cipp(Option<&'a str>),
     CippLocal(Option<&'a str>),
     CippGlobal,
-    CippRx,
 }
 impl<'a> TrivialDrop for Reactivity<'a> {}
 

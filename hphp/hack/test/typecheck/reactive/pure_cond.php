@@ -14,9 +14,9 @@ abstract class MyTestClass {
 }
 
 abstract class MyOtherTestClass {
-  <<__Rx, __OnlyRxIfImpl(MyClass::class)>>
+
   abstract protected static function bar(): bool;
-  <<__Rx, __OnlyRxIfImpl(MyClass::class)>>
+
   final public static function foo(): bool {
     return static::bar();
   }

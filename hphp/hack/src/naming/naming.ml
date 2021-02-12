@@ -479,66 +479,6 @@ and hint_
         ] )
     when String.equal hname SN.Rx.hPure ->
     hfun env N.FPure hl kl variadic_hint ctxs h
-  (* Special case for Rx<function> *)
-  | Aast.Happly
-      ( (_, hname),
-        [
-          ( _,
-            Aast.Hfun
-              Aast.
-                {
-                  hf_reactive_kind = _;
-                  hf_param_tys = hl;
-                  hf_param_kinds = kl;
-                  hf_param_mutability = _;
-                  hf_variadic_ty = variadic_hint;
-                  hf_ctxs = ctxs;
-                  hf_return_ty = h;
-                  hf_is_mutable_return = _;
-                } );
-        ] )
-    when String.equal hname SN.Rx.hRx ->
-    hfun env N.FReactive hl kl variadic_hint ctxs h
-  (* Special case for RxShallow<function> *)
-  | Aast.Happly
-      ( (_, hname),
-        [
-          ( _,
-            Aast.Hfun
-              Aast.
-                {
-                  hf_reactive_kind = _;
-                  hf_param_tys = hl;
-                  hf_param_kinds = kl;
-                  hf_param_mutability = _;
-                  hf_variadic_ty = variadic_hint;
-                  hf_ctxs = ctxs;
-                  hf_return_ty = h;
-                  hf_is_mutable_return = _;
-                } );
-        ] )
-    when String.equal hname SN.Rx.hRxShallow ->
-    hfun env N.FShallow hl kl variadic_hint ctxs h
-  (* Special case for RxLocal<function> *)
-  | Aast.Happly
-      ( (_, hname),
-        [
-          ( _,
-            Aast.Hfun
-              Aast.
-                {
-                  hf_reactive_kind = _;
-                  hf_param_tys = hl;
-                  hf_param_kinds = kl;
-                  hf_param_mutability = _;
-                  hf_variadic_ty = variadic_hint;
-                  hf_ctxs = ctxs;
-                  hf_return_ty = h;
-                  hf_is_mutable_return = _;
-                } );
-        ] )
-    when String.equal hname SN.Rx.hRxLocal ->
-    hfun env N.FLocal hl kl variadic_hint ctxs h
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl

@@ -21,7 +21,7 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([7:19-20], "f");
-           sm_reactivity = (Some (Decl_defs.Method_reactive (Some "\\IRx")));
+           sm_reactivity = (Some (Decl_defs.Method_pure (Some "\\IRx")));
            sm_type =
            (Rwitness (root|only_rx_if_impl_method.php line 7, characters 19-19),
             (Tfun
@@ -40,8 +40,8 @@
                    ~returns_mutable:false ~returns_void_to_rx:false
                    ~returns_readonly:false ~readonly_this:false);
                  ft_reactive =
-                 Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-35),
-                            (Tapply (([6:26-29], "\\IRx"), [])))};
+                 Pure {(Rhint (root|only_rx_if_impl_method.php line 6, characters 28-37),
+                        (Tapply (([6:28-31], "\\IRx"), [])))};
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];

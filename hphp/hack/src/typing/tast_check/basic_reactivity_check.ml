@@ -521,12 +521,6 @@ let get_reactivity_from_user_attributes user_attributes =
     | { Aast.ua_name = (_, n); ua_params } :: tl ->
       if String.equal n UA.uaPure then
         Some (Pure None)
-      else if String.equal n UA.uaReactive then
-        Some (Reactive None)
-      else if String.equal n UA.uaShallowReactive then
-        Some (Shallow None)
-      else if String.equal n UA.uaLocalReactive then
-        Some (Local None)
       else if String.equal n UA.uaNonRx then
         Some Nonreactive
       else if String.equal n UA.uaCipp then
@@ -535,8 +529,6 @@ let get_reactivity_from_user_attributes user_attributes =
         Some (CippLocal (get_params ua_params))
       else if String.equal n UA.uaCippGlobal then
         Some CippGlobal
-      else if String.equal n UA.uaCippRx then
-        Some CippRx
       else
         go tl
   in
@@ -760,10 +752,7 @@ let check =
 
 let check_redundant_rx_condition env pos r =
   match r with
-  | Pure (Some cond_ty)
-  | Reactive (Some cond_ty)
-  | Local (Some cond_ty)
-  | Shallow (Some cond_ty) ->
+  | Pure (Some cond_ty) ->
     let (env, cond_ty) = Tast_env.localize_with_self env cond_ty in
     if Tast_env.can_subtype env (Tast_env.get_self_ty_exn env) cond_ty then (
       match get_node cond_ty with

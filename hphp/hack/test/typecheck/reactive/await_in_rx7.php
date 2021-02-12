@@ -1,5 +1,5 @@
 <?hh // strict
-<<__Rx>>
+
 async function f()[rx]: Awaitable<int> {
   return 1;
 }

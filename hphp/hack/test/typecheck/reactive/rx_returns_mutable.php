@@ -4,7 +4,7 @@ class A {
   }
 }
 
-<<__RxLocal, __MutableReturn>>
+
 function Get(int $a): A {
   return new A($a);
 }

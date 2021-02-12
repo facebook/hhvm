@@ -1,17 +1,17 @@
 //// toplevel.php
 <?hh
-<<__Rx>>
+<<__Pure>>
 function reactive(mixed $x = \extract_standalone_make_default()): void {
   throw new \Exception();
 }
-<<__Rx>>
+<<__Pure>>
 function call_reactive(): void {
   reactive();
 }
 
 //// __extract_standalone__.php
 <?hh
-<<__Rx>>
+<<__Pure>>
 function extract_standalone_make_default(): nothing {
   throw new \Exception();
 }

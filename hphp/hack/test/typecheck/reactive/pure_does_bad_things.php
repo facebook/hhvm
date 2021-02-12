@@ -9,13 +9,13 @@ function pure()[]: void {
   $f2->bar++;
 }
 
-<<__Rx>>
-function rx()[]: void {
+
+function rx()[rx]: void {
   FooClass::$foo += 1;
   echo 'bar';
   $f = new FooClass();
   $f->bar++;
-  $f2 = Rx\mutable(new FooClass());
+  $f2 = new FooClass();
   $f2->bar++;
 }
 

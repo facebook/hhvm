@@ -7,7 +7,7 @@ function f()[write_props]: int {
   }
 }
 
-<<__Rx>>
+
 function rx()[rx]: int {
   return 1;
 }

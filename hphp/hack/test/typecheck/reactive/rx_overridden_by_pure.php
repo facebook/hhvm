@@ -1,12 +1,12 @@
 <?hh
 interface IPure {
-  <<__Rx>>
+
   public function rx(): void;
 
-  <<__RxLocal>>
+
   public function rx_local(): void;
 
-  <<__RxShallow>>
+
   public function rx_shallow(): void;
 }
 class IPureChild implements IPure {
@@ -21,13 +21,13 @@ class IPureChild implements IPure {
 }
 
 class Base {
-  <<__Rx>>
+
   public function rx(): void {}
 
-  <<__RxLocal>>
+
   public function rx_local(): void {}
 
-  <<__RxShallow>>
+
   public function rx_shallow(): void {}
 }
 class Child extends Base {

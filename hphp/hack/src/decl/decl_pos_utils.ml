@@ -171,9 +171,6 @@ struct
   and fun_elt fe = { fe with fe_type = ty fe.fe_type; fe_pos = pos fe.fe_pos }
 
   and fun_reactive = function
-    | Local (Some ty1) -> Local (Some (ty ty1))
-    | Shallow (Some ty1) -> Shallow (Some (ty ty1))
-    | Reactive (Some ty1) -> Reactive (Some (ty ty1))
     | Pure (Some ty1) -> Pure (Some (ty ty1))
     | r -> r
 

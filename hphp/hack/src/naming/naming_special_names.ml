@@ -261,14 +261,6 @@ module UserAttributes = struct
 
   let uaCippGlobal = "__CippGlobal"
 
-  let uaCippRx = "__CippRx"
-
-  let uaReactive = "__Rx"
-
-  let uaLocalReactive = "__RxLocal"
-
-  let uaShallowReactive = "__RxShallow"
-
   let uaMutable = "__Mutable"
 
   let uaMutableReturn = "__MutableReturn"
@@ -360,12 +352,8 @@ module UserAttributes = struct
           (uaCipp, [fn; mthd; lambda]);
           (uaCippLocal, [fn; mthd; lambda]);
           (uaCippGlobal, [fn; mthd; lambda]);
-          (uaCippRx, [fn; mthd; lambda]);
-          (uaReactive, [fn; mthd; lambda]);
-          (uaLocalReactive, [fn; mthd; lambda]);
           (uaMutable, [mthd; parameter]);
           (uaMutableReturn, [fn; mthd; lambda]);
-          (uaShallowReactive, [fn; mthd; lambda]);
           (uaOnlyRxIfImpl, [parameter; mthd]);
           (uaLSB, [staticProperty]);
           (uaSealed, [cls; enumcls; enum]);
@@ -753,9 +741,7 @@ module Rx = struct
   let hOwnedMutable = "OwnedMutable"
 
   let is_reactive_typehint =
-    let reactive_typehints =
-      [hPure; hRx; hRxShallow; hRxLocal; hMutable; hMaybeMutable; hOwnedMutable]
-    in
+    let reactive_typehints = [hPure; hMutable; hMaybeMutable; hOwnedMutable] in
     fun name ->
       List.exists reactive_typehints ~f:(fun th -> String.equal th name)
 end

@@ -4,7 +4,7 @@ class A {
   }
 }
 
-<<__Rx>>
+
 function f(A $a)[]: void {
   $a->v[] = 1;
 }

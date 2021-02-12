@@ -19,16 +19,10 @@ class MyClass {
     yield 0 => "test";
   }
 
-  <<__Rx>>
+  <<__Pure>>
   public function reactive_function(): void {}
 
-  <<__RxShallow>>
-  public function shallow_reactive_function(): void {}
-
-  <<__RxLocal>>
-  public function local_reactive_function(): void {}
-
-  <<__Rx>>
+  <<__Pure>>
   public function reactive_function_mutable_args(
     <<__Mutable>> MyClass $a,
     <<__MaybeMutable>> MyClass $b,
@@ -36,7 +30,7 @@ class MyClass {
   ): void {
   }
 
-  <<__Rx, __MutableReturn>>
+  <<__Pure, __MutableReturn>>
   public function mutable_return(): MyClass {
     return \HH\Rx\mutable(new MyClass());
   }

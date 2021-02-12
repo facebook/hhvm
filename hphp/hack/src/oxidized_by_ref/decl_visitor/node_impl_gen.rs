@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<afae5c9e1718c4dcb4d081eeea09da16>>
+// @generated SignedSource<<cca4487dc4131518f4216cf64d810b95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -406,16 +406,12 @@ impl<'a> Node<'a> for Reactivity<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Reactivity::Nonreactive => {}
-            Reactivity::Local(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::Shallow(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::Reactive(ref __binding_0) => __binding_0.accept(v),
             Reactivity::Pure(ref __binding_0) => __binding_0.accept(v),
             Reactivity::MaybeReactive(ref __binding_0) => __binding_0.accept(v),
             Reactivity::RxVar(ref __binding_0) => __binding_0.accept(v),
             Reactivity::Cipp(ref __binding_0) => __binding_0.accept(v),
             Reactivity::CippLocal(ref __binding_0) => __binding_0.accept(v),
             Reactivity::CippGlobal => {}
-            Reactivity::CippRx => {}
         }
     }
 }

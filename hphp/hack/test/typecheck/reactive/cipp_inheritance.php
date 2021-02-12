@@ -3,15 +3,15 @@
 
 /*
 
-               A                    G (Rx)
-               |                      |
-        B (CippGlobal)            H (CippRx)
+               A
+               |
+        B (CippGlobal)
                |
         C (CippLocal)
                |
             D (Cipp)
-           /       \
-     E (Pure)     F (CippRx)
+               |
+           E (Pure)
 
 
 */
@@ -42,18 +42,8 @@ class E extends D {
   public function f(): void {}
 }
 
-class F extends D {
-  <<__CippRx>>
-  public function f(): void {}
-}
-
 class G {
-  <<__Rx>>
-  public function f(): void {}
-}
 
-class H extends G {
-  <<__CippRx>>
   public function f(): void {}
 }
 

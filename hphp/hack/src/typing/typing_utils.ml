@@ -478,12 +478,6 @@ let reactivity_to_string env r =
     match r with
     | Pure None -> "pure"
     | Pure (Some ty) -> cond_reactive "conditionally pure" ty
-    | Reactive None -> "reactive"
-    | Reactive (Some ty) -> cond_reactive "conditionally reactive" ty
-    | Shallow None -> "shallow reactive"
-    | Shallow (Some ty) -> cond_reactive "conditionally shallow reactive" ty
-    | Local None -> "local reactive"
-    | Local (Some ty) -> cond_reactive "conditionally local reactive" ty
     | MaybeReactive n -> "maybe (" ^ aux n ^ ")"
     | Nonreactive -> "normal"
     | RxVar _ -> "maybe reactive"
@@ -492,7 +486,6 @@ let reactivity_to_string env r =
     | CippLocal None -> "cipp_local"
     | CippLocal (Some s) -> "cipp_local(" ^ s ^ ")"
     | CippGlobal -> "cipp_global"
-    | CippRx -> "cipp_rx"
   in
   aux r
 

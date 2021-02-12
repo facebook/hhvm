@@ -29,13 +29,7 @@ module Shared (Env : Env_S) = struct
   let is_fun_call_returning_mutable (env : Env.env) (e : Tast.expr) : bool =
     let fun_ty_returns_mutable fun_ty =
       match get_node fun_ty with
-      | Tfun fty ->
-        begin
-          match Env.env_reactivity env with
-          (* in localrx context assume non-reactive functions to return mutable *)
-          | Local _ when not (any_reactive fty.ft_reactive) -> true
-          | _ -> get_ft_returns_mutable fty
-        end
+      | Tfun fty -> get_ft_returns_mutable fty
       | _ -> false
     in
     let fun_returns_mutable id =

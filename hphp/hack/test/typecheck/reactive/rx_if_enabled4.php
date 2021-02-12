@@ -1,5 +1,5 @@
 <?hh // strict
-<<__Rx>>
+
 function f1(): int {
   // ERROR
   if (Rx\IS_ENABLED) {

@@ -52,7 +52,7 @@ const int JSON_FB_THRIFT_SIMPLE_JSON = 0;
 const int JSON_FB_WARN_KEYSETS = 0;
 const int JSON_FB_FORCE_HACK_ARRAYS = 0;
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function json_encode(mixed $value, int $options = 0, int $depth = 512);
 <<__PHPStdLib, __Pure>>
 function json_encode_with_error(
@@ -61,7 +61,7 @@ function json_encode_with_error(
   int $options = 0,
   int $depth = 512,
 )[];
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0);
 <<__PHPStdLib, __Pure>>
 function json_decode_with_error(

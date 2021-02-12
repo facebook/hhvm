@@ -3,6 +3,6 @@
 interface IRx {}
 
 class C {
-  <<__Rx, __OnlyRxIfImpl(IRx::class)>>
+  <<__Pure, __OnlyRxIfImpl(IRx::class)>>
   public function f(): void {}
 }

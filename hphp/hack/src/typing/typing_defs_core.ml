@@ -324,16 +324,12 @@ and 'phase taccess_type = 'phase ty * Nast.sid
   *)
 and reactivity =
   | Nonreactive
-  | Local of decl_ty option
-  | Shallow of decl_ty option
-  | Reactive of decl_ty option
   | Pure of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
   | Cipp of string option
   | CippLocal of string option
   | CippGlobal
-  | CippRx
 
 and 'ty capability =
   | CapDefaults of Pos.t
@@ -731,21 +727,6 @@ module Pp = struct
       Format.pp_print_string fmt "MaybeReactive {";
       pp_reactivity fmt v;
       Format.pp_print_string fmt "}"
-    | Local None -> Format.pp_print_string fmt "Local {}"
-    | Local (Some ty) ->
-      Format.pp_print_string fmt "Local {";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt "}"
-    | Shallow None -> Format.pp_print_string fmt "Shallow {}"
-    | Shallow (Some ty) ->
-      Format.pp_print_string fmt "Shallow {";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt "}"
-    | Reactive None -> Format.pp_print_string fmt "Reactive {}"
-    | Reactive (Some ty) ->
-      Format.pp_print_string fmt "Reactive {";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt "}"
     | Pure None -> Format.pp_print_string fmt "Pure {}"
     | Pure (Some ty) ->
       Format.pp_print_string fmt "Pure {";
@@ -762,7 +743,6 @@ module Pp = struct
       Format.pp_print_string fmt s;
       Format.pp_print_string fmt "}"
     | CippGlobal -> Format.pp_print_string fmt "CippGlobal"
-    | CippRx -> Format.pp_print_string fmt "CippRx"
 
   and pp_possibly_enforced_ty :
       type a. Format.formatter -> a ty possibly_enforced_ty -> unit =

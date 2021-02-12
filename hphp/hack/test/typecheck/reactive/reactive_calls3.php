@@ -1,5 +1,5 @@
 <?hh // strict
-<<__Rx>>
+
 function append(bool $x)[]: void {
   if ($x) {
     $y = Vector {};

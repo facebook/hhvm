@@ -8,7 +8,7 @@ interface IRxFactory {
 
   abstract const type TLoader as RxLoader<Base>;
 
-  <<__RxLocal>>
+
   public static function __getLoader(): RxLoader<Base>;
 }
 
@@ -21,7 +21,7 @@ abstract class Factory {
   <<__LSB>>
   private static ?this::TLoader $getLoader = null;
 
-  <<__RxShallow, __OnlyRxIfImpl(IRxFactory::class)>>
+
   final public static function get(): this::TLoader {
     if (Rx\IS_ENABLED) {
       return static::__getLoader();
@@ -32,7 +32,7 @@ abstract class Factory {
       return static::$getLoader;
     }
   }
-  <<__RxLocal, __OnlyRxIfImpl(IRxFactory::class)>>
+
   public static function __getLoader(): this::TLoader {
     throw new Exception("");
   }

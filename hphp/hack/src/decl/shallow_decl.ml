@@ -234,27 +234,6 @@ let method_ env m =
         | _ -> None
       end
     | Pure None -> Some (Method_pure None)
-    | Reactive (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> Some (Method_reactive (Some cls))
-        | _ -> None
-      end
-    | Reactive None -> Some (Method_reactive None)
-    | Shallow (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> Some (Method_shallow (Some cls))
-        | _ -> None
-      end
-    | Shallow None -> Some (Method_shallow None)
-    | Local (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> Some (Method_local (Some cls))
-        | _ -> None
-      end
-    | Local None -> Some (Method_local None)
     | _ -> None
   in
   let sm_deprecated =

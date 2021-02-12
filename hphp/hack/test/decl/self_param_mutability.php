@@ -1,9 +1,9 @@
 <?hh // partial
 
 class C {
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function a(): void {}
 
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function b(): void {}
 }

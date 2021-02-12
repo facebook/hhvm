@@ -46,9 +46,6 @@ and is_reified = bool
 
 and func_reactive =
   | FPure
-  | FReactive
-  | FLocal
-  | FShallow
   | FNonreactive
 
 and param_mutability =
@@ -242,11 +239,7 @@ and reify_kind =
 
 let is_f_non_reactive = function
   | FNonreactive -> true
-  | FPure
-  | FReactive
-  | FLocal
-  | FShallow ->
-    false
+  | FPure -> false
 
 let string_of_visibility vis =
   match vis with

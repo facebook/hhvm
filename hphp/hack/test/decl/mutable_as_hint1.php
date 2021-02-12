@@ -3,6 +3,6 @@
 class A {}
 
 // ERROR
-<<__Rx>>
+<<__Pure>>
 function f(Mutable<A> $a): void {
 }

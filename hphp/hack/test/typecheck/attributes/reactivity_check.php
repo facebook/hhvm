@@ -5,13 +5,13 @@ class FAttr implements HH\FunctionAttribute, HH\MethodAttribute {
   public function __construct(public string $s) {}
 }
 
-<<__Rx, FAttr('RXException')>>
+<<__Pure, FAttr('RXException')>>
 async function rx(): Awaitable<void> {}
 
 class C {
-  <<__Rx, FAttr('RXException')>>
+  <<__Pure, FAttr('RXException')>>
   public async function rx(): Awaitable<void> {}
 }
 
-<<__Rx, FAttr(1)>>
+<<__Pure, FAttr(1)>>
 async function ry(): Awaitable<void> {}

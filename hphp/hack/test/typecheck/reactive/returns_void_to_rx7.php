@@ -1,6 +1,6 @@
 <?hh
 interface Rx {
-  <<__Rx>>
+
   public function foo(): this;
 }
 
@@ -12,7 +12,7 @@ abstract class MyParent {
 }
 
 class MyChild extends MyParent {
-  <<__Rx, __OnlyRxIfImpl(Rx::class), __Mutable, __ReturnsVoidToRx>>
+
   public function foo(): this {
     return $this;
   }

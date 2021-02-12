@@ -1,5 +1,5 @@
 <?hh // strict
-<<__Rx>>
+
 function f<Tv as arraykey>(bool $c, Tv $v)[]: mixed {
   $result = varray[];
   if ($c) {

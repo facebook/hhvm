@@ -1,5 +1,5 @@
 <?hh // strict
-<<__Rx>>
+
 function rx(): void {}
 
 <<__Pure>>

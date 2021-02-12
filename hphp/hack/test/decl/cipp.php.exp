@@ -72,27 +72,6 @@
                    ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = CippLocal {a};
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
-         { Shallow_decl_defs.sm_name = ([14:19-33], "cipp_rx_method");
-           sm_reactivity = None;
-           sm_type =
-           (Rwitness (root|cipp.php line 14, characters 19-32),
-            (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
-                 ft_implicit_params =
-                 { capability = (CapDefaults [14:19-33]) };
-                 ft_ret =
-                 { et_enforced = false;
-                   et_type =
-                   (Rhint (root|cipp.php line 14, characters 37-40),
-                    (Tprim Tvoid))
-                   };
-                 ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
-                 ft_reactive = CippRx; ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -100,15 +79,15 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|cipp.php line 18, characters 10-22),
+        (Rwitness (root|cipp.php line 15, characters 10-22),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [18:10-23]) };
+              ft_implicit_params = { capability = (CapDefaults [15:10-23]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|cipp.php line 18, characters 27-30),
+                (Rhint (root|cipp.php line 15, characters 27-30),
                  (Tprim Tvoid))
                 };
               ft_flags =
@@ -116,20 +95,20 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Cipp {b}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [18:10-23]; fe_php_std_lib = false }));
+        fe_pos = [15:10-23]; fe_php_std_lib = false }));
   ("\\cipp_global_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|cipp.php line 21, characters 10-29),
+        (Rwitness (root|cipp.php line 18, characters 10-29),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [21:10-30]) };
+              ft_implicit_params = { capability = (CapDefaults [18:10-30]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|cipp.php line 21, characters 34-37),
+                (Rhint (root|cipp.php line 18, characters 34-37),
                  (Tprim Tvoid))
                 };
               ft_flags =
@@ -137,20 +116,20 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = CippGlobal; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [21:10-30]; fe_php_std_lib = false }));
+        fe_pos = [18:10-30]; fe_php_std_lib = false }));
   ("\\cipp_local_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|cipp.php line 24, characters 10-28),
+        (Rwitness (root|cipp.php line 21, characters 10-28),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [24:10-29]) };
+              ft_implicit_params = { capability = (CapDefaults [21:10-29]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|cipp.php line 24, characters 33-36),
+                (Rhint (root|cipp.php line 21, characters 33-36),
                  (Tprim Tvoid))
                 };
               ft_flags =
@@ -159,28 +138,7 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = CippLocal {\C}; ft_ifc_decl = FDPolicied {PUBLIC}
               }));
-        fe_pos = [24:10-29]; fe_php_std_lib = false }));
-  ("\\cipp_rx_function",
-   (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_type =
-        (Rwitness (root|cipp.php line 27, characters 10-25),
-         (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [27:10-26]) };
-              ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|cipp.php line 27, characters 30-33),
-                 (Tprim Tvoid))
-                };
-              ft_flags =
-              (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = CippRx; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [27:10-26]; fe_php_std_lib = false }))
+        fe_pos = [21:10-29]; fe_php_std_lib = false }))
   ]
 
 They matched!

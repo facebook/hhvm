@@ -1,9 +1,0 @@
-<?hh
-<<__RxShallow>>
-function shallow_reactive(): void {
-  throw new \Exception();
-}
-<<__RxShallow>>
-function call_shallow_reactive(): void {
-  shallow_reactive();
-}

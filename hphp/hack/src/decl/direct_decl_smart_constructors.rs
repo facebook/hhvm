@@ -1228,21 +1228,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         for attribute in nodes.iter().rev() {
             if let Node::Attribute(attribute) = attribute {
                 match attribute.name.1.as_ref() {
-                    // NB: It is an error to specify more than one of __Rx,
-                    // __RxShallow, and __RxLocal, so to avoid cloning the
-                    // condition type, we use Option::take here.
-                    "__Rx" => {
-                        attributes.reactivity =
-                            Reactivity::Reactive(attributes.reactivity_condition_type)
-                    }
-                    "__RxShallow" => {
-                        attributes.reactivity =
-                            Reactivity::Shallow(attributes.reactivity_condition_type)
-                    }
-                    "__RxLocal" => {
-                        attributes.reactivity =
-                            Reactivity::Local(attributes.reactivity_condition_type)
-                    }
                     "__Pure" => {
                         attributes.reactivity =
                             Reactivity::Pure(attributes.reactivity_condition_type);
@@ -1256,9 +1241,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     "__CippLocal" => {
                         attributes.reactivity =
                             Reactivity::CippLocal(string_or_classname_arg(attribute))
-                    }
-                    "__CippRx" => {
-                        attributes.reactivity = Reactivity::CippRx;
                     }
                     "__Mutable" => {
                         attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
@@ -1796,27 +1778,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Pure(None),
-                    implicit_params: extend_capability_pos(f.implicit_params),
-                    ..*f
-                }))
-            }
-            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Rx" => {
-                Ty_::Tfun(self.alloc(FunType {
-                    reactive: Reactivity::Reactive(None),
-                    implicit_params: extend_capability_pos(f.implicit_params),
-                    ..*f
-                }))
-            }
-            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxShallow" => {
-                Ty_::Tfun(self.alloc(FunType {
-                    reactive: Reactivity::Shallow(None),
-                    implicit_params: extend_capability_pos(f.implicit_params),
-                    ..*f
-                }))
-            }
-            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxLocal" => {
-                Ty_::Tfun(self.alloc(FunType {
-                    reactive: Reactivity::Local(None),
                     implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
@@ -4022,15 +3983,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let method = self.alloc(ShallowMethod {
             name: id,
             reactivity: match attributes.reactivity {
-                Reactivity::Local(condition_type) => Some(MethodReactivity::MethodLocal(
-                    get_condition_type_name(condition_type),
-                )),
-                Reactivity::Shallow(condition_type) => Some(MethodReactivity::MethodShallow(
-                    get_condition_type_name(condition_type),
-                )),
-                Reactivity::Reactive(condition_type) => Some(MethodReactivity::MethodReactive(
-                    get_condition_type_name(condition_type),
-                )),
                 Reactivity::Pure(condition_type) => Some(MethodReactivity::MethodPure(
                     get_condition_type_name(condition_type),
                 )),
@@ -4039,8 +3991,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 | Reactivity::RxVar(_)
                 | Reactivity::Cipp(_)
                 | Reactivity::CippLocal(_)
-                | Reactivity::CippGlobal
-                | Reactivity::CippRx => None,
+                | Reactivity::CippGlobal => None,
             },
             type_: ty,
             visibility: modifiers.visibility,

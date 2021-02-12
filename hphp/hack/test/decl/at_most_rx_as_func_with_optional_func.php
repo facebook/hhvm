@@ -1,6 +1,6 @@
 <?hh
 
-<<__Rx, __AtMostRxAsArgs>>
+<<__Pure, __AtMostRxAsArgs>>
 function f<T>(
   <<__AtMostRxAsFunc>>
   ?(function(T): bool) $predicate = null,

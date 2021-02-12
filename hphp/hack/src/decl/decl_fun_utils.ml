@@ -44,12 +44,6 @@ let fun_reactivity_opt env user_attributes =
     | { Aast.ua_name = (_, n); ua_params } :: tl ->
       if String.equal n UA.uaPure then
         Some (Pure rx_condition)
-      else if String.equal n UA.uaReactive then
-        Some (Reactive rx_condition)
-      else if String.equal n UA.uaShallowReactive then
-        Some (Shallow rx_condition)
-      else if String.equal n UA.uaLocalReactive then
-        Some (Local rx_condition)
       else if String.equal n UA.uaNonRx then
         Some Nonreactive
       else if String.equal n UA.uaCipp then
@@ -58,8 +52,6 @@ let fun_reactivity_opt env user_attributes =
         Some (CippLocal (get_classname_or_literal_attribute_param ua_params))
       else if String.equal n UA.uaCippGlobal then
         Some CippGlobal
-      else if String.equal n UA.uaCippRx then
-        Some CippRx
       else
         go tl
   in

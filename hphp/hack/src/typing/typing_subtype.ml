@@ -2428,10 +2428,7 @@ and simplify_subtype_reactivity
      accessible as parent::f() but will be treated as non-reactive call.
      *)
     match (r_super, extra_info) with
-    | ( ( Pure (Some condition_type_super)
-        | Reactive (Some condition_type_super)
-        | Shallow (Some condition_type_super)
-        | Local (Some condition_type_super) ),
+    | ( Pure (Some condition_type_super),
         Some { method_info = Some (method_name, is_static); _ } ) ->
       let m =
         ConditionTypes.try_get_method_from_condition_type
@@ -2450,13 +2447,7 @@ and simplify_subtype_reactivity
         | Some { ce_type = (lazy ty); _ } ->
           begin
             match get_node ty with
-            | Tfun
-                {
-                  ft_reactive =
-                    (Pure None | Reactive None | Shallow None | Local None) as
-                    fr;
-                  _;
-                } ->
+            | Tfun { ft_reactive = Pure None as fr; _ } ->
               let extra_info =
                 {
                   empty_extra_info with
@@ -2479,9 +2470,7 @@ and simplify_subtype_reactivity
   in
   let is_some_cipp_or_pure r =
     match r with
-    | Pure _
-    | CippRx ->
-      true
+    | Pure _ -> true
     | Nonreactive -> false
     | _ -> not (any_reactive r)
   in
@@ -2551,10 +2540,6 @@ and simplify_subtype_reactivity
       super
       env
   | (RxVar _, _) -> invalid_env env
-  | ( (Local cond_sub | Shallow cond_sub | Reactive cond_sub | Pure cond_sub),
-      Local cond_super )
-  | ((Shallow cond_sub | Reactive cond_sub | Pure cond_sub), Shallow cond_super)
-  | ((Reactive cond_sub | Pure cond_sub), Reactive cond_super)
   | (Pure cond_sub, Pure cond_super) ->
     env
     |> simplify_subtype_param_rx_if_impl
@@ -2567,21 +2552,8 @@ and simplify_subtype_reactivity
          cond_super
     ||| check_condition_type_has_matching_reactive_method
   (* call_site specific cases *)
-  (* shallow can call into local *)
-  | (Local cond_sub, Shallow cond_super) when is_call_site ->
-    simplify_subtype_param_rx_if_impl
-      ~subtype_env
-      ~is_param:false
-      p_sub
-      cond_sub
-      class_ty
-      p_super
-      cond_super
-      env
-  (* local can call into non-reactive, but not for inheritance *)
-  | (Nonreactive, Local _) when is_call_site -> valid env
   (* Cipp(Local) can call pure *)
-  | (Pure _, (Cipp _ | CippLocal _ | CippRx)) -> valid env
+  | (Pure _, (Cipp _ | CippLocal _)) -> valid env
   (* Cipp can call Cipp(Local) if the params match *)
   | (Cipp x, Cipp y) when Option.is_none x || Option.equal String.equal x y ->
     valid env
@@ -2593,16 +2565,13 @@ and simplify_subtype_reactivity
     when (is_call_site && Option.is_none x) || Option.equal String.equal x y ->
     valid env
   (* CippLocal can also call nonreactive *)
-  | ( (Nonreactive | Reactive _ | Local _ | Shallow _ | MaybeReactive _),
-      CippLocal _ )
-    when is_call_site ->
+  | ((Nonreactive | MaybeReactive _), CippLocal _) when is_call_site ->
     valid env
   (* Anything can call CippGlobal*)
   (* CippRx is the same as CippGlobal, but with reactivity constraints *)
   (* Nonreactive is covered from above*)
-  | ( (CippGlobal | CippRx),
-      ( Reactive _ | Local _ | Shallow _ | MaybeReactive _ | Cipp _
-      | CippLocal _ | CippGlobal | CippRx | Pure _ ) ) ->
+  | (CippGlobal, (MaybeReactive _ | Cipp _ | CippLocal _ | CippGlobal | Pure _))
+    ->
     valid env
   (* CippGlobal can (safely) call anything the following *)
   | ((Pure _ | Cipp _ | CippLocal _), CippGlobal) -> valid env

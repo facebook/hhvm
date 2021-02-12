@@ -15,7 +15,7 @@ interface Rx {
 let content_a_1 =
   {|<?hh // strict
 interface Rx {
-  <<__Rx>>
+  <<__Pure>>
   public function f(): int;
 }
 |}
@@ -23,7 +23,7 @@ interface Rx {
 let content_b =
   {|<?hh // strict
 class A {
-  <<__Rx, __OnlyRxIfImpl(Rx::class)>>
+  <<__Pure, __OnlyRxIfImpl(Rx::class)>>
   public function f(): int {
     return 5;
   }
@@ -41,7 +41,7 @@ let errors =
 File "/B.php", line 10, characters 19-19:
 The method `f` is not compatible with the overridden method (Typing[4341])
   File "/B.php", line 4, characters 19-19:
-  This function is conditionally reactive (condition type: \Rx).
+  This function is conditionally pure (condition type: \Rx).
   File "/B.php", line 10, characters 19-19:
   This function is normal.
 |}

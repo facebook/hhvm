@@ -13,7 +13,7 @@ interface Rx {
 class A {
 }
 
-<<__Rx>>
+<<__Pure>>
 function f(A $a): void {
 }
 |}
@@ -26,7 +26,7 @@ interface Rx {
 class A {
 }
 
-<<__Rx, __AtMostRxAsArgs>>
+<<__Pure, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(Rx::class)>> A $a): void {
 }
 |}
@@ -34,7 +34,7 @@ function f(<<__OnlyRxIfImpl(Rx::class)>> A $a): void {
 let content_b =
   {|<?hh // strict
 
-<<__Rx>>
+<<__Pure>>
 function g(): void {
   f(new A());
 }

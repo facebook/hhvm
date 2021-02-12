@@ -308,16 +308,12 @@ and 'phase taccess_type = 'phase ty * Nast.sid
   *)
 and reactivity =
   | Nonreactive
-  | Local of decl_ty option
-  | Shallow of decl_ty option
-  | Reactive of decl_ty option
   | Pure of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
   | Cipp of string option
   | CippLocal of string option
   | CippGlobal
-  | CippRx
 
 (* Because Tfun is currently used as both a decl and locl ty, without this,
  * the HH\Contexts\defaults alias must be stored in shared memory for a

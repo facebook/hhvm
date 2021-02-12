@@ -460,10 +460,6 @@ let reactivity_ordinal r =
   match r with
   | Nonreactive -> 0
   | CippGlobal -> 1
-  | CippRx -> 2
-  | Local _ -> 3
-  | Shallow _ -> 4
-  | Reactive _ -> 5
   | Pure _ -> 6
   | MaybeReactive _ -> 7
   | RxVar _ -> 8
@@ -736,12 +732,8 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
   and reactivity_compare r1 r2 =
     match (r1, r2) with
     | (Nonreactive, Nonreactive)
-    | (CippGlobal, CippGlobal)
-    | (CippRx, CippRx) ->
+    | (CippGlobal, CippGlobal) ->
       0
-    | (Local opt_ty1, Local opt_ty2)
-    | (Shallow opt_ty1, Shallow opt_ty2)
-    | (Reactive opt_ty1, Reactive opt_ty2)
     | (Pure opt_ty1, Pure opt_ty2) ->
       (* TODO T82455489: proper decl compare. Poly.compare will be position sensitive *)
       Option.compare Poly.compare opt_ty1 opt_ty2
@@ -751,10 +743,10 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Cipp opt_s1, Cipp opt_s2)
     | (CippLocal opt_s1, CippLocal opt_s2) ->
       Option.compare String.compare opt_s1 opt_s2
-    | ( ( Nonreactive | CippGlobal | CippRx | Local _ | Shallow _ | Reactive _
-        | Pure _ | MaybeReactive _ | RxVar _ | Cipp _ | CippLocal _ ),
-        ( Nonreactive | CippGlobal | CippRx | Local _ | Shallow _ | Reactive _
-        | Pure _ | MaybeReactive _ | RxVar _ | Cipp _ | CippLocal _ ) ) ->
+    | ( ( Nonreactive | CippGlobal | Pure _ | MaybeReactive _ | RxVar _ | Cipp _
+        | CippLocal _ ),
+        ( Nonreactive | CippGlobal | Pure _ | MaybeReactive _ | RxVar _ | Cipp _
+        | CippLocal _ ) ) ->
       reactivity_ordinal r1 - reactivity_ordinal r2
   and ty_compare ty1 ty2 = ty__compare (get_node ty1) (get_node ty2) in
   ty__compare ty_1 ty_2
@@ -1018,28 +1010,19 @@ and equal_decl_fun_type fty1 fty2 =
 and equal_reactivity r1 r2 =
   match (r1, r2) with
   | (Nonreactive, Nonreactive) -> true
-  | (Local ty1, Local ty2)
-  | (Shallow ty1, Shallow ty2)
-  | (Reactive ty1, Reactive ty2)
-  | (Pure ty1, Pure ty2) ->
-    Option.equal equal_decl_ty ty1 ty2
+  | (Pure ty1, Pure ty2) -> Option.equal equal_decl_ty ty1 ty2
   | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
   | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
   | (Cipp s1, Cipp s2) -> Option.equal String.equal s1 s2
   | (CippLocal s1, CippLocal s2) -> Option.equal String.equal s1 s2
   | (CippGlobal, CippGlobal) -> true
-  | (CippRx, CippRx) -> true
   | _ -> false
 
 and any_reactive r =
   match r with
-  | Local _
-  | Shallow _
-  | Reactive _
   | Pure _
   | MaybeReactive _
-  | RxVar _
-  | CippRx ->
+  | RxVar _ ->
     true
   | Nonreactive
   | Cipp _

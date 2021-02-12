@@ -1,3 +1,3 @@
 <?hh // partial
-<<__rx>>
+<<__Pure>>
 public function foo() : void { ; }

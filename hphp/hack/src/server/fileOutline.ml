@@ -180,13 +180,7 @@ let get_reactivity_attributes attrs =
     | { ua_name = (_, n); _ } :: tl ->
       let module SNUA = Naming_special_names.UserAttributes in
       let acc =
-        if String.equal n SNUA.uaReactive then
-          Rx :: acc
-        else if String.equal n SNUA.uaShallowReactive then
-          Shallow :: acc
-        else if String.equal n SNUA.uaLocalReactive then
-          Local :: acc
-        else if String.equal n SNUA.uaOnlyRxIfImpl then
+        if String.equal n SNUA.uaOnlyRxIfImpl then
           OnlyRxIfImpl :: acc
         else if String.equal n SNUA.uaAtMostRxAsArgs then
           AtMostRxAsArgs :: acc

@@ -1,0 +1,2 @@
+File "ordering.bad.php", line 4, characters 6-6:
+Enum B cannot include enum A because it precedes it in the same file (Typing[4388])

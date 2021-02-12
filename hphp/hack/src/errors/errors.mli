@@ -1511,3 +1511,5 @@ val readonly_mismatch :
 val explicit_readonly_cast : string -> Pos.t -> unit
 
 val readonly_method_call : Pos.t -> Pos.t -> unit
+
+val enum_inclusion_unsupported_ordering : Pos.t -> string -> string -> unit

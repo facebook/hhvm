@@ -5657,6 +5657,17 @@ let readonly_method_call receiver_pos method_pos =
       "This expression is readonly, so it can only call readonly methods" )
     [(method_pos, "This method is not readonly")]
 
+let enum_inclusion_unsupported_ordering dest_pos dest_name src_name =
+  add_list
+    (Typing.err_code Typing.IncompatibleEnumInclusion)
+    ( dest_pos,
+      "Enum "
+      ^ strip_ns dest_name
+      ^ " cannot include enum "
+      ^ strip_ns src_name
+      ^ " because it precedes it in the same file" )
+    []
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

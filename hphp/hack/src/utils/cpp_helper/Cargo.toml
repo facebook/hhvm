@@ -3,7 +3,6 @@
 name = "cpp_helper"
 edition = "2018"
 version = "0.0.0"
-include = ["../cpp_helper.rs"]
 
 [lib]
 path = "../cpp_helper.rs"

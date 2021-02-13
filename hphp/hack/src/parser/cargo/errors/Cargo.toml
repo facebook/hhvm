@@ -3,7 +3,6 @@
 name = "rust_parser_errors"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rust_parser_errors.rs"]
 
 [lib]
 path = "../../rust_parser_errors.rs"

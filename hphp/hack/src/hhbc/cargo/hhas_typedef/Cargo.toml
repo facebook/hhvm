@@ -3,7 +3,6 @@
 name = "hhas_typedef_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hhas_typedef.rs"]
 
 [lib]
 path = "../../hhas_typedef.rs"

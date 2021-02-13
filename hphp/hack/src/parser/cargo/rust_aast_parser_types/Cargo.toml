@@ -3,7 +3,6 @@
 name = "rust_aast_parser_types"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rust_aast_parser_types.rs"]
 
 [lib]
 path = "../../rust_aast_parser_types.rs"

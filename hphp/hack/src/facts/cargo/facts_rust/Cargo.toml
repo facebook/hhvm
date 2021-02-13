@@ -3,7 +3,6 @@
 name = "facts_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../facts.rs", "../../facts_parser.rs", "../../lib.rs"]
 
 [lib]
 path = "../../lib.rs"

@@ -3,7 +3,6 @@
 name = "positioned_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../positioned_parser.rs"]
 
 [lib]
 path = "../../positioned_parser.rs"

@@ -3,7 +3,6 @@
 name = "smart_constructors"
 edition = "2018"
 version = "0.0.0"
-include = ["../../smart_constructors.rs", "../../smart_constructors_generated.rs", "../../smart_constructors_wrappers.rs"]
 
 [lib]
 path = "../../smart_constructors.rs"

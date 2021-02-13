@@ -3,7 +3,6 @@
 name = "env"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emitter.rs", "../../env.rs", "../../iterator.rs", "../../jump_targets.rs", "../../local.rs"]
 
 [lib]
 path = "../../env.rs"

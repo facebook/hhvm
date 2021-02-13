@@ -3,7 +3,6 @@
 name = "rust_to_ocaml"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rust_to_ocaml.rs"]
 
 [lib]
 path = "../../rust_to_ocaml.rs"

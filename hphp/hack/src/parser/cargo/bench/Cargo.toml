@@ -3,7 +3,6 @@
 name = "bench"
 edition = "2018"
 version = "0.0.0"
-include = ["../../bench/bench.rs"]
 
 [[bin]]
 name = "bench"

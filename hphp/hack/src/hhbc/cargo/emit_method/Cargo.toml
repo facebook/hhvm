@@ -3,7 +3,6 @@
 name = "emit_method_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_method.rs"]
 
 [lib]
 path = "../../emit_method.rs"

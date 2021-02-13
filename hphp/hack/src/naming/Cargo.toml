@@ -3,7 +3,6 @@
 name = "naming_special_names_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["naming_special_names.rs"]
 
 [lib]
 path = "naming_special_names.rs"

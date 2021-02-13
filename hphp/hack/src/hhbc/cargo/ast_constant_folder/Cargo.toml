@@ -3,7 +3,6 @@
 name = "ast_constant_folder_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../ast_constant_folder.rs"]
 
 [lib]
 path = "../../ast_constant_folder.rs"

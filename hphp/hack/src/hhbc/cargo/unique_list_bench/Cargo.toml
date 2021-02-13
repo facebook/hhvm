@@ -3,7 +3,6 @@
 name = "unique_list_bench"
 edition = "2018"
 version = "0.0.0"
-include = ["../../unique_list_bench.rs"]
 
 [[bin]]
 name = "unique_list_bench"

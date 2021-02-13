@@ -3,7 +3,6 @@
 name = "ocaml_helper"
 edition = "2018"
 version = "0.0.0"
-include = ["../ocaml_helper.rs"]
 
 [lib]
 path = "../ocaml_helper.rs"

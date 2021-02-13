@@ -3,7 +3,6 @@
 name = "string_utils_bench"
 edition = "2018"
 version = "0.0.0"
-include = ["../../string_utils_bench.rs"]
 
 [[bin]]
 name = "string_utils_bench"

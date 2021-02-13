@@ -3,7 +3,6 @@
 name = "oxidized_by_ref"
 edition = "2018"
 version = "0.0.0"
-include = ["**/*.rs"]
 
 [lib]
 path = "lib.rs"

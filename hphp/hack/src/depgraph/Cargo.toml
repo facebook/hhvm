@@ -3,7 +3,6 @@
 name = "depgraph"
 edition = "2018"
 version = "0.0.0"
-include = ["byteutils.rs", "dep.rs", "lib.rs", "reader.rs", "writer.rs"]
 
 [lib]
 path = "lib.rs"

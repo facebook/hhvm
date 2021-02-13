@@ -3,7 +3,6 @@
 name = "direct_decl_smart_constructors"
 edition = "2018"
 version = "0.0.0"
-include = ["../direct_decl_smart_constructors.rs", "../direct_decl_smart_constructors_generated.rs"]
 
 [lib]
 path = "../direct_decl_smart_constructors.rs"

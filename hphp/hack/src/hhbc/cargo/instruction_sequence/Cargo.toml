@@ -3,7 +3,6 @@
 name = "instruction_sequence_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../instruction_sequence.rs"]
 
 [lib]
 path = "../../instruction_sequence.rs"

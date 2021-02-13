@@ -3,7 +3,6 @@
 name = "hhbc_hhas_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../print.rs", "../../print_env.rs", "../../write.rs"]
 
 [lib]
 path = "../../print.rs"

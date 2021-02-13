@@ -3,7 +3,6 @@
 name = "arena_collections"
 edition = "2018"
 version = "0.0.0"
-include = ["*.rs"]
 
 [lib]
 path = "lib.rs"

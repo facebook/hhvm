@@ -3,7 +3,6 @@
 name = "hh_fanout_dep_graph_is_subgraph_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../dep_graph_is_subgraph.rs"]
 
 [lib]
 path = "../../dep_graph_is_subgraph.rs"

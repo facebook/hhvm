@@ -3,7 +3,6 @@
 name = "positioned_by_ref_parser_ffi"
 edition = "2018"
 version = "0.0.0"
-include = ["../../positioned_by_ref_parser_ffi.rs"]
 
 [lib]
 path = "../../positioned_by_ref_parser_ffi.rs"

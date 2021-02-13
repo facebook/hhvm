@@ -3,7 +3,6 @@
 name = "rescan_trivia"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rescan_trivia.rs"]
 
 [lib]
 path = "../../rescan_trivia.rs"

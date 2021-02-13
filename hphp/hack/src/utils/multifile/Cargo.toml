@@ -3,7 +3,6 @@
 name = "multifile_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../multifile.rs"]
 
 [lib]
 path = "../multifile.rs"

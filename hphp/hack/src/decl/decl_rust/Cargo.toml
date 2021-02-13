@@ -3,7 +3,6 @@
 name = "decl_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../decl_subst.rs", "../direct_decl_parser.rs", "../lib.rs"]
 
 [lib]
 path = "../lib.rs"

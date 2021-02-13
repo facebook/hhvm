@@ -3,7 +3,6 @@
 name = "hh_name_index"
 edition = "2018"
 version = "0.0.0"
-include = ["main.rs"]
 
 [[bin]]
 name = "hh_name_index"

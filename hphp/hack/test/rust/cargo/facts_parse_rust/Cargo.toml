@@ -3,7 +3,6 @@
 name = "facts_parse_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../facts_parse.rs"]
 
 [[bin]]
 name = "facts_parse_rust"

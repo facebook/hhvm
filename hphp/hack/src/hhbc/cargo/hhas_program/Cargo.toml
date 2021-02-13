@@ -3,7 +3,6 @@
 name = "hhas_program_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hhas_program.rs"]
 
 [lib]
 path = "../../hhas_program.rs"

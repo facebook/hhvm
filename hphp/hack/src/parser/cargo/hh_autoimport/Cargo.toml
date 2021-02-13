@@ -3,7 +3,6 @@
 name = "hh_autoimport_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hh_autoimport.rs"]
 
 [lib]
 path = "../../hh_autoimport.rs"

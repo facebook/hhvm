@@ -3,7 +3,6 @@
 name = "emit_symbol_refs_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_symbol_refs.rs"]
 
 [lib]
 path = "../../emit_symbol_refs.rs"

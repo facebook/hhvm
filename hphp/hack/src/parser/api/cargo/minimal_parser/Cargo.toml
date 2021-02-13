@@ -3,7 +3,6 @@
 name = "minimal_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../minimal_parser.rs"]
 
 [lib]
 path = "../../minimal_parser.rs"

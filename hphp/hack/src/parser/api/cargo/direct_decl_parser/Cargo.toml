@@ -3,7 +3,6 @@
 name = "direct_decl_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../direct_decl_parser.rs"]
 
 [lib]
 path = "../../direct_decl_parser.rs"

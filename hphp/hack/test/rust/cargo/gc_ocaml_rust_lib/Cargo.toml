@@ -3,7 +3,6 @@
 name = "gc_ocaml_rust_lib"
 edition = "2018"
 version = "0.0.0"
-include = ["../../gc_ocaml_rust.rs"]
 
 [lib]
 path = "../../gc_ocaml_rust.rs"

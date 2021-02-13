@@ -3,7 +3,6 @@
 name = "hhas_constant_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hhas_constant.rs"]
 
 [lib]
 path = "../../hhas_constant.rs"

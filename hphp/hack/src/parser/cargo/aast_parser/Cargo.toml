@@ -3,7 +3,6 @@
 name = "aast_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../aast_check.rs", "../../aast_parser.rs", "../../aast_parser_lib.rs", "../../expression_tree_check.rs"]
 
 [lib]
 path = "../../aast_parser_lib.rs"

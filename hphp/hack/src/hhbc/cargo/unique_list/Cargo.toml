@@ -3,7 +3,6 @@
 name = "unique_list_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../unique_list.rs"]
 
 [lib]
 path = "../../unique_list.rs"

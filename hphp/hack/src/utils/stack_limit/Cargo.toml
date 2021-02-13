@@ -3,7 +3,6 @@
 name = "stack_limit"
 edition = "2018"
 version = "0.0.0"
-include = ["lib.rs", "retry.rs"]
 
 [lib]
 path = "lib.rs"

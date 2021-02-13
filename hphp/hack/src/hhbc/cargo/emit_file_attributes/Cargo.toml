@@ -3,7 +3,6 @@
 name = "emit_file_attributes_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_file_attributes.rs"]
 
 [lib]
 path = "../../emit_file_attributes.rs"

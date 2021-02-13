@@ -3,7 +3,6 @@
 name = "hh_compile"
 edition = "2018"
 version = "0.0.0"
-include = ["*.rs"]
 
 [[bin]]
 name = "hh_compile"

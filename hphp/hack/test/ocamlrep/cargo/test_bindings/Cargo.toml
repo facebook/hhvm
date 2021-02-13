@@ -3,7 +3,6 @@
 name = "test_bindings"
 edition = "2018"
 version = "0.0.0"
-include = ["../../test_bindings.rs"]
 
 [lib]
 path = "../../test_bindings.rs"

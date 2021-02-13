@@ -3,7 +3,6 @@
 name = "verify_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../verify_parser.rs"]
 
 [lib]
 path = "../../verify_parser.rs"

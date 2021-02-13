@@ -3,7 +3,6 @@
 name = "global_state"
 edition = "2018"
 version = "0.0.0"
-include = ["../../global_state.rs"]
 
 [lib]
 path = "../../global_state.rs"

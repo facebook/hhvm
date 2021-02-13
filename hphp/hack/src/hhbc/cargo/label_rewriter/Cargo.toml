@@ -3,7 +3,6 @@
 name = "label_rewriter_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../label_rewriter.rs"]
 
 [lib]
 path = "../../label_rewriter.rs"

@@ -3,7 +3,6 @@
 name = "ocaml_positioned_parser_ffi"
 edition = "2018"
 version = "0.0.0"
-include = ["../../ocaml_positioned_parser_ffi.rs"]
 
 [lib]
 path = "../../ocaml_positioned_parser_ffi.rs"

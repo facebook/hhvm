@@ -3,7 +3,6 @@
 name = "test_from_ocamlrep_in"
 edition = "2018"
 version = "0.0.0"
-include = ["../../test_from_ocamlrep_in.rs"]
 
 [lib]
 path = "../../test_from_ocamlrep_in.rs"

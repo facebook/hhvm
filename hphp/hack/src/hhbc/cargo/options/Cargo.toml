@@ -3,7 +3,6 @@
 name = "options"
 edition = "2018"
 version = "0.0.0"
-include = ["../../options.rs", "../../options_cli.rs"]
 
 [lib]
 path = "../../options.rs"

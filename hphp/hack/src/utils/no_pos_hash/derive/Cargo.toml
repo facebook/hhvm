@@ -3,7 +3,6 @@
 name = "no_pos_hash_derive"
 edition = "2018"
 version = "0.0.0"
-include = ["../no_pos_hash_derive.rs"]
 
 [lib]
 path = "../no_pos_hash_derive.rs"

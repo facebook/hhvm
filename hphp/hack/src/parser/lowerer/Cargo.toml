@@ -3,7 +3,6 @@
 name = "lowerer"
 edition = "2018"
 version = "0.0.0"
-include = ["desugar_expression_tree.rs", "lib.rs", "lowerer.rs", "modifier.rs", "scour_comment.rs"]
 
 [lib]
 path = "lib.rs"

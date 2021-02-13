@@ -3,7 +3,6 @@
 name = "ast_scope_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../ast_scope.rs", "../../ast_scope_item.rs"]
 
 [lib]
 path = "../../ast_scope.rs"

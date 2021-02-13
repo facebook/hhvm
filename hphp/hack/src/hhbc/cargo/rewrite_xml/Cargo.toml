@@ -3,7 +3,6 @@
 name = "rewrite_xml"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rewrite_xml.rs"]
 
 [lib]
 path = "../../rewrite_xml.rs"

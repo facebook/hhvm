@@ -3,7 +3,6 @@
 name = "typing_collections_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../typing_collections_rust.rs"]
 
 [lib]
 path = "../../typing_collections_rust.rs"

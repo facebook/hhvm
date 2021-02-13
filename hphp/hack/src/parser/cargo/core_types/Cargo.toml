@@ -3,7 +3,6 @@
 name = "parser_core_types"
 edition = "2018"
 version = "0.0.0"
-include = ["../../compact_token.rs", "../../compact_trivia.rs", "../../indexed_source_text.rs", "../../lexable_token.rs", "../../lexable_trivia.rs", "../../minimal_token.rs", "../../minimal_trivia.rs", "../../parser_core_types_lib.rs", "../../parser_env.rs", "../../positioned_syntax.rs", "../../positioned_token.rs", "../../positioned_trivia.rs", "../../source_text.rs", "../../syntax.rs", "../../syntax_by_ref/has_arena.rs", "../../syntax_by_ref/mod.rs", "../../syntax_by_ref/positioned_syntax.rs", "../../syntax_by_ref/positioned_token.rs", "../../syntax_by_ref/positioned_value.rs", "../../syntax_by_ref/syntax.rs", "../../syntax_by_ref/syntax_children_iterator.rs", "../../syntax_by_ref/syntax_children_iterator_generated.rs", "../../syntax_by_ref/syntax_impl_generated.rs", "../../syntax_by_ref/syntax_type_impl_generated.rs", "../../syntax_by_ref/syntax_variant_generated.rs", "../../syntax_error.rs", "../../syntax_generated.rs", "../../syntax_kind.rs", "../../syntax_trait.rs", "../../syntax_tree.rs", "../../syntax_type.rs", "../../token_factory.rs", "../../token_kind.rs", "../../trivia_kind.rs"]
 
 [lib]
 path = "../../parser_core_types_lib.rs"

@@ -3,7 +3,6 @@
 name = "compile_ffi"
 edition = "2018"
 version = "0.0.0"
-include = ["../../compile_ffi.rs"]
 
 [lib]
 path = "../../compile_ffi.rs"

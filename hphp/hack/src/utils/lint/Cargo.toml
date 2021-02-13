@@ -3,7 +3,6 @@
 name = "lint_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["lint.rs"]
 
 [lib]
 path = "lint.rs"

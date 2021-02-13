@@ -3,7 +3,6 @@
 name = "find_utils"
 edition = "2018"
 version = "0.0.0"
-include = ["../find_utils.rs"]
 
 [lib]
 path = "../find_utils.rs"

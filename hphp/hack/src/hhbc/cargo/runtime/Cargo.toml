@@ -3,7 +3,6 @@
 name = "runtime"
 edition = "2018"
 version = "0.0.0"
-include = ["../../typed_value.rs"]
 
 [lib]
 path = "../../typed_value.rs"

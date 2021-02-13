@@ -3,7 +3,6 @@
 name = "emit_type_constant_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_type_constant.rs"]
 
 [lib]
 path = "../../emit_type_constant.rs"

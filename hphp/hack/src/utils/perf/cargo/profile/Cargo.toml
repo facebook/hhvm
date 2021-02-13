@@ -3,7 +3,6 @@
 name = "profile_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../profile.rs"]
 
 [lib]
 path = "../../profile.rs"

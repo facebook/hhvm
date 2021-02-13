@@ -3,7 +3,6 @@
 name = "rust_facts_ffi"
 edition = "2018"
 version = "0.0.0"
-include = ["../rust_facts_ffi.rs"]
 
 [lib]
 path = "../rust_facts_ffi.rs"

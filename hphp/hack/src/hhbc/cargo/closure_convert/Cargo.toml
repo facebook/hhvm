@@ -3,7 +3,6 @@
 name = "closure_convert_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../closure_convert.rs"]
 
 [lib]
 path = "../../closure_convert.rs"

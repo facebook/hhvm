@@ -3,7 +3,6 @@
 name = "options_serde"
 edition = "2018"
 version = "0.0.0"
-include = ["../../options_serde.rs"]
 
 [lib]
 path = "../../options_serde.rs"

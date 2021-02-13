@@ -3,7 +3,6 @@
 name = "ocamlpool_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["lib.rs", "utils.rs"]
 
 [lib]
 path = "lib.rs"

@@ -3,7 +3,6 @@
 name = "elaborate_namespaces_visitor"
 edition = "2018"
 version = "0.0.0"
-include = ["../../elaborate_namespaces_visitor.rs"]
 
 [lib]
 path = "../../elaborate_namespaces_visitor.rs"

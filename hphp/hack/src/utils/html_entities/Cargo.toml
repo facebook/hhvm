@@ -3,7 +3,6 @@
 name = "html_entities"
 edition = "2018"
 version = "0.0.0"
-include = ["decoder.rs", "html_entities.rs"]
 
 [lib]
 path = "html_entities.rs"

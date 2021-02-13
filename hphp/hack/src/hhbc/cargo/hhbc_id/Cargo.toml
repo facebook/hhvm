@@ -3,7 +3,6 @@
 name = "hhbc_id_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../hhbc_id.rs"]
 
 [lib]
 path = "../../hhbc_id.rs"

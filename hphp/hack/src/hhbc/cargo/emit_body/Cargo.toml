@@ -3,7 +3,6 @@
 name = "emit_body_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_body.rs", "../../emit_statement.rs", "../../reified_generics_helpers.rs", "../../try_finally_rewriter.rs"]
 
 [lib]
 path = "../../emit_body.rs"

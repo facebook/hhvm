@@ -3,7 +3,6 @@
 name = "decl_vars_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../decl_vars.rs"]
 
 [lib]
 path = "../../decl_vars.rs"

@@ -3,7 +3,6 @@
 name = "emit_xhp_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../emit_xhp.rs"]
 
 [lib]
 path = "../../emit_xhp.rs"

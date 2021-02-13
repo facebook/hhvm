@@ -3,7 +3,6 @@
 name = "facts_parser"
 edition = "2018"
 version = "0.0.0"
-include = ["../../facts_parser.rs"]
 
 [lib]
 path = "../../facts_parser.rs"

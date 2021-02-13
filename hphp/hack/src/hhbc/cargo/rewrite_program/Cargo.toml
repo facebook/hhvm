@@ -3,7 +3,6 @@
 name = "rewrite_program"
 edition = "2018"
 version = "0.0.0"
-include = ["../../rewrite_program.rs"]
 
 [lib]
 path = "../../rewrite_program.rs"

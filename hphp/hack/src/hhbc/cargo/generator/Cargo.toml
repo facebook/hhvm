@@ -3,7 +3,6 @@
 name = "generator_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../generator.rs"]
 
 [lib]
 path = "../../generator.rs"

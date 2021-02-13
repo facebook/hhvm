@@ -3,7 +3,6 @@
 name = "ast_class_expr_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../ast_class_expr.rs"]
 
 [lib]
 path = "../../ast_class_expr.rs"

@@ -3,7 +3,6 @@
 name = "dump_saved_state_depgraph"
 edition = "2018"
 version = "0.0.0"
-include = ["dump_saved_state_depgraph.rs"]
 
 [[bin]]
 name = "dump_saved_state_depgraph"

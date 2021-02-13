@@ -3,7 +3,6 @@
 name = "deps_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["typing_deps.rs"]
 
 [lib]
 path = "typing_deps.rs"

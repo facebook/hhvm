@@ -3,7 +3,6 @@
 name = "operator"
 edition = "2018"
 version = "0.0.0"
-include = ["../../operator.rs", "../../operator_generated.rs"]
 
 [lib]
 path = "../../operator.rs"

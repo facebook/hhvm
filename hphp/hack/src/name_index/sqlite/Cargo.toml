@@ -3,7 +3,6 @@
 name = "names"
 edition = "2018"
 version = "0.0.0"
-include = ["consts.rs", "datatypes.rs", "file_infos.rs", "funs.rs", "lib.rs", "names.rs", "types.rs"]
 
 [lib]
 path = "lib.rs"

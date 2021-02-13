@@ -104,27 +104,27 @@ Type native_function_return_type(const php::Func* f) {
     assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
   }
 
-  return remove_uninit(t);
-}
+  t = remove_uninit(std::move(t));
+  if (!f->hasInOutArgs) return t;
 
-Type native_function_out_type(const php::Func* f, uint32_t index) {
-  assertx(f->nativeInfo);
-  assertx(f->hasInOutArgs);
+  std::vector<Type> types;
+  types.emplace_back(std::move(t));
 
-  for (auto& p : f->params) {
+  for (auto const& p : f->params) {
     if (!p.inout) continue;
-
-    if (index-- == 0) {
-      auto dt = Native::builtinOutType(p.typeConstraint, p.userAttributes);
-      if (!dt) return TInitCell;
-      auto t = from_DataType(*dt);
-      return p.typeConstraint.isNullable()
-        ? union_of(std::move(t), TInitNull)
-        : t;
+    auto const dt =
+      Native::builtinOutType(p.typeConstraint, p.userAttributes);
+    if (!dt) {
+      types.emplace_back(TInitCell);
+      continue;
     }
+    auto t = from_DataType(*dt);
+    if (p.typeConstraint.isNullable()) t |= TInitNull;
+    types.emplace_back(remove_uninit(std::move(t)));
   }
+  std::reverse(types.begin()+1, types.end());
 
-  return TBottom;
+  return vec(std::move(types));
 }
 
 }}

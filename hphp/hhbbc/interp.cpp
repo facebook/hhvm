@@ -3764,14 +3764,17 @@ Type typeFromWH(Type t) {
 }
 
 void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
-  if (ty == TBottom) {
-    // The callee function never returns.  It might throw, or loop forever.
-    unreachable(env);
-  }
   auto const numRets = fca.numRets();
   if (numRets != 1) {
     assertx(fca.asyncEagerTarget() == NoBlockId);
+
     for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
+    if (!ty.couldBe(BVecN)) {
+      // Function cannot have an in-out args match, so call will
+      // always fail.
+      for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
+      return unreachable(env);
+    }
     if (is_specialized_vec(ty)) {
       for (int32_t i = 1; i < numRets; i++) {
         push(env, vecish_elem(ty, ival(i)).first);
@@ -3782,9 +3785,15 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
     }
     return;
   }
+  if (ty.subtypeOf(BBottom)) {
+    // The callee function never returns.  It might throw, or loop
+    // forever.
+    push(env, TBottom);
+    return unreachable(env);
+  }
   if (fca.asyncEagerTarget() != NoBlockId) {
     push(env, typeFromWH(ty));
-    assertx(topC(env) != TBottom);
+    assertx(!topC(env).subtypeOf(BBottom));
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
@@ -3831,6 +3840,12 @@ void fcallKnownImpl(
       (numArgs == 1 || numArgs == 2) &&
       !fca.hasUnpack() && !fca.hasGenerics()) {
     handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
+  }
+
+  // If there's a caller/callee inout mismatch, then the call will
+  // always fail.
+  if (auto const numInOut = env.index.lookup_num_inout_params(env.ctx, func)) {
+    if (*numInOut + 1 != fca.numRets()) returnType = TBottom;
   }
 
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);

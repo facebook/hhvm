@@ -402,6 +402,22 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // folding
 
+bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
+                                               const php::Func* callee) {
+  if (!caller->coeffectRules.empty() || !callee->coeffectRules.empty()) {
+    return false;
+  }
+  // TODO(oulgen): We can actually be smarter here and actually check for
+  // bits matching but HHBBC currently does not know about the bit patterns
+  // and enforcement levels, so just check for coeffects matching identically
+  if (caller->staticCoeffects.size() != callee->staticCoeffects.size()) {
+    return false;
+  }
+  return std::is_permutation(caller->staticCoeffects.begin(),
+                             caller->staticCoeffects.end(),
+                             callee->staticCoeffects.begin());
+}
+
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
   if (!func ||
@@ -431,6 +447,11 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
   // be foldable
   if (func->isReified) return false;
+
+  // Coeffect violation may raise warning or throw an exception
+  if (!canDefinitelyCallWithoutCoeffectViolation(env.ctx.func, func)) {
+    return false;
+  }
 
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;

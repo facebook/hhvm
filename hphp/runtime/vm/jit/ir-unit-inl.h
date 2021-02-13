@@ -276,11 +276,6 @@ inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
   return m_ssaTmps[id];
 }
 
-inline SSATmp* IRUnit::mainFP() const {
-  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
-  return entry()->begin()->dst();
-}
-
 inline int64_t IRUnit::startNanos() const {
   return m_startNanos;
 }

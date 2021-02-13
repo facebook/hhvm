@@ -185,12 +185,6 @@ struct IRUnit {
   SSATmp* findSSATmp(uint32_t id) const;
 
   /*
-   * Return the main FramePtr for the unit.  This is the result of the DefFP
-   * instruction on the entry block.
-   */
-  SSATmp* mainFP() const;
-
-  /*
    * Return the "start" timestamp when this IRUnit was constructed.
    */
   int64_t startNanos() const;

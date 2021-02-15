@@ -61,9 +61,6 @@ val log_new_tvar_for_new_object :
 val log_new_tvar_for_tconst :
   Typing_env_types.env -> Pos.t -> int -> string -> Typing_defs.locl_ty -> unit
 
-val log_new_tvar_for_pu_access :
-  Typing_env_types.env -> Pos.t -> int -> string -> Typing_defs.locl_ty -> unit
-
 val log_new_tvar_for_tconst_access :
   Typing_env_types.env ->
   Pos.t ->

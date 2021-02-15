@@ -148,14 +148,7 @@ val get_tyvar_eager_solve_fail : t -> Ident.t -> bool
 val get_tyvar_type_const :
   t -> Ident.t -> Aast.sid -> (Aast.sid * locl_ty) option
 
-val get_tyvar_pu_access :
-  t -> Ident.t -> Aast.sid -> (Aast.sid * locl_ty) option
-
-val get_tyvar_pu_accesses : t -> Ident.t -> (Aast.sid * locl_ty) SMap.t
-
 val set_tyvar_type_const : t -> Ident.t -> Aast.sid -> locl_ty -> t
-
-val set_tyvar_pu_access : t -> Ident.t -> Aast.sid -> locl_ty -> t
 
 val get_tyvar_type_consts : t -> Ident.t -> (Aast.sid * locl_ty) SMap.t
 

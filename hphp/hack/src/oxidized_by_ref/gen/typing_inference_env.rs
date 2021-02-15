@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3756194ace31a01171eb48a47978fcf8>>
+// @generated SignedSource<<fb68c40cfd8dbd81b47bce7f0decb2d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -50,12 +50,6 @@ pub struct TyvarConstraints<'a> {
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
     pub type_constants: s_map::SMap<'a, (aast::Sid<'a>, &'a Ty<'a>)>,
-    /// Map associating PU information to each instance of
-    /// #v:@T
-    /// when the type variable #v is not resolved yet. We introduce a new type
-    /// variable to 'postpone' the checking of this expression until the end,
-    /// when #v will be known.
-    pub pu_accesses: s_map::SMap<'a, (aast::Sid<'a>, &'a Ty<'a>)>,
 }
 impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 

@@ -701,10 +701,6 @@ let log_new_tvar_for_tconst env p tvar tconstid tvar_for_tconst =
   in
   log_new_tvar env p tvar_for_tconst message
 
-let log_new_tvar_for_pu_access env p tvar tid tvar_for_pu_access =
-  let message = Printf.sprintf "Creating new type var for #%d::%s" tvar tid in
-  log_new_tvar env p tvar_for_pu_access message
-
 let log_new_tvar_for_tconst_access env p tvar class_name tconst =
   let message =
     Printf.sprintf

@@ -38,15 +38,6 @@ type tyvar_constraints = {
           Whenever we localize "T1::T" in a constraint, we add a fresh type variable
           indexed by "T" in the type_constants of the type variable representing T1.
           This allows to properly check constraints on "T1::T". *)
-  pu_accesses:
-    ( Aast.sid (* id of the pu projection "T", containing its position. *)
-    * locl_ty )
-    SMap.t;
-      (** Map associating PU information to each instance of
-          #v:@T
-          when the type variable #v is not resolved yet. We introduce a new type
-          variable to 'postpone' the checking of this expression until the end,
-          when #v will be known. *)
 }
 
 type solving_info =
@@ -94,7 +85,6 @@ module Log = struct
       type_constants;
       lower_bounds;
       upper_bounds;
-      pu_accesses;
     } =
       tvcstr
     in
@@ -106,8 +96,6 @@ module Log = struct
         ("upper_bounds", internal_type_set_as_value upper_bounds);
         ( "type_constants",
           smap_as_value (fun (_, ty) -> locl_type_as_value ty) type_constants );
-        ( "pu_acceses",
-          smap_as_value (fun (_, ty) -> locl_type_as_value ty) pu_accesses );
       ]
 
   let solving_info_as_value sinfo =
@@ -205,7 +193,6 @@ module Log = struct
           appears_contravariantly;
           lower_bounds;
           upper_bounds;
-          pu_accesses = _;
           type_constants = _;
         } =
       let bounds_to_json bs =
@@ -284,7 +271,6 @@ let empty_tyvar_constraints =
     appears_covariantly = false;
     appears_contravariantly = false;
     type_constants = SMap.empty;
-    pu_accesses = SMap.empty;
   }
 
 let empty_tyvar_info pos =
@@ -669,16 +655,8 @@ let get_tyvar_type_consts env var =
   | Some cstr -> cstr.type_constants
   | None -> SMap.empty
 
-let get_tyvar_pu_accesses env var =
-  match get_tyvar_constraints_opt env var with
-  | Some cstr -> cstr.pu_accesses
-  | None -> SMap.empty
-
 let get_tyvar_type_const env var (_, tyconstid) =
   SMap.find_opt tyconstid (get_tyvar_type_consts env var)
-
-let get_tyvar_pu_access env var (_, typ_name) =
-  SMap.find_opt typ_name (get_tyvar_pu_accesses env var)
 
 let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let tvinfo = get_tyvar_constraints_exn env var in
@@ -686,11 +664,6 @@ let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
     SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
   in
   set_tyvar_constraints env var { tvinfo with type_constants }
-
-let set_tyvar_pu_access env var name new_var =
-  let tvinfo = get_tyvar_constraints_exn env var in
-  let pu_accesses = SMap.add (snd name) (name, new_var) tvinfo.pu_accesses in
-  set_tyvar_constraints env var { tvinfo with pu_accesses }
 
 (** Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
@@ -925,9 +898,6 @@ module Size = struct
     SMap.map (fun (_id, ty) -> ty_size env ty) tconsts |> fun m ->
     SMap.fold (fun _ x y -> x + y) m 0
 
-  let pu_accesses_size env pu_accesses =
-    SMap.fold (fun _ (_id, ty) acc -> acc + ty_size env ty) pu_accesses 0
-
   let solving_info_size env solving_info =
     match solving_info with
     | TVIType ty -> ty_size env ty
@@ -938,15 +908,13 @@ module Size = struct
         upper_bounds;
         lower_bounds;
         type_constants;
-        pu_accesses;
       } =
         tvcstr
       in
       let ubound_size = internal_type_set_size env upper_bounds in
       let lbound_size = internal_type_set_size env lower_bounds in
       let tconst_size = type_constants_size env type_constants in
-      let pu_accesses_size = pu_accesses_size env pu_accesses in
-      ubound_size + lbound_size + tconst_size + pu_accesses_size
+      ubound_size + lbound_size + tconst_size
 
   let tyvar_info_size env tvinfo =
     let {
@@ -990,7 +958,6 @@ let merge_constraints cstr1 cstr2 =
     lower_bounds = lb1;
     upper_bounds = ub1;
     type_constants = tc1;
-    pu_accesses = pu_accesses1;
     appears_covariantly = cov1;
     appears_contravariantly = contra1;
   } =
@@ -1000,7 +967,6 @@ let merge_constraints cstr1 cstr2 =
     lower_bounds = lb2;
     upper_bounds = ub2;
     type_constants = tc2;
-    pu_accesses = pu_accesses2;
     appears_covariantly = cov2;
     appears_contravariantly = contra2;
   } =
@@ -1015,7 +981,6 @@ let merge_constraints cstr1 cstr2 =
       (* Type constants must already have been made equivalent, so picking any should be fine *)
       (* TODO: that might actually not be true during initial merging, but let's fix that later. *)
       SMap.union tc1 tc2;
-    pu_accesses = SMap.union pu_accesses1 pu_accesses2;
   }
 
 let solving_info_as_constraints sinfo =
@@ -1028,7 +993,6 @@ let solving_info_as_constraints sinfo =
       appears_covariantly = false;
       appears_contravariantly = false;
       type_constants = SMap.empty;
-      pu_accesses = SMap.empty;
     }
 
 let merge_solving_infos sinfo1 sinfo2 =
@@ -1212,7 +1176,6 @@ let solving_info_carries_information = function
       upper_bounds;
       lower_bounds;
       type_constants;
-      pu_accesses;
     } =
       tvcstr
     in
@@ -1221,7 +1184,6 @@ let solving_info_carries_information = function
     || (not @@ ITySet.is_empty upper_bounds)
     || (not @@ ITySet.is_empty lower_bounds)
     || (not @@ SMap.is_empty type_constants)
-    || (not @@ SMap.is_empty pu_accesses)
 
 let tyvar_info_carries_information tvinfo =
   let { tyvar_pos = _; solving_info; global_reason = _; eager_solve_failed = _ }
@@ -1650,7 +1612,6 @@ let unsolve env v =
             upper_bounds = ITySet.singleton (LoclType ty);
             lower_bounds = ITySet.singleton (LoclType ty);
             type_constants = SMap.empty;
-            pu_accesses = SMap.empty;
           }
       in
       let tvinfo =

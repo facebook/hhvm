@@ -42,6 +42,7 @@ enum TypeStructureKind : int {
   OF_DARRAY = 0;
   OF_VARRAY = 0;
   OF_VARRAY_OR_DARRAY = 0;
+  OF_ANY_ARRAY = 0;
   OF_NULL = 0;
   OF_NOTHING = 0;
   OF_DYNAMIC = 0;

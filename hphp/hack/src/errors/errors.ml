@@ -5665,7 +5665,11 @@ let enum_inclusion_unsupported_ordering dest_pos dest_name src_name =
       ^ strip_ns dest_name
       ^ " cannot include enum "
       ^ strip_ns src_name
-      ^ " because it precedes it in the same file" )
+      ^ " because "
+      ^ strip_ns dest_name
+      ^ " precedes "
+      ^ strip_ns src_name
+      ^ " in the same file" )
     []
 
 let invalid_meth_caller_calling_convention call_pos param_pos convention =

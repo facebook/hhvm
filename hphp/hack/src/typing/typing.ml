@@ -3044,18 +3044,31 @@ and expr_
           | `Dynamic -> None
           | `Class (_, class_info, _) -> Some class_info)
     in
-    let (env, _te, obj) =
-      expr env (fst sid, New ((fst sid, cid), [], [], None, fst sid))
+    let (env, te, obj) =
+      (* New statements derived from Xml literals are of the following form:
+       *
+       *   __construct(
+       *     darray<string,mixed> $attributes,
+       *     varray<mixed> $children,
+       *     string $file,
+       *     int $line
+       *   );
+       *)
+      let new_exp = Typing_xhp.rewrite_xml_into_new p sid attrl el in
+      expr ?expected env new_exp
+    in
+    let tchildren =
+      match te with
+      | (_, New (_, _, [_; (_, Varray (_, children)); _; _], _, _)) -> children
+      | _ ->
+        (* We end up in this case when the cosntructed new expression does
+        not typecheck. *)
+        []
     in
     let (env, typed_attrs, attr_types) =
       xhp_attribute_exprs env class_info attrl
     in
-    let (env, tel) =
-      List.map_env env el ~f:(fun env e ->
-          let (env, te, _) = expr env e in
-          (env, te))
-    in
-    let txml = Aast.Xml (sid, typed_attrs, tel) in
+    let txml = Aast.Xml (sid, typed_attrs, tchildren) in
     (match class_info with
     | None -> make_result env p txml (mk (Reason.Runknown_class p, Tobject))
     | Some class_info ->
@@ -5902,71 +5915,68 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       env
       (Cls.where_constraints class_)
   in
-  if Cls.is_xhp class_ then
-    (env, [], None, TUtils.mk_tany env p)
-  else
-    let cstr = Env.get_construct env class_ in
-    let mode = Env.get_mode env in
-    match fst cstr with
-    | None ->
-      if
-        ((not (List.is_empty el)) || Option.is_some unpacked_element)
-        && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
-        && Cls.members_fully_known class_
-      then
-        Errors.constructor_no_args p;
-      let (env, tel, _tyl) = exprs env el ~allow_awaitable:(*?*) false in
-      (env, tel, None, TUtils.terr env Reason.Rnone)
-    | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
-      let def_pos = get_pos m in
-      TVis.check_obj_access ~use_pos:p ~def_pos env vis;
-      TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
-      (* Obtain the type of the constructor *)
-      let (env, m) =
-        match deref m with
-        | (r, Tfun ft) ->
-          let ft =
-            Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
-          in
-          (* This creates type variables for non-denotable type parameters on constructors.
-           * These are notably different from the tparams on the class, which are handled
-           * at the top of this function. User-written type parameters on constructors
-           * are still a parse error. This is a no-op if ft.ft_tparams is empty. *)
-          let (env, implicit_constructor_targs) =
-            Phase.localize_targs
-              ~check_well_kinded:true
-              ~is_method:true
+  let cstr = Env.get_construct env class_ in
+  let mode = Env.get_mode env in
+  match fst cstr with
+  | None ->
+    if
+      ((not (List.is_empty el)) || Option.is_some unpacked_element)
+      && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
+      && Cls.members_fully_known class_
+    then
+      Errors.constructor_no_args p;
+    let (env, tel, _tyl) = exprs env el ~allow_awaitable:(*?*) false in
+    (env, tel, None, TUtils.terr env Reason.Rnone)
+  | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
+    let def_pos = get_pos m in
+    TVis.check_obj_access ~use_pos:p ~def_pos env vis;
+    TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
+    (* Obtain the type of the constructor *)
+    let (env, m) =
+      match deref m with
+      | (r, Tfun ft) ->
+        let ft =
+          Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+        in
+        (* This creates type variables for non-denotable type parameters on constructors.
+         * These are notably different from the tparams on the class, which are handled
+         * at the top of this function. User-written type parameters on constructors
+         * are still a parse error. This is a no-op if ft.ft_tparams is empty. *)
+        let (env, implicit_constructor_targs) =
+          Phase.localize_targs
+            ~check_well_kinded:true
+            ~is_method:true
+            ~def_pos
+            ~use_pos:p
+            ~use_name:"constructor"
+            env
+            ft.ft_tparams
+            []
+        in
+        let (env, ft) =
+          Phase.(
+            localize_ft
+              ~instantiation:
+                {
+                  use_name = "constructor";
+                  use_pos = p;
+                  explicit_targs = implicit_constructor_targs;
+                }
+              ~ety_env
               ~def_pos
-              ~use_pos:p
-              ~use_name:"constructor"
               env
-              ft.ft_tparams
-              []
-          in
-          let (env, ft) =
-            Phase.(
-              localize_ft
-                ~instantiation:
-                  {
-                    use_name = "constructor";
-                    use_pos = p;
-                    explicit_targs = implicit_constructor_targs;
-                  }
-                ~ety_env
-                ~def_pos
-                env
-                ft)
-          in
-          (env, mk (r, Tfun ft))
-        | (r, _) ->
-          Errors.internal_error p "Expected function type for constructor";
-          let ty = TUtils.terr env r in
-          (env, ty)
-      in
-      let (env, (tel, typed_unpack_element, _ty)) =
-        call ~expected:None p env m el unpacked_element
-      in
-      (env, tel, typed_unpack_element, m)
+              ft)
+        in
+        (env, mk (r, Tfun ft))
+      | (r, _) ->
+        Errors.internal_error p "Expected function type for constructor";
+        let ty = TUtils.terr env r in
+        (env, ty)
+    in
+    let (env, (tel, typed_unpack_element, _ty)) =
+      call ~expected:None p env m el unpacked_element
+    in
+    (env, tel, typed_unpack_element, m)
 
 and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
   let exp_min = Typing_defs.arity_min ft in

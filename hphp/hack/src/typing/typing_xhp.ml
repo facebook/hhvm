@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+open Aast
 open Common
 open Typing_defs
 module Env = Typing_env
@@ -155,3 +156,27 @@ let is_xhp_child env pos ty =
     (MakeType.nullable_locl
        r
        (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))
+
+let rewrite_xml_into_new pos sid attributes children =
+  let cid = CI sid in
+  let mk_attribute ix = function
+    | Xhp_simple ((attr_pos, attr_key), exp) ->
+      let attr_aux = attr_pos in
+      let key = (attr_aux, String attr_key) in
+      (key, exp)
+    | Xhp_spread exp ->
+      let attr_key = Format.asprintf "...$%s" (string_of_int ix) in
+      let attr_key_ann = pos in
+      let key = (attr_key_ann, String attr_key) in
+      (key, exp)
+  in
+  let attributes =
+    let attributes = List.mapi ~f:mk_attribute attributes in
+    (pos, Darray (None, attributes))
+  in
+  let children = (pos, Varray (None, children)) in
+  let file = (pos, String "") in
+  let line = (pos, Int "1") in
+  let args = [attributes; children; file; line] in
+  let sid_ann = fst sid in
+  (sid_ann, New ((sid_ann, cid), [], args, None, sid_ann))

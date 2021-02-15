@@ -7,6 +7,7 @@
  *
  *)
 
+open Aast
 open Typing_env_types
 
 (**
@@ -27,3 +28,23 @@ val get_spread_attributes :
  * Verify that an XHP body expression is legal.
  *)
 val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
+
+(* Rewrites an Xml node into a New node. The resulting New expression has
+ * four arguments. This mimics the rewrite undergone before the emitter is
+ * run.
+ *
+ * For example,
+ * `<p colur='blue'>Hi</p>z`
+ * becomes
+ * `new :p(darray['colour' => 'blue'], varray['Hi'],"",1);`
+ *
+ * The first two arguments are for the attributes and children. The last two
+ * arguments are for the filename and line number. These are irrelevant from a
+ * typing perspective, so they are set to arbitrary defaults.
+ *)
+val rewrite_xml_into_new :
+  Pos.t ->
+  sid ->
+  (Pos.t, 'b, 'c, 'd) xhp_attribute list ->
+  (Pos.t, 'b, 'c, 'd) expr list ->
+  (Pos.t, 'b, 'c, 'd) expr

@@ -1,8 +1,8 @@
 <?hh
 
-class :hello {}
-class :selam implements XHPChild {}
-class :salut implements XHPChild {}
+class :hello extends XHPTest {}
+class :selam extends XHPTest implements XHPChild {}
+class :salut extends XHPTest implements XHPChild {}
 
 function f(): void {
   <hello>

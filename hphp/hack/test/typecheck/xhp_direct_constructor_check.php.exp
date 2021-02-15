@@ -1,0 +1,6 @@
+File "xhp_direct_constructor_check.php", line 8, characters 10-13:
+Invalid argument (Typing[4110])
+  File "xhp_direct_constructor_check.php", line 4, characters 31-33:
+  Expected `int`
+  File "xhp_direct_constructor_check.php", line 8, characters 10-13:
+  But got `string`

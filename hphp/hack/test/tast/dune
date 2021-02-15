@@ -3,6 +3,7 @@
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/hhi/XHPTest.hhi)
           (glob_files %{project_root}/test/tast/HH_FLAGS)
           (glob_files %{project_root}/test/tast/*.php)
           (glob_files %{project_root}/test/tast/*.exp)
@@ -41,6 +42,7 @@
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/hhi/XHPTest.hhi)
           (glob_files %{project_root}/test/tast/HH_FLAGS)
           (glob_files %{project_root}/test/tast/*.php)
           (glob_files %{project_root}/test/tast/*.exp)

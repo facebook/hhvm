@@ -17,4 +17,4 @@ class Meh {
   }
 }
 
-class :blah {}
+class :blah extends XHPTest {}

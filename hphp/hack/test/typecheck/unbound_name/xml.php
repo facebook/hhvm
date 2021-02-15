@@ -1,6 +1,6 @@
 <?hh
 
-final class :a:post {}
+final class :a:post extends XHPTest {}
 
 type alias = :a:post;
 

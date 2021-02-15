@@ -13,6 +13,6 @@ function test(): void {
   $x = <xx children=""/>;
 }
 
-class :xx {
+class :xx extends XHPTest {
   attribute string children;
 }

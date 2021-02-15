@@ -1,2 +1,3 @@
 --tast
 --global-inference
+--extra-builtin ../../../hhi/XHPTest.hhi

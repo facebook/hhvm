@@ -9,7 +9,7 @@
  *
  */
 
-final class :ui:link {}
+final class :ui:link extends XHPTest {}
 
 class Bloo {
   public function mybloo(): void {

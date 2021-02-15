@@ -1,6 +1,6 @@
 <?hh // strict
 
-class :foo {
+class :foo extends XHPTest {
   attribute enum {'herp', 'derp'} bar;
 }
 

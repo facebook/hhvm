@@ -15,4 +15,4 @@ class Bloo {
   }
 }
 
-class :div {}
+class :div extends XHPTest {}

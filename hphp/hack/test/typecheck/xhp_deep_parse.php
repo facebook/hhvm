@@ -9,7 +9,7 @@
  *
  */
 
-class :x:xx {}
+class :x:xx extends XHPTest {}
 
 function test(): void {
   $x = <x:xx><x:xy></x:xy></x:xx>;

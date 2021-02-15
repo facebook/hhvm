@@ -1,5 +1,5 @@
 <?hh // strict
-class :foo {
+class :foo extends XHPTest {
   attribute int x = 0;
   public string $x = "";
 }

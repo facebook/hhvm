@@ -1,6 +1,6 @@
 <?hh // strict
 
-class :my-xhp {
+class :my-xhp extends XHPTest {
   attribute this me;
 }
 

@@ -13,6 +13,6 @@ function g(): void {
     </p>;
 }
 
-class :p {
+class :p extends XHPTest {
   attribute string class;
 }

@@ -9,7 +9,7 @@
  *
  */
 
-xhp class x implements XHPChild {}
+xhp class x extends XHPTest implements XHPChild {}
 
 function f1(XHPChild $x): void {}
 

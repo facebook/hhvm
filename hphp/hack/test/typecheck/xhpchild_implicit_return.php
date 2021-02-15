@@ -9,7 +9,7 @@
  *
  */
 
-class :div implements XHPChild {}
+class :div extends XHPTest implements XHPChild {}
 
 function foo(): XHPChild {
   if (1) {

@@ -1,7 +1,7 @@
 <?hh // strict
-xhp class div {}
+xhp class div extends XHPTest {}
 
-xhp class test:default_attributes {
+xhp class test:default_attributes extends XHPTest {
   attribute string mystring = 'mydefault';
 
   protected function render(): :div {
@@ -13,11 +13,11 @@ xhp class test:default_attributes {
  }
 }
 
-xhp class test:parent_class {
+xhp class test:parent_class extends XHPTest {
   attribute string parentstring @required;
 }
 
-xhp class test:child_class {
+xhp class test:child_class extends XHPTest {
   attribute
     :test:parent_class,
     string childstring @required;

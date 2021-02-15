@@ -14,6 +14,6 @@ class :subfoo extends :foo {
   attribute string age;
 }
 
-class :bar {
+class :bar extends XHPTest {
   attribute int age;
 }

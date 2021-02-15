@@ -15,6 +15,6 @@ class Dude {
   }
 }
 
-class :fbt {
+class :fbt extends XHPTest {
   attribute string project;
 }

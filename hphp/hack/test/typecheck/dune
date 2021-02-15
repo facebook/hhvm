@@ -53,6 +53,7 @@ let () =
           %%{project_root}/test/verify.py
           %%{project_root}/test/review.sh
           %%{project_root}/test/hhi/expr_tree.hhi
+          %%{project_root}/test/hhi/XHPTest.hhi
           %s)" (String.concat "\n          " files) in
   (* typecheck *)
   let typecheck_deps = deps files_tc in

@@ -1,7 +1,7 @@
 <?hh // strict
 
 namespace {
-  xhp class foo:bar {}
+  xhp class foo:bar extends XHPTest {}
 
   function usage_same(): void {
     <foo:bar/>;

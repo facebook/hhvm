@@ -1,7 +1,7 @@
 <?hh // strict
 
-class :foo { }
-class :baz {
+class :foo extends XHPTest { }
+class :baz extends XHPTest {
   attribute string name;
 }
 

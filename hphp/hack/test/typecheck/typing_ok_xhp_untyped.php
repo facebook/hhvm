@@ -11,7 +11,7 @@
 
 class A implements XHPChild {}
 
-class :x:dumb {}
+class :x:dumb extends XHPTest {}
 
 function foo($y): void {
   $y = <x:dumb>{0}{'hello'}{$y}{new A()}</x:dumb>;

@@ -7,6 +7,6 @@ class A {
   }
 }
 
-class :cls {
+class :cls extends XHPTest {
   public ?int $x;
 }

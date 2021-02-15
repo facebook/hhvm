@@ -1,5 +1,5 @@
 <?hh // partial
-final class :x {
+final class :x extends XHPTest {
   public function foo(): string {
     return "";
   }

@@ -1,7 +1,7 @@
 <?hh // strict
 
 namespace first {
-  xhp class firstxhp implements \XHPChild {}
+  xhp class firstxhp extends \XHPTest implements \XHPChild {}
 }
 namespace second {
   xhp class foo extends \first\firstxhp {}

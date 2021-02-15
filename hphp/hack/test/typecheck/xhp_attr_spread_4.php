@@ -4,7 +4,7 @@ class :foo {
   attribute int name, int age;
 }
 
-class :bar {
+class :bar extends XHPTest {
   attribute string name;
 }
 

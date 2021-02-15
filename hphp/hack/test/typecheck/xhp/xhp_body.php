@@ -1,6 +1,6 @@
 <?hh // strict
 
-class :xhp implements XHPChild {}
+class :xhp extends XHPTest implements XHPChild {}
 class :foo extends :xhp {}
 class :bar extends :xhp {}
 

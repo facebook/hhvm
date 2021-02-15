@@ -11,7 +11,7 @@
 
 class A implements XHPChild {}
 
-class :x:dumb {}
+class :x:dumb extends XHPTest {}
 
 function foo(mixed $x, string $s, ConstVector<string> $cs, dynamic $d): void {
   // This is allowed

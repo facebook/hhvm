@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class :a {
+class :a extends XHPTest {
   attribute int i;
   attribute string s @required;
 

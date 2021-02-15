@@ -9,7 +9,7 @@
  *
  */
 
-class :meh {
+class :meh extends XHPTest {
   attribute
     string if,
     string else,

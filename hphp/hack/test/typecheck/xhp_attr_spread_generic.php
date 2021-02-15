@@ -1,10 +1,10 @@
 <?hh // strict
 
-class :my-foo<T> {
+class :my-foo<T> extends XHPTest {
   attribute vec<T> my-vec;
 }
 
-class :my-bar {
+class :my-bar extends XHPTest {
   attribute vec<int> my-vec;
 }
 

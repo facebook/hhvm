@@ -1,7 +1,14 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class :xhp implements XHPChild {}
+class :xhp implements XHPChild {
+  public function __construct(
+    darray<string, mixed> $attr,
+    varray<mixed> $children,
+    string $file,
+    int $line
+  ) {}
+}
 
 class :foo extends :xhp {
   attribute

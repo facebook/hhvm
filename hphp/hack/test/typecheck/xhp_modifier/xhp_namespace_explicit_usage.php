@@ -3,7 +3,7 @@
 
 namespace foo;
 
-xhp class bar {}
+xhp class bar extends \XHPTest {}
 //// xhp_namespace_explicit_usage_usage.php
 <?hh // strict
 

@@ -481,13 +481,11 @@ fn print_ctx_constant<W: Write>(
     w: &mut W,
     c: &HhasCtxConstant,
 ) -> Result<(), W::Error> {
-    ctx.newline(w)?;
-    concat_str_by(w, " ", [".ctx", &c.name])?;
     if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects, |c| c.to_string()) {
-        w.write(" ")?;
-        w.write(coeffects)?;
+        ctx.newline(w)?;
+        concat_str_by(w, " ", [".ctx", &c.name, coeffects.as_ref()])?;
+        w.write(";")?;
     }
-    w.write(";")?;
     Ok(())
 }
 

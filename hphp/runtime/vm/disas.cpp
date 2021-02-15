@@ -732,6 +732,16 @@ void print_cls_inheritance_list(Output& out, const PreClass* cls) {
   }
 }
 
+void print_enum_includes(Output& out, const PreClass* cls) {
+  if (!cls->includedEnums().empty()) {
+    out.fmt(" enum_includes (");
+    for (auto i = uint32_t{}; i < cls->includedEnums().size(); ++i) {
+      out.fmt("{}{}", i != 0 ? " " : "", cls->includedEnums()[i].get());
+    }
+    out.fmt(")");
+  }
+}
+
 void print_cls_enum_ty(Output& out, const PreClass* cls) {
   if (cls->attrs() & AttrEnum) {
     out.fmtln(".enum_ty <{}>;", type_constraint(cls->enumBaseTy()));
@@ -858,6 +868,7 @@ void print_cls(Output& out, const PreClass* cls) {
     name,
     format_line_pair(cls));
   print_cls_inheritance_list(out, cls);
+  print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
   indented(out, [&] { print_cls_directives(out, cls); });

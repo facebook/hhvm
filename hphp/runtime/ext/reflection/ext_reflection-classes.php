@@ -1322,6 +1322,7 @@ namespace HH {
     OF_DARRAY = 24;
     OF_VARRAY = 25;
     OF_VARRAY_OR_DARRAY = 26;
+    OF_ANY_ARRAY = 27;
     OF_NULL = 28;
     OF_NOTHING = 29;
     OF_DYNAMIC = 30;

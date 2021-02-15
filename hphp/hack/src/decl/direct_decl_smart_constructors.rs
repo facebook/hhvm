@@ -729,6 +729,7 @@ pub enum Node<'a> {
     Constructor(&'a ConstructorNode<'a>),
     Method(&'a MethodNode<'a>),
     Property(&'a PropertyNode<'a>),
+    EnumUse(&'a Node<'a>),
     TraitUse(&'a Node<'a>),
     XhpClassAttributeDeclaration(&'a XhpClassAttributeDeclarationNode<'a>),
     XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
@@ -4080,7 +4081,23 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             _ => None,
         };
 
-        let includes = self.slice(use_clauses.iter().filter_map(|&node| self.node_to_ty(node)));
+        let mut includes_len = 0;
+        for element in use_clauses.iter() {
+            match element {
+                Node::EnumUse(names) => includes_len += names.len(),
+                _ => {}
+            }
+        }
+        let mut includes = Vec::with_capacity_in(includes_len, self.arena);
+        for element in use_clauses.iter() {
+            match element {
+                Node::EnumUse(names) => {
+                    includes.extend(names.iter().filter_map(|&name| self.node_to_ty(name)))
+                }
+                _ => {}
+            }
+        }
+        let includes = includes.into_bump_slice();
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -4118,6 +4135,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         self.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SK::EnumDeclaration)
+    }
+
+    fn make_enum_use(&mut self, _keyword: Self::R, names: Self::R, _semicolon: Self::R) -> Self::R {
+        Node::EnumUse(self.alloc(names))
     }
 
     fn make_enumerator(

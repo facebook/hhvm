@@ -87,7 +87,6 @@ time_t start_time();
 struct ExecutionContext;
 
 void hphp_process_init();
-void cli_server_init();
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport = nullptr);
 

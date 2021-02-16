@@ -94,6 +94,8 @@ module Fmt = struct
 
   let angles pp_v ppf v = surround "<" ">" pp_v ppf v
 
+  let brackets pp_v ppf v = surround "[" "]" pp_v ppf v
+
   let comma ppf _ =
     string ppf ",";
     sp ppf ()
@@ -1160,24 +1162,40 @@ end = struct
         ppf
         hints
     | Aast.(
-        Hfun { hf_param_tys; hf_param_kinds; hf_variadic_ty; hf_return_ty; _ })
-      ->
-      (* TODO(vmladenov) support capability types here *)
+        Hfun
+          {
+            hf_param_tys;
+            hf_param_kinds;
+            hf_variadic_ty;
+            hf_return_ty;
+            hf_ctxs;
+            _;
+          }) ->
+      let pp_typed_param ppf kp =
+        Fmt.(pair ~sep:nop (option @@ suffix sp pp_paramkind) pp_hint) ppf kp
+      in
+      let pp_fun_params ppf (ps, v) =
+        Fmt.(
+          parens
+          @@ pair
+               ~sep:nop
+               (list ~sep:comma pp_typed_param)
+               (option @@ surround ", " "..." @@ pp_hint))
+          ppf
+          (ps, v)
+      in
+      let all_params =
+        (List.zip_exn hf_param_kinds hf_param_tys, hf_variadic_ty)
+      in
       Fmt.(
         parens
         @@ pair
              ~sep:colon
              ( prefix (const string "function")
-             @@ parens
-             @@ pair
-                  ~sep:nop
-                  ( list ~sep:comma
-                  @@ pair ~sep:nop (option @@ suffix sp pp_paramkind) pp_hint )
-                  (option @@ surround ", " "..." @@ pp_hint) )
+             @@ pair ~sep:nop pp_fun_params (option pp_contexts) )
              pp_hint)
         ppf
-        ( (List.zip_exn hf_param_kinds hf_param_tys, hf_variadic_ty),
-          hf_return_ty )
+        ((all_params, hf_ctxs), hf_return_ty)
     | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map }) ->
       Fmt.(
         prefix (const string "shape")
@@ -1206,6 +1224,9 @@ end = struct
     | Ast_defs.SFlit_str (_, s) -> Fmt.(surround "'" "'" string) ppf s
     | Ast_defs.SFclass_const ((_, c), (_, s)) ->
       Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
+
+  and pp_contexts ppf (_, ctxts) =
+    Fmt.(brackets @@ list ~sep:comma pp_hint) ppf ctxts
 
   let pp_user_attrs ppf attrs =
     match

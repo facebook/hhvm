@@ -144,3 +144,11 @@ type TydefWithFun<T> = (
 );
 
 function function_in_typedef<T>(TydefWithFun<T> $y):void {}
+
+type TydefWithCapabilities<T> = (
+  (function(): void),
+  (function()[]: void),
+  (function()[write_props,rx]: void),
+);
+
+function contexts_in_typedef<T>(TydefWithCapabilities<T> $y):void {}

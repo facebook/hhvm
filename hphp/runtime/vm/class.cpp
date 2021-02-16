@@ -3853,6 +3853,7 @@ void Class::setIncludedEnums() {
       raise_error("%s cannot include %s - it is not an enum",
                   m_preClass->name()->data(), cp->name()->data());
     }
+    m_preClass->enforceInMaybeSealedParentWhitelist(cp->preClass());
     auto cp_baseType = cp->m_enumBaseTy;
     if (m_enumBaseTy &&
         (!cp_baseType ||

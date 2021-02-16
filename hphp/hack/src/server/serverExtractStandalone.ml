@@ -1167,11 +1167,13 @@ end = struct
         parens
         @@ pair
              ~sep:colon
-             (pair
-                ~sep:nop
-                ( list ~sep:comma
-                @@ pair ~sep:nop (option @@ suffix sp pp_paramkind) pp_hint )
-                (option @@ surround ", " "..." @@ pp_hint))
+             ( prefix (const string "function")
+             @@ parens
+             @@ pair
+                  ~sep:nop
+                  ( list ~sep:comma
+                  @@ pair ~sep:nop (option @@ suffix sp pp_paramkind) pp_hint )
+                  (option @@ surround ", " "..." @@ pp_hint) )
              pp_hint)
         ppf
         ( (List.zip_exn hf_param_kinds hf_param_tys, hf_variadic_ty),

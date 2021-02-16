@@ -137,3 +137,10 @@ class WithTypeAliasHint {
     return $this->x;
   }
 }
+
+type TydefWithFun<T> = (
+  (function(int, ?T): void),
+  (function(int, float...):void)
+);
+
+function function_in_typedef<T>(TydefWithFun<T> $y):void {}

@@ -82,6 +82,9 @@ let check =
         if we recurse on expressions in the visitor. We expect this to generally
         be quite small, though. *)
       | (_, Obj_get (e1, _, _, _)) -> self#ty_expr e1
+      | (_, Await e) -> self#ty_expr e
+      (* $array[$x] access *)
+      | (_, Array_get (e, Some _)) -> self#ty_expr e
       | _ -> Mut
 
     method assign lval rval =

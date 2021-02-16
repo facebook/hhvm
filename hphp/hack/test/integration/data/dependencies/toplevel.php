@@ -152,3 +152,15 @@ type TydefWithCapabilities<T> = (
 );
 
 function contexts_in_typedef<T>(TydefWithCapabilities<T> $y):void {}
+
+function with_argument_dependent_context_callee(
+  (function()[_]: void) $f,
+)[write_props, ctx $f]: void {
+  $f();
+}
+
+function with_argument_dependent_context()[ policied_local, rx]: void {
+  with_argument_dependent_context_callee(()[policied_local] ==> {
+    echo "write";
+  });
+}

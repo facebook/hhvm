@@ -956,6 +956,9 @@ end = struct
     | Some (_, name) -> name
     | None -> obj_name
 
+  let is_contextual_param Aast.{ tp_name = (_, name); _ } =
+    String.is_substring ~substring:"Tctx" name
+
   (** Generate an initial value based on type hint *)
   let init_value ctx hint =
     let unsupported_hint _ =
@@ -1291,7 +1294,8 @@ end = struct
         Fmt.(list ~sep:sp pp_constraint)
         tp_constraints)
 
-  and pp_tparams ppf = function
+  and pp_tparams ppf ps =
+    match List.filter ~f:Fn.(compose not is_contextual_param) ps with
     | [] -> ()
     | ps -> Fmt.(angles @@ list ~sep:comma pp_tparam) ppf ps
 
@@ -1308,6 +1312,27 @@ end = struct
       Fmt.string ppf param_name
 
   let pp_fun_param_default ppf _ = Fmt.pf ppf {| = \%s()|} __FN_MAKE_DEFAULT__
+
+  let update_hfun_context (pos, hints) ~name =
+    ( pos,
+      List.map hints ~f:(function
+          | (pos, Aast_defs.Hfun_context nm) when String.(nm = name) ->
+            (pos, Aast_defs.Hvar "_")
+          | hint -> hint) )
+
+  let update_hint_fun_context hint_fun ~name =
+    Aast_defs.
+      {
+        hint_fun with
+        hf_ctxs =
+          Option.map ~f:(update_hfun_context ~name) hint_fun.Aast_defs.hf_ctxs;
+      }
+
+  let update_fun_context type_hint ~name =
+    match type_hint with
+    | (nm, Some (pos, Aast_defs.Hfun hint_fun)) ->
+      (nm, Some (pos, Aast_defs.Hfun (update_hint_fun_context hint_fun ~name)))
+    | o -> o
 
   let pp_fun_param
       ppf
@@ -1330,7 +1355,9 @@ end = struct
         Fmt.(option pp_paramkind)
         param_callconv
         (pp_type_hint ~is_ret_type:false)
-        param_type_hint
+        (* Type hint for parameter $f used for contextful function must be a
+        function type hint whose context is exactly [_] *)
+        (update_fun_context ~name:param_name param_type_hint)
         pp_fun_param_name
         (param_is_variadic, param_name)
         Fmt.(option pp_fun_param_default)
@@ -1456,12 +1483,20 @@ end = struct
     let pp_fun
         ppf
         ( name,
-          Aast.{ f_user_attributes; f_tparams; f_variadic; f_params; f_ret; _ }
-        ) =
+          Aast.
+            {
+              f_user_attributes;
+              f_tparams;
+              f_variadic;
+              f_params;
+              f_ret;
+              f_ctxs;
+              _;
+            } ) =
       Fmt.(
         pf
           ppf
-          "%a function %s%a%a%a {throw new \\Exception();}"
+          "%a function %s%a%a%a%a {throw new \\Exception();}"
           pp_user_attrs
           f_user_attributes
           (strip_ns name)
@@ -1469,6 +1504,8 @@ end = struct
           f_tparams
           pp_fun_params
           (f_params, f_variadic)
+          (option pp_contexts)
+          f_ctxs
           (pp_type_hint ~is_ret_type:true)
           f_ret)
 

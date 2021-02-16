@@ -200,6 +200,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\respects_newtype_abstraction",
             "\\function_in_typedef",
             "\\contexts_in_typedef",
+            "\\with_argument_dependent_context",
         ]
 
         for function_name in function_names:

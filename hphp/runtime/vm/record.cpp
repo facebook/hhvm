@@ -105,7 +105,7 @@ void RecordDesc::setRecordDescHandle(
 
 bool RecordDesc::verifyPersistent() const {
   if (!isPersistent()) return false;
-  if (m_parent && !recordHasPersistentRDS(m_parent.get())) return false;
+  assertx(!m_parent || recordHasPersistentRDS(m_parent.get()));
   return true;
 }
 

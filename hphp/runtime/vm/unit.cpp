@@ -294,9 +294,9 @@ Func* Unit::getCachedEntryPoint() const {
 namespace {
 
 void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
-  bool const isPersistent =
-    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
-    newRecord->verifyPersistent();
+  bool const isPersistent = newRecord->isPersistent();
+  assertx(isPersistent == (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative));
+  assertx(!isPersistent || newRecord->verifyPersistent());
   nameList->m_cachedRecordDesc.bind(
     isPersistent? rds::Mode::Persistent : rds::Mode::Normal,
     rds::LinkName{"NERecord", newRecord->name()}
@@ -881,8 +881,13 @@ void Unit::initialMerge() {
             needsCompact = true;
           }
           break;
-        case MergeKind::Record:
+        case MergeKind::Record: {
+          auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
+          if (m_preRecords[recordId]->attrs() & AttrPersistent) {
+            needsCompact = true;
+          }
           break;
+        }
         case MergeKind::Define: {
           auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
           if (m_constants[constantId].attrs & AttrPersistent) {
@@ -931,7 +936,8 @@ void Unit::merge() {
 
 static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
                                const Unit::TypeAliasVec& aliasInfo,
-                               const Unit::ConstantVec& constantInfo) {
+                               const Unit::ConstantVec& constantInfo,
+                               const CompactVector<PreRecordDescPtr>& recordInfo) {
   using MergeKind = Unit::MergeKind;
 
   Func** it = in->funcBegin();
@@ -1005,7 +1011,12 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         break;
       }
       case MergeKind::Record: {
-        if (out) out->mergeableObj(oix++) = obj;
+        auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
+        if (recordInfo[recordId]->attrs() & AttrPersistent) {
+          delta++;
+        } else if (out) {
+          out->mergeableObj(oix++) = obj;
+        }
         break;
       }
       case MergeKind::TypeAlias: {
@@ -1290,7 +1301,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
      * and any requires of modules that are (now) empty
      */
     size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
-                                    m_constants);
+                                    m_constants, m_preRecords);
     MergeInfo* newMi = mi;
     if (delta) {
       newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
@@ -1302,7 +1313,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
      * readers. But thats ok, because it doesnt matter
      * whether they see the old contents or the new.
      */
-    compactMergeInfo(mi, newMi, m_typeAliases, m_constants);
+    compactMergeInfo(mi, newMi, m_typeAliases, m_constants, m_preRecords);
     if (newMi != mi) {
       this->m_mergeInfo.store(newMi, std::memory_order_release);
       Treadmill::deferredFree(mi);

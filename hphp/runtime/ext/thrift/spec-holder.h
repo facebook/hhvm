@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -25,7 +27,8 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/util/fixed-vector.h"
 
-#include <folly/AtomicHashMap.h>
+#include <folly/concurrency/ConcurrentHashMap.h>
+#include <folly/Portability.h>
 
 namespace HPHP { namespace thrift {
 
@@ -44,29 +47,15 @@ struct FieldSpec {
 
 using StructSpec = FixedVector<FieldSpec>;
 
-using SpecCacheKey = std::tuple<const ArrayData*, const Class*, bool>;
-
-struct SpecCacheCompare {
-  bool equal(const SpecCacheKey& a, const SpecCacheKey& b) const {
-    return a == b;
-  }
-  size_t hash(const SpecCacheKey& k) const {
-    return
-      folly::hash::hash_combine(
-        folly::hash::hash_combine(
-          pointer_hash<ArrayData>{}(std::get<0>(k)),
-          pointer_hash<Class>{}(std::get<1>(k))
-        ),
-        std::get<2>(k)
-      );
-  }
-};
-
-using SpecCacheMap = tbb::concurrent_hash_map<
-  SpecCacheKey,
-  StructSpec*,
-  SpecCacheCompare
->;
+using SpecCacheMap =
+#if FOLLY_SSE_PREREQ(4, 2)
+    folly::ConcurrentHashMapSIMD
+#else
+    folly::ConcurrentHashMap
+#endif
+    <std::tuple<const ArrayData*, const Class*, bool>,
+     // Store the pointer as the non-SIMD map doesn't have reference stability.
+     std::unique_ptr<StructSpec>>;
 
 // Provides safe access to specifications.
 struct SpecHolder {
@@ -86,25 +75,18 @@ struct SpecHolder {
       isBinary = false;
     }
 
-    SpecCacheKey key{ spec.get(), cls, isBinary };
+    SpecCacheMap::key_type key{ spec.get(), cls, isBinary };
 
     {
-      SpecCacheMap::const_accessor acc;
-      if (s_specCacheMap.find(acc, key)) return *acc->second;
+      const auto it = s_specCacheMap.find(key);
+      if (it != s_specCacheMap.cend()) return *it->second;
     }
 
     if (spec->isStatic()) {
       // Static specs are kept by the cache.
-      SpecCacheMap::accessor acc;
-      if (s_specCacheMap.insert(acc, key)) {
-        try {
-          acc->second = new StructSpec{compileSpec(spec, cls, isBinary)};
-        } catch (...) {
-          s_specCacheMap.erase(acc);
-          throw;
-        }
-      }
-      return *acc->second;
+      const auto [it, _] = s_specCacheMap.try_emplace(
+        key, std::make_unique<StructSpec>(compileSpec(spec, cls, isBinary)));
+      return *it->second;
     } else {
       // Temporary specs are kept by m_tempSpec.
       StructSpec temp(compileSpec(spec, nullptr, false));

@@ -98,8 +98,7 @@ _readField_type:
   }
 _readField_name:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->name);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->name, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -115,9 +114,8 @@ _readField_name:
 _readField_annotations:
   {
     _readState.beforeSubobject(iprot);
-    
     this->annotations = std::unordered_map<::std::string, ::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::read(*iprot, this->annotations);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::readWithContext(*iprot, this->annotations, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.annotations = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -309,8 +307,7 @@ void DataType::readNoXfer(Protocol_* iprot) {
   }
 _readField_name:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->name);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->name, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -326,9 +323,8 @@ _readField_name:
 _readField_fields:
   {
     _readState.beforeSubobject(iprot);
-    
     this->fields = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::read(*iprot, this->fields);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::readWithContext(*iprot, this->fields, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.fields = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -375,9 +371,8 @@ _readField_valueType:
 _readField_enumValues:
   {
     _readState.beforeSubobject(iprot);
-    
     this->enumValues = std::unordered_map<::std::string, int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::read(*iprot, this->enumValues);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::readWithContext(*iprot, this->enumValues, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.enumValues = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -573,9 +568,8 @@ void Schema::readNoXfer(Protocol_* iprot) {
 _readField_dataTypes:
   {
     _readState.beforeSubobject(iprot);
-    
     this->dataTypes = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>::read(*iprot, this->dataTypes);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>::readWithContext(*iprot, this->dataTypes, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.dataTypes = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -592,9 +586,8 @@ _readField_dataTypes:
 _readField_names:
   {
     _readState.beforeSubobject(iprot);
-    
     this->names = std::unordered_map<::std::string, int64_t>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int64_t>>::read(*iprot, this->names);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int64_t>>::readWithContext(*iprot, this->names, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.names = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END

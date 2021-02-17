@@ -17,11 +17,8 @@ template <>
 struct ForEachField<::apache::thrift::frozen::schema::Field> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::frozen::schema::Field>;
-
-    f(get_metadata(0), static_cast<T&&>(t).layoutId_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).offset_ref()...);
+    f(0, static_cast<T&&>(t).layoutId_ref()...);
+    f(1, static_cast<T&&>(t).offset_ref()...);
   }
 };
 
@@ -29,13 +26,10 @@ template <>
 struct ForEachField<::apache::thrift::frozen::schema::Layout> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::frozen::schema::Layout>;
-
-    f(get_metadata(0), static_cast<T&&>(t).size_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).bits_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).fields_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).typeName_ref()...);
+    f(0, static_cast<T&&>(t).size_ref()...);
+    f(1, static_cast<T&&>(t).bits_ref()...);
+    f(2, static_cast<T&&>(t).fields_ref()...);
+    f(3, static_cast<T&&>(t).typeName_ref()...);
   }
 };
 
@@ -43,13 +37,10 @@ template <>
 struct ForEachField<::apache::thrift::frozen::schema::Schema> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::frozen::schema::Schema>;
-
-    f(get_metadata(0), static_cast<T&&>(t).fileVersion_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).relaxTypeChecks_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).layouts_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).rootLayout_ref()...);
+    f(0, static_cast<T&&>(t).fileVersion_ref()...);
+    f(1, static_cast<T&&>(t).relaxTypeChecks_ref()...);
+    f(2, static_cast<T&&>(t).layouts_ref()...);
+    f(3, static_cast<T&&>(t).rootLayout_ref()...);
   }
 };
 } // namespace detail

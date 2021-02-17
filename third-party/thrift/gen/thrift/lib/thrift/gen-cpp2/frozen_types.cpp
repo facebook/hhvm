@@ -100,6 +100,7 @@ template uint32_t Field::serializedSizeZC<>(apache::thrift::CompactProtocolWrite
 
 
 }}}} // apache::thrift::frozen::schema
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -209,6 +210,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}}} // apache::thrift::frozen::schema
+
 namespace apache {
 namespace thrift {
 namespace detail {

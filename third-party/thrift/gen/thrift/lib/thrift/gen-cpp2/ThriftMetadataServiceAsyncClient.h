@@ -27,11 +27,10 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
   }
 
 
-
   virtual void getThriftServiceMetadata(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
+  void getThriftServiceMetadataImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
  public:
 
   virtual void sync_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);
@@ -47,35 +46,35 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
   folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata() {
-    auto _task = semifuture_getThriftServiceMetadata();
+    auto task = semifuture_getThriftServiceMetadata();
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
   folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-    auto _task = semifuture_getThriftServiceMetadata(rpcOptions);
+    auto task = semifuture_getThriftServiceMetadata(rpcOptions);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
   folly::coro::Task<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-    auto _task = header_semifuture_getThriftServiceMetadata(rpcOptions);
+    auto task = header_semifuture_getThriftServiceMetadata(rpcOptions);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
@@ -90,7 +89,8 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
   virtual folly::exception_wrapper recv_instance_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void getThriftServiceMetadataT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
+  void getThriftServiceMetadataT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> getThriftServiceMetadataCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

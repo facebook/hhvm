@@ -159,6 +159,7 @@ template uint32_t StructField::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // apache::thrift::reflection
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -292,6 +293,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::reflection
+
 namespace apache {
 namespace thrift {
 namespace detail {

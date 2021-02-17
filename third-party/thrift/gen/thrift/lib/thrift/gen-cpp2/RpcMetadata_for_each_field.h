@@ -17,9 +17,6 @@ template <>
 struct ForEachField<::apache::thrift::ZlibCompressionCodecConfig> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::ZlibCompressionCodecConfig>;
-
   }
 };
 
@@ -27,9 +24,6 @@ template <>
 struct ForEachField<::apache::thrift::ZstdCompressionCodecConfig> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::ZstdCompressionCodecConfig>;
-
   }
 };
 
@@ -37,11 +31,8 @@ template <>
 struct ForEachField<::apache::thrift::CodecConfig> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::CodecConfig>;
-
-    f(get_metadata(0), static_cast<T&&>(t).zlibConfig_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).zstdConfig_ref()...);
+    f(0, static_cast<T&&>(t).zlibConfig_ref()...);
+    f(1, static_cast<T&&>(t).zstdConfig_ref()...);
   }
 };
 
@@ -49,11 +40,8 @@ template <>
 struct ForEachField<::apache::thrift::CompressionConfig> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::CompressionConfig>;
-
-    f(get_metadata(0), static_cast<T&&>(t).codecConfig_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).compressionSizeLimit_ref()...);
+    f(0, static_cast<T&&>(t).codecConfig_ref()...);
+    f(1, static_cast<T&&>(t).compressionSizeLimit_ref()...);
   }
 };
 
@@ -61,11 +49,8 @@ template <>
 struct ForEachField<::apache::thrift::NegotiationParameters> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::NegotiationParameters>;
-
-    f(get_metadata(0), static_cast<T&&>(t).compressionAlgos_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).useStopTLS_ref()...);
+    f(0, static_cast<T&&>(t).compressionAlgos_ref()...);
+    f(1, static_cast<T&&>(t).useStopTLS_ref()...);
   }
 };
 
@@ -73,11 +58,8 @@ template <>
 struct ForEachField<::apache::thrift::InteractionCreate> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::InteractionCreate>;
-
-    f(get_metadata(0), static_cast<T&&>(t).interactionId_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).interactionName_ref()...);
+    f(0, static_cast<T&&>(t).interactionId_ref()...);
+    f(1, static_cast<T&&>(t).interactionName_ref()...);
   }
 };
 
@@ -85,10 +67,7 @@ template <>
 struct ForEachField<::apache::thrift::InteractionTerminate> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::InteractionTerminate>;
-
-    f(get_metadata(0), static_cast<T&&>(t).interactionId_ref()...);
+    f(0, static_cast<T&&>(t).interactionId_ref()...);
   }
 };
 
@@ -96,26 +75,22 @@ template <>
 struct ForEachField<::apache::thrift::RequestRpcMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::RequestRpcMetadata>;
-
-    f(get_metadata(0), static_cast<T&&>(t).protocol_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).name_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).kind_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).seqId_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).clientTimeoutMs_ref()...);
-    f(get_metadata(5), static_cast<T&&>(t).queueTimeoutMs_ref()...);
-    f(get_metadata(6), static_cast<T&&>(t).priority_ref()...);
-    f(get_metadata(7), static_cast<T&&>(t).otherMetadata_ref()...);
-    f(get_metadata(8), static_cast<T&&>(t).host_ref()...);
-    f(get_metadata(9), static_cast<T&&>(t).url_ref()...);
-    f(get_metadata(10), static_cast<T&&>(t).crc32c_ref()...);
-    f(get_metadata(11), static_cast<T&&>(t).flags_ref()...);
-    f(get_metadata(12), static_cast<T&&>(t).loadMetric_ref()...);
-    f(get_metadata(13), static_cast<T&&>(t).compression_ref()...);
-    f(get_metadata(14), static_cast<T&&>(t).compressionConfig_ref()...);
-    f(get_metadata(15), static_cast<T&&>(t).interactionId_ref()...);
-    f(get_metadata(16), static_cast<T&&>(t).interactionCreate_ref()...);
+    f(0, static_cast<T&&>(t).protocol_ref()...);
+    f(1, static_cast<T&&>(t).name_ref()...);
+    f(2, static_cast<T&&>(t).kind_ref()...);
+    f(3, static_cast<T&&>(t).seqId_ref()...);
+    f(4, static_cast<T&&>(t).clientTimeoutMs_ref()...);
+    f(5, static_cast<T&&>(t).queueTimeoutMs_ref()...);
+    f(6, static_cast<T&&>(t).priority_ref()...);
+    f(7, static_cast<T&&>(t).otherMetadata_ref()...);
+    f(8, static_cast<T&&>(t).crc32c_ref()...);
+    f(9, static_cast<T&&>(t).loadMetric_ref()...);
+    f(10, static_cast<T&&>(t).compression_ref()...);
+    f(11, static_cast<T&&>(t).compressionConfig_ref()...);
+    f(12, static_cast<T&&>(t).interactionId_ref()...);
+    f(13, static_cast<T&&>(t).interactionCreate_ref()...);
+    f(14, static_cast<T&&>(t).clientId_ref()...);
+    f(15, static_cast<T&&>(t).serviceTraceMeta_ref()...);
   }
 };
 
@@ -123,9 +98,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadResponseMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadResponseMetadata>;
-
   }
 };
 
@@ -133,9 +105,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadDeclaredExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadDeclaredExceptionMetadata>;
-
   }
 };
 
@@ -143,9 +112,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadProxyExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadProxyExceptionMetadata>;
-
   }
 };
 
@@ -153,9 +119,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadProxiedExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadProxiedExceptionMetadata>;
-
   }
 };
 
@@ -163,9 +126,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadAppClientExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadAppClientExceptionMetadata>;
-
   }
 };
 
@@ -173,9 +133,6 @@ template <>
 struct ForEachField<::apache::thrift::PayloadAppServerExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadAppServerExceptionMetadata>;
-
   }
 };
 
@@ -183,14 +140,11 @@ template <>
 struct ForEachField<::apache::thrift::PayloadExceptionMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadExceptionMetadata>;
-
-    f(get_metadata(0), static_cast<T&&>(t).declaredException_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).proxyException_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).proxiedException_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).appClientException_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).appServerException_ref()...);
+    f(0, static_cast<T&&>(t).declaredException_ref()...);
+    f(1, static_cast<T&&>(t).proxyException_ref()...);
+    f(2, static_cast<T&&>(t).proxiedException_ref()...);
+    f(3, static_cast<T&&>(t).appClientException_ref()...);
+    f(4, static_cast<T&&>(t).appServerException_ref()...);
   }
 };
 
@@ -198,12 +152,9 @@ template <>
 struct ForEachField<::apache::thrift::PayloadExceptionMetadataBase> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadExceptionMetadataBase>;
-
-    f(get_metadata(0), static_cast<T&&>(t).name_utf8_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).what_utf8_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).metadata_ref()...);
+    f(0, static_cast<T&&>(t).name_utf8_ref()...);
+    f(1, static_cast<T&&>(t).what_utf8_ref()...);
+    f(2, static_cast<T&&>(t).metadata_ref()...);
   }
 };
 
@@ -211,11 +162,8 @@ template <>
 struct ForEachField<::apache::thrift::PayloadMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::PayloadMetadata>;
-
-    f(get_metadata(0), static_cast<T&&>(t).responseMetadata_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).exceptionMetadata_ref()...);
+    f(0, static_cast<T&&>(t).responseMetadata_ref()...);
+    f(1, static_cast<T&&>(t).exceptionMetadata_ref()...);
   }
 };
 
@@ -223,9 +171,6 @@ template <>
 struct ForEachField<::apache::thrift::ProxiedPayloadMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::ProxiedPayloadMetadata>;
-
   }
 };
 
@@ -233,17 +178,14 @@ template <>
 struct ForEachField<::apache::thrift::ResponseRpcMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::ResponseRpcMetadata>;
-
-    f(get_metadata(0), static_cast<T&&>(t).protocol_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).seqId_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).otherMetadata_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).load_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).crc32c_ref()...);
-    f(get_metadata(5), static_cast<T&&>(t).compression_ref()...);
-    f(get_metadata(6), static_cast<T&&>(t).payloadMetadata_ref()...);
-    f(get_metadata(7), static_cast<T&&>(t).proxiedPayloadMetadata_ref()...);
+    f(0, static_cast<T&&>(t).protocol_ref()...);
+    f(1, static_cast<T&&>(t).seqId_ref()...);
+    f(2, static_cast<T&&>(t).otherMetadata_ref()...);
+    f(3, static_cast<T&&>(t).load_ref()...);
+    f(4, static_cast<T&&>(t).crc32c_ref()...);
+    f(5, static_cast<T&&>(t).compression_ref()...);
+    f(6, static_cast<T&&>(t).payloadMetadata_ref()...);
+    f(7, static_cast<T&&>(t).proxiedPayloadMetadata_ref()...);
   }
 };
 
@@ -251,14 +193,11 @@ template <>
 struct ForEachField<::apache::thrift::ResponseRpcError> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::ResponseRpcError>;
-
-    f(get_metadata(0), static_cast<T&&>(t).name_utf8_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).what_utf8_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).category_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).code_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).load_ref()...);
+    f(0, static_cast<T&&>(t).name_utf8_ref()...);
+    f(1, static_cast<T&&>(t).what_utf8_ref()...);
+    f(2, static_cast<T&&>(t).category_ref()...);
+    f(3, static_cast<T&&>(t).code_ref()...);
+    f(4, static_cast<T&&>(t).load_ref()...);
   }
 };
 
@@ -266,11 +205,18 @@ template <>
 struct ForEachField<::apache::thrift::StreamPayloadMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::StreamPayloadMetadata>;
+    f(0, static_cast<T&&>(t).compression_ref()...);
+    f(1, static_cast<T&&>(t).otherMetadata_ref()...);
+  }
+};
 
-    f(get_metadata(0), static_cast<T&&>(t).compression_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).otherMetadata_ref()...);
+template <>
+struct ForEachField<::apache::thrift::ClientMetadata> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).agent_ref()...);
+    f(1, static_cast<T&&>(t).hostname_ref()...);
+    f(2, static_cast<T&&>(t).otherMetadata_ref()...);
   }
 };
 
@@ -278,15 +224,29 @@ template <>
 struct ForEachField<::apache::thrift::RequestSetupMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::RequestSetupMetadata>;
+    f(0, static_cast<T&&>(t).opaque_ref()...);
+    f(1, static_cast<T&&>(t).interfaceKind_ref()...);
+    f(2, static_cast<T&&>(t).minVersion_ref()...);
+    f(3, static_cast<T&&>(t).maxVersion_ref()...);
+    f(4, static_cast<T&&>(t).dscpToReflect_ref()...);
+    f(5, static_cast<T&&>(t).markToReflect_ref()...);
+    f(6, static_cast<T&&>(t).clientMetadata_ref()...);
+  }
+};
 
-    f(get_metadata(0), static_cast<T&&>(t).opaque_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).interfaceKind_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).minVersion_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).maxVersion_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).dscpToReflect_ref()...);
-    f(get_metadata(5), static_cast<T&&>(t).markToReflect_ref()...);
+template <>
+struct ForEachField<::apache::thrift::SetupResponse> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).version_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::ServerPushMetadata> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).setupResponse_ref()...);
   }
 };
 
@@ -294,10 +254,7 @@ template <>
 struct ForEachField<::apache::thrift::HeadersPayloadContent> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::HeadersPayloadContent>;
-
-    f(get_metadata(0), static_cast<T&&>(t).otherMetadata_ref()...);
+    f(0, static_cast<T&&>(t).otherMetadata_ref()...);
   }
 };
 
@@ -305,10 +262,7 @@ template <>
 struct ForEachField<::apache::thrift::HeadersPayloadMetadata> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::HeadersPayloadMetadata>;
-
-    f(get_metadata(0), static_cast<T&&>(t).compression_ref()...);
+    f(0, static_cast<T&&>(t).compression_ref()...);
   }
 };
 } // namespace detail

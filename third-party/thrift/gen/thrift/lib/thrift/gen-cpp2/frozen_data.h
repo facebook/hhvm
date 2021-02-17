@@ -12,81 +12,25 @@
 
 namespace apache { namespace thrift {
 
-
-
 template <> struct TStructDataStorage<::apache::thrift::frozen::schema::Field> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 2;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "layoutId",
-    "offset",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I16,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::frozen::schema::Layout> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 4;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "size",
-    "bits",
-    "fields",
-    "typeName",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    1,
-    2,
-    3,
-    4,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_I16,
-    TType::T_MAP,
-    TType::T_STRING,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 template <> struct TStructDataStorage<::apache::thrift::frozen::schema::Schema> {
- private:
-  using TType = apache::thrift::protocol::TType;
-
- public:
   static constexpr const std::size_t fields_size = 4;
-  static constexpr std::array<folly::StringPiece, fields_size> fields_names = {{
-    "fileVersion",
-    "relaxTypeChecks",
-    "layouts",
-    "rootLayout",
-  }};
-  static constexpr std::array<int16_t, fields_size> fields_ids = {{
-    4,
-    1,
-    2,
-    3,
-  }};
-  static constexpr std::array<TType, fields_size> fields_types = {{
-    TType::T_I32,
-    TType::T_BOOL,
-    TType::T_MAP,
-    TType::T_I16,
-  }};
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
-
 
 }} // apache::thrift

@@ -232,9 +232,8 @@ _readField_bits:
 _readField_fields:
   {
     _readState.beforeSubobject(iprot);
-    
     this->fields = folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>>::read(*iprot, this->fields);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Field>>::readWithContext(*iprot, this->fields, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.fields = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -250,8 +249,7 @@ _readField_fields:
   }
 _readField_typeName:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->typeName);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->typeName, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.typeName = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -437,9 +435,8 @@ _readField_relaxTypeChecks:
 _readField_layouts:
   {
     _readState.beforeSubobject(iprot);
-    
     this->layouts = folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>>::read(*iprot, this->layouts);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, folly::sorted_vector_map<int16_t,  ::apache::thrift::frozen::schema::Layout>>::readWithContext(*iprot, this->layouts, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.layouts = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END

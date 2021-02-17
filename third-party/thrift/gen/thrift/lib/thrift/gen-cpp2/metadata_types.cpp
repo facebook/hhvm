@@ -49,6 +49,512 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::metadata::ThriftStructType>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::metadata::ThriftStructType>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace metadata {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ThriftStructType::ThriftStructType(apache::thrift::FragileConstructor, ::std::string name__arg) :
+    name(std::move(name__arg)) {
+  __isset.name = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ThriftStructType::__clear() {
+  // clear all fields
+  name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool ThriftStructType::operator==(const ThriftStructType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.name == rhs.name)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftStructType::operator<(const ThriftStructType& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.name == rhs.name)) {
+    return lhs.name < rhs.name;
+  }
+  return false;
+}
+
+
+void swap(ThriftStructType& a, ThriftStructType& b) {
+  using ::std::swap;
+  swap(a.name_ref().value(), b.name_ref().value());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void ThriftStructType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftStructType::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftStructType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftStructType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftStructType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftStructType::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftStructType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftStructType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}}} // apache::thrift::metadata
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftConstStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::metadata::ThriftConstStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace metadata {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ThriftConstStruct::ThriftConstStruct(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftStructType type__arg, ::std::map<::std::string,  ::apache::thrift::metadata::ThriftConstValue> fields__arg) :
+    type(std::move(type__arg)),
+    fields(std::move(fields__arg)) {
+  __isset.type = true;
+  __isset.fields = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ThriftConstStruct::__clear() {
+  // clear all fields
+  type.__clear();
+  fields.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool ThriftConstStruct::operator==(const ThriftConstStruct& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.type == rhs.type)) {
+    return false;
+  }
+  if (!(lhs.fields == rhs.fields)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftConstStruct::operator<(const ThriftConstStruct& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.type == rhs.type)) {
+    return lhs.type < rhs.type;
+  }
+  if (!(lhs.fields == rhs.fields)) {
+    return lhs.fields < rhs.fields;
+  }
+  return false;
+}
+
+const  ::apache::thrift::metadata::ThriftStructType& ThriftConstStruct::get_type() const& {
+  return type;
+}
+
+ ::apache::thrift::metadata::ThriftStructType ThriftConstStruct::get_type() && {
+  return std::move(type);
+}
+
+const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftConstValue>& ThriftConstStruct::get_fields() const& {
+  return fields;
+}
+
+::std::map<::std::string,  ::apache::thrift::metadata::ThriftConstValue> ThriftConstStruct::get_fields() && {
+  return std::move(fields);
+}
+
+
+void swap(ThriftConstStruct& a, ThriftConstStruct& b) {
+  using ::std::swap;
+  swap(a.type_ref().value(), b.type_ref().value());
+  swap(a.fields_ref().value(), b.fields_ref().value());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void ThriftConstStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftConstStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftConstStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftConstStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftConstStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftConstStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftConstStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftConstStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstStruct,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStructType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::variant>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftConstValue>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstStruct,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStructType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::variant>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftConstValue>>,
+    "inconsistent use of nimble option");
+
+}}} // apache::thrift::metadata
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftConstValue>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::metadata::ThriftConstValue>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::metadata::ThriftConstValue::Type>::size;
+folly::Range<::apache::thrift::metadata::ThriftConstValue::Type const*> const TEnumTraits<::apache::thrift::metadata::ThriftConstValue::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::metadata::ThriftConstValue::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::metadata::ThriftConstValue::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::metadata::ThriftConstValue::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::metadata::ThriftConstValue::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::metadata::ThriftConstValue::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::metadata::ThriftConstValue::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::metadata::ThriftConstValue::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+}} // apache::thrift
+namespace apache { namespace thrift { namespace metadata {
+
+void ThriftConstValue::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::cv_bool:
+      destruct(value_.cv_bool);
+      break;
+    case Type::cv_integer:
+      destruct(value_.cv_integer);
+      break;
+    case Type::cv_double:
+      destruct(value_.cv_double);
+      break;
+    case Type::cv_string:
+      destruct(value_.cv_string);
+      break;
+    case Type::cv_map:
+      destruct(value_.cv_map);
+      break;
+    case Type::cv_list:
+      destruct(value_.cv_list);
+      break;
+    case Type::cv_struct:
+      destruct(value_.cv_struct);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool ThriftConstValue::operator==(const ThriftConstValue& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::cv_bool:
+      return value_.cv_bool == rhs.value_.cv_bool;
+    case Type::cv_integer:
+      return value_.cv_integer == rhs.value_.cv_integer;
+    case Type::cv_double:
+      return value_.cv_double == rhs.value_.cv_double;
+    case Type::cv_string:
+      return value_.cv_string == rhs.value_.cv_string;
+    case Type::cv_map:
+      return value_.cv_map == rhs.value_.cv_map;
+    case Type::cv_list:
+      return value_.cv_list == rhs.value_.cv_list;
+    case Type::cv_struct:
+      return value_.cv_struct == rhs.value_.cv_struct;
+    default:
+      return true;
+  }
+}
+
+bool ThriftConstValue::operator<(const ThriftConstValue& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.type_ != rhs.type_) {
+    return lhs.type_ < rhs.type_;
+  }
+  switch (lhs.type_) {
+    case Type::cv_bool:
+      return lhs.value_.cv_bool < rhs.value_.cv_bool;
+    case Type::cv_integer:
+      return lhs.value_.cv_integer < rhs.value_.cv_integer;
+    case Type::cv_double:
+      return lhs.value_.cv_double < rhs.value_.cv_double;
+    case Type::cv_string:
+      return lhs.value_.cv_string < rhs.value_.cv_string;
+    case Type::cv_map:
+      return lhs.value_.cv_map < rhs.value_.cv_map;
+    case Type::cv_list:
+      return lhs.value_.cv_list < rhs.value_.cv_list;
+    case Type::cv_struct:
+      return lhs.value_.cv_struct < rhs.value_.cv_struct;
+    default:
+      return false;
+  }
+}
+
+void swap(ThriftConstValue& a, ThriftConstValue& b) {
+  ThriftConstValue temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void ThriftConstValue::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftConstValue::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftConstValue::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftConstValue::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftConstValue::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftConstValue::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftConstValue::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftConstValue::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstValue,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstValuePair>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstValue,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftConstStruct>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstValue,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstValuePair>>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstValue,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftConstStruct>,
+    "inconsistent use of nimble option");
+
+}}} // apache::thrift::metadata
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftConstValuePair>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::metadata::ThriftConstValuePair>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace metadata {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ThriftConstValuePair::ThriftConstValuePair(apache::thrift::FragileConstructor,  ::apache::thrift::metadata::ThriftConstValue key__arg,  ::apache::thrift::metadata::ThriftConstValue value__arg) :
+    key(std::move(key__arg)),
+    value(std::move(value__arg)) {
+  __isset.key = true;
+  __isset.value = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ThriftConstValuePair::__clear() {
+  // clear all fields
+  key.__clear();
+  value.__clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool ThriftConstValuePair::operator==(const ThriftConstValuePair& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.key == rhs.key)) {
+    return false;
+  }
+  if (!(lhs.value == rhs.value)) {
+    return false;
+  }
+  return true;
+}
+
+bool ThriftConstValuePair::operator<(const ThriftConstValuePair& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.key == rhs.key)) {
+    return lhs.key < rhs.key;
+  }
+  if (!(lhs.value == rhs.value)) {
+    return lhs.value < rhs.value;
+  }
+  return false;
+}
+
+const  ::apache::thrift::metadata::ThriftConstValue& ThriftConstValuePair::get_key() const& {
+  return key;
+}
+
+ ::apache::thrift::metadata::ThriftConstValue ThriftConstValuePair::get_key() && {
+  return std::move(key);
+}
+
+const  ::apache::thrift::metadata::ThriftConstValue& ThriftConstValuePair::get_value() const& {
+  return value;
+}
+
+ ::apache::thrift::metadata::ThriftConstValue ThriftConstValuePair::get_value() && {
+  return std::move(value);
+}
+
+
+void swap(ThriftConstValuePair& a, ThriftConstValuePair& b) {
+  using ::std::swap;
+  swap(a.key_ref().value(), b.key_ref().value());
+  swap(a.value_ref().value(), b.value_ref().value());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void ThriftConstValuePair::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ThriftConstValuePair::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ThriftConstValuePair::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ThriftConstValuePair::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ThriftConstValuePair::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ThriftConstValuePair::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ThriftConstValuePair::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ThriftConstValuePair::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstValuePair,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftConstValue>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftConstValuePair,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftConstValue>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstValuePair,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftConstValue>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftConstValuePair,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftConstValue>,
+    "inconsistent use of nimble option");
+
+}}} // apache::thrift::metadata
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::apache::thrift::metadata::ThriftListType>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -147,6 +653,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -249,6 +756,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -383,6 +891,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -461,84 +970,7 @@ template uint32_t ThriftEnumType::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // apache::thrift::metadata
-namespace apache {
-namespace thrift {
-namespace detail {
 
-void TccStructTraits<::apache::thrift::metadata::ThriftStructType>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::metadata::ThriftStructType>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace apache { namespace thrift { namespace metadata {
-
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftStructType::ThriftStructType(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    name(std::move(name__arg)) {
-  __isset.name = true;
-}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-void ThriftStructType::__clear() {
-  // clear all fields
-  name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-}
-
-bool ThriftStructType::operator==(const ThriftStructType& rhs) const {
-  (void)rhs;
-  auto& lhs = *this;
-  (void)lhs;
-  if (!(lhs.name == rhs.name)) {
-    return false;
-  }
-  return true;
-}
-
-bool ThriftStructType::operator<(const ThriftStructType& rhs) const {
-  (void)rhs;
-  auto& lhs = *this;
-  (void)lhs;
-  if (!(lhs.name == rhs.name)) {
-    return lhs.name < rhs.name;
-  }
-  return false;
-}
-
-
-void swap(ThriftStructType& a, ThriftStructType& b) {
-  using ::std::swap;
-  swap(a.name_ref().value(), b.name_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-}
-
-template void ThriftStructType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t ThriftStructType::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ThriftStructType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ThriftStructType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ThriftStructType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ThriftStructType::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ThriftStructType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ThriftStructType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-
-}}} // apache::thrift::metadata
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -617,6 +1049,7 @@ template uint32_t ThriftUnionType::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -740,6 +1173,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -874,6 +1308,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1040,6 +1475,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1313,6 +1749,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1337,17 +1774,20 @@ void TccStructTraits<::apache::thrift::metadata::ThriftEnum>::translateFieldName
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftEnum::ThriftEnum(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::map<int32_t, ::std::string> elements__arg) :
+ThriftEnum::ThriftEnum(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::map<int32_t, ::std::string> elements__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
-    elements(std::move(elements__arg)) {
+    elements(std::move(elements__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.name = true;
   __isset.elements = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftEnum::__clear() {
   // clear all fields
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   elements.clear();
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1363,6 +1803,9 @@ bool ThriftEnum::operator==(const ThriftEnum& rhs) const {
   if (!(lhs.elements == rhs.elements)) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -1376,6 +1819,9 @@ bool ThriftEnum::operator<(const ThriftEnum& rhs) const {
   if (!(lhs.elements == rhs.elements)) {
     return lhs.elements < rhs.elements;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
+  }
   return false;
 }
 
@@ -1387,11 +1833,20 @@ const ::std::map<int32_t, ::std::string>& ThriftEnum::get_elements() const& {
   return std::move(elements);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftEnum::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftEnum::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftEnum& a, ThriftEnum& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.elements_ref().value(), b.elements_ref().value());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1406,9 +1861,22 @@ template uint32_t ThriftEnum::write<>(apache::thrift::CompactProtocolWriter*) co
 template uint32_t ThriftEnum::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftEnum::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftEnum,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftEnum,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1433,15 +1901,26 @@ void TccStructTraits<::apache::thrift::metadata::ThriftField>::translateFieldNam
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftField::ThriftField(apache::thrift::FragileConstructor, int32_t id__arg,  ::apache::thrift::metadata::ThriftType type__arg, ::std::string name__arg, bool is_optional__arg) :
+ThriftField::ThriftField() :
+      id(0),
+      is_optional(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+
+ThriftField::~ThriftField() {}
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ThriftField::ThriftField(apache::thrift::FragileConstructor, int32_t id__arg,  ::apache::thrift::metadata::ThriftType type__arg, ::std::string name__arg, bool is_optional__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     id(std::move(id__arg)),
     type(std::move(type__arg)),
     name(std::move(name__arg)),
-    is_optional(std::move(is_optional__arg)) {
+    is_optional(std::move(is_optional__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.id = true;
   __isset.type = true;
   __isset.name = true;
   __isset.is_optional = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftField::__clear() {
@@ -1450,6 +1929,7 @@ void ThriftField::__clear() {
   type.__clear();
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   is_optional = 0;
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1471,6 +1951,9 @@ bool ThriftField::operator==(const ThriftField& rhs) const {
   if (!(lhs.is_optional == rhs.is_optional)) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -1490,6 +1973,9 @@ bool ThriftField::operator<(const ThriftField& rhs) const {
   if (!(lhs.is_optional == rhs.is_optional)) {
     return lhs.is_optional < rhs.is_optional;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
+  }
   return false;
 }
 
@@ -1501,6 +1987,14 @@ const  ::apache::thrift::metadata::ThriftType& ThriftField::get_type() const& {
   return std::move(type);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftField::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftField::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftField& a, ThriftField& b) {
   using ::std::swap;
@@ -1508,6 +2002,7 @@ void swap(ThriftField& a, ThriftField& b) {
   swap(a.type_ref().value(), b.type_ref().value());
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.is_optional_ref().value(), b.is_optional_ref().value());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1528,6 +2023,12 @@ static_assert(
         ::apache::thrift::type_class::variant,
          ::apache::thrift::metadata::ThriftType>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftField,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -1535,8 +2036,15 @@ static_assert(
         ::apache::thrift::type_class::variant,
          ::apache::thrift::metadata::ThriftType>,
     "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftField,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1561,13 +2069,15 @@ void TccStructTraits<::apache::thrift::metadata::ThriftStruct>::translateFieldNa
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftStruct::ThriftStruct(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> fields__arg, bool is_union__arg) :
+ThriftStruct::ThriftStruct(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> fields__arg, bool is_union__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
-    is_union(std::move(is_union__arg)) {
+    is_union(std::move(is_union__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.name = true;
   __isset.fields = true;
   __isset.is_union = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftStruct::__clear() {
@@ -1575,6 +2085,7 @@ void ThriftStruct::__clear() {
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   fields.clear();
   is_union = 0;
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1593,6 +2104,9 @@ bool ThriftStruct::operator==(const ThriftStruct& rhs) const {
   if (!(lhs.is_union == rhs.is_union)) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -1609,6 +2123,9 @@ bool ThriftStruct::operator<(const ThriftStruct& rhs) const {
   if (!(lhs.is_union == rhs.is_union)) {
     return lhs.is_union < rhs.is_union;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
+  }
   return false;
 }
 
@@ -1620,12 +2137,21 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftStruct::get
   return std::move(fields);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftStruct::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftStruct::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftStruct& a, ThriftStruct& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.fields_ref().value(), b.fields_ref().value());
   swap(a.is_union_ref().value(), b.is_union_ref().value());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1646,6 +2172,12 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -1653,8 +2185,15 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1679,17 +2218,20 @@ void TccStructTraits<::apache::thrift::metadata::ThriftException>::translateFiel
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftException::ThriftException(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> fields__arg) :
+ThriftException::ThriftException(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> fields__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
-    fields(std::move(fields__arg)) {
+    fields(std::move(fields__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.name = true;
   __isset.fields = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftException::__clear() {
   // clear all fields
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   fields.clear();
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1705,6 +2247,9 @@ bool ThriftException::operator==(const ThriftException& rhs) const {
   if (!(lhs.fields == rhs.fields)) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -1718,6 +2263,9 @@ bool ThriftException::operator<(const ThriftException& rhs) const {
   if (!(lhs.fields == rhs.fields)) {
     return lhs.fields < rhs.fields;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
+  }
   return false;
 }
 
@@ -1729,11 +2277,20 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftException::
   return std::move(fields);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftException::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftException::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftException& a, ThriftException& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.fields_ref().value(), b.fields_ref().value());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1754,6 +2311,12 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftException,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -1761,8 +2324,15 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftException,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1795,17 +2365,19 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 ThriftFunction::~ThriftFunction() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftFunction::ThriftFunction(apache::thrift::FragileConstructor, ::std::string name__arg,  ::apache::thrift::metadata::ThriftType return_type__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> arguments__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> exceptions__arg, bool is_oneway__arg) :
+ThriftFunction::ThriftFunction(apache::thrift::FragileConstructor, ::std::string name__arg,  ::apache::thrift::metadata::ThriftType return_type__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> arguments__arg, ::std::vector< ::apache::thrift::metadata::ThriftField> exceptions__arg, bool is_oneway__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     return_type(std::move(return_type__arg)),
     arguments(std::move(arguments__arg)),
     exceptions(std::move(exceptions__arg)),
-    is_oneway(std::move(is_oneway__arg)) {
+    is_oneway(std::move(is_oneway__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.name = true;
   __isset.return_type = true;
   __isset.arguments = true;
   __isset.exceptions = true;
   __isset.is_oneway = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftFunction::__clear() {
@@ -1815,6 +2387,7 @@ void ThriftFunction::__clear() {
   arguments.clear();
   exceptions.clear();
   is_oneway = 0;
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1839,6 +2412,9 @@ bool ThriftFunction::operator==(const ThriftFunction& rhs) const {
   if (!(lhs.is_oneway == rhs.is_oneway)) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -1860,6 +2436,9 @@ bool ThriftFunction::operator<(const ThriftFunction& rhs) const {
   }
   if (!(lhs.is_oneway == rhs.is_oneway)) {
     return lhs.is_oneway < rhs.is_oneway;
+  }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
   }
   return false;
 }
@@ -1888,6 +2467,14 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftFunction::g
   return std::move(exceptions);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftFunction::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftFunction::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftFunction& a, ThriftFunction& b) {
   using ::std::swap;
@@ -1896,6 +2483,7 @@ void swap(ThriftFunction& a, ThriftFunction& b) {
   swap(a.arguments_ref().value(), b.arguments_ref().value());
   swap(a.exceptions_ref().value(), b.exceptions_ref().value());
   swap(a.is_oneway_ref().value(), b.is_oneway_ref().value());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1928,6 +2516,12 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -1947,8 +2541,15 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftField>>,
     "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1973,13 +2574,15 @@ void TccStructTraits<::apache::thrift::metadata::ThriftService>::translateFieldN
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ThriftService::ThriftService(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftFunction> functions__arg, ::std::string parent__arg) :
+ThriftService::ThriftService(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector< ::apache::thrift::metadata::ThriftFunction> functions__arg, ::std::string parent__arg, ::std::vector< ::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     functions(std::move(functions__arg)),
-    parent(std::move(parent__arg)) {
+    parent(std::move(parent__arg)),
+    structured_annotations(std::move(structured_annotations__arg)) {
   __isset.name = true;
   __isset.functions = true;
   __isset.parent = true;
+  __isset.structured_annotations = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ThriftService::__clear() {
@@ -1987,6 +2590,7 @@ void ThriftService::__clear() {
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   functions.clear();
   parent = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  structured_annotations.clear();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2005,6 +2609,9 @@ bool ThriftService::operator==(const ThriftService& rhs) const {
   if (lhs.parent_ref() != rhs.parent_ref()) {
     return false;
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return false;
+  }
   return true;
 }
 
@@ -2021,6 +2628,9 @@ bool ThriftService::operator<(const ThriftService& rhs) const {
   if (lhs.parent_ref() != rhs.parent_ref()) {
     return lhs.parent_ref() < rhs.parent_ref();
   }
+  if (!(lhs.structured_annotations == rhs.structured_annotations)) {
+    return lhs.structured_annotations < rhs.structured_annotations;
+  }
   return false;
 }
 
@@ -2032,12 +2642,21 @@ const ::std::vector< ::apache::thrift::metadata::ThriftFunction>& ThriftService:
   return std::move(functions);
 }
 
+const ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>& ThriftService::get_structured_annotations() const& {
+  return structured_annotations;
+}
+
+::std::vector< ::apache::thrift::metadata::ThriftConstStruct> ThriftService::get_structured_annotations() && {
+  return std::move(structured_annotations);
+}
+
 
 void swap(ThriftService& a, ThriftService& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.functions_ref().value(), b.functions_ref().value());
   swap(a.parent_ref().value_unchecked(), b.parent_ref().value_unchecked());
+  swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2058,6 +2677,12 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftFunction>>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftService,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -2065,8 +2690,15 @@ static_assert(
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
         ::std::vector< ::apache::thrift::metadata::ThriftFunction>>,
     "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftService,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftConstStruct>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2145,6 +2777,7 @@ template uint32_t ThriftModuleContext::serializedSizeZC<>(apache::thrift::Compac
 
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2273,6 +2906,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2461,6 +3095,7 @@ static_assert(
     "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata
+
 namespace apache {
 namespace thrift {
 namespace detail {

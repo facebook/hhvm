@@ -172,3 +172,10 @@ class Contextual {
     $f();
   }
 }
+
+class WithContextConstant {
+  const ctx C = [policied_local];
+  public function has_io()[self::C]: void {
+    echo "I have IO!";
+  }
+}

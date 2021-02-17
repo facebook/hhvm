@@ -1104,7 +1104,7 @@ end = struct
       | Tresource -> Fmt.string ppf "resource"
       | Tnoreturn -> Fmt.string ppf "noreturn")
 
-  let rec pp_hint ppf (_, hint_) =
+  let rec pp_hint ~is_ctx ppf (_, hint_) =
     match hint_ with
     | Aast.Hany
     | Aast.Herr ->
@@ -1117,43 +1117,62 @@ end = struct
     | Aast.Hvar name -> Fmt.string ppf name
     | Aast.Hfun_context name ->
       Fmt.(prefix (const string "ctx ") string) ppf name
-    | Aast.Hoption hint -> Fmt.(prefix (const string "?") pp_hint) ppf hint
-    | Aast.Hlike hint -> Fmt.(prefix (const string "~") pp_hint) ppf hint
-    | Aast.Hsoft hint -> Fmt.(prefix (const string "@") pp_hint) ppf hint
-    | Aast.Htuple hints -> Fmt.(parens @@ list ~sep:comma pp_hint) ppf hints
-    | Aast.Hunion hints -> Fmt.(parens @@ list ~sep:vbar pp_hint) ppf hints
+    | Aast.Hoption hint ->
+      Fmt.(prefix (const string "?") @@ pp_hint ~is_ctx:false) ppf hint
+    | Aast.Hlike hint ->
+      Fmt.(prefix (const string "~") @@ pp_hint ~is_ctx:false) ppf hint
+    | Aast.Hsoft hint ->
+      Fmt.(prefix (const string "@") @@ pp_hint ~is_ctx:false) ppf hint
+    | Aast.Htuple hints ->
+      Fmt.(parens @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
+    | Aast.Hunion hints ->
+      Fmt.(parens @@ list ~sep:vbar @@ pp_hint ~is_ctx:false) ppf hints
+    | Aast.Hintersection hints when is_ctx ->
+      Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hintersection hints ->
-      Fmt.(parens @@ list ~sep:amp pp_hint) ppf hints
+      Fmt.(parens @@ list ~sep:amp @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hprim prim -> pp_tprim ppf prim
     | Aast.Haccess (root, ids) ->
-      Fmt.(pair ~sep:dbl_colon pp_hint @@ list ~sep:dbl_colon string)
+      Fmt.(
+        pair ~sep:dbl_colon (pp_hint ~is_ctx:false)
+        @@ list ~sep:dbl_colon string)
         ppf
         (root, List.map ~f:snd ids)
     | Aast.Hvarray hint ->
-      Fmt.(prefix (const string "varray") @@ angles pp_hint) ppf hint
+      Fmt.(prefix (const string "varray") @@ angles @@ pp_hint ~is_ctx:false)
+        ppf
+        hint
     | Aast.Hvarray_or_darray (None, vhint) ->
-      Fmt.(prefix (const string "varray_or_darray") @@ angles pp_hint) ppf vhint
+      Fmt.(
+        prefix (const string "varray_or_darray")
+        @@ angles
+        @@ pp_hint ~is_ctx:false)
+        ppf
+        vhint
     | Aast.Hvarray_or_darray (Some khint, vhint) ->
       Fmt.(
         prefix (const string "varray_or_darray")
         @@ angles
-        @@ pair ~sep:comma pp_hint pp_hint)
+        @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
         (khint, vhint)
     | Aast.Hvec_or_dict (None, vhint) ->
-      Fmt.(prefix (const string "vec_or_dict") @@ angles pp_hint) ppf vhint
+      Fmt.(
+        prefix (const string "vec_or_dict") @@ angles @@ pp_hint ~is_ctx:false)
+        ppf
+        vhint
     | Aast.Hvec_or_dict (Some khint, vhint) ->
       Fmt.(
         prefix (const string "vec_or_dict")
         @@ angles
-        @@ pair ~sep:comma pp_hint pp_hint)
+        @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
         (khint, vhint)
     | Aast.Hdarray (khint, vhint) ->
       Fmt.(
         prefix (const string "darray")
         @@ angles
-        @@ pair ~sep:comma pp_hint pp_hint)
+        @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
         (khint, vhint)
     | Aast.Habstr (name, [])
@@ -1161,7 +1180,11 @@ end = struct
       Fmt.string ppf name
     | Aast.Habstr (name, hints)
     | Aast.Happly ((_, name), hints) ->
-      Fmt.(prefix (const string name) @@ angles @@ list ~sep:comma pp_hint)
+      Fmt.(
+        prefix (const string name)
+        @@ angles
+        @@ list ~sep:comma
+        @@ pp_hint ~is_ctx:false)
         ppf
         hints
     | Aast.(
@@ -1175,7 +1198,11 @@ end = struct
             _;
           }) ->
       let pp_typed_param ppf kp =
-        Fmt.(pair ~sep:nop (option @@ suffix sp pp_paramkind) pp_hint) ppf kp
+        Fmt.(
+          pair ~sep:nop (option @@ suffix sp pp_paramkind)
+          @@ pp_hint ~is_ctx:false)
+          ppf
+          kp
       in
       let pp_fun_params ppf (ps, v) =
         Fmt.(
@@ -1183,7 +1210,7 @@ end = struct
           @@ pair
                ~sep:nop
                (list ~sep:comma pp_typed_param)
-               (option @@ surround ", " "..." @@ pp_hint))
+               (option @@ surround ", " "..." @@ pp_hint ~is_ctx:false))
           ppf
           (ps, v)
       in
@@ -1196,7 +1223,7 @@ end = struct
              ~sep:colon
              ( prefix (const string "function")
              @@ pair ~sep:nop pp_fun_params (option pp_contexts) )
-             pp_hint)
+        @@ pp_hint ~is_ctx:false)
         ppf
         ((all_params, hf_ctxs), hf_return_ty)
     | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map }) ->
@@ -1218,7 +1245,7 @@ end = struct
            ~sep:nop
            (cond ~pp_t:(const string "?") ~pp_f:nop)
            pp_shape_field_name)
-        pp_hint)
+      @@ pp_hint ~is_ctx:false)
       ppf
       ((sfi_optional, sfi_name), sfi_hint)
 
@@ -1229,7 +1256,7 @@ end = struct
       Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
 
   and pp_contexts ppf (_, ctxts) =
-    Fmt.(brackets @@ list ~sep:comma pp_hint) ppf ctxts
+    Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf ctxts
 
   let pp_user_attrs ppf attrs =
     match
@@ -1257,7 +1284,11 @@ end = struct
       | Constraint_super -> Fmt.string ppf "super")
 
   let pp_constraint ppf (kind, hint) =
-    Format.(fprintf ppf {|%a %a|}) pp_constraint_kind kind pp_hint hint
+    Format.(fprintf ppf {|%a %a|})
+      pp_constraint_kind
+      kind
+      (pp_hint ~is_ctx:false)
+      hint
 
   let pp_tp_reified ppf =
     Aast.(
@@ -1301,9 +1332,11 @@ end = struct
 
   let pp_type_hint ~is_ret_type ppf (_, hint) =
     if is_ret_type then
-      Fmt.(option @@ prefix (const string ": ") pp_hint) ppf hint
+      Fmt.(option @@ prefix (const string ": ") @@ pp_hint ~is_ctx:false)
+        ppf
+        hint
     else
-      Fmt.(option @@ suffix sp pp_hint) ppf hint
+      Fmt.(option @@ suffix sp @@ pp_hint ~is_ctx:false) ppf hint
 
   let pp_fun_param_name ppf (param_is_variadic, param_name) =
     if param_is_variadic then
@@ -1530,15 +1563,21 @@ end = struct
           (strip_ns nm)
           pp_tparams
           t_tparams
-          (option @@ prefix (const string " as ") pp_hint)
+          (option @@ prefix (const string " as ") @@ pp_hint ~is_ctx:false)
           t_constraint
-          pp_hint
+          (pp_hint ~is_ctx:false)
           t_kind)
 
     (* -- Global constants -------------------------------------------------- *)
 
     let pp_gconst ppf (name, hint, init) =
-      Fmt.pf ppf {|const %a %s = %s;|} pp_hint hint (strip_ns name) init
+      Fmt.pf
+        ppf
+        {|const %a %s = %s;|}
+        (pp_hint ~is_ctx:false)
+        hint
+        (strip_ns name)
+        init
 
     (* -- Enums ------------------------------------------------------------- *)
 
@@ -1548,9 +1587,9 @@ end = struct
           ppf
           {|enum %s: %a%a {%a}|}
           (strip_ns name)
-          pp_hint
+          (pp_hint ~is_ctx:false)
           base
-          (option @@ prefix (const string " as ") pp_hint)
+          (option @@ prefix (const string " as ") @@ pp_hint ~is_ctx:false)
           constr
           (list ~sep:sp @@ suffix semicolon @@ pair ~sep:equal_to string string)
           consts)
@@ -1601,6 +1640,7 @@ end = struct
           name: string;
           line: int;
           is_abstract: bool;
+          is_ctx: bool;
           type_: Aast.hint option;
           constraint_: Aast.hint option;
         }
@@ -1663,6 +1703,7 @@ end = struct
             c_tconst_name = (pos, name);
             c_tconst_type;
             c_tconst_as_constraint;
+            c_tconst_is_ctx;
             _;
           } =
       let is_abstract =
@@ -1678,6 +1719,7 @@ end = struct
           is_abstract;
           type_ = c_tconst_type;
           constraint_ = c_tconst_as_constraint;
+          is_ctx = c_tconst_is_ctx;
         }
 
     let mk_method from_interface (Aast.{ m_name = (pos, _); _ } as method_) =
@@ -1792,7 +1834,7 @@ end = struct
           {|%a attribute %a %s %a %a;|}
           pp_user_attrs
           user_attrs
-          (option pp_hint)
+          (option @@ pp_hint ~is_ctx:false)
           type_
           (String.lstrip ~drop:(fun c -> Char.equal c ':') name)
           (option @@ prefix equal_to string)
@@ -1811,24 +1853,26 @@ end = struct
           visibility
           (cond ~pp_t:(const string "static") ~pp_f:nop)
           is_static
-          (option pp_hint)
+          (option @@ pp_hint ~is_ctx:false)
           type_
           name
           (option @@ prefix equal_to string)
           init_val)
 
     (* -- Type constants ---------------------------------------------------- *)
-    let pp_tyconst ppf (name, is_abstract, type_, constraint_) =
+    let pp_tyconst ppf (name, is_abstract, is_ctx, type_, constraint_) =
       Fmt.(
         pf
           ppf
-          {|%a const type %s%a%a;|}
+          {|%a const %a %s%a%a;|}
           (cond ~pp_t:(const string "abstract") ~pp_f:nop)
           is_abstract
+          (cond ~pp_t:(const string "ctx") ~pp_f:(const string "type"))
+          is_ctx
           name
-          (option @@ prefix (const string " as ") pp_hint)
+          (option @@ prefix (const string " as ") @@ pp_hint ~is_ctx:false)
           constraint_
-          (option @@ prefix equal_to pp_hint)
+          (option @@ prefix equal_to @@ pp_hint ~is_ctx)
           type_)
 
     (* -- Constants --------------------------------------------------------- *)
@@ -1840,7 +1884,7 @@ end = struct
           {|%a const %a %s %a;|}
           (cond ~pp_t:(const string "abstract") ~pp_f:nop)
           is_abstract
-          (option pp_hint)
+          (option @@ pp_hint ~is_ctx:false)
           type_
           name
           (option @@ prefix equal_to string)
@@ -1851,8 +1895,8 @@ end = struct
       | EltMethod (from_interface, _, method_) ->
         pp_method ppf (from_interface, method_)
       | EltTargetMethod (_, src) -> Fmt.string ppf @@ SourceText.text src
-      | EltTypeConst { name; is_abstract; type_; constraint_; _ } ->
-        pp_tyconst ppf (name, is_abstract, type_, constraint_)
+      | EltTypeConst { name; is_abstract; is_ctx; type_; constraint_; _ } ->
+        pp_tyconst ppf (name, is_abstract, is_ctx, type_, constraint_)
       | EltConst { name; is_abstract; type_; init_val; _ } ->
         pp_const ppf (name, is_abstract, type_, init_val)
       | EltXHPAttr { name; user_attrs; type_; init_val; xhp_attr_info; _ } ->
@@ -1926,14 +1970,20 @@ end = struct
     let pp_class_extends ppf = function
       | [] -> Fmt.nop ppf ()
       | hints ->
-        Fmt.(prefix (const string "extends ") @@ list ~sep:comma pp_hint)
+        Fmt.(
+          prefix (const string "extends ")
+          @@ list ~sep:comma
+          @@ pp_hint ~is_ctx:false)
           ppf
           hints
 
     let pp_class_implements ppf = function
       | [] -> Fmt.nop ppf ()
       | hints ->
-        Fmt.(prefix (const string "implements ") @@ list ~sep:comma pp_hint)
+        Fmt.(
+          prefix (const string "implements ")
+          @@ list ~sep:comma
+          @@ pp_hint ~is_ctx:false)
           ppf
           hints
 
@@ -1989,11 +2039,13 @@ end = struct
         elements = List.sort ~compare:Class_elt.compare class_elts;
       }
 
-    let pp_use ppf = Fmt.pf ppf "use %a;" pp_hint
+    let pp_use ppf = Fmt.pf ppf "use %a;" @@ pp_hint ~is_ctx:false
 
-    let pp_req_extends ppf = Fmt.pf ppf "require extends %a;" pp_hint
+    let pp_req_extends ppf =
+      Fmt.pf ppf "require extends %a;" @@ pp_hint ~is_ctx:false
 
-    let pp_req_implements ppf = Fmt.pf ppf "require implements %a;" pp_hint
+    let pp_req_implements ppf =
+      Fmt.pf ppf "require implements %a;" @@ pp_hint ~is_ctx:false
 
     let pp ppf { uses; req_extends; req_implements; elements } =
       Fmt.(

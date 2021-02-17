@@ -9,8 +9,12 @@ pub mod smart_constructors_wrappers;
 
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-use parser_core_types::syntax_kind::SyntaxKind;
-use parser_core_types::token_kind::TokenKind;
+use parser_core_types::{
+    lexable_token::LexableToken,
+    syntax_by_ref::{syntax::Syntax, syntax_variant_generated::SyntaxVariant},
+    syntax_kind::SyntaxKind,
+    token_kind::TokenKind,
+};
 
 pub use crate::smart_constructors_generated::*;
 pub use crate::smart_constructors_wrappers::*;
@@ -134,5 +138,69 @@ impl<R> NodeType for (SyntaxKind, R) {
             SyntaxKind::PrefixUnaryExpression { .. } => true,
             _ => false,
         }
+    }
+}
+
+impl<'a, T: LexableToken, V> NodeType for Syntax<'a, T, V> {
+    type R = Self;
+
+    fn extract(self) -> Self::R {
+        self
+    }
+
+    fn is_missing(&self) -> bool {
+        match self.children {
+            SyntaxVariant::Missing => true,
+            SyntaxVariant::SyntaxList(l) if l.is_empty() => true,
+            _ => false,
+        }
+    }
+
+    fn is_abstract(&self) -> bool {
+        matches!(&self.children, SyntaxVariant::Token(t) if t.kind() == TokenKind::Abstract)
+    }
+
+    fn is_variable_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::VariableExpression {..})
+    }
+
+    fn is_subscript_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::SubscriptExpression {..})
+    }
+
+    fn is_member_selection_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::MemberSelectionExpression {..})
+    }
+
+    fn is_scope_resolution_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::ScopeResolutionExpression {..})
+    }
+
+    fn is_object_creation_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::ObjectCreationExpression {..})
+    }
+
+    fn is_qualified_name(&self) -> bool {
+        matches!(self.children, SyntaxVariant::QualifiedName {..})
+    }
+
+    fn is_safe_member_selection_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::SafeMemberSelectionExpression {..})
+    }
+
+    fn is_function_call_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::FunctionCallExpression {..})
+    }
+
+    fn is_list_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::ListExpression {..})
+    }
+
+    fn is_name(&self) -> bool {
+        matches!(&self.children, SyntaxVariant::Token(t) if t.kind() == TokenKind::Name)
+    }
+
+    fn is_prefix_unary_expression(&self) -> bool {
+        matches!(self.children, SyntaxVariant::PrefixUnaryExpression {..})
     }
 }

@@ -1359,6 +1359,8 @@ struct RuntimeOption {
   F(uint32_t, IdleUnitTimeoutSecs, 0)                                   \
   /* Don't reap total Units below threshold */                          \
   F(uint32_t, IdleUnitMinThreshold, 0)                                  \
+  /* 0 nothing, 1 notice, 2 error */                                    \
+  F(int32_t, NoticeOnCoerceForStrConcat, 0)                             \
   /* */
 
 private:

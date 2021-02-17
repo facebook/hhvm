@@ -1,0 +1,185 @@
+--- . with empty LHS ---
+0-10100
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 9
+1.234
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 10
+-34000000000
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 11
+INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 12
+-INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 13
+NAN
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 14
+1
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 15
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 16
+9223372036854775807
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 18
+Resource id #1string
+--- . with empty RHS ---
+0-10100
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 25
+1.234
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 26
+-34000000000
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 27
+INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 28
+-INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 29
+NAN
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 30
+1
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 31
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 32
+9223372036854775807
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 34
+Resource id #1string
+--- . with non-empty LHS ---
+<0<-10<100
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 41
+<1.234
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 42
+<-34000000000
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 43
+<INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 44
+<-INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 45
+<NAN
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 46
+<1
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 47
+<
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 48
+<<9223372036854775807
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 50
+<Resource id #1<string
+--- concatN middle ---
+<0><-10><100>
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 57
+<1.234>
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 58
+<-34000000000>
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 59
+<INF>
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 60
+<-INF>
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 61
+<NAN>
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 62
+<1>
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 63
+<>
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 64
+<><9223372036854775807>
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 66
+<Resource id #1><string
+>--- concatN left ---
+0 string
+-10 string
+100 string
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 73
+1.234 string
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 74
+-34000000000 string
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 75
+INF string
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 76
+-INF string
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 77
+NAN string
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 78
+1 string
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 79
+ string
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 80
+ string
+9223372036854775807 string
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 82
+Resource id #1 string
+string string
+--- concatN emptystring left ---
+0
+-10
+100
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 89
+1.234
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 90
+-34000000000
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 91
+INF
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 92
+-INF
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 93
+NAN
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 94
+1
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 95
+
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 96
+
+9223372036854775807
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 98
+Resource id #1
+string
+--- concatN emptystring right ---
+value:0value:-10value:100
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 105
+value:1.234
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 106
+value:-34000000000
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 107
+value:INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 108
+value:-INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 109
+value:NAN
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 110
+value:1
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 111
+value:
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 112
+value:value:9223372036854775807
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 114
+value:Resource id #1value:string--- .= ---
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 122
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 123
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 124
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 125
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 126
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 127
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 128
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 129
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 131
+0-101001.234-34000000000INF-INFNAN19223372036854775807Resource id #1string

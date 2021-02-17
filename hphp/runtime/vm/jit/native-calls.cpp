@@ -189,10 +189,6 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvObjToStr,       convObjToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvResToStr,       convResToStrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    {ConvTVToStr,      tvCastToStringData, DSSA, SSync,
-                           {{TV, 0}}},
 
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatStrInt,       concat_si, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

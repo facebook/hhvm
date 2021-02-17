@@ -59,6 +59,8 @@ X(Resource)
 #undef Y
 #undef X
 
+enum class ConvNoticeLevel: uint8_t { None, Log, Throw };
+
 template<typename T>
 enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
 template<typename T>
@@ -77,7 +79,10 @@ String tvCastToString(TypedValue tv);
 template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
 
-StringData* tvCastToStringData(TypedValue tv);
+StringData* tvCastToStringData(
+   TypedValue tv,
+   const ConvNoticeLevel notice_level = ConvNoticeLevel::None,
+   const StringData* reason = nullptr);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
@@ -106,7 +111,22 @@ TypedValue tvClassToString(TypedValue key);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const char* convOpToName(ConvNoticeLevel level);
+
+template <typename T> ConvNoticeLevel flagToConvNoticeLevel(T flag) {
+  return static_cast<ConvNoticeLevel>(
+     flag + static_cast<uint8_t>(ConvNoticeLevel::None)
+  );
+}
+
+void handleConvNoticeLevel(
+   ConvNoticeLevel Level,
+   const char* const from,
+   const char* const to,
+   const StringData* reason);
+
+extern const StaticString s_ConvNoticeReasonConcat;
+
 }
 
 #include "hphp/runtime/base/tv-conversions-inl.h"
-

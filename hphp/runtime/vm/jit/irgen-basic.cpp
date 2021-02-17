@@ -487,7 +487,7 @@ void emitCastInt(IRGS& env) {
 
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvTVToStr, src));
+  push(env, gen(env, ConvTVToStr, ConvNoticeData{}, src));
   decRef(env, src);
 }
 

@@ -2460,6 +2460,32 @@ struct BespokeGetData : IRExtraData {
   KeyState state;
 };
 
+struct ConvNoticeData : IRExtraData {
+  explicit ConvNoticeData(ConvNoticeLevel l = ConvNoticeLevel::None,
+                          const StringData* r = nullptr)
+                          : level(l), reason(r) {}
+  std::string show() const {
+    assertx(level == ConvNoticeLevel::None || (reason != nullptr && reason->isStatic()));
+    if (reason == nullptr) return convOpToName(level);
+    return folly::format("{} for {}", convOpToName(level), reason).str();
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<ConvNoticeLevel>()(level),
+      std::hash<const StringData*>()(reason)
+    );
+  }
+
+  bool equals(const ConvNoticeData& o) const {
+    // can use pointer equality bc reason is always a StaticString
+    return level == o.level && reason == o.reason;
+  }
+
+  ConvNoticeLevel level;
+  const StringData* reason;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -2675,6 +2701,8 @@ X(LdRecDescCached,              RecNameData);
 X(LdRecDescCachedSafe,          RecNameData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
 X(LdClsTypeCns,                 LdClsTypeCnsData);
+X(ConvTVToStr,                  ConvNoticeData);
+X(ConvResToStr,                 ConvNoticeData);
 
 #undef X
 

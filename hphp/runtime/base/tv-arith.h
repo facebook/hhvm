@@ -171,7 +171,11 @@ void tvShrEq(tv_lval c1, TypedValue);
  * Post: lhs.m_type == KindOfString
  */
 inline void tvConcatEq(tv_lval lhs, TypedValue rhs) {
-  concat_assign(lhs, tvAsCVarRef(rhs).toString());
+  // if this is a regression work harder on pushing it into the jit
+  const ConvNoticeLevel level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+  concat_assign(lhs,
+                tvAsCVarRef(rhs).toString(level, s_ConvNoticeReasonConcat.get()));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -199,4 +203,3 @@ void tvBitNot(TypedValue&);
 //////////////////////////////////////////////////////////////////////
 
 }
-

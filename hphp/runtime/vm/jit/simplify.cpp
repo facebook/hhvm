@@ -272,6 +272,30 @@ DEBUG_ONLY bool validate(const State& env,
 
 //////////////////////////////////////////////////////////////////////
 
+// return true if throws
+bool handleConvNoticeLevel(
+  State& env,
+  Block* trace,
+  const ConvNoticeData* notice_data,
+  const char* const from,
+  const char* const to) {
+  if (LIKELY(notice_data->level == ConvNoticeLevel::None)) return false;
+
+  assertx(notice_data->reason != nullptr);
+  const auto str = makeStaticString(folly::sformat(
+    "Implicit {} to {} conversion for {}", from, to, notice_data->reason));
+  if (notice_data->level == ConvNoticeLevel::Throw) {
+    gen(env, ThrowInvalidOperation, trace, cns(env, str));
+    return true;
+  }
+  if (notice_data->level == ConvNoticeLevel::Log) {
+    gen(env, RaiseNotice, trace, cns(env, str));
+  }
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Individual simplification routines return nullptr if they don't want to
  * change anything, or they can call gen any number of times to produce a
@@ -2170,20 +2194,28 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
-  auto const src        = inst->src(0);
-  auto const srcType    = src->type();
-  auto const catchTrace = inst->taken();
+  auto const src           = inst->src(0);
+  auto const srcType       = src->type();
+  auto const catchTrace    = inst->taken();
+  auto const notice_data   = inst->extra<ConvNoticeData>();
 
   if (srcType <= TBool) {
-    return gen(
+    const auto tmp = gen(
       env,
       Select,
       src,
       cns(env, s_1.get()),
       cns(env, staticEmptyString())
     );
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, "bool", "string");
+    return throws ? cns(env, TBottom) : tmp ;
   }
-  if (srcType <= TNull)   return cns(env, staticEmptyString());
+  if (srcType <= TNull) {
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, "null", "string");
+    return throws ? cns(env, TBottom) : cns(env, staticEmptyString());
+  }
   if (srcType <= TArr){
     gen(env, ThrowInvalidOperation, catchTrace, cns(env, s_msgArrToStr.get()));
     return cns(env, TBottom);
@@ -2201,14 +2233,22 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
     gen(env, ThrowInvalidOperation, catchTrace, message);
     return cns(env, TBottom);
   }
-  if (srcType <= TDbl)    return gen(env, ConvDblToStr, src);
+
+  if (srcType <= TDbl) {
+    const auto tmp = gen(env, ConvDblToStr, src);
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, "double", "string");
+    return throws ? cns(env, TBottom) : tmp;
+  }
   if (srcType <= TInt)    return gen(env, ConvIntToStr, src);
   if (srcType <= TStr) {
     gen(env, IncRef, src);
     return src;
   }
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
-  if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
+  if (srcType <= TRes) {
+    return gen(env, ConvResToStr, *notice_data, catchTrace, src);
+  }
   if (srcType <= TClsMeth) {
     auto const message = cns(env, s_msgClsMethToStr.get());
     gen(env, ThrowInvalidOperation, catchTrace, message);

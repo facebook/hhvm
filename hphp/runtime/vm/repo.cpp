@@ -295,6 +295,9 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RO::EvalRaiseClsMethConversionWarning =
       s_globalData.RaiseClsMethConversionWarning;
 
+    RO::EvalNoticeOnCoerceForStrConcat =
+      s_globalData.NoticeOnCoerceForStrConcat;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

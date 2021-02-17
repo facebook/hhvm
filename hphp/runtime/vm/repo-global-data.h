@@ -160,6 +160,9 @@ struct Repo::GlobalData {
   /* Whether implicit class meth conversions can raise a warning */
   bool RaiseClsMethConversionWarning = false;
 
+  /* Whether implicit coercions for concat/interp trigger logs/exceptions */
+  int32_t NoticeOnCoerceForStrConcat = 0;
+
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
    */
@@ -204,6 +207,7 @@ struct Repo::GlobalData {
       (RaiseClassConversionWarning)
       (RaiseClsMethConversionWarning)
       (StrictArrayFillKeys)
+      (NoticeOnCoerceForStrConcat)
       ;
   }
 };

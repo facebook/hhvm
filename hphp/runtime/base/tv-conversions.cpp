@@ -528,21 +528,27 @@ void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy) {
   assertx(tvIsPlausible(*tv));
 }
 
-StringData* tvCastToStringData(TypedValue tv) {
+StringData* tvCastToStringData(
+  TypedValue tv,
+  const ConvNoticeLevel notice_level,
+  const StringData* notice_reason) {
   assertx(tvIsPlausible(tv));
 
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNoticeLevel(notice_level, "null", "string", notice_reason);
       return staticEmptyString();
 
     case KindOfBoolean:
+      handleConvNoticeLevel(notice_level, "bool", "string", notice_reason);
       return tv.m_data.num ? s_1.get() : staticEmptyString();
 
     case KindOfInt64:
       return buildStringData(tv.m_data.num);
 
     case KindOfDouble:
+      handleConvNoticeLevel(notice_level, "double", "string", notice_reason);
       return buildStringData(tv.m_data.dbl);
 
     case KindOfPersistentString:
@@ -581,9 +587,12 @@ StringData* tvCastToStringData(TypedValue tv) {
       );
 
     case KindOfObject:
+      // not adding new conversion notice here because it's
+      // handled downstream via another notice
       return tv.m_data.pobj->invokeToString().detach();
 
     case KindOfResource:
+      handleConvNoticeLevel(notice_level, "resource", "string", notice_reason);
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRFunc:
@@ -1423,6 +1432,35 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
   val(tv).pres = req::make<DummyResource>().detach()->hdr();
   assertx(tvIsPlausible(*tv));
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+char const *conv_notice_level_names[] = { "None", "Log", "Throw" };
+
+const char* convOpToName(ConvNoticeLevel level) {
+  return conv_notice_level_names[
+    static_cast<uint8_t>(level) - static_cast<uint8_t>(ConvNoticeLevel::None)
+  ];
+}
+
+void handleConvNoticeLevel(
+  ConvNoticeLevel level,
+  const char* const from,
+  const char* const to,
+  const StringData* reason) {
+  if (LIKELY(level == ConvNoticeLevel::None)) return;
+  assertx(reason != nullptr);
+
+  const auto str = folly::sformat(
+    "Implicit {} to {} conversion for {}", from, to, reason);
+  if (level == ConvNoticeLevel::Throw) {
+    SystemLib::throwInvalidOperationExceptionObject(str);
+  } else if (level == ConvNoticeLevel::Log) {
+    raise_notice(str);
+  }
+}
+
+const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");
 
 ///////////////////////////////////////////////////////////////////////////////
 #define X(kind) \

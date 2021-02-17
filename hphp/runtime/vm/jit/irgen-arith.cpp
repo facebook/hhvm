@@ -1637,7 +1637,13 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
   auto cast =
     [&] (SSATmp* s) {
       if (s->isA(TStr)) return s;
-      auto const ret = gen(env, ConvTVToStr, s);
+      const ConvNoticeLevel notice_level =
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+      auto const ret = gen(
+        env,
+        ConvTVToStr,
+        ConvNoticeData{notice_level, s_ConvNoticeReasonConcat.get()},
+        s);
       decRef(env, s);
       return ret;
     };
@@ -1697,10 +1703,13 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t3 = popC(env);
   auto const t4 = n == 4 ? popC(env) : nullptr;
 
-  auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, t4);
-  auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, t3);
-  auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvTVToStr, t2);
-  auto const s1 = t1->isA(TStr) ? t1 : gen(env, ConvTVToStr, t1);
+  const ConvNoticeLevel level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+  const auto convData = ConvNoticeData{level, s_ConvNoticeReasonConcat.get()};
+  auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, convData, t4);
+  auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, convData, t3);
+  auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvTVToStr, convData, t2);
+  auto const s1 = t1->isA(TStr) ? t1 : gen(env, ConvTVToStr, convData, t1);
 
   if (n == 3) {
     push(env, gen(env, ConcatStr3, s3, s2, s1));

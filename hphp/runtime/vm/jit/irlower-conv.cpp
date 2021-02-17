@@ -343,8 +343,24 @@ void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(ConvIntToStr);
 IMPL_OPCODE_CALL(ConvDblToStr);
 IMPL_OPCODE_CALL(ConvObjToStr);
-IMPL_OPCODE_CALL(ConvResToStr);
-IMPL_OPCODE_CALL(ConvTVToStr);
+
+// these really ought to be native-calls, but it really hates when `reason`
+// is nullptr for some reason. Figure out why and fix that.
+#define X(op, dest, argKind) \
+void cg##op(IRLS& env, const IRInstruction* inst) {                          \
+  auto const notice_data = inst->extra<ConvNoticeData>();                    \
+  auto const args = argGroup(env, inst)                                      \
+                      .argKind(0)                                            \
+                      .imm(static_cast<uint8_t>(notice_data->level))         \
+                      .immPtr(notice_data->reason);                          \
+  cgCallHelper(vmain(env), env, CallSpec::direct(dest), callDest(env, inst), \
+               SyncOptions::Sync, args);                                     \
+}
+
+X(ConvTVToStr,  tvCastToStringData, typedValue)
+X(ConvResToStr, convResToStrHelper, ssa)
+
+#undef X
 
 ///////////////////////////////////////////////////////////////////////////////
 

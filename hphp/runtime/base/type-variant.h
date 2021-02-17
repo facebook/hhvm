@@ -85,9 +85,10 @@ public:
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
   auto toDouble()  const { return tvCastToDouble(*m_val); }
-  auto toString() const {
+  auto toString(ConvNoticeLevel level = ConvNoticeLevel::None,
+                const StringData* notice_reason = nullptr) const {
     if (isStringType(type(m_val))) return String{val(m_val).pstr};
-    return String::attach(tvCastToStringData(*m_val));
+    return String::attach(tvCastToStringData(*m_val, level, notice_reason));
   }
   auto toArray() const {
     if (isArrayLikeType(type(m_val))) return Array{val(m_val).parr};
@@ -962,17 +963,19 @@ struct Variant : private TypedValue {
     return tvCastToDouble(*asTypedValue());
   }
 
-  String toString() const& {
+  String toString(ConvNoticeLevel level = ConvNoticeLevel::None,
+                  const StringData* notice_reason = nullptr) const& {
     if (isStringType(m_type)) return String{m_data.pstr};
-    return String::attach(tvCastToStringData(*this));
+    return String::attach(tvCastToStringData(*this, level, notice_reason));
   }
 
-  String toString() && {
+  String toString(ConvNoticeLevel level = ConvNoticeLevel::None,
+                  const StringData* notice_reason = nullptr) && {
     if (isStringType(m_type)) {
       m_type = KindOfNull;
       return String::attach(m_data.pstr);
     }
-    return toString();
+    return toString(level, notice_reason);
   }
 
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
@@ -1746,4 +1749,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

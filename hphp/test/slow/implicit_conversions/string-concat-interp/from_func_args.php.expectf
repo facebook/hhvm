@@ -1,0 +1,32 @@
+int <42>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 21
+bool <1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 22
+double <1.234>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 23
+null <>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 24
+resource <Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 25
+mixed <1.234>
+int <42>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 21
+bool <1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 22
+double <1.234>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 23
+null <>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 24
+resource <Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/from_func_args.php on line 25
+mixed <1.234>

@@ -1,0 +1,768 @@
+<0 0>
+<0 -10>
+<0 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 >
+<0 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<0 Resource id #1>
+<0 string>
+00
+<-10 0>
+<-10 -10>
+<-10 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 >
+<-10 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-10 Resource id #1>
+<-10 string>
+-10-10
+<100 0>
+<100 -10>
+<100 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 >
+<100 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<100 Resource id #1>
+<100 string>
+100100
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 0>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 -10>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 NAN>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 9223372036854775807>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1.234 string>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 27
+1.234
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 28
+1.234
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 0>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 -10>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 NAN>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 9223372036854775807>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-34000000000 string>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 27
+-34000000000
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 28
+-34000000000
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF 0>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF -10>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF NAN>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF 1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF 9223372036854775807>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<INF string>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 27
+INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 28
+INF
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF 0>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF -10>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF NAN>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF 1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF 9223372036854775807>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<-INF string>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 27
+-INF
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 28
+-INF
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN 0>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN -10>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN NAN>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN 1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN >
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN 9223372036854775807>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN Resource id #1>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<NAN string>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 27
+NAN
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 28
+NAN
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 0>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 -10>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 100>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 1.234>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 -34000000000>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 INF>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 -INF>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 >
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 >
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 9223372036854775807>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 Resource id #1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<1 string>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 27
+1
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 28
+1
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 0>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -10>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 100>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 1.234>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -34000000000>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< INF>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -INF>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< >
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< >
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 9223372036854775807>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< Resource id #1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< string>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 27
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 28
+
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 0>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -10>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 100>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 1.234>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -34000000000>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< INF>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< -INF>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< NAN>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 1>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< 9223372036854775807>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< Resource id #1>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+< string>
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 27
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 28
+
+<9223372036854775807 0>
+<9223372036854775807 -10>
+<9223372036854775807 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 >
+<9223372036854775807 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<9223372036854775807 Resource id #1>
+<9223372036854775807 string>
+92233720368547758079223372036854775807
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 0>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 -10>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 100>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 1.234>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 -34000000000>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 INF>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 -INF>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 NAN>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 1>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 >
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 >
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 Resource id #1>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<Resource id #1 string>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 26
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 27
+Resource id #1
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 28
+Resource id #1
+<string 0>
+<string -10>
+<string 100>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string 1.234>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string -34000000000>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string -INF>
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string NAN>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string 1>
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string >
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string >
+<string 9223372036854775807>
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/known.php on line 24
+<string Resource id #1>
+<string string>
+stringstring

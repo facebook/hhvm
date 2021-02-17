@@ -1407,11 +1407,17 @@ OPTBLD_INLINE void iopClsCnsL(tv_lval local) {
   tvSet(clsCns, *clsTV);
 }
 
+String toStringWithNotice(const Variant& c) {
+  static ConvNoticeLevel notice_level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+  return c.toString(notice_level, s_ConvNoticeReasonConcat.get());
+}
+
 OPTBLD_INLINE void iopConcat() {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  auto const s2 = tvAsVariant(*c2).toString();
-  auto const s1 = tvAsCVarRef(*c1).toString();
+  auto const s2 = toStringWithNotice(tvAsVariant(*c2));
+  auto const s1 = toStringWithNotice(tvAsCVarRef(*c1));
   tvAsVariant(*c2) = concat(s2, s1);
   assertx(c2->m_data.pstr->checkCount());
   vmStack().popC();
@@ -1420,27 +1426,25 @@ OPTBLD_INLINE void iopConcat() {
 OPTBLD_INLINE void iopConcatN(uint32_t n) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
+  auto const s1 = toStringWithNotice(tvAsCVarRef(*c1));
 
   if (n == 2) {
-    auto const s2 = tvAsVariant(*c2).toString();
-    auto const s1 = tvAsCVarRef(*c1).toString();
+    auto const s2 = toStringWithNotice(tvAsVariant(*c2));
     tvAsVariant(*c2) = concat(s2, s1);
     assertx(c2->m_data.pstr->checkCount());
   } else if (n == 3) {
     auto const c3 = vmStack().indC(2);
-    auto const s3 = tvAsVariant(*c3).toString();
-    auto const s2 = tvAsCVarRef(*c2).toString();
-    auto const s1 = tvAsCVarRef(*c1).toString();
+    auto const s3 = toStringWithNotice(tvAsVariant(*c3));
+    auto const s2 = toStringWithNotice(tvAsCVarRef(*c2));
     tvAsVariant(*c3) = concat3(s3, s2, s1);
     assertx(c3->m_data.pstr->checkCount());
   } else {
     assertx(n == 4);
     auto const c3 = vmStack().indC(2);
     auto const c4 = vmStack().indC(3);
-    auto const s4 = tvAsVariant(*c4).toString();
-    auto const s3 = tvAsCVarRef(*c3).toString();
-    auto const s2 = tvAsCVarRef(*c2).toString();
-    auto const s1 = tvAsCVarRef(*c1).toString();
+    auto const s4 = toStringWithNotice(tvAsVariant(*c4));
+    auto const s3 = toStringWithNotice(tvAsCVarRef(*c3));
+    auto const s2 = toStringWithNotice(tvAsCVarRef(*c2));
     tvAsVariant(*c4) = concat4(s4, s3, s2, s1);
     assertx(c4->m_data.pstr->checkCount());
   }

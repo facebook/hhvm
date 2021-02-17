@@ -116,6 +116,7 @@ type t = {
   tco_enable_sound_dynamic: bool;
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
+  po_disallow_inst_meth: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
   po_enable_enum_supertyping: bool;
@@ -300,6 +301,7 @@ let default =
     tco_enable_sound_dynamic = false;
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
+    po_disallow_inst_meth = false;
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = [];
     po_enable_enum_supertyping = false;
@@ -436,6 +438,7 @@ let make
     ?(po_disallow_hash_comments = default.po_disallow_hash_comments)
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
+    ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
@@ -555,6 +558,7 @@ let make
     tco_enable_sound_dynamic;
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
+    po_disallow_inst_meth;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
     po_enable_enum_supertyping;
@@ -809,6 +813,8 @@ let po_disallow_hash_comments t = t.po_disallow_hash_comments
 
 let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
+
+let po_disallow_inst_meth t = t.po_disallow_inst_meth
 
 let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
 

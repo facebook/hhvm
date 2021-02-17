@@ -25,6 +25,7 @@ type t = {
   disable_modes: bool;
   disallow_hash_comments: bool;
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
+  disallow_inst_meth: bool;
   array_unification: bool;
   interpret_soft_types_as_like_types: bool;
 }
@@ -49,6 +50,7 @@ let default =
     disable_modes = false;
     disallow_hash_comments = false;
     disallow_fun_and_cls_meth_pseudo_funcs = false;
+    disallow_inst_meth = false;
     array_unification = false;
     interpret_soft_types_as_like_types = false;
   }
@@ -76,6 +78,7 @@ let make
     ?(disallow_hash_comments = default.disallow_hash_comments)
     ?(disallow_fun_and_cls_meth_pseudo_funcs =
       default.disallow_fun_and_cls_meth_pseudo_funcs)
+    ?(disallow_inst_meth = default.disallow_inst_meth)
     ?(array_unification = default.array_unification)
     ?(interpret_soft_types_as_like_types =
       default.interpret_soft_types_as_like_types)
@@ -98,6 +101,7 @@ let make
     disable_modes;
     disallow_hash_comments;
     disallow_fun_and_cls_meth_pseudo_funcs;
+    disallow_inst_meth;
     array_unification;
     interpret_soft_types_as_like_types;
   }

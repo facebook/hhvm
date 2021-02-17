@@ -59,6 +59,7 @@ type t = {
   option_allow_unstable_features: bool;
   option_disallow_hash_comments: bool;
   option_disallow_fun_and_cls_meth_pseudo_funcs: bool;
+  option_disallow_inst_meth: bool;
 }
 [@@deriving eq, ord]
 
@@ -114,6 +115,7 @@ let default =
     option_allow_unstable_features = false;
     option_disallow_hash_comments = false;
     option_disallow_fun_and_cls_meth_pseudo_funcs = false;
+    option_disallow_inst_meth = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -215,6 +217,8 @@ let disallow_hash_comments o = o.option_disallow_hash_comments
 let disallow_fun_and_cls_meth_pseudo_funcs o =
   o.option_disallow_fun_and_cls_meth_pseudo_funcs
 
+let disallow_inst_meth o = o.option_disallow_inst_meth
+
 let canonical_aliased_namespaces an =
   List.sort ~compare:(fun p1 p2 -> String.compare (fst p1) (fst p2)) an
 
@@ -298,6 +302,7 @@ let to_string o =
       Printf.sprintf "disallow_hash_comments: %B" @@ disallow_hash_comments o;
       Printf.sprintf "disallow_fun_and_cls_meth_pseudo_funcs: %B"
       @@ disallow_fun_and_cls_meth_pseudo_funcs o;
+      Printf.sprintf "disallow_inst_meth: %B" @@ disallow_inst_meth o;
     ]
 
 let as_bool s =
@@ -406,6 +411,8 @@ let set_option options name value =
       options with
       option_disallow_fun_and_cls_meth_pseudo_funcs = as_bool value;
     }
+  | "hhvm.hack.lang.disallow_inst_meth" ->
+    { options with option_disallow_inst_meth = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -608,6 +615,8 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
       { opts with option_disallow_fun_and_cls_meth_pseudo_funcs = v = 1 } );
+    ( set_value "hhvm.hack.lang.disallow_inst_meth" get_value_from_config_int
+    @@ fun opts v -> { opts with option_disallow_inst_meth = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

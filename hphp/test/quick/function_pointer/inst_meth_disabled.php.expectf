@@ -1,0 +1,1 @@
+Fatal error: `inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead in %s on line %d

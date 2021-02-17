@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9284eda5ff6f2539875f6cfa377ed51>>
+// @generated SignedSource<<7d889c950fa3719fa5c92087e0fe144c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -134,6 +134,7 @@ pub struct GlobalOptions<'a> {
     pub tco_enable_sound_dynamic: bool,
     pub po_disallow_hash_comments: bool,
     pub po_disallow_fun_and_cls_meth_pseudo_funcs: bool,
+    pub po_disallow_inst_meth: bool,
     pub tco_use_direct_decl_parser: bool,
     pub tco_ifc_enabled: &'a [&'a str],
     pub po_enable_enum_supertyping: bool,

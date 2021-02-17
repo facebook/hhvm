@@ -114,6 +114,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_enable_sound_dynamic: false,
     po_disallow_hash_comments: false,
     po_disallow_fun_and_cls_meth_pseudo_funcs: false,
+    po_disallow_inst_meth: false,
     tco_use_direct_decl_parser: false,
     tco_ifc_enabled: &[],
     po_enable_enum_supertyping: false,

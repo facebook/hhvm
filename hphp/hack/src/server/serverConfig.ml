@@ -427,6 +427,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?po_disallow_hash_comments:(bool_opt "disallow_hash_comments" config)
       ?po_disallow_fun_and_cls_meth_pseudo_funcs:
         (bool_opt "disallow_fun_and_cls_meth_pseudo_funcs" config)
+      ?po_disallow_inst_meth:(bool_opt "disallow_inst_meth" config)
       ~tco_use_direct_decl_parser:
         local_config.ServerLocalConfig.use_direct_decl_parser
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)

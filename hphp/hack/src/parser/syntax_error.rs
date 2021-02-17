@@ -1028,3 +1028,6 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
 
 pub const lambda_effect_polymorphic: Error =
     Cow::Borrowed("A lambda cannot have polymorphic context");
+
+pub const inst_meth_disabled: Error =
+    Cow::Borrowed("`inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead");

@@ -3351,6 +3351,13 @@ where
                         errors::class_meth_disabled,
                     ))
                 }
+
+                if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::INST_METH)
+                    && self.env.parser_options.po_disallow_inst_meth
+                {
+                    self.errors
+                        .push(Self::make_error_from_node(recv, errors::inst_meth_disabled))
+                }
             }
 
             ETSpliceExpression(_) => {

@@ -274,6 +274,7 @@ let parse_options () =
   let enable_sound_dynamic = ref false in
   let disallow_hash_comments = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
+  let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref false in
   let enable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
@@ -634,6 +635,9 @@ let parse_options () =
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         "Disable parsing of fun() and class_meth()." );
+      ( "--disallow-inst-meth",
+        Arg.Set disallow_inst_meth,
+        "Disable parsing of inst_meth()." );
       ( "--use-direct-decl-parser",
         Arg.Set use_direct_decl_parser,
         "Use direct decl parser" );
@@ -780,6 +784,7 @@ let parse_options () =
       ~po_disallow_hash_comments:!disallow_hash_comments
       ~po_disallow_fun_and_cls_meth_pseudo_funcs:
         !disallow_fun_and_cls_meth_pseudo_funcs
+      ~po_disallow_inst_meth:!disallow_inst_meth
       ~tco_ifc_enabled:
         ( if is_ifc_mode then
           ["/"]

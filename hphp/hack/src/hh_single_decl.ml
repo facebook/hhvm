@@ -241,6 +241,7 @@ let () =
       ignored_flag "--union-intersection-type-hints";
       ignored_flag "--enable-strict-string-concat-interp";
       ignored_arg "--extra-builtin";
+      ignored_flag "--disallow-inst-meth";
     ]
     set_file
     usage;

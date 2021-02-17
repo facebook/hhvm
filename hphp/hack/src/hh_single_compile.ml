@@ -454,6 +454,7 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
         ~disallow_hash_comments:(disallow_hash_comments co)
         ~disallow_fun_and_cls_meth_pseudo_funcs:
           (disallow_fun_and_cls_meth_pseudo_funcs co)
+        ~disallow_inst_meth:(disallow_inst_meth co)
         ?mode
         ()
     in

@@ -74,6 +74,7 @@ module FullFidelityParseArgs = struct
     enable_xhp_class_modifier: bool;
     disallow_hash_comments: bool;
     disallow_fun_and_cls_meth_pseudo_funcs: bool;
+    disallow_inst_meth: bool;
     ignore_missing_json: bool;
   }
 
@@ -115,6 +116,7 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier
       disallow_hash_comments
       disallow_fun_and_cls_meth_pseudo_funcs
+      disallow_inst_meth
       ignore_missing_json =
     {
       full_fidelity_json;
@@ -154,6 +156,7 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier;
       disallow_hash_comments;
       disallow_fun_and_cls_meth_pseudo_funcs;
+      disallow_inst_meth;
       ignore_missing_json;
     }
 
@@ -210,6 +213,7 @@ module FullFidelityParseArgs = struct
     let enable_xhp_class_modifier = ref false in
     let disallow_hash_comments = ref false in
     let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
+    let disallow_inst_meth = ref false in
     let ignore_missing_json = ref false in
     let options =
       [
@@ -356,6 +360,9 @@ No errors are filtered out."
         ( "--disallow-fun-and-cls-meth-pseudo-funcs",
           Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
           "Disables parsing of fun() and class_meth()" );
+        ( "--disallow-inst-meth",
+          Arg.Set disallow_inst_meth,
+          "Disabled parsing of inst_meth()" );
         ( "--ignore-missing-json",
           Arg.Set ignore_missing_json,
           "Ignore missing nodes in JSON ouput" );
@@ -416,6 +423,7 @@ No errors are filtered out."
       !enable_xhp_class_modifier
       !disallow_hash_comments
       !disallow_fun_and_cls_meth_pseudo_funcs
+      !disallow_inst_meth
       !ignore_missing_json
 end
 
@@ -512,6 +520,9 @@ let handle_existing_file args filename =
       popt
       args.disallow_fun_and_cls_meth_pseudo_funcs
   in
+  let popt =
+    ParserOptions.with_disallow_inst_meth popt args.disallow_inst_meth
+  in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
@@ -532,6 +543,7 @@ let handle_existing_file args filename =
       ~disallow_hash_comments:args.disallow_hash_comments
       ~disallow_fun_and_cls_meth_pseudo_funcs:
         args.disallow_fun_and_cls_meth_pseudo_funcs
+      ~disallow_inst_meth:args.disallow_inst_meth
       ?mode
       ()
   in

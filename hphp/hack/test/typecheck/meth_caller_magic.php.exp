@@ -1,2 +1,2 @@
-File "__construct.php", line 11, characters 10-20:
+File "meth_caller_magic.php", line 8, characters 30-42:
 `__construct` is a magic method and cannot be called directly (NastCheck[3011])

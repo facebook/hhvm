@@ -65,6 +65,7 @@ let handler =
         ->
         Errors.magic mid
       | Obj_get (_, (_, Id s), _, _) when is_magic s -> Errors.magic s
+      | Method_caller (_, meth) when is_magic meth -> Errors.magic meth
       | _ -> ()
 
     method! at_fun_ _ f =

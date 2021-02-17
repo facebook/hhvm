@@ -329,6 +329,10 @@ let rec obj_get_concrete_ty
               }
             in
             (env, (mk (Reason.Rnone, Tfun ft), []))
+          | None when String.equal id_str SN.Members.__construct ->
+            (* __construct is not an instance method and shouldn't be invoked directly *)
+            let () = Errors.magic (id_pos, id_str) in
+            default ()
           | None ->
             member_not_found env id_pos ~is_method class_info id_str r on_error;
             default ()

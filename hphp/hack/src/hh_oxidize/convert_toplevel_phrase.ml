@@ -114,7 +114,12 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     List.iter type_decls Convert_type_decl.type_declaration;
     env
   (* Convert `open Foo` to `use crate::foo::*;` *)
-  | Pstr_open { popen_lid = id; _ } ->
+  | Pstr_open { popen_expr; _ } ->
+    let id =
+      match popen_expr.pmod_desc with
+      | Pmod_ident id -> id
+      | _ -> failwith "unsupported 'open' statement"
+    in
     let mod_name = longident_to_string id.txt ~for_open:true in
     if blacklisted mod_name then
       log "Not opening %s: it is blacklisted" mod_name
@@ -206,7 +211,8 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     let kind = string_of_module_desc pmod_desc in
     log "Not converting include: %s not supported" kind;
     env
-  | Pstr_exception { pext_name = { txt = name; _ }; _ } ->
+  | Pstr_exception
+      { ptyexn_constructor = { pext_name = { txt = name; _ }; _ }; _ } ->
     log "Not converting exception %s" name;
     env
   | Pstr_eval _ ->

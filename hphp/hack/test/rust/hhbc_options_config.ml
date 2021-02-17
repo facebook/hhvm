@@ -150,7 +150,7 @@ let check_configs (pair_json_str : string) : bool =
             true
           end
         with _ ->
-          Pervasives.flush stderr;
+          Out_channel.flush stderr;
           Printf.eprintf "RUST CRASHED #%d\n" !check_cnt;
           (* Record the inputs for easy inspection with less *)
           let file = Printf.sprintf "%s%d.configs" tmp_prefix !check_cnt in
@@ -158,7 +158,7 @@ let check_configs (pair_json_str : string) : bool =
           Printf.printf "jq . '%s'%s\n" file interact_suffix;
           true
       in
-      Pervasives.flush stdout;
+      Out_channel.flush stdout;
       not fail
     end else
       true

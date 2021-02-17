@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OCAML_VERSION=4.07.1
+export OCAML_VERSION=4.09.1
 export OCAML_VARIANT=+fp
 
 export HACK_OPAM_DEPS=(

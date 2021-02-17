@@ -195,8 +195,8 @@ let rename ty_name =
 let should_use_alias_instead_of_tuple_struct ty_name =
   List.mem tuple_aliases (curr_module_name (), ty_name) ~equal:( = )
 
-let doc_comment_of_attribute attr =
-  match attr with
+let doc_comment_of_attribute { attr_name; attr_payload; _ } =
+  match (attr_name, attr_payload) with
   | ({ txt = "ocaml.doc"; _ }, PStr structure_items) ->
     List.find_map structure_items (fun structure_item ->
         match structure_item.pstr_desc with
@@ -343,8 +343,8 @@ let variant_constructor_declaration ?(box_fields = false) cd =
     (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
        and that all the variants are zero-argument (i.e., assume this is a
        C-like enum and provide custom discriminant values). *)
-    List.find_map cd.pcd_attributes (fun attr ->
-        match attr with
+    List.find_map cd.pcd_attributes (fun { attr_name; attr_payload; _ } ->
+        match (attr_name, attr_payload) with
         | ( { txt = "value"; _ },
             PStr
               [

@@ -90,6 +90,7 @@ template uint32_t McVersionRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -198,6 +199,7 @@ template uint32_t McVersionReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -276,6 +278,7 @@ template uint32_t McStatsRequest::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -392,6 +395,7 @@ template uint32_t McStatsReply::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -470,6 +474,7 @@ template uint32_t McShutdownRequest::serializedSizeZC<>(apache::thrift::CompactP
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -568,6 +573,7 @@ template uint32_t McShutdownReply::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -646,6 +652,7 @@ template uint32_t McQuitRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -744,6 +751,7 @@ template uint32_t McQuitReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -822,6 +830,7 @@ template uint32_t McExecRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -930,6 +939,7 @@ template uint32_t McExecReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -993,6 +1003,7 @@ template uint32_t GoAwayAcknowledgement::serializedSizeZC<>(apache::thrift::Comp
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {

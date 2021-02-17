@@ -28,10 +28,10 @@ StructMetadata<::facebook::memcache::thrift::McGetRequest>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGetRequest = res.first->second;
   Memcache_McGetRequest.name_ref() = "Memcache.McGetRequest";
   Memcache_McGetRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGetRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGetRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -39,6 +39,7 @@ StructMetadata<::facebook::memcache::thrift::McGetRequest>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGetRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -52,13 +53,13 @@ StructMetadata<::facebook::memcache::thrift::McGetReply>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGetReply = res.first->second;
   Memcache_McGetReply.name_ref() = "Memcache.McGetReply";
   Memcache_McGetReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGetReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGetReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -66,6 +67,7 @@ StructMetadata<::facebook::memcache::thrift::McGetReply>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGetReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -79,12 +81,12 @@ StructMetadata<::facebook::memcache::thrift::McSetRequest>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McSetRequest = res.first->second;
   Memcache_McSetRequest.name_ref() = "Memcache.McSetRequest";
   Memcache_McSetRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McSetRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McSetRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -92,6 +94,7 @@ StructMetadata<::facebook::memcache::thrift::McSetRequest>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McSetRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -105,13 +108,13 @@ StructMetadata<::facebook::memcache::thrift::McSetReply>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& Memcache_McSetReply = res.first->second;
   Memcache_McSetReply.name_ref() = "Memcache.McSetReply";
   Memcache_McSetReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McSetReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McSetReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -119,6 +122,7 @@ StructMetadata<::facebook::memcache::thrift::McSetReply>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McSetReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -132,13 +136,13 @@ StructMetadata<::facebook::memcache::thrift::McDeleteRequest>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& Memcache_McDeleteRequest = res.first->second;
   Memcache_McDeleteRequest.name_ref() = "Memcache.McDeleteRequest";
   Memcache_McDeleteRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McDeleteRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(5, "attributes", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "attributes", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McDeleteRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -146,6 +150,7 @@ StructMetadata<::facebook::memcache::thrift::McDeleteRequest>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McDeleteRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -159,13 +164,13 @@ StructMetadata<::facebook::memcache::thrift::McDeleteReply>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McDeleteReply = res.first->second;
   Memcache_McDeleteReply.name_ref() = "Memcache.McDeleteReply";
   Memcache_McDeleteReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McDeleteReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McDeleteReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -173,6 +178,7 @@ StructMetadata<::facebook::memcache::thrift::McDeleteReply>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McDeleteReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -186,10 +192,10 @@ StructMetadata<::facebook::memcache::thrift::McLeaseGetRequest>::gen(ThriftMetad
   ::apache::thrift::metadata::ThriftStruct& Memcache_McLeaseGetRequest = res.first->second;
   Memcache_McLeaseGetRequest.name_ref() = "Memcache.McLeaseGetRequest";
   Memcache_McLeaseGetRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McLeaseGetRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McLeaseGetRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -197,6 +203,7 @@ StructMetadata<::facebook::memcache::thrift::McLeaseGetRequest>::gen(ThriftMetad
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McLeaseGetRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -210,14 +217,14 @@ StructMetadata<::facebook::memcache::thrift::McLeaseGetReply>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& Memcache_McLeaseGetReply = res.first->second;
   Memcache_McLeaseGetReply.name_ref() = "Memcache.McLeaseGetReply";
   Memcache_McLeaseGetReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McLeaseGetReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "leaseToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "leaseToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McLeaseGetReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -225,6 +232,7 @@ StructMetadata<::facebook::memcache::thrift::McLeaseGetReply>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McLeaseGetReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -238,13 +246,13 @@ StructMetadata<::facebook::memcache::thrift::McLeaseSetRequest>::gen(ThriftMetad
   ::apache::thrift::metadata::ThriftStruct& Memcache_McLeaseSetRequest = res.first->second;
   Memcache_McLeaseSetRequest.name_ref() = "Memcache.McLeaseSetRequest";
   Memcache_McLeaseSetRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McLeaseSetRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(5, "leaseToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "leaseToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McLeaseSetRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -252,6 +260,7 @@ StructMetadata<::facebook::memcache::thrift::McLeaseSetRequest>::gen(ThriftMetad
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McLeaseSetRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -265,11 +274,11 @@ StructMetadata<::facebook::memcache::thrift::McLeaseSetReply>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& Memcache_McLeaseSetReply = res.first->second;
   Memcache_McLeaseSetReply.name_ref() = "Memcache.McLeaseSetReply";
   Memcache_McLeaseSetReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McLeaseSetReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McLeaseSetReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -277,6 +286,7 @@ StructMetadata<::facebook::memcache::thrift::McLeaseSetReply>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McLeaseSetReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -290,12 +300,12 @@ StructMetadata<::facebook::memcache::thrift::McAddRequest>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McAddRequest = res.first->second;
   Memcache_McAddRequest.name_ref() = "Memcache.McAddRequest";
   Memcache_McAddRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McAddRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McAddRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -303,6 +313,7 @@ StructMetadata<::facebook::memcache::thrift::McAddRequest>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McAddRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -316,11 +327,11 @@ StructMetadata<::facebook::memcache::thrift::McAddReply>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& Memcache_McAddReply = res.first->second;
   Memcache_McAddReply.name_ref() = "Memcache.McAddReply";
   Memcache_McAddReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McAddReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McAddReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -328,6 +339,7 @@ StructMetadata<::facebook::memcache::thrift::McAddReply>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McAddReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -341,12 +353,12 @@ StructMetadata<::facebook::memcache::thrift::McReplaceRequest>::gen(ThriftMetada
   ::apache::thrift::metadata::ThriftStruct& Memcache_McReplaceRequest = res.first->second;
   Memcache_McReplaceRequest.name_ref() = "Memcache.McReplaceRequest";
   Memcache_McReplaceRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McReplaceRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McReplaceRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -354,6 +366,7 @@ StructMetadata<::facebook::memcache::thrift::McReplaceRequest>::gen(ThriftMetada
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McReplaceRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -367,11 +380,11 @@ StructMetadata<::facebook::memcache::thrift::McReplaceReply>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& Memcache_McReplaceReply = res.first->second;
   Memcache_McReplaceReply.name_ref() = "Memcache.McReplaceReply";
   Memcache_McReplaceReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McReplaceReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McReplaceReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -379,6 +392,7 @@ StructMetadata<::facebook::memcache::thrift::McReplaceReply>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McReplaceReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -392,10 +406,10 @@ StructMetadata<::facebook::memcache::thrift::McGetsRequest>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGetsRequest = res.first->second;
   Memcache_McGetsRequest.name_ref() = "Memcache.McGetsRequest";
   Memcache_McGetsRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGetsRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGetsRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -403,6 +417,7 @@ StructMetadata<::facebook::memcache::thrift::McGetsRequest>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGetsRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -416,14 +431,14 @@ StructMetadata<::facebook::memcache::thrift::McGetsReply>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGetsReply = res.first->second;
   Memcache_McGetsReply.name_ref() = "Memcache.McGetsReply";
   Memcache_McGetsReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGetsReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGetsReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -431,6 +446,7 @@ StructMetadata<::facebook::memcache::thrift::McGetsReply>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGetsReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -444,13 +460,13 @@ StructMetadata<::facebook::memcache::thrift::McCasRequest>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McCasRequest = res.first->second;
   Memcache_McCasRequest.name_ref() = "Memcache.McCasRequest";
   Memcache_McCasRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McCasRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(5, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McCasRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -458,6 +474,7 @@ StructMetadata<::facebook::memcache::thrift::McCasRequest>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McCasRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -471,11 +488,11 @@ StructMetadata<::facebook::memcache::thrift::McCasReply>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& Memcache_McCasReply = res.first->second;
   Memcache_McCasReply.name_ref() = "Memcache.McCasReply";
   Memcache_McCasReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McCasReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McCasReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -483,6 +500,7 @@ StructMetadata<::facebook::memcache::thrift::McCasReply>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McCasReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -496,10 +514,10 @@ StructMetadata<::facebook::memcache::thrift::McIncrRequest>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McIncrRequest = res.first->second;
   Memcache_McIncrRequest.name_ref() = "Memcache.McIncrRequest";
   Memcache_McIncrRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McIncrRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McIncrRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -507,6 +525,7 @@ StructMetadata<::facebook::memcache::thrift::McIncrRequest>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McIncrRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -520,12 +539,12 @@ StructMetadata<::facebook::memcache::thrift::McIncrReply>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& Memcache_McIncrReply = res.first->second;
   Memcache_McIncrReply.name_ref() = "Memcache.McIncrReply";
   Memcache_McIncrReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McIncrReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(4, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McIncrReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -533,6 +552,7 @@ StructMetadata<::facebook::memcache::thrift::McIncrReply>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McIncrReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -546,10 +566,10 @@ StructMetadata<::facebook::memcache::thrift::McDecrRequest>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McDecrRequest = res.first->second;
   Memcache_McDecrRequest.name_ref() = "Memcache.McDecrRequest";
   Memcache_McDecrRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McDecrRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McDecrRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -557,6 +577,7 @@ StructMetadata<::facebook::memcache::thrift::McDecrRequest>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McDecrRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -570,12 +591,12 @@ StructMetadata<::facebook::memcache::thrift::McDecrReply>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& Memcache_McDecrReply = res.first->second;
   Memcache_McDecrReply.name_ref() = "Memcache.McDecrReply";
   Memcache_McDecrReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McDecrReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(4, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "delta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McDecrReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -583,6 +604,7 @@ StructMetadata<::facebook::memcache::thrift::McDecrReply>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McDecrReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -596,9 +618,9 @@ StructMetadata<::facebook::memcache::thrift::McMetagetRequest>::gen(ThriftMetada
   ::apache::thrift::metadata::ThriftStruct& Memcache_McMetagetRequest = res.first->second;
   Memcache_McMetagetRequest.name_ref() = "Memcache.McMetagetRequest";
   Memcache_McMetagetRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McMetagetRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McMetagetRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -606,6 +628,7 @@ StructMetadata<::facebook::memcache::thrift::McMetagetRequest>::gen(ThriftMetada
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McMetagetRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -619,15 +642,15 @@ StructMetadata<::facebook::memcache::thrift::McMetagetReply>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& Memcache_McMetagetReply = res.first->second;
   Memcache_McMetagetReply.name_ref() = "Memcache.McMetagetReply";
   Memcache_McMetagetReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McMetagetReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "age", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(4, "ipv", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
-    std::make_tuple(5, "ipAddress", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(6, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(7, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "age", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "ipv", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "ipAddress", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(7, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McMetagetReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -635,6 +658,7 @@ StructMetadata<::facebook::memcache::thrift::McMetagetReply>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McMetagetReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -648,12 +672,12 @@ StructMetadata<::facebook::memcache::thrift::McAppendRequest>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& Memcache_McAppendRequest = res.first->second;
   Memcache_McAppendRequest.name_ref() = "Memcache.McAppendRequest";
   Memcache_McAppendRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McAppendRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McAppendRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -661,6 +685,7 @@ StructMetadata<::facebook::memcache::thrift::McAppendRequest>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McAppendRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -674,11 +699,11 @@ StructMetadata<::facebook::memcache::thrift::McAppendReply>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McAppendReply = res.first->second;
   Memcache_McAppendReply.name_ref() = "Memcache.McAppendReply";
   Memcache_McAppendReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McAppendReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McAppendReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -686,6 +711,7 @@ StructMetadata<::facebook::memcache::thrift::McAppendReply>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McAppendReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -699,12 +725,12 @@ StructMetadata<::facebook::memcache::thrift::McPrependRequest>::gen(ThriftMetada
   ::apache::thrift::metadata::ThriftStruct& Memcache_McPrependRequest = res.first->second;
   Memcache_McPrependRequest.name_ref() = "Memcache.McPrependRequest";
   Memcache_McPrependRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McPrependRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McPrependRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -712,6 +738,7 @@ StructMetadata<::facebook::memcache::thrift::McPrependRequest>::gen(ThriftMetada
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McPrependRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -725,11 +752,11 @@ StructMetadata<::facebook::memcache::thrift::McPrependReply>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& Memcache_McPrependReply = res.first->second;
   Memcache_McPrependReply.name_ref() = "Memcache.McPrependReply";
   Memcache_McPrependReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McPrependReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McPrependReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -737,6 +764,7 @@ StructMetadata<::facebook::memcache::thrift::McPrependReply>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McPrependReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -750,10 +778,10 @@ StructMetadata<::facebook::memcache::thrift::McTouchRequest>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& Memcache_McTouchRequest = res.first->second;
   Memcache_McTouchRequest.name_ref() = "Memcache.McTouchRequest";
   Memcache_McTouchRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McTouchRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McTouchRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -761,6 +789,7 @@ StructMetadata<::facebook::memcache::thrift::McTouchRequest>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McTouchRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -774,11 +803,11 @@ StructMetadata<::facebook::memcache::thrift::McTouchReply>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McTouchReply = res.first->second;
   Memcache_McTouchReply.name_ref() = "Memcache.McTouchReply";
   Memcache_McTouchReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McTouchReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McTouchReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -786,6 +815,7 @@ StructMetadata<::facebook::memcache::thrift::McTouchReply>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McTouchReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -799,9 +829,9 @@ StructMetadata<::facebook::memcache::thrift::McFlushReRequest>::gen(ThriftMetada
   ::apache::thrift::metadata::ThriftStruct& Memcache_McFlushReRequest = res.first->second;
   Memcache_McFlushReRequest.name_ref() = "Memcache.McFlushReRequest";
   Memcache_McFlushReRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McFlushReRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McFlushReRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -809,6 +839,7 @@ StructMetadata<::facebook::memcache::thrift::McFlushReRequest>::gen(ThriftMetada
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McFlushReRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -822,11 +853,11 @@ StructMetadata<::facebook::memcache::thrift::McFlushReReply>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& Memcache_McFlushReReply = res.first->second;
   Memcache_McFlushReReply.name_ref() = "Memcache.McFlushReReply";
   Memcache_McFlushReReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McFlushReReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McFlushReReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -834,6 +865,7 @@ StructMetadata<::facebook::memcache::thrift::McFlushReReply>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McFlushReReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -847,10 +879,10 @@ StructMetadata<::facebook::memcache::thrift::McFlushAllRequest>::gen(ThriftMetad
   ::apache::thrift::metadata::ThriftStruct& Memcache_McFlushAllRequest = res.first->second;
   Memcache_McFlushAllRequest.name_ref() = "Memcache.McFlushAllRequest";
   Memcache_McFlushAllRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McFlushAllRequest_fields[] = {
-    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
-    std::make_tuple(2, "delay", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "delay", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McFlushAllRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -858,6 +890,7 @@ StructMetadata<::facebook::memcache::thrift::McFlushAllRequest>::gen(ThriftMetad
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McFlushAllRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -871,11 +904,11 @@ StructMetadata<::facebook::memcache::thrift::McFlushAllReply>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& Memcache_McFlushAllReply = res.first->second;
   Memcache_McFlushAllReply.name_ref() = "Memcache.McFlushAllReply";
   Memcache_McFlushAllReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McFlushAllReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McFlushAllReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -883,6 +916,7 @@ StructMetadata<::facebook::memcache::thrift::McFlushAllReply>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McFlushAllReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -896,10 +930,10 @@ StructMetadata<::facebook::memcache::thrift::McGatRequest>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGatRequest = res.first->second;
   Memcache_McGatRequest.name_ref() = "Memcache.McGatRequest";
   Memcache_McGatRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGatRequest_fields[] = {
-    std::make_tuple(1, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(2, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
+    std::make_tuple(1, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGatRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -907,6 +941,7 @@ StructMetadata<::facebook::memcache::thrift::McGatRequest>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGatRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -920,13 +955,13 @@ StructMetadata<::facebook::memcache::thrift::McGatReply>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGatReply = res.first->second;
   Memcache_McGatReply.name_ref() = "Memcache.McGatReply";
   Memcache_McGatReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGatReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGatReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -934,6 +969,7 @@ StructMetadata<::facebook::memcache::thrift::McGatReply>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGatReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -947,10 +983,10 @@ StructMetadata<::facebook::memcache::thrift::McGatsRequest>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGatsRequest = res.first->second;
   Memcache_McGatsRequest.name_ref() = "Memcache.McGatsRequest";
   Memcache_McGatsRequest.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGatsRequest_fields[] = {
-    std::make_tuple(1, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(2, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE))),
+    std::make_tuple(1, "exptime", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "key", false, std::make_unique<Typedef>("carbon.IOBufKey", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGatsRequest_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -958,6 +994,7 @@ StructMetadata<::facebook::memcache::thrift::McGatsRequest>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGatsRequest.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -971,14 +1008,14 @@ StructMetadata<::facebook::memcache::thrift::McGatsReply>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& Memcache_McGatsReply = res.first->second;
   Memcache_McGatsReply.name_ref() = "Memcache.McGatsReply";
   Memcache_McGatsReply.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   Memcache_McGatsReply_fields[] = {
-    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result")),
-    std::make_tuple(2, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
+    std::make_tuple(1, "result", false, std::make_unique<Enum< ::carbon::Result>>("carbon_result.Result"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "casToken", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "flags", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "appSpecificErrorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : Memcache_McGatsReply_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -986,6 +1023,7 @@ StructMetadata<::facebook::memcache::thrift::McGatsReply>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     Memcache_McGatsReply.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;

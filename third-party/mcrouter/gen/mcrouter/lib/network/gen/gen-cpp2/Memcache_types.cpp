@@ -100,6 +100,7 @@ template uint32_t McGetRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -238,6 +239,7 @@ template uint32_t McGetReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -346,6 +348,7 @@ template uint32_t McSetRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -474,6 +477,7 @@ template uint32_t McSetReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -587,6 +591,7 @@ template uint32_t McDeleteRequest::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -715,6 +720,7 @@ template uint32_t McDeleteReply::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -803,6 +809,7 @@ template uint32_t McLeaseGetRequest::serializedSizeZC<>(apache::thrift::CompactP
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -952,6 +959,7 @@ template uint32_t McLeaseGetReply::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1080,6 +1088,7 @@ template uint32_t McLeaseSetRequest::serializedSizeZC<>(apache::thrift::CompactP
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1178,6 +1187,7 @@ template uint32_t McLeaseSetReply::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1286,6 +1296,7 @@ template uint32_t McAddRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1384,6 +1395,7 @@ template uint32_t McAddReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1492,6 +1504,7 @@ template uint32_t McReplaceRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1590,6 +1603,7 @@ template uint32_t McReplaceReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1678,6 +1692,7 @@ template uint32_t McGetsRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1827,6 +1842,7 @@ template uint32_t McGetsReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1955,6 +1971,7 @@ template uint32_t McCasRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2053,6 +2070,7 @@ template uint32_t McCasReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2141,6 +2159,7 @@ template uint32_t McIncrRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2249,6 +2268,7 @@ template uint32_t McIncrReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2337,6 +2357,7 @@ template uint32_t McDecrRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2445,6 +2466,7 @@ template uint32_t McDecrReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2523,6 +2545,7 @@ template uint32_t McMetagetRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2673,6 +2696,7 @@ template uint32_t McMetagetReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2781,6 +2805,7 @@ template uint32_t McAppendRequest::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2879,6 +2904,7 @@ template uint32_t McAppendReply::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -2987,6 +3013,7 @@ template uint32_t McPrependRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3085,6 +3112,7 @@ template uint32_t McPrependReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3173,6 +3201,7 @@ template uint32_t McTouchRequest::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3271,6 +3300,7 @@ template uint32_t McTouchReply::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3349,6 +3379,7 @@ template uint32_t McFlushReRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3447,6 +3478,7 @@ template uint32_t McFlushReReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3535,6 +3567,7 @@ template uint32_t McFlushAllRequest::serializedSizeZC<>(apache::thrift::CompactP
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3633,6 +3666,7 @@ template uint32_t McFlushAllReply::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3721,6 +3755,7 @@ template uint32_t McGatRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3859,6 +3894,7 @@ template uint32_t McGatReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -3947,6 +3983,7 @@ template uint32_t McGatsRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {

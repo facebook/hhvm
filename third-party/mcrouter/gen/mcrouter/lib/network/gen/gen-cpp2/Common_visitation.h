@@ -5,5 +5,7 @@
  *  @generated
  */
 #pragma once
+#include "mcrouter/lib/carbon/gen-cpp2/carbon_visitation.h"
+#include "mcrouter/lib/carbon/gen-cpp2/carbon_result_visitation.h"
 #include "mcrouter/lib/network/gen/gen-cpp2/Common_for_each_field.h"
 #include "mcrouter/lib/network/gen/gen-cpp2/Common_visit_union.h"

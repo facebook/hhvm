@@ -30,60 +30,59 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   }
 
 
-
-  virtual void mcAdd(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& request);
-  virtual void mcAdd(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& request);
+  virtual void mcAdd(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& p_request);
+  virtual void mcAdd(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& p_request);
  protected:
-  void mcAddImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& request);
+  void mcAddImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& p_request);
  public:
 
-  virtual void sync_mcAdd(facebook::memcache::McAddReply& _return, const facebook::memcache::McAddRequest& request);
-  virtual void sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McAddReply& _return, const facebook::memcache::McAddRequest& request);
+  virtual void sync_mcAdd(facebook::memcache::McAddReply& _return, const facebook::memcache::McAddRequest& p_request);
+  virtual void sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McAddReply& _return, const facebook::memcache::McAddRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McAddReply> future_mcAdd(const facebook::memcache::McAddRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McAddReply> semifuture_mcAdd(const facebook::memcache::McAddRequest& request);
-  virtual folly::Future<facebook::memcache::McAddReply> future_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McAddReply> semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request);
+  virtual folly::Future<facebook::memcache::McAddReply> future_mcAdd(const facebook::memcache::McAddRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McAddReply> semifuture_mcAdd(const facebook::memcache::McAddRequest& p_request);
+  virtual folly::Future<facebook::memcache::McAddReply> future_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McAddReply> semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(const facebook::memcache::McAddRequest& request) {
-    auto _task = semifuture_mcAdd(request);
+  folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(const facebook::memcache::McAddRequest& p_request) {
+    auto task = semifuture_mcAdd(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request) {
-    auto _task = semifuture_mcAdd(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McAddReply> co_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request) {
+    auto task = semifuture_mcAdd(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& request) {
-    auto _task = header_semifuture_mcAdd(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request) {
+    auto task = header_semifuture_mcAdd(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcAdd(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAddRequest& request);
+  virtual void mcAdd(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAddRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcAdd(facebook::memcache::McAddReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -93,62 +92,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcAdd(facebook::memcache::McAddReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcAddT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& request);
+  void mcAddT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcAddCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcAppend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& request);
-  virtual void mcAppend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& request);
+  virtual void mcAppend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& p_request);
+  virtual void mcAppend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& p_request);
  protected:
-  void mcAppendImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& request);
+  void mcAppendImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& p_request);
  public:
 
-  virtual void sync_mcAppend(facebook::memcache::McAppendReply& _return, const facebook::memcache::McAppendRequest& request);
-  virtual void sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McAppendReply& _return, const facebook::memcache::McAppendRequest& request);
+  virtual void sync_mcAppend(facebook::memcache::McAppendReply& _return, const facebook::memcache::McAppendRequest& p_request);
+  virtual void sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McAppendReply& _return, const facebook::memcache::McAppendRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McAppendReply> future_mcAppend(const facebook::memcache::McAppendRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McAppendReply> semifuture_mcAppend(const facebook::memcache::McAppendRequest& request);
-  virtual folly::Future<facebook::memcache::McAppendReply> future_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McAppendReply> semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request);
+  virtual folly::Future<facebook::memcache::McAppendReply> future_mcAppend(const facebook::memcache::McAppendRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McAppendReply> semifuture_mcAppend(const facebook::memcache::McAppendRequest& p_request);
+  virtual folly::Future<facebook::memcache::McAppendReply> future_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McAppendReply> semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(const facebook::memcache::McAppendRequest& request) {
-    auto _task = semifuture_mcAppend(request);
+  folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(const facebook::memcache::McAppendRequest& p_request) {
+    auto task = semifuture_mcAppend(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request) {
-    auto _task = semifuture_mcAppend(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McAppendReply> co_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request) {
+    auto task = semifuture_mcAppend(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& request) {
-    auto _task = header_semifuture_mcAppend(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request) {
+    auto task = header_semifuture_mcAppend(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcAppend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAppendRequest& request);
+  virtual void mcAppend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAppendRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcAppend(facebook::memcache::McAppendReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -158,62 +157,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcAppend(facebook::memcache::McAppendReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcAppendT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& request);
+  void mcAppendT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcAppendCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcCas(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& request);
-  virtual void mcCas(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& request);
+  virtual void mcCas(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& p_request);
+  virtual void mcCas(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& p_request);
  protected:
-  void mcCasImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& request);
+  void mcCasImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& p_request);
  public:
 
-  virtual void sync_mcCas(facebook::memcache::McCasReply& _return, const facebook::memcache::McCasRequest& request);
-  virtual void sync_mcCas(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McCasReply& _return, const facebook::memcache::McCasRequest& request);
+  virtual void sync_mcCas(facebook::memcache::McCasReply& _return, const facebook::memcache::McCasRequest& p_request);
+  virtual void sync_mcCas(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McCasReply& _return, const facebook::memcache::McCasRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McCasReply> future_mcCas(const facebook::memcache::McCasRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McCasReply> semifuture_mcCas(const facebook::memcache::McCasRequest& request);
-  virtual folly::Future<facebook::memcache::McCasReply> future_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McCasReply> semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request);
+  virtual folly::Future<facebook::memcache::McCasReply> future_mcCas(const facebook::memcache::McCasRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McCasReply> semifuture_mcCas(const facebook::memcache::McCasRequest& p_request);
+  virtual folly::Future<facebook::memcache::McCasReply> future_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McCasReply> semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(const facebook::memcache::McCasRequest& request) {
-    auto _task = semifuture_mcCas(request);
+  folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(const facebook::memcache::McCasRequest& p_request) {
+    auto task = semifuture_mcCas(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request) {
-    auto _task = semifuture_mcCas(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McCasReply> co_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request) {
+    auto task = semifuture_mcCas(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& request) {
-    auto _task = header_semifuture_mcCas(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request) {
+    auto task = header_semifuture_mcCas(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcCas(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McCasRequest& request);
+  virtual void mcCas(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McCasRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcCas(facebook::memcache::McCasReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -223,62 +222,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcCas(facebook::memcache::McCasReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcCasT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& request);
+  void mcCasT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcCasCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcDecr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& request);
-  virtual void mcDecr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& request);
+  virtual void mcDecr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& p_request);
+  virtual void mcDecr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& p_request);
  protected:
-  void mcDecrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& request);
+  void mcDecrImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& p_request);
  public:
 
-  virtual void sync_mcDecr(facebook::memcache::McDecrReply& _return, const facebook::memcache::McDecrRequest& request);
-  virtual void sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McDecrReply& _return, const facebook::memcache::McDecrRequest& request);
+  virtual void sync_mcDecr(facebook::memcache::McDecrReply& _return, const facebook::memcache::McDecrRequest& p_request);
+  virtual void sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McDecrReply& _return, const facebook::memcache::McDecrRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McDecrReply> future_mcDecr(const facebook::memcache::McDecrRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McDecrReply> semifuture_mcDecr(const facebook::memcache::McDecrRequest& request);
-  virtual folly::Future<facebook::memcache::McDecrReply> future_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McDecrReply> semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request);
+  virtual folly::Future<facebook::memcache::McDecrReply> future_mcDecr(const facebook::memcache::McDecrRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McDecrReply> semifuture_mcDecr(const facebook::memcache::McDecrRequest& p_request);
+  virtual folly::Future<facebook::memcache::McDecrReply> future_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McDecrReply> semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(const facebook::memcache::McDecrRequest& request) {
-    auto _task = semifuture_mcDecr(request);
+  folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(const facebook::memcache::McDecrRequest& p_request) {
+    auto task = semifuture_mcDecr(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request) {
-    auto _task = semifuture_mcDecr(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McDecrReply> co_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request) {
+    auto task = semifuture_mcDecr(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& request) {
-    auto _task = header_semifuture_mcDecr(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request) {
+    auto task = header_semifuture_mcDecr(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcDecr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDecrRequest& request);
+  virtual void mcDecr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDecrRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcDecr(facebook::memcache::McDecrReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -288,62 +287,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcDecr(facebook::memcache::McDecrReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcDecrT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& request);
+  void mcDecrT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcDecrCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcDelete(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& request);
-  virtual void mcDelete(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& request);
+  virtual void mcDelete(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& p_request);
+  virtual void mcDelete(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& p_request);
  protected:
-  void mcDeleteImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& request);
+  void mcDeleteImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& p_request);
  public:
 
-  virtual void sync_mcDelete(facebook::memcache::McDeleteReply& _return, const facebook::memcache::McDeleteRequest& request);
-  virtual void sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McDeleteReply& _return, const facebook::memcache::McDeleteRequest& request);
+  virtual void sync_mcDelete(facebook::memcache::McDeleteReply& _return, const facebook::memcache::McDeleteRequest& p_request);
+  virtual void sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McDeleteReply& _return, const facebook::memcache::McDeleteRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McDeleteReply> future_mcDelete(const facebook::memcache::McDeleteRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McDeleteReply> semifuture_mcDelete(const facebook::memcache::McDeleteRequest& request);
-  virtual folly::Future<facebook::memcache::McDeleteReply> future_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McDeleteReply> semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request);
+  virtual folly::Future<facebook::memcache::McDeleteReply> future_mcDelete(const facebook::memcache::McDeleteRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McDeleteReply> semifuture_mcDelete(const facebook::memcache::McDeleteRequest& p_request);
+  virtual folly::Future<facebook::memcache::McDeleteReply> future_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McDeleteReply> semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(const facebook::memcache::McDeleteRequest& request) {
-    auto _task = semifuture_mcDelete(request);
+  folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(const facebook::memcache::McDeleteRequest& p_request) {
+    auto task = semifuture_mcDelete(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request) {
-    auto _task = semifuture_mcDelete(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McDeleteReply> co_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request) {
+    auto task = semifuture_mcDelete(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& request) {
-    auto _task = header_semifuture_mcDelete(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request) {
+    auto task = header_semifuture_mcDelete(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcDelete(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDeleteRequest& request);
+  virtual void mcDelete(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDeleteRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcDelete(facebook::memcache::McDeleteReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -353,62 +352,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcDelete(facebook::memcache::McDeleteReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcDeleteT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& request);
+  void mcDeleteT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcDeleteCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcFlushAll(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& request);
-  virtual void mcFlushAll(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& request);
+  virtual void mcFlushAll(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& p_request);
+  virtual void mcFlushAll(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& p_request);
  protected:
-  void mcFlushAllImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& request);
+  void mcFlushAllImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& p_request);
  public:
 
-  virtual void sync_mcFlushAll(facebook::memcache::McFlushAllReply& _return, const facebook::memcache::McFlushAllRequest& request);
-  virtual void sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McFlushAllReply& _return, const facebook::memcache::McFlushAllRequest& request);
+  virtual void sync_mcFlushAll(facebook::memcache::McFlushAllReply& _return, const facebook::memcache::McFlushAllRequest& p_request);
+  virtual void sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McFlushAllReply& _return, const facebook::memcache::McFlushAllRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McFlushAllReply> future_mcFlushAll(const facebook::memcache::McFlushAllRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McFlushAllReply> semifuture_mcFlushAll(const facebook::memcache::McFlushAllRequest& request);
-  virtual folly::Future<facebook::memcache::McFlushAllReply> future_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McFlushAllReply> semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request);
+  virtual folly::Future<facebook::memcache::McFlushAllReply> future_mcFlushAll(const facebook::memcache::McFlushAllRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McFlushAllReply> semifuture_mcFlushAll(const facebook::memcache::McFlushAllRequest& p_request);
+  virtual folly::Future<facebook::memcache::McFlushAllReply> future_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McFlushAllReply> semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(const facebook::memcache::McFlushAllRequest& request) {
-    auto _task = semifuture_mcFlushAll(request);
+  folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(const facebook::memcache::McFlushAllRequest& p_request) {
+    auto task = semifuture_mcFlushAll(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request) {
-    auto _task = semifuture_mcFlushAll(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McFlushAllReply> co_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request) {
+    auto task = semifuture_mcFlushAll(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& request) {
-    auto _task = header_semifuture_mcFlushAll(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request) {
+    auto task = header_semifuture_mcFlushAll(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcFlushAll(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushAllRequest& request);
+  virtual void mcFlushAll(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushAllRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcFlushAll(facebook::memcache::McFlushAllReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -418,62 +417,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcFlushAll(facebook::memcache::McFlushAllReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcFlushAllT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& request);
+  void mcFlushAllT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcFlushAllCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcFlushRe(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& request);
-  virtual void mcFlushRe(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& request);
+  virtual void mcFlushRe(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& p_request);
+  virtual void mcFlushRe(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& p_request);
  protected:
-  void mcFlushReImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& request);
+  void mcFlushReImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& p_request);
  public:
 
-  virtual void sync_mcFlushRe(facebook::memcache::McFlushReReply& _return, const facebook::memcache::McFlushReRequest& request);
-  virtual void sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McFlushReReply& _return, const facebook::memcache::McFlushReRequest& request);
+  virtual void sync_mcFlushRe(facebook::memcache::McFlushReReply& _return, const facebook::memcache::McFlushReRequest& p_request);
+  virtual void sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McFlushReReply& _return, const facebook::memcache::McFlushReRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McFlushReReply> future_mcFlushRe(const facebook::memcache::McFlushReRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McFlushReReply> semifuture_mcFlushRe(const facebook::memcache::McFlushReRequest& request);
-  virtual folly::Future<facebook::memcache::McFlushReReply> future_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McFlushReReply> semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request);
+  virtual folly::Future<facebook::memcache::McFlushReReply> future_mcFlushRe(const facebook::memcache::McFlushReRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McFlushReReply> semifuture_mcFlushRe(const facebook::memcache::McFlushReRequest& p_request);
+  virtual folly::Future<facebook::memcache::McFlushReReply> future_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McFlushReReply> semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(const facebook::memcache::McFlushReRequest& request) {
-    auto _task = semifuture_mcFlushRe(request);
+  folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(const facebook::memcache::McFlushReRequest& p_request) {
+    auto task = semifuture_mcFlushRe(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request) {
-    auto _task = semifuture_mcFlushRe(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McFlushReReply> co_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request) {
+    auto task = semifuture_mcFlushRe(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& request) {
-    auto _task = header_semifuture_mcFlushRe(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request) {
+    auto task = header_semifuture_mcFlushRe(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcFlushRe(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushReRequest& request);
+  virtual void mcFlushRe(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushReRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcFlushRe(facebook::memcache::McFlushReReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -483,62 +482,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcFlushRe(facebook::memcache::McFlushReReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcFlushReT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& request);
+  void mcFlushReT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcFlushReCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcGat(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& request);
-  virtual void mcGat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& request);
+  virtual void mcGat(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& p_request);
+  virtual void mcGat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& p_request);
  protected:
-  void mcGatImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& request);
+  void mcGatImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& p_request);
  public:
 
-  virtual void sync_mcGat(facebook::memcache::McGatReply& _return, const facebook::memcache::McGatRequest& request);
-  virtual void sync_mcGat(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGatReply& _return, const facebook::memcache::McGatRequest& request);
+  virtual void sync_mcGat(facebook::memcache::McGatReply& _return, const facebook::memcache::McGatRequest& p_request);
+  virtual void sync_mcGat(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGatReply& _return, const facebook::memcache::McGatRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McGatReply> future_mcGat(const facebook::memcache::McGatRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGatReply> semifuture_mcGat(const facebook::memcache::McGatRequest& request);
-  virtual folly::Future<facebook::memcache::McGatReply> future_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGatReply> semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request);
+  virtual folly::Future<facebook::memcache::McGatReply> future_mcGat(const facebook::memcache::McGatRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGatReply> semifuture_mcGat(const facebook::memcache::McGatRequest& p_request);
+  virtual folly::Future<facebook::memcache::McGatReply> future_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGatReply> semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(const facebook::memcache::McGatRequest& request) {
-    auto _task = semifuture_mcGat(request);
+  folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(const facebook::memcache::McGatRequest& p_request) {
+    auto task = semifuture_mcGat(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request) {
-    auto _task = semifuture_mcGat(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McGatReply> co_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request) {
+    auto task = semifuture_mcGat(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& request) {
-    auto _task = header_semifuture_mcGat(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request) {
+    auto task = header_semifuture_mcGat(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcGat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatRequest& request);
+  virtual void mcGat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcGat(facebook::memcache::McGatReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -548,62 +547,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcGat(facebook::memcache::McGatReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcGatT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& request);
+  void mcGatT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcGatCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcGats(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& request);
-  virtual void mcGats(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& request);
+  virtual void mcGats(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& p_request);
+  virtual void mcGats(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& p_request);
  protected:
-  void mcGatsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& request);
+  void mcGatsImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& p_request);
  public:
 
-  virtual void sync_mcGats(facebook::memcache::McGatsReply& _return, const facebook::memcache::McGatsRequest& request);
-  virtual void sync_mcGats(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGatsReply& _return, const facebook::memcache::McGatsRequest& request);
+  virtual void sync_mcGats(facebook::memcache::McGatsReply& _return, const facebook::memcache::McGatsRequest& p_request);
+  virtual void sync_mcGats(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGatsReply& _return, const facebook::memcache::McGatsRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McGatsReply> future_mcGats(const facebook::memcache::McGatsRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGatsReply> semifuture_mcGats(const facebook::memcache::McGatsRequest& request);
-  virtual folly::Future<facebook::memcache::McGatsReply> future_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGatsReply> semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request);
+  virtual folly::Future<facebook::memcache::McGatsReply> future_mcGats(const facebook::memcache::McGatsRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGatsReply> semifuture_mcGats(const facebook::memcache::McGatsRequest& p_request);
+  virtual folly::Future<facebook::memcache::McGatsReply> future_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGatsReply> semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(const facebook::memcache::McGatsRequest& request) {
-    auto _task = semifuture_mcGats(request);
+  folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(const facebook::memcache::McGatsRequest& p_request) {
+    auto task = semifuture_mcGats(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request) {
-    auto _task = semifuture_mcGats(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McGatsReply> co_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request) {
+    auto task = semifuture_mcGats(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& request) {
-    auto _task = header_semifuture_mcGats(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request) {
+    auto task = header_semifuture_mcGats(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcGats(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatsRequest& request);
+  virtual void mcGats(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatsRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcGats(facebook::memcache::McGatsReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -613,62 +612,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcGats(facebook::memcache::McGatsReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcGatsT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& request);
+  void mcGatsT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcGatsCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& request);
-  virtual void mcGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& request);
+  virtual void mcGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& p_request);
+  virtual void mcGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& p_request);
  protected:
-  void mcGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& request);
+  void mcGetImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& p_request);
  public:
 
-  virtual void sync_mcGet(facebook::memcache::McGetReply& _return, const facebook::memcache::McGetRequest& request);
-  virtual void sync_mcGet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGetReply& _return, const facebook::memcache::McGetRequest& request);
+  virtual void sync_mcGet(facebook::memcache::McGetReply& _return, const facebook::memcache::McGetRequest& p_request);
+  virtual void sync_mcGet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGetReply& _return, const facebook::memcache::McGetRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McGetReply> future_mcGet(const facebook::memcache::McGetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGetReply> semifuture_mcGet(const facebook::memcache::McGetRequest& request);
-  virtual folly::Future<facebook::memcache::McGetReply> future_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGetReply> semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request);
+  virtual folly::Future<facebook::memcache::McGetReply> future_mcGet(const facebook::memcache::McGetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGetReply> semifuture_mcGet(const facebook::memcache::McGetRequest& p_request);
+  virtual folly::Future<facebook::memcache::McGetReply> future_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGetReply> semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(const facebook::memcache::McGetRequest& request) {
-    auto _task = semifuture_mcGet(request);
+  folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(const facebook::memcache::McGetRequest& p_request) {
+    auto task = semifuture_mcGet(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request) {
-    auto _task = semifuture_mcGet(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McGetReply> co_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request) {
+    auto task = semifuture_mcGet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& request) {
-    auto _task = header_semifuture_mcGet(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request) {
+    auto task = header_semifuture_mcGet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetRequest& request);
+  virtual void mcGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcGet(facebook::memcache::McGetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -678,62 +677,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcGet(facebook::memcache::McGetReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcGetT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& request);
+  void mcGetT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcGetCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcGets(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& request);
-  virtual void mcGets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& request);
+  virtual void mcGets(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& p_request);
+  virtual void mcGets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& p_request);
  protected:
-  void mcGetsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& request);
+  void mcGetsImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& p_request);
  public:
 
-  virtual void sync_mcGets(facebook::memcache::McGetsReply& _return, const facebook::memcache::McGetsRequest& request);
-  virtual void sync_mcGets(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGetsReply& _return, const facebook::memcache::McGetsRequest& request);
+  virtual void sync_mcGets(facebook::memcache::McGetsReply& _return, const facebook::memcache::McGetsRequest& p_request);
+  virtual void sync_mcGets(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McGetsReply& _return, const facebook::memcache::McGetsRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McGetsReply> future_mcGets(const facebook::memcache::McGetsRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGetsReply> semifuture_mcGets(const facebook::memcache::McGetsRequest& request);
-  virtual folly::Future<facebook::memcache::McGetsReply> future_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McGetsReply> semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request);
+  virtual folly::Future<facebook::memcache::McGetsReply> future_mcGets(const facebook::memcache::McGetsRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGetsReply> semifuture_mcGets(const facebook::memcache::McGetsRequest& p_request);
+  virtual folly::Future<facebook::memcache::McGetsReply> future_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McGetsReply> semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(const facebook::memcache::McGetsRequest& request) {
-    auto _task = semifuture_mcGets(request);
+  folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(const facebook::memcache::McGetsRequest& p_request) {
+    auto task = semifuture_mcGets(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request) {
-    auto _task = semifuture_mcGets(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McGetsReply> co_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request) {
+    auto task = semifuture_mcGets(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& request) {
-    auto _task = header_semifuture_mcGets(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request) {
+    auto task = header_semifuture_mcGets(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcGets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetsRequest& request);
+  virtual void mcGets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetsRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcGets(facebook::memcache::McGetsReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -743,62 +742,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcGets(facebook::memcache::McGetsReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcGetsT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& request);
+  void mcGetsT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcGetsCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcIncr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& request);
-  virtual void mcIncr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& request);
+  virtual void mcIncr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& p_request);
+  virtual void mcIncr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& p_request);
  protected:
-  void mcIncrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& request);
+  void mcIncrImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& p_request);
  public:
 
-  virtual void sync_mcIncr(facebook::memcache::McIncrReply& _return, const facebook::memcache::McIncrRequest& request);
-  virtual void sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McIncrReply& _return, const facebook::memcache::McIncrRequest& request);
+  virtual void sync_mcIncr(facebook::memcache::McIncrReply& _return, const facebook::memcache::McIncrRequest& p_request);
+  virtual void sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McIncrReply& _return, const facebook::memcache::McIncrRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McIncrReply> future_mcIncr(const facebook::memcache::McIncrRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McIncrReply> semifuture_mcIncr(const facebook::memcache::McIncrRequest& request);
-  virtual folly::Future<facebook::memcache::McIncrReply> future_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McIncrReply> semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request);
+  virtual folly::Future<facebook::memcache::McIncrReply> future_mcIncr(const facebook::memcache::McIncrRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McIncrReply> semifuture_mcIncr(const facebook::memcache::McIncrRequest& p_request);
+  virtual folly::Future<facebook::memcache::McIncrReply> future_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McIncrReply> semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(const facebook::memcache::McIncrRequest& request) {
-    auto _task = semifuture_mcIncr(request);
+  folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(const facebook::memcache::McIncrRequest& p_request) {
+    auto task = semifuture_mcIncr(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request) {
-    auto _task = semifuture_mcIncr(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McIncrReply> co_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request) {
+    auto task = semifuture_mcIncr(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& request) {
-    auto _task = header_semifuture_mcIncr(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request) {
+    auto task = header_semifuture_mcIncr(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcIncr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McIncrRequest& request);
+  virtual void mcIncr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McIncrRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcIncr(facebook::memcache::McIncrReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -808,62 +807,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcIncr(facebook::memcache::McIncrReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcIncrT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& request);
+  void mcIncrT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcIncrCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcLeaseGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& request);
-  virtual void mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& request);
+  virtual void mcLeaseGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual void mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& p_request);
  protected:
-  void mcLeaseGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& request);
+  void mcLeaseGetImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& p_request);
  public:
 
-  virtual void sync_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, const facebook::memcache::McLeaseGetRequest& request);
-  virtual void sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McLeaseGetReply& _return, const facebook::memcache::McLeaseGetRequest& request);
+  virtual void sync_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual void sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McLeaseGetReply& _return, const facebook::memcache::McLeaseGetRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McLeaseGetReply> future_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McLeaseGetReply> semifuture_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request);
-  virtual folly::Future<facebook::memcache::McLeaseGetReply> future_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McLeaseGetReply> semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request);
+  virtual folly::Future<facebook::memcache::McLeaseGetReply> future_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McLeaseGetReply> semifuture_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual folly::Future<facebook::memcache::McLeaseGetReply> future_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McLeaseGetReply> semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request) {
-    auto _task = semifuture_mcLeaseGet(request);
+  folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& p_request) {
+    auto task = semifuture_mcLeaseGet(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request) {
-    auto _task = semifuture_mcLeaseGet(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McLeaseGetReply> co_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request) {
+    auto task = semifuture_mcLeaseGet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& request) {
-    auto _task = header_semifuture_mcLeaseGet(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request) {
+    auto task = header_semifuture_mcLeaseGet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcLeaseGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseGetRequest& request);
+  virtual void mcLeaseGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseGetRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -873,62 +872,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcLeaseGetT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& request);
+  void mcLeaseGetT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcLeaseGetCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcLeaseSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& request);
-  virtual void mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& request);
+  virtual void mcLeaseSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual void mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& p_request);
  protected:
-  void mcLeaseSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& request);
+  void mcLeaseSetImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& p_request);
  public:
 
-  virtual void sync_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, const facebook::memcache::McLeaseSetRequest& request);
-  virtual void sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McLeaseSetReply& _return, const facebook::memcache::McLeaseSetRequest& request);
+  virtual void sync_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual void sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McLeaseSetReply& _return, const facebook::memcache::McLeaseSetRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McLeaseSetReply> future_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McLeaseSetReply> semifuture_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request);
-  virtual folly::Future<facebook::memcache::McLeaseSetReply> future_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McLeaseSetReply> semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request);
+  virtual folly::Future<facebook::memcache::McLeaseSetReply> future_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McLeaseSetReply> semifuture_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual folly::Future<facebook::memcache::McLeaseSetReply> future_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McLeaseSetReply> semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request) {
-    auto _task = semifuture_mcLeaseSet(request);
+  folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& p_request) {
+    auto task = semifuture_mcLeaseSet(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request) {
-    auto _task = semifuture_mcLeaseSet(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McLeaseSetReply> co_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request) {
+    auto task = semifuture_mcLeaseSet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& request) {
-    auto _task = header_semifuture_mcLeaseSet(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request) {
+    auto task = header_semifuture_mcLeaseSet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcLeaseSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseSetRequest& request);
+  virtual void mcLeaseSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseSetRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -938,62 +937,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcLeaseSetT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& request);
+  void mcLeaseSetT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcLeaseSetCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcMetaget(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& request);
-  virtual void mcMetaget(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& request);
+  virtual void mcMetaget(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& p_request);
+  virtual void mcMetaget(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& p_request);
  protected:
-  void mcMetagetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& request);
+  void mcMetagetImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& p_request);
  public:
 
-  virtual void sync_mcMetaget(facebook::memcache::McMetagetReply& _return, const facebook::memcache::McMetagetRequest& request);
-  virtual void sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McMetagetReply& _return, const facebook::memcache::McMetagetRequest& request);
+  virtual void sync_mcMetaget(facebook::memcache::McMetagetReply& _return, const facebook::memcache::McMetagetRequest& p_request);
+  virtual void sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McMetagetReply& _return, const facebook::memcache::McMetagetRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McMetagetReply> future_mcMetaget(const facebook::memcache::McMetagetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McMetagetReply> semifuture_mcMetaget(const facebook::memcache::McMetagetRequest& request);
-  virtual folly::Future<facebook::memcache::McMetagetReply> future_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McMetagetReply> semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request);
+  virtual folly::Future<facebook::memcache::McMetagetReply> future_mcMetaget(const facebook::memcache::McMetagetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McMetagetReply> semifuture_mcMetaget(const facebook::memcache::McMetagetRequest& p_request);
+  virtual folly::Future<facebook::memcache::McMetagetReply> future_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McMetagetReply> semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(const facebook::memcache::McMetagetRequest& request) {
-    auto _task = semifuture_mcMetaget(request);
+  folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(const facebook::memcache::McMetagetRequest& p_request) {
+    auto task = semifuture_mcMetaget(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request) {
-    auto _task = semifuture_mcMetaget(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McMetagetReply> co_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request) {
+    auto task = semifuture_mcMetaget(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& request) {
-    auto _task = header_semifuture_mcMetaget(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request) {
+    auto task = header_semifuture_mcMetaget(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcMetaget(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McMetagetRequest& request);
+  virtual void mcMetaget(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McMetagetRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcMetaget(facebook::memcache::McMetagetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1003,62 +1002,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcMetaget(facebook::memcache::McMetagetReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcMetagetT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& request);
+  void mcMetagetT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcMetagetCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcPrepend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& request);
-  virtual void mcPrepend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& request);
+  virtual void mcPrepend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& p_request);
+  virtual void mcPrepend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& p_request);
  protected:
-  void mcPrependImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& request);
+  void mcPrependImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& p_request);
  public:
 
-  virtual void sync_mcPrepend(facebook::memcache::McPrependReply& _return, const facebook::memcache::McPrependRequest& request);
-  virtual void sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McPrependReply& _return, const facebook::memcache::McPrependRequest& request);
+  virtual void sync_mcPrepend(facebook::memcache::McPrependReply& _return, const facebook::memcache::McPrependRequest& p_request);
+  virtual void sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McPrependReply& _return, const facebook::memcache::McPrependRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McPrependReply> future_mcPrepend(const facebook::memcache::McPrependRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McPrependReply> semifuture_mcPrepend(const facebook::memcache::McPrependRequest& request);
-  virtual folly::Future<facebook::memcache::McPrependReply> future_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McPrependReply> semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request);
+  virtual folly::Future<facebook::memcache::McPrependReply> future_mcPrepend(const facebook::memcache::McPrependRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McPrependReply> semifuture_mcPrepend(const facebook::memcache::McPrependRequest& p_request);
+  virtual folly::Future<facebook::memcache::McPrependReply> future_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McPrependReply> semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(const facebook::memcache::McPrependRequest& request) {
-    auto _task = semifuture_mcPrepend(request);
+  folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(const facebook::memcache::McPrependRequest& p_request) {
+    auto task = semifuture_mcPrepend(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request) {
-    auto _task = semifuture_mcPrepend(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McPrependReply> co_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request) {
+    auto task = semifuture_mcPrepend(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& request) {
-    auto _task = header_semifuture_mcPrepend(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request) {
+    auto task = header_semifuture_mcPrepend(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcPrepend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McPrependRequest& request);
+  virtual void mcPrepend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McPrependRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcPrepend(facebook::memcache::McPrependReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1068,62 +1067,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcPrepend(facebook::memcache::McPrependReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcPrependT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& request);
+  void mcPrependT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcPrependCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcReplace(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& request);
-  virtual void mcReplace(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& request);
+  virtual void mcReplace(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& p_request);
+  virtual void mcReplace(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& p_request);
  protected:
-  void mcReplaceImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& request);
+  void mcReplaceImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& p_request);
  public:
 
-  virtual void sync_mcReplace(facebook::memcache::McReplaceReply& _return, const facebook::memcache::McReplaceRequest& request);
-  virtual void sync_mcReplace(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McReplaceReply& _return, const facebook::memcache::McReplaceRequest& request);
+  virtual void sync_mcReplace(facebook::memcache::McReplaceReply& _return, const facebook::memcache::McReplaceRequest& p_request);
+  virtual void sync_mcReplace(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McReplaceReply& _return, const facebook::memcache::McReplaceRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McReplaceReply> future_mcReplace(const facebook::memcache::McReplaceRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McReplaceReply> semifuture_mcReplace(const facebook::memcache::McReplaceRequest& request);
-  virtual folly::Future<facebook::memcache::McReplaceReply> future_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McReplaceReply> semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request);
+  virtual folly::Future<facebook::memcache::McReplaceReply> future_mcReplace(const facebook::memcache::McReplaceRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McReplaceReply> semifuture_mcReplace(const facebook::memcache::McReplaceRequest& p_request);
+  virtual folly::Future<facebook::memcache::McReplaceReply> future_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McReplaceReply> semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(const facebook::memcache::McReplaceRequest& request) {
-    auto _task = semifuture_mcReplace(request);
+  folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(const facebook::memcache::McReplaceRequest& p_request) {
+    auto task = semifuture_mcReplace(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request) {
-    auto _task = semifuture_mcReplace(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McReplaceReply> co_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request) {
+    auto task = semifuture_mcReplace(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& request) {
-    auto _task = header_semifuture_mcReplace(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request) {
+    auto task = header_semifuture_mcReplace(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcReplace(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McReplaceRequest& request);
+  virtual void mcReplace(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McReplaceRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcReplace(facebook::memcache::McReplaceReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1133,62 +1132,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcReplace(facebook::memcache::McReplaceReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcReplaceT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& request);
+  void mcReplaceT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcReplaceCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& request);
-  virtual void mcSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& request);
+  virtual void mcSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& p_request);
+  virtual void mcSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& p_request);
  protected:
-  void mcSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& request);
+  void mcSetImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& p_request);
  public:
 
-  virtual void sync_mcSet(facebook::memcache::McSetReply& _return, const facebook::memcache::McSetRequest& request);
-  virtual void sync_mcSet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McSetReply& _return, const facebook::memcache::McSetRequest& request);
+  virtual void sync_mcSet(facebook::memcache::McSetReply& _return, const facebook::memcache::McSetRequest& p_request);
+  virtual void sync_mcSet(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McSetReply& _return, const facebook::memcache::McSetRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McSetReply> future_mcSet(const facebook::memcache::McSetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McSetReply> semifuture_mcSet(const facebook::memcache::McSetRequest& request);
-  virtual folly::Future<facebook::memcache::McSetReply> future_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McSetReply> semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request);
+  virtual folly::Future<facebook::memcache::McSetReply> future_mcSet(const facebook::memcache::McSetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McSetReply> semifuture_mcSet(const facebook::memcache::McSetRequest& p_request);
+  virtual folly::Future<facebook::memcache::McSetReply> future_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McSetReply> semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(const facebook::memcache::McSetRequest& request) {
-    auto _task = semifuture_mcSet(request);
+  folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(const facebook::memcache::McSetRequest& p_request) {
+    auto task = semifuture_mcSet(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request) {
-    auto _task = semifuture_mcSet(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McSetReply> co_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request) {
+    auto task = semifuture_mcSet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& request) {
-    auto _task = header_semifuture_mcSet(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request) {
+    auto task = header_semifuture_mcSet(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McSetRequest& request);
+  virtual void mcSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McSetRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcSet(facebook::memcache::McSetReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1198,62 +1197,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcSet(facebook::memcache::McSetReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcSetT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& request);
+  void mcSetT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcSetCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcTouch(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& request);
-  virtual void mcTouch(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& request);
+  virtual void mcTouch(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& p_request);
+  virtual void mcTouch(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& p_request);
  protected:
-  void mcTouchImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& request);
+  void mcTouchImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& p_request);
  public:
 
-  virtual void sync_mcTouch(facebook::memcache::McTouchReply& _return, const facebook::memcache::McTouchRequest& request);
-  virtual void sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McTouchReply& _return, const facebook::memcache::McTouchRequest& request);
+  virtual void sync_mcTouch(facebook::memcache::McTouchReply& _return, const facebook::memcache::McTouchRequest& p_request);
+  virtual void sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McTouchReply& _return, const facebook::memcache::McTouchRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McTouchReply> future_mcTouch(const facebook::memcache::McTouchRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McTouchReply> semifuture_mcTouch(const facebook::memcache::McTouchRequest& request);
-  virtual folly::Future<facebook::memcache::McTouchReply> future_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McTouchReply> semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request);
+  virtual folly::Future<facebook::memcache::McTouchReply> future_mcTouch(const facebook::memcache::McTouchRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McTouchReply> semifuture_mcTouch(const facebook::memcache::McTouchRequest& p_request);
+  virtual folly::Future<facebook::memcache::McTouchReply> future_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McTouchReply> semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(const facebook::memcache::McTouchRequest& request) {
-    auto _task = semifuture_mcTouch(request);
+  folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(const facebook::memcache::McTouchRequest& p_request) {
+    auto task = semifuture_mcTouch(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request) {
-    auto _task = semifuture_mcTouch(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McTouchReply> co_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request) {
+    auto task = semifuture_mcTouch(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& request) {
-    auto _task = header_semifuture_mcTouch(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request) {
+    auto task = header_semifuture_mcTouch(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcTouch(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McTouchRequest& request);
+  virtual void mcTouch(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McTouchRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcTouch(facebook::memcache::McTouchReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1263,62 +1262,62 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcTouch(facebook::memcache::McTouchReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcTouchT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& request);
+  void mcTouchT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcTouchCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
-
-  virtual void mcVersion(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& request);
-  virtual void mcVersion(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& request);
+  virtual void mcVersion(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& p_request);
+  virtual void mcVersion(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& p_request);
  protected:
-  void mcVersionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& request);
+  void mcVersionImpl(const apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& p_request);
  public:
 
-  virtual void sync_mcVersion(facebook::memcache::McVersionReply& _return, const facebook::memcache::McVersionRequest& request);
-  virtual void sync_mcVersion(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McVersionReply& _return, const facebook::memcache::McVersionRequest& request);
+  virtual void sync_mcVersion(facebook::memcache::McVersionReply& _return, const facebook::memcache::McVersionRequest& p_request);
+  virtual void sync_mcVersion(apache::thrift::RpcOptions& rpcOptions, facebook::memcache::McVersionReply& _return, const facebook::memcache::McVersionRequest& p_request);
 
-  virtual folly::Future<facebook::memcache::McVersionReply> future_mcVersion(const facebook::memcache::McVersionRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McVersionReply> semifuture_mcVersion(const facebook::memcache::McVersionRequest& request);
-  virtual folly::Future<facebook::memcache::McVersionReply> future_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request);
-  virtual folly::SemiFuture<facebook::memcache::McVersionReply> semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request);
-  virtual folly::Future<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request);
-  virtual folly::SemiFuture<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request);
+  virtual folly::Future<facebook::memcache::McVersionReply> future_mcVersion(const facebook::memcache::McVersionRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McVersionReply> semifuture_mcVersion(const facebook::memcache::McVersionRequest& p_request);
+  virtual folly::Future<facebook::memcache::McVersionReply> future_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
+  virtual folly::SemiFuture<facebook::memcache::McVersionReply> semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
+  virtual folly::Future<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
+  virtual folly::SemiFuture<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(const facebook::memcache::McVersionRequest& request) {
-    auto _task = semifuture_mcVersion(request);
+  folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(const facebook::memcache::McVersionRequest& p_request) {
+    auto task = semifuture_mcVersion(p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request) {
-    auto _task = semifuture_mcVersion(rpcOptions, request);
+  folly::coro::Task<facebook::memcache::McVersionReply> co_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request) {
+    auto task = semifuture_mcVersion(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
   template <int = 0>
-  folly::coro::Task<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& request) {
-    auto _task = header_semifuture_mcVersion(rpcOptions, request);
+  folly::coro::Task<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request) {
+    auto task = header_semifuture_mcVersion(rpcOptions, p_request);
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(task))));
     } else {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(task)));
     }
   }
 #endif // FOLLY_HAS_COROUTINES
 
-  virtual void mcVersion(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McVersionRequest& request);
+  virtual void mcVersion(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McVersionRequest& p_request);
 
 
   static folly::exception_wrapper recv_wrapped_mcVersion(facebook::memcache::McVersionReply& _return, ::apache::thrift::ClientReceiveState& state);
@@ -1328,7 +1327,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::exception_wrapper recv_instance_wrapped_mcVersion(facebook::memcache::McVersionReply& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_>
-  void mcVersionT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& request);
+  void mcVersionT(Protocol_* prot, apache::thrift::RpcOptions rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& p_request);
+  std::shared_ptr<::apache::thrift::detail::ac::ClientRequestContext> mcVersionCtx(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

@@ -124,8 +124,7 @@ void McVersionRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -250,8 +249,7 @@ _readField_result:
   }
 _readField_value:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::readWithContext(*iprot, this->value, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -266,8 +264,7 @@ _readField_value:
   }
 _readField_message:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -437,8 +434,7 @@ void McStatsRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -563,8 +559,7 @@ _readField_result:
   }
 _readField_message:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -580,9 +575,8 @@ _readField_message:
 _readField_stats:
   {
     _readState.beforeSubobject(iprot);
-    
     this->stats = ::std::vector<::std::string>();
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::read(*iprot, this->stats);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::readWithContext(*iprot, this->stats, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.stats = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -753,8 +747,7 @@ void McShutdownRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -879,8 +872,7 @@ _readField_result:
   }
 _readField_message:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1035,8 +1027,7 @@ void McQuitRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1161,8 +1152,7 @@ _readField_result:
   }
 _readField_message:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1317,8 +1307,7 @@ void McExecRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>,  ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1443,8 +1432,7 @@ _readField_result:
   }
 _readField_response:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->response);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->response, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.response = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1459,8 +1447,7 @@ _readField_response:
   }
 _readField_message:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1724,8 +1711,7 @@ _readField_result:
   }
 _readField_reason:
   {
-    
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->reason);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->reason, _readState);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.reason = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END

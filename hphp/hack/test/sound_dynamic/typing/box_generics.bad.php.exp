@@ -1,6 +1,10 @@
 File "box_generics.bad.php", line 5, characters 19-29:
-Class Box cannot implement dynamic because method __construct is not dynamically callable (Typing[4402])
+Class `Box` cannot implement dynamic because method `__construct` is not dynamically callable (Typing[4402])
+File "box_generics.bad.php", line 5, characters 41-42:
+Class `Box` cannot implement dynamic because property `x` cannot be assigned to dynamic (Typing[4402])
+File "box_generics.bad.php", line 5, characters 41-42:
+Class `Box` cannot implement dynamic because property `x` does not have an enforceable type (Typing[4402])
 File "box_generics.bad.php", line 6, characters 19-21:
-Class Box cannot implement dynamic because method set is not dynamically callable (Typing[4402])
+Class `Box` cannot implement dynamic because method `set` is not dynamically callable (Typing[4402])
 File "box_generics.bad.php", line 7, characters 19-21:
-Class Box cannot implement dynamic because method get is not dynamically callable (Typing[4402])
+Class `Box` cannot implement dynamic because method `get` is not dynamically callable (Typing[4402])

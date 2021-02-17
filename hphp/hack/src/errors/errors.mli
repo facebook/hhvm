@@ -1487,6 +1487,10 @@ val parent_implements_dynamic :
 
 val method_is_not_dynamically_callable : Pos.t -> string -> string -> unit
 
+val property_is_not_enforceable : Pos.t -> string -> string -> unit
+
+val property_is_not_dynamic : Pos.t -> string -> string -> unit
+
 val immutable_local : Pos.t -> unit
 
 val enum_classes_reserved_syntax : Pos.t -> unit

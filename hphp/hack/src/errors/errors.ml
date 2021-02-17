@@ -5566,10 +5566,32 @@ let method_is_not_dynamically_callable pos method_name class_name =
     (Typing.err_code Typing.ImplementsDynamic)
     pos
     ( "Class "
-    ^ class_name
+    ^ Markdown_lite.md_codify class_name
     ^ " cannot implement dynamic because method "
-    ^ method_name
+    ^ Markdown_lite.md_codify method_name
     ^ " is not dynamically callable" )
+
+let property_is_not_enforceable pos prop_name class_name =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.ImplementsDynamic)
+    pos
+    ( "Class "
+    ^ Markdown_lite.md_codify class_name
+    ^ " cannot implement dynamic because property "
+    ^ Markdown_lite.md_codify prop_name
+    ^ " does not have an enforceable type" )
+
+let property_is_not_dynamic pos prop_name class_name =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.ImplementsDynamic)
+    pos
+    ( "Class "
+    ^ Markdown_lite.md_codify class_name
+    ^ " cannot implement dynamic because property "
+    ^ Markdown_lite.md_codify prop_name
+    ^ " cannot be assigned to dynamic" )
 
 let immutable_local pos =
   add

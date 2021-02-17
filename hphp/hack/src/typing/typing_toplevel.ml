@@ -1326,6 +1326,33 @@ let class_var_def ~is_static cls env cv =
       (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
     | None -> Tast.dummy_type_hint (hint_of_type_hint cv.cv_type)
   in
+  (* if the class implements dynamic, then check that the type of the property
+   * is enforceable (for writing) and coerces to dynamic (for reading) *)
+  if
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && Cls.get_implements_dynamic cls
+  then begin
+    Option.iter decl_cty (fun ty ->
+        let te_check = Typing_enforceability.is_enforceable env ty in
+        if not te_check then
+          Errors.property_is_not_enforceable
+            (fst cv.cv_id)
+            (snd cv.cv_id)
+            (Cls.name cls));
+    if
+      not
+        (Typing_subtype.is_sub_type_for_union
+           ~coerce:(Some Typing_logic.CoerceToDynamic)
+           env
+           (fst cv_type)
+           (mk (Reason.Rnone, Tdynamic)))
+    then
+      Errors.property_is_not_dynamic
+        (fst cv.cv_id)
+        (snd cv.cv_id)
+        (Cls.name cls)
+  end;
   ( env,
     ( {
         Aast.cv_final = cv.cv_final;

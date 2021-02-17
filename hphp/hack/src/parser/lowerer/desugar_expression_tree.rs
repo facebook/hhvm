@@ -115,7 +115,6 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
             "makeTree",
             vec![
                 exprpos(&temp_pos),
-                Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
                 spliced_dict,
                 visitor_lambda,
                 inferred_type,
@@ -1004,6 +1003,7 @@ fn exprpos(pos: &Pos) -> Expr {
             &pos,
             "\\ExprPos",
             vec![
+                Expr::new(Pos::make_none(), Expr_::Id(Box::new(make_id("__FILE__")))),
                 int_literal(start_lnum),
                 int_literal(start_cnum - start_bol),
                 int_literal(end_lnum),

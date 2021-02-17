@@ -76,16 +76,16 @@
                                                         ([5:8-14],
                                                          "\\ExprPos"))),
                                                     [],
-                                                    [([Pos.none], (Int "5"));
+                                                    [([Pos.none],
+                                                      (Id
+                                                         ([Pos.none],
+                                                          "\\__FILE__")));
+                                                      ([Pos.none], (Int "5"));
                                                       ([Pos.none], (Int "7"));
                                                       ([Pos.none], (Int "5"));
                                                       ([Pos.none], (Int "13"))
                                                       ],
                                                     None, [5:8-14])));
-                                                 ([5:8-14],
-                                                  (Id
-                                                     ([Pos.none],
-                                                      "\\__FILE__")));
                                                  ([Pos.none],
                                                   (KeyValCollection (Dict,
                                                      None,

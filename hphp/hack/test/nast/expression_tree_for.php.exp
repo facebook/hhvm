@@ -174,16 +174,16 @@
                                                         ([4:8-60],
                                                          "\\ExprPos"))),
                                                     [],
-                                                    [([Pos.none], (Int "4"));
+                                                    [([Pos.none],
+                                                      (Id
+                                                         ([Pos.none],
+                                                          "\\__FILE__")));
+                                                      ([Pos.none], (Int "4"));
                                                       ([Pos.none], (Int "7"));
                                                       ([Pos.none], (Int "4"));
                                                       ([Pos.none], (Int "59"))
                                                       ],
                                                     None, [4:8-60])));
-                                                 ([4:8-60],
-                                                  (Id
-                                                     ([Pos.none],
-                                                      "\\__FILE__")));
                                                  ([Pos.none],
                                                   (KeyValCollection (Dict,
                                                      None,
@@ -283,6 +283,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "7"));
@@ -327,6 +331,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "16"));
@@ -364,6 +372,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "20"));
@@ -397,6 +409,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "20"));
@@ -434,6 +450,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "25"));
@@ -477,6 +497,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "28"));
@@ -510,6 +534,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "28"));
@@ -564,6 +592,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "34"));
@@ -597,6 +629,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "34"));
@@ -634,6 +670,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "39"));
@@ -667,6 +707,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "39"));
@@ -711,6 +755,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "44"));
@@ -760,6 +808,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "49"));
@@ -793,6 +845,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "49"));
@@ -842,6 +898,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "7"));
@@ -875,6 +935,10 @@
                                                                     "\\ExprPos"))),
                                                                     [],
                                                                     [([Pos.none],
+                                                                    (Id
+                                                                    ([Pos.none],
+                                                                    "\\__FILE__")));
+                                                                    ([Pos.none],
                                                                     (Int "4"));
                                                                     ([Pos.none],
                                                                     (Int "7"));

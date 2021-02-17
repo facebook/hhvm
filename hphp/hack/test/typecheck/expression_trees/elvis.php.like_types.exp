@@ -2,9 +2,9 @@ File "elvis.php", line 7, characters 13-27:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "elvis.php", line 7, characters 13-16:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 30, characters 5-43:
+  File "expr_tree.hhi", line 29, characters 5-43:
   But got `dynamic` because it is an unenforceable type
 File "elvis.php", line 7, characters 21-27:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 35, characters 5-45:
+  File "expr_tree.hhi", line 34, characters 5-45:
   But got `dynamic` because it is an unenforceable type

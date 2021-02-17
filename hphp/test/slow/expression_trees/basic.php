@@ -22,19 +22,17 @@ function test(): void {
 final class MyVisitor {
   public static function makeTree<TInfer>(
     ?ExprPos $pos,
-    ?string $filepath,
     dict<string, mixed> $cached_dict,
     (function(MyVisitor): mixed) $ast,
     ?(function(): TInfer) $err,
   ): ExprTree<MyVisitor, mixed, TInfer> {
-    return new ExprTree($pos, $filepath, $cached_dict, $ast, $err);
+    return new ExprTree($pos, $cached_dict, $ast, $err);
   }
 
   public static function intLiteral(
     int $i,
   ): ExprTree<MyVisitor, mixed, int> {
     return new ExprTree(
-      null,
       null,
       dict[],
       (MyVisitor $_) ==> (string)$i,
@@ -46,7 +44,6 @@ final class MyVisitor {
     string $s
   ): ExprTree<MyVisitor, mixed, string> {
     return new ExprTree(
-      null,
       null,
       dict[],
       (MyVisitor $_) ==> "\"$s\"",
@@ -97,7 +94,6 @@ final class MyVisitor {
   ): ExprTree<this, this::TAst, T> {
     return new ExprTree(
       null,
-      null,
       dict[],
       (MyVisitor $_) ==> { return $name; },
       () ==> { throw new Exception(); },
@@ -108,7 +104,6 @@ final class MyVisitor {
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private ?ExprPos $pos,
-    private ?string $filepath,
     private dict<string, mixed> $cached_dict,
     private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
@@ -121,6 +116,7 @@ final class ExprTree<TVisitor, TResult, TInfer>{
 
 final class ExprPos {
   public function __construct(
+    private string $path,
     private int $begin_line,
     private int $begin_col,
     private int $end_line,

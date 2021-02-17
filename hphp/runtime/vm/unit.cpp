@@ -39,7 +39,6 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/smalllocks.h"
 #include "hphp/util/struct-log.h"
 
 #include "hphp/runtime/base/attr.h"

@@ -181,34 +181,6 @@ impl<'i, 'a> Iterator for InstrIter<'i, 'a> {
 }
 
 #[allow(clippy::needless_lifetimes)]
-mod bumpalo_helpers {
-    pub fn str_of_string<'a>(alloc: &'a bumpalo::Bump, s: std::string::String) -> &'a str {
-        bumpalo::collections::String::from_str_in(s.as_str(), alloc).into_bump_str()
-    }
-    pub fn slice_of_vec<'a, T, U, F: FnMut(T) -> U>(
-        alloc: &'a bumpalo::Bump,
-        f: F,
-        xs: std::vec::Vec<T>,
-    ) -> &'a [U] {
-        bumpalo::collections::Vec::from_iter_in(xs.into_iter().map(f), alloc).into_bump_slice()
-    }
-    #[allow(clippy::mut_from_ref)]
-    pub fn slice_of_vec_mut<'a, T, U, F: FnMut(T) -> U>(
-        alloc: &'a bumpalo::Bump,
-        f: F,
-        xs: std::vec::Vec<T>,
-    ) -> &'a mut [U] {
-        bumpalo::collections::Vec::from_iter_in(xs.into_iter().map(f), alloc).into_bump_slice_mut()
-    }
-    pub fn slice_of_string_vec<'a>(
-        alloc: &'a bumpalo::Bump,
-        xs: std::vec::Vec<std::string::String>,
-    ) -> &'a [&'a str] {
-        slice_of_vec(alloc, |s| str_of_string(alloc, s), xs)
-    }
-}
-
-#[allow(clippy::needless_lifetimes)]
 pub mod instr {
     use crate::*;
 
@@ -220,8 +192,8 @@ pub mod instr {
         InstrSeq::new_singleton(alloc, i)
     }
 
-    pub fn instrs<'a>(alloc: &'a bumpalo::Bump, is: std::vec::Vec<Instruct<'a>>) -> InstrSeq<'a> {
-        InstrSeq::from_iter_in(alloc, is.into_iter())
+    pub fn instrs<'a>(_alloc: &'a bumpalo::Bump, is: &'a mut [Instruct<'a>]) -> InstrSeq<'a> {
+        InstrSeq::new_list(is)
     }
 
     pub fn lit_const<'a>(alloc: &'a bumpalo::Bump, l: InstructLitConst<'a>) -> InstrSeq<'a> {
@@ -331,12 +303,13 @@ pub mod instr {
         label: Label<'a>,
         itrs: std::vec::Vec<IterId>,
     ) -> InstrSeq<'a> {
-        let mut itrs = itrs
-            .into_iter()
-            .map(|id| Instruct::IIterator(InstructIterator::IterFree(id)))
-            .collect::<Vec<_>>();
-        itrs.push(Instruct::IContFlow(InstructControlFlow::Jmp(label)));
-        instrs(alloc, itrs)
+        let mut vec = bumpalo::collections::Vec::from_iter_in(
+            itrs.into_iter()
+                .map(|id| Instruct::IIterator(InstructIterator::IterFree(id))),
+            alloc,
+        );
+        vec.push(Instruct::IContFlow(InstructControlFlow::Jmp(label)));
+        instrs(alloc, vec.into_bump_slice_mut())
     }
 
     pub fn false_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
@@ -822,13 +795,13 @@ pub mod instr {
         instr(alloc, Instruct::ILitConst(InstructLitConst::AddNewElemC))
     }
 
-    pub fn switch<'a>(alloc: &'a bumpalo::Bump, labels: std::vec::Vec<Label<'a>>) -> InstrSeq<'a> {
+    pub fn switch<'a>(alloc: &'a bumpalo::Bump, labels: &'a [Label<'a>]) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::Switch(
                 Switchkind::Unbounded,
                 0,
-                bumpalo_helpers::slice_of_vec(alloc, std::convert::identity, labels),
+                labels,
             )),
         )
     }
@@ -839,13 +812,8 @@ pub mod instr {
 
     pub fn sswitch<'a>(
         alloc: &'a bumpalo::Bump,
-        cases: std::vec::Vec<(std::string::String, Label<'a>)>,
+        cases: &'a [(&'a str, Label<'a>)],
     ) -> InstrSeq<'a> {
-        let cases = bumpalo_helpers::slice_of_vec(
-            alloc,
-            |(s, l)| (bumpalo_helpers::str_of_string(alloc, s), l),
-            cases,
-        );
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::SSwitch(cases)),
@@ -879,40 +847,25 @@ pub mod instr {
     pub fn new_record<'a>(
         alloc: &'a bumpalo::Bump,
         id: ClassId<'a>,
-        keys: std::vec::Vec<std::string::String>,
+        keys: &'a [&'a str],
     ) -> InstrSeq<'a> {
-        let keys = bumpalo_helpers::slice_of_vec(
-            alloc,
-            |s| bumpalo_helpers::str_of_string(alloc, s),
-            keys,
-        );
         instr(
             alloc,
             Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)),
         )
     }
 
-    pub fn newstructdarray<'a>(
-        alloc: &'a bumpalo::Bump,
-        keys: std::vec::Vec<std::string::String>,
-    ) -> InstrSeq<'a> {
+    pub fn newstructdarray<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDArray(
-                bumpalo_helpers::slice_of_string_vec(alloc, keys),
-            )),
+            Instruct::ILitConst(InstructLitConst::NewStructDArray(keys)),
         )
     }
 
-    pub fn newstructdict<'a>(
-        alloc: &'a bumpalo::Bump,
-        keys: std::vec::Vec<std::string::String>,
-    ) -> InstrSeq<'a> {
+    pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDict(
-                bumpalo_helpers::slice_of_string_vec(alloc, keys),
-            )),
+            Instruct::ILitConst(InstructLitConst::NewStructDict(keys)),
         )
     }
 
@@ -1790,25 +1743,17 @@ impl<'a> InstrSeq<'a> {
         match self {
             InstrSeq::List(&mut []) => InstrSeq::new_empty(alloc),
             InstrSeq::List(&mut [ref instr]) => f(instr),
-            InstrSeq::List(instr_lst) => {
-                let v = instr_lst.iter().map(|x| f(x)).collect::<std::vec::Vec<_>>();
-                InstrSeq::Concat(bumpalo_helpers::slice_of_vec_mut(
+            InstrSeq::List(instr_lst) => InstrSeq::Concat(
+                bumpalo::collections::vec::Vec::from_iter_in(instr_lst.iter().map(|x| f(x)), alloc)
+                    .into_bump_slice_mut(),
+            ),
+            InstrSeq::Concat(instrseq_lst) => InstrSeq::Concat(
+                bumpalo::collections::vec::Vec::from_iter_in(
+                    instrseq_lst.iter().map(|x| x.flat_map_seq(alloc, f)),
                     alloc,
-                    std::convert::identity,
-                    v,
-                ))
-            }
-            InstrSeq::Concat(instrseq_lst) => {
-                let v = instrseq_lst
-                    .iter()
-                    .map(|x| x.flat_map_seq(alloc, f))
-                    .collect::<std::vec::Vec<_>>();
-                InstrSeq::Concat(bumpalo_helpers::slice_of_vec_mut(
-                    alloc,
-                    std::convert::identity,
-                    v,
-                ))
-            }
+                )
+                .into_bump_slice_mut(),
+            ),
         }
     }
 
@@ -1836,25 +1781,17 @@ impl<'a> InstrSeq<'a> {
                 Some(x) => instr::instr(alloc, x),
                 None => InstrSeq::new_empty(alloc),
             },
-            InstrSeq::List(instr_lst) => {
-                let v = instr_lst.iter().filter_map(f).collect::<Vec<_>>();
-                InstrSeq::List(bumpalo_helpers::slice_of_vec_mut(
+            InstrSeq::List(instr_lst) => InstrSeq::List(
+                bumpalo::collections::vec::Vec::from_iter_in(instr_lst.iter().filter_map(f), alloc)
+                    .into_bump_slice_mut(),
+            ),
+            InstrSeq::Concat(instrseq_lst) => InstrSeq::Concat(
+                bumpalo::collections::vec::Vec::from_iter_in(
+                    instrseq_lst.iter().map(|x| x.filter_map(alloc, f)),
                     alloc,
-                    std::convert::identity,
-                    v,
-                ))
-            }
-            InstrSeq::Concat(instrseq_lst) => {
-                let v = instrseq_lst
-                    .iter()
-                    .map(|x| x.filter_map(alloc, f))
-                    .collect::<std::vec::Vec<_>>();
-                InstrSeq::Concat(bumpalo_helpers::slice_of_vec_mut(
-                    alloc,
-                    std::convert::identity,
-                    v,
-                ))
-            }
+                )
+                .into_bump_slice_mut(),
+            ),
         }
     }
 
@@ -1895,17 +1832,23 @@ mod tests {
     #[test]
     fn iter() {
         let alloc = &bumpalo::Bump::new();
-        let to_bump_str = |s| bumpalo_helpers::str_of_string(alloc, s);
-        let to_bump_slice = |v| bumpalo_helpers::slice_of_vec_mut(alloc, std::convert::identity, v);
 
-        let mk_i = || Instruct::IComment(to_bump_str("".into()));
+        let mk_i = || {
+            Instruct::IComment(bumpalo::collections::String::from_str_in("", alloc).into_bump_str())
+        };
         let empty = || InstrSeq::new_empty(alloc);
+
         let one = || instr(alloc, mk_i());
-        let list0 = || instrs(alloc, vec![]);
-        let list1 = || instrs(alloc, vec![mk_i()]);
-        let list2 = || instrs(alloc, vec![mk_i(), mk_i()]);
-        let concat0 = || InstrSeq::Concat(to_bump_slice(vec![]));
-        let concat1 = || InstrSeq::Concat(to_bump_slice(vec![one()]));
+        let list0 = || instrs(alloc, bumpalo::vec![in alloc;].into_bump_slice_mut());
+        let list1 = || instrs(alloc, bumpalo::vec![in alloc; mk_i()].into_bump_slice_mut());
+        let list2 = || {
+            instrs(
+                alloc,
+                bumpalo::vec![in alloc; mk_i(), mk_i()].into_bump_slice_mut(),
+            )
+        };
+        let concat0 = || InstrSeq::Concat(bumpalo::vec![in alloc;].into_bump_slice_mut());
+        let concat1 = || InstrSeq::Concat(bumpalo::vec![in alloc; one()].into_bump_slice_mut());
 
         assert_eq!(empty().iter().count(), 0);
         assert_eq!(one().iter().count(), 1);
@@ -1915,40 +1858,52 @@ mod tests {
         assert_eq!(concat0().iter().count(), 0);
         assert_eq!(concat1().iter().count(), 1);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![empty()]));
+        let concat = InstrSeq::Concat(bumpalo::vec![in alloc; empty()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 0);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![empty(), one()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; empty(), one()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![one(), empty()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; one(), empty()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![one(), list1()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; one(), list1()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![list2(), list1()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; list2(), list1()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![concat0(), list2(), list1()]));
+        let concat = InstrSeq::Concat(
+            bumpalo::vec![in alloc; concat0(), list2(), list1()].into_bump_slice_mut(),
+        );
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![concat1(), concat1()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; concat1(), concat1()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![concat0(), concat1()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; concat0(), concat1()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![list2(), concat1()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; list2(), concat1()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![list2(), concat0()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; list2(), concat0()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![one(), concat0()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; one(), concat0()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(to_bump_slice(vec![empty(), concat0()]));
+        let concat =
+            InstrSeq::Concat(bumpalo::vec![in alloc; empty(), concat0()].into_bump_slice_mut());
         assert_eq!(concat.iter().count(), 0);
     }
 }

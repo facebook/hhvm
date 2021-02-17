@@ -15,4 +15,4 @@ hhbc_string_utils_rust = { path = "../../hhbc/cargo/string_utils" }
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
-libc = "0.2"
+libc = "0.2.86"

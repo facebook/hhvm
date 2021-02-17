@@ -18,4 +18,4 @@ parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 stack_limit = { path = "../../../utils/stack_limit" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-libc = "0.2"
+libc = "0.2.86"

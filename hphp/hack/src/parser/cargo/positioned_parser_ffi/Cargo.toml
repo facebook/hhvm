@@ -17,4 +17,4 @@ positioned_parser = { path = "../../api/cargo/positioned_parser" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
-libc = "0.2"
+libc = "0.2.86"

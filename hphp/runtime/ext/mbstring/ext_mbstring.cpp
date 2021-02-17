@@ -3341,7 +3341,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const String& pattern,
     if ((err_code = onig_new(&rc, (OnigUChar *)pattern.data(),
                              (OnigUChar *)(pattern.data() + pattern.size()),
                              options,enc, syntax, &err_info)) != ONIG_NORMAL) {
-      onig_error_code_to_str(err_str, err_code, err_info);
+      onig_error_code_to_str(err_str, err_code, &err_info);
       raise_warning("mbregex compile err: %s", err_str);
       return nullptr;
     }

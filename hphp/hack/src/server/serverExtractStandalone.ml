@@ -1740,6 +1740,7 @@ end = struct
               m_tparams;
               m_params;
               m_variadic;
+              m_ctxs;
               m_ret;
               m_static;
               m_abstract;
@@ -1751,7 +1752,7 @@ end = struct
       Fmt.(
         pf
           ppf
-          "%a %a %a %a %a function %s%a%a%a%a"
+          "%a %a %a %a %a function %s%a%a%a%a%a"
           pp_user_attrs
           m_user_attributes
           (cond ~pp_t:(const string "abstract") ~pp_f:nop)
@@ -1767,6 +1768,8 @@ end = struct
           m_tparams
           pp_fun_params
           (m_params, m_variadic)
+          (option pp_contexts)
+          m_ctxs
           (pp_type_hint ~is_ret_type:true)
           m_ret
           (cond

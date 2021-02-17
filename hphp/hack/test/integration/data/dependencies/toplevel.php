@@ -164,3 +164,11 @@ function with_argument_dependent_context()[ policied_local, rx]: void {
     echo "write";
   });
 }
+
+class Contextual {
+  public static function with_argument_dependent_context(
+    (function()[_]: void) $f,
+  )[write_props, ctx $f]: void {
+    $f();
+  }
+}

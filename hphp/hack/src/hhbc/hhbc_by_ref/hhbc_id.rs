@@ -10,11 +10,13 @@ pub trait Id<'arena>: Sized {
 
     fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Self;
 
-    fn to_unmangled_str(&self) -> std::string::String {
+    fn to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
         if Self::MANGLE {
-            hhbc_string_utils_rust::unmangle(self.to_raw_string().into())
+            std::borrow::Cow::from(hhbc_string_utils_rust::unmangle(
+                self.to_raw_string().into(),
+            ))
         } else {
-            self.to_raw_string().into()
+            std::borrow::Cow::from(self.to_raw_string())
         }
     }
 }

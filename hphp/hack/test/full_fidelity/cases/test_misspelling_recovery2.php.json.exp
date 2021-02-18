@@ -82,11 +82,14 @@
             "token":{
               "kind":"name",
               "text":"C",
-              "offset":31,
-              "leading_width":0,
+              "offset":25,
+              "leading_width":6,
               "width":1,
               "trailing_width":1,
-              "leading":[],
+              "leading":[
+                {"kind":"extra_token_error","text":"ckass","offset":25,"width":5},
+                {"kind":"whitespace","text":" ","offset":30,"width":1}
+              ],
               "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
               "line_number":3
             }
@@ -98,16 +101,11 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":27,
-                "leading_width":6,
+                "offset":33,
+                "leading_width":0,
                 "width":1,
                 "trailing_width":14,
-                "leading":[
-                  {"kind":"extra_token_error","text":"ass","offset":27,"width":3},
-                  {"kind":"whitespace","text":" ","offset":30,"width":1},
-                  {"kind":"extra_token_error","text":"C","offset":31,"width":1},
-                  {"kind":"whitespace","text":" ","offset":32,"width":1}
-                ],
+                "leading":[],
                 "trailing":[
                   {"kind":"whitespace","text":" ","offset":34,"width":1},
                   {"kind":"single_line_comment","text":"// error1058","offset":35,"width":12},
@@ -158,11 +156,14 @@
             "token":{
               "kind":"name",
               "text":"I",
-              "offset":67,
-              "leading_width":0,
+              "offset":57,
+              "leading_width":10,
               "width":1,
               "trailing_width":1,
-              "leading":[],
+              "leading":[
+                {"kind":"extra_token_error","text":"interfsce","offset":57,"width":9},
+                {"kind":"whitespace","text":" ","offset":66,"width":1}
+              ],
               "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
               "line_number":6
             }
@@ -174,16 +175,11 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":59,
-                "leading_width":10,
+                "offset":69,
+                "leading_width":0,
                 "width":1,
                 "trailing_width":14,
-                "leading":[
-                  {"kind":"extra_token_error","text":"terfsce","offset":59,"width":7},
-                  {"kind":"whitespace","text":" ","offset":66,"width":1},
-                  {"kind":"extra_token_error","text":"I","offset":67,"width":1},
-                  {"kind":"whitespace","text":" ","offset":68,"width":1}
-                ],
+                "leading":[],
                 "trailing":[
                   {"kind":"whitespace","text":" ","offset":70,"width":1},
                   {"kind":"single_line_comment","text":"// error1058","offset":71,"width":12},
@@ -248,11 +244,14 @@
             "token":{
               "kind":"name",
               "text":"T",
-              "offset":108,
-              "leading_width":0,
+              "offset":102,
+              "leading_width":6,
               "width":1,
               "trailing_width":1,
-              "leading":[],
+              "leading":[
+                {"kind":"extra_token_error","text":"ttait","offset":102,"width":5},
+                {"kind":"whitespace","text":" ","offset":107,"width":1}
+              ],
               "trailing":[{"kind":"whitespace","text":" ","offset":109,"width":1}],
               "line_number":9
             }
@@ -264,16 +263,11 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":104,
-                "leading_width":6,
+                "offset":110,
+                "leading_width":0,
                 "width":1,
                 "trailing_width":14,
-                "leading":[
-                  {"kind":"extra_token_error","text":"ait","offset":104,"width":3},
-                  {"kind":"whitespace","text":" ","offset":107,"width":1},
-                  {"kind":"extra_token_error","text":"T","offset":108,"width":1},
-                  {"kind":"whitespace","text":" ","offset":109,"width":1}
-                ],
+                "leading":[],
                 "trailing":[
                   {"kind":"whitespace","text":" ","offset":111,"width":1},
                   {"kind":"single_line_comment","text":"// error1058","offset":112,"width":12},
@@ -397,5 +391,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nabstract ckass C { // error1058\n}\n\nfinal interfsce I { // error1058\n}\n\nabstract final ttait T { // error1058\n}\n\n// Error recovery in this case remains unsophisticated, though.\n\nckass C {\n}\n",
-  "version":"2021-01-05-0001"
+  "version":"2021-02-01-0001"
 }

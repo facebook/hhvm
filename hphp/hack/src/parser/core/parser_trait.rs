@@ -474,8 +474,7 @@ where
     // as a class name or function name, for example, control flow keywords or
     // declaration keywords are reserved.
     fn next_token_non_reserved_as_name(&mut self) -> Token<S> {
-        // TODO: This isn't right.  Pass flags to the lexer.
-        self.lexer_mut().next_token_non_reserved_as_name()
+        self.next_token_with_tokenizer(|l| l.next_token_non_reserved_as_name())
     }
 
     fn scan_header(&mut self) -> (Token<S>, Option<(Token<S>, Option<Token<S>>)>) {

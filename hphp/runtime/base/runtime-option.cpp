@@ -1499,8 +1499,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.SignalTimeout", 1);
       Config::Bind(DebuggerDefaultRpcPort, ini, config,
                    "Eval.Debugger.RPC.DefaultPort", 8083);
-      Config::Bind(DebuggerDefaultRpcAuth, ini, config,
-                   "Eval.Debugger.RPC.DefaultAuth");
+      DebuggerDefaultRpcAuth =
+        Config::GetString(ini, config, "Eval.Debugger.RPC.DefaultAuth");
       Config::Bind(DebuggerRpcHostDomain, ini, config,
                    "Eval.Debugger.RPC.HostDomain");
       Config::Bind(DebuggerDefaultRpcTimeout, ini, config,
@@ -2017,10 +2017,10 @@ void RuntimeOption::Load(
     Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
-    Config::Bind(AdminPassword, ini, config, "AdminServer.Password");
-    Config::Bind(AdminPasswords, ini, config, "AdminServer.Passwords");
-    Config::Bind(HashedAdminPasswords, ini, config,
-                 "AdminServer.HashedPasswords");
+    AdminPassword = Config::GetString(ini, config, "AdminServer.Password");
+    AdminPasswords = Config::GetSet(ini, config, "AdminServer.Passwords");
+    HashedAdminPasswords =
+      Config::GetSet(ini, config, "AdminServer.HashedPasswords");
   }
   {
     // Proxy

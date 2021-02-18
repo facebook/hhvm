@@ -3366,10 +3366,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     fn make_const_declaration(
         &mut self,
         modifiers: Self::R,
-        _const_keyword: Self::R,
+        const_keyword: Self::R,
         hint: Self::R,
         decls: Self::R,
-        _semicolon: Self::R,
+        semicolon: Self::R,
     ) -> Self::R {
         match decls {
             // Class consts.
@@ -3402,14 +3402,20 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             }
             // Global consts.
             Node::List([Node::ConstInitializer(&(name, initializer))]) => {
-                let Id(pos, id) = match self.elaborate_defined_id(name) {
+                let Id(id_pos, id) = match self.elaborate_defined_id(name) {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
                 };
+                let pos = Pos::merge(
+                    self.arena,
+                    self.get_pos(const_keyword),
+                    self.get_pos(semicolon),
+                )
+                .unwrap_or(id_pos);
                 let ty = self
                     .node_to_ty(hint)
                     .or_else(|| self.infer_const(name, initializer))
-                    .unwrap_or_else(|| self.tany_with_pos(pos));
+                    .unwrap_or_else(|| self.tany_with_pos(id_pos));
                 self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
                 Node::Ignored(SK::ConstDeclaration)
             }

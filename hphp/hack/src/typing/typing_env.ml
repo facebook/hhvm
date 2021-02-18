@@ -801,7 +801,7 @@ let get_gconst env cst_name =
       cst_name
   in
   match res with
-  | Some cst when Pos.is_hhi (get_pos cst) -> res
+  | Some cst when Pos.is_hhi cst.cd_pos -> res
   | _ ->
     let dep = Dep.GConst cst_name in
     Option.iter env.decl_env.droot (fun root ->

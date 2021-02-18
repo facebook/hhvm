@@ -1,34 +1,34 @@
 [("\\MY_CONST",
   (Shallow_decl_defs.Const
-     { Typing_defs.cd_pos = [6:14-22];
+     { Typing_defs.cd_pos = [6:1-36];
        cd_type =
        (Rhint (root|constants.php line 6, characters 7-12), (Tprim Tstring))
        }));
   ("\\MY_CONST2",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [7:11-20];
+      { Typing_defs.cd_pos = [7:1-25];
         cd_type =
         (Rhint (root|constants.php line 7, characters 7-9), (Tprim Tint)) }));
   ("\\MY_CONST3",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [8:13-22];
+      { Typing_defs.cd_pos = [8:1-29];
         cd_type =
         (Rhint (root|constants.php line 8, characters 7-11), (Tprim Tfloat))
         }));
   ("\\MY_CONST5",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [9:11-20];
+      { Typing_defs.cd_pos = [9:1-27];
         cd_type =
         (Rhint (root|constants.php line 9, characters 7-9), (Tprim Tnum)) }));
   ("\\MY_CONST6",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [10:12-21];
+      { Typing_defs.cd_pos = [10:1-29];
         cd_type =
         (Rhint (root|constants.php line 10, characters 7-10), (Tprim Tbool))
         }));
   ("\\MY_VEC",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [11:16-22];
+      { Typing_defs.cd_pos = [11:1-31];
         cd_type =
         (Rhint (root|constants.php line 11, characters 7-14),
          (Tapply (([11:7-10], "\\HH\\vec"),

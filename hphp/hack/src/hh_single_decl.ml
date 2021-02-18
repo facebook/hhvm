@@ -91,8 +91,7 @@ let rec shallow_declare_ast ctx decls prog =
         (name, Shallow_decl_defs.Typedef decl) :: decls
       | Stmt _ -> decls
       | Constant cst ->
-        let (name, ty) = Decl_nast.const_naming_and_decl ctx cst in
-        let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = ty } in
+        let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
         (name, Shallow_decl_defs.Const decl) :: decls)
 
 let compare_decls ctx fn text =

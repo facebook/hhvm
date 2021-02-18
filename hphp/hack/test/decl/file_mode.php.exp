@@ -39,7 +39,7 @@
         }));
   ("\\MY_PARTIAL_CONST",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [9:21-37];
+      { Typing_defs.cd_pos = [9:1-10:53];
         cd_type =
         (Rhint (root|file_mode.php line 9, characters 7-19),
          (Tapply (([9:7-20], "\\MyPartialType"), [])))

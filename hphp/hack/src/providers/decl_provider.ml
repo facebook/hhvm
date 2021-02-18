@@ -27,7 +27,7 @@ type record_def_decl = Typing_defs.record_def_type
 
 type typedef_decl = Typing_defs.typedef_type
 
-type gconst_decl = Typing_defs.decl_ty
+type gconst_decl = Typing_defs.const_decl
 
 let tracked_names : FileInfo.names option ref = ref None
 
@@ -386,7 +386,7 @@ let get_record_def
 
 let declare_const_in_file
     (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Typing_defs.decl_ty =
+    gconst_decl =
   match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst ->
     let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
@@ -413,7 +413,7 @@ let get_gconst
                  | (name, Shallow_decl_defs.Const decl)
                    when String.equal gconst_name name ->
                    record_const name;
-                   Some decl.Typing_defs.cd_type
+                   Some decl
                  | _ -> None)
         else
           let gconst =
@@ -437,7 +437,7 @@ let get_gconst
                    | (name, Shallow_decl_defs.Const decl)
                      when String.equal gconst_name name ->
                      record_const name;
-                     Some decl.Typing_defs.cd_type
+                     Some decl
                    | _ -> None)
           else
             let gconst =

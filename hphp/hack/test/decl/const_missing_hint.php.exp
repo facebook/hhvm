@@ -1,46 +1,46 @@
 [("\\CInt",
   (Shallow_decl_defs.Const
-     { Typing_defs.cd_pos = [3:7-11];
+     { Typing_defs.cd_pos = [3:1-16];
        cd_type =
        (Rwitness (root|const_missing_hint.php line 3, characters 14-14),
         (Tprim Tint))
        }));
   ("\\CBool",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [4:7-12];
+      { Typing_defs.cd_pos = [4:1-20];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 4, characters 15-18),
          (Tprim Tbool))
         }));
   ("\\Utild",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [6:7-12];
+      { Typing_defs.cd_pos = [6:1-18];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 6, characters 7-11), Tany)
         }));
   ("\\Unot",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [7:7-11];
+      { Typing_defs.cd_pos = [7:1-20];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 7, characters 7-10), Tany)
         }));
   ("\\Uplus",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [8:7-12];
+      { Typing_defs.cd_pos = [8:1-18];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 8, characters 15-16),
          (Tprim Tint))
         }));
   ("\\Uminus",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [9:7-13];
+      { Typing_defs.cd_pos = [9:1-19];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 9, characters 16-17),
          (Tprim Tint))
         }));
   ("\\FromConst",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [11:7-16];
+      { Typing_defs.cd_pos = [11:1-24];
         cd_type =
         (Rwitness (root|const_missing_hint.php line 11, characters 7-15),
          Tany)

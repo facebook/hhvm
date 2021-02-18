@@ -21,7 +21,7 @@ val rpc_get_typedef : t -> string -> Typing_defs.typedef_type option
 
 val rpc_get_record_def : t -> string -> Typing_defs.record_def_type option
 
-val rpc_get_gconst : t -> string -> Typing_defs.decl_ty option
+val rpc_get_gconst : t -> string -> Typing_defs.const_decl option
 
 val rpc_get_gconst_path : t -> string -> Relative_path.t option
 

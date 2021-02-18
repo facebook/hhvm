@@ -172,14 +172,14 @@ let rpc_get_record_def (t : t) (name : string) :
             (Some (Pos.filename rdt.Typing_defs.rdt_pos, Naming_types.TRecordDef)));
       record_decl_opt)
 
-let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
+let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
   let key = (FileInfo.Const, name) in
   match SymbolMap.find_opt t.current_file_decls key with
-  | Some (Const decl) -> Some decl.Typing_defs.cd_type
+  | Some (Const decl) -> Some decl
   | Some _ -> assert false
   | None ->
     (match Decls.get key with
-    | Some (Some (Const decl)) -> Some decl.Typing_defs.cd_type
+    | Some (Some (Const decl)) -> Some decl
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
@@ -193,7 +193,7 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
             Pos.filename (Typing_defs.get_pos ty))
       in
       add_to_cache t.gconst_path_cache name path_opt;
-      Option.map gconst_decl_opt (fun c -> c.Typing_defs.cd_type))
+      gconst_decl_opt)
 
 let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
   match String.Table.find t.gconst_path_cache name with

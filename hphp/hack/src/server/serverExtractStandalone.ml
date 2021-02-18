@@ -202,7 +202,7 @@ end = struct
 
   let get_gconst_pos ctx name =
     Decl_provider.get_gconst ctx name
-    |> Option.map ~f:(fun ty -> Typing_defs.get_pos ty)
+    |> Option.map ~f:(fun const -> const.Typing_defs.cd_pos)
 
   let get_class_or_typedef_pos ctx name =
     Option.first_some (get_class_pos ctx name) (get_typedef_pos ctx name)
@@ -790,10 +790,10 @@ end = struct
           add_dep ctx ~this:None env @@ fe_type
         | GConst c
         | GConstName c ->
-          let ty =
+          let const =
             value_or_not_found description @@ Decl_provider.get_gconst ctx c
           in
-          add_dep ctx ~this:None env ty
+          add_dep ctx ~this:None env const.Typing_defs.cd_type
         | _ -> raise UnexpectedDependency))
 
   let add_impls ~ctx ~env ~cls acc ancestor_name =
@@ -1685,10 +1685,10 @@ end = struct
       let (type_, init_val) =
         match (cc_type, cc_expr) with
         | (Some hint, _) -> (Some hint, Some (init_value ctx hint))
-        | (_, Some e) ->
-          (match Decl_utils.infer_const e with
+        | (_, Some (e_pos, e_)) ->
+          (match Decl_utils.infer_const e_ with
           | Some tprim ->
-            let hint = (fst e, Aast.Hprim tprim) in
+            let hint = (e_pos, Aast.Hprim tprim) in
             (None, Some (init_value ctx hint))
           | None -> raise Unsupported)
         | (None, None) -> (None, None)

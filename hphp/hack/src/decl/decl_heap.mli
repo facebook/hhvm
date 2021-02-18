@@ -47,7 +47,7 @@ module RecordDef : sig
 end
 
 module GConst : sig
-  type t = decl_ty
+  type t = const_decl
 
   val prefix : Prefix.t
 

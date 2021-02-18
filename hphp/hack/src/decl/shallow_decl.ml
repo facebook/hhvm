@@ -30,10 +30,10 @@ let class_const env c cc =
       match (h, e) with
       | (Some h, Some _) -> (Decl_hint.hint env h, false)
       | (Some h, None) -> (Decl_hint.hint env h, true)
-      | (None, Some e) ->
+      | (None, Some (e_pos, e_)) ->
         begin
-          match Decl_utils.infer_const e with
-          | Some tprim -> (mk (Reason.Rwitness (fst e), Tprim tprim), false)
+          match Decl_utils.infer_const e_ with
+          | Some tprim -> (mk (Reason.Rwitness e_pos, Tprim tprim), false)
           | None ->
             (* Typing will take care of rejecting constants that have neither
              * an initializer nor a literal initializer *)

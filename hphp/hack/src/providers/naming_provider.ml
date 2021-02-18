@@ -193,7 +193,7 @@ let get_full_pos ctx (pos, name) =
       |> Option.map ~f:(fun typedef -> typedef.Typing_defs.td_pos)
     | FileInfo.File (FileInfo.Const, _) ->
       Decl_service_client.rpc_get_gconst decl_service name
-      |> Option.map ~f:(fun const -> Typing_defs.get_pos const)
+      |> Option.map ~f:(fun const -> const.Typing_defs.cd_pos)
     | FileInfo.File (FileInfo.Fun, _) ->
       Decl_service_client.rpc_get_fun decl_service name
       |> Option.map ~f:(fun fun_def -> fun_def.Typing_defs.fe_pos))

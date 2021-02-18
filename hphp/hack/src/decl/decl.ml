@@ -62,7 +62,6 @@ let rec name_and_declare_types_program
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
         with_sh (fun _ -> Decl_heap.GConsts.add name decl);
-        let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = decl } in
         (name, Shallow_decl_defs.Const decl) :: acc)
 
 let nast_to_decls

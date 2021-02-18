@@ -30,7 +30,7 @@ type record_def_decl = Typing_defs.record_def_type
 
 type typedef_decl = Typing_defs.typedef_type
 
-type gconst_decl = Typing_defs.decl_ty
+type gconst_decl = Typing_defs.const_decl
 
 val with_decl_tracking : (unit -> 'a) -> 'a * FileInfo.names
 

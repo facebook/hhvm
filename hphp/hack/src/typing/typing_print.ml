@@ -1790,7 +1790,7 @@ let debug_i env ty =
 
 let class_ ctx c = PrintClass.class_type ctx c
 
-let gconst ctx gc = Full.to_string_decl ctx gc
+let gconst ctx gc = Full.to_string_decl ctx gc.cd_type
 
 let fun_ ctx { fe_type; _ } = Full.to_string_decl ctx fe_type
 

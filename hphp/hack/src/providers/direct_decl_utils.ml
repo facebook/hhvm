@@ -18,7 +18,7 @@ let cache_decls ctx decls =
         | (name, Fun decl) -> Decl_heap.Funs.add name decl
         | (name, Record decl) -> Decl_heap.RecordDefs.add name decl
         | (name, Typedef decl) -> Decl_heap.Typedefs.add name decl
-        | (name, Const decl) -> Decl_heap.GConsts.add name decl.cd_type)
+        | (name, Const decl) -> Decl_heap.GConsts.add name decl)
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
     List.iter decls ~f:(function
         | (name, Class decl) ->
@@ -56,11 +56,11 @@ let cache_decls ctx decls =
           in
           ()
         | (name, Const decl) ->
-          let (_ : decl_ty option) =
+          let (_ : const_decl option) =
             Provider_backend.Decl_cache.find_or_add
               decl_cache
               ~key:(Provider_backend.Decl_cache_entry.Gconst_decl name)
-              ~default:(fun () -> Some decl.cd_type)
+              ~default:(fun () -> Some decl)
           in
           ())
   | Provider_backend.Decl_service _ ->

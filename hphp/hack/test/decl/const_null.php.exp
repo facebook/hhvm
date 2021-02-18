@@ -1,6 +1,6 @@
 [("\\MUST_PREPARE",
   (Shallow_decl_defs.Const
-     { Typing_defs.cd_pos = [3:7-19];
+     { Typing_defs.cd_pos = [3:1-27];
        cd_type =
        (Rwitness (root|const_null.php line 3, characters 22-25),
         (Tprim Tnull))

@@ -1805,8 +1805,8 @@ and expr_
       let ty = err_witness env cst_pos in
       make_result env cst_pos (Aast.Id id) ty
     | None -> make_result env p (Aast.Id id) (Typing_utils.mk_tany env cst_pos)
-    | Some ty ->
-      let (env, ty) = Phase.localize_with_self ~pos:p env ty in
+    | Some const ->
+      let (env, ty) = Phase.localize_with_self ~pos:p env const.cd_type in
       make_result env p (Aast.Id id) ty)
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic

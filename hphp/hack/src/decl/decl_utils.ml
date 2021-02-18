@@ -72,7 +72,7 @@ let split_defs defs split_if_in_defs =
     in
     (r1, r2))
 
-let infer_const (_, expr_) =
+let infer_const expr_ =
   match expr_ with
   | String _ -> Some Tstring
   | True

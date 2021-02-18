@@ -20,4 +20,4 @@ val typedef_naming_and_decl :
   Provider_context.t -> Nast.typedef -> string * Typing_defs.typedef_type
 
 val const_naming_and_decl :
-  Provider_context.t -> Nast.gconst -> string * Typing_defs.decl_ty
+  Provider_context.t -> Nast.gconst -> string * Typing_defs.const_decl

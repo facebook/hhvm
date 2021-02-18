@@ -179,21 +179,35 @@ let typedef_naming_and_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
 (*****************************************************************************)
 
 let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
-    Typing_defs.decl_ty =
-  let (cst_pos, _cst_name) = cst.cst_name in
-  let dep = Dep.GConst (snd cst.cst_name) in
-  let env = { Decl_env.mode = cst.cst_mode; droot = Some dep; ctx } in
-  match cst.cst_type with
-  | Some h -> Decl_hint.hint env h
-  | None ->
-    (match Decl_utils.infer_const cst.cst_value with
-    | Some tprim -> mk (Reason.Rwitness (fst cst.cst_value), Tprim tprim)
-    (* A NAST check will take care of rejecting constants that have neither
-     * an initializer nor a literal initializer *)
-    | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
+    Typing_defs.const_decl =
+  let {
+    Aast.cst_name = (name_pos, name);
+    cst_annotation = _;
+    cst_emit_id = _;
+    cst_mode;
+    cst_namespace = _;
+    cst_span;
+    cst_type;
+    cst_value = (value_pos, value);
+  } =
+    cst
+  in
+  let dep = Dep.GConst name in
+  let env = { Decl_env.mode = cst_mode; droot = Some dep; ctx } in
+  let cd_type =
+    match cst_type with
+    | Some h -> Decl_hint.hint env h
+    | None ->
+      (match Decl_utils.infer_const value with
+      | Some tprim -> mk (Reason.Rwitness value_pos, Tprim tprim)
+      (* A NAST check will take care of rejecting constants that have neither
+       * an initializer nor a literal initializer *)
+      | None -> mk (Reason.Rwitness name_pos, Typing_defs.make_tany ()))
+  in
+  { cd_pos = cst_span; cd_type }
 
 let const_naming_and_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
-    string * Typing_defs.decl_ty =
+    string * Typing_defs.const_decl =
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let hint_ty = const_decl ctx cst in
   (snd cst.cst_name, hint_ty)

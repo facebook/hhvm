@@ -5663,14 +5663,15 @@ let readonly_mismatch prefix pos ~reason_sub ~reason_super =
     (pos, prefix)
     (reason_sub @ reason_super)
 
-let explicit_readonly_cast kind pos =
-  add
+let explicit_readonly_cast kind pos origin_pos =
+  add_list
     (Typing.err_code Typing.ExplicitReadonlyCast)
-    pos
-    ( "This "
-    ^ kind
-    ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
+    ( pos,
+      "This "
+      ^ kind
+      ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
     )
+    [(origin_pos, "The " ^ kind ^ " is defined here.")]
 
 let readonly_method_call receiver_pos method_pos =
   add_list

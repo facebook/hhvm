@@ -140,6 +140,7 @@ let check =
             Errors.explicit_readonly_cast
               "function call"
               (Tast.get_position caller)
+              (get_pos (Tast.get_type caller))
         | _ -> ()
       in
       (* Check that readonly arguments match their parameters *)
@@ -188,6 +189,33 @@ let check =
       check_args caller args unpacked_arg;
       check_method_call caller
 
+    method obj_get env obj get =
+      let open Typing_defs in
+      match (get_node (Tast.get_type obj), get) with
+      (* Basic case of a single class and a statically known id:
+        $x->prop (where $x : Foo) *)
+      | (Tclass (id, _exact, _args), (_, Id prop_id)) ->
+        let provider_ctx = Tast_env.get_ctx env in
+        (match Decl_provider.get_class provider_ctx (snd id) with
+        | Some class_decl ->
+          let prop = Cls.get_prop class_decl (snd prop_id) in
+          (match prop with
+          | Some elt ->
+            let prop_ro = get_ce_readonly_prop elt in
+            (match (prop_ro, self#ty_expr obj) with
+            | (true, Mut) ->
+              Errors.explicit_readonly_cast
+                "property"
+                (Tast.get_position get)
+                (Lazy.force elt.ce_pos)
+            | _ -> ())
+          | None -> ())
+        (* Class doesn't exist, error elsewhere*)
+        | None -> ())
+      (* TODO: Handle more complex generic cases *)
+      | _ -> ()
+
+    (* TODO: support obj get on generics, aliases and expression dependent types *)
     method! on_method_ env m =
       let method_pos = fst m.m_name in
       let ret_pos = Typing_defs.get_pos (fst m.m_ret) in
@@ -232,6 +260,12 @@ let check =
       (* Non readonly calls *)
       | (_, Call (caller, _, args, unpacked_arg)) ->
         self#call ~is_readonly:false caller args unpacked_arg;
+        super#on_expr env e
+      | (_, ReadonlyExpr (_, Obj_get (obj, get, nullable, is_prop_call))) ->
+        (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
+        self#on_Obj_get env obj get nullable is_prop_call
+      | (_, Obj_get (obj, get, _nullable, _is_prop_call)) ->
+        self#obj_get env obj get;
         super#on_expr env e
       | _ -> super#on_expr env e
 

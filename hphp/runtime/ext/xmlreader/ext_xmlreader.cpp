@@ -680,11 +680,11 @@ Variant HHVM_METHOD(XMLReader, expand,
   if (!basenode.isNull()) {
     auto dombasenode = Native::data<DOMNode>(basenode.toObject());
     doc = dombasenode->doc();
-    docp = doc->docp();
-    if (docp == nullptr) {
+    if (doc == nullptr || doc->docp() == nullptr) {
       raise_warning("Invalid State Error");
       return false;
     }
+    docp = doc->docp();
   }
 
   if (data->m_ptr) {

@@ -20,6 +20,8 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
 
+#include <folly/File.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -46,8 +48,7 @@ private:
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
-  bool handleDumpStaticStringsRequest(const std::string &cmd,
-                                      const std::string &filename);
+  bool handleDumpStaticStringsRequest(folly::File& file);
   bool handleRandomStaticStringsRequest(const std::string &cmd,
                                         Transport *transport);
   bool handleVMRequest      (const std::string &cmd, Transport *transport);

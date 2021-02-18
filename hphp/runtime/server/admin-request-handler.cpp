@@ -74,6 +74,9 @@
 #endif
 
 #include <folly/Conv.h>
+#include <folly/File.h>
+#include <folly/FileUtil.h>
+#include <folly/Optional.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 
@@ -248,6 +251,34 @@ void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {
   };
   GetAccessLog().log(transport, nullptr);
   WarnIfNotOK(transport);
+}
+
+namespace {
+
+// When this struct is destroyed, it will close the file.
+struct DumpFile {
+  std::string path;
+  folly::File file;
+};
+
+folly::Optional<DumpFile> dump_file(const char* name) {
+  auto const path = folly::sformat("{}/{}", RO::AdminDumpPath, name);
+
+  // mkdir -p the directory prefix of `path`
+  if (FileUtil::mkdir(path) != 0) return folly::none;
+
+  // If remove fails because of a permissions issue, then we won't be
+  // able to open the file for exclusive write below.
+  remove(path.c_str());
+
+  // Create the file, failing if it already exists. Doing so ensures
+  // that we have write access to the file and that no other user does.
+  auto const fd = open(path.c_str(), O_CREAT|O_EXCL|O_RDWR, 0666);
+  if (fd < 0) return folly::none;
+
+  return DumpFile{path, folly::File(fd, /*owns=*/true)};
+}
+
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
@@ -659,10 +690,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
-      auto filename = transport->getParam("file");
-      if (filename == "") filename = "/tmp/static_strings";
-      handleDumpStaticStringsRequest(cmd, filename);
-      transport->sendString("OK\n");
+      if (auto file = dump_file("static_strings")) {
+        handleDumpStaticStringsRequest(file->file);
+        transport->sendString(folly::sformat("dumped to {}\n", file->path));
+      } else {
+        transport->sendString("Unable to mkdir or file already exists.\n");
+      }
       break;
     }
     if (strncmp(cmd.c_str(), "random-static-strings", 21) == 0) {
@@ -686,10 +719,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 
     if (cmd == "dump-pcre-cache") {
-      auto filename = transport->getParam("file");
-      if (filename == "") filename = "/tmp/pcre_cache";
-      pcre_dump_cache(filename);
-      transport->sendString("OK\n");
+      if (auto file = dump_file("pcre_cache")) {
+        pcre_dump_cache(file->file);
+        transport->sendString(folly::sformat("dumped to {}\n", file->path));
+      } else {
+        transport->sendString("Unable to mkdir or file already exists.\n");
+      }
       break;
     }
 
@@ -1348,13 +1383,11 @@ std::string formatStaticString(StringData* str) {
       "----\n{} bytes\n{}\n", str->size(), str->toCppString());
 }
 
-bool AdminRequestHandler::handleDumpStaticStringsRequest(
-  const std::string& /*cmd*/, const std::string& filename) {
+bool AdminRequestHandler::handleDumpStaticStringsRequest(folly::File& file) {
   std::vector<StringData*> list = lookupDefinedStaticStrings();
-  std::ofstream out(filename.c_str());
-  SCOPE_EXIT { out.close(); };
   for (auto item : list) {
-    out << formatStaticString(item);
+    auto const line = formatStaticString(item);
+    folly::writeFull(file.fd(), line.data(), line.size());
     if (RuntimeOption::EvalPerfDataMap) {
       size_t len = item->size();
       if (len > 255) len = 255;

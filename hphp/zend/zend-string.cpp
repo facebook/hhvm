@@ -245,8 +245,8 @@ static void ito64(char *s, long v, int n) {
 }
 
 char *string_crypt(const char *key, const char *salt) {
-  assert(key);
-  assert(salt);
+  assertx(key);
+  assertx(salt);
 
   char random_salt[12];
   if (!*salt) {
@@ -256,7 +256,8 @@ char *string_crypt(const char *key, const char *salt) {
     return string_crypt(key, random_salt);
   }
 
-  if ((strlen(salt) > sizeof("$2X$00$")) &&
+  auto const saltLen = strlen(salt);
+  if ((saltLen > sizeof("$2X$00$")) &&
     (salt[0] == '$') &&
     (salt[1] == '2') &&
     (salt[2] >= 'a') && (salt[2] <= 'z') &&
@@ -266,7 +267,16 @@ char *string_crypt(const char *key, const char *salt) {
     (salt[6] == '$')) {
     // Bundled blowfish crypt()
     char output[61];
-    if (php_crypt_blowfish_rn(key, salt, output, sizeof(output))) {
+
+    static constexpr size_t maxSaltLength = 123;
+    char paddedSalt[maxSaltLength + 1];
+    paddedSalt[0] = paddedSalt[maxSaltLength] = '\0';
+
+    memset(&paddedSalt[1], '$', maxSaltLength - 1);
+    memcpy(paddedSalt, salt, std::min(maxSaltLength, saltLen));
+    paddedSalt[saltLen] = '\0';
+
+    if (php_crypt_blowfish_rn(key, paddedSalt, output, sizeof(output))) {
       return strdup(output);
     }
 

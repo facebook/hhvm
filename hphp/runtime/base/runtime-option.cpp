@@ -350,6 +350,7 @@ int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 std::set<std::string> RuntimeOption::HashedAdminPasswords;
+std::string RuntimeOption::AdminDumpPath;
 
 std::string RuntimeOption::ProxyOriginRaw;
 int RuntimeOption::ProxyPercentageRaw = 0;
@@ -2021,6 +2022,8 @@ void RuntimeOption::Load(
     AdminPasswords = Config::GetSet(ini, config, "AdminServer.Passwords");
     HashedAdminPasswords =
       Config::GetSet(ini, config, "AdminServer.HashedPasswords");
+    Config::Bind(AdminDumpPath, ini, config,
+                 "AdminServer.DumpPath", "/tmp/hhvm_admin_dump");
   }
   {
     // Proxy

@@ -49,7 +49,6 @@ HHVM_REMOVE_MATCHES_FROM_LISTS(
   # Quic
   "/HQ"
   "Quic"
-  "/http/HTTP3ErrorCode.cpp"
   "/http/codec/UnframedBodyOffsetTracker.cpp"
 )
 list(APPEND CXX_SOURCES ${files})

@@ -3378,7 +3378,17 @@ class TestLsp(TestCase[LspTestDriver]):
                     "hoverProvider": True,
                     "completionProvider": {
                         "resolveProvider": True,
-                        "triggerCharacters": ["$", ">", "\\", ":", "<", "[", "'", '"'],
+                        "triggerCharacters": [
+                            "$",
+                            ">",
+                            "\\",
+                            ":",
+                            "<",
+                            "[",
+                            "'",
+                            '"',
+                            "{",
+                        ],
                     },
                     "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
                     "definitionProvider": True,

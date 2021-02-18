@@ -122,6 +122,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         is_after_open_square_bracket = false;
         is_after_quote = false;
         is_before_apostrophe = false;
+        is_open_curly_without_equals = false;
         char_at_pos = ' ';
       }
     in

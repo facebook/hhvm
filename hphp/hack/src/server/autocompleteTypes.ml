@@ -72,6 +72,7 @@ type legacy_autocomplete_context = {
   is_after_open_square_bracket: bool;
   is_after_quote: bool;
   is_before_apostrophe: bool;
+  is_open_curly_without_equals: bool;
   char_at_pos: char;
 }
 

@@ -663,6 +663,17 @@ let find_global_results
   else if ctx.is_after_double_right_angle_bracket then
     (* <<__Override>>AUTO332 *)
     ()
+  else if ctx.is_open_curly_without_equals then
+    (* In the case that we trigger autocompletion with an open curly brace,
+    we only want to perform autocompletion if it is preceded by an equal sign.
+
+    i.e. if (true) {
+      --> Do not autocomplete
+
+    i.e. <foo:bar my-attribute={
+      --> Allow autocompletion
+    *)
+    ()
   else (
     (kind_filter :=
        match completion_type with

@@ -27,6 +27,10 @@ let context_after_double_right_angle_bracket_regex =
 (* For identifying shape keys *)
 let context_after_quote = Str.regexp ".*['\"]$"
 
+(* For identifying instances of { that are not part of an XHP attribute value. *)
+let context_after_open_curly_brace_without_equals_regex =
+  Str.regexp ".*[^=][ ]*{$"
+
 let get_autocomplete_context
     ~(file_content : string)
     ~(pos : File_content.position)
@@ -45,6 +49,7 @@ let get_autocomplete_context
       is_after_open_square_bracket = false;
       is_after_quote = false;
       is_before_apostrophe = false;
+      is_open_curly_without_equals = false;
       char_at_pos = ' ';
     }
   else
@@ -82,6 +87,12 @@ let get_autocomplete_context
       with _ -> ' '
     in
     let is_before_apostrophe = Char.equal char_at_pos '\'' in
+    let is_open_curly_without_equals =
+      Str.string_match
+        context_after_open_curly_brace_without_equals_regex
+        leading_text
+        0
+    in
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname;
@@ -91,6 +102,7 @@ let get_autocomplete_context
       is_after_open_square_bracket;
       is_after_quote;
       is_before_apostrophe;
+      is_open_curly_without_equals;
       char_at_pos;
     }
 

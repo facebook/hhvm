@@ -262,7 +262,7 @@ struct DumpFile {
 };
 
 folly::Optional<DumpFile> dump_file(const char* name) {
-  auto const path = folly::sformat("{}/{}", RO::AdminDumpPath, name);
+  auto const path = folly::sformat("{}/{}", RuntimeOption::AdminDumpPath, name);
 
   // mkdir -p the directory prefix of `path`
   if (FileUtil::mkdir(path) != 0) return folly::none;

@@ -20,6 +20,7 @@ pub struct HhasConstant<'id> {
     pub name: hhbc_id::r#const::Type<'id>,
     pub value: Option<TypedValue>,
     pub initializer_instrs: Option<InstrSeq>,
+    pub is_abstract: bool,
 }
 
 pub fn from_ast<'a>(
@@ -28,14 +29,15 @@ pub fn from_ast<'a>(
     id: &'a tast::Id,
     expr: Option<&tast::Expr>,
 ) -> Result<HhasConstant<'a>> {
-    let (value, initializer_instrs) = match expr {
-        None => (None, None),
+    let (value, initializer_instrs, is_abstract) = match expr {
+        None => (None, None, true),
         Some(init) => {
             match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, init) {
-                Ok(v) => (Some(v), None),
+                Ok(v) => (Some(v), None, false),
                 Err(_) => (
                     Some(TypedValue::Uninit),
                     Some(emit_expr::emit_expr(emitter, env, init)?),
+                    false,
                 ),
             }
         }
@@ -44,5 +46,6 @@ pub fn from_ast<'a>(
         name: hhbc_id::r#const::Type::from_ast_name(id.name()).into(),
         value,
         initializer_instrs,
+        is_abstract,
     })
 }

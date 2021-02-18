@@ -1300,7 +1300,7 @@ MemberKey read_member_key(AsmState& as) {
   if (mcode != MW && as.in.getc() != ':') {
     as.error("expected `:' after member code `" + word + "'");
   }
-  
+
   switch (mcode) {
     case MW:
       return MemberKey{};
@@ -3010,9 +3010,9 @@ void parse_record_field(AsmState& as) {
   );
 }
 
-
 /*
  * const-flags     : isType
+ *                 : isAbstract
  *                 ;
  *
  * directive-const : identifier const-flags member-tv-initializer
@@ -3031,9 +3031,12 @@ void parse_class_constant(AsmState& as) {
   auto const kind =
     isType ? ConstModifiers::Kind::Type : ConstModifiers::Kind::Value;
   as.in.skipWhitespace();
+  DEBUG_ONLY bool isAbstract = as.in.tryConsume("isAbstract");
+  as.in.skipWhitespace();
 
   if (as.in.peek() == ';') {
     as.in.getc();
+    assertx(isAbstract);
     as.pce->addAbstractConstant(makeStaticString(name),
                                 staticEmptyString(),
                                 kind,
@@ -3050,7 +3053,10 @@ void parse_class_constant(AsmState& as) {
 }
 
 /*
- * directive-ctx : identifier coeffect-name* ';'
+ * const-flags     : isAbstract
+ *                 ;
+ *
+ * directive-ctx : identifier const-flags coeffect-name* ';'
  */
 void parse_context_constant(AsmState& as) {
   as.in.skipWhitespace();
@@ -3060,22 +3066,23 @@ void parse_context_constant(AsmState& as) {
     as.error("expected name for context constant");
   }
 
+  as.in.skipWhitespace();
+  /*bool isAbstract = */as.in.tryConsume("isAbstract");
+
   auto coeffects = StaticCoeffects::none();
-  auto isAbstract = true;
-  
+
   while (true) {
     as.in.skipWhitespace();
     std::string coeffect;
     if (!as.in.readword(coeffect)) break;
-    isAbstract = false;
-    auto const result = CoeffectsConfig::fromName(coeffect);
-    coeffects |= result;
+    coeffects |= CoeffectsConfig::fromName(coeffect);
   }
 
   as.in.expectWs(';');
 
   DEBUG_ONLY auto added =
-    as.pce->addContextConstant(makeStaticString(name), coeffects, isAbstract);
+    as.pce->addContextConstant(makeStaticString(name), coeffects,
+                               false /* isAbstract */);
   assertx(added);
 }
 

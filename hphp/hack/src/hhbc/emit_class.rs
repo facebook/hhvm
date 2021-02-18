@@ -171,16 +171,34 @@ fn from_type_constant<'a>(
         }
     };
 
-    Ok(HhasTypeConstant { name, initializer })
+    let is_abstract = match &tc.abstract_ {
+        TCConcrete => false,
+        _ => true,
+    };
+
+    Ok(HhasTypeConstant {
+        name,
+        initializer,
+        is_abstract,
+    })
 }
 
 fn from_ctx_constant(tc: &tast::ClassTypeconst) -> Result<HhasCtxConstant> {
+    use tast::TypeconstAbstractKind::*;
     let name = tc.name.1.to_string();
     let coeffects = match &tc.type_ {
         Some(hint) => HhasCoeffects::from_ctx_constant(hint),
         None => vec![],
     };
-    Ok(HhasCtxConstant { name, coeffects })
+    let is_abstract = match &tc.abstract_ {
+        TCConcrete => false,
+        _ => true,
+    };
+    Ok(HhasCtxConstant {
+        name,
+        coeffects,
+        is_abstract,
+    })
 }
 
 fn from_class_elt_classvars<'a>(

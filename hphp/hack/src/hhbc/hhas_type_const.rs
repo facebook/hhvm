@@ -9,4 +9,5 @@ use runtime::TypedValue;
 pub struct HhasTypeConstant {
     pub name: String,
     pub initializer: Option<TypedValue>,
+    pub is_abstract: bool,
 }

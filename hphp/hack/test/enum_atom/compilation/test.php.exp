@@ -212,7 +212,7 @@
 }
 
 .class {} [abstract] Controller (29,50) {
-  .const TEnum isType;
+  .const TEnum isType isAbstract;
   .method {}{} [public static] (33,35) <"T" "T" extended_hint type_var> get(<"HH\\MemberOf<HH\\this::TEnum, Box<T>>" "HH\\MemberOf" > $enum) {
     .srcloc 33:5,35:93;
     Array @A_2

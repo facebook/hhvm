@@ -61,6 +61,7 @@ impl fmt::Display for Ctx {
 pub struct HhasCtxConstant {
     pub name: String,
     pub coeffects: Vec<Ctx>,
+    pub is_abstract: bool,
 }
 
 #[derive(Clone, Debug, Default, ToOcamlRep, FromOcamlRep)]

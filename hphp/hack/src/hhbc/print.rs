@@ -469,6 +469,9 @@ fn print_type_constant<W: Write>(
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     concat_str_by(w, " ", [".const", &c.name, "isType"])?;
+    if c.is_abstract {
+        w.write(" isAbstract")?;
+    }
     option(w, &c.initializer, |w, init| {
         w.write(" = ")?;
         triple_quotes(w, |w| print_adata(ctx, w, init))
@@ -483,7 +486,12 @@ fn print_ctx_constant<W: Write>(
 ) -> Result<(), W::Error> {
     if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects, |c| c.to_string()) {
         ctx.newline(w)?;
-        concat_str_by(w, " ", [".ctx", &c.name, coeffects.as_ref()])?;
+        concat_str_by(w, " ", [".ctx", &c.name])?;
+        w.write(" ")?;
+        if c.is_abstract {
+            w.write("isAbstract ")?;
+        }
+        w.write(coeffects)?;
         w.write(";")?;
     }
     Ok(())
@@ -580,6 +588,9 @@ fn print_constant<W: Write>(
     ctx.newline(w)?;
     w.write(".const ")?;
     w.write(c.name.to_raw_string())?;
+    if c.is_abstract {
+        w.write(" isAbstract")?;
+    }
     match c.value.as_ref() {
         Some(TypedValue::Uninit) => w.write(" = uninit")?,
         Some(value) => {

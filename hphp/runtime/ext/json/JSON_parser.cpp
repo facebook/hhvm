@@ -334,7 +334,7 @@ struct SimpleParser {
                        Variant& out) {
     SimpleParser parser(inp, length, buf);
     bool ok = parser.parseValue();
-    parser.skipSpace();
+    if (ok) parser.skipSpace();
     if (!ok || parser.p != inp + length) {
       // Unsupported, malformed, or trailing garbage. Release entire stack.
       tvDecRefRange(buf, parser.top);

@@ -245,7 +245,8 @@ let autocomplete_member ~is_static env class_ cid id =
 
 let autocomplete_xhp_enum_value
     (attr_name : string) id_id env xhp_class_ xhp_cid =
-  if is_auto_complete (snd id_id) then
+  if is_auto_complete (snd id_id) then begin
+    autocomplete_identifier := Some id_id;
     let get_class_name (ty : Typing_defs.decl_ty) : string option =
       let get_name = function
         | Tapply ((_, name), _) -> Some name
@@ -296,6 +297,7 @@ let autocomplete_xhp_enum_value
                     (Phase.decl ty.cc_type)
                     SearchUtils.SI_Enum
                     enum_class))
+  end
 
 let autocomplete_lvar id env =
   (* This is used for "$|" and "$x = $|" local variables. *)

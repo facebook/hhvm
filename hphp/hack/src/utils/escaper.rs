@@ -89,7 +89,6 @@ pub fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
         b'\\' => Some((&b"\\\\"[..]).into()),
         b'"' => Some((&b"\\\""[..]).into()),
         b'$' => None,
-        b'?' => Some((&b"\\?"[..]).into()),
         c if is_lit_printable(c) => None,
         c => {
             let mut r = vec![];
@@ -612,7 +611,7 @@ mod tests {
         assert_eq!(escape_char_(0), "\\000");
         assert_eq!(escape("house"), "house");
         assert_eq!(escape("\n"), "\\n");
-        assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
+        assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$?");
         assert_eq!(is_oct(b'5'), true);
         assert_eq!(is_oct(b'a'), false);
     }

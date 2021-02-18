@@ -27,7 +27,6 @@ let escape_char = function
   | '\\' -> "\\\\"
   | '"' -> "\\\""
   | '$' -> "$"
-  | '?' -> "\\?"
   | c when is_lit_printable c -> String.make 1 c
   | c -> Printf.sprintf "\\%03o" (Char.to_int c)
 

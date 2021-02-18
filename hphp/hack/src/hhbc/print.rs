@@ -2555,7 +2555,6 @@ fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<(), W::Error> {
             b'\\' => Some((&b"\\\\\\\\"[..]).into()),
             b'"' => Some((&b"\\\\\\\""[..]).into()),
             b'$' => Some((&b"\\\\$"[..]).into()),
-            b'?' => Some((&b"\\?"[..]).into()),
             c if is_lit_printable(c) => None,
             c => {
                 let mut r = vec![];
@@ -2919,7 +2918,7 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, &og.0)?;
             w.write(match og.2 {
                 ast::OgNullFlavor::OGNullthrows => "->",
-                ast::OgNullFlavor::OGNullsafe => "\\?->",
+                ast::OgNullFlavor::OGNullsafe => "?->",
             })?;
             print_expr(ctx, w, env, &og.1)
         }
@@ -2945,7 +2944,7 @@ fn print_expr<W: Write>(
         }
         E_::Eif(eif) => {
             print_expr(ctx, w, env, &eif.0)?;
-            w.write(" \\? ")?;
+            w.write(" ? ")?;
             option(w, &eif.1, |w, etrue| print_expr(ctx, w, env, etrue))?;
             w.write(" : ")?;
             print_expr(ctx, w, env, &eif.2)
@@ -3290,7 +3289,7 @@ fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {
         Bop::LogXor => w.write("xor"),
         Bop::Diff => w.write("!="),
         Bop::Diff2 => w.write("!=="),
-        Bop::QuestionQuestion => w.write("\\?\\?"),
+        Bop::QuestionQuestion => w.write("??"),
     }
 }
 

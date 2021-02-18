@@ -1,0 +1,6 @@
+File "new.php", line 18, characters 16-26:
+Invalid argument (Typing[4411])
+  File "new.php", line 18, characters 16-26:
+  This expression is readonly
+  File "new.php", line 7, characters 42-43:
+  It is incompatible with this parameter, which is mutable

@@ -1156,7 +1156,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         "varray_or_darray" => {
                             let key_type = self.varray_or_darray_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                            Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
+                            if self.opts.array_unification {
+                                Ty_::TvecOrDict(self.alloc((key_type, value_type)))
+                            } else {
+                                Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
+                            }
+                        }
+                        "vec_or_dict" => {
+                            let key_type = self.vec_or_dict_key(pos);
+                            let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                            Ty_::TvecOrDict(self.alloc((key_type, value_type)))
                         }
                         "_" => Ty_::Terr,
                         _ => {
@@ -1801,12 +1810,24 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.alloc(Ty(self.alloc(Reason::witness(pos)), TANY_))
     }
 
-    /// The type used when a `varray_or_darray` typehint is missing its key type argument.
-    fn varray_or_darray_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
+    /// The type used when a `vec_or_dict` typehint is missing its key type argument.
+    fn vec_or_dict_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
         self.alloc(Ty(
-            self.alloc(Reason::RvarrayOrDarrayKey(pos)),
+            self.alloc(Reason::RvecOrDictKey(pos)),
             Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
         ))
+    }
+
+    /// The type used when a `varray_or_darray` typehint is missing its key type argument.
+    fn varray_or_darray_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
+        if self.opts.array_unification {
+            self.vec_or_dict_key(pos)
+        } else {
+            self.alloc(Ty(
+                self.alloc(Reason::RvarrayOrDarrayKey(pos)),
+                Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
+            ))
+        }
     }
 
     fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'a [u8] {
@@ -2821,7 +2842,41 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             let pos = self.merge(id_pos, self.get_pos(type_arguments));
             let type_arguments = type_arguments.as_slice(self.arena);
             let ty_ = match type_arguments {
-                [tk, tv] => Ty_::TvarrayOrDarray(
+                [tk, tv] => {
+                    let tup = self.alloc((
+                        self.node_to_ty(*tk)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        self.node_to_ty(*tv)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                    ));
+
+                    if self.opts.array_unification {
+                        Ty_::TvecOrDict(tup)
+                    } else {
+                        Ty_::TvarrayOrDarray(tup)
+                    }
+                }
+                [tv] => {
+                    let tup = self.alloc((
+                        self.varray_or_darray_key(pos),
+                        self.node_to_ty(*tv)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                    ));
+                    if self.opts.array_unification {
+                        Ty_::TvecOrDict(tup)
+                    } else {
+                        Ty_::TvarrayOrDarray(tup)
+                    }
+                }
+                _ => TANY_,
+            };
+            self.hint_ty(pos, ty_)
+        } else if class_id.1.trim_start_matches("\\") == "vec_or_dict" {
+            let id_pos = class_id.0;
+            let pos = self.merge(id_pos, self.get_pos(type_arguments));
+            let type_arguments = type_arguments.as_slice(self.arena);
+            let ty_ = match type_arguments {
+                [tk, tv] => Ty_::TvecOrDict(
                     self.alloc((
                         self.node_to_ty(*tk)
                             .unwrap_or_else(|| self.tany_with_pos(id_pos)),
@@ -2829,9 +2884,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                             .unwrap_or_else(|| self.tany_with_pos(id_pos)),
                     )),
                 ),
-                [tv] => Ty_::TvarrayOrDarray(
+                [tv] => Ty_::TvecOrDict(
                     self.alloc((
-                        self.varray_or_darray_key(pos),
+                        self.vec_or_dict_key(pos),
                         self.node_to_ty(*tv)
                             .unwrap_or_else(|| self.tany_with_pos(id_pos)),
                     )),

@@ -6090,10 +6090,10 @@ and call
          * coercible iff it's constituent types are. *)
         Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
       in
-      let _expected_arg_ty = ExpectedTy.make pos Reason.URparam ty in
       let (env, tel) =
         List.map_env env el (fun env elt ->
-            let (env, te, e_ty) = expr (*~expected:expected_arg_ty*) env elt in
+            (* TODO(sowens): Pass the expected type to expr *)
+            let (env, te, e_ty) = expr env elt in
             let env =
               match elt with
               | (_, Callconv (Ast_defs.Pinout, e1)) ->

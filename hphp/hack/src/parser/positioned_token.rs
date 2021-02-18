@@ -13,6 +13,7 @@ use crate::{
     source_text::SourceText,
     token_factory::SimpleTokenFactory,
     token_kind::TokenKind,
+    trivia_factory::SimpleTriviaFactory,
     trivia_kind::TriviaKind,
 };
 
@@ -202,5 +203,11 @@ impl LexablePositionedToken for PositionedToken {
 
     fn positioned_trailing(&self) -> &[PositionedTrivium] {
         &self.trailing
+    }
+}
+
+impl SimpleTriviaFactory for PositionedTrivia {
+    fn make() -> Self {
+        Self::new()
     }
 }

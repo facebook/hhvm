@@ -7,7 +7,8 @@
 use bitflags::bitflags;
 
 use crate::{
-    lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivium, trivia_kind::TriviaKind,
+    lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivium,
+    trivia_factory::SimpleTriviaFactory, trivia_kind::TriviaKind,
 };
 
 bitflags! {
@@ -61,19 +62,6 @@ impl CompactTrivia {
 impl LexableTrivia for CompactTrivia {
     type Trivium = MinimalTrivium;
 
-    fn new() -> Self {
-        Self {
-            kinds: TriviaKinds::empty(),
-            width: 0,
-        }
-    }
-    fn from_slice(trivia: &[MinimalTrivium]) -> Self {
-        let mut result = Self::new();
-        for trivium in trivia {
-            result.push(trivium.clone());
-        }
-        result
-    }
     fn is_empty(&self) -> bool {
         self.kinds.is_empty()
     }
@@ -87,5 +75,14 @@ impl LexableTrivia for CompactTrivia {
     fn extend(&mut self, other: Self) {
         self.kinds |= other.kinds;
         self.width += other.width;
+    }
+}
+
+impl SimpleTriviaFactory for CompactTrivia {
+    fn make() -> Self {
+        Self {
+            kinds: TriviaKinds::empty(),
+            width: 0,
+        }
     }
 }

@@ -77,7 +77,7 @@ impl<'src> AastParser {
             &env.parser_options,
             env.elaborate_namespaces,
             stack_limit,
-            TokenFactory { arena: &arena },
+            TokenFactory::new(&arena),
             &arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());

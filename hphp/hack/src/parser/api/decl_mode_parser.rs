@@ -54,7 +54,7 @@ pub fn parse_script<'src, 'arena>(
 ) {
     let sc = WithKind::new(DeclModeSmartConstructors::new(
         &source,
-        TokenFactory { arena },
+        TokenFactory::new(arena),
         arena,
     ));
     let mut parser = Parser::new(&source, env, sc);

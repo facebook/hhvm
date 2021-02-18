@@ -43,7 +43,7 @@ where
         self.state
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 

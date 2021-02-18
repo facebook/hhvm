@@ -10,8 +10,6 @@ use std::fmt::Debug;
 pub trait LexableTrivia: Clone + Debug {
     type Trivium: LexableTrivium;
 
-    fn new() -> Self;
-    fn from_slice(trivia: &[Self::Trivium]) -> Self;
     fn is_empty(&self) -> bool;
     fn has_kind(&self, kind: TriviaKind) -> bool;
     fn push(&mut self, trivium: Self::Trivium);

@@ -29,7 +29,7 @@ pub trait SmartConstructors: Clone {
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
-    fn token_factory(&mut self) -> &mut Self::TF;
+    fn token_factory_mut(&mut self) -> &mut Self::TF;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Token<Self>) -> Self::R;

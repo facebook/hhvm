@@ -847,7 +847,7 @@ where
                     let (l, _, _) = head.into_trivia_and_width();
                     let (_, _, t) = token.into_trivia_and_width();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(parser.sc_mut().token_factory().make(k, o, w, l, t))
+                    Some(parser.sc_mut().token_factory_mut().make(k, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -856,7 +856,7 @@ where
                         | TokenKind::DoubleQuotedStringLiteralTail => token,
                         _ => parser
                             .sc_mut()
-                            .token_factory()
+                            .token_factory_mut()
                             .with_kind(token, TokenKind::StringLiteralBody),
                     };
                     Some(token)

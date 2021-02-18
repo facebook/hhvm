@@ -4,13 +4,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::lexable_trivia::{LexableTrivia, LexableTrivium};
-use parser_core_types::source_text::{SourceText, INVALID};
-use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
-use parser_core_types::token_factory::{TokenFactory, Trivia, Trivium};
-use parser_core_types::token_kind::TokenKind;
-use parser_core_types::trivia_kind::TriviaKind;
+use parser_core_types::{
+    lexable_token::LexableToken,
+    lexable_trivia::{LexableTrivia, LexableTrivium},
+    source_text::{SourceText, INVALID},
+    syntax_error::{self as Errors, Error, SyntaxError},
+    token_factory::{TokenFactory, Trivia, Trivium},
+    token_kind::TokenKind,
+    trivia_factory::TriviaFactory,
+    trivia_kind::TriviaKind,
+};
 
 use std::cell::RefCell;
 use std::ops::DerefMut;
@@ -1890,7 +1893,7 @@ where
         &mut self,
         scanner: impl Fn(&mut Self) -> Option<Trivium<TF>>,
     ) -> Trivia<TF> {
-        let mut acc = Trivia::<TF>::new();
+        let mut acc = self.token_factory.trivia_factory_mut().make();
         while let Some(t) = scanner(self) {
             acc.push(t)
         }
@@ -1902,7 +1905,7 @@ where
         scanner: impl Fn(&mut Self) -> Option<Trivium<TF>>,
         mut width: usize,
     ) -> Trivia<TF> {
-        let mut acc = Trivia::<TF>::new();
+        let mut acc = self.token_factory.trivia_factory_mut().make();
         let mut extra_token_error_width = 0;
         let mut extra_token_error_offset = self.offset();
         loop {
@@ -1960,7 +1963,7 @@ where
         &mut self,
         scanner: impl Fn(&mut Self) -> Option<Trivium<TF>>,
     ) -> <TF::Token as LexableToken>::Trivia {
-        let mut acc = Trivia::<TF>::new();
+        let mut acc = self.token_factory.trivia_factory_mut().make();
         loop {
             let mut lexer1 = self.clone();
             match scanner(&mut lexer1) {
@@ -2082,7 +2085,9 @@ where
 
         let (kind, w, leading) = self.scan_token_and_leading_trivia(scanner, as_name);
         let trailing = match kind {
-            TokenKind::DoubleQuotedStringLiteralHead => Trivia::<TF>::new(),
+            TokenKind::DoubleQuotedStringLiteralHead => {
+                self.token_factory.trivia_factory_mut().make()
+            }
             _ => self.scan_trailing_php_trivia(),
         };
         self.token_factory
@@ -2189,8 +2194,9 @@ where
             let token_start = x.offset;
             let (kind, w, leading) =
                 x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
+            let trailing = x.token_factory.trivia_factory_mut().make();
             x.token_factory
-                .make(kind, token_start, w, leading, Trivia::<TF>::new())
+                .make(kind, token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&tokenizer)
     }
@@ -2206,10 +2212,11 @@ where
             TokenKind::DoubleQuotedStringLiteralTail | TokenKind::HeredocStringLiteralTail => {
                 self.scan_trailing_php_trivia()
             }
-            _ => Trivia::<TF>::new(),
+            _ => self.token_factory.trivia_factory_mut().make(),
         };
+        let leading = self.token_factory.trivia_factory_mut().make();
         self.token_factory
-            .make(kind, token_start, w, Trivia::<TF>::new(), trailing)
+            .make(kind, token_start, w, leading, trailing)
     }
 
     pub fn next_docstring_header(&mut self) -> (TF::Token, &'a [u8]) {
@@ -2220,12 +2227,13 @@ where
         self.start_new_lexeme();
         let (name, _) = self.scan_docstring_header();
         let w = self.width();
+        let trailing = self.token_factory.trivia_factory_mut().make();
         let token = self.token_factory.make(
             TokenKind::HeredocStringLiteralHead,
             token_start,
             w,
             leading,
-            Trivia::<TF>::new(),
+            trailing,
         );
         (token, name)
     }
@@ -2248,9 +2256,12 @@ where
             // an XHP body then we want any whitespace or newlines to be leading trivia
             // of the body token.
             match kind {
-                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => lexer
-                    .token_factory
-                    .make(kind, token_start, w, leading, Trivia::<TF>::new()),
+                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
+                    let trailing = lexer.token_factory.trivia_factory_mut().make();
+                    lexer
+                        .token_factory
+                        .make(kind, token_start, w, leading, trailing)
+                }
                 _ => {
                     let trailing = lexer.scan_trailing_php_trivia();
                     lexer
@@ -2283,7 +2294,7 @@ where
             if kind == TokenKind::XHPBody {
                 lexer.scan_trailing_xhp_trivia()
             } else {
-                Trivia::<TF>::new()
+                lexer.token_factory.trivia_factory_mut().make()
             };
             lexer
                 .token_factory
@@ -2312,12 +2323,14 @@ where
     }
 
     fn make_hashbang_token(&mut self) -> TF::Token {
+        let leading = self.token_factory.trivia_factory_mut().make();
+        let trailing = self.token_factory.trivia_factory_mut().make();
         self.token_factory.make(
             TokenKind::Hashbang,
             self.start,
             self.width(),
-            Trivia::<TF>::new(),
-            Trivia::<TF>::new(),
+            leading,
+            trailing,
         )
     }
 
@@ -2334,24 +2347,23 @@ where
         // determine the file check mode, read the trailing trivia and attach it
         // to the language token
         let trailing = self.scan_trailing_php_trivia();
-        let name = self.token_factory.make(
-            TokenKind::Name,
-            name_token_offset,
-            size,
-            Trivia::<TF>::new(),
-            trailing,
-        );
+        let leading = self.token_factory.trivia_factory_mut().make();
+        let name =
+            self.token_factory
+                .make(TokenKind::Name, name_token_offset, size, leading, trailing);
         (markup_text, Some((less_than_question_token, Some(name))))
     }
 
     fn make_hashbang_and_suffix(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
         let hashbang = self.make_hashbang_token();
+        let leading = self.token_factory.trivia_factory_mut().make();
+        let trailing = self.token_factory.trivia_factory_mut().make();
         let less_than_question_token = self.token_factory.make(
             TokenKind::LessThanQuestion,
             self.offset,
             2,
-            Trivia::<TF>::new(),
-            Trivia::<TF>::new(),
+            leading,
+            trailing,
         );
         // skip <?
         self.advance(2);

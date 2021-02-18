@@ -35,7 +35,7 @@ where
         Self {
             lexer: Lexer::make(
                 &source,
-                sc.token_factory().clone(),
+                sc.token_factory_mut().clone(),
                 env.disallow_hash_comments,
             ),
             errors: vec![],

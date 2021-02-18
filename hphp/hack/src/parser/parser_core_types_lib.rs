@@ -37,4 +37,5 @@ pub mod syntax_tree;
 pub mod syntax_type;
 pub mod token_factory;
 pub mod token_kind;
+pub mod trivia_factory;
 pub mod trivia_kind;

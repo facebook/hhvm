@@ -7,6 +7,7 @@
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use crate::lexable_trivia::{LexableTrivia, LexableTrivium};
+use crate::trivia_factory::SimpleTriviaFactory;
 use crate::trivia_kind::TriviaKind;
 
 #[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
@@ -20,12 +21,6 @@ pub type MinimalTrivia = Vec<MinimalTrivium>;
 impl LexableTrivia for MinimalTrivia {
     type Trivium = MinimalTrivium;
 
-    fn new() -> Self {
-        Vec::new()
-    }
-    fn from_slice(trivia: &[Self::Trivium]) -> Self {
-        trivia.to_vec()
-    }
     fn is_empty(&self) -> bool {
         self.is_empty()
     }
@@ -105,5 +100,11 @@ impl LexableTrivium for MinimalTrivium {
             kind: TriviaKind::DelimitedComment,
             width,
         }
+    }
+}
+
+impl SimpleTriviaFactory for MinimalTrivia {
+    fn make() -> Self {
+        vec![]
     }
 }

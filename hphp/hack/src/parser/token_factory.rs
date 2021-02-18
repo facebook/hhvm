@@ -4,7 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{lexable_token::LexableToken, lexable_trivia::LexableTrivia, token_kind::TokenKind};
+use crate::{
+    lexable_token::LexableToken,
+    lexable_trivia::LexableTrivia,
+    token_kind::TokenKind,
+    trivia_factory::{SimpleTriviaFactory, SimpleTriviaFactoryImpl, TriviaFactory},
+};
 use std::fmt::Debug;
 
 pub type Trivia<TF> = <<TF as TokenFactory>::Token as LexableToken>::Trivia;
@@ -13,6 +18,7 @@ pub type Trivium<TF> =
 
 pub trait TokenFactory: Clone {
     type Token: LexableToken;
+    type TriviaFactory: TriviaFactory<Trivia = Trivia<Self>>;
 
     fn make(
         &mut self,
@@ -23,17 +29,11 @@ pub trait TokenFactory: Clone {
         trailing: Trivia<Self>,
     ) -> Self::Token;
 
-    fn with_leading(
-        &mut self,
-        token: Self::Token,
-        trailing: <Self::Token as LexableToken>::Trivia,
-    ) -> Self::Token;
-    fn with_trailing(
-        &mut self,
-        token: Self::Token,
-        trailing: <Self::Token as LexableToken>::Trivia,
-    ) -> Self::Token;
+    fn with_leading(&mut self, token: Self::Token, trailing: Trivia<Self>) -> Self::Token;
+    fn with_trailing(&mut self, token: Self::Token, trailing: Trivia<Self>) -> Self::Token;
     fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token;
+
+    fn trivia_factory_mut(&mut self) -> &mut Self::TriviaFactory;
 }
 
 pub trait SimpleTokenFactory: LexableToken {
@@ -51,16 +51,24 @@ pub trait SimpleTokenFactory: LexableToken {
 }
 
 #[derive(Clone)]
-pub struct SimpleTokenFactoryImpl<Token: SimpleTokenFactory>(std::marker::PhantomData<Token>);
+pub struct SimpleTokenFactoryImpl<Token: SimpleTokenFactory>(
+    std::marker::PhantomData<Token>,
+    SimpleTriviaFactoryImpl<<Token as LexableToken>::Trivia>,
+);
 
 impl<Token: SimpleTokenFactory> SimpleTokenFactoryImpl<Token> {
     pub fn new() -> Self {
-        Self(std::marker::PhantomData)
+        Self(std::marker::PhantomData, SimpleTriviaFactoryImpl::new())
     }
 }
 
-impl<T: SimpleTokenFactory + Debug> TokenFactory for SimpleTokenFactoryImpl<T> {
+impl<T> TokenFactory for SimpleTokenFactoryImpl<T>
+where
+    T: SimpleTokenFactory + Debug,
+    <T as LexableToken>::Trivia: SimpleTriviaFactory,
+{
     type Token = T;
+    type TriviaFactory = SimpleTriviaFactoryImpl<<T as LexableToken>::Trivia>;
 
     fn make(
         &mut self,
@@ -91,6 +99,11 @@ impl<T: SimpleTokenFactory + Debug> TokenFactory for SimpleTokenFactoryImpl<T> {
 
     fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token {
         token.with_kind(kind)
+    }
+
+
+    fn trivia_factory_mut(&mut self) -> &mut Self::TriviaFactory {
+        &mut self.1
     }
 }
 

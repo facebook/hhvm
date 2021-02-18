@@ -52,8 +52,8 @@ where S: SmartConstructors<State = State>,
       self.s.into_state()
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
-        self.s.token_factory()
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
+        self.s.token_factory_mut()
     }
 
 

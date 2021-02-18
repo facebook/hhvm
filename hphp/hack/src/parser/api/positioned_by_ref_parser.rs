@@ -56,7 +56,7 @@ pub fn parse_script<'src, 'arena>(
     env: ParserEnv,
     stack_limit: Option<&'src StackLimit>,
 ) -> (Syntax<'arena>, Vec<SyntaxError>, State<'arena>) {
-    let tf = TokenFactory { arena };
+    let tf = TokenFactory::new(arena);
     let sc = SmartConstructors::new(State { arena }, tf);
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
@@ -70,7 +70,7 @@ pub fn parse_header_only<'src, 'arena>(
     arena: &'arena Bump,
     source: &SourceText<'src>,
 ) -> Option<Syntax<'arena>> {
-    let tf = TokenFactory { arena };
+    let tf = TokenFactory::new(arena);
     let sc = WithKind::new(SmartConstructors::new(State { arena }, tf));
     Parser::parse_header_only(env, source, sc)
 }

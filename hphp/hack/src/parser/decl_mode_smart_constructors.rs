@@ -10,13 +10,13 @@ use bumpalo::Bump;
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
     lexable_token::LexableToken,
-    lexable_trivia::LexableTrivia,
     source_text::SourceText,
     syntax::{SyntaxTypeBase, SyntaxValueType},
     syntax_by_ref::{has_arena::HasArena, syntax::Syntax, syntax_variant_generated::SyntaxVariant},
     syntax_type::SyntaxType,
     token_factory::TokenFactory,
     token_kind::TokenKind,
+    trivia_factory::TriviaFactory,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
@@ -236,8 +236,9 @@ where
     match body.children {
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
-                let token =
-                    token_factory.make(TokenKind::Yield, 0, 0, T::Trivia::new(), T::Trivia::new());
+                let leading = token_factory.trivia_factory_mut().make();
+                let trailing = token_factory.trivia_factory_mut().make();
+                let token = token_factory.make(TokenKind::Yield, 0, 0, leading, trailing);
                 let yield_ = Syntax::<T, V>::make_token(token);
                 Syntax::make_list(st, vec![yield_], 0)
             } else {

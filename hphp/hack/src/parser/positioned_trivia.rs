@@ -34,12 +34,6 @@ impl PositionedTrivium {
 impl LexableTrivia for PositionedTrivia {
     type Trivium = PositionedTrivium;
 
-    fn new() -> Self {
-        Vec::new()
-    }
-    fn from_slice(trivia: &[Self::Trivium]) -> Self {
-        trivia.to_vec()
-    }
     fn is_empty(&self) -> bool {
         self.is_empty()
     }

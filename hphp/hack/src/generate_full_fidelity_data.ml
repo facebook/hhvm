@@ -1239,7 +1239,7 @@ pub trait SmartConstructors: Clone {
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
-    fn token_factory(&mut self) -> &mut Self::TF;
+    fn token_factory_mut(&mut self) -> &mut Self::TF;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Token<Self>) -> Self::R;
@@ -1326,7 +1326,7 @@ where
       self.state
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 
@@ -1408,7 +1408,7 @@ impl<'src> SmartConstructors for VerifySmartConstructors
       self.state
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 
@@ -1714,7 +1714,7 @@ where
         self.state
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 
@@ -1859,7 +1859,7 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
       self.state
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 
@@ -1934,7 +1934,7 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         self
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
         &mut self.token_factory
     }
 
@@ -2081,8 +2081,8 @@ where S: SmartConstructors<State = State>,
       self.s.into_state()
     }
 
-    fn token_factory(&mut self) -> &mut Self::TF {
-        self.s.token_factory()
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
+        self.s.token_factory_mut()
     }
 
 

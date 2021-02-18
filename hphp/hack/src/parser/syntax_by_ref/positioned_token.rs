@@ -11,6 +11,7 @@ use crate::{
     source_text::SourceText,
     token_factory,
     token_kind::TokenKind,
+    trivia_factory::SimpleTriviaFactoryImpl,
     trivia_kind::TriviaKind,
 };
 use bumpalo::Bump;
@@ -167,11 +168,22 @@ impl<'a> LexableToken for PositionedToken<'a> {
 
 #[derive(Clone)]
 pub struct TokenFactory<'a> {
-    pub arena: &'a Bump,
+    arena: &'a Bump,
+    trivia_factory: SimpleTriviaFactoryImpl<CompactTrivia>,
+}
+
+impl<'a> TokenFactory<'a> {
+    pub fn new(arena: &'a Bump) -> Self {
+        Self {
+            arena,
+            trivia_factory: SimpleTriviaFactoryImpl::new(),
+        }
+    }
 }
 
 impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
     type Token = PositionedToken<'a>;
+    type TriviaFactory = SimpleTriviaFactoryImpl<CompactTrivia>;
 
     fn make(
         &mut self,
@@ -212,6 +224,10 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
         let mut new = PositionedTokenImpl::clone(token.0);
         new.kind = kind;
         PositionedToken(self.arena.alloc(new))
+    }
+
+    fn trivia_factory_mut(&mut self) -> &mut Self::TriviaFactory {
+        &mut self.trivia_factory
     }
 }
 

@@ -7,11 +7,14 @@
 use crate::lexer::{self, Lexer};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NodeType, SmartConstructors, Token, Trivia};
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::lexable_trivia::LexableTrivia;
-use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
-use parser_core_types::token_factory::TokenFactory;
-use parser_core_types::token_kind::TokenKind;
+use parser_core_types::{
+    lexable_token::LexableToken,
+    lexable_trivia::LexableTrivia,
+    syntax_error::{self as Errors, Error, SyntaxError},
+    token_factory::TokenFactory,
+    token_kind::TokenKind,
+    trivia_factory::TriviaFactory,
+};
 use stack_limit::StackLimit;
 
 #[derive(PartialEq)]
@@ -191,7 +194,11 @@ where
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
             let start = self.lexer().start();
-            let mut leading = Trivia::<S>::new();
+            let mut leading = self
+                .sc_mut()
+                .token_factory_mut()
+                .trivia_factory_mut()
+                .make();
             for t in self.drain_skipped_tokens() {
                 let (t_leading, t_width, t_trailing) = t.into_trivia_and_width();
                 leading.extend(t_leading);
@@ -199,7 +206,9 @@ where
                 leading.extend(t_trailing);
             }
             leading.extend(token.clone_leading());
-            self.sc_mut().token_factory().with_leading(token, leading)
+            self.sc_mut()
+                .token_factory_mut()
+                .with_leading(token, leading)
         } else {
             token
         }
@@ -285,13 +294,10 @@ where
         if tparam_open == '<' && attr1 == '<' && attr2 == '<' {
             lexer.advance(1);
             let start = lexer.start();
-            let token = self.sc_mut().token_factory().make(
-                TokenKind::LessThan,
-                start,
-                1,
-                Trivia::<S>::new(),
-                Trivia::<S>::new(),
-            );
+            let token_factory = self.sc_mut().token_factory_mut();
+            let leading = token_factory.trivia_factory_mut().make();
+            let trailing = token_factory.trivia_factory_mut().make();
+            let token = token_factory.make(TokenKind::LessThan, start, 1, leading, trailing);
             S!(make_token, self, token)
         } else {
             self.continue_from(parser1);

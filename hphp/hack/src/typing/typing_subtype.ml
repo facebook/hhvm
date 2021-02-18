@@ -1289,7 +1289,8 @@ and simplify_subtype_i
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
-            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Taccess _ ) ) ->
+            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
+            | Taccess _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (_, Tdynamic)

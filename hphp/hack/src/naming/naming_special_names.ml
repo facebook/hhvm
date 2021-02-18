@@ -339,7 +339,7 @@ module UserAttributes = struct
         [
           (uaOverride, [mthd]);
           (uaConsistentConstruct, [cls]);
-          (uaConst, [cls; instProperty; parameter; staticProperty]);
+          (uaConst, [cls; instProperty; parameter; staticProperty; lambda]);
           (uaDeprecated, [fn; mthd]);
           (uaEntryPoint, [fn]);
           (uaMemoize, [fn; mthd]);

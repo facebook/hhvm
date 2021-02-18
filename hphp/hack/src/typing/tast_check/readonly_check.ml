@@ -47,6 +47,10 @@ let get_local lenv id =
   | Some r -> r
   | None -> Mut
 
+let has_const_attribute user_attributes =
+  List.exists user_attributes ~f:(fun ua ->
+      String.equal (snd ua.ua_name) Naming_special_names.UserAttributes.uaConst)
+
 (* Returns true if rty_sub is a subtype of rty_sup.
 TODO: Later, we'll have to consider the regular type as well, for example
 we could allow readonly int as equivalent to an int for devX purposes *)
@@ -157,6 +161,26 @@ let check =
               (Typing_defs.get_pos caller_ty)
         | _ -> ()
       in
+      (* Checks a single arg against a parameter *)
+      let check_arg param arg =
+        let param_rty = param_to_rty param in
+        let arg_rty = self#ty_expr arg in
+        if not (subtype_rty arg_rty param_rty) then
+          Errors.readonly_mismatch
+            "Invalid argument"
+            (Tast.get_position arg)
+            ~reason_sub:
+              [
+                ( Tast.get_position arg,
+                  "This expression is " ^ rty_to_str arg_rty );
+              ]
+            ~reason_super:
+              [
+                ( param.fp_pos,
+                  "It is incompatible with this parameter, which is "
+                  ^ rty_to_str param_rty );
+              ]
+      in
       (* Check that readonly arguments match their parameters *)
       let check_args caller_ty args unpacked_arg =
         match get_node caller_ty with
@@ -164,26 +188,7 @@ let check =
           let unpacked_rty = Option.to_list unpacked_arg in
           let args = args @ unpacked_rty in
           (* If the args are unequal length, we errored elsewhere so this does not care *)
-          let _ =
-            List.iter2 fty.ft_params args ~f:(fun param arg ->
-                let param_rty = param_to_rty param in
-                let arg_rty = self#ty_expr arg in
-                if not (subtype_rty arg_rty param_rty) then
-                  Errors.readonly_mismatch
-                    "Invalid argument"
-                    (Tast.get_position arg)
-                    ~reason_sub:
-                      [
-                        ( Tast.get_position arg,
-                          "This expression is " ^ rty_to_str arg_rty );
-                      ]
-                    ~reason_super:
-                      [
-                        ( param.fp_pos,
-                          "It is incompatible with this parameter, which is "
-                          ^ rty_to_str param_rty );
-                      ])
-          in
+          let _ = List.iter2 fty.ft_params args ~f:check_arg in
           ()
         | _ -> ()
       in
@@ -236,15 +241,50 @@ let check =
       ctx <- new_ctx;
       super#on_method_ env m
 
-    method! on_fun_ env f =
-      (* TODO: handle lambdas, which capture values. Const lambdas should make every value captured readonly. *)
+    method! on_fun_def env f =
       let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
       let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos) in
       let new_ctx =
         { this_ty = None; ret_ty; lenv = lenv_from_params f.f_params }
       in
       ctx <- new_ctx;
-      super#on_fun_ env f
+      super#on_fun_def env f
+
+    (* Normal functions go through on_fun_def, but all functions including closures go through on_fun_*)
+    method! on_fun_ env f =
+      (* Copy the old ctx *)
+      let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
+      match ctx.ret_ty with
+      (* If the ret pos is the same between both functions,
+          then this is just a fun_def, so ctx is correct already. Don't need to do anything *)
+      | Some (_, outer_ret) when Pos.equal outer_ret ret_pos ->
+        super#on_fun_ env f
+      | _ ->
+        (* Keep the old context for use later *)
+        let old_ctx = ctx in
+        (* First get the lenv from parameters, which override captured values *)
+        let new_lenv = lenv_from_params f.f_params in
+        let new_lenv = SMap.union new_lenv ctx.lenv in
+        let is_const = has_const_attribute f.f_user_attributes in
+        (* If the lambda is const, we need to treat the entire lenv as if it is readonly, and all parameters as readonly *)
+        let new_lenv =
+          if is_const then
+            SMap.map (fun _ -> Readonly) new_lenv
+          else
+            new_lenv
+        in
+        let new_ctx =
+          {
+            this_ty = None;
+            ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos);
+            lenv = new_lenv;
+          }
+        in
+        ctx <- new_ctx;
+        let result = super#on_fun_ env f in
+        (* Set the old context back *)
+        ctx <- old_ctx;
+        result
 
     (* TODO: property accesses *)
     (* TODO: lambda expressions *)
@@ -312,10 +352,10 @@ let handler =
       else
         ()
 
-    method! at_fun_ env f =
+    method! at_fun_def env f =
       let tcopt = Tast_env.get_tcopt env in
       if TypecheckerOptions.readonly tcopt then
-        check#on_fun_ env f
+        check#on_fun_def env f
       else
         ()
   end

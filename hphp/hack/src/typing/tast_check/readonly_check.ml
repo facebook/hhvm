@@ -301,6 +301,22 @@ let check =
         ctx <- old_ctx;
         result
 
+    method! on_Foreach env e as_e b =
+      (* foreach ($vec as $x)
+        The as expression always has the same readonlyness
+        as the collection in question. If it is readonly,
+        then the as expression's lvals are each assigned to readonly.
+      *)
+      (match as_e with
+      | As_v lval
+      | Await_as_v (_, lval) ->
+        self#assign env lval e
+      | As_kv (l1, l2)
+      | Await_as_kv (_, l1, l2) ->
+        self#assign env l1 e;
+        self#assign env l2 e);
+      super#on_Foreach env e as_e b
+
     method! on_expr env e =
       match e with
       (* Property assignment *)

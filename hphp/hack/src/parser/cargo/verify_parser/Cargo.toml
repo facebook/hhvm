@@ -12,4 +12,5 @@ parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 smart_constructors = { path = "../smart_constructors" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
+bumpalo = { version = "3.2.1", features = ["collections"] }
 ocaml = "0.8"

@@ -19,6 +19,7 @@ use parser_core_types::{
     source_text::SourceText,
     syntax::*,
     syntax_by_ref::{
+        arena_state::State as ArenaState,
         positioned_token::PositionedToken as PositionedTokenByRef,
         positioned_value::PositionedValue as PositionedValueByRef, syntax::Syntax as SyntaxByRef,
         syntax_variant_generated::SyntaxVariant as SyntaxVariantByRef,
@@ -402,5 +403,11 @@ where
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         // don't serialize .1 (source text) as it is not part the real state we care about
         self.0.to_ocaml(_context)
+    }
+}
+
+impl ToOcaml for ArenaState<'_> {
+    unsafe fn to_ocaml(&self, c: &SerializationContext) -> Value {
+        NoState.to_ocaml(c)
     }
 }

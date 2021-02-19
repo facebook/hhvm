@@ -10,8 +10,5 @@ path = "../../positioned_by_ref_parser.rs"
 [dependencies]
 parser = { path = "../../../core" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
-rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-syntax_smart_constructors = { path = "../../../cargo/syntax_smart_constructors" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-ocaml = "0.8"

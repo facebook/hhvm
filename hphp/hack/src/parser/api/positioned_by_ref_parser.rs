@@ -4,16 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use ocaml::core::mlvalues::Value;
 use parser::{
     lexer::Lexer,
     parser::Parser,
     parser_env::ParserEnv,
-    smart_constructors::NoState,
     smart_constructors_wrappers::WithKind,
     source_text::SourceText,
     syntax_by_ref::{
-        has_arena::HasArena,
+        arena_state::State,
         positioned_token::{PositionedToken, TokenFactory, TokenFactoryFullTrivia},
         positioned_trivia::PositionedTrivia,
         positioned_value::PositionedValue,
@@ -22,30 +20,7 @@ use parser::{
     syntax_error::SyntaxError,
 };
 use positioned_smart_constructors::*;
-use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::StackLimit;
-use syntax_smart_constructors::StateType;
-
-#[derive(Clone)]
-pub struct State<'a> {
-    arena: &'a Bump,
-}
-
-impl<'a> HasArena<'a> for State<'a> {
-    fn get_arena(&self) -> &'a Bump {
-        self.arena
-    }
-}
-
-impl<R> StateType<R> for State<'_> {
-    fn next(&mut self, _inputs: &[&R]) {}
-}
-
-impl ToOcaml for State<'_> {
-    unsafe fn to_ocaml(&self, c: &SerializationContext) -> Value {
-        NoState.to_ocaml(c)
-    }
-}
 
 type Syntax<'a> = syntax::Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>;
 

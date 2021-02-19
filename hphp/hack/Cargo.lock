@@ -2197,12 +2197,9 @@ name = "positioned_by_ref_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "ocaml",
  "parser",
  "positioned_smart_constructors",
- "rust_to_ocaml",
  "stack_limit",
- "syntax_smart_constructors",
 ]
 
 [[package]]
@@ -2226,7 +2223,6 @@ dependencies = [
  "positioned_smart_constructors",
  "serde",
  "stack_limit",
- "syntax_smart_constructors",
 ]
 
 [[package]]
@@ -2993,6 +2989,7 @@ dependencies = [
 name = "verify_smart_constructors"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "ocaml",
  "parser_core_types",
  "rust_to_ocaml",

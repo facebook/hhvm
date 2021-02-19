@@ -10,7 +10,7 @@ use parser::{
     source_text::SourceText,
     syntax_by_ref::serialize,
     syntax_by_ref::{
-        has_arena::HasArena,
+        arena_state::State,
         positioned_token::{PositionedTokenFullTrivia, TokenFactoryFullTrivia},
         positioned_value::PositionedValueFullTrivia,
         syntax,
@@ -20,22 +20,6 @@ use parser::{
 use positioned_smart_constructors::*;
 use serde::{Serialize, Serializer};
 use stack_limit::StackLimit;
-use syntax_smart_constructors::StateType;
-
-#[derive(Clone)]
-pub struct State<'a> {
-    arena: &'a Bump,
-}
-
-impl<'a> HasArena<'a> for State<'a> {
-    fn get_arena(&self) -> &'a Bump {
-        self.arena
-    }
-}
-
-impl<R> StateType<R> for State<'_> {
-    fn next(&mut self, _inputs: &[&R]) {}
-}
 
 pub type Syntax<'a> =
     syntax::Syntax<'a, PositionedTokenFullTrivia<'a>, PositionedValueFullTrivia<'a>>;

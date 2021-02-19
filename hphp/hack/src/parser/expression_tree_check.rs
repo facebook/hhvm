@@ -153,6 +153,8 @@ impl<'ast> Visitor<'ast> for Checker {
             Unop(uop) => match **uop {
                 // Allow boolean not operator !$x
                 (Uop::Unot, _) => None,
+                // Allow negation -$x (required for supporting negative literals -123)
+                (Uop::Uminus, _) => None,
                 _ => Some("Expression trees do not support this operator."),
             },
             // Allow ternary _ ? _ : _, but not Elvis operator _ ?: _

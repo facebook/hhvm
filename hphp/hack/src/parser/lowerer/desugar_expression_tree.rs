@@ -297,6 +297,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
 
                 match op {
                     Uop::Unot => *e = virtualize_unop(operand, "__exclamationMark", &e.0),
+                    Uop::Uminus => *e = virtualize_unop(operand, "__negate", &e.0),
                     // The rest should be parser errors from expression_tree_check
                     _ => {}
                 }

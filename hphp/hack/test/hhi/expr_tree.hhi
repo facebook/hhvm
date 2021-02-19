@@ -183,6 +183,7 @@ abstract class ExampleInt extends ExampleMixed {
   public abstract function __minus(ExampleInt $_): ExampleInt;
   public abstract function __star(ExampleInt $_): ExampleInt;
   public abstract function __slash(ExampleInt $_): ExampleInt;
+  public abstract function __negate(): ExampleInt;
 
   public abstract function __lessThan(ExampleInt $_): ExampleBool;
   public abstract function __lessThanEqual(ExampleInt $_): ExampleBool;

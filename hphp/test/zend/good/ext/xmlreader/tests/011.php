@@ -7,7 +7,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 $reader->read();
-echo $reader->readInnerXml();
+echo $reader->readInnerXML();
 echo "\n";
 $reader->close();
 
@@ -15,7 +15,7 @@ $reader->close();
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 $reader->read();
-echo $reader->readOuterXml();
+echo $reader->readOuterXML();
 echo "\n";
 $reader->close();
 echo "===DONE===\n";

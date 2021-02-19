@@ -781,17 +781,6 @@ let check_const_trait_members pos env use_list =
 let check_consistent_enum_inclusion included_cls (dest_cls : Cls.t) =
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->
-    (* Temporary workaround until D26410129 reaches HHVM *)
-    let pos_included = Cls.pos included_cls in
-    let pos_dest = Cls.pos dest_cls in
-    if
-      Relative_path.equal (Pos.filename pos_dest) (Pos.filename pos_included)
-      && Pos.line pos_dest < Pos.line pos_included
-    then
-      Errors.enum_inclusion_unsupported_ordering
-        pos_dest
-        (Cls.name dest_cls)
-        (Cls.name included_cls);
     (* ensure that the base types are identical *)
     if not (Typing_defs.equal_decl_ty included_e.te_base dest_e.te_base) then
       Errors.incompatible_enum_inclusion_base

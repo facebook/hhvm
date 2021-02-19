@@ -4,9 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use super::positioned_trivia::PositionedTrivia;
 use crate::compact_trivia::CompactTrivia;
 
 pub type PositionedValue<'a> = internal::PositionedValue<'a, CompactTrivia>;
+pub type PositionedValueFullTrivia<'a> = internal::PositionedValue<'a, PositionedTrivia<'a>>;
 
 mod internal {
     use crate::{

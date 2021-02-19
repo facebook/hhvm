@@ -1305,6 +1305,7 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
+ "positioned_full_trivia_parser",
  "positioned_parser",
  "rayon",
  "stack_limit",
@@ -2207,6 +2208,17 @@ dependencies = [
  "oxidized",
  "positioned_by_ref_parser",
  "rust_parser_ffi",
+]
+
+[[package]]
+name = "positioned_full_trivia_parser"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "parser",
+ "positioned_smart_constructors",
+ "stack_limit",
+ "syntax_smart_constructors",
 ]
 
 [[package]]

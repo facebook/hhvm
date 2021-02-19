@@ -18,6 +18,7 @@ options = { path = "../hhbc/cargo/options" }
 oxidized = { path = "../oxidized" }
 parser_core_types = { path = "../parser/cargo/core_types" }
 positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parser" }
+positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 stack_limit = { path = "../utils/stack_limit" }
 anyhow = "1.0"

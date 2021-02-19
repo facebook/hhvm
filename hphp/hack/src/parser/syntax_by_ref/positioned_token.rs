@@ -79,8 +79,18 @@ pub(crate) mod internal {
         pub trailing: Trivia,
     }
 
-    #[derive(Debug, Clone, Copy)]
+    #[derive(Debug)]
     pub struct PositionedToken<'a, Trivia>(&'a PositionedTokenImpl<Trivia>);
+
+    // derive(Clone) requires Trivia implements Clone, which isn't necessary.
+    impl<'a, Trivia> Clone for PositionedToken<'a, Trivia> {
+        fn clone(&self) -> Self {
+            Self(self.0)
+        }
+    }
+
+    // derive(Copy) requires Trivia implements Copy, which isn't necessary.
+    impl<'a, Trivia> Copy for PositionedToken<'a, Trivia> {}
 
     impl<Trivia: Clone> PositionedTokenImpl<Trivia> {
         fn start_offset(&self) -> usize {

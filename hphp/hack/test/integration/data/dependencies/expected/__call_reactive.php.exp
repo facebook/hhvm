@@ -12,6 +12,6 @@ function call_reactive(): void {
 //// __extract_standalone__.php
 <?hh
 <<__Pure>>
-function extract_standalone_make_default(): nothing {
+function extract_standalone_make_default()[]: nothing {
   throw new \Exception();
 }

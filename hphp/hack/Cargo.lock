@@ -1852,13 +1852,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "minimal_parser"
-version = "0.0.0"
-dependencies = [
- "parser",
-]
-
-[[package]]
 name = "mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -2465,7 +2458,6 @@ dependencies = [
 name = "rescan_trivia"
 version = "0.0.0"
 dependencies = [
- "minimal_parser",
  "parser",
  "positioned_parser",
 ]

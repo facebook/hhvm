@@ -18,7 +18,6 @@
 
 module TriviaKind = Full_fidelity_trivia_kind
 module SourceText = Full_fidelity_source_text
-module MinimalTrivia = Full_fidelity_minimal_trivia
 
 type t = {
   kind: TriviaKind.t;

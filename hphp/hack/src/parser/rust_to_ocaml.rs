@@ -12,7 +12,6 @@ use ocamlpool_rust::utils::*;
 use ocamlrep_ocamlpool::add_to_ambient_pool;
 use parser_core_types::{
     lexable_token::LexableToken,
-    minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia,
     positioned_syntax::PositionedValue,
     positioned_token::PositionedToken,
@@ -85,12 +84,6 @@ impl ToOcaml for TriviaKind {
 }
 
 impl ToOcaml for MinimalTrivia {
-    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        add_to_ambient_pool(self)
-    }
-}
-
-impl ToOcaml for MinimalToken {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         add_to_ambient_pool(self)
     }

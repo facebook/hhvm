@@ -547,26 +547,25 @@ ArrayData* apply_mutation_fast(ArrayData* in, ArrayData* result,
 template <typename State>
 ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
                                State& state, bool cow, uint32_t depth) {
-  IterateKVNoInc(in, [&](auto key, auto prev) {
+  // Careful! Even IterateKVNoInc will take a refcount on unknown arrays.
+  // In order to do the mutation in place when possible, we iterate by hand.
+  auto const end = in->iter_end();
+  for (auto pos = in->iter_begin(); pos != end; pos = in->iter_advance(pos)) {
+    auto const prev = in->nvGetVal(pos);
     auto const ad = apply_mutation(prev, state, cow, depth + 1);
-    if (!ad) return;
+    if (!ad) continue;
 
+    // TODO(kshaunak): We can avoid the copy here if !cow by modifying all
+    // of these mutation helpers to have "setMove" semantics. But it doesn't
+    // affect algorithmic complexity, since we already do O(n) iteration.
+    auto const escalated = result ? result : in;
+    if (escalated == in) in->incRefCount();
+
+    auto const key = in->nvGetKey(pos);
     auto const next = make_array_like_tv(ad);
-    if (result || !cow) {
-      result = result ? result : in;
-      auto const escalated = result->setMove(key, next);
-      ad->incRefCount();
-      assertx(escalated->hasExactlyOneRef());
-      if (escalated == result) return;
-      result->incRefCount();
-      result = escalated;
-    } else {
-      in->incRefCount();
-      result = in->setMove(key, next);
-      ad->incRefCount();
-      assertx(result->hasExactlyOneRef());
-    }
-  });
+    result = escalated->setMove(key, next);
+    assertx(result->hasExactlyOneRef());
+  }
   FTRACE(1, "Depth {}: {} {}\n", depth,
          result && result != in ? "copy" : "reuse", in);
   return result == in ? nullptr : result;

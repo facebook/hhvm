@@ -2238,16 +2238,11 @@ dependencies = [
 name = "positioned_parser_ffi"
 version = "0.0.0"
 dependencies = [
- "cpp_helper",
- "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
- "parser_core_types",
  "positioned_parser",
  "rust_parser_ffi",
- "smart_constructors",
- "stack_limit",
 ]
 
 [[package]]

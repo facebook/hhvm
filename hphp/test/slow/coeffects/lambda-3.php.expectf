@@ -1,0 +1,13 @@
+Warning: Call to __invoke() requires [defaults] coeffects but pure() provided [] in %s on line 8
+in lambda
+in lambda
+
+Warning: Call to __invoke() requires [rx] coeffects but pure() provided [] in %s on line 8
+in lambda
+
+Warning: Call to __invoke() requires [rx_shallow] coeffects but pure() provided [] in %s on line 8
+in lambda
+in lambda
+in lambda
+in lambda
+in lambda

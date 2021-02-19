@@ -424,7 +424,15 @@ let check_const_override
     | Ast_defs.(Cabstract | Cnormal) ->
       is_inherited_and_conflicts_with_parent
       && conflicts_with_declared_interface
-    | Ast_defs.(Ctrait | Cenum) -> false
+    | Ast_defs.Ctrait ->
+      is_inherited_and_conflicts_with_parent
+      && conflicts_with_declared_interface
+      &&
+      (* constant must be declared on a trait to conflict *)
+      (match Env.get_class env parent_class_const.cc_origin with
+      | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+      | None -> false)
+    | Ast_defs.Cenum -> false
   in
   let is_bad_interface_const_override =
     (* HHVM does not support one specific case of overriding constants:

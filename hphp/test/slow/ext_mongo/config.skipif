@@ -1,2 +1,5 @@
 <?hh
-if (!extension_loaded('mongo')) echo 'skip';
+<<__EntryPoint>>
+function main(): void {
+  if (!extension_loaded('mongo')) echo 'skip: No mongo';
+}

@@ -1,0 +1,10 @@
+File "parent_override_trait2.php", line 16, characters 7-7:
+Class `A` does not correctly implement all required members  (Typing[4340])
+  File "parent_override_trait2.php", line 16, characters 17-17:
+  Some members are incompatible with those declared in type `B`
+  File "parent_override_trait2.php", line 7, characters 16-16:
+  Non-abstract constants defined in an interface cannot conflict with other inherited constants.
+  File "parent_override_trait2.php", line 4, characters 16-16:
+  `X` inherited from `I1`
+  File "parent_override_trait2.php", line 7, characters 16-16:
+  conflicts with constant `X` inherited from `I2`.

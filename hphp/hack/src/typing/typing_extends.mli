@@ -14,6 +14,7 @@
 
 val check_implements :
   Typing_env_types.env ->
+  Typing_defs.decl_ty list ->
   (* The parent (interface, base type, or trait) *)
   Typing_defs.decl_ty ->
   (* The type to be checked, instantiated at its generic parameters *)

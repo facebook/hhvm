@@ -409,6 +409,9 @@ val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
 val concrete_const_interface_override :
   Pos.t -> Pos.t -> string -> string -> typing_error_callback -> unit
 
+val interface_const_multiple_defs :
+  Pos.t -> Pos.t -> string -> string -> string -> typing_error_callback -> unit
+
 val const_without_typehint : Pos.t * string -> unit
 
 val prop_without_typehint : string -> Pos.t * string -> unit
@@ -953,7 +956,7 @@ val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> ?pos_def:Pos.t option -> string -> unit
 
 val cannot_declare_constant :
-  [< `enum | `trait | `record ] -> Pos.t -> Pos.t * string -> unit
+  [< `enum | `record ] -> Pos.t -> Pos.t * string -> unit
 
 val ambiguous_inheritance :
   Pos.t -> string -> string -> error -> typing_error_callback -> unit

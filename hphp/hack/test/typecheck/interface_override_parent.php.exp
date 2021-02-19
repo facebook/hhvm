@@ -1,0 +1,10 @@
+File "interface_override_parent.php", line 11, characters 7-7:
+Class `A` does not correctly implement all required members  (Typing[4340])
+  File "interface_override_parent.php", line 11, characters 17-17:
+  Some members are incompatible with those declared in type `B`
+  File "interface_override_parent.php", line 4, characters 9-12:
+  Non-abstract constants defined in an interface cannot conflict with other inherited constants.
+  File "interface_override_parent.php", line 8, characters 9-12:
+  `FOO1` inherited from `B`
+  File "interface_override_parent.php", line 4, characters 9-12:
+  conflicts with constant `FOO1` inherited from `I1`.

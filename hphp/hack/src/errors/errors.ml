@@ -1522,6 +1522,33 @@ let concrete_const_interface_override
         ^ "." );
     ]
 
+let interface_const_multiple_defs
+    child_pos
+    parent_pos
+    child_origin
+    parent_origin
+    name
+    (on_error : typing_error_callback) =
+  let parent_origin = strip_ns parent_origin in
+  let child_origin = strip_ns child_origin in
+  on_error
+    ~code:(Typing.err_code Typing.ConcreteConstInterfaceOverride)
+    ( child_pos,
+      "Non-abstract constants defined in an interface cannot conflict with other inherited constants."
+    )
+    [
+      ( parent_pos,
+        Markdown_lite.md_codify name
+        ^ " inherited from "
+        ^ Markdown_lite.md_codify parent_origin );
+      ( child_pos,
+        "conflicts with constant "
+        ^ Markdown_lite.md_codify name
+        ^ " inherited from "
+        ^ Markdown_lite.md_codify child_origin
+        ^ "." );
+    ]
+
 let const_without_typehint sid =
   let (pos, name) = sid in
   let msg =
@@ -4548,7 +4575,6 @@ let cannot_declare_constant kind pos (class_pos, class_name) =
   let kind_str =
     match kind with
     | `enum -> "an enum"
-    | `trait -> "a trait"
     | `record -> "a record"
   in
   add_list

@@ -1231,14 +1231,14 @@ let class_constr_def env cls constructor =
   let env = { env with inside_constructor = true } in
   Option.bind constructor (method_def env cls)
 
-let class_implements_type env c1 ctype2 =
+let class_implements_type env implements c1 ctype2 =
   let params =
     List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
         mk (Reason.Rwitness p, Tgeneric (s, [])))
   in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = mk (r, Tapply (c1.c_name, params)) in
-  Typing_extends.check_implements env ctype2 ctype1
+  Typing_extends.check_implements env implements ctype2 ctype1
 
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
@@ -1519,7 +1519,8 @@ let class_def_ env c tc =
   List.iter methods ~f:(fun { m_name = (p, id); _ } ->
       check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p);
   let env =
-    List.fold ~init:env impl ~f:(fun env -> class_implements_type env c)
+    List.fold ~init:env impl ~f:(fun env ->
+        class_implements_type env implements c)
   in
   if Cls.is_disposable tc then
     List.iter

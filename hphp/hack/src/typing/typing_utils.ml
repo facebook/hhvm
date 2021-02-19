@@ -613,8 +613,6 @@ let tany = Env.tany
 
 let mk_tany env p = mk (Reason.Rwitness p, tany env)
 
-let decl_tany = Env.decl_tany
-
 let terr env r =
   let dynamic_view_enabled =
     TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env)

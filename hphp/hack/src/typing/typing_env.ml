@@ -1117,8 +1117,6 @@ let tany env =
   else
     Typing_defs.make_tany ()
 
-let decl_tany = tany
-
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   let not_found_is_ok x ctx =
     let xstr = LID.to_string x in

@@ -1,5 +1,5 @@
 File "global_const24.php", line 3, characters 11-13:
-Invalid expression in constant initializer (Parsing[1002])
+Expected constant expression for initializer (Parsing[1002])
 File "global_const24.php", line 3, characters 13-13:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "global_const24.php", line 3, characters 11-13:

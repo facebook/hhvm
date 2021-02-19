@@ -1,4 +1,4 @@
 File "vec_const.php", line 7, characters 62-69:
-Invalid expression in constant initializer (Parsing[1002])
+Expected constant expression for initializer (Parsing[1002])
 File "vec_const.php", line 7, characters 62-69:
 Illegal constant value (Naming[2023])

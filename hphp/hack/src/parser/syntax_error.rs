@@ -584,7 +584,7 @@ pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant"
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
 pub const invalid_constant_initializer: Error =
-    Cow::Borrowed("Invalid expression in constant initializer");
+    Cow::Borrowed("Expected constant expression for initializer");
 pub const parent_static_prop_decl: Error =
     Cow::Borrowed("Cannot use `static` or `parent::class` in property declaration");
 pub fn error2070(open_tag: &str, close_tag: &str) -> Error {

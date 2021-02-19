@@ -1,1 +1,1 @@
-Fatal error: Invalid expression in constant initializer in %s/enum_class01.php on line 9
+Fatal error: Expected constant expression for initializer in %s/enum_class01.php on line 9

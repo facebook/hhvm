@@ -1,4 +1,4 @@
-(8,34)-(8,43) Invalid expression in constant initializer
-(8,45)-(8,54) Invalid expression in constant initializer
-(11,43)-(11,52) Invalid expression in constant initializer
-(11,54)-(11,63) Invalid expression in constant initializer
+(8,34)-(8,43) Expected constant expression for initializer
+(8,45)-(8,54) Expected constant expression for initializer
+(11,43)-(11,52) Expected constant expression for initializer
+(11,54)-(11,63) Expected constant expression for initializer

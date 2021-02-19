@@ -544,6 +544,81 @@ TO_KIND        }
       ()
 end
 
+module GenerateSyntaxSerialize = struct
+  let match_arm x =
+    let get_field x = escape_rust_keyword (fst x) in
+    let serialize_fields =
+      map_and_concat_separated
+        "\n"
+        (fun y ->
+          sprintf
+            "ss.serialize_field(\"%s_%s\", &self.with(%s))?;"
+            x.prefix
+            (fst y)
+            (get_field y))
+        x.fields
+    in
+    let fields = map_and_concat_separated "," get_field x.fields in
+    sprintf
+      "SyntaxVariant::%s (%sChildren{%s} ) => {
+      let mut ss = s.serialize_struct(\"\", %d)?;
+      ss.serialize_field(\"kind\", \"%s\")?;
+      %s
+      ss.end()
+} \n"
+      x.kind_name
+      x.kind_name
+      fields
+      (1 + List.length x.fields)
+      x.description
+      serialize_fields
+
+  let template =
+    make_header CStyle ""
+    ^ "
+use super::{serialize::WithContext, syntax::Syntax, syntax_variant_generated::*};
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
+impl<'a, T, V> Serialize for WithContext<'a, Syntax<'a, T, V>>
+where
+    T: 'a,
+    WithContext<'a, T>: Serialize,
+{
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match self.1.children {
+            SyntaxVariant::Missing => {
+                let mut ss = s.serialize_struct(\"\", 1)?;
+                ss.serialize_field(\"kind\", \"missing\")?;
+                ss.end()
+            }
+            SyntaxVariant::Token(ref t) => {
+                let mut ss = s.serialize_struct(\"\", 2)?;
+                ss.serialize_field(\"kind\", \"token\")?;
+                ss.serialize_field(\"token\", &self.with(t))?;
+                ss.end()
+            }
+            SyntaxVariant::SyntaxList(l) => {
+                let mut ss = s.serialize_struct(\"\", 2)?;
+                ss.serialize_field(\"kind\", \"list\")?;
+                ss.serialize_field(\"elements\", &self.with(l))?;
+                ss.end()
+            }
+            MATCH_ARMS
+        }
+    }
+}
+"
+
+  let gen =
+    Full_fidelity_schema.make_template_file
+      ~transformations:[{ pattern = "MATCH_ARMS"; func = match_arm }]
+      ~filename:
+        ( full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_serialize_generated.rs" )
+      ~template
+      ()
+end
+
 module GenerateFFRustSyntaxVariantByRef = struct
   let to_syntax_variant_children x =
     let mapper (f, _) =
@@ -3144,6 +3219,23 @@ OPERATOR_DECL_IMPLend
       ()
 end
 
+module GenerateSchemaVersion = struct
+  let template =
+    make_header CStyle ""
+    ^ sprintf
+        "
+pub const VERSION: &'static str = \"%s\";
+"
+        Full_fidelity_schema.full_fidelity_schema_version_number
+
+  let gen =
+    Full_fidelity_schema.make_template_file
+      ~filename:
+        "hphp/hack/src/parser/schema/full_fidelity_schema_version_number.rs"
+      ~template
+      ()
+end
+
 let templates =
   [
     GenerateFFOperatorRust.full_fidelity_operators;
@@ -3181,4 +3273,6 @@ let templates =
     GenerateSyntaxTypeImpl.full_fidelity_syntax;
     GenerateSyntaxChildrenIterator.full_fidelity_syntax;
     GenerateFFRustSyntaxImplByRef.full_fidelity_syntax;
+    GenerateSyntaxSerialize.gen;
+    GenerateSchemaVersion.gen;
   ]

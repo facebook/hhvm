@@ -16,3 +16,4 @@ oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 itertools = "0.8"
+serde = { version = "1.0", features = ["derive", "rc"] }

@@ -8,8 +8,10 @@ version = "0.0.0"
 path = "../../positioned_full_trivia_parser.rs"
 
 [dependencies]
+full_fidelity_schema_version_number = { path = "../../../schema" }
 parser = { path = "../../../core" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
 stack_limit = { path = "../../../../utils/stack_limit" }
 syntax_smart_constructors = { path = "../../../cargo/syntax_smart_constructors" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
+serde = { version = "1.0", features = ["derive", "rc"] }

@@ -1179,6 +1179,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 
 [[package]]
+name = "full_fidelity_schema_version_number"
+version = "0.0.0"
+
+[[package]]
 name = "generator_rust"
 version = "0.0.0"
 dependencies = [
@@ -1308,6 +1312,7 @@ dependencies = [
  "positioned_full_trivia_parser",
  "positioned_parser",
  "rayon",
+ "serde_json",
  "stack_limit",
  "structopt",
  "strum",
@@ -2166,6 +2171,7 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
+ "serde",
 ]
 
 [[package]]
@@ -2215,8 +2221,10 @@ name = "positioned_full_trivia_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "full_fidelity_schema_version_number",
  "parser",
  "positioned_smart_constructors",
+ "serde",
  "stack_limit",
  "syntax_smart_constructors",
 ]

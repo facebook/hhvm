@@ -9,9 +9,14 @@ pub mod positioned_syntax;
 pub mod positioned_token;
 pub mod positioned_trivia;
 pub mod positioned_value;
+pub mod serialize;
 pub mod syntax;
+pub mod syntax_impl_generated;
+pub mod syntax_variant_generated;
+
 mod syntax_children_iterator;
 mod syntax_children_iterator_generated;
-pub mod syntax_impl_generated;
+mod syntax_serialize_generated;
 mod syntax_type_impl_generated;
-pub mod syntax_variant_generated;
+
+pub use syntax_serialize_generated::*;

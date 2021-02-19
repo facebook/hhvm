@@ -5663,6 +5663,13 @@ let readonly_mismatch prefix pos ~reason_sub ~reason_super =
     (pos, prefix)
     (reason_sub @ reason_super)
 
+let readonly_mismatch_on_error
+    prefix pos ~reason_sub ~reason_super (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.ReadonlyMismatch)
+    (pos, prefix)
+    (reason_sub @ reason_super)
+
 let explicit_readonly_cast kind pos origin_pos =
   add_list
     (Typing.err_code Typing.ExplicitReadonlyCast)

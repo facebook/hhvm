@@ -1,0 +1,24 @@
+File "function_subtype.php", line 27, characters 19-21:
+The method `get` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 27, characters 19-21:
+  Function readonly mismatch
+  File "function_subtype.php", line 27, characters 19-21:
+  This function is not marked readonly
+  File "function_subtype.php", line 10, characters 28-30:
+  This function is marked readonly
+File "function_subtype.php", line 32, characters 19-27:
+The method `return_ro` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 32, characters 19-27:
+  Function readonly return mismatch
+  File "function_subtype.php", line 32, characters 19-27:
+  This function returns a readonly value
+  File "function_subtype.php", line 14, characters 19-27:
+  This function does not return a readonly value
+File "function_subtype.php", line 36, characters 19-27:
+The method `setParams` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 19, characters 50-51:
+  Mismatched parameter readonlyness
+  File "function_subtype.php", line 19, characters 50-51:
+  This parameter is mutable
+  File "function_subtype.php", line 37, characters 17-18:
+  But this parameter is readonly

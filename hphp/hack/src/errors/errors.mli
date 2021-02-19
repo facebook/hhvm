@@ -1512,6 +1512,14 @@ val readonly_mismatch :
   reason_super:(Pos.t * string) list ->
   unit
 
+val readonly_mismatch_on_error :
+  string ->
+  Pos.t ->
+  reason_sub:(Pos.t * string) list ->
+  reason_super:(Pos.t * string) list ->
+  typing_error_callback ->
+  unit
+
 val explicit_readonly_cast : string -> Pos.t -> Pos.t -> unit
 
 val readonly_method_call : Pos.t -> Pos.t -> unit

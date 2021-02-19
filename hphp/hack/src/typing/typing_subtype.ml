@@ -2277,6 +2277,7 @@ and simplify_subtype_params
     (* Check that the calling conventions of the params are compatible. *)
     env
     |> simplify_param_modes ~subtype_env sub super
+    &&& simplify_param_readonly ~subtype_env sub super
     &&& simplify_param_accept_disposable ~subtype_env sub super
     &&& begin
           if check_params_ifc then
@@ -2835,6 +2836,25 @@ and simplify_param_ifc ~subtype_env sub super env =
       env
   | _ -> valid env
 
+and simplify_param_readonly ~subtype_env sub super env =
+  (* The sub param here (as with all simplify_param_* functions)
+  is actually the parameter on ft_super, since params are contravariant *)
+  (* Thus we check readonly subtyping covariantly *)
+  let { fp_pos = pos1; _ } = sub in
+  let { fp_pos = pos2; _ } = super in
+  if not (readonly_subtype (get_fp_readonly sub) (get_fp_readonly super)) then
+    invalid
+      ~fail:(fun () ->
+        Errors.readonly_mismatch_on_error
+          "Mismatched parameter readonlyness"
+          pos1
+          ~reason_sub:[(pos1, "This parameter is mutable")]
+          ~reason_super:[(pos2, "But this parameter is readonly")]
+          subtype_env.on_error)
+      env
+  else
+    valid env
+
 and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
   match (ifc1, ifc2) with
   | (FDPolicied (Some s1), FDPolicied (Some s2)) when String.equal s1 s2 -> true
@@ -2842,6 +2862,12 @@ and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
   (* TODO(T79510128): IFC needs to check that the constraints inferred by the parent entail those by the subtype *)
   | (FDInferFlows, FDInferFlows) -> true
   | _ -> false
+
+and readonly_subtype (r_sub : bool) (r_super : bool) =
+  match (r_sub, r_super) with
+  | (true, false) ->
+    false (* A readonly value is a supertype of a mutable one *)
+  | _ -> true
 
 (* Helper function for subtyping on function types: performs all checks that
  * don't involve actual types:
@@ -2851,6 +2877,7 @@ and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
  *   <<__Mutable>> attribute
  *   variadic arity
  *  <<__Policied>> attribute
+ *  Readonlyness
  *)
 and simplify_subtype_funs_attributes
     ~subtype_env
@@ -2891,6 +2918,30 @@ and simplify_subtype_funs_attributes
            p_super
            (ifc_policy_err_str ft_sub.ft_ifc_decl)
            (ifc_policy_err_str ft_super.ft_ifc_decl)
+           subtype_env.on_error)
+  |> check_with
+       (readonly_subtype
+          (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
+          (get_ft_readonly_this ft_super)
+          (get_ft_readonly_this ft_sub))
+       (fun () ->
+         Errors.readonly_mismatch_on_error
+           "Function readonly mismatch"
+           p_sub
+           [(p_sub, "This function is not marked readonly")]
+           [(p_super, "This function is marked readonly")]
+           subtype_env.on_error)
+  |> check_with
+       (readonly_subtype
+          (* Readonly return is covariant, so check ft_sub <: ft_super *)
+          (get_ft_returns_readonly ft_sub)
+          (get_ft_returns_readonly ft_super))
+       (fun () ->
+         Errors.readonly_mismatch_on_error
+           "Function readonly return mismatch"
+           p_sub
+           [(p_sub, "This function returns a readonly value")]
+           [(p_super, "This function does not return a readonly value")]
            subtype_env.on_error)
   |> check_with
        (Bool.equal

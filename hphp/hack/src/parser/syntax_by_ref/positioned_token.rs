@@ -52,7 +52,7 @@ impl<'a> internal::TokenFactory<'a, positioned_trivia::Factory<'a>> {
     }
 }
 
-mod internal {
+pub(crate) mod internal {
     use super::SizedTrivia;
     use crate::{
         compact_trivia::CompactTrivia,

@@ -23,7 +23,7 @@ $doc = $dom->documentElement->firstChild;
 echo $doc->C14N()."\n\n";
 
 /* exclusive/without comments first child element of doc element is context. */
-echo $doc->c14N(TRUE)."\n\n";
+echo $doc->C14N(TRUE)."\n\n";
 
 /* inclusive/with comments first child element of doc element is context. */
 echo $doc->C14N(FALSE, TRUE)."\n\n";
@@ -32,12 +32,12 @@ echo $doc->C14N(FALSE, TRUE)."\n\n";
 echo $doc->C14N(TRUE, TRUE)."\n\n";
 
 /* exclusive/without comments using xpath query. */
-echo $doc->c14N(TRUE, FALSE, darray['query'=>'(//. | //@* | //namespace::*)'])."\n\n";
+echo $doc->C14N(TRUE, FALSE, darray['query'=>'(//. | //@* | //namespace::*)'])."\n\n";
 
 /* exclusive/without comments first child element of doc element is context.
    using xpath query with registered namespace.
    test namespace prefix is also included. */
-echo $doc->c14N(TRUE, FALSE,
+echo $doc->C14N(TRUE, FALSE,
                 darray[
                   'query'=>'(//a:contain | //a:bar | .//namespace::*)',
                   'namespaces'=>darray['a'=>'http://www.example.com/ns/foo']

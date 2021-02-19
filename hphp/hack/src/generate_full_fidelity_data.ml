@@ -1439,7 +1439,7 @@ module GenerateFFRustVerifySmartConstructors = struct
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
         let args = arg_kinds!(%s);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_%s(self, %s);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_%s(self, %s);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
@@ -1454,9 +1454,10 @@ module GenerateFFRustVerifySmartConstructors = struct
     make_header CStyle ""
     ^ "
 use crate::*;
-use parser_core_types::positioned_syntax::PositionedSyntax;
-use parser_core_types::positioned_token::PositionedToken;
-use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use parser_core_types::syntax_by_ref::{
+    positioned_syntax::PositionedSyntax,
+    positioned_token::TokenFactory,
+};
 use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
@@ -1469,17 +1470,17 @@ macro_rules! arg_kinds {
     );
 }
 
-impl<'src> SmartConstructors for VerifySmartConstructors
+impl<'a> SmartConstructors for VerifySmartConstructors<'a>
 {
-    type State = State;
-    type TF = SimpleTokenFactoryImpl<PositionedToken>;
-    type R = PositionedSyntax;
+    type State = State<'a>;
+    type TF = TokenFactory<'a>;
+    type R = PositionedSyntax<'a>;
 
-    fn state_mut(&mut self) -> &mut State {
+    fn state_mut(&mut self) -> &mut State<'a> {
        &mut self.state
     }
 
-    fn into_state(self) -> State {
+    fn into_state(self) -> State<'a> {
       self.state
     }
 
@@ -1488,13 +1489,13 @@ impl<'src> SmartConstructors for VerifySmartConstructors
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_missing(self, offset);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_missing(self, offset);
         self.state_mut().push(r.kind());
         r
     }
 
-    fn make_token(&mut self, offset: PositionedToken) -> Self::R {
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_token(self, offset);
+    fn make_token(&mut self, offset: PositionedToken<'a>) -> Self::R {
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_token(self, offset);
         self.state_mut().push(r.kind());
         r
     }
@@ -1502,7 +1503,7 @@ impl<'src> SmartConstructors for VerifySmartConstructors
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
         if !lst.is_empty() {
             let args: Vec<_> = (&lst).iter().map(|s| s.kind()).collect();
-            let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_list(self, lst, offset);
+            let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_list(self, lst, offset);
             self.state_mut().verify(&args);
             self.state_mut().push(r.kind());
             r

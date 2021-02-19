@@ -1,8 +1,8 @@
 <?hh
-require "connect.inc";
 <<__EntryPoint>> function main(): void {
-$link = ldap_connect($host, $port);
-ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
+require "connect.inc";
+$link = ldap_connect(test_host(), test_port());
+ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, test_protocol_version());
 var_dump(ldap_bind($link));
 echo "===DONE===\n";
 }

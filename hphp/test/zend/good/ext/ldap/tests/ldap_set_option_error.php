@@ -1,19 +1,19 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 require "connect.inc";
-
-$link = ldap_connect($host, $port);
+$link = ldap_connect(test_host(), test_port());
 $controls = varray[
-	varray[
-		darray["xid" => "1.2.752.58.10.1", "iscritical" => true],
-		darray["xid" => "1.2.752.58.1.10", "value" => "magic"],
-	],
-	varray[
-		darray["oid" => "1.2.752.58.10.1", "iscritical" => true],
-		darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
-		"weird"
-	],
-	varray[
-	],
+    varray[
+        darray["xid" => "1.2.752.58.10.1", "iscritical" => true],
+        darray["xid" => "1.2.752.58.1.10", "value" => "magic"],
+    ],
+    varray[
+        darray["oid" => "1.2.752.58.10.1", "iscritical" => true],
+        darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
+        "weird"
+    ],
+    varray[
+    ],
 ];
 
 // Too few parameters
@@ -27,7 +27,8 @@ try { var_dump(ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, 3, "Additional 
 var_dump(ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, 10));
 
 foreach ($controls as $control)
-	var_dump(ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $control));
+    var_dump(ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $control));
 
 var_dump(ldap_set_option($link, 999999, 999999));
 echo "===DONE===\n";
+}

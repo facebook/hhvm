@@ -3,6 +3,9 @@
 function main_entry(): void {
   require "connect.inc";
 
+  $host = test_host();
+  $port = test_port();
+
   // no hostname, no port
   $link = ldap_connect();
   var_dump($link);
@@ -22,5 +25,6 @@ function main_entry(): void {
   // bad hostname (connect should work, not bind)
   $link = ldap_connect("nonexistent" . $host);
   var_dump($link);
+
   echo "===DONE===\n";
 }

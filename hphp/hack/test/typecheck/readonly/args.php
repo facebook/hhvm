@@ -9,8 +9,10 @@ class Foo {
   public readonly function takes_mutable(Foo $other) : void {
     $other->prop = 4;
   }
-  public readonly function takes_readonly(readonly Foo $other, Foo $mutable) : void {
-    $mutable->prop = $other->prop;
+  public readonly function takes_readonly(
+    readonly Foo $other,
+    Foo $mutable
+  ) : void {
   }
 }
 function takes_mutable(Foo $x) : void {
@@ -18,7 +20,6 @@ function takes_mutable(Foo $x) : void {
 }
 
 function takes_readonly(readonly Foo $other, Foo $mutable) : void {
-  $mutable->prop = $other->prop;
 }
 
 function test(): void {

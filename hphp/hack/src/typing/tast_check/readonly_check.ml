@@ -91,14 +91,29 @@ let check =
       | (_, Array_get (e, Some _)) -> self#ty_expr e
       | _ -> Mut
 
-    method assign lval rval =
+    method assign env lval rval =
       match lval with
-      | (_, Obj_get (e1, _, _, _)) ->
+      | (_, Obj_get (obj, get, _, _)) ->
         begin
-          match self#ty_expr e1 with
-          | Readonly -> Errors.readonly_modified (Tast.get_position e1)
+          match self#ty_expr obj with
+          | Readonly -> Errors.readonly_modified (Tast.get_position obj)
           | Mut -> ()
-        end
+        end;
+        let prop_elt = self#get_prop_elt env obj get in
+        (match (prop_elt, self#ty_expr rval) with
+        | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
+          ->
+          Errors.readonly_mismatch
+            "Invalid property assignment"
+            (Tast.get_position lval)
+            ~reason_sub:
+              [(Tast.get_position rval, "This expression is readonly")]
+            ~reason_super:
+              [
+                ( Lazy.force elt.Typing_defs.ce_pos,
+                  "But it's being assigned to a mutable property" );
+              ]
+        | _ -> ())
       | (_, Lvar (_, lid)) ->
         let var_ro_opt = SMap.find_opt (Local_id.to_string lid) ctx.lenv in
         begin
@@ -195,7 +210,7 @@ let check =
       check_readonly_call caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
 
-    method obj_get env obj get =
+    method get_prop_elt env obj get =
       let open Typing_defs in
       match (get_node (Tast.get_type obj), get) with
       (* Basic case of a single class and a statically known id:
@@ -205,20 +220,20 @@ let check =
         (match Decl_provider.get_class provider_ctx (snd id) with
         | Some class_decl ->
           let prop = Cls.get_prop class_decl (snd prop_id) in
-          (match prop with
-          | Some elt ->
-            let prop_ro = get_ce_readonly_prop elt in
-            (match (prop_ro, self#ty_expr obj) with
-            | (true, Mut) ->
-              Errors.explicit_readonly_cast
-                "property"
-                (Tast.get_position get)
-                (Lazy.force elt.ce_pos)
-            | _ -> ())
-          | None -> ())
-        (* Class doesn't exist, error elsewhere*)
-        | None -> ())
+          prop
+        (* Class doesn't exist, assume mutable *)
+        | None -> None)
       (* TODO: Handle more complex generic cases *)
+      | _ -> None
+
+    method obj_get env obj get =
+      let prop_elt = self#get_prop_elt env obj get in
+      match (prop_elt, self#ty_expr obj) with
+      | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
+        Errors.explicit_readonly_cast
+          "property"
+          (Tast.get_position get)
+          (Lazy.force elt.Typing_defs.ce_pos)
       | _ -> ()
 
     (* TODO: support obj get on generics, aliases and expression dependent types *)
@@ -286,12 +301,22 @@ let check =
         ctx <- old_ctx;
         result
 
-    (* TODO: property accesses *)
-    (* TODO: lambda expressions *)
     method! on_expr env e =
       match e with
+      (* Property assignment *)
+      | ( _,
+          Binop
+            ( (Ast_defs.Eq _ as bop),
+              ((_, Obj_get (obj, get, nullable, is_prop_call)) as lval),
+              rval ) ) ->
+        self#assign env lval rval;
+        self#on_bop env bop;
+        (* During a property assignment, skip the self#expr call to avoid erroring *)
+        self#on_Obj_get env obj get nullable is_prop_call;
+        self#on_expr env rval
+      (* All other assignment *)
       | (_, Binop (Ast_defs.Eq _, lval, rval)) ->
-        self#assign lval rval;
+        self#assign env lval rval;
         super#on_expr env e
       (* Readonly calls *)
       | (_, ReadonlyExpr (_, Call (caller, targs, args, unpacked_arg))) ->

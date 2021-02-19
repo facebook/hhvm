@@ -36,17 +36,6 @@ let check_param _env params p user_attributes name =
       Errors.inout_params_memoize p param.param_pos
   | _ -> ()
 
-let is_dynamic_call func_expr =
-  match func_expr with
-  (* regular function call, e.g. func() *)
-  | Id _ -> false
-  (* instance method call, e.g. $x->method() *)
-  | Obj_get (_, (_, Id _), _, false) -> false
-  (* static method call, e.g. Foo::method() *)
-  | Class_const (_, _) -> false
-  (* everything else *)
-  | _ -> true
-
 let check_callconv_expr e =
   let rec check_callconv_expr_helper e1 =
     match snd e1 with

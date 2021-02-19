@@ -507,10 +507,12 @@ let shape_field_name_ this field =
 let shape_field_name env (p, field) =
   let this =
     lazy
-      (let c_ty = get_node (Env.get_self env) in
-       match c_ty with
-       | Tclass (sid, _, _) -> Some sid
-       | _ -> None)
+      (match Env.get_self_ty env with
+      | None -> None
+      | Some c_ty ->
+        (match get_node c_ty with
+        | Tclass (sid, _, _) -> Some sid
+        | _ -> None))
   in
   match shape_field_name_ this (p, field) with
   | Ok x -> Some x

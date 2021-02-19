@@ -157,7 +157,7 @@ val get_val_kind : env -> Typing_defs.val_kind
 
 val get_self_ty : env -> locl_ty option
 
-val get_self : env -> locl_ty
+val get_self_class_type : env -> (Nast.sid * exact * locl_ty list) option
 
 val get_self_id : env -> string option
 

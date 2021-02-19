@@ -85,7 +85,13 @@ type method_instantiation = {
 }
 
 let env_with_self ?pos ?(quiet = false) ?report_cycle env =
-  let this_ty = mk (Reason.none, TUtils.this_of (Env.get_self env)) in
+  let this_ty =
+    mk
+      ( Reason.none,
+        match Env.get_self_ty env with
+        | None -> TUtils.tany env (* Error already reported in naming phase *)
+        | Some ty -> TUtils.this_of ty )
+  in
   {
     type_expansions =
       begin

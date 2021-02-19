@@ -66,7 +66,11 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
      * of attribute spreads even on XHP classes not marked `final`. We should
      * implement <<__ConsistentAttributes>> as a way to make this hacky
      * inference sound and check it before doing this conversion. *)
-    walk_and_gather_xhp_ ~env ~pos (Env.get_self env)
+    begin
+      match Env.get_self_ty env with
+      | None -> (env, [], [])
+      | Some ty -> walk_and_gather_xhp_ ~env ~pos ty
+    end
   | Tgeneric _
   | Tdependent _
   | Tnewtype _ ->

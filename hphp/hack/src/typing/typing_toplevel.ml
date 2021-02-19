@@ -502,10 +502,10 @@ let method_def env cls m =
           m.m_where_constraints
       in
       let env =
-        if Env.is_static env then
-          env
-        else
-          Env.set_local env this (Env.get_self env) Pos.none
+        match Env.get_self_ty env with
+        | Some ty when not (Env.is_static env) ->
+          Env.set_local env this ty Pos.none
+        | _ -> env
       in
       let env =
         match Env.get_self_class env with

@@ -964,10 +964,15 @@ let get_val_kind env = env.genv.val_kind
 
 let get_self_ty env = Option.map env.genv.self ~f:snd
 
-let get_self env =
+let get_self_class_type env =
   match get_self_ty env with
-  | Some self -> self
-  | None -> mk (Reason.none, Typing_defs.make_tany ())
+  | Some self ->
+    begin
+      match get_node self with
+      | Tclass (id, exact, tys) -> Some (id, exact, tys)
+      | _ -> None
+    end
+  | None -> None
 
 let get_self_id env = Option.map env.genv.self ~f:fst
 

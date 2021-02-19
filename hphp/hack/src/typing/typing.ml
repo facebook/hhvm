@@ -4324,8 +4324,8 @@ and check_class_get env p def_pos cid mid ce e function_pointer =
   match e with
   | CIself when get_ce_abstract ce ->
     begin
-      match get_class_type (Env.get_self env) with
-      | Some ((_, self), _, _) ->
+      match Env.get_self_id env with
+      | Some self ->
         (* at runtime, self:: in a trait is a call to whatever
          * self:: is in the context of the non-trait "use"-ing
          * the trait's code *)
@@ -4367,8 +4367,8 @@ and call_parent_construct pos env el unpacked_element =
     (* continue here *)
     let ty = Typing_utils.mk_tany env pos in
     let default = (env, [], None, ty, ty, ty) in
-    (match get_class_type (Env.get_self env) with
-    | Some ((_, self), _, _) ->
+    (match Env.get_self_id env with
+    | Some self ->
       (match Env.get_class env self with
       | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
@@ -4482,9 +4482,6 @@ and dispatch_call
         []
         e1
     in
-    let this_ty =
-      mk (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env))
-    in
     (* In static context, you can only call parent::foo() on static methods.
      * In instance context, you can call parent:foo() on static
      * methods as well as instance methods
@@ -4494,42 +4491,42 @@ and dispatch_call
       || Env.is_static env
       || class_contains_smethod env ty1 m
     in
-    let (env, (fty, tal)) =
-      if is_static then
-        class_get
-          ~coerce_from_ty:None
-          ~is_method:true
-          ~is_const:false
-          ~explicit_targs
-          env
-          ty1
-          m
-          e1
-      else
+    let ((env, (fty, tal)), ty) =
+      match Env.get_self_ty env with
+      | Some this_ty when not is_static ->
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
          *)
-        TOG.obj_get
-          ~inst_meth:false
-          ~is_method:true
-          ~nullsafe:None
-          ~obj_pos:pos
-          ~coerce_from_ty:None
-          ~explicit_targs:[]
-          ~class_id:e1
-          ~member_id:m
-          ~on_error:Errors.unify_error
-          ~parent_ty:ty1
-          env
-          this_ty
+        ( TOG.obj_get
+            ~inst_meth:false
+            ~is_method:true
+            ~nullsafe:None
+            ~obj_pos:pos
+            ~coerce_from_ty:None
+            ~explicit_targs:[]
+            ~class_id:e1
+            ~member_id:m
+            ~on_error:Errors.unify_error
+            ~parent_ty:ty1
+            env
+            this_ty,
+          if Nast.equal_class_id_ e1 CIparent then
+            this_ty
+          else
+            ty1 )
+      | _ ->
+        ( class_get
+            ~coerce_from_ty:None
+            ~is_method:true
+            ~is_const:false
+            ~explicit_targs
+            env
+            ty1
+            m
+            e1,
+          ty1 )
     in
     check_disposable_in_return env fty;
-    let ty =
-      if Nast.equal_class_id_ e1 CIparent then
-        this_ty
-      else
-        ty1
-    in
     let (env, (tel, typed_unpack_element, ty)) =
       call
         ~expected
@@ -5739,8 +5736,8 @@ and static_class_id
   let make_result env tal te ty = (env, tal, ((p, ty), te), ty) in
   function
   | CIparent ->
-    (match get_class_type (Env.get_self env) with
-    | Some ((_, self), _, _) ->
+    (match Env.get_self_id env with
+    | Some self ->
       (match Env.get_class env self with
       | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
@@ -5787,15 +5784,25 @@ and static_class_id
         Aast.CIparent
         (mk (r, TUtils.this_of (mk (r, get_node parent)))))
   | CIstatic ->
-    let this = mk (Reason.Rwitness p, TUtils.this_of (Env.get_self env)) in
-    make_result env [] Aast.CIstatic this
-  | CIself ->
-    let self =
-      match get_node (Env.get_self env) with
-      | Tclass (c, _, tyl) -> Tclass (c, exact, tyl)
-      | self -> self
+    let ty =
+      match Env.get_self_ty env with
+      | Some ty -> mk (Reason.Rwitness p, TUtils.this_of ty)
+      | None ->
+        (* Naming phase has already checked and replaced CIstatic with CI if outside a class *)
+        Errors.internal_error p "Unexpected CIstatic";
+        Typing_utils.mk_tany env p
     in
-    make_result env [] Aast.CIself (mk (Reason.Rwitness p, self))
+    make_result env [] Aast.CIstatic ty
+  | CIself ->
+    let ty =
+      match Env.get_self_class_type env with
+      | Some (c, _, tyl) -> mk (Reason.Rwitness p, Tclass (c, exact, tyl))
+      | None ->
+        (* Naming phase has already checked and replaced CIself with CI if outside a class *)
+        Errors.internal_error p "Unexpected CIself";
+        Typing_utils.mk_tany env p
+    in
+    make_result env [] Aast.CIself ty
   | CI ((p, id) as c) ->
     begin
       match Env.get_pos_and_kind_of_generic env id with
@@ -5889,10 +5896,10 @@ and static_class_id
 
 and call_construct p env class_ params el unpacked_element cid cid_ty =
   let cid_ty =
-    if Nast.equal_class_id_ cid CIparent then
-      mk (Reason.Rwitness p, TUtils.this_of (Env.get_self env))
-    else
-      cid_ty
+    match Env.get_self_ty env with
+    | Some ty when Nast.equal_class_id_ cid CIparent ->
+      mk (Reason.Rwitness p, TUtils.this_of ty)
+    | _ -> cid_ty
   in
   let ety_env =
     {

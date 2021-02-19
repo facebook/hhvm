@@ -38,9 +38,9 @@ module ExprDepTy = struct
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
       | N.CIself ->
-        (match get_node (Env.get_self env) with
-        | Tclass ((_, cls), _, _) -> (pos, Reason.ERself cls, Dep_Cls cls)
-        | _ ->
+        (match Env.get_self_id env with
+        | Some cls -> (pos, Reason.ERself cls, Dep_Cls cls)
+        | None ->
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
       | N.CI (p, cls) -> (p, Reason.ERclass cls, Dep_Cls cls)

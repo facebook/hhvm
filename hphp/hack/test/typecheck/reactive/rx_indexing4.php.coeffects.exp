@@ -1,6 +1,0 @@
-File "rx_indexing4.php", line 5, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "rx_indexing4.php", line 3, characters 43-44:
-  The local (enclosing) context provides the capability set {}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

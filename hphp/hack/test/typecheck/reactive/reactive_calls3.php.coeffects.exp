@@ -1,7 +1,0 @@
-File "reactive_calls3.php", line 9, characters 3-6:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "reactive_calls3.php", line 3, characters 25-26:
-  The local (enclosing) context provides the capability set {}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

@@ -298,9 +298,8 @@ void OfflineCode::printRangeInfo(std::ostream& os,
   if (rangeInfo.sk && !rangeInfo.sk->prologue() &&
       rangeInfo.disasm[0].ip == rangeInfo.start) {
     auto const currBC = rangeInfo.sk->offset();
-    if (rangeInfo.unit) {
-      auto const currUnit = *rangeInfo.unit;
-      auto const func = currUnit->getFunc(currBC);
+    if (rangeInfo.func) {
+      auto const func = *rangeInfo.func;
       func->prettyPrintInstruction(os, currBC);
     } else {
       auto const currSha1 = rangeInfo.sha1 ?
@@ -440,20 +439,17 @@ TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
                                       const TCA start,
                                       const TCA end) {
   TCRangeInfo rangeInfo{start, end, transBCMap.sk, transBCMap.sha1};
-
-  if (auto const currUnit = g_repo->getUnit(transBCMap.sha1)) {
+  auto const func = transBCMap.sk.valid() ? transBCMap.sk.func() : nullptr;
+  if (func) {
     auto const sk = transBCMap.sk;
-    rangeInfo.unit = currUnit;
+    rangeInfo.unit = func->unit();
+    rangeInfo.func = func;
     if (sk.prologue()) {
-      auto const func = currUnit->getFunc(sk.entryOffset());
       auto const lineNum = func->line1();
-      rangeInfo.func = func;
       rangeInfo.instrStr = "Prologue";
       if (lineNum != -1) rangeInfo.lineNum = lineNum;
     } else {
-      auto const func = currUnit->getFunc(sk.offset());
       auto const lineNum = func->getLineNumber(sk.offset());
-      rangeInfo.func = func;
       rangeInfo.instrStr = instrToString(func->at(sk.offset()), func);
       if (lineNum != -1) rangeInfo.lineNum = lineNum;
     }

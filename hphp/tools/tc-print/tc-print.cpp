@@ -664,19 +664,17 @@ dynamic getTrans(TransID transId) {
   for (auto const& block : tRec->blocks) {
     std::stringstream byteInfo; // TODO(T52857125) - translate to actual data
 
-    auto const unit = g_repo->getUnit(block.sha1);
-    if (unit) {
-      auto const newFunc = unit->getFunc(block.bcStart);
-      always_assert(newFunc);
+    auto const newFunc = block.sk.valid() ? block.sk.func() : nullptr;
+    if (newFunc) {
       newFunc->prettyPrint(byteInfo,
                            HPHP::Func::PrintOpts().noName().noMetadata()
-                                                  .range(block.bcStart, block.bcPast));
+                                                  .range(block.sk.offset(), block.bcPast));
     }
 
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
-                                    ("start", block.bcStart)
+                                    ("start", block.sk.offset())
                                     ("end", block.bcPast)
-                                    ("unit", unit ?
+                                    ("unit", newFunc ?
                                              byteInfo.str() :
                                              dynamic()));
   }
@@ -763,16 +761,14 @@ void printTrans(TransID transId) {
     const Func* curFunc = nullptr;
     for (auto& block : tRec->blocks) {
       std::stringstream byteInfo;
-      auto unit = g_repo->getUnit(block.sha1);
-      if (!unit) {
+      auto newFunc = block.sk.valid() ? block.sk.func() : nullptr;
+      if (!newFunc) {
         byteInfo << folly::format(
-          "<<< couldn't find unit {} to print bytecode range [{},{}) >>>\n",
-          block.sha1, block.bcStart, block.bcPast);
+          "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
+          block.sha1, block.sk.offset(), block.bcPast);
         continue;
       }
 
-      auto newFunc = unit->getFunc(block.bcStart);
-      always_assert(newFunc);
       if (newFunc != curFunc) {
         byteInfo << '\n';
         newFunc->prettyPrint(byteInfo, Func::PrintOpts().noMetadata().noBytecode());
@@ -781,7 +777,7 @@ void printTrans(TransID transId) {
 
       newFunc->prettyPrint(
         byteInfo,
-        Func::PrintOpts().noName().noMetadata().range(block.bcStart, block.bcPast));
+        Func::PrintOpts().noName().noMetadata().range(block.sk.offset(), block.bcPast));
       g_logger->printBytecode(byteInfo.str());
     }
   }
@@ -1130,6 +1126,7 @@ int main(int argc, char *argv[]) {
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
   g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile, !useJSON);
+  g_transData->loadTCData(g_repo);
   g_annotations = std::make_unique<AnnotationCache>(dumpDir);
 
   loadProfData();

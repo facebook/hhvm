@@ -147,6 +147,8 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   SrcKey advanced(const Func* f = nullptr) const;
 
+  SrcKey withFuncID(FuncId funcId) const;
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*

@@ -107,4 +107,22 @@ Unit* RepoWrapper::getUnit(SHA1 sha1) {
   return unit;
 }
 
+Func* RepoWrapper::getFunc(SHA1 sha1, Id funcSn) {
+  auto const unit = getUnit(sha1);
+  if (!unit) {
+    return nullptr;
+  }
+
+  Func* func = nullptr;
+  unit->forEachFunc([&](Func* f) {
+    if (f->sn() == funcSn) {
+      func = f;
+      return true;
+    }
+    return false;
+  });
+
+  return func;
+}
+
 } }

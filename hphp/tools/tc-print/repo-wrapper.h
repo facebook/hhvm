@@ -42,6 +42,7 @@ public:
 
   void addUnit(Unit* u);
   Unit* getUnit(SHA1 sha1);
+  Func* getFunc(SHA1 sha1, Id funcSn);
 };
 
 } }

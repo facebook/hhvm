@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/sha1.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -37,8 +38,8 @@ struct TransBCMapping {
  */
 struct TransRec {
   struct Block {
-    SHA1 sha1;
-    Offset bcStart;
+    SHA1   sha1;
+    SrcKey sk;
     Offset bcPast;
   };
 

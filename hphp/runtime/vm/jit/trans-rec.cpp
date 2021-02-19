@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/func.h"
 
 namespace HPHP { namespace jit {
 
@@ -56,8 +58,7 @@ TransRec::TransRec(SrcKey                      _src,
   assertx(!region->empty());
   for (auto& block : region->blocks()) {
     auto sk = block->start();
-    blocks.emplace_back(Block{sk.unit()->sha1(), sk.offset(),
-                              block->last().advanced().offset()});
+    blocks.emplace_back(Block { sk.unit()->sha1(), sk, block->last().advanced().offset() });
   }
 
   auto& firstBlock = *region->blocks().front();
@@ -180,10 +181,11 @@ std::string TransRec::print() const {
     blocks.size());
 
   for (auto const& block : blocks) {
+    auto sk = block.sk;
     folly::format(
       &ret,
-      "    {} {} {}\n",
-      block.sha1, block.bcStart, block.bcPast);
+      "    {} {} {} {}\n",
+      sk.unit()->sha1(), sk.func()->sn(), sk.toAtomicInt(), block.bcPast);
   }
 
   folly::format( &ret, "  src.guards = {}\n", guards.size());
@@ -228,11 +230,11 @@ std::string TransRec::print() const {
   folly::format(&ret, "  bcMapping = {}\n", bcMapping.size());
 
   for (auto const& info : bcMapping) {
+    auto sk = info.sk;
     folly::format(
       &ret,
-      "    {} {} {} {} {}\n",
-      info.sha1, info.sk.toAtomicInt(),
-      info.aStart, info.acoldStart, info.afrozenStart);
+      "    {} {} {} {} {} {}\n",
+      sk.unit()->sha1(), sk.func()->sn(), sk.toAtomicInt(), info.aStart, info.acoldStart, info.afrozenStart);
   }
 
   ret += "}\n\n";

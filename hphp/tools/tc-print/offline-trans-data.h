@@ -33,6 +33,7 @@
 namespace HPHP { namespace jit {
 
 struct OfflineCode;
+struct RepoWrapper;
 
 typedef char SHA1Str[41];
 
@@ -50,7 +51,7 @@ struct TransAddrRange {
 struct OfflineTransData {
   explicit OfflineTransData(const std::string& dumpDir)
     : dumpDir(dumpDir) {
-    loadTCData(dumpDir);
+    loadTCHeader();
   }
 
   uint32_t getNumTrans() const {
@@ -169,7 +170,10 @@ struct OfflineTransData {
     annotationsVerbosity = level;
   }
 
+  void loadTCData(RepoWrapper* repoWrapper);
+
 private:
+  uint32_t                    headerSize;
   uint32_t                    nTranslations;
   std::vector<TransRec>       translations;
   std::vector<TransIDSet>     preds;
@@ -199,8 +203,7 @@ private:
 
   uint32_t                    annotationsVerbosity;
 
-  void loadTCData(std::string dumpDir);
-
+  void loadTCHeader();
 };
 
 } }

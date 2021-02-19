@@ -168,6 +168,12 @@ inline SrcKey SrcKey::advanced(const Func* f) const {
   return tmp;
 }
 
+inline SrcKey SrcKey::withFuncID(FuncId funcId) const {
+  auto tmp = *this;
+  tmp.m_s.m_funcID = funcId;
+  return tmp;
+}
+
 inline bool SrcKey::operator==(const SrcKey& r) const {
   return m_atomicInt == r.m_atomicInt;
 }

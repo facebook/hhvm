@@ -17,6 +17,7 @@
 
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-code.h"
+#include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/util/build-info.h"
 #include "hphp/runtime/vm/repo.h"
 #include <folly/Math.h>
@@ -38,10 +39,9 @@ static string tcDataFileName("/tc_data.txt.gz");
 
 namespace HPHP { namespace jit {
 
-void OfflineTransData::loadTCData(string dumpDir) {
+void OfflineTransData::loadTCHeader() {
   string fileName = dumpDir + tcDataFileName;
   char buf[BUFLEN+1];
-  char funcName[BUFLEN+1];
 
   gzFile file = gzopen(fileName.c_str(), "r");
   if (!file) {
@@ -63,6 +63,22 @@ void OfflineTransData::loadTCData(string dumpDir) {
   READ_EMPTY();
   READ("total_translations = %u", &nTranslations);
   READ_EMPTY();
+
+  headerSize = gztell(file);
+  gzclose(file);
+}
+
+void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
+  string fileName = dumpDir + tcDataFileName;
+  char buf[BUFLEN+1];
+  char funcName[BUFLEN+1];
+
+  gzFile file = gzopen(fileName.c_str(), "r");
+  if (!file) {
+    error("Error opening file " + fileName);
+  }
+
+  gzseek(file, headerSize, SEEK_SET);
 
   // Read translations
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
@@ -92,18 +108,23 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
       SHA1Str sha1Tmp;
-      Offset start = kInvalidOffset;
+      Id funcSn = kInvalidId;
+      uint64_t srcKeyIntTmp;
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %d", sha1Tmp, &start, &past) != 3) {
+          sscanf(buf, "%s %d %" PRIu64 " %d", sha1Tmp, &funcSn, &srcKeyIntTmp, &past) != 4) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
         error(buf);
       }
 
-      tRec.blocks.emplace_back(TransRec::Block{SHA1(sha1Tmp), start, past});
+      auto const sha1 = SHA1(sha1Tmp);
+      auto const func = repoWrapper->getFunc(sha1, funcSn);
+      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Dummy;
+      auto const sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
+      tRec.blocks.emplace_back(TransRec::Block { sha1, sk, past });
     }
 
     READ(" src.guards = %lu", &numGuards);
@@ -164,14 +185,17 @@ void OfflineTransData::loadTCData(string dumpDir) {
     for (size_t i = 0; i < numBCMappings; i++) {
       TransBCMapping bcMap;
       SHA1Str sha1Tmp;
+      Id funcSn = kInvalidId;
       uint64_t srcKeyIntTmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %" PRIu64 " %p %p %p",
-                 sha1Tmp, &srcKeyIntTmp,
+          sscanf(buf, "%s %d %" PRIu64 " %p %p %p",
+                 sha1Tmp,
+                 &funcSn,
+                 &srcKeyIntTmp,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
-                 (void**)&bcMap.afrozenStart) != 5) {
+                 (void**)&bcMap.afrozenStart) != 6) {
 
         snprintf(buf, BUFLEN,
                  "Error reading bytecode mapping #%lu at translation %u\n",
@@ -181,7 +205,9 @@ void OfflineTransData::loadTCData(string dumpDir) {
       }
 
       bcMap.sha1 = SHA1(sha1Tmp);
-      bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp);
+      auto const func = repoWrapper->getFunc(bcMap.sha1, funcSn);
+      auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Dummy;
+      bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.bcMapping.push_back(bcMap);
     }
 

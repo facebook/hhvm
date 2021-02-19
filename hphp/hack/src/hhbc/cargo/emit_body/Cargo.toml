@@ -38,7 +38,7 @@ runtime = { path = "../runtime" }
 scope_rust = { path = "../scope" }
 bitflags = "1.2"
 bstr = { version = "0.2", features = ["serde1"] }
-indexmap = { version = "1.3", features = ["serde-1", "rayon"] }
+indexmap = { version = "1.6", features = ["serde-1", "rayon"] }
 itertools = "0.8"
 lazy_static = "1.0"
 regex = "1.4.2"

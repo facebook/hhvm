@@ -65,20 +65,13 @@ let source_text trivia = trivia.source_text
 let text trivia =
   SourceText.sub (source_text trivia) (start_offset trivia) (width trivia)
 
-let from_minimal source_text minimal_trivia offset =
-  let kind = MinimalTrivia.kind minimal_trivia in
-  let width = MinimalTrivia.width minimal_trivia in
+let from_rust_trivium source_text rust_trivium =
+  let kind = rust_trivium.Rust_lazy_trivia_ffi.RustPositionedTrivium.kind in
+  let width = rust_trivium.Rust_lazy_trivia_ffi.RustPositionedTrivium.width in
+  let offset = rust_trivium.Rust_lazy_trivia_ffi.RustPositionedTrivium.offset in
   { kind; source_text; offset; width }
 
-let from_minimal_list source_text ts offset =
-  let rec aux acc ts offset =
-    match ts with
-    | [] -> acc
-    | h :: t ->
-      let et = from_minimal source_text h offset in
-      aux (et :: acc) t (offset + MinimalTrivia.width h)
-  in
-  List.rev (aux [] ts offset)
+let from_rust_trivia source_text = List.map (from_rust_trivium source_text)
 
 let to_json trivia =
   Hh_json.(

@@ -7,6 +7,7 @@
 pub mod has_arena;
 pub mod positioned_syntax;
 pub mod positioned_token;
+pub mod positioned_trivia;
 pub mod positioned_value;
 pub mod syntax;
 mod syntax_children_iterator;

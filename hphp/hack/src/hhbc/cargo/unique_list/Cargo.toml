@@ -8,4 +8,4 @@ version = "0.0.0"
 path = "../../unique_list.rs"
 
 [dependencies]
-indexmap = { version = "1.3", features = ["serde-1", "rayon"] }
+indexmap = { version = "1.6", features = ["serde-1", "rayon"] }

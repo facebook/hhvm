@@ -14,7 +14,7 @@ $port = random_free_port();
 $time = microtime(true);
 $errno = null;
 $errstr = null;
-@stream_socket_client("tcp://172.0.0.1:$port", $errno, $errstr, 0.001);
+@stream_socket_client("tcp://127.0.0.1:$port", inout $errno, inout $errstr, 0.001);
 $elapsed = microtime(true) - $time;
 echo $errstr, "\n";
 if ($elapsed < 1) {

@@ -458,6 +458,7 @@ int fd = fdNetworkSocket.toFd();
     m_dispatcher->enqueue(fd);
   }
 
+  using folly::AsyncServerSocket::AcceptCallback::acceptError;
   void acceptError(const std::exception& ex) noexcept override {
     Logger::Warning("Error accepting connection: %s", ex.what());
   }

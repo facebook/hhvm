@@ -410,12 +410,10 @@ bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
   // TODO(oulgen): We can actually be smarter here and actually check for
   // bits matching but HHBBC currently does not know about the bit patterns
   // and enforcement levels, so just check for coeffects matching identically
-  if (caller->staticCoeffects.size() != callee->staticCoeffects.size()) {
-    return false;
-  }
   return std::is_permutation(caller->staticCoeffects.begin(),
                              caller->staticCoeffects.end(),
-                             callee->staticCoeffects.begin());
+                             callee->staticCoeffects.begin(),
+                             callee->staticCoeffects.end());
 }
 
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,

@@ -1,5 +1,5 @@
 <?hh
-    /* Setup socket server */
+<<__EntryPoint>> function main(): void {
     $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
     if (!$server) {
         die('Unable to create AF_INET6 socket [server]');
@@ -42,3 +42,4 @@
     socket_close($client);
     socket_close($socket);
     socket_close($server);
+}

@@ -2,7 +2,7 @@ darray(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
-  array(5) {
+  darray(5) {
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
@@ -17,7 +17,7 @@ darray(13) {
   ["hash"]=>
   string(8) "%s"
   ["issuer"]=>
-  array(5) {
+  darray(5) {
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
@@ -44,7 +44,7 @@ darray(13) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(9) {
+  darray(9) {
     [1]=>
     varray(3) {
       bool(true)
@@ -117,7 +117,7 @@ darray(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
-  array(5) {
+  darray(5) {
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
@@ -132,7 +132,7 @@ darray(13) {
   ["hash"]=>
   string(8) "%s"
   ["issuer"]=>
-  array(5) {
+  darray(5) {
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
@@ -159,7 +159,7 @@ darray(13) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(9) {
+  darray(9) {
     [1]=>
     varray(3) {
       bool(true)

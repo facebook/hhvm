@@ -19,7 +19,6 @@ class FooIsNotBrokenTest extends FooTest {
 }
 
 @Attr1@Attr2 class C {
-  // @lint-ignore LINEWRAP
   @Attr1@Attr2 public function f<@__Soft reify T>(@__Soft int $x): @__Soft void {}
 }
 
@@ -33,10 +32,8 @@ function f(@ReallyOverlyLongAttributeNameForTest
   @Attr function (@__Soft int $x): @__Soft void { return $x * $x; };
   @AnotherReallyOverlyLongAttributeNameForTest function (
     @__Soft string $x,
-    // @lint-ignore LINEWRAP
     @__Soft@YetAnotherEvenMoreOverlyLongAttributeNameForTest int $sameXParameterButMuchLongerForTest,
   ): @__Soft void {
-    // @lint-ignore LINEWRAP
     return multiplyButLonger($sameXParameterButMuchLongerForTest, $sameXParameterButMuchLongerForTest);
   };
 }

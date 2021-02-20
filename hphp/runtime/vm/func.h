@@ -327,6 +327,7 @@ struct Func final {
    * The function's short name (e.g., foo).
    */
   const StringData* name() const;
+  String nameWithClosureName() const;
   StrNR nameStr() const;
 
   /*
@@ -338,6 +339,7 @@ struct Func final {
    * The function's fully class-qualified, name (e.g., C::foo).
    */
   const StringData* fullName() const;
+  String fullNameWithClosureName() const;
   StrNR fullNameStr() const;
 
   /*

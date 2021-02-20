@@ -1,13 +1,16 @@
-Warning: Call to __invoke() requires [defaults] coeffects but pure() provided [] in %s on line 8
+Warning: Call to Closure$main() requires [defaults] coeffects but pure() provided [] in %s on line 8
 in lambda
 in lambda
 
-Warning: Call to __invoke() requires [rx] coeffects but pure() provided [] in %s on line 8
+Warning: Call to Closure$main#3() requires [rx] coeffects but pure() provided [] in %s on line 8
 in lambda
 
-Warning: Call to __invoke() requires [rx_shallow] coeffects but pure() provided [] in %s on line 8
+Warning: Call to Closure$main#4() requires [rx_shallow] coeffects but pure() provided [] in %s on line 8
 in lambda
 in lambda
 in lambda
 in lambda
+in lambda
+
+Warning: Call to Closure$C::defaults() requires [rx] coeffects but pure() provided [] in %s on line 8
 in lambda

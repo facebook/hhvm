@@ -1,7 +1,7 @@
-Warning: Call to regular() requires [defaults] coeffects but __invoke() provided [] in %s on line 14
+Warning: Call to regular() requires [defaults] coeffects but Closure$test() provided [] in %s on line 14
 
-Warning: Call to regular() requires [defaults] coeffects but __invoke() provided [rx] in %s on line 19
+Warning: Call to regular() requires [defaults] coeffects but Closure$test#2() provided [rx] in %s on line 19
 
-Warning: Call to __invoke() requires [defaults] coeffects but f() provided [rx] in %s on line 7
+Warning: Call to Closure$test#3() requires [defaults] coeffects but f() provided [rx] in %s on line 7
 
-Warning: Call to __invoke() requires [write_props] coeffects but f() provided [rx] in %s on line 7
+Warning: Call to Closure$test#4() requires [write_props] coeffects but f() provided [rx] in %s on line 7

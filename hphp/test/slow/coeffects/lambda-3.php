@@ -8,6 +8,13 @@ function pure($f)[] {
   $f();
 };
 
+class C {
+  static function defaults() {
+    $f = ()[rx] ==> { echo "in lambda\n"; };
+    pure($f);
+  }
+}
+
 <<__EntryPoint>>
 function main() {
   $f1 = () ==> { echo "in lambda\n"; };
@@ -22,4 +29,6 @@ function main() {
   rx_local($f2);
   rx_local($f3);
   rx_local($f4);
+
+  C::defaults();
 }

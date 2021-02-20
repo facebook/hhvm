@@ -155,6 +155,13 @@ inline const StringData* Func::name() const {
   return m_name;
 }
 
+inline String Func::nameWithClosureName() const {
+  if (!isClosureBody()) return String(const_cast<StringData*>(name()));
+  // Strip the file hash from the closure name.
+  String name{const_cast<StringData*>(baseCls()->name())};
+  return name.substr(0, name.find(';'));
+}
+
 inline StrNR Func::nameStr() const {
   assertx(m_name != nullptr);
   return StrNR(m_name);
@@ -175,6 +182,11 @@ inline const StringData* Func::fullName() const {
       std::string(cls()->name()->data()) + "::" + m_name->data());
   }
   return m_fullName;
+}
+
+inline String Func::fullNameWithClosureName() const {
+  if (!isClosureBody()) return String(const_cast<StringData*>(fullName()));
+  return nameWithClosureName();
 }
 
 inline StrNR Func::fullNameStr() const {

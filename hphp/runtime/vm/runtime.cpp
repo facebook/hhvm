@@ -290,9 +290,9 @@ void raiseCoeffectsCallViolation(const ActRec* caller, const Func* callee,
   auto const required = callee->staticCoeffects().toRequired();
   auto const errMsg = folly::sformat(
     "Call to {}() requires [{}] coeffects but {}() provided [{}]",
-    callee->fullName()->data(),
+    callee->fullNameWithClosureName(),
     required.toString(),
-    caller->func()->fullName()->data(),
+    caller->func()->fullNameWithClosureName(),
     provided.toString()
   );
 

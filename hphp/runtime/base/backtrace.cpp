@@ -434,13 +434,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_line, prevFunc->getLineNumber(prev.pc));
     }
 
-    // Check for include.
-    String funcname{const_cast<StringData*>(fp->func()->name())};
-    if (fp->func()->isClosureBody()) {
-      // Strip the file hash from the closure name.
-      String fullName{const_cast<StringData*>(fp->func()->baseCls()->name())};
-      funcname = fullName.substr(0, fullName.find(';'));
-    }
+    auto funcname = fp->func()->nameWithClosureName();
 
     if (RuntimeOption::EnableArgsInBacktraces &&
         !fp->localsDecRefd() &&
@@ -723,13 +717,7 @@ Array CompactTraceData::extract() const {
 
     auto const f = m_frames[idx].func;
 
-    // Check for include.
-    String funcname{const_cast<StringData*>(f->name())};
-    if (f->isClosureBody()) {
-      // Strip the file hash from the closure name.
-      String fullName{const_cast<StringData*>(f->baseCls()->name())};
-      funcname = fullName.substr(0, fullName.find(';'));
-    }
+    auto funcname = f->nameWithClosureName();
 
     // Check for pseudomain.
     if (funcname.empty()) {

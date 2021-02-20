@@ -3067,7 +3067,7 @@ void parse_context_constant(AsmState& as) {
   }
 
   as.in.skipWhitespace();
-  /*bool isAbstract = */as.in.tryConsume("isAbstract");
+  bool isAbstract = as.in.tryConsume("isAbstract");
 
   auto coeffects = StaticCoeffects::none();
 
@@ -3079,6 +3079,9 @@ void parse_context_constant(AsmState& as) {
   }
 
   as.in.expectWs(';');
+
+  // temporarily drop the abstract ones until runtime is fixed
+  if (isAbstract) return;
 
   DEBUG_ONLY auto added =
     as.pce->addContextConstant(makeStaticString(name), coeffects,

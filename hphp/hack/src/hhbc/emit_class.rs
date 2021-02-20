@@ -186,9 +186,16 @@ fn from_type_constant<'a>(
 fn from_ctx_constant(tc: &tast::ClassTypeconst) -> Result<HhasCtxConstant> {
     use tast::TypeconstAbstractKind::*;
     let name = tc.name.1.to_string();
-    let coeffects = match &tc.type_ {
-        Some(hint) => HhasCoeffects::from_ctx_constant(hint),
-        None => vec![],
+    let coeffects = match (&tc.abstract_, &tc.type_) {
+        (TCAbstract(Some(hint)), _) | (_, Some(hint)) => {
+            let result = HhasCoeffects::from_ctx_constant(hint);
+            if result.is_empty() {
+                vec![hhas_coeffects::Ctx::Pure]
+            } else {
+                result
+            }
+        }
+        (_, None) => vec![],
     };
     let is_abstract = match &tc.abstract_ {
         TCConcrete => false,

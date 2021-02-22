@@ -201,7 +201,7 @@ void Unit::operator delete(void* p, size_t /*sz*/) {
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
-bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
+bool Unit::getOffsetRanges(int line, OffsetFuncRangeVec& offsets) const {
   assertx(offsets.size() == 0);
   forEachFunc([&](const Func* func) {
     // Quickly ignore functions that can't have that line in them
@@ -210,7 +210,7 @@ bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
     auto map = func->getLineToOffsetRangeVecMap();
     auto it = map.find(line);
     if (it != map.end()) {
-      offsets.insert(offsets.end(), it->second.begin(), it->second.end());
+      offsets.push_back(std::pair(func, it->second));
     }
     return false;
   });

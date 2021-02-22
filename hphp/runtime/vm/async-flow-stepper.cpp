@@ -81,25 +81,22 @@ void AsyncFlowStepper::setup() {
   }
   auto const line = source_loc.line1;
 
-  OffsetRangeVec curLineRanges;
+  OffsetFuncRangeVec curLineRanges;
   if (!unit->getOffsetRanges(line, curLineRanges)) {
     curLineRanges.clear();
   }
 
   auto const awaitOpcodeFilter = [](Op op) { return op == OpAwait; };
   m_stepRangeFlowFilter.addRanges(
-    unit,
     curLineRanges
   );
   m_awaitOpcodeBreakpointFilter.addRanges(
-    unit,
     curLineRanges,
     awaitOpcodeFilter
   );
   // So that we can get notified when hitting await instruction.
   auto bpFilter = getBreakPointFilter();
   bpFilter->addRanges(
-    unit,
     curLineRanges,
     awaitOpcodeFilter
   );

@@ -94,12 +94,13 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   auto const unit = func->unit();
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), unit);
-  OffsetRangeVec ranges;
+  OffsetFuncRangeVec ranges;
   if (m_smallStep) {
     // Get offset range for the pc only.
     OffsetRange range;
     if (func->getOffsetRange(site->getCurOffset(), range)) {
-      ranges.push_back(range);
+      OffsetRangeVec rangeVec = { range };
+      ranges.push_back(std::make_pair(func, rangeVec));
     }
   } else {
     // Get offset ranges for the whole line.
@@ -116,10 +117,9 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
              (op != OpAwait) &&
              (op != OpRetC);
     };
-    rid.m_flowFilter.addRanges(unit, ranges,
-                                     excludeResumableReturns);
+    rid.m_flowFilter.addRanges(ranges, excludeResumableReturns);
   } else {
-    rid.m_flowFilter.addRanges(unit, ranges);
+    rid.m_flowFilter.addRanges(ranges);
   }
 }
 

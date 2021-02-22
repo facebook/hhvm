@@ -101,19 +101,21 @@ void PCFilter::PtrMap::clear() {
 
 // Adds a range of PCs to the filter given a collection of offset ranges.
 // Omit PCs which have opcodes that don't pass the given opcode filter.
-void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
+void PCFilter::addRanges(const OffsetFuncRangeVec& funcOffsets,
                          OpcodeFilter isOpcodeAllowed) {
-  for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
-    TRACE(3, "\toffsets [%d, %d)\n", range->base, range->past);
-    auto func = unit->getFunc(range->base);
-    for (PC pc = func->at(range->base); pc < func->at(range->past);
-         pc += instrLen(pc)) {
-      if (isOpcodeAllowed(peek_op(pc))) {
-        TRACE(3, "\t\tpc %p\n", pc);
-        addPC(pc);
-      } else {
-        TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
-              func->offsetOf(pc));
+  for (auto offsets : funcOffsets) {
+    auto func = offsets.first;
+    for (auto range = offsets.second.cbegin(); range != offsets.second.cend(); ++range) {
+      TRACE(3, "\toffsets [%d, %d)\n", range->base, range->past);
+      for (PC pc = func->at(range->base); pc < func->at(range->past);
+          pc += instrLen(pc)) {
+        if (isOpcodeAllowed(peek_op(pc))) {
+          TRACE(3, "\t\tpc %p\n", pc);
+          addPC(pc);
+        } else {
+          TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
+                func->offsetOf(pc));
+        }
       }
     }
   }
@@ -121,19 +123,21 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
 
 // Removes a range of PCs to the filter given a collection of offset ranges.
 // Omit PCs which have opcodes that don't pass the given opcode filter.
-void PCFilter::removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
+void PCFilter::removeRanges(const OffsetFuncRangeVec& funcOffsets,
                             OpcodeFilter isOpcodeAllowed) {
-  for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
-    TRACE(3, "\toffsets [%d, %d) (remove)\n", range->base, range->past);
-    auto func = unit->getFunc(range->base);
-    for (PC pc = func->at(range->base); pc < func->at(range->past);
-         pc += instrLen(pc)) {
-      if (isOpcodeAllowed(peek_op(pc))) {
-        TRACE(3, "\t\tpc %p (remove)\n", pc);
-        removePC(pc);
-      } else {
-        TRACE(3, "\t\tpc %p -- skipping (offset %d) (remove)\n", pc,
-              func->offsetOf(pc));
+  for (auto offsets : funcOffsets) {
+    auto func = offsets.first;
+    for (auto range = offsets.second.cbegin(); range != offsets.second.cend(); ++range) {
+      TRACE(3, "\toffsets [%d, %d) (remove)\n", range->base, range->past);
+      for (PC pc = func->at(range->base); pc < func->at(range->past);
+          pc += instrLen(pc)) {
+        if (isOpcodeAllowed(peek_op(pc))) {
+          TRACE(3, "\t\tpc %p (remove)\n", pc);
+          removePC(pc);
+        } else {
+          TRACE(3, "\t\tpc %p -- skipping (offset %d) (remove)\n", pc,
+                func->offsetOf(pc));
+        }
       }
     }
   }

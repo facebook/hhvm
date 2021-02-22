@@ -366,7 +366,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
 
-  bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
+  bool getOffsetRanges(int line, OffsetFuncRangeVec& offsets) const;
 
   /*
    * Return the Func* for the code at offset `pc'.

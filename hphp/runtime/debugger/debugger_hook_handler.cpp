@@ -28,7 +28,7 @@ static bool matchFunctionName(std::string name, const Func* f) {
 }
 
 static void addBreakPointInUnit(BreakPointInfoPtr bp, Unit* unit) {
-  OffsetRangeVec offsets;
+  OffsetFuncRangeVec offsets;
   if (!unit->getOffsetRanges(bp->m_line1, offsets) || offsets.size() == 0) {
     bp->m_bindState = BreakPointInfo::KnownToBeInvalid;
     return;
@@ -38,8 +38,9 @@ static void addBreakPointInUnit(BreakPointInfoPtr bp, Unit* unit) {
       unit->filepath()->data(), bp->m_line1, unit);
 
   assertx(offsets.size() > 0);
-  auto bpOffset = offsets[0].base;
-  auto func = unit->getFunc(bpOffset);
+  assertx(offsets[0].second.size() > 0);
+  auto func = offsets[0].first;
+  auto bpOffset = offsets[0].second[0].base;
   phpAddBreakPoint(func, bpOffset);
 }
 

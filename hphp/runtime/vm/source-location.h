@@ -85,6 +85,7 @@ struct OffsetRange {
 };
 
 using OffsetRangeVec = std::vector<OffsetRange>;
+using OffsetFuncRangeVec = std::vector<std::pair<const Func*, OffsetRangeVec>>;
 using LineToOffsetRangeVecMap = std::map<int, OffsetRangeVec>;
 
 /*

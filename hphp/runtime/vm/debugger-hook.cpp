@@ -404,12 +404,12 @@ void phpDebuggerStepIn() {
         unit->filepath()->data(), line, unit);
 
   // Get offset ranges for the whole line.
-  OffsetRangeVec ranges;
+  OffsetFuncRangeVec ranges;
   if (!unit->getOffsetRanges(line, ranges)) {
     ranges.clear();
   }
 
-  flow_filter->addRanges(unit, ranges);
+  flow_filter->addRanges(ranges);
 }
 
 void phpDebuggerStepOut() {
@@ -496,32 +496,34 @@ void phpAddBreakPointFuncExit(const Func* f) {
 
 bool phpAddBreakPointLine(const Unit* unit, int line) {
   // Grab the unit offsets
-  OffsetRangeVec offsets;
-  if (!unit->getOffsetRanges(line, offsets)) {
+  OffsetFuncRangeVec funcOffsets;
+  if (!unit->getOffsetRanges(line, funcOffsets)) {
     return false;
   }
 
   // Add to the breakpoint filter and the line filter.
-  assertx(offsets.size() > 0);
+  assertx(funcOffsets.size() > 0);
   bool containsEntryNop = false;
-  for (auto const offset : offsets) {
-    auto bpOffset = offset.base;
-    auto f = unit->getFunc(bpOffset);
-    auto op = f->getOp(bpOffset);
-    if (op == Op::EntryNop) {
-      containsEntryNop = true;
-    }
+  for (auto const offsets : funcOffsets) {
+    auto f = offsets.first;
+    for (auto const offset : offsets.second) {
+      auto bpOffset = offset.base;
+      auto op = f->getOp(bpOffset);
+      if (op == Op::EntryNop) {
+        containsEntryNop = true;
+      }
 
-    if (containsEntryNop) {
-      phpAddBreakPoint(f, offset.base);
+      if (containsEntryNop) {
+        phpAddBreakPoint(f, offset.base);
+      }
     }
   }
 
   if (containsEntryNop) {
-    RID().m_lineBreakPointFilter.addRanges(unit, offsets);
+    RID().m_lineBreakPointFilter.addRanges(funcOffsets);
   } else {
-    auto bpOffset = offsets[0].base;
-    auto f = unit->getFunc(bpOffset);
+    auto bpOffset = funcOffsets[0].second[0].base;
+    auto f = funcOffsets[0].first;
     phpAddBreakPoint(f, bpOffset);
 
     auto pc = f->at(bpOffset);
@@ -559,10 +561,10 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
 
 void phpRemoveBreakPointLine(const Unit* unit, int line) {
   // See note in debugger-hook.h. This can only remove from the line filter
-  OffsetRangeVec offsets;
+  OffsetFuncRangeVec offsets;
   if (unit->getOffsetRanges(line, offsets)) {
     RequestInfo::s_requestInfo->
-      m_reqInjectionData.m_lineBreakPointFilter.removeRanges(unit, offsets);
+      m_reqInjectionData.m_lineBreakPointFilter.removeRanges(offsets);
   }
 }
 

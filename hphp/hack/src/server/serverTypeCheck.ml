@@ -57,7 +57,6 @@ let use_direct_decl_parser (ctx : Provider_context.t) =
 (* Debugging *)
 (*****************************************************************************)
 
-(** Something is removing diagnostic subscriptions, but I don't know what... *)
 let log_if_diag_subscribe_changed
     (title : string)
     ~(before : Diagnostic_subscription.t option)
@@ -67,16 +66,13 @@ let log_if_diag_subscribe_changed
   | (Some _, Some _) ->
     ()
   | _ ->
-    let stack =
-      Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string
-    in
     let disposition =
       if Option.is_none before then
         "added"
       else
         "removed"
     in
-    Hh_logger.log "Diag_subscribe: %s - %s!\n%s" title disposition stack
+    Hh_logger.log "Diag_subscribe: %s - %s!" title disposition
 
 let print_defs prefix defs =
   List.iter defs (fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)

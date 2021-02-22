@@ -626,8 +626,11 @@ pub mod instr {
         instr(alloc, Instruct::IOp(InstructOperator::BitXor))
     }
 
-    pub fn sets<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetS))
+    pub fn sets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
+        instr(
+            alloc,
+            Instruct::IMutator(InstructMutator::SetS(readonly_op)),
+        )
     }
 
     pub fn setl<'a>(alloc: &'a bumpalo::Bump, local: local::Type<'a>) -> InstrSeq<'a> {
@@ -661,8 +664,15 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::IncDecG(op)))
     }
 
-    pub fn incdecs<'a>(alloc: &'a bumpalo::Bump, op: IncdecOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::IncDecS(op)))
+    pub fn incdecs<'a>(
+        alloc: &'a bumpalo::Bump,
+        op: IncdecOp,
+        readonly_op: ReadOnlyOp,
+    ) -> InstrSeq<'a> {
+        instr(
+            alloc,
+            Instruct::IMutator(InstructMutator::IncDecS(op, readonly_op)),
+        )
     }
 
     pub fn setopg<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
@@ -676,8 +686,11 @@ pub mod instr {
         )
     }
 
-    pub fn setops<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetOpS(op)))
+    pub fn setops<'a>(alloc: &'a bumpalo::Bump, op: EqOp, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
+        instr(
+            alloc,
+            Instruct::IMutator(InstructMutator::SetOpS(op, readonly_op)),
+        )
     }
 
     pub fn issetl<'a>(alloc: &'a bumpalo::Bump, local: local::Type<'a>) -> InstrSeq<'a> {
@@ -696,8 +709,8 @@ pub mod instr {
         instr(alloc, Instruct::IIsset(InstructIsset::IsUnsetL(local)))
     }
 
-    pub fn cgets<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetS))
+    pub fn cgets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
+        instr(alloc, Instruct::IGet(InstructGet::CGetS(readonly_op)))
     }
 
     pub fn cgetg<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
@@ -756,10 +769,15 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn initprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>, op: InitpropOp) -> InstrSeq<'a> {
+    pub fn initprop<'a>(
+        alloc: &'a bumpalo::Bump,
+        pid: PropId<'a>,
+        op: InitpropOp,
+        readonly_op: ReadOnlyOp,
+    ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMutator(InstructMutator::InitProp(pid, op)),
+            Instruct::IMutator(InstructMutator::InitProp(pid, op, readonly_op)),
         )
     }
 
@@ -937,8 +955,12 @@ pub mod instr {
         y: StackIndex,
         z: StackIndex,
         mode: MemberOpMode,
+        readonly_op: ReadOnlyOp,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBase(InstructBase::BaseSC(y, z, mode)))
+        instr(
+            alloc,
+            Instruct::IBase(InstructBase::BaseSC(y, z, mode, readonly_op)),
+        )
     }
 
     pub fn baseh<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
@@ -1023,12 +1045,20 @@ pub mod instr {
         instr(alloc, Instruct::IBase(InstructBase::Dim(op, key)))
     }
 
-    pub fn dim_warn_pt<'a>(alloc: &'a bumpalo::Bump, key: PropId<'a>) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Warn, MemberKey::PT(key))
+    pub fn dim_warn_pt<'a>(
+        alloc: &'a bumpalo::Bump,
+        key: PropId<'a>,
+        readonly_op: ReadOnlyOp,
+    ) -> InstrSeq<'a> {
+        dim(alloc, MemberOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn dim_define_pt<'a>(alloc: &'a bumpalo::Bump, key: PropId<'a>) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Define, MemberKey::PT(key))
+    pub fn dim_define_pt<'a>(
+        alloc: &'a bumpalo::Bump,
+        key: PropId<'a>,
+        readonly_op: ReadOnlyOp,
+    ) -> InstrSeq<'a> {
+        dim(alloc, MemberOpMode::Define, MemberKey::PT(key, readonly_op))
     }
 
     pub fn fcallclsmethod<'a>(
@@ -1154,8 +1184,14 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
         key: PropId<'a>,
+        readonly_op: ReadOnlyOp,
     ) -> InstrSeq<'a> {
-        querym(alloc, num_params, QueryOp::CGet, MemberKey::PT(key))
+        querym(
+            alloc,
+            num_params,
+            QueryOp::CGet,
+            MemberKey::PT(key, readonly_op),
+        )
     }
 
     pub fn setm<'a>(
@@ -1208,8 +1244,9 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
         key: PropId<'a>,
+        readonly_op: ReadOnlyOp,
     ) -> InstrSeq<'a> {
-        setm(alloc, num_params, MemberKey::PT(key))
+        setm(alloc, num_params, MemberKey::PT(key, readonly_op))
     }
 
     pub fn resolve_func<'a>(alloc: &'a bumpalo::Bump, func_id: FunctionId<'a>) -> InstrSeq<'a> {

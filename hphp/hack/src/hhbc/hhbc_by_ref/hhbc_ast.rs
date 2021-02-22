@@ -147,14 +147,14 @@ pub enum FatalOp {
 
 #[derive(Clone, Debug)]
 pub enum MemberKey<'arena> {
-    EC(StackIndex),
-    EL(hhbc_by_ref_local::Type<'arena>),
-    ET(&'arena str),
-    EI(i64),
-    PC(StackIndex),
-    PL(hhbc_by_ref_local::Type<'arena>),
-    PT(PropId<'arena>),
-    QT(PropId<'arena>),
+    EC(StackIndex, ReadOnlyOp),
+    EL(hhbc_by_ref_local::Type<'arena>, ReadOnlyOp),
+    ET(&'arena str, ReadOnlyOp),
+    EI(i64, ReadOnlyOp),
+    PC(StackIndex, ReadOnlyOp),
+    PL(hhbc_by_ref_local::Type<'arena>, ReadOnlyOp),
+    PT(PropId<'arena>, ReadOnlyOp),
+    QT(PropId<'arena>, ReadOnlyOp),
     W,
 }
 
@@ -166,10 +166,18 @@ pub enum InstructBasic {
     PopU,
     Dup,
 }
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypestructResolveOp {
     Resolve,
     DontResolve,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ReadOnlyOp {
+    ReadOnly,
+    Mutable,
+    Any,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -334,7 +342,7 @@ pub enum InstructGet<'arena> {
     CUGetL(hhbc_by_ref_local::Type<'arena>),
     PushL(hhbc_by_ref_local::Type<'arena>),
     CGetG,
-    CGetS,
+    CGetS(ReadOnlyOp),
     ClassGetC,
     ClassGetTS,
 }
@@ -424,17 +432,17 @@ pub enum InstructMutator<'arena> {
     /// PopL is put in mutators since it behaves as SetL + PopC
     PopL(hhbc_by_ref_local::Type<'arena>),
     SetG,
-    SetS,
+    SetS(ReadOnlyOp),
     SetOpL(hhbc_by_ref_local::Type<'arena>, EqOp),
     SetOpG(EqOp),
-    SetOpS(EqOp),
+    SetOpS(EqOp, ReadOnlyOp),
     IncDecL(hhbc_by_ref_local::Type<'arena>, IncdecOp),
     IncDecG(IncdecOp),
-    IncDecS(IncdecOp),
+    IncDecS(IncdecOp, ReadOnlyOp),
     UnsetL(hhbc_by_ref_local::Type<'arena>),
     UnsetG,
     CheckProp(PropId<'arena>),
-    InitProp(PropId<'arena>, InitpropOp),
+    InitProp(PropId<'arena>, InitpropOp, ReadOnlyOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -466,7 +474,7 @@ pub enum InstructCall<'arena> {
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(hhbc_by_ref_local::Type<'arena>, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode),
+    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
     BaseL(hhbc_by_ref_local::Type<'arena>, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
@@ -480,7 +488,7 @@ pub enum InstructFinal<'arena> {
     IncDecM(NumParams, IncdecOp, MemberKey<'arena>),
     SetOpM(NumParams, EqOp, MemberKey<'arena>),
     UnsetM(NumParams, MemberKey<'arena>),
-    SetRangeM(NumParams, SetrangeOp, isize),
+    SetRangeM(NumParams, isize, SetrangeOp, ReadOnlyOp),
 }
 
 #[derive(Clone, Debug)]

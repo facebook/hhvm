@@ -7193,13 +7193,23 @@ and string2 env idl =
           TypecheckerOptions.enable_strict_string_concat_interp
             (Env.get_tcopt env)
         then
+          let r = Reason.Rinterp_operand p in
+          let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+          let stringlike =
+            MakeType.union
+              r
+              [
+                MakeType.arraykey r;
+                MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
+              ]
+          in
           let env =
             Typing_ops.sub_type
               p
               Reason.URstr_interp
               env
               ty
-              (MakeType.arraykey (Reason.Rinterp_operand p))
+              stringlike
               Errors.strict_str_interp_type_mismatch
           in
           (env, te :: tel)

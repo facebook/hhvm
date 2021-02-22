@@ -369,12 +369,22 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     if TypecheckerOptions.enable_strict_string_concat_interp (Env.get_tcopt env)
     then
       let sub_arraykey env p ty =
+        let r = Reason.Rconcat_operand p in
+        let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+        let stringlike =
+          MakeType.union
+            r
+            [
+              MakeType.arraykey r;
+              MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
+            ]
+        in
         Typing_ops.sub_type
           p
           Reason.URstr_concat
           env
           ty
-          (MakeType.arraykey (Reason.Rconcat_operand p))
+          stringlike
           Errors.strict_str_concat_type_mismatch
       in
       let env = sub_arraykey env p1 ty1 in

@@ -11,9 +11,14 @@ function bad_concat(): void {
 }
 
 // These should typecheck.
-function ok_concat(arraykey $a, arraykey $b): void {
+function ok_concat(
+  arraykey $a,
+  arraykey $b,
+  \HH\FormatString<\PlainSprintf> $c
+): void {
   1 . 2;
   "test" . 2;
   "test" . "hello";
   $a . $b;
+  $c . "other string";
 }

@@ -9,8 +9,13 @@ function bad_interp(bool $a, float $b, null $c, string $d): void {
 }
 
 // These should typecheck fine.
-function ok_interp(string $a, int $b): void {
+function ok_interp(
+  string $a,
+  int $b,
+  \HH\FormatString<\PlainSprintf> $c
+): void {
   "interp $a";
   "interp $b";
-  "interp $a $b";
+  "interp $c";
+  "interp $a $b $c";
 }

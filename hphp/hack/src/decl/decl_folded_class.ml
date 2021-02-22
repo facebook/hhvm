@@ -780,9 +780,8 @@ and typeconst_fold
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
+  | Ast_defs.Cenum -> acc
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum ->
-    acc
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
   | Ast_defs.Cnormal ->
@@ -810,6 +809,7 @@ and typeconst_fold
     let tc =
       {
         ttc_abstract = stc.stc_abstract;
+        ttc_synthesized = false;
         ttc_name = stc.stc_name;
         ttc_as_constraint = stc.stc_as_constraint;
         ttc_type = stc.stc_type;

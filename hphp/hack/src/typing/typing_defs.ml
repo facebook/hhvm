@@ -122,6 +122,7 @@ and typeconst_abstract_kind =
 
 and typeconst_type = {
   ttc_abstract: typeconst_abstract_kind;
+  ttc_synthesized: bool;
   ttc_name: Nast.sid;
   ttc_as_constraint: decl_ty option;
   ttc_type: decl_ty option;

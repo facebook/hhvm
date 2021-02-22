@@ -1549,6 +1549,42 @@ let interface_const_multiple_defs
         ^ "." );
     ]
 
+let interface_typeconst_multiple_defs
+    child_pos
+    parent_pos
+    child_origin
+    parent_origin
+    name
+    child_is_abstract
+    (on_error : typing_error_callback) =
+  let parent_origin = strip_ns parent_origin in
+  let child_origin = strip_ns child_origin in
+  let child =
+    if child_is_abstract then
+      "abstract type constant with default value"
+    else
+      "concrete type constant"
+  in
+  on_error
+    ~code:(Typing.err_code Typing.ConcreteConstInterfaceOverride)
+    ( child_pos,
+      "Concrete and abstract type constants with default values in an interface cannot conflict with inherited"
+      ^ " concrete or abstract type constants with default values." )
+    [
+      ( parent_pos,
+        Markdown_lite.md_codify name
+        ^ " inherited from "
+        ^ Markdown_lite.md_codify parent_origin );
+      ( child_pos,
+        "conflicts with "
+        ^ Markdown_lite.md_codify child
+        ^ " "
+        ^ Markdown_lite.md_codify name
+        ^ " inherited from "
+        ^ Markdown_lite.md_codify child_origin
+        ^ "." );
+    ]
+
 let const_without_typehint sid =
   let (pos, name) = sid in
   let msg =

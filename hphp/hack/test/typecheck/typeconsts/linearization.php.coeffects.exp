@@ -1,0 +1,20 @@
+File "linearization.php", line 11, characters 7-11:
+Class `child` does not correctly implement all required members  (Typing[4340])
+  File "linearization.php", line 11, characters 24-25:
+  Some members are incompatible with those declared in type `I2`
+  File "linearization.php", line 4, characters 23-23:
+  The assigned type of this type constant is inconsistent with its parent
+  File "linearization.php", line 8, characters 18-23:
+  Expected `string`
+  File "linearization.php", line 4, characters 27-29:
+  But got `int`
+File "linearization.php", line 11, characters 7-11:
+Class `child` does not correctly implement all required members  (Typing[4340])
+  File "linearization.php", line 11, characters 24-25:
+  Some members are incompatible with those declared in type `I2`
+  File "linearization.php", line 4, characters 23-23:
+  Type constants with declared values in an interface cannot conflict with other inherited type constants with declared values.
+  File "linearization.php", line 8, characters 14-14:
+  `T` inherited from `I2`
+  File "linearization.php", line 4, characters 23-23:
+  conflicts with type constant `T` inherited from `I1`.

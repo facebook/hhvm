@@ -209,6 +209,7 @@ struct
   and typeconst tc =
     {
       ttc_abstract = typeconst_abstract_kind tc.ttc_abstract;
+      ttc_synthesized = tc.ttc_synthesized;
       ttc_name = string_id tc.ttc_name;
       ttc_as_constraint = ty_opt tc.ttc_as_constraint;
       ttc_type = ty_opt tc.ttc_type;

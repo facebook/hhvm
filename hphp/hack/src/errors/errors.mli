@@ -412,6 +412,16 @@ val concrete_const_interface_override :
 val interface_const_multiple_defs :
   Pos.t -> Pos.t -> string -> string -> string -> typing_error_callback -> unit
 
+val interface_typeconst_multiple_defs :
+  Pos.t ->
+  Pos.t ->
+  string ->
+  string ->
+  string ->
+  bool ->
+  typing_error_callback ->
+  unit
+
 val const_without_typehint : Pos.t * string -> unit
 
 val prop_without_typehint : string -> Pos.t * string -> unit

@@ -229,6 +229,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
       {
         ttc_abstract = TCConcrete;
+        ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
         ttc_name;
         ttc_as_constraint = None;
         ttc_type = Some default;
@@ -239,6 +240,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     | _ ->
       {
         ttc_abstract = abstract;
+        ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
         ttc_name;
         ttc_as_constraint = as_constraint;
         ttc_type = ty;

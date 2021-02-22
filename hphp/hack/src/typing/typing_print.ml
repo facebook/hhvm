@@ -1558,6 +1558,7 @@ module PrintClass = struct
       ctx
       {
         ttc_abstract = _;
+        ttc_synthesized = synthetic;
         ttc_name = tc_name;
         ttc_as_constraint = as_constraint;
         ttc_type = tc_type;
@@ -1583,6 +1584,10 @@ module PrintClass = struct
     ^ " (origin:"
     ^ origin
     ^ ")"
+    ^ ( if synthetic then
+        " (synthetic)"
+      else
+        "" )
     ^ ( if enforceable then
         " (enforceable)"
       else

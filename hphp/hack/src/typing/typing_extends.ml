@@ -375,6 +375,45 @@ let check_override
   ) else
     env
 
+(* Constants and type constants with declared values in declared interfaces can never be 
+ * overridden by other inherited constants.
+ * @precondition: both constants must not be synthesized 
+ *)
+let conflict_with_declared_interface
+    env implements parent_class class_ parent_origin origin const_name =
+  let is_inherited_and_conflicts_with_parent =
+    String.( <> ) origin (Cls.name class_) && String.( <> ) origin parent_origin
+  in
+  (* True if a declared interface on class_ has a concrete constant with
+     the same name and origin as child constant *)
+  let child_const_from_declared_interface =
+    match Env.get_class env origin with
+    | Some cls ->
+      Cls.kind cls |> Ast_defs.is_c_interface
+      && List.fold implements ~init:false ~f:(fun acc iface ->
+             acc
+             ||
+             match Cls.get_const iface const_name with
+             | None -> false
+             | Some const -> String.( = ) const.cc_origin origin)
+    | None -> false
+  in
+  match Cls.kind parent_class with
+  | Ast_defs.Cinterface -> is_inherited_and_conflicts_with_parent
+  | Ast_defs.Cabstract
+  | Ast_defs.Cnormal ->
+    is_inherited_and_conflicts_with_parent
+    && child_const_from_declared_interface
+  | Ast_defs.Ctrait ->
+    is_inherited_and_conflicts_with_parent
+    && child_const_from_declared_interface
+    &&
+    (* constant must be declared on a trait to conflict *)
+    (match Env.get_class env parent_origin with
+    | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+    | None -> false)
+  | Ast_defs.Cenum -> false
+
 let check_const_override
     env
     implements
@@ -385,20 +424,6 @@ let check_const_override
     class_const
     on_error =
   let check_params = should_check_params parent_class class_ in
-  (* Returns true if a declared interface on class_ has a concrete constant with
-     the same name and origin as class_const *)
-  let conflicts_with_declared_interface =
-    match Env.get_class env class_const.cc_origin with
-    | Some cls ->
-      Cls.kind cls |> Ast_defs.is_c_interface
-      && List.fold implements ~init:false ~f:(fun acc iface ->
-             acc
-             ||
-             match Cls.get_const iface const_name with
-             | None -> false
-             | Some const -> String.( = ) const.cc_origin class_const.cc_origin)
-    | None -> false
-  in
   (* Shared preconditons for const_interface_member_not_unique and 
      is_bad_interface_const_override *)
   let both_are_non_synthetic_and_concrete =
@@ -410,29 +435,19 @@ let check_const_override
     && (not class_const.cc_abstract)
     && not parent_class_const.cc_abstract
   in
-  let is_inherited_and_conflicts_with_parent =
-    both_are_non_synthetic_and_concrete
-    && String.( <> ) class_const.cc_origin (Cls.name class_)
-    && String.( <> ) class_const.cc_origin parent_class_const.cc_origin
-  in
   let const_interface_member_not_unique =
     (* Similar to should_check_member_unique, we check if there are multiple
       concrete implementations of class constants with no override.
     *)
-    match Cls.kind parent_class with
-    | Ast_defs.Cinterface -> is_inherited_and_conflicts_with_parent
-    | Ast_defs.(Cabstract | Cnormal) ->
-      is_inherited_and_conflicts_with_parent
-      && conflicts_with_declared_interface
-    | Ast_defs.Ctrait ->
-      is_inherited_and_conflicts_with_parent
-      && conflicts_with_declared_interface
-      &&
-      (* constant must be declared on a trait to conflict *)
-      (match Env.get_class env parent_class_const.cc_origin with
-      | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
-      | None -> false)
-    | Ast_defs.Cenum -> false
+    conflict_with_declared_interface
+      env
+      implements
+      parent_class
+      class_
+      parent_class_const.cc_origin
+      class_const.cc_origin
+      const_name
+    && both_are_non_synthetic_and_concrete
   in
   let is_bad_interface_const_override =
     (* HHVM does not support one specific case of overriding constants:
@@ -816,25 +831,96 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
          child_typeconst.ttc_type
          ~f:(check env)
 
-(* For type constants we need to check that a child respects the
- * constraints specified by its parent. *)
-let check_typeconsts env parent_class class_ on_error =
-  let (parent_pos, parent_class, _) = parent_class in
-  let (pos, class_, _) = class_ in
-  let ptypeconsts = Cls.typeconsts parent_class in
+let check_typeconst_override
+    env implements class_ parent_tconst tconst parent_class on_error =
   let tconst_check parent_tconst tconst () =
     tconst_subsumption env (Cls.name class_) parent_tconst tconst on_error
   in
+  let env =
+    check_ambiguous_inheritance
+      tconst_check
+      parent_tconst
+      tconst
+      (fst tconst.ttc_name)
+      class_
+      tconst.ttc_origin
+      on_error
+  in
+  let (pos, name) = tconst.ttc_name in
+  let parent_pos = fst parent_tconst.ttc_name in
+  (* Temporarily skip checks on context constants *)
+  let is_context_constant =
+    match (parent_tconst.ttc_abstract, tconst.ttc_abstract) with
+    | (TCAbstract (Some hint1), TCAbstract (Some hint2)) ->
+      (match (deref hint1, deref hint2) with
+      | ((_, Tintersection _), _)
+      | (_, (_, Tintersection _)) ->
+        true
+      | _ -> false)
+    | (TCAbstract (Some hint), _)
+    | (_, TCAbstract (Some hint)) ->
+      (match deref hint with
+      | (_, Tintersection _) -> true
+      | _ -> false)
+    | _ -> false
+  in
+  (match
+     ( parent_tconst.ttc_type,
+       tconst.ttc_type,
+       parent_tconst.ttc_abstract,
+       tconst.ttc_abstract )
+   with
+  | (Some _, Some _, _, _)
+  | (_, Some _, TCAbstract (Some _), _)
+  | (_, _, TCAbstract (Some _), TCAbstract (Some _)) ->
+    if
+      (not is_context_constant)
+      && (not tconst.ttc_synthesized)
+      && (not parent_tconst.ttc_synthesized)
+      && conflict_with_declared_interface
+           env
+           implements
+           parent_class
+           class_
+           parent_tconst.ttc_origin
+           tconst.ttc_origin
+           name
+    then
+      let child_is_abstract =
+        match tconst.ttc_abstract with
+        | TCConcrete -> false
+        | TCAbstract _
+        | TCPartiallyAbstract ->
+          true
+      in
+      Errors.interface_typeconst_multiple_defs
+        pos
+        parent_pos
+        tconst.ttc_origin
+        parent_tconst.ttc_origin
+        name
+        child_is_abstract
+        on_error
+  | _ -> ());
+  env
+
+(* For type constants we need to check that a child respects the
+ * constraints specified by its parent, and does not conflict
+ * with other inherited type constants *)
+let check_typeconsts env implements parent_class class_ on_error =
+  let (parent_pos, parent_class, _) = parent_class in
+  let (pos, class_, _) = class_ in
+  let ptypeconsts = Cls.typeconsts parent_class in
   List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
       | Some tconst ->
-        check_ambiguous_inheritance
-          tconst_check
+        check_typeconst_override
+          env
+          implements
+          class_
           parent_tconst
           tconst
-          (fst tconst.ttc_name)
-          class_
-          tconst.ttc_origin
+          parent_class
           on_error
       | None ->
         Errors.member_not_implemented
@@ -851,13 +937,6 @@ let check_consts env implements parent_class class_ psubst subst on_error =
   let consts =
     List.fold consts ~init:SMap.empty ~f:(fun m (k, v) -> SMap.add k v m)
   in
-  let get_interfaces acc x =
-    let (_, (_, name), _) = TUtils.unwrap_class_type x in
-    match Env.get_class env name with
-    | Some iface -> iface :: acc
-    | None -> acc
-  in
-  let implements = List.fold ~f:get_interfaces ~init:[] implements in
   List.fold pconsts ~init:env ~f:(fun env (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then (
         match SMap.find_opt const_name consts with
@@ -891,7 +970,14 @@ let check_consts env implements parent_class class_ psubst subst on_error =
  *)
 let check_class_implements
     env implements (parent_class, parent_ty) (class_, class_ty) on_error =
-  let env = check_typeconsts env parent_class class_ on_error in
+  let get_interfaces acc x =
+    let (_, (_, name), _) = TUtils.unwrap_class_type x in
+    match Env.get_class env name with
+    | Some iface -> iface :: acc
+    | None -> acc
+  in
+  let implements = List.fold ~f:get_interfaces ~init:[] implements in
+  let env = check_typeconsts env implements parent_class class_ on_error in
   let (parent_pos, parent_class, parent_tparaml) = parent_class in
   let (pos, class_, tparaml) = class_ in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in

@@ -260,7 +260,6 @@ let mark_as_synthesized inh =
     Tuple.T2.map_fst elt ~f:(fun elt -> set_elt_synthesized elt true)
   in
   {
-    inh with
     ih_substs =
       SMap.map
         begin
@@ -273,6 +272,10 @@ let mark_as_synthesized inh =
     ih_sprops = SMap.map mark_elt inh.ih_sprops;
     ih_methods = SMap.map mark_elt inh.ih_methods;
     ih_smethods = SMap.map mark_elt inh.ih_smethods;
+    ih_typeconsts =
+      SMap.map
+        (fun const -> { const with ttc_synthesized = true })
+        inh.ih_typeconsts;
     ih_consts =
       SMap.map (fun const -> { const with cc_synthesized = true }) inh.ih_consts;
   }

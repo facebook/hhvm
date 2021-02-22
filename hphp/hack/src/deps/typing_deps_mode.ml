@@ -35,3 +35,9 @@ let hash_mode : t -> hash_mode = function
   | SQLiteMode -> Hash32Bit
   | CustomMode _ -> Hash64Bit
   | SaveCustomMode _ -> Hash64Bit
+
+let is_64bit : t -> bool =
+ fun mode ->
+  match hash_mode mode with
+  | Hash32Bit -> false
+  | Hash64Bit -> true

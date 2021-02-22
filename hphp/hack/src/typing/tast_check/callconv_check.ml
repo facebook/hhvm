@@ -25,6 +25,7 @@ let check_types env ((p, _), te) =
         | Tvarray _
         | Tdarray _
         | Tvarray_or_darray _
+        | Tvec_or_dict _
         | Ttuple _
         | Tshape _ ->
           true

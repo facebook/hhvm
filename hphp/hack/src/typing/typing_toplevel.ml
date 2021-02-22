@@ -208,7 +208,10 @@ let make_param_local_ty env decl_hint param =
        * argument, "f(C ...$args)", $args is a varray<C> *)
       let r = Reason.Rvar_param param.param_pos in
       let arr_values = mk (r, t) in
-      mk (r, Tvarray arr_values)
+      let unification =
+        TypecheckerOptions.array_unification (Env.get_tcopt env)
+      in
+      MakeType.varray ~unification r arr_values
     | _ -> ty
   in
   Typing_reactivity.disallow_atmost_rx_as_rxfunc_on_non_functions env param ty;

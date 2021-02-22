@@ -345,9 +345,12 @@ let to_array env pos shape_ty res =
       Errors.unify_error
   in
   to_collection env shape_ty res (fun env r key value ->
+      let unification =
+        TypecheckerOptions.array_unification (Env.get_tcopt env)
+      in
       Typing_enforceability.make_locl_like_type
         env
-        (mk (r, Tdarray (key, value))))
+        (MakeType.darray ~unification r key value))
 
 let to_dict env pos shape_ty res =
   let (env, shape_ty) =

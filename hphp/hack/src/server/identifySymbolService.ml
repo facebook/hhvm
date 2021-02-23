@@ -36,6 +36,20 @@ let process_attribute (pos, name) class_name method_ =
   in
   Result_set.singleton { name; type_; is_declaration = false; pos }
 
+let process_xml_attrs class_name attrs =
+  List.fold attrs ~init:Result_set.empty ~f:(fun acc attr ->
+      match attr with
+      | Aast.Xhp_simple ((pos, name), _) ->
+        Result_set.add
+          {
+            name;
+            type_ = Property (class_name, Utils.add_xhp_ns name);
+            is_declaration = false;
+            pos;
+          }
+          acc
+      | _ -> acc)
+
 let clean_member_name name = String_utils.lstrip name "$"
 
 let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
@@ -193,7 +207,10 @@ let visitor =
         | Aast.Class_const (((_, ty), _), mid) -> typed_const env ty mid
         | Aast.Class_get (((_, ty), _), Aast.CGstring mid, _) ->
           typed_property env ty mid
-        | Aast.Xml (cid, _, _) -> process_class_id cid
+        | Aast.Xml (cid, attrs, _) ->
+          let class_id = process_class_id cid in
+          let xhp_attributes = process_xml_attrs (snd cid) attrs in
+          self#plus class_id xhp_attributes
         | Aast.Fun_id id ->
           process_fun_id (pos, SN.AutoimportedFunctions.fun_)
           + process_fun_id (remove_apostrophes_from_function_eval id)

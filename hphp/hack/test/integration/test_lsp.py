@@ -3892,6 +3892,25 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            .request(
+                line=line(),
+                comment="hover over an attribute in an xhp literal",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 62, "character": 25},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "public :xhp:enum-attribute name"}
+                    ],
+                    "range": {
+                        "start": {"line": 62, "character": 22},
+                        "end": {"line": 62, "character": 26},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )

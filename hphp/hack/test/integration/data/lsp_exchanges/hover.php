@@ -58,3 +58,7 @@ final class GeneratedClass {
 function testing_generated_autocomplete(): void {
   GeneratedClass::generatedMethod();
 }
+
+function test_xhp_attribute(): void {
+  <xhp:enum-attribute name="abc"/>;
+}

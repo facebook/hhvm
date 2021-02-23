@@ -277,7 +277,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
         auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
         if (!(result & UnwindReachedGoal)) {
           if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
-          else if (phpException)        phpException->decRefCount();
+          else if (phpException)        phpException->decReleaseCheck();
           g_unwind_rds->doSideExit = true;
           g_unwind_rds->sideEnter = false;
 

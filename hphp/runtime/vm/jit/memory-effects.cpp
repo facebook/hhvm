@@ -1623,6 +1623,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AHeapAny);
 
   case LookupClsCns:
+  case LookupClsCtxCns:
     return may_load_store(AEmpty, AEmpty);
 
   case StClosureArg:

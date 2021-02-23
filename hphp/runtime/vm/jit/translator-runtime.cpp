@@ -683,6 +683,10 @@ TypedValue lookupClsCns(const Class* cls, const StringData* cnsName) {
   return cls->clsCnsGet(cnsName);
 }
 
+int lookupClsCtxCns(const Class* cls, const StringData* cnsName) {
+  return cls->clsCtxCnsGet(cnsName).value();
+}
+
 bool methodExistsHelper(Class* cls, StringData* meth) {
   assertx(isNormalClass(cls) && !isAbstract(cls));
   return cls->lookupMethod(meth) != nullptr;

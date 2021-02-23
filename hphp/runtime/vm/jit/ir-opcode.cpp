@@ -386,6 +386,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSSwitchDestSlow:
   case LdSwitchObjIndex:
   case LookupClsCns:
+  case LookupClsCtxCns:
   case LookupClsMethod:
   case LookupClsMethodCache:
   case LookupClsMethodFCache:

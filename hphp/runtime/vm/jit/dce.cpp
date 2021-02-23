@@ -700,6 +700,7 @@ bool canDCE(IRInstruction* inst) {
   case StFrameFunc:
   case StFrameMeta:
   case LookupClsCns:
+  case LookupClsCtxCns:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:

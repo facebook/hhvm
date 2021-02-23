@@ -155,6 +155,7 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Class* ctx);
 
 TypedValue lookupClsCns(const Class* cls, const StringData* cnsName);
+int lookupClsCtxCns(const Class* cls, const StringData* cnsName);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs

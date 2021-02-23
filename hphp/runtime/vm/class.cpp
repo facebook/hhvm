@@ -1447,6 +1447,24 @@ Slot Class::propIndexToSlot(uint16_t index) const {
 
 const StaticString s_classname("classname");
 
+RuntimeCoeffects Class::clsCtxCnsGet(const StringData* name) const {
+  auto const slot = m_constants.findIndex(name);
+
+  if (slot == kInvalidSlot) {
+    raise_error("Context constant %s does not exist", name->data());
+  }
+  auto const& cns = m_constants[slot];
+  if (cns.kind() != ConstModifiers::Kind::Context) {
+    raise_error("%s is a %s, looking for a context constant",
+                name->data(), ConstModifiers::show(cns.kind()));
+  }
+  if (cns.isAbstract()) {
+    raise_error("Context constant %s is abstract", name->data());
+  }
+
+  return cns.val.constModifiers().getCoeffects().toRequired();
+}
+
 TypedValue Class::clsCnsGet(const StringData* clsCnsName,
                             ClsCnsLookup what) const {
   Slot clsCnsInd;

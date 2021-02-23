@@ -67,6 +67,7 @@ struct Class;
 struct ClassInfo;
 struct EnumValues;
 struct Func;
+struct RuntimeCoeffects;
 struct StringData;
 struct c_Awaitable;
 
@@ -1062,6 +1063,13 @@ public:
    */
   bool hasTypeConstant(const StringData* typeCnsName,
                        bool includeAbs = false) const;
+
+  /*
+   * Returns the runtime coeffect value of the class context constant.
+   * Raises an error if the context constant is not defined, is abstract or
+   * is a type/value constant.
+   */
+  RuntimeCoeffects clsCtxCnsGet(const StringData* name) const;
 
   /*
    * Look up the actual value of a class constant.  Perform dynamic

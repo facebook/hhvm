@@ -98,9 +98,9 @@ struct StaticMultiPropData {
 };
 
 enum class ClsCnsLookup {
-  NoTypes,
-  IncludeTypes,
-  IncludeTypesPartial
+  ValueOnly,
+  ValueAndTypes,
+  ValueAndPartialTypes,
 };
 
 /*
@@ -1071,7 +1071,7 @@ public:
    * such constant.
    */
   TypedValue clsCnsGet(const StringData* clsCnsName,
-                       ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
+                       ClsCnsLookup what = ClsCnsLookup::ValueOnly) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require dynamic
@@ -1087,7 +1087,7 @@ public:
    */
   const TypedValue* cnsNameToTV(const StringData* clsCnsName,
                                 Slot& clsCnsInd,
-                                ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
+                                ClsCnsLookup what = ClsCnsLookup::ValueOnly) const;
 
   /*
    * Get the slot for a constant with name, which can optionally be abstract and

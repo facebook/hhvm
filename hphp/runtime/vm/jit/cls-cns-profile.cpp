@@ -44,7 +44,7 @@ Slot updateSlot(Slot curSlot, Slot newSlot) {
 TypedValue ClsCnsProfile::reportClsCns(const Class* cls,
                                        const StringData* cnsName) {
   Slot slot;
-  auto const tv = cls->cnsNameToTV(cnsName, slot, ClsCnsLookup::NoTypes);
+  auto const tv = cls->cnsNameToTV(cnsName, slot, ClsCnsLookup::ValueOnly);
   if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
   m_curSlot = updateSlot(m_curSlot, slot);
   if (!tv) return make_tv<KindOfUninit>();

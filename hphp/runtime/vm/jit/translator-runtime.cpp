@@ -771,14 +771,14 @@ ArrayData* loadClsTypeCnsHelper(
   TypedValue typeCns;
   if (no_throw_on_undefined) {
     try {
-      typeCns = cls->clsCnsGet(name, ClsCnsLookup::IncludeTypes);
+      typeCns = cls->clsCnsGet(name, ClsCnsLookup::ValueAndTypes);
     } catch (Exception& e) {
       return getFake();
     } catch (Object& e) {
       return getFake();
     }
   } else {
-    typeCns = cls->clsCnsGet(name, ClsCnsLookup::IncludeTypes);
+    typeCns = cls->clsCnsGet(name, ClsCnsLookup::ValueAndTypes);
   }
   if (typeCns.m_type == KindOfUninit) {
     if (no_throw_on_undefined) {

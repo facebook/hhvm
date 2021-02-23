@@ -783,7 +783,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         auto tv = cls->clsCnsGet(
           cnsName.get(),
           env.allow_partial ?
-          ClsCnsLookup::IncludeTypesPartial : ClsCnsLookup::IncludeTypes);
+          ClsCnsLookup::ValueAndPartialTypes : ClsCnsLookup::ValueAndTypes);
         if (tv.m_type == KindOfUninit) {
           assertx(env.allow_partial);
           throw Exception(

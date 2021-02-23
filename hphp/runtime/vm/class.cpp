@@ -1475,13 +1475,13 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
           assertx(resolved->isHAMSafeDArray());
           return make_persistent_array_like_tv(resolved);
         }
-        if (what == ClsCnsLookup::IncludeTypesPartial) {
+        if (what == ClsCnsLookup::ValueAndPartialTypes) {
           return make_tv<KindOfUninit>();
         }
         break;
       }
       case ConstModifiers::Kind::Context:
-        raise_error("Cannot load context constants");
+        always_assert(false && "Cannot load context constants");
     }
   }
 
@@ -1555,7 +1555,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
   if (cns.kind() == ConstModifiers::Kind::Type) {
     // Resolve type constant, if needed
-    if (what == ClsCnsLookup::IncludeTypesPartial) {
+    if (what == ClsCnsLookup::ValueAndPartialTypes) {
       clsCnsData.remove(StrNR{clsCnsName});
       return make_tv<KindOfUninit>();
     }
@@ -1637,19 +1637,22 @@ const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
                                      Slot& clsCnsInd,
                                      ClsCnsLookup what) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
-  if (clsCnsInd == kInvalidSlot) {
-    return nullptr;
+  if (clsCnsInd == kInvalidSlot) return nullptr;
+  if (m_constants[clsCnsInd].isAbstract()) return nullptr;
+
+  auto const kind = m_constants[clsCnsInd].kind();
+  switch (kind) {
+    case ConstModifiers::Kind::Value:
+      break;
+    case ConstModifiers::Kind::Type:
+      if (what == ClsCnsLookup::ValueOnly) return nullptr;
+      break;
+    case ConstModifiers::Kind::Context:
+      return nullptr;
   }
-  if (m_constants[clsCnsInd].isAbstract()) {
-    return nullptr;
-  }
-  if (what == ClsCnsLookup::NoTypes
-      && m_constants[clsCnsInd].kind() == ConstModifiers::Kind::Type) {
-    return nullptr;
-  }
+
   auto const ret = &m_constants[clsCnsInd].val;
-  assertx(m_constants[clsCnsInd].kind() == ConstModifiers::Kind::Type
-          || tvIsPlausible(*ret));
+  assertx(IMPLIES(kind == ConstModifiers::Kind::Value, tvIsPlausible(*ret)));
   return ret;
 }
 

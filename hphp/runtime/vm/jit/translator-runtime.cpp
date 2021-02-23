@@ -804,9 +804,8 @@ ArrayData* loadClsTypeCnsHelper(
   return typeCns.m_data.parr;
 }
 
-void raiseCoeffectsCallViolationHelper(const ActRec* caller, const Func* callee,
-                                       uint64_t rawFlags) {
-  raiseCoeffectsCallViolation(caller, callee, CallFlags(rawFlags));
+void raiseCoeffectsCallViolationHelper(const Func* callee, uint64_t rawFlags) {
+  raiseCoeffectsCallViolation(callee, CallFlags(rawFlags));
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {

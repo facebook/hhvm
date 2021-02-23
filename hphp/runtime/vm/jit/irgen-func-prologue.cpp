@@ -266,7 +266,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     auto const providedCoeffects =
       CallFlags(callFlags->intVal()).coeffects();
     if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return;
-    gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, fp(env), callFlags);
+    gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags);
     return;
   }
   ifThen(
@@ -283,7 +283,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, fp(env), callFlags);
+      gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags);
     }
   );
 }

@@ -1,10 +1,10 @@
 <?hh
 
-<<__NEVER_INLINE>> function regular() { } // defaults
+function regular() { } // defaults
 
-<<__NEVER_INLINE>> function regular_writeprops()[write_props] { }
+function regular_writeprops()[write_props] { }
 
-<<__NEVER_INLINE>> function f($f)[rx] { $f(); }
+function f($f)[rx] { $f(); }
 
 function test(int $times): void {
   switch ($times) {

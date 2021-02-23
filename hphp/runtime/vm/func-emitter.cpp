@@ -190,8 +190,6 @@ void FuncEmitter::commit(RepoTxn& txn) {
   frp.insertFunc[repoId]
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name);
 
-  frp.insertFuncLineTable[repoId].insert(txn, usn, m_sn, m_lineTable);
-
   if (RuntimeOption::RepoDebugInfo) {
     for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
       SourceLoc& e = m_sourceLocTab[i].second;
@@ -681,7 +679,6 @@ FuncRepoProxy::FuncRepoProxy(Repo& repo)
     : RepoProxy(repo),
       insertFunc{InsertFuncStmt(repo, 0), InsertFuncStmt(repo, 1)},
       getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)},
-      insertFuncLineTable{InsertFuncLineTableStmt(repo, 0), InsertFuncLineTableStmt(repo, 1)},
       getFuncLineTable{GetFuncLineTableStmt(repo, 0), GetFuncLineTableStmt(repo, 1)},
       insertFuncSourceLoc{InsertFuncSourceLocStmt(repo, 0), InsertFuncSourceLocStmt(repo, 1)},
       getSourceLocTab{GetSourceLocTabStmt(repo, 0), GetSourceLocTabStmt(repo, 1)}
@@ -695,7 +692,7 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
       "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
-      " extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
+      " extraData BLOB, lineTable BLOB, PRIMARY KEY (unitSn, funcSn));",
       m_repo.table(repoId, "Func"));
     txn.exec(createQuery);
   }
@@ -708,12 +705,6 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
       m_repo.table(repoId, "FuncSourceLoc"));
     txn.exec(createQuery);
   }
-  {
-    auto createQuery = folly::sformat(
-      "CREATE TABLE {} (unitSn INTEGER, funcSn INTEGER, data BLOB, PRIMARY KEY (unitSn, funcSn));",
-      m_repo.table(repoId, "FuncLineTable"));
-    txn.exec(createQuery);
-  }
 }
 
 void FuncRepoProxy::InsertFuncStmt
@@ -723,12 +714,14 @@ void FuncRepoProxy::InsertFuncStmt
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} "
-      "VALUES(@unitSn, @funcSn, @preClassId, @name, @extraData);",
+      "VALUES(@unitSn, @funcSn, @preClassId, @name, @extraData, @lineTable);",
       m_repo.table(m_repoId, "Func"));
     txn.prepare(*this, insertQuery);
   }
 
   BlobEncoder extraBlob{fe.useGlobalIds()};
+  BlobEncoder lineTableBlob{false};
+
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindInt("@funcSn", funcSn);
@@ -736,6 +729,18 @@ void FuncRepoProxy::InsertFuncStmt
   query.bindStaticString("@name", name);
   const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
+
+  lineTableBlob(
+    const_cast<LineTable&>(fe.lineTable()),
+    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
+      return LineEntry {
+        cur.pastOffset() - prev.pastOffset(),
+        cur.val() - prev.val()
+      };
+    }
+  );
+  query.bindBlob("@lineTable", lineTableBlob, /* static */ true);
+
   query.exec();
 }
 
@@ -744,12 +749,10 @@ void FuncRepoProxy::GetFuncsStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT f.funcSn, f.preClassId, f.name, f.extraData, l.data as lineData "
-      "FROM {} AS f "
-      "LEFT JOIN {} as l ON f.unitSn = l.unitSn AND f.funcSn = l.funcSn "
-      "WHERE f.unitSn == @unitSn ORDER BY f.funcSn ASC;",
-      m_repo.table(m_repoId, "Func"),
-      m_repo.table(m_repoId, "FuncLineTable"));
+      "SELECT funcSn, preClassId, name, extraData, lineTable "
+      "FROM {} "
+      "WHERE unitSn == @unitSn ORDER BY funcSn ASC;",
+      m_repo.table(m_repoId, "Func"));
     txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
@@ -781,8 +784,8 @@ void FuncRepoProxy::GetFuncsStmt
         }
       }
 
-      BlobDecoder dataBlob = query.getBlob(4, false);
-      dataBlob(
+      BlobDecoder lineTableBlob = query.getBlob(4, false);
+      lineTableBlob(
         fe->m_lineTable,
         [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
           return LineEntry {
@@ -799,43 +802,13 @@ void FuncRepoProxy::GetFuncsStmt
   txn.commit();
 }
 
-void FuncRepoProxy::InsertFuncLineTableStmt
-                  ::insert(RepoTxn& txn,
-                           int64_t unitSn,
-                           int64_t funcSn,
-                           LineTable& lineTable) {
-  if (!prepared()) {
-    auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(@unitSn, @funcSn, @data);",
-      m_repo.table(m_repoId, "FuncLineTable"));
-    txn.prepare(*this, insertQuery);
-  }
-
-  BlobEncoder dataBlob{false};
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt64("@funcSn", funcSn);
-  dataBlob(
-    lineTable,
-    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
-      return LineEntry {
-        cur.pastOffset() - prev.pastOffset(),
-        cur.val() - prev.val()
-      };
-    }
-  );
-
-  query.bindBlob("@data", dataBlob, /* static */ true);
-  query.exec();
-}
-
 void FuncRepoProxy::GetFuncLineTableStmt::get(int64_t unitSn, int64_t funcSn,
                                               LineTable& lineTable) {
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT data FROM {} WHERE unitSn == @unitSn AND funcSn == @funcSn;",
-      m_repo.table(m_repoId, "FuncLineTable"));
+      "SELECT lineTable FROM {} WHERE unitSn == @unitSn AND funcSn == @funcSn;",
+      m_repo.table(m_repoId, "Func"));
     txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);

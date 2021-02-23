@@ -388,13 +388,6 @@ struct FuncRepoProxy : public RepoProxy {
     void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
-  struct InsertFuncLineTableStmt : public RepoProxy::Stmt {
-    InsertFuncLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn,
-                int64_t unitSn,
-                int64_t funcSn,
-                LineTable& lineTable); // throws(RepoExc)
-  };
   struct GetFuncLineTableStmt : public RepoProxy::Stmt {
     GetFuncLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(int64_t unitSn, int64_t funcSn, LineTable& lineTable);
@@ -412,7 +405,6 @@ struct FuncRepoProxy : public RepoProxy {
 
   InsertFuncStmt insertFunc[RepoIdCount];
   GetFuncsStmt getFuncs[RepoIdCount];
-  InsertFuncLineTableStmt insertFuncLineTable[RepoIdCount];
   GetFuncLineTableStmt getFuncLineTable[RepoIdCount];
   InsertFuncSourceLocStmt insertFuncSourceLoc[RepoIdCount];
   GetSourceLocTabStmt getSourceLocTab[RepoIdCount];

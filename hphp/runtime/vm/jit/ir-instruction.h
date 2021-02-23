@@ -300,6 +300,7 @@ struct IRInstruction {
    */
   folly::Range<SSATmp**> srcs() const;
   folly::Range<SSATmp**> dsts();
+  folly::Range<SSATmp* const *> dsts() const;
 
   /*
    * Set a single src or all srcs.

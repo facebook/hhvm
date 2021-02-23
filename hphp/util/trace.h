@@ -143,6 +143,7 @@ namespace Trace {
       TM(hhir_licm)     \
       TM(hhir_load)     \
       TM(hhir_loop)     \
+      TM(hhir_outline)  \
       TM(hhir_phi)      \
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \

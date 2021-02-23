@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -189,7 +190,10 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   auto frozen_start = frozen->frontier();
 
   folly::Optional<AsmInfo> optAI;
-  if (unit && dumpIREnabled(unit->context().kind)) optAI.emplace(*unit);
+  if (unit && (RuntimeOption::EvalJitBuildOutliningHashes ||
+               dumpIREnabled(unit->context().kind))) {
+    optAI.emplace(*unit);
+  }
   auto ai = optAI.get_pointer();
 
   Vtext vtext{main, cold, *frozen, code.data()};
@@ -226,6 +230,9 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     }
     printUnit(kCodeGenLevel, *unit, " after code gen ",
              ai, nullptr, annotations);
+    if (RuntimeOption::EvalJitBuildOutliningHashes) {
+      recordIR(*unit, ai);
+    }
   }
 }
 

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -386,25 +387,34 @@ void retranslateAll() {
     BootStats::Block timer("RTA_translate_and_relocate",
                            RuntimeOption::ServerExecutionMode());
     auto const runParallelRetranslate = [&] {
-      Treadmill::Session session(Treadmill::SessionKind::Retranslate);
-      auto bufp = codeBuffer.get();
-      for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
-        auto const fid = sortedFuncs[i];
-        auto const func = const_cast<Func*>(Func::fromFuncId(fid));
-        if (!RuntimeOption::EvalJitSerdesDebugFunctions.empty()) {
-          // Only run specified functions
-          if (!RuntimeOption::EvalJitSerdesDebugFunctions.
-              count(func->fullName()->toCppString())) {
-            continue;
+      {
+        Treadmill::Session session(Treadmill::SessionKind::Retranslate);
+        auto bufp = codeBuffer.get();
+        for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
+          auto const fid = sortedFuncs[i];
+          auto const func = const_cast<Func*>(Func::fromFuncId(fid));
+          if (!RuntimeOption::EvalJitSerdesDebugFunctions.empty()) {
+            // Only run specified functions
+            if (!RuntimeOption::EvalJitSerdesDebugFunctions.
+                count(func->fullName()->toCppString())) {
+              continue;
+            }
           }
+
+          jobs.emplace_back(
+            tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
+          );
+
+          createSrcRecs(func);
+          enqueueRetranslateOptRequest(&jobs.back());
         }
-
-        jobs.emplace_back(
-          tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
-        );
-
-        createSrcRecs(func);
-        enqueueRetranslateOptRequest(&jobs.back());
+      }
+      if (RuntimeOption::EvalJitBuildOutliningHashes) {
+        auto const dispatcher = s_dispatcher.load(std::memory_order_acquire);
+        if (dispatcher) {
+          dispatcher->waitEmpty(false);
+        }
+        buildOptimizedHashes();
       }
     };
     runParallelRetranslate();
@@ -424,7 +434,6 @@ void retranslateAll() {
         profData()->clearAllOptimizedSKs();
         clearCachedInliningCost();
       }
-
       runParallelRetranslate();
     }
 

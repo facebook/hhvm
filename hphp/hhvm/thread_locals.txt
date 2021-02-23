@@ -118,3 +118,6 @@ HPHP::(anonymous namespace)::cc_misses
 HPHP::(anonymous namespace)::s_predict
 HPHP::(anonymous namespace)::s_predictors
 HPHP::(anonymous namespace)::tl_cti_cache
+
+# Outlining data caches are background JIT thread local
+HPHP::jit::(anonymous namespace)::tl_dataStorePtr

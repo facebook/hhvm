@@ -197,6 +197,10 @@ inline folly::Range<SSATmp**> IRInstruction::dsts() {
   return folly::Range<SSATmp**>(m_dsts, m_numDsts);
 }
 
+inline folly::Range<SSATmp* const *> IRInstruction::dsts() const {
+  return const_cast<IRInstruction*>(this)->dsts();
+}
+
 inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   always_assert(i < numSrcs());
   m_srcs[i] = newSrc;

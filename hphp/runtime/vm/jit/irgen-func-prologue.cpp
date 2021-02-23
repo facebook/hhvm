@@ -260,13 +260,13 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   assertx(callFlags);
 
   if (!CoeffectsConfig::enabled()) return;
+  auto const requiredCoeffects = callee->staticCoeffects().toRequired();
   ifThen(
     env,
     [&] (Block* taken) {
       // providedCoeffects & (~requiredCoeffects) == 0
       auto const providedCoeffects =
         gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
-      auto const requiredCoeffects = callee->staticCoeffects().toRequired();
       auto const requiredCoeffectsFlipped = (~requiredCoeffects.value()) &
         ((1 << CoeffectsConfig::numUsedBits()) - 1);
       auto const cond =
@@ -275,7 +275,8 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags);
+      gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags,
+          cns(env, requiredCoeffects.value()));
     }
   );
 }

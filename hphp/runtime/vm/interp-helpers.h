@@ -155,7 +155,7 @@ inline bool calleeCoeffectChecks(const Func* callee, const CallFlags flags) {
   // permissive context than it would otherwise have with coeffect rules
   auto const requiredCoeffects = callee->staticCoeffects().toRequired();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
-  raiseCoeffectsCallViolation(callee, flags);
+  raiseCoeffectsCallViolation(callee, flags, requiredCoeffects);
   return false;
 }
 

@@ -263,7 +263,7 @@ static CallMap s_callMap {
                            {extra(&FuncData::func), {SSA, 0}}},
     {RaiseCoeffectsCallViolation, raiseCoeffectsCallViolationHelper,
                           DNone, SSync, {extra(&FuncData::func),
-                                         {SSA, 0}}},
+                                         {SSA, 0}, {SSA, 1}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
                           DNone, SSync, {{SSA, 0}}},
     {ThrowCallReifiedFunctionWithoutGenerics,

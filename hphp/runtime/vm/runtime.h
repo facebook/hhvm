@@ -62,7 +62,8 @@ std::string formatParamInOutMismatch(const char* fname, uint32_t index,
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
 
-void raiseCoeffectsCallViolation(const Func* callee, const CallFlags flags);
+void raiseCoeffectsCallViolation(const Func* callee, const CallFlags flags,
+                                 RuntimeCoeffects required);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

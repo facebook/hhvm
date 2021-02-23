@@ -49,12 +49,14 @@ std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVArray;
 
+auto constexpr kDefaultVanillaArrayExtra = ArrayData::kDefaultVanillaArrayExtra;
+
 struct PackedArray::VecInitializer {
   VecInitializer() {
     auto const aux = packSizeIndexAndAuxBits(0, 0);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVec);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
     assertx(checkInvariants(ad));
   }
@@ -66,7 +68,7 @@ struct PackedArray::VArrayInitializer {
     auto const aux = packSizeIndexAndAuxBits(0, 0);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVArray);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->initHeader_16(HeaderKind::Packed, StaticValue, aux);
     assertx(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
@@ -78,7 +80,7 @@ struct PackedArray::MarkedVecInitializer {
     auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVec);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
     assertx(!RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
@@ -90,7 +92,7 @@ struct PackedArray::MarkedVArrayInitializer {
     auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVArray);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->initHeader_16(HeaderKind::Packed, StaticValue, aux);
     assertx(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
@@ -121,7 +123,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(IMPLIES(arr->isLegacyArray(), arr->isHAMSafeVArray()));
   assertx(!RO::EvalHackArrDVArrs || arr->isVecKind());
   assertx(IMPLIES(!arrprov::arrayWantsTag(arr),
-                  arr->m_extra == 0 &&
+                  arr->m_extra == kDefaultVanillaArrayExtra &&
                   IMPLIES(RO::EvalArrayProvenance,
                           !arrprov::getTag(arr).valid())));
 
@@ -385,7 +387,7 @@ ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
 
   auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
   ad->m_size = 0;
-  ad->m_extra = 0;
+  ad->m_extra = kDefaultVanillaArrayExtra;
   assertx(ad->isPackedKind());
   assertx(ad->isVArray());
   assertx(ad->m_size == 0);
@@ -396,7 +398,7 @@ ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
 ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   auto ad = MakeReserveImpl(capacity, HeaderKind::Vec);
   ad->m_size = 0;
-  ad->m_extra = 0;
+  ad->m_extra = kDefaultVanillaArrayExtra;
   assertx(ad->isVecKind());
   assertx(ad->m_size == 0);
   assertx(checkInvariants(ad));
@@ -411,7 +413,7 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   assertx(size > 0);
   auto ad = MakeReserveImpl(size, hk);
   ad->m_size = size;
-  ad->m_extra = 0;
+  ad->m_extra = kDefaultVanillaArrayExtra;
 
   // Append values by moving; this function takes ownership of them.
   if (reverse) {
@@ -489,7 +491,7 @@ ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
   }
   auto ad = MakeReserveImpl(size, HeaderKind::Packed);
   ad->m_size = size;
-  ad->m_extra = 0;
+  ad->m_extra = kDefaultVanillaArrayExtra;
   assertx(ad->isPackedKind());
   assertx(ad->isVArray());
   assertx(ad->m_size == size);
@@ -500,7 +502,7 @@ ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
 ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Vec);
   ad->m_size = size;
-  ad->m_extra = 0;
+  ad->m_extra = kDefaultVanillaArrayExtra;
   assertx(ad->isVecKind());
   assertx(ad->m_size == size);
   assertx(checkInvariants(ad));

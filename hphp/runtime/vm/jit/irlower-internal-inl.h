@@ -136,9 +136,8 @@ inline Vreg materialize(Vout&, Vreg data) { return data; }
 template <class JmpFn>
 void emitBespokeLayoutTest(Vout& v, ArrayLayout layout, Vreg r, JmpFn doJcc) {
   auto const check = layout.bespokeMaskAndCompare();
-  auto const extra = BespokeArray::kExtraMagicBit.raw;
-  const int16_t xorVal = static_cast<int16_t>(extra | check.xorVal);
-  const int16_t andVal = static_cast<int16_t>(extra | check.andVal);
+  const int16_t xorVal = static_cast<int16_t>(check.xorVal);
+  const int16_t andVal = static_cast<int16_t>(check.andVal);
   const int16_t cmpVal = static_cast<int16_t>(check.cmpVal);
 
   auto const bits = v.makeReg();
@@ -243,16 +242,15 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   assertx(!spec.type());
 
   auto const r = materialize(v, dataSrc);
-  if (spec.vanilla()) {
+  auto const layout = spec.layout();
+  if (layout == ArrayLayout::Vanilla() || layout == ArrayLayout::Bespoke()) {
     auto const sf = v.makeReg();
+    auto const cc = layout == ArrayLayout::Vanilla() ? CC_Z : CC_NZ;
     v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
-    doJcc(CC_Z, sf);
-  } else if (spec.bespoke()) {
-    emitBespokeLayoutTest(v, spec.layout(), r, doJcc);
+    doJcc(cc, sf);
   } else {
-    always_assert(false);
+    emitBespokeLayoutTest(v, layout, r, doJcc);
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

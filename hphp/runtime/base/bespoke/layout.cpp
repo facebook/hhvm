@@ -558,12 +558,16 @@ MaskAndCompare Layout::computeMaskAndCompare() const {
   }
 
   // The set of all concrete layouts that do *not* descend from this layout.
+  // This set includes the vanilla index, so that our test will exclude it.
   std::vector<uint16_t> deadVec;
   std::set_difference(
     allConcrete.cbegin(), allConcrete.cend(),
     liveVec.cbegin(), liveVec.cend(),
     std::back_inserter(deadVec)
   );
+  static_assert(ArrayData::kDefaultVanillaArrayExtra == uint32_t(-1));
+  auto constexpr kVanillaLayoutIndex = uint16_t(-1);
+  deadVec.push_back(kVanillaLayoutIndex);
 
   auto const check = [&] () -> MaskAndCompare {
     // 1. Attempt to find a trivial mask to cover.

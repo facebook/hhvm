@@ -89,7 +89,7 @@ struct MixedArray::DictInitializer {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyDictArrayPtr);
     ad->initHash(1);
     ad->m_size  = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, kHasStrKeyTable);
@@ -104,7 +104,7 @@ struct MixedArray::DArrayInitializer {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyDArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Mixed, StaticValue, kHasStrKeyTable);
@@ -119,7 +119,7 @@ struct MixedArray::MarkedDictArrayInitializer {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyMarkedDictArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue,
@@ -135,7 +135,7 @@ struct MixedArray::MarkedDArrayInitializer {
     auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyMarkedDArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
-    ad->m_extra = 0;
+    ad->m_extra = kDefaultVanillaArrayExtra;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Mixed, StaticValue,
@@ -162,7 +162,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
 
   ad->initHeader(hk, OneReference);
   ad->m_size         = 0;
-  ad->m_extra        = 0;
+  ad->m_extra        = kDefaultVanillaArrayExtra;
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
@@ -214,7 +214,7 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
 
   ad->initHeader_16(hk, OneReference, aux);
   ad->m_size             = size;
-  ad->m_extra            = 0;
+  ad->m_extra            = kDefaultVanillaArrayExtra;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -275,7 +275,7 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
 
   ad->initHeader_16(hk, OneReference, aux);
   ad->m_size             = size;
-  ad->m_extra            = 0;
+  ad->m_extra            = kDefaultVanillaArrayExtra;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -319,7 +319,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 
   ad->initHeader(hdr, OneReference);
   ad->m_size             = size;
-  ad->m_extra            = 0;
+  ad->m_extra            = kDefaultVanillaArrayExtra;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -409,7 +409,7 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
     ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   }
   ad->m_size             = size;
-  ad->m_extra            = 0;
+  ad->m_extra            = kDefaultVanillaArrayExtra;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = size;
 
@@ -776,7 +776,7 @@ bool MixedArray::checkInvariants() const {
   assertx(MixedArray::HashSize(m_scale) ==
          folly::nextPowTwo<uint64_t>(capacity()));
   assertx(IMPLIES(!arrprov::arrayWantsTag(this),
-                  m_extra == 0 &&
+                  m_extra == kDefaultVanillaArrayExtra &&
                   IMPLIES(RO::EvalArrayProvenance,
                           !arrprov::getTag(this).valid())));
 

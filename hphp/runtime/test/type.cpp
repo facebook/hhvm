@@ -1361,8 +1361,6 @@ TEST(Type, BespokeRanges) {
   };
   bespoke::selectBespokeLayouts();
 
-  auto const top_layout = ArrayLayout::Bespoke();
-  top_layout.bespokeMaskAndCompare();
   foo_layout.bespokeMaskAndCompare();
   baz_layout.bespokeMaskAndCompare();
   bar_layout.bespokeMaskAndCompare();

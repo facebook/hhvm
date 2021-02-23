@@ -131,6 +131,11 @@ struct ArrayData : MaybeCountable {
    */
   static auto constexpr kSampledArray = 8;
 
+  /*
+   * See notes on the m_extra field for constraints on this value.
+   */
+  static auto constexpr kDefaultVanillaArrayExtra = uint32_t(-1);
+
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
@@ -679,25 +684,25 @@ protected:
   friend struct bespoke::MonotypeVec;
 
   uint32_t m_size;
+
   /*
-   * m_extra is used both to store bespoke IDs and for array provenance (for
-   * v/darrays.) It's fine to share the field since we already refuse to enable
-   * these features together.
+   * m_extra is used to store BespokeArray data and to store arrprov::Tag for
+   * dvarrays when array provenance is enabled. It's fine to share the field,
+   * since we refuse to enable these features together.
    *
-   * When RO::EvalArrayProvenance is on, this stores an arrprov::Tag--otherwise
-   * we use this field as follows:
+   * When RO::EvalArrayProvenance is on, this stores an arrprov::Tag.
+   * Otherwise we use this field as follows:
    *
-   * When the array is bespoke (m_kind & kBespokeKindMask):
+   * When the array is bespoke:
    *
-   *   bits 0..15: for private bespoke-array use. we don't require these to be
-   *                have any specific value but are reserved for use by bespoke
-   *                layouts
+   *   bits 0..15: For private BespokeArray use. We don't constrain the value
+   *               in this field - different layouts can use it differently.
    *
-   *   bits 16..30: store the bespoke layout index
+   *   bits 16..31: The bespoke LayoutIndex.
    *
-   *   bit 31:      must be set
-   *
-   * When the array is vanilla and array provenance is off, m_extra must be 0.
+   * When the array is vanilla and array provenance is disabled, m_extra must
+   * be kDefaultVanillaArrayExtra. This value must also equal, as raw bytes,
+   * the default arrprov::Tag.
    */
   union {
     uint32_t m_extra;

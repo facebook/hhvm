@@ -50,10 +50,8 @@ namespace arrprov {
  */
 struct Tag {
   enum class Kind {
-    /* uninitialized */
-    Invalid,
     /* lost original line number as a result of trait ${x}init merges */
-    KnownTraitMerge,
+    KnownTraitMerge = 0x1,
     /* Dummy tag for all large enums, which we cache as static arrays */
     KnownLargeEnum,
     /* a particular argument to a function should be marked */
@@ -66,7 +64,10 @@ struct Tag {
     RuntimeLocationPoison,
     /* known unit + line number */
     Known,
-    /* NOTE: We CANNOT fit another kind here; kind 7 is reserved */
+    /* default-constructed tag. Must be 0x7 (to match default m_id of -1) */
+    Invalid,
+    /* NOTE: We cannot fit another Kind here - it must fit in 3 bits. */
+    /* NOTE: We reserve 0x0 to mean that this tag is in a side table. */
   };
 
   constexpr Tag() = default;
@@ -170,7 +171,7 @@ private:
   friend void clearTag(AsioExternalThreadEvent* ev);
 
 private:
-  uint32_t m_id = 0;
+  uint32_t m_id = -1;
 };
 
 /*

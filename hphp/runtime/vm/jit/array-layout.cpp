@@ -181,8 +181,8 @@ folly::Optional<bespoke::LayoutIndex> ArrayLayout::layoutIndex() const {
 }
 
 MaskAndCompare ArrayLayout::bespokeMaskAndCompare() const {
+  assertx(!isBasicSort(sort));
   auto const& layout = assertBespoke(*this);
-  if (isBasicSort(sort)) return MaskAndCompare{0,0,0};
   return layout.maskAndCompare();
 }
 

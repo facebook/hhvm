@@ -37,7 +37,7 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 bespoke::LayoutIndex BespokeArray::layoutIndex() const {
-  return {safe_cast<uint16_t>(m_extra_hi16 & ~kExtraMagicBit.raw)};
+  return {m_extra_hi16};
 }
 
 const bespoke::LayoutFunctions* BespokeArray::vtable() const {
@@ -45,8 +45,7 @@ const bespoke::LayoutFunctions* BespokeArray::vtable() const {
 }
 
 void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
-  static_assert(bespoke::Layout::kMaxIndex.raw < kExtraMagicBit.raw);
-  m_extra_hi16 = index.raw | kExtraMagicBit.raw;
+  m_extra_hi16 = index.raw;
 }
 
 size_t BespokeArray::heapSize() const {
@@ -65,7 +64,9 @@ bool BespokeArray::checkInvariants() const {
   assertx(kindIsValid());
   assertx(!isSampledArray());
   assertx(vtable() != nullptr);
-  assertx(m_extra_hi16 & kExtraMagicBit.raw);
+  static_assert(ArrayData::kDefaultVanillaArrayExtra == uint32_t(-1));
+  DEBUG_ONLY auto constexpr kVanillaLayoutIndex = uint16_t(-1);
+  assertx(m_extra_hi16 != kVanillaLayoutIndex);
   return true;
 }
 

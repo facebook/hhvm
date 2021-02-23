@@ -99,13 +99,6 @@ public:
  * like.
  */
 struct BespokeArray : ArrayData {
-  /*
-   * We set the MSB of m_extra_hi16 when we store the bespoke layout there. This
-   * is so (on little-endian systems) we can do a single comparison to test both
-   * (size >= some constant) and bespoke-ness together.
-   */
-  static constexpr bespoke::LayoutIndex kExtraMagicBit = {1 << 15};
-
   static BespokeArray* asBespoke(ArrayData*);
   static const BespokeArray* asBespoke(const ArrayData*);
 

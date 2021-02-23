@@ -57,6 +57,7 @@ using TagStorage = std::pair<LowPtr<const StringData>, int32_t>;
 
 static constexpr TagID kKindBits = 3;
 static constexpr TagID kKindMask = 0x7;
+static constexpr TagID kExternalStorageSentinel = 0x0;
 static constexpr size_t kNumTagIDs = (1 << (8 * sizeof(TagID) - kKindBits));
 static constexpr size_t kNumRuntimeTagIDs = (1 << 10);
 
@@ -170,10 +171,14 @@ Tag Tag::Param(const Func* func, int32_t param) {
 
 Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
   auto const k = TagID(kind);
-  assertx(k < kKindMask);
   assertx((k & kKindMask) == k);
   assertx((k & uintptr_t(name)) == 0);
+  assertx(k != kExternalStorageSentinel);
   assertx(kind != Kind::Invalid);
+
+  // Assert that the default-constructed tag matches the default Array extra.
+  static_assert(Tag().m_id == ArrayData::kDefaultVanillaArrayExtra);
+  assertx(Tag().kind() == Kind::Invalid);
 
   if (isIndirectKind(kind)) {
     m_id = k | (s_defaultTags.getTagID({name, line}) << kKindBits);
@@ -182,7 +187,7 @@ Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
   } else if (uintptr_t(name) <= std::numeric_limits<TagID>::max()) {
     m_id = k | safe_cast<TagID>(uintptr_t(name));
   } else {
-    m_id = kKindMask | (s_defaultTags.getTagID({name, -int(k)}) << kKindBits);
+    m_id = s_defaultTags.getTagID({name, -int(k)}) << kKindBits;
   }
 
   // Check that we can undo tag compression and get back the original values.
@@ -193,12 +198,12 @@ Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
 
 Tag::Kind Tag::kind() const {
   auto const bits = m_id & kKindMask;
-  if (bits < kKindMask) return Tag::Kind(bits);
+  if (bits != kExternalStorageSentinel) return Tag::Kind(bits);
   return Tag::Kind(-s_defaultTags.getTag(size_t(m_id) >> kKindBits).second);
 }
 const StringData* Tag::name() const {
   auto const bits = m_id & kKindMask;
-  if (bits == kKindMask || isIndirectKind(Kind(bits))) {
+  if (bits == kExternalStorageSentinel || isIndirectKind(Kind(bits))) {
     return s_defaultTags.getTag(size_t(m_id) >> kKindBits).first;
   } else if (!use_lowptr && isRuntimeKind(Kind(bits))) {
     return s_runtimeTags.getTag(size_t(m_id) >> kKindBits).first;

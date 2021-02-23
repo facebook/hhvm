@@ -363,13 +363,19 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       return true;
     }
 
+    if (RuntimeOption::AllowedFiles.find(fullname.c_str()) !=
+      RuntimeOption::AllowedFiles.end()) {
+      return true;
+    }
+    if (RuntimeOption::RepoAuthoritative &&
+      !RuntimeOption::EnableStaticContentFromDisk) {
+      return false;
+    }
     struct stat st;
-    return RuntimeOption::AllowedFiles.find(fullname.c_str()) !=
-      RuntimeOption::AllowedFiles.end() ||
-      ((!RuntimeOption::RepoAuthoritative ||
-        RuntimeOption::EnableStaticContentFromDisk) &&
-         (stat(m_absolutePath.c_str(), &st) == 0 &&
-          (st.st_mode & S_IFMT) == S_IFREG));
+    if (stat(m_absolutePath.c_str(), &st) != 0) {
+      return false;
+    }
+    return (st.st_mode & S_IFMT) == S_IFREG;
   }
   m_path = canon;
   m_absolutePath = String(sourceRoot) + canon;

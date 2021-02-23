@@ -276,12 +276,13 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
       in
       let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
       let expected =
-        ExpectedTy.make_and_allow_coercion
+        ExpectedTy.make_and_allow_coercion_opt
+          env
           param.param_pos
           Reason.URparam
           ty1_enforced
       in
-      let (env, te, ty2) = expr ~expected env e ~allow_awaitable:(*?*) false in
+      let (env, te, ty2) = expr ?expected env e ~allow_awaitable:(*?*) false in
       Typing_sequencing.sequence_check_expr e;
       let (env, ty1) =
         if
@@ -6333,14 +6334,15 @@ and call
             | Some (te, ty) -> (env, te, ty)
             | None ->
               let expected =
-                ExpectedTy.make_and_allow_coercion
+                ExpectedTy.make_and_allow_coercion_opt
+                  env
                   pos
                   Reason.URparam
                   param.fp_type
               in
               expr
                 ~accept_using_var:(get_fp_accept_disposable param)
-                ~expected
+                ?expected
                 env
                 e
           in

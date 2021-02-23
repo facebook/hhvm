@@ -65,6 +65,14 @@ module ExpectedTy : sig
   (* We will allow coercion to this expected type, if et_enforced=true *)
   val make_and_allow_coercion :
     Pos.t -> Typing_reason.ureason -> locl_possibly_enforced_ty -> t
+
+  (* If type is an unsolved type variable, don't create an expected type *)
+  val make_and_allow_coercion_opt :
+    Typing_env_types.env ->
+    Pos.t ->
+    Typing_reason.ureason ->
+    locl_possibly_enforced_ty ->
+    t option
 end = struct
   (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
    * enables bidirectional type checking. This module abstracts away that type so that it can be
@@ -75,6 +83,13 @@ end = struct
     ty: locl_possibly_enforced_ty;
   }
   [@@deriving show]
+
+  let make_and_allow_coercion_opt env pos reason ty =
+    let (_env, ety) = Env.expand_type env ty.et_type in
+    if is_tyvar ety then
+      None
+    else
+      Some { pos; reason; ty }
 
   let make_and_allow_coercion pos reason ty = { pos; reason; ty }
 

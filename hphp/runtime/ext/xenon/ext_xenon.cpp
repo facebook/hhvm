@@ -16,6 +16,7 @@
 */
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -51,7 +52,13 @@ TRACE_SET_MOD(xenon);
 struct XenonRequestLocalData final {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
-  void log(Xenon::SampleType t, c_WaitableWaitHandle* wh = nullptr);
+  void log(
+    Xenon::SampleType t,
+    EventHook::Source sourceType,
+    c_WaitableWaitHandle* wh = nullptr
+  );
+  static StaticString show(EventHook::Source sourceType);
+
   Array createResponse();
 
   void requestInit();
@@ -70,15 +77,22 @@ static RDS_LOCAL(XenonRequestLocalData, s_xenonData);
 // statics used by the Xenon classes
 
 const StaticString
+  s_asio("Asio"),
   s_class("class"),
   s_function("function"),
   s_file("file"),
+  s_interpreter("Interpreter"),
+  s_isWait("ioWaitSample"),
+  s_jit("Jit"),
   s_line("line"),
   s_metadata("metadata"),
-  s_time("time"),
-  s_isWait("ioWaitSample"),
+  s_native("Native"),
+  s_phpStack("phpStack"),
+  s_sourceType("sourceType"),
   s_stack("stack"),
-  s_phpStack("phpStack");
+  s_time("time"),
+  s_unwinder("Unwinder");
+
 
 namespace {
 
@@ -206,13 +220,15 @@ void Xenon::stop() {
 // the Surprise flag.  The data is gathered in thread local storage.
 // If the sample is Enter, then do not record this function name because it
 // hasn't done anything.  The sample belongs to the previous function.
-void Xenon::log(SampleType t, c_WaitableWaitHandle* wh) const {
+void Xenon::log(SampleType t,
+                EventHook::Source sourceType,
+                c_WaitableWaitHandle* wh) const {
   if (getSurpriseFlag(XenonSignalFlag)) {
     if (!RuntimeOption::XenonForceAlwaysOn) {
       clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", show(t));
-    s_xenonData->log(t, wh);
+    s_xenonData->log(t, sourceType, wh);
   }
 }
 
@@ -258,13 +274,26 @@ Array XenonRequestLocalData::createResponse() {
       s_time, frame[s_time],
       s_stack, frame[s_stack].toArray(),
       s_phpStack, parsePhpStack(frame[s_stack].toArray()),
-      s_isWait, frame[s_isWait]
+      s_isWait, frame[s_isWait],
+      s_sourceType, frame[s_sourceType]
     ));
   }
   return stacks.toArray();
 }
 
+StaticString XenonRequestLocalData::show(EventHook::Source sourceType) {
+  switch (sourceType) {
+    case EventHook::Source::Asio: return s_asio;
+    case EventHook::Source::Interpreter: return s_interpreter;
+    case EventHook::Source::Jit: return s_jit;;
+    case EventHook::Source::Native: return s_native;
+    case EventHook::Source::Unwinder: return s_unwinder;
+  }
+  always_assert(false);
+}
+
 void XenonRequestLocalData::log(Xenon::SampleType t,
+                                EventHook::Source sourceType,
                                 c_WaitableWaitHandle* wh) {
   if (!m_isProfiledRequest) return;
 
@@ -279,6 +308,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   m_stackSnapshots.append(make_darray(
     s_time, now,
     s_stack, bt,
+    s_sourceType, show(sourceType),
     s_isWait, !Xenon::isCPUTime(t)
   ));
 }

@@ -667,7 +667,8 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                bool unwind, ObjectData* phpException,
-                               size_t flags, bool isSuspend) {
+                               size_t flags, bool isSuspend,
+                               EventHook::Source sourceType) {
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
@@ -680,7 +681,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     if (Strobelight::active()) {
       Strobelight::getInstance().log();
     } else {
-      Xenon::getInstance().log(Xenon::ExitSample);
+      Xenon::getInstance().log(Xenon::ExitSample, sourceType);
     }
   }
 
@@ -747,7 +748,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   }
 }
 
-bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
+bool EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
+  return EventHook::onFunctionCall(ar, funcType, EventHook::Source::Jit);
+}
+
+bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
+                               EventHook::Source sourceType) {
   auto const flags = handle_request_surprise();
   if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
@@ -759,7 +765,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
     if (Strobelight::active()) {
       Strobelight::getInstance().log();
     } else {
-      Xenon::getInstance().log(Xenon::EnterSample);
+      Xenon::getInstance().log(Xenon::EnterSample, sourceType);
     }
   }
 
@@ -780,7 +786,8 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
   return true;
 }
 
-void EventHook::onFunctionResumeAwait(const ActRec* ar) {
+void EventHook::onFunctionResumeAwait(const ActRec* ar,
+                                      EventHook::Source sourceType) {
   auto const flags = handle_request_surprise();
 
   // Xenon
@@ -788,7 +795,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
     if (Strobelight::active()) {
       Strobelight::getInstance().log();
     } else {
-      Xenon::getInstance().log(Xenon::ResumeAwaitSample);
+      Xenon::getInstance().log(Xenon::ResumeAwaitSample, sourceType);
     }
   }
 
@@ -808,7 +815,8 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
-void EventHook::onFunctionResumeYield(const ActRec* ar) {
+void EventHook::onFunctionResumeYield(const ActRec* ar,
+                                      EventHook::Source sourceType) {
   auto const flags = handle_request_surprise();
 
   // Xenon
@@ -816,7 +824,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
     if (Strobelight::active()) {
       Strobelight::getInstance().log();
     } else {
-      Xenon::getInstance().log(Xenon::EnterSample);
+      Xenon::getInstance().log(Xenon::EnterSample, sourceType);
     }
   }
 
@@ -836,9 +844,19 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
+void EventHook::onFunctionSuspendAwaitEFJit(ActRec* suspending,
+                                         const ActRec* resumableAR) {
+  EventHook::onFunctionSuspendAwaitEF(
+    suspending,
+    resumableAR,
+    EventHook::Source::Jit
+  );
+}
+
 // Eagerly executed async function initially suspending at Await.
 void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
-                                         const ActRec* resumableAR) {
+                                         const ActRec* resumableAR,
+                                         EventHook::Source sourceType) {
   assertx(suspending->func()->isAsyncFunction());
   assertx(suspending->func() == resumableAR->func());
   assertx(isResumed(resumableAR));
@@ -849,7 +867,7 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
 
   try {
     auto const flags = handle_request_surprise();
-    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true, sourceType);
 
     if (flags & AsyncEventHookFlag) {
       auto const afwh = frame_afwh(resumableAR);
@@ -864,9 +882,14 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
   }
 }
 
+void EventHook::onFunctionSuspendAwaitEGJit(ActRec* suspending) {
+  EventHook::onFunctionSuspendAwaitEG(suspending, EventHook::Source::Jit);
+}
+
 // Eagerly executed async generator that was resumed at Yield suspending
 // at Await.
-void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
+void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending,
+                                         EventHook::Source sourceType) {
   assertx(suspending->func()->isAsyncGenerator());
   assertx(isResumed(suspending));
 
@@ -877,7 +900,7 @@ void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
 
   try {
     auto const flags = handle_request_surprise();
-    onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+    onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
 
     if (flags & AsyncEventHookFlag) {
       auto const session = AsioSession::Get();
@@ -891,16 +914,22 @@ void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
   }
 }
 
+void EventHook::onFunctionSuspendAwaitRJit(ActRec* suspending, ObjectData* child) {
+  EventHook::onFunctionSuspendAwaitR(suspending, child, EventHook::Source::Jit);
+}
+
 // Async function or async generator that was resumed at Await suspending
 // again at Await. The suspending frame has an associated AFWH/AGWH. Child
 // is the WH we are going to block on.
-void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
+void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
+                                        ObjectData* child,
+                                        EventHook::Source sourceType) {
   assertx(suspending->func()->isAsync());
   assertx(isResumed(suspending));
   assertx(child->isWaitHandle());
 
   auto const flags = handle_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
 
   if (flags & AsyncEventHookFlag) {
     assertx(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -921,9 +950,19 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
   }
 }
 
+void EventHook::onFunctionSuspendCreateContJit(ActRec* suspending,
+                                            const ActRec* resumableAR) {
+  EventHook::onFunctionSuspendCreateCont(
+    suspending,
+    resumableAR,
+    EventHook::Source::Jit
+  );
+}
+
 // Generator or async generator suspending initially at CreateCont.
 void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
-                                            const ActRec* resumableAR) {
+                                            const ActRec* resumableAR,
+                                            EventHook::Source sourceType) {
   assertx(suspending->func()->isGenerator());
   assertx(suspending->func() == resumableAR->func());
   assertx(isResumed(resumableAR));
@@ -934,7 +973,7 @@ void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
 
   try {
     auto const flags = handle_request_surprise();
-    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true, sourceType);
   } catch (...) {
     auto const resumableObj = [&]() -> ObjectData* {
       return !resumableAR->func()->isAsync()
@@ -946,13 +985,17 @@ void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
   }
 }
 
+void EventHook::onFunctionSuspendYieldJit(ActRec* suspending) {
+  EventHook::onFunctionSuspendYield(suspending, EventHook::Source::Jit);
+}
+
 // Generator or async generator suspending at Yield.
-void EventHook::onFunctionSuspendYield(ActRec* suspending) {
+void EventHook::onFunctionSuspendYield(ActRec* suspending, EventHook::Source sourceType) {
   assertx(suspending->func()->isGenerator());
   assertx(isResumed(suspending));
 
   auto const flags = handle_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
 
   if ((flags & AsyncEventHookFlag) && suspending->func()->isAsync()) {
     auto const ag = frame_async_generator(suspending);
@@ -966,14 +1009,20 @@ void EventHook::onFunctionSuspendYield(ActRec* suspending) {
   }
 }
 
-void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
+void EventHook::onFunctionReturnJit(ActRec* ar, TypedValue retval) {
+  EventHook::onFunctionReturn(ar, retval, EventHook::Source::Jit);
+}
+
+void EventHook::onFunctionReturn(ActRec* ar,
+                                 TypedValue retval,
+                                 EventHook::Source sourceType) {
   // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
 
   try {
     auto const flags = handle_request_surprise();
-    onFunctionExit(ar, &retval, false, nullptr, flags, false);
+    onFunctionExit(ar, &retval, false, nullptr, flags, false, sourceType);
 
     // Async profiler
     if ((flags & AsyncEventHookFlag) && isResumed(ar) &&
@@ -1000,7 +1049,8 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   }
 }
 
-void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
+void EventHook::onFunctionUnwind(ActRec* ar,
+                                 ObjectData* phpException) {
   // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
@@ -1008,7 +1058,7 @@ void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault
   auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
-  onFunctionExit(ar, nullptr, true, phpException, flags, false);
+  onFunctionExit(ar, nullptr, true, phpException, flags, false, EventHook::Source::Unwinder);
 }
 
 } // namespace HPHP

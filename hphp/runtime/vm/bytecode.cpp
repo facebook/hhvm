@@ -941,7 +941,15 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
 
-  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
+  if (
+    !EventHook::FunctionCall(
+      enterFnAr,
+      EventHook::NormalFunc,
+      EventHook::Source::Native
+    )
+  ) {
+    return;
+  }
   checkStack(vmStack(), enterFnAr->func(), 0);
   assertx(vmfp()->func()->contains(vmpc()));
 
@@ -2262,8 +2270,14 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // value must be removed from the stack, or the unwinder would try to free it
   // if the hook throws---but the event hook routine decrefs the return value
   // in that case if necessary.
+  // in that case if necessary.
   fp->setLocalsDecRefd();
-  frame_free_locals_inl(fp, func->numLocals(), &retval);
+  frame_free_locals_inl(
+    fp,
+    func->numLocals(),
+    &retval,
+    EventHook::Source::Interpreter
+  );
 
   if (LIKELY(!isResumed(fp))) {
     // If in an eagerly executed async function, wrap the return value into
@@ -2346,7 +2360,12 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   // value must be removed from the stack, or the unwinder would try to free it
   // if the hook throws---but the event hook routine decrefs the return value
   // in that case if necessary.
-  frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retvals[0]);
+  frame_free_locals_inl(
+    vmfp(),
+    vmfp()->func()->numLocals(),
+    &retvals[0],
+    EventHook::Source::Interpreter
+  );
 
   assertx(!vmfp()->func()->isGenerator() && !vmfp()->func()->isAsync());
 
@@ -3658,7 +3677,11 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   try {
     prepareFuncEntry(ar, numArgsInclUnpack);
 
-    return EventHook::FunctionCall(ar, EventHook::NormalFunc);
+    return EventHook::FunctionCall(
+      ar,
+      EventHook::NormalFunc,
+      EventHook::Source::Interpreter
+    );
   } catch (...) {
     // Manually unwind the pre-live or live frame, as we may be called from JIT
     // and expected to enter JIT unwinder with vmfp() set to the callee.
@@ -4953,7 +4976,11 @@ OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
     static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj)) :
     static_cast<BaseGenerator*>(Generator::fromObject(obj));
 
-  EventHook::FunctionSuspendCreateCont(fp, genData->actRec());
+  EventHook::FunctionSuspendCreateCont(
+    fp,
+    genData->actRec(),
+    EventHook::Source::Interpreter
+  );
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
@@ -4992,7 +5019,7 @@ OPTBLD_INLINE void contEnterImpl(PC origpc) {
   // Do linkage of the generator's AR.
   assertx(vmfp()->hasThis());
   movePCIntoGenerator(origpc, this_base_generator(vmfp()));
-  EventHook::FunctionResumeYield(vmfp());
+  EventHook::FunctionResumeYield(vmfp(), EventHook::Source::Interpreter);
 }
 
 OPTBLD_INLINE void iopContEnter(PC origpc, PC& pc) {
@@ -5015,7 +5042,7 @@ OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const TypedValue* key, const TypedVal
   assertx(isResumed(fp));
   assertx(func->isGenerator());
 
-  EventHook::FunctionSuspendYield(fp);
+  EventHook::FunctionSuspendYield(fp, EventHook::Source::Interpreter);
 
   auto const sfp = fp->sfp();
   auto const callOff = fp->callOffset();
@@ -5120,7 +5147,11 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     }
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
-    EventHook::FunctionSuspendAwaitEF(fp, waitHandle->actRec());
+    EventHook::FunctionSuspendAwaitEF(
+      fp,
+      waitHandle->actRec(),
+      EventHook::Source::Interpreter
+    );
 
     // Grab caller info from ActRec.
     ActRec* sfp = fp->sfp();
@@ -5147,7 +5178,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
-    EventHook::FunctionSuspendAwaitEG(fp);
+    EventHook::FunctionSuspendAwaitEG(fp, EventHook::Source::Interpreter);
 
     // Store the return value.
     vmStack().pushObjectNoRc(waitHandle);
@@ -5174,7 +5205,11 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Before adjusting the stack or doing anything, check the suspend hook.
   // This can throw.
-  EventHook::FunctionSuspendAwaitR(fp, child.get());
+  EventHook::FunctionSuspendAwaitR(
+    fp,
+    child.get(),
+    EventHook::Source::Interpreter
+  );
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.

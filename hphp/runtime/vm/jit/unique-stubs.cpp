@@ -553,7 +553,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
-    bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCall;
+    bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCallJit;
 
     v << vinvoke{
       CallSpec::direct(hook),

@@ -430,7 +430,12 @@ TypedValue* functionWrapper(ActRec* ar) {
   callFunc(func, ar, nullptr, args, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
-  frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
+  frame_free_locals_no_this_inl(
+    ar,
+    func->numLocals(),
+    &rv,
+    EventHook::Source::Native
+  );
   tvCopy(rv, *ar->retSlot());
   ar->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
   return ar->retSlot();
@@ -467,9 +472,19 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
-    frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
+    frame_free_locals_no_this_inl(
+      ar,
+      func->numLocals(),
+      &rv,
+      EventHook::Source::Native
+    );
   } else {
-    frame_free_locals_inl(ar, func->numLocals(), &rv);
+    frame_free_locals_inl(
+      ar,
+      func->numLocals(),
+      &rv,
+      EventHook::Source::Native
+    );
   }
   tvCopy(rv, *ar->retSlot());
   ar->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;

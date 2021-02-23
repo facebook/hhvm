@@ -18,6 +18,7 @@
 #pragma once
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include <semaphore.h>
 
 /*
@@ -122,7 +123,10 @@ struct Xenon final {
   int64_t getAndClearMissedSampleCount();
   // Log a sample if XenonSignalFlag is set. Also clear it, unless
   // in always-on mode.
-  void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
+  void log(
+    SampleType t,
+    EventHook::Source sourceType,
+    c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
   void onTimer();
   bool getIsProfiledRequest();
@@ -135,4 +139,3 @@ struct Xenon final {
 #endif
 };
 }
-

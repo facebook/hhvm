@@ -121,7 +121,8 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 }
 
 void ALWAYS_INLINE
-frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
+frame_free_locals_inl_no_hook(ActRec* fp,
+                              int numLocals) {
   frame_free_locals_helper_inl(fp, numLocals);
   if (fp->func()->cls() && fp->hasThis()) {
     decRefObj(fp->getThis());
@@ -129,15 +130,21 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
 }
 
 void ALWAYS_INLINE
-frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
+frame_free_locals_inl(ActRec* fp,
+                      int numLocals,
+                      TypedValue* rv,
+                      EventHook::Source sourceType) {
   frame_free_locals_inl_no_hook(fp, numLocals);
-  EventHook::FunctionReturn(fp, *rv);
+  EventHook::FunctionReturn(fp, *rv, sourceType);
 }
 
 void ALWAYS_INLINE
-frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
+frame_free_locals_no_this_inl(ActRec* fp,
+                              int numLocals,
+                              TypedValue* rv,
+                              EventHook::Source sourceType) {
   frame_free_locals_helper_inl(fp, numLocals);
-  EventHook::FunctionReturn(fp, *rv);
+  EventHook::FunctionReturn(fp, *rv, sourceType);
 }
 
 // Helper for iopFCallBuiltin.

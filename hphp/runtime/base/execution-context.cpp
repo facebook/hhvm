@@ -1678,7 +1678,7 @@ static void prepareAsyncFuncEntry(ActRec* enterFnAr,
       ? resumable->suspendOffset()
       : resumable->resumeFromAwaitOffset()
   );
-  EventHook::FunctionResumeAwait(enterFnAr);
+  EventHook::FunctionResumeAwait(enterFnAr, EventHook::Source::Asio);
 }
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,

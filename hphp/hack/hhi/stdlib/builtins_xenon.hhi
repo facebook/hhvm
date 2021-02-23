@@ -17,6 +17,7 @@ type XenonSample = shape(
   /* HH_FIXME[2071] */
   'phpStack' => varray,
   'ioWaitSample' => bool,
+  'sourceType' => string,
 );
 
 /**

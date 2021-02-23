@@ -452,17 +452,17 @@ static CallMap s_callMap {
                                    {{SSA, 0}, {TV, 1}}},
 
     /* surprise flag support */
-    {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEF, DNone,
+    {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEFJit, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},
-    {SuspendHookAwaitEG, &EventHook::onFunctionSuspendAwaitEG, DNone,
+    {SuspendHookAwaitEG, &EventHook::onFunctionSuspendAwaitEGJit, DNone,
                             SSync, {{SSA, 0}}},
-    {SuspendHookAwaitR, &EventHook::onFunctionSuspendAwaitR, DNone,
+    {SuspendHookAwaitR, &EventHook::onFunctionSuspendAwaitRJit, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},
-    {SuspendHookCreateCont, &EventHook::onFunctionSuspendCreateCont, DNone,
+    {SuspendHookCreateCont, &EventHook::onFunctionSuspendCreateContJit, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},
-    {SuspendHookYield, &EventHook::onFunctionSuspendYield, DNone,
+    {SuspendHookYield, &EventHook::onFunctionSuspendYieldJit, DNone,
                             SSync, {{SSA, 0}}},
-    {ReturnHook, &EventHook::onFunctionReturn, DNone,
+    {ReturnHook, &EventHook::onFunctionReturnJit, DNone,
                             SSync, {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */

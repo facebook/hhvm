@@ -385,7 +385,7 @@ void retranslateAll() {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
     BootStats::Block timer("RTA_translate_and_relocate",
                            RuntimeOption::ServerExecutionMode());
-    {
+    auto const runParallelRetranslate = [&] {
       Treadmill::Session session(Treadmill::SessionKind::Retranslate);
       auto bufp = codeBuffer.get();
       for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
@@ -406,10 +406,29 @@ void retranslateAll() {
         createSrcRecs(func);
         enqueueRetranslateOptRequest(&jobs.back());
       }
+    };
+    runParallelRetranslate();
+
+    if (RuntimeOption::EvalJitRerunRetranslateAll) {
+      if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+        dispatcher->waitEmpty(false);
+      }
+      jobs.clear();
+      jobs.reserve(nFuncs);
+      {
+        ProfData::Session pds;
+        for (auto i = 0u; i < nFuncs; ++i) {
+          auto const fid = sortedFuncs[i];
+          profData()->unsetOptimized(fid);
+        }
+        profData()->clearAllOptimizedSKs();
+        clearCachedInliningCost();
+      }
+
+      runParallelRetranslate();
     }
 
     // 5) Relocate the machine code into code.hot in the desired order
-
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {

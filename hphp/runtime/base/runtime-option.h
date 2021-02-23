@@ -816,6 +816,7 @@ struct RuntimeOption {
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
   F(uint32_t, JitRetranslateAllRequest, retranslateAllRequestDefault()) \
   F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
+  F(bool,     JitRerunRetranslateAll,  false)                           \
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
   F(bool,     JitPGOVasmBlockCountersForceSaveSF, false)                \

@@ -834,5 +834,9 @@ void setBaseInliningProfCount(uint64_t value) {
   FTRACE(1, "setBaseInliningProfCount: {}\n", value);
 }
 
+void clearCachedInliningCost() {
+  s_inlCostCache->clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

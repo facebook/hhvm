@@ -425,10 +425,17 @@ struct ProfData {
    */
   void setOptimized(FuncId funcId) {
     auto func = Func::fromFuncId(funcId);
-    DEBUG_ONLY auto const changed =
+    DEBUG_ONLY auto const previousValue =
       func->atomicFlags().set(Func::Flags::Optimized);
-    assertx(!changed);
+    assertx(!previousValue);
     m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
+  }
+  void unsetOptimized(FuncId funcId) {
+    auto func = Func::fromFuncId(funcId);
+    DEBUG_ONLY auto const previousValue =
+      func->atomicFlags().unset(Func::Flags::Optimized);
+    assertx(previousValue);
+    m_optimizedFuncCount.fetch_sub(1, std::memory_order_relaxed);
   }
   void setOptimized(SrcKey sk) {
     m_optimizedSKs.emplace(sk.toAtomicInt(), true).first->second = true;
@@ -437,6 +444,9 @@ struct ProfData {
   /*
    * Forget that a SrcKey is optimized.
    */
+  void clearAllOptimizedSKs() {
+    m_optimizedSKs.clear();
+  }
   void clearOptimized(SrcKey sk) {
     auto const it = m_optimizedSKs.find(sk.toAtomicInt());
     if (it == m_optimizedSKs.end()) return;

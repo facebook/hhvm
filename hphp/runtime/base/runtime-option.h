@@ -897,7 +897,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
   /* Temporarily only enable in debug builds so the optimizations get
    * tested */                                                          \
-  F(bool, HHIRLoadEnableTeardownOpts, debug)                            \
+  F(bool, HHIRLoadEnableTeardownOpts, false)                            \
   F(uint32_t, HHIRLoadStackTeardownMaxDecrefs, 8)                       \
   F(uint32_t, HHIRLoadThrowMaxDecrefs, 64)                              \
   F(bool, HHIRStorePRE,                true)                            \

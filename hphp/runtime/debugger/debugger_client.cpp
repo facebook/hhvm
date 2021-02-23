@@ -73,13 +73,14 @@ static boost::scoped_ptr<DebuggerClient> debugger_client;
 const StaticString
   s_name("name"),
   s_cmds("cmds"),
+  s_wordwrap("wordwrap"),
   s_hhvm_never_save_config("hhvm.never_save_config");
 
 static String wordwrap(const String& str, int width /* = 75 */,
                        const String& wordbreak /* = "\n" */,
                        bool cut /* = false */) {
   Array args = make_varray(str, width, wordbreak, cut);
-  return vm_call_user_func("wordwrap", args).toString();
+  return vm_call_user_func(Func::lookup(s_wordwrap.get()), args).toString();
 }
 
 struct DebuggerExtension final : Extension {

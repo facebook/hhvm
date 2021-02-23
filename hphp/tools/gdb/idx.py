@@ -286,6 +286,22 @@ def object_data_at(obj, cls, prop_name_or_slot, hasher=None):
     return tv_layout_at(T("HPHP::ObjectProps"), props_base, idx)
 
 
+def packed_array_at(base, idx):
+    try:
+        idx = int(idx)
+        base = base.cast(T('char').pointer())
+        quot = idx // 8
+        rem = idx % 8
+        chunk = base + T("HPHP::PackedBlock").sizeof * quot
+        tyaddr = chunk + rem
+        ty = tyaddr.cast(T("HPHP::DataType").pointer()).dereference()
+        valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
+        val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
+        return pretty_tv(ty, val)
+    except:
+        pass
+
+
 #------------------------------------------------------------------------------
 # `idx' command.
 

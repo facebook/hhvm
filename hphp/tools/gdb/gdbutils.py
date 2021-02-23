@@ -449,7 +449,7 @@ def pretty_tv(t, data):
         val = int(data['num'])
 
     elif t == DT('HPHP::KindOfDouble'):
-        val = double(data['dbl'])
+        val = float(data['dbl'])
 
     elif (t == DT('HPHP::KindOfString')
           or t == DT('HPHP::KindOfPersistentString')):

@@ -256,26 +256,24 @@ class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
 
     class _packed_iterator(_BaseIterator):
-        def __init__(self, begin, end):
-            self.cur = begin
-            self.end = end
-            self.count = 0
+        def __init__(self, base, size):
+            self.base = base
+            self.size = size
+            self.cur = 0
 
         def __next__(self):
-            if self.cur == self.end:
+            if self.cur == self.size:
                 raise StopIteration
 
-            elt = self.cur
-            key = '%d' % self.count
-
+            key = '%d' % self.cur
             try:
-                data = elt.dereference()
+                val = idx.packed_array_at(self.base, self.cur)
             except gdb.MemoryError:
                 data = '<invalid>'
 
             self.cur = self.cur + 1
-            self.count = self.count + 1
-            return (key, data)
+
+            return (key, val)
 
     class _mixed_iterator(_BaseIterator):
         def __init__(self, begin, end):
@@ -364,7 +362,7 @@ class ArrayDataPrinter(object):
 
         if self.kind == self._kind('Packed') or self.kind == self._kind('Vec'):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
-            return self._packed_iterator(pelm, pelm + self.val['m_size'])
+            return self._packed_iterator(pelm, self.val['m_size'])
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             pelm = data.cast(T('HPHP::MixedArrayElm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])

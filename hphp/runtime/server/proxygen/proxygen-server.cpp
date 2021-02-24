@@ -882,6 +882,20 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
     bool isDefault) {
   wangle::SSLContextConfig sslCtxConfig;
 
+#ifdef FACEBOOK // proxygen update + folly update
+  if (RuntimeOption::SSLClientAuthLevel == 2) {
+    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::ALWAYS;
+  } else if (RuntimeOption::SSLClientAuthLevel == 1) {
+    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
+  } else {
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  }
+#else
   if (RuntimeOption::SSLClientAuthLevel == 2) {
     sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
     sslCtxConfig.clientVerification =
@@ -894,6 +908,7 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
     sslCtxConfig.clientVerification =
       folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
   }
+#endif
 
   try {
     sslCtxConfig.setCertificate(path.certPath, path.keyPath, "");

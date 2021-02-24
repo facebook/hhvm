@@ -2940,7 +2940,7 @@ static bool php_openssl_validate_iv(
   }
 
   if (piv.size() < iv_required_len) {
-    raise_warning("IV passed is only %d bytes long, cipher "
+    raise_warning("IV passed is only %ld bytes long, cipher "
                   "expects an IV of precisely %d bytes, padding with \\0",
                   piv.size(), iv_required_len);
     memcpy(iv_new, piv.data(), piv.size());
@@ -2949,7 +2949,7 @@ static bool php_openssl_validate_iv(
     return true;
   }
 
-  raise_warning("IV passed is %d bytes long which is longer than the %d "
+  raise_warning("IV passed is %ld bytes long which is longer than the %d "
                 "expected by selected cipher, truncating", piv.size(),
                 iv_required_len);
   memcpy(iv_new, piv.data(), iv_required_len);

@@ -7647,6 +7647,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
     if (c == 0xFF)
       return 0;
     marker = c;
+    if (ImageInfo->Thumbnail.size - 2 < pos) return 0;
     length = php_jpg_get16(data+pos);
     if (length > ImageInfo->Thumbnail.size || pos >= ImageInfo->Thumbnail.size - length) {
       return 0;

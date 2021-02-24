@@ -1225,8 +1225,8 @@ struct MemoProfiler final : Profiler {
           if (mme.second.m_return_value != fr) all_same = false;
           count += mme.second.m_count;
           auto ser_len = mme.second.m_return_value.length();
-          min_ser_len = std::min(min_ser_len, ser_len);
-          max_ser_len = std::max(max_ser_len, ser_len);
+          min_ser_len = std::min<int64_t>(min_ser_len, ser_len);
+          max_ser_len = std::max<int64_t>(max_ser_len, ser_len);
           if (mme.second.m_count > 1) any_multiple = true;
         }
         if (!any_multiple && !all_same) continue;

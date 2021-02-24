@@ -443,7 +443,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
         lazyClassToStringHelper(value.toLazyClassVal());
       auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {
-        throw Exception("Size of serialized string (%d) exceeds max", size);
+        throw Exception("Size of serialized string (%ld) exceeds max", size);
       }
       StringBuffer sb;
       sb.append("s:");

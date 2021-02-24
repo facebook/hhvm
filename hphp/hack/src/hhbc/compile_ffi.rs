@@ -101,50 +101,52 @@ impl<'a> std::convert::From<&CEnv> for compile::Env<&'a str> {
 
 // Return a result of `compile_from_text_cpp_ffi` to Rust.
 #[no_mangle]
-extern "C" fn compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
-    let _ = unsafe { std::ffi::CString::from_raw(s) };
+unsafe extern "C" fn compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
+    // Safety:
+    //   - This should only ever be called on a pointer obtained by
+    //     `CString::into_raw`.
+    //   - `CString::from_raw` and `CString::to_raw` should not be
+    //     used with C functions that can modify the string's length.
+    let _ = std::ffi::CString::from_raw(s);
 }
 
 // Compile to HHAS from source text.
 #[no_mangle]
-extern "C" fn compile_from_text_cpp_ffi(
+unsafe extern "C" fn compile_from_text_cpp_ffi(
     env: usize,
     source_text: *const c_char,
     output_cfg: usize,
     err_buf: usize,
 ) -> *const c_char {
-    // We rely on the C caller that `env` can be legitmately
+    // Safety: We rely on the C caller that `env` can be legitmately
     // reinterpreted as a `*const CBuf` and that on doing so, it
     // points to a valid properly initialized value.
-    let err_buf: &cpp_helper::CBuf =
-        unsafe { cpp_helper::from_ptr(err_buf, std::convert::identity) }.unwrap();
+    let err_buf: &cpp_helper::CBuf = cpp_helper::from_ptr(err_buf, std::convert::identity).unwrap();
     let buf_len: c_int = err_buf.buf_len;
-    // We rely on the C aller that `err_buf.buf` be valid for reads
-    // and write for `buf_len * mem::sizeof::<u8>()` bytes.
-    let buf: &mut [u8] = unsafe { cpp_helper::cstr::to_mut_u8(err_buf.buf, buf_len) };
-    // We rely on the C caller that `output_cfg` can be legitmately
-    // reinterpreted as a `*const COutputConfig` and that on doing so,
-    // it points to a valid properly initialized value.
-    let _output_config: RustOutputConfig = unsafe {
-        cpp_helper::from_ptr(
-            output_cfg,
-            <RustOutputConfig as std::convert::From<&COutputConfig>>::from,
-        )
-    }
+    // Safety : We rely on the C aller that `err_buf.buf` be valid for
+    // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
+    let buf: &mut [u8] = cpp_helper::cstr::to_mut_u8(err_buf.buf, buf_len);
+    // Safety: We rely on the C caller that `output_cfg` can be
+    // legitmately reinterpreted as a `*const COutputConfig` and that
+    // on doing so, it points to a valid properly initialized value.
+    let _output_config: RustOutputConfig = cpp_helper::from_ptr(
+        output_cfg,
+        <RustOutputConfig as std::convert::From<&COutputConfig>>::from,
+    )
     .unwrap();
-    // We rely on the C caller that `source_text` be a properly iniitalized
-    // null-terminated C string.
-    let text: &[u8] = unsafe { cpp_helper::cstr::to_u8(source_text) };
+    // Safety: We rely on the C caller that `source_text` be a
+    // properly iniitalized null-terminated C string.
+    let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
 
     let job_builder = move || {
         move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-            // We rely on the C caller that `env` can be legitmately
-            // reinterpreted as a `*const CBuf` and that on doing so,
-            // it points to a valid properly initialized value.
-            let env = unsafe {
+            // Safety: We rely on the C caller that `env` can be
+            // legitmately reinterpreted as a `*const CBuf` and that
+            // on doing so, it points to a valid properly initialized
+            // value.
+            let env =
                 cpp_helper::from_ptr(env, <compile::Env<&str> as std::convert::From<&CEnv>>::from)
-            }
-            .unwrap();
+                    .unwrap();
             let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
             let mut w = String::new();
             match compile::from_text_(&env, stack_limit, &mut w, source_text) {
@@ -163,13 +165,13 @@ extern "C" fn compile_from_text_cpp_ffi(
         // Not always printing warning here because this would fail
         // some HHVM tests.
         if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            // We rely on the C caller that `env` can be legitmately
-            // reinterpreted as a `*const CBuf` and that on doing so,
-            // it points to a valid properly initialized value.
-            let env = unsafe {
+            // Safety : We rely on the C caller that `env` can be
+            // legitmately reinterpreted as a `*const CBuf` and that
+            // on doing so, it points to a valid properly initialized
+            // value.
+            let env =
                 cpp_helper::from_ptr(env, <compile::Env<&str> as std::convert::From<&CEnv>>::from)
-            }
-            .unwrap();
+                    .unwrap();
             eprintln!(
                 "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
                 (stack_size_tried - stack_slack(stack_size_tried)) / KI,
@@ -205,9 +207,19 @@ extern "C" fn compile_from_text_cpp_ffi(
                     buf.len()
                 );
             } else {
-                unsafe {
-                    std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len())
-                };
+                // Safety:
+                //   - `e` must be valid for reads of `e.len() *
+                //     size_of::<u8>()` bytes;
+                //   - `buf` must be valid for writes of of `e.len() *
+                //     size_of::<u8>()` bytes;
+                //   - The region of memory beginning at `e` with a
+                //     size of of `e.len() * size_of::<u8>()` bytes must
+                //     not overlap with the region of memory beginning
+                //     at `buf` with the same size;
+                //   - Even if the of `e.len() * size_of::<u8>()` is
+                //     `0`, the pointers must be non-null and properly
+                //     aligned.
+                std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len());
                 buf[e.len()] = 0;
             }
             std::ptr::null()

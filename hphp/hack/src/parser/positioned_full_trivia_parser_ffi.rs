@@ -47,36 +47,39 @@ impl std::convert::From<&CParserEnv> for parser_core_types::parser_env::ParserEn
 
 /// Return result of `parse_positioned_full_trivia_cpp_ffi` to Rust.
 #[no_mangle]
-extern "C" fn parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut libc::c_char) {
-    let _ = unsafe { std::ffi::CString::from_raw(s) };
+unsafe extern "C" fn parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut libc::c_char) {
+    // Safety:
+    //   - This should only ever be called on a pointer obtained by
+    //     `CString::into_raw`.
+    //   - `CString::from_raw` and `CString::to_raw` should not be
+    //     used with C functions that can modify the string's length.
+    let _ = std::ffi::CString::from_raw(s);
 }
 
 /// Calculate a parse tree from source text and render it as json.
 #[no_mangle]
-extern "C" fn parse_positioned_full_trivia_cpp_ffi(
+unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
     filename: *const libc::c_char,
     source_text: *const libc::c_char,
     env: usize,
 ) -> *const libc::c_char {
-    // We rely on the C caller that `filename` be a
-    // properly initialized null-terminated C string and we do
-    // not check that the bytes it contains are valid UTF-8.
+    // Safety: We rely on the C caller that `filename` be a properly
+    // initialized null-terminated C string and we do not check that
+    // the bytes it contains are valid UTF-8.
     let filepath = oxidized::relative_path::RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(unsafe { cpp_helper::cstr::to_str(filename) }),
+        std::path::PathBuf::from(cpp_helper::cstr::to_str(filename)),
     );
-    // We rely on the C caller that `text` be a properly iniitalized
-    // null-terminated C string.
-    let text: &[u8] = unsafe { cpp_helper::cstr::to_u8(source_text) };
-    // We rely on the C caller that `env` can be legitmately
+    // Safety : We rely on the C caller that `text` be a properly
+    // iniitalized null-terminated C string.
+    let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
+    // Safety : We rely on the C caller that `env` can be legitmately
     // reinterpreted as a `*const CParserEnv` and that on doing so, it
     // points to a valid properly initialized value.
-    let env: parser_core_types::parser_env::ParserEnv = unsafe {
-        cpp_helper::from_ptr(
-            env,
-            <parser_core_types::parser_env::ParserEnv as std::convert::From<&CParserEnv>>::from,
-        )
-    }
+    let env: parser_core_types::parser_env::ParserEnv = cpp_helper::from_ptr(
+        env,
+        <parser_core_types::parser_env::ParserEnv as std::convert::From<&CParserEnv>>::from,
+    )
     .unwrap();
     let indexed_source = parser_core_types::indexed_source_text::IndexedSourceText::new(
         parser_core_types::source_text::SourceText::make(ocamlrep::rc::RcOc::new(filepath), text),
@@ -91,9 +94,9 @@ extern "C" fn parse_positioned_full_trivia_cpp_ffi(
         env,
         stack_limit,
     ) {
-        Ok(()) =>
-        // No runtime assertion is made that `v` contains no 0 bytes.
-        unsafe {
+        Ok(()) => {
+            // Safety : No runtime assertion is made that `v` contains no
+            // 0 bytes.
             cpp_helper::cstr::from_vec_u8(serializer.into_inner())
         }
         _ => std::ptr::null(),

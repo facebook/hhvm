@@ -14,21 +14,21 @@ use oxidized::relative_path::RelativePath;
 use facts::facts_parser::*;
 
 #[no_mangle]
-extern "C" fn extract_as_json_cpp_ffi(
+unsafe extern "C" fn extract_as_json_cpp_ffi(
     flags: i32,
     filename: *const c_char,
     text_ptr: *const c_char,
     mangle_xhp: bool,
 ) -> *const c_char {
-    //  We rely on the C caller that `text_ptr` be a valid
+    //  Safety : We rely on the C caller that `text_ptr` be a valid
     //  null-terminated C string.
-    let text = unsafe { cpp_helper::cstr::to_u8(text_ptr) };
-    // We rely on the C caller that `filename` be a valid
+    let text = cpp_helper::cstr::to_u8(text_ptr);
+    // Safety: We rely on the C caller that `filename` be a valid
     // null-terminated C string. Also, we do not check that the bytes
     // contained by `filename` are valid UTF-8.
     let filename = RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(unsafe { cpp_helper::cstr::to_str(filename) }),
+        std::path::PathBuf::from(cpp_helper::cstr::to_str(filename)),
     );
     match extract_as_json_ffi0(
         ((1 << 0) & flags) != 0, // php5_compat_mode
@@ -51,8 +51,13 @@ extern "C" fn extract_as_json_cpp_ffi(
 
 // Return a result of `extract_as_json_cpp_ffi` to Rust.
 #[no_mangle]
-extern "C" fn extract_as_json_free_string_cpp_ffi(s: *mut c_char) {
-    let _ = unsafe { std::ffi::CString::from_raw(s) };
+unsafe extern "C" fn extract_as_json_free_string_cpp_ffi(s: *mut c_char) {
+    // Safety:
+    //   - This should only ever be called on a pointer obtained by
+    //     `CString::into_raw`.
+    //   - `CString::from_raw` and `CString::to_raw` should not be
+    //     used with C functions that can modify the string's length.
+    let _ = std::ffi::CString::from_raw(s);
 }
 
 ocaml_ffi! {

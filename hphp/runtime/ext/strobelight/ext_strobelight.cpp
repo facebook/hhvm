@@ -110,7 +110,10 @@ bool logToUSDT(const Array& bt) {
         assertx(isStringType(type(file_name)));
         strncpy(frame->file_name,
                 val(file_name).pstr->data(),
-                std::min(val(file_name).pstr->size(), strobelight::kFileNameMax));
+                std::min<int64_t>(
+                  val(file_name).pstr->size(),
+                  strobelight::kFileNameMax
+                ));
         frame->file_name[strobelight::kFileNameMax - 1] = '\0';
       }
 
@@ -119,7 +122,10 @@ bool logToUSDT(const Array& bt) {
         assertx(isStringType(type(class_name)));
         strncpy(frame->class_name,
                 val(class_name).pstr->data(),
-                std::min(val(class_name).pstr->size(), strobelight::kClassNameMax));
+                std::min<int64_t>(
+                  val(class_name).pstr->size(),
+                  strobelight::kClassNameMax
+                ));
         frame->class_name[strobelight::kClassNameMax - 1] = '\0';
       }
 
@@ -128,8 +134,10 @@ bool logToUSDT(const Array& bt) {
         assertx(isStringType(type(function_name)));
         strncpy(frame->function,
                 val(function_name).pstr->data(),
-                std::min(val(function_name).pstr->size(),
-                         strobelight::kFunctionMax));
+                std::min<int64_t>(
+                  val(function_name).pstr->size(),
+                  strobelight::kFunctionMax
+                ));
         frame->function[strobelight::kFunctionMax - 1] = '\0';
       }
 

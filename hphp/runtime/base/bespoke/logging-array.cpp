@@ -64,14 +64,28 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
 
 template <typename... Ts>
 void logEvent(const LoggingArray* lad, EntryTypes newTypes,
+              const KeyOrder& keyOrder,
               ArrayOp op, Ts&&... args) {
   lad->profile->logEntryTypes(lad->entryTypes, newTypes);
+  lad->profile->logKeyOrders(keyOrder);
   lad->profile->logEvent(op, std::forward<Ts>(args)...);
 }
 
 template <typename... Ts>
+void logEvent(const LoggingArray* lad, EntryTypes newTypes,
+              ArrayOp op, Ts&&... args) {
+  logEvent(lad, newTypes, lad->keyOrder, op, std::forward<Ts>(args)...);
+}
+
+template <typename... Ts>
+void logEvent(const LoggingArray* lad, const KeyOrder& keyOrder,
+              ArrayOp op, Ts&&... args) {
+  logEvent(lad, lad->entryTypes, keyOrder, op, std::forward<Ts>(args)...);
+}
+
+template <typename... Ts>
 void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
-  logEvent(lad, lad->entryTypes, op, std::forward<Ts>(args)...);
+  logEvent(lad, lad->entryTypes, lad->keyOrder, op, std::forward<Ts>(args)...);
 }
 
 // PRc|CRc method that returns a copy of the vanilla array `vad` with the
@@ -154,7 +168,8 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
     tvIsString(k) ? profile->logEvent(ArrayOp::ConstructStr, val(k).pstr, v)
                   : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
   });
-  return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad));
+  return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad),
+                            KeyOrder::ForArray(ad));
 }
 
 void profileArrLikeProps(ObjectData* obj) {
@@ -198,7 +213,7 @@ const LoggingArray* LoggingArray::As(const ArrayData* ad) {
 }
 
 LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
-                                 EntryTypes ms) {
+                                 EntryTypes ms, const KeyOrder& ko) {
   assertx(ad->isVanilla());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
@@ -208,6 +223,7 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = ms;
+  lad->keyOrder = ko;
   assertx(lad->checkInvariants());
   return lad;
 }
@@ -225,6 +241,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = EntryTypes::ForArray(ad);
+  lad->keyOrder = KeyOrder::ForArray(ad);
   assertx(lad->checkInvariants());
   return lad;
 }
@@ -362,7 +379,8 @@ TypedValue countedValue(TypedValue val) {
 LoggingArray* escalate(LoggingArray* lad, ArrayData* result) {
   lad->updateSize();
   if (result == lad->wrapped) return lad;
-  return LoggingArray::Make(result, lad->profile, lad->entryTypes);
+  return LoggingArray::Make(result, lad->profile,
+                            lad->entryTypes, lad->keyOrder);
 }
 
 LoggingArray* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
@@ -371,7 +389,18 @@ LoggingArray* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
     lad->entryTypes = ms;
     return lad;
   }
-  return LoggingArray::Make(result, lad->profile, ms);
+  return LoggingArray::Make(result, lad->profile, ms, lad->keyOrder);
+}
+
+LoggingArray* escalate(LoggingArray* lad, ArrayData* result,
+                       EntryTypes ms, const KeyOrder& ko) {
+  lad->updateSize();
+  if (result == lad->wrapped) {
+    lad->entryTypes = ms;
+    lad->keyOrder = ko;
+    return lad;
+  }
+  return LoggingArray::Make(result, lad->profile, ms, ko);
 }
 
 arr_lval escalate(LoggingArray* lad, arr_lval result) {
@@ -398,6 +427,15 @@ decltype(auto) mutate(LoggingArray* lad, EntryTypes ms, F&& f) {
   return escalate(lad, f(lad->wrapped), ms);
 }
 
+template <typename F>
+decltype(auto) mutate(LoggingArray* lad, EntryTypes ms,
+                      const KeyOrder& ko, F&& f) {
+  auto const cow = lad->cowCheck();
+  if (cow) lad->wrapped->incRefCount();
+  SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
+  return escalate(lad, f(lad->wrapped), ms, ko);
+}
+
 tv_lval elem(tv_lval lvalIn, arr_lval result) {
   result.type() = dt_modulo_persistence(result.type());
   auto const ladIn = LoggingArray::As(lvalIn.val().parr);
@@ -410,12 +448,13 @@ tv_lval elem(tv_lval lvalIn, arr_lval result) {
 }
 
 template <typename F>
-LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms, F&& f) {
+LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms,
+                         const KeyOrder& ko, F&& f) {
   auto const cow = lad->cowCheck();
   if (cow) lad->wrapped->incRefCount();
   auto const res = f(lad->wrapped);
   if (cow || res == lad->wrapped) {
-    auto const ladNew = escalate(lad, res, ms);
+    auto const ladNew = escalate(lad, res, ms, ko);
     if (ladNew != lad && lad->decReleaseCheck()) {
       LoggingArray::ZombieRelease(lad);
     }
@@ -425,7 +464,7 @@ LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms, F&& f) {
   auto const profile = lad->profile;
   assertx(lad->decReleaseCheck());
   LoggingArray::ZombieRelease(lad);
-  return LoggingArray::Make(res, profile, ms);
+  return LoggingArray::Make(res, profile, ms, ko);
 }
 
 }
@@ -478,22 +517,28 @@ tv_lval LoggingArray::ElemStr(
 ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
-  logEvent(lad, ms, ArrayOp::SetInt, k, v);
-  return mutateMove(lad, ms, [&](ArrayData* w) { return w->setMove(k, v); });
+  auto const ko = KeyOrder::MakeInvalid();
+  logEvent(lad, ms, ko, ArrayOp::SetInt, k, v);
+  return mutateMove(lad, ms, ko,
+                    [&](ArrayData* w) { return w->setMove(k, v); });
 }
 ArrayData* LoggingArray::SetStrMove(LoggingArray* lad, StringData* k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
-  logEvent(lad, ms, ArrayOp::SetStr, k, v);
-  return mutateMove(lad, ms, [&](ArrayData* w) { return w->setMove(k, v); });
+  auto const ko = lad->keyOrder.insert(k);
+  logEvent(lad, ms, ko, ArrayOp::SetStr, k, v);
+  return mutateMove(lad, ms, ko,
+                    [&](ArrayData* w) { return w->setMove(k, v); });
 }
 ArrayData* LoggingArray::RemoveInt(LoggingArray* lad, int64_t k) {
   logEvent(lad, ArrayOp::RemoveInt, k);
   return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
 }
 ArrayData* LoggingArray::RemoveStr(LoggingArray* lad, const StringData* k) {
-  logEvent(lad, ArrayOp::RemoveStr, k);
-  return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
+  auto const ko = lad->keyOrder.remove(k);
+  logEvent(lad, ko, ArrayOp::RemoveStr, k);
+  return mutate(lad, lad->entryTypes, ko,
+                [&](ArrayData* w) { return w->remove(k); });
 }
 
 ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
@@ -501,12 +546,16 @@ ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
-  logEvent(lad, ms, ArrayOp::Append, v);
-  return mutateMove(lad, ms, [&](ArrayData* w) { return w->appendMove(v); });
+  auto const ko = KeyOrder::MakeInvalid();
+  logEvent(lad, ms, ko, ArrayOp::Append, v);
+  return mutateMove(lad, ms, ko,
+                    [&](ArrayData* w) { return w->appendMove(v); });
 }
 ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
-  logEvent(lad, ArrayOp::Pop);
-  return mutate(lad, [&](ArrayData* w) { return w->pop(ret); });
+  auto const ko = lad->keyOrder.pop();
+  logEvent(lad, ko, ArrayOp::Pop);
+  return mutate(lad, lad->entryTypes, ko,
+                [&](ArrayData* w) { return w->pop(ret); });
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -514,7 +563,8 @@ ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
 namespace {
 ArrayData* convert(LoggingArray* lad, ArrayData* result) {
   if (result != lad->wrapped) {
-    return LoggingArray::Make(result, lad->profile, lad->entryTypes);
+    return LoggingArray::Make(result, lad->profile,
+                              lad->entryTypes, lad->keyOrder);
   }
   lad->updateKindAndLegacy();
   return lad;

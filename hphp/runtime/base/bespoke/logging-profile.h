@@ -18,6 +18,7 @@
 #define HPHP_LOGGING_PROFILE_H_
 
 #include "hphp/runtime/base/bespoke/entry-types.h"
+#include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
@@ -161,6 +162,8 @@ struct LoggingProfile {
                                               integralHashCompare<uint16_t>>;
   using EntryTypesMap = folly::F14FastMap<EntryTypesMapKey, CopyAtomic<size_t>,
                                           EntryTypesMapHasher>;
+  using KeyOrderMap =
+    std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
 
   // The content of the logging profile that can be freed after layout selection.
   struct LoggingProfileData {
@@ -172,6 +175,7 @@ struct LoggingProfile {
     ArrayData* staticSampledArray = nullptr;
     EventMap events;
     EntryTypesMap entryTypes;
+    KeyOrderMap keyOrders;
   };
 
   explicit LoggingProfile(LoggingProfileKey key);
@@ -193,6 +197,7 @@ struct LoggingProfile {
   void logEvent(ArrayOp op, const StringData* k, TypedValue v);
 
   void logEntryTypes(EntryTypes before, EntryTypes after);
+  void logKeyOrders(const KeyOrder&);
 
   // TODO(kshaunak): Refactor this class so that we automatically construct
   // this cached array when we set the layout. (We should make layout.apply
@@ -219,6 +224,8 @@ using SinkProfileKey = std::pair<TransID, SrcKey>;
 // We'll store a SinkProfile for each place where an array is used.
 struct SinkProfile {
   using SourceMap = folly::F14FastMap<LoggingProfile*, CopyAtomic<size_t>>;
+  using KeyOrderMap =
+    std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
 
   static constexpr size_t kNumArrTypes = ArrayData::kNumKinds / 2;
   static constexpr size_t kNumKeyTypes = int(KeyTypes::Any) + 1;
@@ -239,6 +246,7 @@ struct SinkProfile {
     std::atomic<uint64_t> sampledCount = 0;
     std::atomic<uint64_t> unsampledCount = 0;
     SourceMap sources;
+    KeyOrderMap keyOrders;
   };
 
   void update(const ArrayData* ad);

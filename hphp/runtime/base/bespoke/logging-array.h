@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/entry-types.h"
+#include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -35,7 +36,7 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* As(ArrayData* ad);
   static const LoggingArray* As(const ArrayData* ad);
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
-                            EntryTypes ms);
+                            EntryTypes ms, const KeyOrder& ko);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
   static void ZombieRelease(LoggingArray* lad);
 
@@ -52,6 +53,7 @@ struct LoggingArray : BespokeArray {
   ArrayData* wrapped;
   LoggingProfile* profile;
   EntryTypes entryTypes;
+  KeyOrder keyOrder;
 };
 
 }}

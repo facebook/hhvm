@@ -332,6 +332,17 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
   incrementCounter(data->entryTypes, data->mapLock, key);
 }
 
+void LoggingProfile::logKeyOrders(const KeyOrder& ko) {
+  // Hold the read mutex for the duration of the mutation so that profiling
+  // cannot be interrupted until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return;
+
+  assertx(data);
+
+  incrementCounter(data->keyOrders, data->mapLock, ko);
+}
+
 BespokeArray* LoggingProfile::getStaticBespokeArray() const {
   return staticBespokeArray;
 }
@@ -411,6 +422,7 @@ void SinkProfile::update(const ArrayData* ad) {
   data->valCounts[val]++;
 
   incrementCounter(data->sources, data->mapLock, lad->profile);
+  incrementCounter(data->keyOrders, data->mapLock, lad->keyOrder);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -473,6 +485,20 @@ struct EntryTypesUseOutputData {
   }
 
   EntryTypes state;
+  uint64_t count;
+};
+
+struct KeyOrderOutputData {
+  KeyOrderOutputData(const KeyOrder& ko, uint64_t count)
+    : ko(ko)
+    , count(count)
+  {}
+
+  bool operator<(const KeyOrderOutputData& other) const {
+    return count > other.count;
+  }
+
+  KeyOrder ko;
   uint64_t count;
 };
 
@@ -557,14 +583,17 @@ struct SourceOutputData {
   SourceOutputData(const LoggingProfile* profile,
                    std::vector<OperationOutputData>&& operations,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
-                   std::vector<EntryTypesUseOutputData>&& monoUses)
+                   std::vector<EntryTypesUseOutputData>&& monoUses,
+                   std::vector<KeyOrderOutputData>&& kos)
     : profile(profile)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
+    , keyOrders(std::move(kos))
   {
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(monotypeUses.begin(), monotypeUses.end());
     std::sort(operations.begin(), operations.end());
+    std::sort(keyOrders.begin(), keyOrders.end());
 
     readCount = 0;
     writeCount = 0;
@@ -590,6 +619,7 @@ struct SourceOutputData {
   std::vector<OperationOutputData> writeOperations;
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
   std::vector<EntryTypesUseOutputData> monotypeUses;
+  std::vector<KeyOrderOutputData> keyOrders;
   uint64_t readCount;
   uint64_t writeCount;
   double weight;
@@ -619,6 +649,11 @@ struct SinkOutputData {
     unsampledCount = profile->data->unsampledCount.load(std::memory_order_relaxed);
 
     weight = sampledCount + unsampledCount;
+
+    for (auto const& keyOrderAndCount : profile->data->keyOrders) {
+      keyOrders.push_back({keyOrderAndCount.first, keyOrderAndCount.second});
+    }
+    std::sort(keyOrders.begin(), keyOrders.end());
   }
 
   bool operator<(const SinkOutputData& other) const {
@@ -630,6 +665,7 @@ struct SinkOutputData {
   std::vector<SinkTypeData> keyCounts;
   std::vector<SinkTypeData> valCounts;
   std::vector<SourceFrequencyData> sources;
+  std::vector<KeyOrderOutputData> keyOrders;
   uint64_t loggedCount = 0;
   uint64_t sampledCount = 0;
   uint64_t unsampledCount = 0;
@@ -726,6 +762,11 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                     useData.state.toString());
     }
 
+    LOG_OR_RETURN(file, "  Static String Key Insertion Order:\n");
+    for (auto const koData : sourceData.keyOrders) {
+      LOG_OR_RETURN(file, "  {: >6}x {}\n", koData.count, koData.ko.toString());
+    }
+
     LOG_OR_RETURN(file, "\n");
   }
 
@@ -752,6 +793,11 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
     LOG_OR_RETURN(file, "  Sources:\n");
     for (auto const& edge : sink.sources) {
       LOG_OR_RETURN(file, "  {: >6}x {}\n", edge.count, edge.source);
+    }
+
+    LOG_OR_RETURN(file, "  Static String Key Insertion Order:\n");
+    for (auto const koData : sink.keyOrders) {
+      LOG_OR_RETURN(file, "  {: >6}x {}\n", koData.count, koData.ko.toString());
     }
 
     LOG_OR_RETURN(file, "\n");
@@ -804,8 +850,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     auto const count = statesAndCount.second;
 
     if (before != after) {
-      escalations.emplace_back(EntryTypes(before), EntryTypes(after),
-                               count);
+      escalations.emplace_back(EntryTypes(before), EntryTypes(after), count);
     }
 
     usesMap[after] += count;
@@ -821,8 +866,14 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
+  std::vector<KeyOrderOutputData> keyOrders;
+  for (auto const& keyOrderAndCount : profile->data->keyOrders) {
+    keyOrders.push_back({keyOrderAndCount.first, keyOrderAndCount.second});
+  }
+
   return SourceOutputData(profile, std::move(operations),
-                          std::move(escalations), std::move(uses));
+                          std::move(escalations), std::move(uses),
+                          std::move(keyOrders));
 }
 
 ProfileOutputData sortProfileData() {

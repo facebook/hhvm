@@ -109,13 +109,15 @@ bool MemFile::closeImpl() {
 int64_t MemFile::readImpl(char *buffer, int64_t length) {
   assertx(m_len != -1);
   assertx(length > 0);
+  assertx(m_cursor >= 0);
   int64_t remaining = m_len - m_cursor;
   if (remaining < length) length = remaining;
   if (length > 0) {
     memcpy(buffer, (const void *)(m_data + m_cursor), length);
+    m_cursor += length;
+    return length;
   }
-  m_cursor += length;
-  return length;
+  return 0;
 }
 
 int MemFile::getc() {
@@ -126,7 +128,7 @@ int MemFile::getc() {
 bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assertx(m_len != -1);
   if (whence == SEEK_CUR) {
-    if (offset > 0 && offset < bufferedLen()) {
+    if (offset >= 0 && offset < bufferedLen()) {
       setReadPosition(getReadPosition() + offset);
       setPosition(getPosition() + offset);
       return true;
@@ -139,10 +141,13 @@ bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   setWritePosition(0);
   setReadPosition(0);
   if (whence == SEEK_SET) {
+    if (offset < 0) return false;
     m_cursor = offset;
-  } else {
-    assertx(whence == SEEK_END);
+  } else if (whence == SEEK_END) {
+    if (m_len + offset < 0) return false;
     m_cursor = m_len + offset;
+  } else {
+    return false;
   }
   setPosition(m_cursor);
   return true;

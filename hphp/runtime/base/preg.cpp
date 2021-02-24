@@ -1925,6 +1925,9 @@ String preg_quote(const String& str,
 
   /* Allocate enough memory so that even if each character
      is quoted, we won't run out of room */
+  static_assert(
+    (StringData::MaxSize * 4 + 1) < std::numeric_limits<int64_t>::max()
+  );
   String ret(4 * str.size() + 1, ReserveString);
   char* out_str = ret.mutableData();
 

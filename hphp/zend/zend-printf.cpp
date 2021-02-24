@@ -1143,9 +1143,9 @@ skip_output:
    * Add the terminating null here since it wasn't added incrementally above
    * once the whole string has been composed.
    */
-  result[outpos] = NUL;
+  appendchar(&result, &outpos, &size, NUL);
   *outbuf = result;
-  return outpos;
+  return outpos - 1;
 }
 
 /*

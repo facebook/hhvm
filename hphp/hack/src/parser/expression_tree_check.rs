@@ -139,7 +139,7 @@ impl<'ast> Visitor<'ast> for Checker {
             Lvar(_) => None,
             Binop(bop) => match bop.0 {
                 // Allow arithmetic operators
-                Bop::Plus | Bop::Minus | Bop::Star | Bop::Slash => None,
+                Bop::Plus | Bop::Minus | Bop::Star | Bop::Slash | Bop::Percent => None,
                 // Allow $x = 1, but not $x += 1.
                 Bop::Eq(None) => None,
                 // Allow boolean &&, || operators

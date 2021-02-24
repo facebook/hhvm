@@ -274,6 +274,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Bop::Minus => *e = virtualize_binop(lhs, "__minus", rhs, &e.0),
                     Bop::Star => *e = virtualize_binop(lhs, "__star", rhs, &e.0),
                     Bop::Slash => *e = virtualize_binop(lhs, "__slash", rhs, &e.0),
+                    Bop::Percent => *e = virtualize_binop(lhs, "__percent", rhs, &e.0),
                     // Convert boolean &&, ||
                     Bop::Ampamp => *e = virtualize_binop(lhs, "__ampamp", rhs, &e.0),
                     Bop::Barbar => *e = virtualize_binop(lhs, "__barbar", rhs, &e.0),

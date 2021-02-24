@@ -118,3 +118,6 @@ HPHP::(anonymous namespace)::cc_misses
 HPHP::(anonymous namespace)::s_predict
 HPHP::(anonymous namespace)::s_predictors
 HPHP::(anonymous namespace)::tl_cti_cache
+
+# MemcacheClient reuse DCtx when during call to Zstd
+facebook::memcache::CacheClientSerializer<HPHP::Variant>::zstduncompress(char const*, unsigned long)::pDctx

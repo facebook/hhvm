@@ -284,6 +284,8 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Bop::Gte => *e = virtualize_binop(lhs, "__greaterThanEqual", rhs, &e.0),
                     Bop::Eqeqeq => *e = virtualize_binop(lhs, "__tripleEquals", rhs, &e.0),
                     Bop::Diff2 => *e = virtualize_binop(lhs, "__notTripleEquals", rhs, &e.0),
+                    // Convert string concatenation
+                    Bop::Dot => *e = virtualize_binop(lhs, "__dot", rhs, &e.0),
                     // Assignment is special and not virtualized
                     Bop::Eq(None) => {}
                     // The rest should be parser errors from expression_tree_check

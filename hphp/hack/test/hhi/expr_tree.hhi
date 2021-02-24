@@ -198,7 +198,10 @@ abstract class ExampleBool extends ExampleMixed {
   public abstract function __exclamationMark(): ExampleBool;
 }
 
-abstract class ExampleString extends ExampleMixed {}
+abstract class ExampleString extends ExampleMixed {
+  public abstract function __dot(ExampleString $_): ExampleString;
+}
+
 abstract class ExampleFloat extends ExampleMixed {}
 
 final class ExampleContext {}

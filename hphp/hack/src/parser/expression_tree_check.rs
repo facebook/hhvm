@@ -146,6 +146,8 @@ impl<'ast> Visitor<'ast> for Checker {
                 Bop::Ampamp | Bop::Barbar => None,
                 // Allow comparison operators
                 Bop::Lt | Bop::Lte | Bop::Gt | Bop::Gte | Bop::Eqeqeq | Bop::Diff2 => None,
+                // Allow string concatenation operator
+                Bop::Dot => None,
                 _ => Some(
                     "Expression trees only support comparison (`<`, `===` etc) and basic arithmetic operators (`+` etc).",
                 ),

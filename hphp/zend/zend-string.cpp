@@ -425,7 +425,7 @@ char *string_crypt(const char *key, const char *salt) {
 
     memset(&paddedSalt[1], '$', maxSaltLength - 1);
     memcpy(paddedSalt, salt, std::min(maxSaltLength, saltLen));
-    paddedSalt[saltLen] = '\0';
+    paddedSalt[std::min(maxSaltLength, saltLen)] = '\0';
 
     if (php_crypt_blowfish_rn(key, paddedSalt, output, sizeof(output))) {
       return strdup(output);

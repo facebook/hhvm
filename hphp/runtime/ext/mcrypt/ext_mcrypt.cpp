@@ -656,7 +656,7 @@ Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
 
   int key_size;
   if (key.size() > max_key_size) {
-    raise_warning("Key size too large; supplied length: %d, max: %d",
+    raise_warning("Key size too large; supplied length: %ld, max: %d",
                     key.size(), max_key_size);
     key_size = max_key_size;
   } else {
@@ -665,10 +665,10 @@ Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
   memcpy(key_s, key.data(), key.size());
 
   if (iv.size() != iv_size) {
-    raise_warning("Iv size incorrect; supplied length: %d, needed: %d",
+    raise_warning("Iv size incorrect; supplied length: %ld, needed: %d",
                     iv.size(), iv_size);
   }
-  memcpy(iv_s, iv.data(), std::min(iv_size, iv.size()));
+  memcpy(iv_s, iv.data(), std::min<int64_t>(iv_size, iv.size()));
 
   mcrypt_generic_deinit(pm->m_td);
   int result = mcrypt_generic_init(pm->m_td, key_s, key_size, iv_s);

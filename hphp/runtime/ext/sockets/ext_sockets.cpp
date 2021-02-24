@@ -255,7 +255,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
       sa->sun_family = AF_UNIX;
       if (addr.length() > sizeof(sa->sun_path)) {
         raise_warning(
-          "Unix socket path length (%d) is larger than system limit (%lu)",
+          "Unix socket path length (%ld) is larger than system limit (%lu)",
           addr.length(),
           sizeof(sa->sun_path)
         );

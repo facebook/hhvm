@@ -1,0 +1,2854 @@
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0100, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x005E=UndefinedTa): Illegal format code 0x2A00, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x8298=Copyright  ): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16547840) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal format code 0xE204, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal components(-512) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal format code 0x5460, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal pointer offset(x68686868 + x68686803 = xD0D0D06B > x0C06) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0100, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x005E=UndefinedTa): Illegal format code 0x2A00, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x8298=Copyright  ): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16547840) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal format code 0xE204, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal components(-512) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal format code 0x5460, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal pointer offset(x68686868 + x68686803 = xD0D0D06B > x0C06) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0100, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x005E=UndefinedTa): Illegal format code 0x2A00, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x8298=Copyright  ): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16547840) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal format code 0xE204, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal components(-512) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal format code 0x5460, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal pointer offset(x68686868 + x68686803 = xD0D0D06B > x0C06) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0100, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x005E=UndefinedTa): Illegal format code 0x2A00, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x8298=Copyright  ): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16547840) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal format code 0xE204, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal components(-512) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal format code 0x5460, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal pointer offset(x68686868 + x68686803 = xD0D0D06B > x0C06) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0100, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x005E=UndefinedTa): Illegal format code 0x2A00, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x8298=Copyright  ): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16547840) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal format code 0xE204, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0301=Gamma      ): Illegal components(-512) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal format code 0x5460, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0600=UndefinedTa): Illegal pointer offset(x68686868 + x68686803 = xD0D0D06B > x0C06) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0002, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xBFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0100, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x005E, UndefinedTa): Illegal format code 0x2A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0301, Gamma      ): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8468, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x8484, UndefinedTa): Illegal format code 0x8484, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0x6ADC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF6A, UndefinedTa): Illegal format code 0xC5D8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xC5D8, UndefinedTa): Illegal format code 0x0900, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A00, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x6A00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000F, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA3A3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD80E, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6868, UndefinedTa): Illegal format code 0x6868, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9DE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xA6A6, UndefinedTa): Illegal format code 0xA6A6, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDEE3, UndefinedTa): Illegal format code 0xFBF7, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xD80E, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2500, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x2200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0xFE00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000E, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4DF7, UndefinedTa): Illegal format code 0x004D, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x00FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xDCDC, UndefinedTa): Illegal format code 0xDCDC, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x3200, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE2A3, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x3A3A, UndefinedTa): Illegal format code 0x07FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6A6A, UndefinedTa): Illegal format code 0x6A6A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF06, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x1000, RelatedImag): Illegal format code 0x1010, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFF9, UndefinedTa): Illegal format code 0x00B2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x4949, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x002A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xF400, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x6006, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0xFB01, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x00E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8F9, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFE2, UndefinedTa): Illegal format code 0x06FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF9F9, UndefinedTa): Illegal format code 0xF9F9, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0x06E2, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xF7DE, UndefinedTa): Illegal format code 0x1DFB, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0A0A, UndefinedTa): Illegal format code 0x0A0A, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xFF04, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE204, UndefinedTa): Illegal format code 0x005B, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0354, UndefinedTa): Illegal format code 0xD804, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0xFF00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEFF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0006, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x1700, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00FE, NewSubFile ): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0x0C00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x7A00, UndefinedTa): Illegal format code 0x0106, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD8FF, UndefinedTa): Illegal format code 0x01FF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x6006, UndefinedTa): Illegal format code 0x0354, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x00E2, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xFE0C, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x27FB, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x01FF, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFDE, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x9797, UndefinedTa): Illegal format code 0x9797, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x000B, ACDComment ): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFEDE, UndefinedTa): Illegal format code 0x1D00, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x5460, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0001, UndefinedTa): Illegal format code 0x0306, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0403, UndefinedTa): Illegal format code 0xFFD8, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0xDEE3, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0000, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFE, Computed va): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xD804, UndefinedTa): Illegal format code 0x0BFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xE306, UndefinedTa): Illegal format code 0xF7DE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF00, UndefinedTa): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x5460, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFE00, UndefinedTa): Illegal format code 0x0600, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0306, UndefinedTa): Illegal format code 0xE204, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFF1D, UndefinedTa): Illegal format code 0x00FE, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0xFFFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0xFFFF, No tag valu): Illegal format code 0x7AFF, switching to BYTE in %s/t79224592.php on line %d
+
+Notice: Read from TIFF: tag(0x0600, UndefinedTa): Illegal format code 0x0403, switching to BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal components(-16842752) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal format code 0xFFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(x0002=UndefinedTa): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal format code 0xBFFF, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: Process tag(xFFFF=No tag valu): Illegal components(-1) in %s/t79224592.php on line %d
+
+Warning: Process tag(x0000=UndefinedTa): Illegal format code 0x0000, suppose BYTE in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: corrupt EXIF header: maximum directory nesting level reached in %s/t79224592.php on line %d
+
+Warning: Invalid TIFF file in %s/t79224592.php on line %d
+bool(false)

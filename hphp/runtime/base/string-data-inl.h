@@ -66,7 +66,7 @@ inline void StringData::invalidateHash() {
   assertx(checkSane());
 }
 
-inline void StringData::setSize(int len) {
+inline void StringData::setSize(int64_t len) {
   assertx(!isImmutable() && !hasMultipleRefs());
   assertx(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
@@ -94,7 +94,7 @@ inline char* StringData::mutableData() const {
   return const_cast<char*>(data());
 }
 
-inline int StringData::size() const { return m_len; }
+inline int64_t StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
   assertx(isRefCounted());
@@ -255,4 +255,3 @@ struct string_data_lti {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -216,7 +216,6 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
   } else {
     func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
   }
-  if (unit.m_extended) unit.getExtended()->m_funcTable.push_back(func);
   return func;
 }
 
@@ -574,13 +573,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
       ux->m_namedInfo.emplace_back(LowStringPtr{s});
     }
     ux->m_arrayTypeTable = m_arrayTypeTable;
-
-    // Funcs can be recorded out of order when loading them from the
-    // repo currently.  So sort 'em here.
-    std::sort(ux->m_funcTable.begin(), ux->m_funcTable.end(),
-              [] (const Func* a, const Func* b) {
-                return a->past() < b->past();
-              });
 
     // If prefetching is enabled, store the symbol refs in the Unit so
     // the prefetcher can claim them. Reset the atomic flag to mark

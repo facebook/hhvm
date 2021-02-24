@@ -217,20 +217,6 @@ bool Unit::getOffsetRanges(int line, OffsetFuncRangeVec& offsets) const {
   return offsets.size() != 0;
 }
 
-const Func* Unit::getFunc(Offset pc) const {
-  auto& table = getExtended()->m_funcTable;
-  auto it = std::upper_bound(table.begin(), table.end(), nullptr,
-                             [&] (const Func* a, const Func* b) {
-                               assertx(a == nullptr);
-                               return pc < b->past();
-                             });
-  if (it != table.end()) {
-    assertx(pc < (*it)->past());
-    return *it;
-  }
-  return nullptr;
-}
-
 bool Unit::isCoverageEnabled() const {
   return m_coverage.bound() && m_coverage.isInit();
 }

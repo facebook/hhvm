@@ -369,14 +369,6 @@ public:
   bool getOffsetRanges(int line, OffsetFuncRangeVec& offsets) const;
 
   /*
-   * Return the Func* for the code at offset `pc'.
-   *
-   * Return nullptr if the offset is not in a Func body (but this should be
-   * impossible).
-   */
-  const Func* getFunc(Offset pc) const;
-
-  /*
    * Check whether the coverage map has been enabled for this unit.
    */
   bool isCoverageEnabled() const;
@@ -786,7 +778,6 @@ struct UnitExtended : Unit {
 
   NamedEntityPairTable m_namedInfo;
   ArrayTypeTable m_arrayTypeTable;
-  FuncTable m_funcTable;
 
   // Used by Unit prefetcher:
   SymbolRefs m_symbolRefsForPrefetch;

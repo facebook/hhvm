@@ -444,6 +444,15 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
       return false;
     }
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    case CURLINFO_OFF_T: {
+      curl_off_t code = 0;
+      if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
+        return code;
+      }
+      return false;
+    }
+#endif
     default:
       return false;
   }
@@ -1478,6 +1487,10 @@ struct CurlExtension final : Extension {
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    HHVM_RC_INT_SAME(CURLINFO_SIZE_DOWNLOAD_T)
+    HHVM_RC_INT_SAME(CURLINFO_SIZE_UPLOAD_T)
+    HHVM_RC_INT_SAME(CURLINFO_SPEED_DOWNLOAD_T)
+    HHVM_RC_INT_SAME(CURLINFO_SPEED_UPLOAD_T)
     HHVM_RC_INT_SAME(CURLOPT_REQUEST_TARGET)
     HHVM_RC_INT_SAME(CURLOPT_SOCKS5_AUTH)
 #endif
@@ -1485,6 +1498,8 @@ struct CurlExtension final : Extension {
 #if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
     HHVM_RC_INT_SAME(CURLOPT_SSH_COMPRESSION)
     HHVM_RC_INT_SAME(CURL_VERSION_MULTI_SSL)
+    HHVM_RC_INT_SAME(CURLINFO_CONTENT_LENGTH_DOWNLOAD_T)
+    HHVM_RC_INT_SAME(CURLINFO_CONTENT_LENGTH_UPLOAD_T)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
@@ -1496,6 +1511,7 @@ struct CurlExtension final : Extension {
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+    HHVM_RC_INT_SAME(CURLINFO_FILETIME_T)
     HHVM_RC_INT_SAME(CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS)
     HHVM_RC_INT_SAME(CURLOPT_TIMEVALUE_LARGE)
 #endif
@@ -1507,6 +1523,13 @@ struct CurlExtension final : Extension {
 
 #if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
     HHVM_RC_INT_SAME(CURLAUTH_BEARER)
+    HHVM_RC_INT_SAME(CURLINFO_APPCONNECT_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_CONNECT_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_NAMELOOKUP_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_PRETRANSFER_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_REDIRECT_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_STARTTRANSFER_TIME_T)
+    HHVM_RC_INT_SAME(CURLINFO_TOTAL_TIME_T)
     HHVM_RC_INT_SAME(CURLOPT_DISALLOW_USERNAME_IN_URL)
     HHVM_RC_INT_SAME(CURLOPT_PROXY_TLS13_CIPHERS)
     HHVM_RC_INT_SAME(CURLOPT_TLS13_CIPHERS)

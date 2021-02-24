@@ -204,6 +204,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\Contextual::with_argument_dependent_context",
             "\\WithContextConstant::has_io",
             "\\with_optional_argument_dependent_context",
+            "\\with_expr_in_user_attrs",
         ]
 
         for function_name in function_names:

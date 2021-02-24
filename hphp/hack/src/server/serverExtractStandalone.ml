@@ -117,6 +117,8 @@ module Fmt = struct
 
   let semicolon ppf _ = string ppf ";"
 
+  let arrow ppf _ = string ppf "->"
+
   let fat_arrow ppf _ =
     sp ppf ();
     string ppf "=>";
@@ -1251,23 +1253,334 @@ end = struct
 
   and pp_shape_field_name ppf = function
     | Ast_defs.SFlit_int (_, s) -> Fmt.string ppf s
-    | Ast_defs.SFlit_str (_, s) -> Fmt.(surround "'" "'" string) ppf s
+    | Ast_defs.SFlit_str (_, s) -> Fmt.(quote string) ppf s
     | Ast_defs.SFclass_const ((_, c), (_, s)) ->
       Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
 
   and pp_contexts ppf (_, ctxts) =
     Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf ctxts
 
-  let pp_user_attrs ppf attrs =
-    match
-      List.filter_map attrs ~f:(function
-          | Aast.{ ua_name = (_, nm); ua_params = [] }
-            when SMap.mem nm SN.UserAttributes.as_map ->
-            Some nm
-          | _ -> None)
-    with
+  let pp_lid ppf lid =
+    Fmt.(prefix (const string "$") string) ppf @@ Local_id.get_name lid
+
+  let rec pp_binop ppf = function
+    | Ast_defs.Plus -> Fmt.string ppf "+"
+    | Ast_defs.Minus -> Fmt.string ppf "-"
+    | Ast_defs.Star -> Fmt.string ppf "*"
+    | Ast_defs.Slash -> Fmt.string ppf "/"
+    | Ast_defs.Eqeq -> Fmt.string ppf "=="
+    | Ast_defs.Eqeqeq -> Fmt.string ppf "==="
+    | Ast_defs.Starstar -> Fmt.string ppf "**"
+    | Ast_defs.Diff -> Fmt.string ppf "diff"
+    | Ast_defs.Diff2 -> Fmt.string ppf "diff2"
+    | Ast_defs.Ampamp -> Fmt.string ppf "&&"
+    | Ast_defs.Barbar -> Fmt.string ppf "||"
+    | Ast_defs.LogXor -> Fmt.string ppf "xor"
+    | Ast_defs.Lt -> Fmt.string ppf "<"
+    | Ast_defs.Lte -> Fmt.string ppf "<="
+    | Ast_defs.Gt -> Fmt.string ppf ">"
+    | Ast_defs.Gte -> Fmt.string ppf ">="
+    | Ast_defs.Dot -> Fmt.string ppf "."
+    | Ast_defs.Amp -> Fmt.string ppf "&"
+    | Ast_defs.Bar -> Fmt.string ppf "|"
+    | Ast_defs.Ltlt -> Fmt.string ppf "<<"
+    | Ast_defs.Gtgt -> Fmt.string ppf ">>"
+    | Ast_defs.Percent -> Fmt.string ppf "%"
+    | Ast_defs.Xor -> Fmt.string ppf "^"
+    | Ast_defs.Cmp -> Fmt.string ppf "<=>"
+    | Ast_defs.QuestionQuestion -> Fmt.string ppf "??"
+    | Ast_defs.Eq (Some op) -> Fmt.(suffix (const string "=") pp_binop) ppf op
+    | Ast_defs.Eq _ -> Fmt.string ppf "="
+
+  let pp_unop ppf op =
+    match op with
+    | Ast_defs.Utild -> Fmt.string ppf "~"
+    | Ast_defs.Unot -> Fmt.string ppf "!"
+    | Ast_defs.Uplus -> Fmt.string ppf "+"
+    | Ast_defs.Uminus -> Fmt.string ppf "-"
+    | Ast_defs.Uincr
+    | Ast_defs.Upincr ->
+      Fmt.string ppf "++"
+    | Ast_defs.Udecr
+    | Ast_defs.Updecr ->
+      Fmt.string ppf "--"
+    | Ast_defs.Usilence -> Fmt.string ppf "@"
+
+  let is_postfix_unop = function
+    | Ast_defs.Updecr
+    | Ast_defs.Upincr ->
+      true
+    | _ -> false
+
+  let pp_targ ppf (_, hint) = pp_hint ~is_ctx:false ppf hint
+
+  let pp_targs ppf = function
     | [] -> ()
-    | rs -> Fmt.(angles @@ angles @@ list ~sep:comma string) ppf rs
+    | targs -> Fmt.(angles @@ list ~sep:comma pp_targ) ppf targs
+
+  let pp_vc_kind ppf = function
+    | Aast_defs.Vector -> Fmt.string ppf "Vector"
+    | Aast_defs.ImmVector -> Fmt.string ppf "ImmVector"
+    | Aast_defs.Vec -> Fmt.string ppf "vec"
+    | Aast_defs.Set -> Fmt.string ppf "Set"
+    | Aast_defs.ImmSet -> Fmt.string ppf "ImmSet"
+    | Aast_defs.Keyset -> Fmt.string ppf "keyset"
+
+  let pp_kvc_kind ppf = function
+    | Aast_defs.Dict -> Fmt.string ppf "dict"
+    | Aast_defs.Map -> Fmt.string ppf "Map"
+    | Aast_defs.ImmMap -> Fmt.string ppf "ImmMap"
+
+  let rec pp_expr ppf (_, expr_) = pp_expr_ ppf expr_
+
+  and pp_expr_ ppf = function
+    | Aast.Darray (kv_ty_opt, kvs) ->
+      Fmt.(
+        prefix (const string "darray")
+        @@ pair
+             ~sep:nop
+             (option @@ angles @@ pair ~sep:comma pp_targ pp_targ)
+             (brackets @@ list ~sep:comma @@ pair ~sep:fat_arrow pp_expr pp_expr))
+        ppf
+        (kv_ty_opt, kvs)
+    | Aast.Varray (k_ty_opt, ks) ->
+      Fmt.(
+        prefix (const string "varray")
+        @@ pair
+             ~sep:nop
+             (option @@ angles pp_targ)
+             (brackets @@ list ~sep:comma pp_expr))
+        ppf
+        (k_ty_opt, ks)
+    | Aast.Shape flds ->
+      Fmt.(
+        prefix (const string "shape")
+        @@ parens
+        @@ list ~sep:comma
+        @@ pair ~sep:fat_arrow pp_shape_field_name pp_expr)
+        ppf
+        flds
+    | Aast.ValCollection (kind, targ_opt, exprs) ->
+      let delim =
+        match kind with
+        | Aast_defs.Keyset
+        | Aast_defs.Vec ->
+          Fmt.brackets
+        | _ -> Fmt.braces
+      in
+      Fmt.(
+        pair ~sep:nop pp_vc_kind
+        @@ pair
+             ~sep:nop
+             (option @@ angles @@ pp_targ)
+             (delim @@ list ~sep:comma pp_expr))
+        ppf
+        (kind, (targ_opt, exprs))
+    | Aast.KeyValCollection (kind, targs_opt, flds) ->
+      let delim =
+        match kind with
+        | Aast_defs.Dict -> Fmt.brackets
+        | _ -> Fmt.braces
+      in
+      Fmt.(
+        pair ~sep:nop pp_kvc_kind
+        @@ pair
+             ~sep:nop
+             (option @@ angles @@ pair ~sep:comma pp_targ pp_targ)
+             (delim @@ list ~sep:comma @@ pair ~sep:fat_arrow pp_expr pp_expr))
+        ppf
+        (kind, (targs_opt, flds))
+    | Aast.Null -> Fmt.string ppf "null"
+    | Aast.This -> Fmt.string ppf "this"
+    | Aast.True -> Fmt.string ppf "true"
+    | Aast.False -> Fmt.string ppf "false"
+    | Aast.Id (_, id) -> Fmt.string ppf id
+    | Aast.Lvar (_, lid) -> pp_lid ppf lid
+    | Aast.Dollardollar _ -> Fmt.string ppf "$$"
+    | Aast.Clone expr -> Fmt.(prefix (const string "clone") pp_expr) ppf expr
+    | Aast.Array_get (arr_expr, idx_expr_opt) ->
+      Fmt.(pair ~sep:nop pp_expr @@ brackets @@ option pp_expr)
+        ppf
+        (arr_expr, idx_expr_opt)
+    | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, false)) ->
+      Fmt.(pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
+        ppf
+        (obj_expr, get_expr)
+    | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, _)) ->
+      Fmt.(
+        parens @@ pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
+        ppf
+        (obj_expr, get_expr)
+    | Aast.(Obj_get (obj_expr, get_expr, _, false)) ->
+      Fmt.(pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
+    | Aast.(Obj_get (obj_expr, get_expr, _, _)) ->
+      Fmt.(parens @@ pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
+    | Aast.Class_get (class_id, class_get_expr, false) ->
+      Fmt.(pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
+        ppf
+        (class_id, class_get_expr)
+    | Aast.Class_get (class_id, class_get_expr, _) ->
+      Fmt.(parens @@ pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
+        ppf
+        (class_id, class_get_expr)
+    | Aast.Class_const (class_id, (_, cname)) ->
+      Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
+    | Aast.Call (fn, targs, exprs, expr_opt) ->
+      Fmt.(pair ~sep:nop pp_expr @@ pair ~sep:nop pp_targs pp_arg_exprs)
+        ppf
+        (fn, (targs, (exprs, expr_opt)))
+    | Aast.FunctionPointer (id, targs) ->
+      Fmt.(pair ~sep:nop pp_function_ptr_id (angles @@ list ~sep:comma pp_targ))
+        ppf
+        (id, targs)
+    | Aast.Int str
+    | Aast.Float str ->
+      Fmt.string ppf str
+    | Aast.String str -> Fmt.(quote string) ppf str
+    | Aast.String2 exprs -> Fmt.(quote @@ list ~sep:sp pp_expr) ppf exprs
+    | Aast.PrefixedString (pfx, expr) ->
+      Fmt.(pair ~sep:nop string @@ quote pp_expr) ppf (pfx, expr)
+    | Aast.Yield afield ->
+      Fmt.(prefix (const string "yield") pp_afield) ppf afield
+    | Aast.Await expr -> Fmt.(prefix (const string "await") pp_expr) ppf expr
+    | Aast.ReadonlyExpr expr ->
+      Fmt.(prefix (const string "readonly") pp_expr) ppf expr
+    | Aast.List exprs ->
+      Fmt.(prefix (const string "list") @@ parens @@ list ~sep:comma pp_expr)
+        ppf
+        exprs
+    | Aast.Cast (hint, expr) ->
+      Fmt.(pair ~sep:nop (parens @@ pp_hint ~is_ctx:false) pp_expr)
+        ppf
+        (hint, expr)
+    | Aast.Unop (unop, expr) when is_postfix_unop unop ->
+      Fmt.(pair ~sep:nop pp_expr pp_unop) ppf (expr, unop)
+    | Aast.Unop (unop, expr) ->
+      Fmt.(pair ~sep:nop pp_unop pp_expr) ppf (unop, expr)
+    | Aast.Binop (op, e1, e2) ->
+      Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_binop pp_expr)
+        ppf
+        (e1, (op, e2))
+    | Aast.Pipe (_lid, e1, e2) ->
+      Fmt.(pair ~sep:(const string " |> ") pp_expr pp_expr) ppf (e1, e2)
+    | Aast.Eif (cond, Some texpr, fexpr) ->
+      Fmt.(
+        pair ~sep:(const string " ? ") pp_expr
+        @@ pair ~sep:colon pp_expr pp_expr)
+        ppf
+        (cond, (texpr, fexpr))
+    | Aast.Eif (cond, _, expr) ->
+      Fmt.(pair ~sep:(const string " ?: ") pp_expr pp_expr) ppf (cond, expr)
+    | Aast.Is (expr, hint) ->
+      Fmt.(pair ~sep:(const string " is ") pp_expr @@ pp_hint ~is_ctx:false)
+        ppf
+        (expr, hint)
+    | Aast.As (expr, hint, false) ->
+      Fmt.(pair ~sep:(const string " as ") pp_expr @@ pp_hint ~is_ctx:false)
+        ppf
+        (expr, hint)
+    | Aast.As (expr, hint, true) ->
+      Fmt.(pair ~sep:(const string " ?as ") pp_expr @@ pp_hint ~is_ctx:false)
+        ppf
+        (expr, hint)
+    | Aast.New (class_id, targs, exprs, expr_opt, _) ->
+      Fmt.(
+        prefix (const string "new")
+        @@ pair ~sep:nop pp_class_id
+        @@ pair ~sep:nop pp_targs pp_arg_exprs)
+        ppf
+        (class_id, (targs, (exprs, expr_opt)))
+    | Aast.Record ((_, name), flds) ->
+      Fmt.(
+        pair ~sep:nop string
+        @@ brackets
+        @@ list ~sep:comma
+        @@ pair ~sep:fat_arrow pp_expr pp_expr)
+        ppf
+        (name, flds)
+    | Aast.Callconv (param_kind, expr) ->
+      Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (param_kind, expr)
+    | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
+    | Aast.Fun_id (_, name) ->
+      Fmt.(prefix (const string "fun") @@ quote string) ppf name
+    | Aast.Method_id (expr, (_, meth)) ->
+      Fmt.(
+        prefix (const string "inst_meth")
+        @@ parens
+        @@ pair ~sep:comma pp_expr
+        @@ quote string)
+        ppf
+        (expr, meth)
+    | Aast.Pair (targs_opt, fst, snd) ->
+      Fmt.(
+        prefix (const string "Pair")
+        @@ pair
+             ~sep:nop
+             (option @@ angles @@ pair ~sep:comma pp_targ pp_targ)
+             (braces @@ pair ~sep:comma pp_expr pp_expr))
+        ppf
+        (targs_opt, (fst, snd))
+    | Aast.EnumAtom name -> Fmt.(prefix (const string "#") string) ppf name
+    | Aast.Efun _
+    | Aast.Lfun _
+    | Aast.Xml _
+    | Aast.Import _
+    | Aast.Collection _
+    | Aast.ExpressionTree _
+    | Aast.Method_caller _
+    | Aast.Smethod_id _
+    | Aast.ET_Splice _
+    | Aast.Any
+    | Aast.Omitted ->
+      ()
+
+  and pp_arg_exprs ppf (exprs, expr_opt) =
+    match exprs with
+    | [] ->
+      Fmt.(parens @@ option @@ prefix (const string "...") pp_expr) ppf expr_opt
+    | _ ->
+      Fmt.(
+        parens
+        @@ pair
+             ~sep:comma
+             (list ~sep:comma pp_expr)
+             (option @@ prefix (const string "...") pp_expr))
+        ppf
+        (exprs, expr_opt)
+
+  and pp_afield ppf = function
+    | Aast.AFvalue expr -> pp_expr ppf expr
+    | Aast.AFkvalue (key_expr, val_expr) ->
+      Fmt.(pair ~sep:fat_arrow pp_expr pp_expr) ppf (key_expr, val_expr)
+
+  and pp_class_id ppf (_, class_id_) =
+    match class_id_ with
+    | Aast.CIparent -> Fmt.string ppf "parent"
+    | Aast.CIstatic -> Fmt.string ppf "static"
+    | Aast.CIself -> Fmt.string ppf "self"
+    | Aast.CI (_, name) -> Fmt.string ppf name
+    | Aast.CIexpr expr -> pp_expr ppf expr
+
+  and pp_class_get_expr ppf = function
+    | Aast.CGexpr expr -> pp_expr ppf expr
+    | Aast.CGstring (_, name) -> Fmt.string ppf name
+
+  and pp_function_ptr_id ppf = function
+    | Aast.FP_id (_, name) -> Fmt.string ppf name
+    | Aast.FP_class_const (class_id, (_, str)) ->
+      Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, str)
+
+  let pp_user_attr ppf Aast.{ ua_name = (_, nm); ua_params; _ } =
+    match ua_params with
+    | [] -> Fmt.string ppf nm
+    | _ ->
+      Fmt.(pair ~sep:nop string @@ parens @@ list ~sep:comma pp_expr)
+        ppf
+        (nm, ua_params)
+
+  let pp_user_attrs ppf = function
+    | [] -> ()
+    | rs -> Fmt.(angles @@ angles @@ list ~sep:comma pp_user_attr) ppf rs
 
   let pp_variance ppf =
     Ast_defs.(

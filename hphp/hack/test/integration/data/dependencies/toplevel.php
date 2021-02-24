@@ -191,3 +191,19 @@ function with_optional_argument_dependent_context_callee(
 function with_optional_argument_dependent_context(): void {
   with_optional_argument_dependent_context_callee(null);
 }
+
+<<__Pure, __AtMostRxAsArgs>>
+function my_keys<Tk as arraykey, Tv>(
+  <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>>
+  KeyedTraversable<Tk, Tv> $traversable,
+)[]: keyset<Tk> {
+  $result = keyset[];
+  foreach ($traversable as $key => $_) {
+    $result[] = $key;
+  }
+  return $result;
+}
+
+function with_expr_in_user_attrs(): void {
+  $_ = my_keys(vec[]);
+}

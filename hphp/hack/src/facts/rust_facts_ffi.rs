@@ -13,6 +13,7 @@ use oxidized::relative_path::RelativePath;
 
 use facts::facts_parser::*;
 
+#[cfg(unix)]
 #[no_mangle]
 unsafe extern "C" fn extract_as_json_cpp_ffi(
     flags: i32,
@@ -20,15 +21,17 @@ unsafe extern "C" fn extract_as_json_cpp_ffi(
     text_ptr: *const c_char,
     mangle_xhp: bool,
 ) -> *const c_char {
+    use std::os::unix::ffi::OsStrExt;
     //  Safety : We rely on the C caller that `text_ptr` be a valid
     //  null-terminated C string.
     let text = cpp_helper::cstr::to_u8(text_ptr);
     // Safety: We rely on the C caller that `filename` be a valid
-    // null-terminated C string. Also, we do not check that the bytes
-    // contained by `filename` are valid UTF-8.
+    // null-terminated C string.
     let filename = RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(cpp_helper::cstr::to_str(filename)),
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(cpp_helper::cstr::to_u8(
+            filename,
+        ))),
     );
     match extract_as_json_ffi0(
         ((1 << 0) & flags) != 0, // php5_compat_mode

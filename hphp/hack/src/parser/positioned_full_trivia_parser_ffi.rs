@@ -57,18 +57,21 @@ unsafe extern "C" fn parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut li
 }
 
 /// Calculate a parse tree from source text and render it as json.
+#[cfg(unix)]
 #[no_mangle]
 unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
     filename: *const libc::c_char,
     source_text: *const libc::c_char,
     env: usize,
 ) -> *const libc::c_char {
+    use std::os::unix::ffi::OsStrExt;
     // Safety: We rely on the C caller that `filename` be a properly
-    // initialized null-terminated C string and we do not check that
-    // the bytes it contains are valid UTF-8.
+    // initialized null-terminated C string.
     let filepath = oxidized::relative_path::RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(cpp_helper::cstr::to_str(filename)),
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(cpp_helper::cstr::to_u8(
+            filename,
+        ))),
     );
     // Safety : We rely on the C caller that `text` be a properly
     // iniitalized null-terminated C string.

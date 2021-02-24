@@ -65,6 +65,7 @@ impl std::convert::From<&COutputConfig> for RustOutputConfig {
     }
 }
 
+#[cfg(unix)]
 #[repr(C)]
 struct CEnv {
     filepath: *const c_char,
@@ -76,17 +77,19 @@ struct CEnv {
 }
 impl<'a> std::convert::From<&CEnv> for compile::Env<&'a str> {
     fn from(env: &CEnv) -> compile::Env<&'a str> {
+        use std::os::unix::ffi::OsStrExt;
         compile::Env {
-            // We rely on the C caller that `env.filepath` be a
-            // properly initialized null-terminated C string and we do
-            // not check that the bytes it contains are valid UTF-8.
+            // Safety: We rely on the C caller that `env.filepath` be
+            // a properly initialized null-terminated C string
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
-                std::path::PathBuf::from(unsafe { cpp_helper::cstr::to_str(env.filepath) }),
+                std::path::PathBuf::from(std::ffi::OsStr::from_bytes(unsafe {
+                    cpp_helper::cstr::to_u8(env.filepath)
+                })),
             ),
-            // We rely on the C caller that `env.config_jsons` be a
-            // pointer to `env.num_config_jsons` properly initialized
-            // null-terminated C strings.
+            // Safety: We rely on the C caller that `env.config_jsons`
+            // be a pointer to `env.num_config_jsons` properly
+            // initialized null-terminated C strings.
             config_jsons: unsafe {
                 cpp_helper::cstr::to_vec(env.config_jsons, env.num_config_jsons)
             },

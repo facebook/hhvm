@@ -293,7 +293,7 @@ struct StringData final : MaybeCountable,
    * Pre: !hasMultipleRefs()
    */
   void invalidateHash();
-  void setSize(int len);
+  void setSize(int64_t len);
 
   /*
    * StringData should not generally be allocated on the stack,
@@ -326,10 +326,9 @@ struct StringData final : MaybeCountable,
   /*
    * Accessor for the length of a string.
    *
-   * Note: size() returns a signed int for historical reasons.  It is
-   * guaranteed to be in the range (0 <= size() <= MaxSize)
+   * Note: size() is guaranteed to be >= 0 and <= MaxSize.
    */
-  int size() const;
+  int64_t size() const;
 
   /*
    * Returns: size() == 0

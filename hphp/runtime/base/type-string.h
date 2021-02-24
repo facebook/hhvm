@@ -200,7 +200,7 @@ public:
   }
 
 public:
-  const String& setSize(int len) {
+  const String& setSize(int64_t len) {
     assertx(m_str);
     m_str->setSize(len);
     return *this;
@@ -229,10 +229,10 @@ public:
   bool empty() const {
     return m_str ? m_str->empty() : true;
   }
-  int size() const {
+  int64_t size() const {
     return m_str ? m_str->size() : 0;
   }
-  int length() const {
+  int64_t length() const {
     return m_str ? m_str->size() : 0;
   }
   uint32_t capacity() const {

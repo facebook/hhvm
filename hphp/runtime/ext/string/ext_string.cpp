@@ -1135,15 +1135,23 @@ TypedValue HHVM_FUNCTION(substr_compare,
     return make_tv<KindOfBoolean>(false);
   }
 
-  int cmp_len = s1_len - offset;
-  if (cmp_len < s2_len) cmp_len = s2_len;
-  if (cmp_len > length) cmp_len = length;
+  auto const cmp_len = std::min(s1_len - offset, std::min(s2_len, length));
 
-  const char *s1 = main_str.data();
-  if (case_insensitivity) {
-    return tvReturn(bstrcasecmp(s1 + offset, cmp_len, str.data(), cmp_len));
+  auto const ret = [&] {
+    const char *s1 = main_str.data();
+    if (case_insensitivity) {
+      return bstrcasecmp(s1 + offset, cmp_len, str.data(), cmp_len);
+    }
+    return string_ncmp(s1 + offset, str.data(), cmp_len);
+  }();
+  if (ret == 0) {
+    auto const m1 = std::min(s1_len - offset, length);
+    auto const m2 = std::min(s2_len, length);
+    if (m1 > m2) return tvReturn(1);
+    if (m1 < m2) return tvReturn(-1);
+    return tvReturn(0);
   }
-  return tvReturn(string_ncmp(s1 + offset, str.data(), cmp_len));
+  return tvReturn(ret);
 }
 
 TypedValue HHVM_FUNCTION(strstr,

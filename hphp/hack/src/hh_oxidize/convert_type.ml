@@ -23,10 +23,12 @@ let primitives =
 let is_primitive ty = List.mem primitives ty ~equal:String.equal
 
 let rec is_copy ty targs =
-  Configuration.copy_type ty = `Known true
+  Configuration.is_known (Configuration.copy_type ty) true
   || String.is_prefix ty ~prefix:"&"
   || is_primitive ty
-  || (ty = "Option" || ty = "std::cell::Cell" || ty = "std::cell::RefCell")
+  || ( String.equal ty "Option"
+     || String.equal ty "std::cell::Cell"
+     || String.equal ty "std::cell::RefCell" )
      && is_single_targ_copy targs
 
 and is_single_targ_copy targ =
@@ -60,6 +62,8 @@ let add_indirection_between () =
       ("typing_defs_core", "Ty_", "Ty");
     ]
 
+let equal_s3 = [%derive.eq: string * string * string]
+
 let should_add_indirection ~seen_indirection ty targs =
   match Configuration.mode () with
   | Configuration.ByRef ->
@@ -67,20 +71,20 @@ let should_add_indirection ~seen_indirection ty targs =
       true
     else if seen_indirection then
       false
-    else if self () = ty then
+    else if String.equal (self ()) ty then
       true
     else
       List.mem
         (add_indirection_between ())
         (curr_module_name (), self (), ty)
-        ~equal:( = )
+        ~equal:equal_s3
   | Configuration.ByBox ->
     (not seen_indirection)
-    && ( self () = ty
+    && ( String.equal (self ()) ty
        || List.mem
             (add_indirection_between ())
             (curr_module_name (), self (), ty)
-            ~equal:( = ) )
+            ~equal:equal_s3 )
 
 let add_rcoc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 
@@ -88,7 +92,7 @@ let should_add_rcoc ty =
   match Configuration.mode () with
   | Configuration.ByRef -> false
   | Configuration.ByBox ->
-    List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:( = )
+    List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:equal_s3
 
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
@@ -134,10 +138,11 @@ let rec core_type ?(seen_indirection = false) ct =
       | Lident "float" -> "f64"
       | Lident "list" -> "Vec"
       | Lident "ref" ->
-        if Configuration.(mode () = ByRef) then
-          "std::cell::Cell"
-        else
-          "std::cell::RefCell"
+        begin
+          match Configuration.mode () with
+          | Configuration.ByRef -> "std::cell::Cell"
+          | Configuration.ByBox -> "std::cell::RefCell"
+        end
       | Ldot (Lident "Path", "t") ->
         if is_by_ref then
           "&'a std::path::Path"
@@ -147,7 +152,7 @@ let rec core_type ?(seen_indirection = false) ct =
       | id -> Convert_longident.longident_to_string id
     in
     let id =
-      if id = "T" then
+      if String.equal id "T" then
         self ()
       else
         id
@@ -164,7 +169,7 @@ let rec core_type ?(seen_indirection = false) ct =
       | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "locl_phase"; _ }, _); _ }]
         ->
         []
-      | _ when id = "FunType" -> []
+      | _ when String.equal id "FunType" -> []
       | _ -> args
     in
     let add_lifetime =
@@ -180,7 +185,7 @@ let rec core_type ?(seen_indirection = false) ct =
     else if should_add_indirection ~seen_indirection id args then
       match Configuration.mode () with
       | Configuration.ByRef ->
-        if id = "Option" then
+        if String.equal id "Option" then
           let args = String.sub args 1 (String.length args - 1) in
           sprintf "Option<&'a %s" args
         else

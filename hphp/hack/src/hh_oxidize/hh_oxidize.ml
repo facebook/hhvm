@@ -125,7 +125,7 @@ let parse_types_file filename =
       if String.is_substring name ~substring:"::" then
         Some name
       else (
-        if name <> "" then
+        if String.(name <> "") then
           failwith
             (Printf.sprintf
                "Failed to parse line in types file %S: %S"
@@ -142,13 +142,13 @@ let parse_extern_types_file filename =
            the crate name in our OCaml source) to the fully-qualified name. *)
            let coloncolon_idx = String.substr_index_exn name ~pattern:"::" in
            let after_coloncolon_idx = coloncolon_idx + 2 in
-           assert (name.[after_coloncolon_idx] <> ':');
+           assert (Char.(name.[after_coloncolon_idx] <> ':'));
            let name_without_crate =
              String.subo name ~pos:after_coloncolon_idx
            in
            SMap.add map name_without_crate name
          with _ ->
-           if name <> "" then
+           if String.(name <> "") then
              failwith
                (Printf.sprintf
                   "Failed to parse line in extern types file %S: %S"

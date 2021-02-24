@@ -16,7 +16,7 @@ let enabled = ref true
 let disable () = enabled := false
 
 let init pids_file =
-  assert (!log_oc = None);
+  assert (Option.is_none !log_oc);
   Sys_utils.with_umask 0o111 (fun () ->
       Sys_utils.mkdir_no_fail (Filename.dirname pids_file);
       let oc = Out_channel.create pids_file in

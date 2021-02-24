@@ -37,7 +37,8 @@ end = struct
     in
     fun () ->
       match !memoized_result with
-      | Some (good_until, result) when Unix.gettimeofday () < good_until ->
+      | Some (good_until, result) when Float.(Unix.gettimeofday () < good_until)
+        ->
         result
       | _ -> fetch ()
 end

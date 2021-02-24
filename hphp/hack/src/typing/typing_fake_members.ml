@@ -13,7 +13,7 @@ module Reason = Typing_reason
 module S = struct
   type t = Local_id.t * Reason.blame
 
-  let compare (lid1, _) (lid2, _) = compare lid1 lid2
+  let compare (lid1, _) (lid2, _) = Local_id.compare lid1 lid2
 end
 
 (* A set that treats blame as metadata *)

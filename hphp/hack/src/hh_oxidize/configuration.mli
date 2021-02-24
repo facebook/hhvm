@@ -61,3 +61,6 @@ val owned_type : string -> bool
     [`Known true]. If no list of copy types was provided, return [`Unknown].
     Raises an exception if invoked before [set]. *)
 val copy_type : string -> [ `Known of bool | `Unknown ]
+
+(** Test if the given value is the right kind of `Known *)
+val is_known : [> `Known of bool ] -> bool -> bool

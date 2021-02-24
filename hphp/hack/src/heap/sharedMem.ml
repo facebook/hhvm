@@ -708,7 +708,7 @@ functor
     let add x y =
       let sample_rate = hh_sample_rate () in
       let entry =
-        if hh_log_level () <> 0 && Random.float 1.0 < sample_rate then
+        if hh_log_level () <> 0 && Float.(Random.float 1.0 < sample_rate) then
           ProfiledValue { entry = y; write_time = Unix.gettimeofday () }
         else
           RawValue y

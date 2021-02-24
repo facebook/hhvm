@@ -74,3 +74,8 @@ let copy_type type_name =
                  mod_name ^ "::" ^ type_name
              in
              SSet.mem copy_types maybe_qualified_type) )
+
+let is_known v b =
+  match v with
+  | `Known k -> Bool.equal b k
+  | _ -> false

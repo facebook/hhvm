@@ -591,10 +591,10 @@ let rec select_non_intr read write exn timeout =
   with Unix.Unix_error (Unix.EINTR, _, _) ->
     (* Negative timeouts mean no timeout *)
     let timeout =
-      if timeout < 0.0 then
+      if Float.(timeout < 0.0) then
         timeout
       else
-        max 0.0 (timeout -. (Unix.gettimeofday () -. start_time))
+        Float.(max 0.0 (timeout -. (Unix.gettimeofday () -. start_time)))
     in
     select_non_intr read write exn timeout
 

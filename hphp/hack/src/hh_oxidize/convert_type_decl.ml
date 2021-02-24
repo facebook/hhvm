@@ -44,6 +44,13 @@ let default_derives () =
 
 let derive_copy ty = Convert_type.is_copy ty ""
 
+let is_by_ref () =
+  match Configuration.mode () with
+  | Configuration.ByRef -> true
+  | Configuration.ByBox -> false
+
+let is_by_box () = not (is_by_ref ())
+
 let additional_derives ty : (string option * string) list =
   ( if derive_copy ty then
     [(None, "Copy")]
@@ -51,18 +58,14 @@ let additional_derives ty : (string option * string) list =
     [] )
   @
   match ty with
-  | "aast::EmitId" when Configuration.(mode () = ByBox) ->
+  | "aast::EmitId" when is_by_box () ->
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
-  | "aast::XhpAttrInfo" when Configuration.(mode () = ByBox) ->
+  | "aast::XhpAttrInfo" when is_by_box () ->
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
   | _ -> []
 
 let derive_blacklist ty =
-  let is_by_ref =
-    match Configuration.mode () with
-    | Configuration.ByRef -> true
-    | Configuration.ByBox -> false
-  in
+  let is_by_ref = is_by_ref () in
   match ty with
   (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
@@ -88,7 +91,7 @@ let derived_traits ty =
   let blacklist = derive_blacklist ty in
   default_derives ()
   |> List.filter ~f:(fun (_, derive) ->
-         not (List.mem blacklist derive ~equal:( = )))
+         not (List.mem blacklist derive ~equal:String.equal))
   |> List.append (additional_derives ty)
 
 let blacklisted_types =
@@ -142,8 +145,10 @@ let box_variant () =
   | Configuration.ByBox -> [])
   @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 
+let equal_s2 = [%derive.eq: string * string]
+
 let should_box_variant ty =
-  List.mem (box_variant ()) (curr_module_name (), ty) ~equal:( = )
+  List.mem (box_variant ()) (curr_module_name (), ty) ~equal:equal_s2
 
 (* When should_box_variant returns true, we will switch to boxing the fields of
    each variant by default. Some fields are small enough not to need boxing,
@@ -151,14 +156,15 @@ let should_box_variant ty =
    unnecessary indirections. The rule of thumb I'm using here is that the size
    should be two words or less (the size of a slice). *)
 let unbox_field ty =
+  let open String in
   ty = "String"
   || ty = "bstr::BString"
-  || String.is_prefix ty ~prefix:"Vec<"
-  || String.is_prefix ty ~prefix:"Block<"
-  || String.is_prefix ty ~prefix:"&'a "
-  || String.is_prefix ty ~prefix:"Option<&'a "
-  || String.is_prefix ty ~prefix:"std::cell::Cell<&'a "
-  || String.is_prefix ty ~prefix:"std::cell::RefCell<&'a "
+  || is_prefix ty ~prefix:"Vec<"
+  || is_prefix ty ~prefix:"Block<"
+  || is_prefix ty ~prefix:"&'a "
+  || is_prefix ty ~prefix:"Option<&'a "
+  || is_prefix ty ~prefix:"std::cell::Cell<&'a "
+  || is_prefix ty ~prefix:"std::cell::RefCell<&'a "
   ||
   match Configuration.mode () with
   | Configuration.ByRef ->
@@ -166,11 +172,9 @@ let unbox_field ty =
     || ty = "ident::Ident"
     || ty = "ConditionTypeName<'a>"
     || ty = "ConstraintType<'a>"
-    || (String.is_prefix ty ~prefix:"Option<" && Convert_type.is_ty_copy ty)
-    || String.is_prefix ty ~prefix:"std::cell::Cell<"
-       && Convert_type.is_ty_copy ty
-    || String.is_prefix ty ~prefix:"std::cell::RefCell<"
-       && Convert_type.is_ty_copy ty
+    || (is_prefix ty ~prefix:"Option<" && Convert_type.is_ty_copy ty)
+    || (is_prefix ty ~prefix:"std::cell::Cell<" && Convert_type.is_ty_copy ty)
+    || (is_prefix ty ~prefix:"std::cell::RefCell<" && Convert_type.is_ty_copy ty)
     || Convert_type.is_primitive ty
   | Configuration.ByBox -> false
 
@@ -180,16 +184,18 @@ let should_add_rcoc ty =
   match Configuration.mode () with
   | Configuration.ByRef -> false
   | Configuration.ByBox ->
-    List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
+    List.mem add_rcoc (curr_module_name (), ty) ~equal:equal_s2
 
 let blacklisted ty_name =
   let ty = (curr_module_name (), ty_name) in
-  List.mem blacklisted_types ty ~equal:( = )
+  List.mem blacklisted_types ty ~equal:equal_s2
   || List.exists blacklisted_type_prefixes ~f:(fun (mod_name, prefix) ->
-         mod_name = curr_module_name () && String.is_prefix ty_name ~prefix)
+         String.equal mod_name (curr_module_name ())
+         && String.is_prefix ty_name ~prefix)
 
 let rename ty_name =
-  List.find renamed_types ~f:(fun (x, _) -> x = (curr_module_name (), ty_name))
+  List.find renamed_types ~f:(fun (x, _) ->
+      equal_s2 x (curr_module_name (), ty_name))
   |> Option.value_map ~f:snd ~default:ty_name
 
 let should_use_alias_instead_of_tuple_struct ty_name =
@@ -374,7 +380,10 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 let type_declaration name td =
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
   let attrs_and_vis ~all_nullary ~force_derive_copy =
-    if force_derive_copy && Configuration.copy_type name = `Known false then
+    if
+      force_derive_copy
+      && Configuration.is_known (Configuration.copy_type name) false
+    then
       failwith
         (Printf.sprintf
            "Type %s::%s can implement Copy but is not specified in the copy_types file. Please add it."

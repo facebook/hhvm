@@ -15,5 +15,6 @@
     state
     stringify
     utils)
+  (preprocess (pps ppx_deriving.std))
   (libraries
     signed_source collections ocaml-compiler-libs.common))

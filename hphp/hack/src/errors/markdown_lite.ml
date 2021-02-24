@@ -12,11 +12,12 @@ type delimiter =
   | Asterisk
   | DoubleAsterisk
   | DoubleTilde
+[@@deriving ord]
 
 module DelimiterKind = struct
   type t = delimiter
 
-  let compare = compare
+  let compare = compare_delimiter
 end
 
 module DelimiterSet = Caml.Set.Make (DelimiterKind)

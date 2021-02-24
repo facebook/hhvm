@@ -136,7 +136,7 @@ let timeout_of_deadline deadline ~max_timeout =
   match deadline with
   | Some deadline ->
     let time_left = deadline -. Unix.gettimeofday () in
-    if time_left > 0.0 then
+    if Float.(time_left > 0.0) then
       min (int_of_float time_left) max_timeout
     else
       0

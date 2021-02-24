@@ -83,7 +83,7 @@ let stringify m =
   let ty_reexports =
     ty_reexports
     |> List.map ~f:(sprintf "pub use %s;")
-    |> List.dedup_and_sort ~compare
+    |> List.dedup_and_sort ~compare:String.compare
     |> String.concat ~sep:"\n"
   in
   let decls = decls |> List.rev_map ~f:snd |> String.concat ~sep:"\n\n" in

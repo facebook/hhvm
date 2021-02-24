@@ -109,7 +109,7 @@ module Alarm_timeout = struct
      * http://caml.inria.fr/mantis/view.php?id=7142 *)
     try Stdlib.input_value ic
     with Failure msg as e ->
-      if msg = "input_value: truncated object" then
+      if String.equal msg "input_value: truncated object" then
         Stdlib.input_char ic |> ignore;
       raise e
 
@@ -213,7 +213,7 @@ module Select_timeout = struct
 
   let check_timeout t =
     let timeout_time = Unix.gettimeofday () in
-    if timeout_time > t.timeout then
+    if Float.(timeout_time > t.timeout) then
       raise (Timeout { exn_id = t.id; timeout_time; deadline_time = t.timeout })
 
   (** Channel *)
@@ -264,12 +264,12 @@ module Select_timeout = struct
       let now = Unix.gettimeofday () in
       let remaining_time = deadline_time -. now in
       (* Whoops, timeout already fired, throw right away! *)
-      if remaining_time < 0. then
+      if Float.(remaining_time < 0.) then
         raise (Timeout { exn_id = id; timeout_time = now; deadline_time });
 
       (* A negative select_timeout would mean wait forever *)
       if
-        select_timeout >= 0.0 && select_timeout < remaining_time
+        Float.(select_timeout >= 0.0 && select_timeout < remaining_time)
         (* The select's timeout is smaller than our timeout, so leave it alone *)
       then
         Sys_utils.select_non_intr rfds wfds xfds select_timeout
@@ -353,7 +353,7 @@ module Select_timeout = struct
   let input_scan_line ?timeout tic =
     let rec scan_line tic pos =
       if pos < tic.max then
-        if Bytes.get tic.buf pos = '\n' then
+        if Char.equal (Bytes.get tic.buf pos) '\n' then
           pos - tic.curr + 1
         else
           scan_line tic (pos + 1)
@@ -440,7 +440,8 @@ module Select_timeout = struct
     Bytes.set magic 1 (input_char ?timeout tic);
     Bytes.set magic 2 (input_char ?timeout tic);
     Bytes.set magic 3 (input_char ?timeout tic);
-    if magic <> marshal_magic then failwith "Select.input_value: bad object.";
+    if Bytes.(magic <> marshal_magic) then
+      failwith "Select.input_value: bad object.";
     let b1 = int_of_char (input_char ?timeout tic) in
     let b2 = int_of_char (input_char ?timeout tic) in
     let b3 = int_of_char (input_char ?timeout tic) in
@@ -537,7 +538,7 @@ module Select_timeout = struct
       | Unix.Unix_error ((Unix.EINPROGRESS | Unix.EWOULDBLOCK), _, _) ->
         begin
           match select ?timeout [] [sock] [] no_select_timeout with
-          | (_, [], [exn_sock]) when exn_sock = sock ->
+          | (_, [], [exn_sock]) when Poly.(exn_sock = sock) ->
             failwith "Failed to connect to socket"
           | (_, [], _) ->
             failwith

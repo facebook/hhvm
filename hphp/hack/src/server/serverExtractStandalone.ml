@@ -1361,11 +1361,44 @@ end = struct
           Option.map ~f:(update_hfun_context ~name) hint_fun.Aast_defs.hf_ctxs;
       }
 
-  let update_fun_context type_hint ~name =
-    match type_hint with
-    | (nm, Some (pos, Aast_defs.Hfun hint_fun)) ->
-      (nm, Some (pos, Aast_defs.Hfun (update_hint_fun_context hint_fun ~name)))
-    | o -> o
+  let update_fun_context (nm, hint_opt) ~name =
+    let f ((pos, hint_) as hint) =
+      Aast_defs.(
+        match hint_ with
+        | Hfun hint_fun -> (pos, Hfun (update_hint_fun_context hint_fun ~name))
+        | Hoption (opt_pos, Hfun hint_fun) ->
+          (pos, Hoption (opt_pos, Hfun (update_hint_fun_context hint_fun ~name)))
+        (* Non-function option *)
+        | Hoption _
+        (* places where we _can't_ use wildcard contexts *)
+        | Hlike _
+        | Hsoft _
+        | Hshape _
+        | Htuple _
+        (* places where function types shouldn't appear *)
+        | Haccess _
+        | Happly _
+        (* non-denotable types *)
+        | Hany
+        | Herr
+        | Hmixed
+        | Hnonnull
+        | Habstr _
+        | Hdarray _
+        | Hvarray _
+        | Hvarray_or_darray _
+        | Hvec_or_dict _
+        | Hprim _
+        | Hthis
+        | Hdynamic
+        | Hnothing
+        | Hunion _
+        | Hintersection _
+        | Hfun_context _
+        | Hvar _ ->
+          hint)
+    in
+    (nm, Option.map hint_opt ~f)
 
   let pp_fun_param
       ppf

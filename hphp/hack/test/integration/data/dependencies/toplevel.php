@@ -179,3 +179,15 @@ class WithContextConstant {
     echo "I have IO!";
   }
 }
+
+function with_optional_argument_dependent_context_callee(
+  ?(function()[_]: void) $f1,
+)[ctx $f1]: void {
+  if ($f1 is nonnull) {
+    $f1();
+  }
+}
+
+function with_optional_argument_dependent_context(): void {
+  with_optional_argument_dependent_context_callee(null);
+}

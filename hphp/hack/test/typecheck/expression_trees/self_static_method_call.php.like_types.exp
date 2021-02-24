@@ -2,7 +2,7 @@ File "self_static_method_call.php", line 13, characters 22-37:
 Static method calls in expression trees require explicit class names. (Parsing[1002])
 File "self_static_method_call.php", line 13, characters 22-37:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 49, characters 6-34:
+  File "expr_tree.hhi", line 48, characters 6-34:
   But got `dynamic` because it is an unenforceable type
 File "self_static_method_call.php", line 13, characters 32-36:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])

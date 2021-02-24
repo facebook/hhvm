@@ -44,7 +44,6 @@ class Code {
 
   // Symbols
   public static function symbol<T>(
-    string $_,
     (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();

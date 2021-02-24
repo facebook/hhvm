@@ -91,12 +91,10 @@
                                                   (CI ([4:31-36], "\\Code"))),
                                                  ([4:31-36], "symbol")))),
                                              [],
-                                             [([Pos.none], (String "foo"));
-                                               ([4:31-36],
-                                                (FunctionPointer (
-                                                   (FP_id
-                                                      ([4:31-34], "\\foo")),
-                                                   [])))
+                                             [([4:31-36],
+                                               (FunctionPointer (
+                                                  (FP_id ([4:31-34], "\\foo")),
+                                                  [])))
                                                ],
                                              None)))
                                          )))));

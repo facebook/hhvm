@@ -400,12 +400,11 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
         let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
 
         match &mut e.1 {
-            // Convert `foo(...)` to `__splice__(Visitor::symbol('foo', foo<>))(...)`
+            // Convert `foo(...)` to `__splice__(Visitor::symbol(foo<>))(...)`
             Call(ref mut call) => {
                 let (ref recv, ref mut targs, ref mut args, ref mut variadic) = **call;
                 match &recv.1 {
                     Id(sid) => {
-                        let fn_name = string_literal(&*sid.1);
                         targs.accept(env, self.object())?;
                         let targs = std::mem::replace(targs, vec![]);
 
@@ -419,7 +418,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                         let callee = mk_splice(static_meth_call(
                             &self.visitor_name,
                             "symbol",
-                            vec![fn_name, fp],
+                            vec![fp],
                             &pos,
                         ));
 
@@ -430,17 +429,9 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                         let variadic = variadic.take();
                         e.1 = Call(Box::new((callee, vec![], args, variadic)))
                     }
-                    // Convert `Foo::bar(...)` to `${ Visitor::symbol('Foo::bar', Foo::bar<>) }(...)`
+                    // Convert `Foo::bar(...)` to `${ Visitor::symbol(Foo::bar<>) }(...)`
                     ClassConst(cc) => {
                         let (ref cid, ref s) = **cc;
-                        let fn_name = if let ClassId_::CIexpr(Expr(_, Id(sid))) = &cid.1 {
-                            let name = format!("{}::{}", &*sid.1, &s.1);
-                            string_literal(&name)
-                        } else {
-                            // Should be unreachable
-                            string_literal("__ILLEGAL_STATIC_CALL_IN_EXPRESSION_TREE")
-                        };
-
                         targs.accept(env, self.object())?;
                         let targs = std::mem::replace(targs, vec![]);
 
@@ -455,7 +446,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                         let callee = mk_splice(static_meth_call(
                             &self.visitor_name,
                             "symbol",
-                            vec![fn_name, fp],
+                            vec![fp],
                             &pos,
                         ));
 

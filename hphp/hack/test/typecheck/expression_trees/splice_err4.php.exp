@@ -4,7 +4,7 @@ Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is 
   But got `int`
 File "splice_err4.php", line 13, characters 19-20:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 143, characters 5-35:
+  File "expr_tree.hhi", line 142, characters 5-35:
   Expected `Spliceable<Code, mixed, [unresolved]>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

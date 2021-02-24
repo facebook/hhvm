@@ -89,13 +89,12 @@ final class MyVisitor {
   }
 
   public static function symbol<T>(
-    string $name,
     (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
   ): ExprTree<this, this::TAst, T> {
     return new ExprTree(
       null,
       dict[],
-      (MyVisitor $_) ==> { return $name; },
+      (MyVisitor $_) ==> { return 'function_ptr'; },
       () ==> { throw new Exception(); },
     );
   }

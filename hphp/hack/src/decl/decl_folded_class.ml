@@ -338,6 +338,7 @@ and synthesize_defaults
         ttc_abstract = TCConcrete;
         ttc_as_constraint = None;
         ttc_type = Some default;
+        ttc_concretized = true;
       }
     in
     let typeconsts = SMap.add k concrete typeconsts in
@@ -816,6 +817,7 @@ and typeconst_fold
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;
+        ttc_concretized = false;
       }
     in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in

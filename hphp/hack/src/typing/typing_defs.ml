@@ -129,6 +129,7 @@ and typeconst_type = {
   ttc_origin: string;
   ttc_enforceable: Pos.t * bool;
   ttc_reifiable: Pos.t option;
+  ttc_concretized: bool;
 }
 
 and enum_type = {

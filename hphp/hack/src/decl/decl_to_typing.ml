@@ -236,6 +236,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_origin = mro.mro_name;
         ttc_enforceable;
         ttc_reifiable;
+        ttc_concretized = true;
       }
     | _ ->
       {
@@ -247,6 +248,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_origin = mro.mro_name;
         ttc_enforceable;
         ttc_reifiable;
+        ttc_concretized = false;
       }
   in
   (snd ttc_name, typeconst)

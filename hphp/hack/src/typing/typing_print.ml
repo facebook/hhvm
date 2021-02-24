@@ -1565,6 +1565,7 @@ module PrintClass = struct
         ttc_origin = origin;
         ttc_enforceable = (_, enforceable);
         ttc_reifiable = reifiable;
+        ttc_concretized = _;
       } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl ctx x in

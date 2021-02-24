@@ -216,6 +216,7 @@ struct
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
       ttc_reifiable = Option.map tc.ttc_reifiable pos;
+      ttc_concretized = tc.ttc_concretized;
     }
 
   and user_attribute { ua_name; ua_classname_params } =

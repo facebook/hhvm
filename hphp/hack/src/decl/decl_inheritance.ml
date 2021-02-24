@@ -305,7 +305,8 @@ let make_typeconst_cache class_name lin =
     lin
     ~is_canonical:(fun t ->
       String.equal t.ttc_origin class_name
-      || equal_typeconst_abstract_kind t.ttc_abstract TCConcrete)
+      || equal_typeconst_abstract_kind t.ttc_abstract TCConcrete
+         && not t.ttc_concretized)
     ~merge:
       begin
         fun ~earlier:descendant_tc ~later:ancestor_tc ->
@@ -372,8 +373,14 @@ let make_typeconst_cache class_name lin =
          *)
         | (TCAbstract _, TCAbstract _)
         | (TCPartiallyAbstract, (TCAbstract _ | TCPartiallyAbstract))
-        | (TCConcrete, (TCAbstract _ | TCPartiallyAbstract | TCConcrete)) ->
+        | (TCConcrete, (TCAbstract _ | TCPartiallyAbstract)) ->
           descendant_tc
+        | (TCConcrete, TCConcrete) ->
+          if descendant_tc.ttc_concretized && not ancestor_tc.ttc_concretized
+          then
+            ancestor_tc
+          else
+            descendant_tc
       end
 
 let constructor_elt child_class_name (mro, cls, subst) =

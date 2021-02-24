@@ -9,7 +9,6 @@ path = "../../positioned_full_trivia_parser_ffi.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-cpp_helper = { path = "../../../utils/cpp_helper" }
 libc = "0.2.86"
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }

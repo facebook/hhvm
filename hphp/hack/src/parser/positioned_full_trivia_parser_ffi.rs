@@ -28,7 +28,7 @@ struct CParserEnv {
 }
 
 impl CParserEnv {
-    /// Returns `None` if `env` is null.
+    /// Returns `None` if `env` is nul.
     ///
     /// # Safety
     /// * `env` must be a valid, aligned pointer to a `CParserEnv`
@@ -74,16 +74,16 @@ unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
 ) -> *const libc::c_char {
     use std::os::unix::ffi::OsStrExt;
     // Safety: We rely on the C caller that `filename` be a properly
-    // initialized null-terminated C string.
+    // initialized nul-terminated C string.
     let filepath = oxidized::relative_path::RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(cpp_helper::cstr::to_u8(
-            filename,
-        ))),
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(
+            std::ffi::CStr::from_ptr(filename).to_bytes(),
+        )),
     );
     // Safety : We rely on the C caller that `text` be a properly
-    // iniitalized null-terminated C string.
-    let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
+    // iniitalized nul-terminated C string.
+    let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
     // Safety : We rely on the C caller that `env` can be legitmately
     // reinterpreted as a `*const CParserEnv` and that on doing so, it
     // points to a valid properly initialized value.
@@ -105,7 +105,7 @@ unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
         Ok(()) => {
             // Safety : No runtime assertion is made that `v` contains no
             // 0 bytes.
-            cpp_helper::cstr::from_vec_u8(serializer.into_inner())
+            std::ffi::CString::from_vec_unchecked(serializer.into_inner()).into_raw()
         }
         _ => std::ptr::null(),
     }

@@ -12,7 +12,6 @@ crate-type = ["lib", "staticlib"]
 anyhow = "1.0"
 atty = "0.2"
 compile_rust = { path = "../compile" }
-cpp_helper = { path = "../../../utils/cpp_helper" }
 libc = "0.2.86"
 log = { version = "0.4.8", features = ["kv_unstable"] }
 ocamlrep = { path = "../../../ocamlrep" }

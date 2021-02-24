@@ -42,18 +42,26 @@ impl<'content> FromOcamlRep for OcamlStr<'content> {
 }
 
 #[repr(C)]
+pub struct CErrBuf {
+    pub buf: *mut c_char,
+    pub buf_len: c_int,
+}
+
+#[repr(C)]
 struct COutputConfig {
     include_header: bool,
     output_file: *const c_char,
 }
 
 impl RustOutputConfig {
-    /// Returns `None` if `output_config` is null.
+    /// Returns `None` if `output_config` is nul.
     ///
     /// # Safety
-    /// * `output_config` must be a valid, aligned pointer to a `COutputConfig`,
-    ///   which must not be accessed through another pointer during this function call.
-    /// * The COutputConfig's `output_file` must be a valid null-terminated C string or nullptr.
+    /// * `output_config` must be a valid, aligned pointer to a
+    ///   `COutputConfig`, which must not be accessed through another
+    ///   pointer during this function call.
+    /// * The COutputConfig's `output_file` must be a valid
+    ///   nul-terminated C string or nulptr.
     #[cfg(unix)]
     unsafe fn from_c_output_config(output_config: *const COutputConfig) -> Option<Self> {
         let output_config = output_config.as_ref()?;
@@ -96,6 +104,13 @@ impl CEnv {
 
         let env = env.as_ref()?;
 
+        let to_vec = |cstrs: *const *const c_char, num_cstrs: usize| -> std::vec::Vec<&str> {
+            std::slice::from_raw_parts(cstrs, num_cstrs)
+                .iter()
+                .map(|&s| std::str::from_utf8_unchecked(std::ffi::CStr::from_ptr(s).to_bytes()))
+                .collect()
+        };
+
         Some(compile::Env {
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
@@ -103,8 +118,8 @@ impl CEnv {
                     std::ffi::CStr::from_ptr(env.filepath).to_bytes(),
                 )),
             ),
-            config_jsons: cpp_helper::cstr::to_vec(env.config_jsons, env.num_config_jsons),
-            config_list: cpp_helper::cstr::to_vec(env.config_list, env.num_config_list),
+            config_jsons: to_vec(env.config_jsons, env.num_config_jsons),
+            config_list: to_vec(env.config_list, env.num_config_list),
             flags: compile::EnvFlags::from_bits(env.flags).unwrap(),
         })
     }
@@ -130,14 +145,15 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
     err_buf: usize,
 ) -> *const c_char {
     // Safety: We rely on the C caller that `env` can be legitmately
-    // reinterpreted as a `*const CBuf` and that on doing so, it is
+    // reinterpreted as a `*const CErrBuf` and that on doing so, it is
     // non-null is well aligned and points to a valid properly
     // initialized value.
-    let err_buf: &cpp_helper::CBuf = (err_buf as *const cpp_helper::CBuf).as_ref().unwrap();
+    let err_buf: &CErrBuf = (err_buf as *const CErrBuf).as_ref().unwrap();
     let buf_len: c_int = err_buf.buf_len;
     // Safety : We rely on the C caller that `err_buf.buf` be valid for
     // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
-    let buf: &mut [u8] = cpp_helper::cstr::to_mut_u8(err_buf.buf, buf_len);
+    let buf: &mut [u8] = std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, buf_len as usize);
+
     // Safety: We rely on the C caller that `output_cfg` can be
     // legitmately reinterpreted as a `*const COutputConfig` and that
     // on doing so, it points to a valid properly initialized value.

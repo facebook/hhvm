@@ -33,7 +33,7 @@
                                  (Expr
                                     ([5:8-9],
                                      (Binop ((Eq None),
-                                        ([5:8-9], (Lvar ([5:8-9], $__0))),
+                                        ([5:8-9], (Lvar ([5:8-9], $0splice0))),
                                         ([5:8-9],
                                          (Call (
                                             ([5:8-9],
@@ -48,7 +48,8 @@
                                   (Expr
                                      ([5:13-14],
                                       (Binop ((Eq None),
-                                         ([5:13-14], (Lvar ([5:13-14], $__1))),
+                                         ([5:13-14],
+                                          (Lvar ([5:13-14], $0splice1))),
                                          ([5:13-14],
                                           (Call (
                                              ([5:13-14],
@@ -90,15 +91,17 @@
                                                   (KeyValCollection (Dict,
                                                      None,
                                                      [(([Pos.none],
-                                                        (String "$__0")),
+                                                        (String "$0splice0")),
                                                        ([Pos.none],
                                                         (Lvar
-                                                           ([Pos.none], $__0))));
+                                                           ([Pos.none],
+                                                            $0splice0))));
                                                        (([Pos.none],
-                                                         (String "$__1")),
+                                                         (String "$0splice1")),
                                                         ([Pos.none],
                                                          (Lvar
-                                                            ([Pos.none], $__1))))
+                                                            ([Pos.none],
+                                                             $0splice1))))
                                                        ]
                                                      )));
                                                  ([5:8-14],
@@ -289,13 +292,13 @@
                                                                     ([5:8-9],
                                                                     (Lvar
                                                                     ([5:8-9],
-                                                                    $__0))))),
+                                                                    $0splice0))))),
                                                                  ([5:13-14],
                                                                   (ET_Splice
                                                                     ([5:13-14],
                                                                     (Lvar
                                                                     ([5:13-14],
-                                                                    $__1)))))
+                                                                    $0splice1)))))
                                                                  ))))))
                                                            ];
                                                          fb_annotation =
@@ -323,8 +326,9 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([Pos.none], $__0);
-                                                       ([Pos.none], $__1)]
+                                                     [([Pos.none], $0splice0);
+                                                       ([Pos.none], $0splice1)
+                                                       ]
                                                      )))
                                                  ],
                                                None))))))

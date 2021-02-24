@@ -985,7 +985,7 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
 }
 
 fn temp_lvar_string(num: usize) -> String {
-    format!("$__{}", num.to_string())
+    format!("$0splice{}", num.to_string())
 }
 
 fn temp_lvar(pos: &Pos, num: usize) -> Expr {

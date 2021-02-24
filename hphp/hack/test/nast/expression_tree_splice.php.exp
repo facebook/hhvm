@@ -42,7 +42,7 @@
                                  (Expr
                                     ([4:8-9],
                                      (Binop ((Eq None),
-                                        ([4:8-9], (Lvar ([4:8-9], $__0))),
+                                        ([4:8-9], (Lvar ([4:8-9], $0splice0))),
                                         ([4:8-9],
                                          (Call (
                                             ([4:8-9],
@@ -57,7 +57,8 @@
                                   (Expr
                                      ([4:12-14],
                                       (Binop ((Eq None),
-                                         ([4:12-14], (Lvar ([4:12-14], $__1))),
+                                         ([4:12-14],
+                                          (Lvar ([4:12-14], $0splice1))),
                                          ([4:12-14],
                                           (Call (
                                              ([4:12-14],
@@ -72,7 +73,8 @@
                                   (Expr
                                      ([4:19-25],
                                       (Binop ((Eq None),
-                                         ([4:19-25], (Lvar ([4:19-25], $__2))),
+                                         ([4:19-25],
+                                          (Lvar ([4:19-25], $0splice2))),
                                          ([4:19-25],
                                           (Binop (Plus,
                                              ([4:19-21],
@@ -110,20 +112,23 @@
                                                   (KeyValCollection (Dict,
                                                      None,
                                                      [(([Pos.none],
-                                                        (String "$__0")),
+                                                        (String "$0splice0")),
                                                        ([Pos.none],
                                                         (Lvar
-                                                           ([Pos.none], $__0))));
+                                                           ([Pos.none],
+                                                            $0splice0))));
                                                        (([Pos.none],
-                                                         (String "$__1")),
+                                                         (String "$0splice1")),
                                                         ([Pos.none],
                                                          (Lvar
-                                                            ([Pos.none], $__1))));
+                                                            ([Pos.none],
+                                                             $0splice1))));
                                                        (([Pos.none],
-                                                         (String "$__2")),
+                                                         (String "$0splice2")),
                                                         ([Pos.none],
                                                          (Lvar
-                                                            ([Pos.none], $__2))))
+                                                            ([Pos.none],
+                                                             $0splice2))))
                                                        ]
                                                      )));
                                                  ([4:8-26],
@@ -285,12 +290,12 @@
                                                                     [4:8-9])));
                                                                     ([Pos.none],
                                                                     (String
-                                                                    "$__0"));
+                                                                    "$0splice0"));
                                                                     ([4:8-9],
                                                                     (Lvar
                                                                     ([4:8-9],
-                                                                    $__0)))],
-                                                                    None)));
+                                                                    $0splice0)))
+                                                                    ], None)));
                                                                     ([Pos.none],
                                                                     (String
                                                                     "__plus"));
@@ -337,13 +342,13 @@
                                                                     )));
                                                                     ([Pos.none],
                                                                     (String
-                                                                    "$__1"));
+                                                                    "$0splice1"));
                                                                     ([4:12-14],
                                                                     (Lvar
                                                                     ([4:12-14],
-                                                                    $__1)))],
-                                                                    None)))]
-                                                                    )))],
+                                                                    $0splice1)))
+                                                                    ], None)))
+                                                                    ])))],
                                                                     None)));
                                                                    ([Pos.none],
                                                                     (
@@ -393,13 +398,13 @@
                                                                     )));
                                                                     ([Pos.none],
                                                                     (String
-                                                                    "$__2"));
+                                                                    "$0splice2"));
                                                                     ([4:19-25],
                                                                     (Lvar
                                                                     ([4:19-25],
-                                                                    $__2)))],
-                                                                    None)))]
-                                                                    )))
+                                                                    $0splice2)))
+                                                                    ], None)))
+                                                                    ])))
                                                                    ],
                                                                  None))))))
                                                            ];
@@ -428,9 +433,9 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([4:19-25], $__2);
-                                                       ([4:12-14], $__1);
-                                                       ([4:8-9], $__0)]
+                                                     [([4:19-25], $0splice2);
+                                                       ([4:12-14], $0splice1);
+                                                       ([4:8-9], $0splice0)]
                                                      )));
                                                  ([4:8-26],
                                                   (Efun (
@@ -468,7 +473,7 @@
                                                                     ([4:8-9],
                                                                     (Lvar
                                                                     ([4:8-9],
-                                                                    $__0))))),
+                                                                    $0splice0))))),
                                                                     ([4:8-14],
                                                                     (Id
                                                                     ([4:8-14],
@@ -481,7 +486,7 @@
                                                                     ([4:12-14],
                                                                     (Lvar
                                                                     ([4:12-14],
-                                                                    $__1)))))
+                                                                    $0splice1)))))
                                                                     ], None))),
                                                                     ([4:8-26],
                                                                     (Id
@@ -495,7 +500,7 @@
                                                                     ([4:19-25],
                                                                     (Lvar
                                                                     ([4:19-25],
-                                                                    $__2)))))
+                                                                    $0splice2)))))
                                                                    ],
                                                                  None))))))
                                                            ];
@@ -524,9 +529,10 @@
                                                          false };
                                                        f_doc_comment = None;
                                                        f_static = false },
-                                                     [([Pos.none], $__0);
-                                                       ([Pos.none], $__1);
-                                                       ([Pos.none], $__2)]
+                                                     [([Pos.none], $0splice0);
+                                                       ([Pos.none], $0splice1);
+                                                       ([Pos.none], $0splice2)
+                                                       ]
                                                      )))
                                                  ],
                                                None))))))

@@ -1016,6 +1016,12 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptUncArrKeyCompat:
       return TInt | TPersistentStr | TCls | TLazyCls | TInitNull;
 
+    case T::UninitBool:     return TBool      | TUninit;
+    case T::UninitInt:      return TInt       | TUninit;
+    case T::UninitStr:      return TStr       | TUninit;
+    case T::UninitSStr:     return TStaticStr | TUninit;
+    case T::UninitObj:      return TObj       | TUninit;
+
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
     case T::Null:           return TNull;
@@ -1043,8 +1049,12 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       return TInt | TPersistentStr | TCls | TLazyCls;
     case T::ArrKeyCompat:
       return TInt | TStr | TCls | TLazyCls;
+    case T::Num:            return TInt | TDbl;
+    case T::OptNum:         return TInitNull | TInt | TDbl;
+    case T::InitPrim:       return TInitNull | TBool | TInt | TDbl;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
+    case T::NonNull:        return TNonNull;
     case T::InitCell:       return TInitCell;
 
 #define X(A, B, C)                                                      \
@@ -1126,18 +1136,26 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
                                    TStaticDArr | TStaticKeyset | TInitNull;
     case T::OptArrLike:     return TVec | TVArr | TDict | TDArr |
                                    TKeyset | TInitNull;
+    case T::ArrLikeCompat:  return TVec | TVArr | TDict | TDArr |
+                                   TKeyset | TClsMeth;
+    case T::OptArrLikeCompat: return TVec | TVArr | TDict | TDArr |
+                                   TKeyset | TClsMeth | TInitNull;
 
 #undef X
 
     case T::SubObj:
     case T::ExactObj:
     case T::OptSubObj:
-    case T::OptExactObj: {
+    case T::OptExactObj:
+    case T::UninitSubObj:
+    case T::UninitExactObj: {
       auto base = TObj;
 
       if (auto const cls = Class::lookupUniqueInContext(ty.clsName(),
-                                                            ctx, nullptr)) {
-        if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
+                                                        ctx, nullptr)) {
+        if (ty.tag() == T::ExactObj ||
+            ty.tag() == T::OptExactObj ||
+            ty.tag() == T::UninitExactObj) {
           base = Type::ExactObj(cls);
         } else {
           base = Type::SubObj(cls);
@@ -1145,6 +1163,8 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       }
       if (ty.tag() == T::OptSubObj || ty.tag() == T::OptExactObj) {
         base |= TInitNull;
+      } else if (ty.tag() == T::UninitSubObj || ty.tag() == T::UninitExactObj) {
+        base |= TUninit;
       }
       return base;
     }

@@ -265,7 +265,7 @@ struct FCallArgsShort {
   }
   template<int nin, int nobj>
   Flavor popFlavor(uint32_t i) const {
-    assert(i < this->template numPop<nin>());
+    assertx(i < this->template numPop<nin>());
     if (i < nin) return Flavor::C;
     i -= nin;
     if (hasGenerics()) {
@@ -380,7 +380,7 @@ struct FCallArgsLong : FCallArgsBase {
   }
   template<int nin, int nobj>
   Flavor popFlavor(uint32_t i) const {
-    assert(i < this->template numPop<nin>());
+    assertx(i < this->template numPop<nin>());
     if (i < nin) return Flavor::C;
     i -= nin;
     if (hasGenerics()) {
@@ -972,19 +972,19 @@ namespace imm {
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
+                      assertx(i < numPop());                  \
                       return Flavor::C;                       \
                     }
 
 #define POP_SMANY   uint32_t numPop() const { return keys.size(); }  \
                     Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
+                      assertx(i < numPop());                  \
                       return Flavor::C;                       \
                     }
 
 #define POP_CUMANY  uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
+                      assertx(i < numPop());                  \
                       return Flavor::CU;                      \
                     }
 

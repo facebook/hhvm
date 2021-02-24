@@ -104,12 +104,17 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   if (tag() != o.tag()) return false;
   switch (tag()) {
   case T::OptBool:
+  case T::UninitBool:
   case T::OptInt:
+  case T::UninitInt:
   case T::OptSStr:
+  case T::UninitSStr:
   case T::OptStr:
+  case T::UninitStr:
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::UninitObj:
   case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
@@ -146,6 +151,10 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::ClsMeth:
   case T::Record:
   case T::LazyCls:
+  case T::Num:
+  case T::OptNum:
+  case T::InitPrim:
+  case T::NonNull:
     return true;
 
   case T::SVec:
@@ -190,6 +199,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptVecCompat:
   case T::ArrCompat:
   case T::OptArrCompat:
+  case T::ArrLikeCompat:
+  case T::OptArrLikeCompat:
     // array id equals to either kInvalidArrayId for null array info, or a
     // regular id. in each case, we just need to compare their id.
     return arrayId() == o.arrayId();
@@ -198,6 +209,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::ExactObj:
   case T::OptSubObj:
   case T::OptExactObj:
+  case T::UninitSubObj:
+  case T::UninitExactObj:
   case T::SubCls:
   case T::ExactCls:
   case T::OptSubCls:
@@ -498,6 +511,17 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
+  case T::OptArrLikeCompat:
+    if (initNull) return true;
+    // fallthrough
+  case T::ArrLikeCompat:
+    if (isClsMethType(tv.m_type)) return true;
+    if (!isArrayLikeType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
 
@@ -512,11 +536,28 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
              tv.m_data.pobj->getVMClass()->classof(cls);
     }
 
+  case T::UninitSubObj:
+    {
+      if (tv.m_type == KindOfUninit) return true;
+      auto const cls = Class::lookup(ty.clsName());
+      if (!cls) return false;
+      return tv.m_type == KindOfObject &&
+             tv.m_data.pobj->getVMClass()->classof(cls);
+    }
+
   case T::OptExactObj:
     if (initNull) return true;
     // fallthrough
   case T::ExactObj:
     {
+      auto const cls = Class::lookup(ty.clsName());
+      if (!cls) return false;
+      return tv.m_type == KindOfObject && tv.m_data.pobj->getVMClass() == cls;
+    }
+
+  case T::UninitExactObj:
+    {
+      if (tv.m_type == KindOfUninit) return true;
       auto const cls = Class::lookup(ty.clsName());
       if (!cls) return false;
       return tv.m_type == KindOfObject && tv.m_data.pobj->getVMClass() == cls;
@@ -616,6 +657,33 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
            tv.m_type == KindOfInt64 ||
            isClassType(tv.m_type) || isLazyClassType(tv.m_type);
 
+  case T::OptNum:
+    if (initNull) return true;
+    // fallthrough
+  case T::Num:
+    return isIntType(tv.m_type) || isDoubleType(tv.m_type);
+
+  case T::NonNull:
+    return tv.m_type != KindOfUninit && !initNull;
+
+  case T::UninitInt:
+    return isIntType(tv.m_type) || tv.m_type == KindOfUninit;
+  case T::UninitBool:
+    return isBoolType(tv.m_type) || tv.m_type == KindOfUninit;
+  case T::UninitSStr:
+    return
+      (isStringType(tv.m_type) && tv.m_data.pstr->isStatic())
+      || tv.m_type == KindOfUninit;
+  case T::UninitStr:
+    return isStringType(tv.m_type) || tv.m_type == KindOfUninit;
+  case T::UninitObj:
+    return isObjectType(tv.m_type) || tv.m_type == KindOfUninit;
+
+  case T::InitPrim:
+    return
+      initNull || isIntType(tv.m_type) ||
+      isDoubleType(tv.m_type) || isBoolType(tv.m_type);
+
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -630,12 +698,17 @@ std::string show(RepoAuthType rat) {
   using T = RepoAuthType::Tag;
   switch (tag) {
   case T::OptBool:       return "?Bool";
+  case T::UninitBool:    return "UninitBool";
   case T::OptInt:        return "?Int";
+  case T::UninitInt:     return "UninitInt";
   case T::OptSStr:       return "?SStr";
+  case T::UninitSStr:    return "UninitSStr";
   case T::OptStr:        return "?Str";
+  case T::UninitStr:     return "UninitStr";
   case T::OptDbl:        return "?Dbl";
   case T::OptRes:        return "?Res";
   case T::OptObj:        return "?Obj";
+  case T::UninitObj:     return "UninitObj";
   case T::OptFunc:       return "?Func";
   case T::OptCls:        return "?Cls";
   case T::OptClsMeth:    return "?ClsMeth";
@@ -672,6 +745,10 @@ std::string show(RepoAuthType rat) {
   case T::ClsMeth:       return "ClsMeth";
   case T::Record:        return "Record";
   case T::LazyCls:       return "LazyCls";
+  case T::Num:           return "Num";
+  case T::OptNum:        return "OptNum";
+  case T::InitPrim:      return "InitPrim";
+  case T::NonNull:       return "NonNull";
 
   case T::OptSArr:
   case T::OptArr:
@@ -715,6 +792,8 @@ std::string show(RepoAuthType rat) {
   case T::OptVecCompat:
   case T::ArrCompat:
   case T::OptArrCompat:
+  case T::ArrLikeCompat:
+  case T::OptArrLikeCompat:
     {
       auto ret = std::string{};
       if (tag == T::OptArr    || tag == T::OptSArr ||
@@ -727,7 +806,7 @@ std::string show(RepoAuthType rat) {
           tag == T::OptDictish || tag == T::OptSDictish ||
           tag == T::OptArrLike || tag == T::OptSArrLike ||
           tag == T::OptVArrCompat || tag == T::OptVecCompat ||
-          tag == T::OptArrCompat) {
+          tag == T::OptArrCompat || tag == T::OptArrLikeCompat) {
         ret += '?';
       }
       if (tag == T::ArrCompat || tag == T::OptArrCompat) {
@@ -738,6 +817,9 @@ std::string show(RepoAuthType rat) {
       }
       if (tag == T::VecCompat || tag == T::OptVecCompat) {
         ret += "VecCompat";
+      }
+      if (tag == T::ArrLikeCompat || tag == T::OptArrLikeCompat) {
+        ret += "ArrLikeCompat";
       }
       if (tag == T::SArr    || tag == T::OptSArr ||
           tag == T::SVArr   || tag == T::OptSVArr ||
@@ -785,6 +867,8 @@ std::string show(RepoAuthType rat) {
 
   case T::OptSubObj:
   case T::OptExactObj:
+  case T::UninitSubObj:
+  case T::UninitExactObj:
   case T::SubObj:
   case T::ExactObj:
   case T::OptSubCls:
@@ -800,10 +884,12 @@ std::string show(RepoAuthType rat) {
       if (tag == T::OptSubObj || tag == T::OptExactObj ||
           tag == T::SubObj || tag == T::ExactObj) {
         ret += "Obj";
+      } else if (tag == T::UninitSubObj || tag == T::UninitExactObj) {
+        ret += "UninitObj";
       } else {
         ret += "Cls";
       }
-      if (tag == T::OptSubObj || tag == T::SubObj ||
+      if (tag == T::OptSubObj || tag == T::UninitSubObj || tag == T::SubObj ||
           tag == T::OptSubCls || tag == T::SubCls) {
         ret += "<";
       }

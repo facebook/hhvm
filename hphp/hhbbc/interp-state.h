@@ -132,9 +132,9 @@ enum class BaseLoc {
  * Information about the current member base's type and location.
  */
 struct Base {
-  explicit Base(Type type = {},
+  explicit Base(Type type = TCell,
                 BaseLoc loc = BaseLoc::None,
-                Type locTy = {},
+                Type locTy = TCell,
                 SString locName = {},
                 LocalId locLocal = NoLocalId,
                 uint32_t locSlot = 0)

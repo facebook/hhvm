@@ -50,18 +50,23 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::Null:
   case T::Int:
   case T::OptInt:
+  case T::UninitInt:
   case T::Dbl:
   case T::OptDbl:
   case T::Res:
   case T::OptRes:
   case T::Bool:
   case T::OptBool:
+  case T::UninitBool:
   case T::SStr:
   case T::OptSStr:
+  case T::UninitSStr:
   case T::Str:
   case T::OptStr:
+  case T::UninitStr:
   case T::Obj:
   case T::OptObj:
+  case T::UninitObj:
   case T::Func:
   case T::OptFunc:
   case T::ClsMeth:
@@ -84,8 +89,12 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::ArrKeyCompat:
   case T::OptUncArrKeyCompat:
   case T::OptArrKeyCompat:
+  case T::Num:
+  case T::OptNum:
+  case T::InitPrim:
   case T::InitUnc:
   case T::Unc:
+  case T::NonNull:
   case T::InitCell:
   case T::Cell:
     assertx(!highBitSet);
@@ -132,6 +141,8 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptVecCompat:
   case T::ArrCompat:
   case T::OptArrCompat:
+  case T::ArrLikeCompat:
+  case T::OptArrLikeCompat:
     if (highBitSet) {
       return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
     }
@@ -140,6 +151,8 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
+  case T::UninitExactObj:
+  case T::UninitSubObj:
   case T::ExactCls:
   case T::SubCls:
   case T::OptExactCls:

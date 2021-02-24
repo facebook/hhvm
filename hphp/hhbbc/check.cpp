@@ -43,21 +43,21 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
     // the block was deleted
     return true;
   }
-  assert(!b.hhbcs.empty());
+  assertx(!b.hhbcs.empty());
 
   // No instructions in the middle of a block should have taken edges,
   // or be an unconditional Jmp.
   for (auto it = begin(b.hhbcs); it != end(b.hhbcs); ++it) {
-    assert(it->op != Op::Jmp && "unconditional Jmp mid-block");
+    assertx(it->op != Op::Jmp && "unconditional Jmp mid-block");
     if (std::next(it) == end(b.hhbcs)) break;
     forEachTakenEdge(*it, [&](BlockId /*blk*/) {
-      assert(!"Instruction in middle of block had a jump target");
+      assertx(!"Instruction in middle of block had a jump target");
     });
   }
 
   // A block should either have a matching exnNodeId and throwExit, or neither
   // should be set.
-  assert(b.throwExit == (b.exnNodeId != NoExnNodeId
+  assertx(b.throwExit == (b.exnNodeId != NoExnNodeId
     ? f.exnNodes[b.exnNodeId].region.catchEntry
     : NoBlockId));
 
@@ -65,15 +65,15 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
 }
 
 bool DEBUG_ONLY checkParams(const php::Func& f) {
-  assert(f.params.size() <= f.locals.size());
+  assertx(f.params.size() <= f.locals.size());
   for (uint32_t i = 0; i < f.locals.size(); ++i) {
-    assert(f.locals[i].id == i);
+    assertx(f.locals[i].id == i);
   }
 
   // dvInit pointers are consistent in the parameters vector and on
   // the func.
   for (uint32_t i = 0; i < f.params.size(); ++i) {
-    assert(f.params[i].dvEntryPoint == f.dvEntries[i]);
+    assertx(f.params[i].dvEntryPoint == f.dvEntries[i]);
   }
 
   return true;
@@ -94,12 +94,12 @@ void checkExnTreeBasic(const php::Func& f,
   if (seenIds.size() < node->idx + 1) {
     seenIds.resize(node->idx + 1);
   }
-  assert(!seenIds[node->idx]);
+  assertx(!seenIds[node->idx]);
   seenIds[node->idx] = true;
 
   // Parent pointers should point to the node that has a given node as
   // a child.
-  assert(node->parent == expectedParent);
+  assertx(node->parent == expectedParent);
 
   for (auto& c : node->children) {
     checkExnTreeBasic(f, seenIds, &f.exnNodes[c], node->idx);
@@ -119,7 +119,7 @@ bool DEBUG_ONLY checkExnTree(const php::Func& f) {
 
   // ExnNode ids are contiguous.
   for (size_t i = 0; i < seenIds.size(); ++i) {
-    assert(seenIds[i] == true || f.exnNodes[i].idx == NoExnNodeId);
+    assertx(seenIds[i] == true || f.exnNodes[i].idx == NoExnNodeId);
   }
 
   return true;
@@ -134,19 +134,19 @@ bool DEBUG_ONLY checkName(SString name) {
 }
 
 bool check(const php::Func& f) {
-  assert(checkParams(f));
-  assert(checkName(f.name));
+  assertx(checkParams(f));
+  assertx(checkName(f.name));
 
   if constexpr (!debug) return true;
   auto const func = php::WideFunc::cns(&f);
-  for (DEBUG_ONLY auto& block : func.blocks()) assert(checkBlock(f, *block));
+  for (DEBUG_ONLY auto& block : func.blocks()) assertx(checkBlock(f, *block));
 
   /*
    * Some of these relationships may change as async/await
    * implementation progresses.  Asserting them now so they are
    * revisited here if they aren't true anymore.
    */
-  if (f.isPairGenerator) assert(f.isGenerator);
+  if (f.isPairGenerator) assertx(f.isGenerator);
 
   if (f.isClosureBody) {
     assertx(f.cls);
@@ -154,40 +154,40 @@ bool check(const php::Func& f) {
     assertx(f.cls->parentName->isame(s_Closure.get()));
   }
 
-  assert(checkExnTree(f));
+  assertx(checkExnTree(f));
   return true;
 }
 
 bool check(const php::Class& c) {
-  assert(checkName(c.name));
-  for (DEBUG_ONLY auto& m : c.methods) assert(check(*m));
+  assertx(checkName(c.name));
+  for (DEBUG_ONLY auto& m : c.methods) assertx(check(*m));
 
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);
   if (c.closureContextCls) {
-    assert(c.closureContextCls->unit == c.unit);
-    assert(isClo);
+    assertx(c.closureContextCls->unit == c.unit);
+    assertx(isClo);
   }
   if (isClo) {
-    assert(c.methods.size() == 1 || c.methods.size() == 2);
-    assert(c.methods[0]->name->isame(s_invoke.get()));
-    assert(c.methods[0]->isClosureBody);
-    assert(c.methods.size() == 1);
+    assertx(c.methods.size() == 1 || c.methods.size() == 2);
+    assertx(c.methods[0]->name->isame(s_invoke.get()));
+    assertx(c.methods[0]->isClosureBody);
+    assertx(c.methods.size() == 1);
   } else {
-    assert(!c.closureContextCls);
+    assertx(!c.closureContextCls);
   }
 
   return true;
 }
 
 bool check(const php::Unit& u) {
-  for (DEBUG_ONLY auto& c : u.classes) assert(check(*c));
-  for (DEBUG_ONLY auto& f : u.funcs)   assert(check(*f));
+  for (DEBUG_ONLY auto& c : u.classes) assertx(check(*c));
+  for (DEBUG_ONLY auto& f : u.funcs)   assertx(check(*f));
   return true;
 }
 
 bool check(const php::Program& p) {
-  for (DEBUG_ONLY auto& u : p.units) assert(check(*u));
+  for (DEBUG_ONLY auto& u : p.units) assertx(check(*u));
   return true;
 }
 

@@ -48,6 +48,11 @@ private:
   using iterator = typename list_index::iterator;
   using const_iterator = typename list_index::const_iterator;
 
+  InsertionOrderedMap() = default;
+  InsertionOrderedMap(std::initializer_list<value_type> il) {
+    for (auto const& kv : il) emplace_back(kv.first, kv.second);
+  }
+
   iterator find(const K& k) {
     return m_map.template project<0>(getUnordered().find(k));
   }
@@ -121,4 +126,3 @@ private:
 };
 
 }
-

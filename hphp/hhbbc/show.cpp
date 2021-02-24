@@ -81,12 +81,6 @@ std::string array_string(SArray arr) {
   return str;
 }
 
-std::string provtag_string(ProvTag tag) {
-  if (tag == ProvTag::Top) return "";
-  if (tag == ProvTag::NoTag) return " [none]";
-  return folly::sformat(" [{}]", tag.get().toString());
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -412,150 +406,302 @@ std::string show(SrcLoc loc) {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(const Type& t) {
-  std::string ret;
+  /*
+   * Type pretty printing
+   *
+   * When you allow arbitrary trep combinations with specializations,
+   * pretty printing the Type in its most concise form can be tricky.
+   *
+   * treps (in general) are printed by attempting a greedy match among
+   * the predefined treps (the ones with names). For a trep b, until
+   * there are no bits left in b, find the largest (most bits)
+   * predefined trep which is fully contained within b. Add that
+   * predefined trep's name to the output list and remove its bits
+   * from b. This should produce the shortest list of names (joined
+   * with a |) which represents the trep.
+   *
+   * If a specialization is present, first all of the bits which
+   * support that specialization are gathered together (using the
+   * above scheme) and printed first. If there is more than one name,
+   * they are surrounded with {}. Then the specialization is attached
+   * to the end. Any remaining trep bits are then processed (again
+   * using the above scheme) and combined with |s as usual. This
+   * scheme makes it clear which bits the specialization applies to,
+   * and which ones it does not.
+   *
+   * TInitNull is treated a bit different. Instead of literally
+   * TInitNull, it is rendered as a ? prefix. Even a predefined type
+   * like TOptInt gets this treatment (it becomes ?Int). If the
+   * remaining bits have multiple names, they are again grouped inside
+   * a {} and the ? is applied to the front of the grouping. This
+   * makes it clear it binds to the group (like ?{Int|Str}), whereas
+   * something like ?Int|Str is more ambiguous.
+   *
+   * Putting it all together, for example, the union of
+   * TDict(Int:Int), TKeyset(Int,Int), TInitNull, TBool, and TObj
+   * would be rendered as:
+   *
+   * ?{{Dict|Keyset}(Int:Int)|Bool|Obj}
+   */
 
-  if (t.couldBe(TUninit) && is_nullish(t)) {
-    auto tinit = unnullish(t);
-    if (t.couldBe(TInitNull)) tinit = opt(std::move(tinit));
-    return "TUninit|" + show(tinit);
-  }
+  // NB: We want this function be usuable even on invalid/malformed
+  // types (for example if we want to print the type from within
+  // checkInvariants()). Therefore we don't make any assumptions about
+  // the Type being sane and don't assert anything. We also just deal
+  // with bits and don't copy or manipulate the actual Type.
 
-  assert(t.checkInvariants());
+  // Sorted vector of all the predefined types, from highest bitcount
+  // to shortest. This lets us implement a greedy covering of bits to
+  // names.
+  static auto const sorted = [] {
+    std::vector<std::pair<trep, std::string>> types{
+      #define X(y, ...) { B##y, #y },
+      HHBBC_TYPE_PREDEFINED(X)
+      #undef X
+    };
+    std::sort(
+      types.begin(), types.end(),
+      [](auto const& a, auto const& b) {
+        auto const pop1 = folly::popcount((uint64_t)a.first);
+        auto const pop2 = folly::popcount((uint64_t)b.first);
+        if (pop1 != pop2) return pop1 > pop2;
+        // Special case here: The static/counted axis of array bits
+        // has the same size as the empty/non-empty axis of array
+        // bits. We want to give preferencial treatment to the
+        // empty/non-empty bits to break this symmetric, and also
+        // because it produces more natural looking unions. This is
+        // purely an aesthetic choice.
+        auto const sizish = [] (trep bits) {
+          return couldBe(bits, BArrLikeE) != couldBe(bits, BArrLikeN);
+        };
+        auto const s1 = sizish(a.first);
+        auto const s2 = sizish(b.first);
+        if (s1 != s2) return s1 > s2;
+        return a.second < b.second;
+      }
+    );
+    return types;
+  }();
 
-  if (is_specialized_wait_handle(t)) {
-    folly::format(&ret, "{}WaitH<{}>",
-                  is_opt(t) ? "?" : "", show(wait_handle_inner(t)));
-    return ret;
-  }
+  // Given a trep, produce a string of the predefined types (joined
+  // with |) which represent this type. The number of such names is
+  // also returned.
+  auto const gather = [&] (trep bits) -> std::pair<std::string, size_t> {
+    // Below loop only works if there's a bit. If there's not, we know
+    // we're Bottom anyways.
+    if (!bits) return std::make_pair("Bottom", 1);
 
-#define SHOW(n) case B##n: ret = #n; break;
-  switch (t.m_bits) {
-    TYPES(SHOW)
-    default:
-      always_assert(false);
-  }
-#undef SHOW
-  if (!ret.compare(0, 3, "Opt", 3)) {
-    ret = ret.substr(2);
-    ret[0] = '?';
-  }
+    std::string ret;
+    size_t count = 0;
+    for (auto const& ty : sorted) {
+      // Bottom ends up in the list. Just skip it.
+      if (!ty.first) continue;
+      // Check if this predefined type is covered by our bits.
+      if ((ty.first & bits) != ty.first) continue;
+      // It is, remove it from the bits and add its name to the list.
+      bits -= ty.first;
 
-  switch (t.m_dataTag) {
-  case DataTag::None:
-    return ret;
-  case DataTag::Obj:
-  case DataTag::Cls:
-  case DataTag::Record:
-  case DataTag::ArrLikePacked:
-  case DataTag::ArrLikePackedN:
-  case DataTag::ArrLikeMap:
-  case DataTag::ArrLikeMapN:
-    break;
-  case DataTag::ArrLikeVal:
-    folly::toAppend("~", &ret);
-    break;
-  case DataTag::Str:
-  case DataTag::Int:
-  case DataTag::Dbl:
-    folly::toAppend("=", &ret);
-    break;
-  }
+      if (!ret.empty()) ret += "|";
+      // Special handling of Opt* types, turn them into ?.
+      if (!ty.second.compare(0, 3, "Opt", 3)) {
+        auto temp = ty.second.substr(2);
+        temp[0] = '?';
+        ret += temp;
+      } else {
+        ret += ty.second;
+      }
+      ++count;
 
-  auto showElem = [&] (const Type& key, const Type& val) -> std::string {
-    if (t.subtypeOrNull(BKeyset)) return show(key);
+      if (!bits) break;
+    }
+    if (bits) {
+      // We'll only get here if we exhausted all the predefined types
+      // and didn't consume all the bits. This can only happen with
+      // invalid types. However, since we want to be robust, just let
+      // it be known something's wrong and continue.
+      ret += ret.empty() ? "???" : "|???";
+      ++count;
+    }
+    return std::make_pair(ret, count);
+  };
+
+  auto const showElem = [&] (const Type& key, const Type& val) -> std::string {
     return show(key) + ":" + show(val);
   };
 
-  switch (t.m_dataTag) {
-  case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
-  case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
-  case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
-  case DataTag::ArrLikeVal:
-    ret += array_string(t.m_data.aval);
-    break;
-  case DataTag::Obj:
-    switch (t.m_data.dobj.type) {
-    case DObj::Exact:
-      folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
-      break;
-    case DObj::Sub:
-      folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
-      break;
+  auto const showMapElem = [&] (TypedValue k, const MapElem& m) {
+    auto const key = [&] {
+      if (isIntType(k.m_type)) return ival(k.m_data.num);
+      assertx(k.m_type == KindOfPersistentString);
+      switch (m.keyStaticness) {
+        case TriBool::Yes:   return sval(k.m_data.pstr);
+        case TriBool::Maybe: return sval_nonstatic(k.m_data.pstr);
+        case TriBool::No:    return sval_counted(k.m_data.pstr);
+      }
+      always_assert(false);
+    }();
+    return showElem(key, m.val);
+  };
+
+  // Given a trep, first gather together the support bits for any
+  // specialization. Add the specialization string, then gather the
+  // remaining (non-support) bits. If there's no specialization, just
+  // delegate to gather().
+  auto const gatherForSpec = [&] (trep bits) {
+    // Gather the supoprt and the non-support bits, then combine them
+    // into a string (with the spec in the middle).
+    auto const impl = [&] (trep mask, const std::string& spec) {
+      auto const [specPart, specMatches] = gather(bits & mask);
+      auto const [restPart, restMatches] = [&] {
+        return (bits & ~mask)
+          ? gather(bits & ~mask)
+          : std::make_pair(std::string{}, size_t{0});
+      }();
+
+      auto const ret = folly::sformat(
+        "{}{}{}{}{}{}",
+        specMatches > 1 ? "{" : "",
+        specPart,
+        specMatches > 1 ? "}" : "",
+        spec,
+        restMatches > 0 ? "|" : "",
+        restPart
+      );
+      return std::make_pair(ret, specMatches + restMatches);
+    };
+
+    switch (t.m_dataTag) {
+    case DataTag::Obj: {
+      std::string ret;
+      switch (t.m_data.dobj.type) {
+      case DObj::Exact:
+        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
+        break;
+      case DObj::Sub:
+        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
+        break;
+      }
+      if (t.m_data.dobj.isCtx) folly::toAppend(" this", &ret);
+      return impl(BObj, ret);
     }
-    if (t.m_data.dobj.isCtx) {
-      folly::toAppend(" this", &ret);
+    case DataTag::WaitHandle:
+      return impl(
+        BObj,
+        folly::sformat("=WaitH<{}>", show(*t.m_data.dwh.inner))
+      );
+    case DataTag::Cls: {
+      std::string ret;
+      switch (t.m_data.dcls.type) {
+      case DCls::Exact:
+        folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
+        break;
+      case DCls::Sub:
+        folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
+        break;
+      }
+      if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
+      return impl(BCls, ret);
     }
-    break;
-  case DataTag::Cls:
-    switch (t.m_data.dcls.type) {
-    case DCls::Exact:
-      folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
-      break;
-    case DCls::Sub:
-      folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
-      break;
+    case DataTag::Record: {
+      std::string ret;
+      switch (t.m_data.drec.type) {
+      case DRecord::Exact:
+        folly::toAppend("=", show(t.m_data.drec.rec), &ret);
+        break;
+      case DRecord::Sub:
+        folly::toAppend("<=", show(t.m_data.drec.rec), &ret);
+        break;
+      }
+      return impl(BRecord, ret);
     }
-    if (t.m_data.dcls.isCtx) {
-      folly::toAppend(" this", &ret);
+    case DataTag::ArrLikePacked:
+      return impl(
+        BArrLikeN,
+        folly::sformat(
+          "({})",
+          [&] {
+            using namespace folly::gen;
+            return from(t.m_data.packed->elems)
+              | map([&] (const Type& t) { return show(t); })
+              | unsplit<std::string>(",");
+          }()
+        )
+      );
+    case DataTag::ArrLikePackedN:
+      return impl(
+        BArrLikeN,
+        folly::sformat("([{}])", show(t.m_data.packedn->type))
+      );
+    case DataTag::ArrLikeMap:
+      return impl(
+        BArrLikeN,
+        folly::sformat(
+          "({}{})",
+          [&] {
+            using namespace folly::gen;
+            return from(t.m_data.map->map)
+              | map([&] (const std::pair<TypedValue,MapElem>& kv) {
+                  return showMapElem(kv.first, kv.second);
+                })
+              | unsplit<std::string>(",");
+          }(),
+          [&] {
+            if (!t.m_data.map->hasOptElements()) return std::string{};
+            return folly::sformat(
+              ",...[{}]",
+              showElem(t.m_data.map->optKey, t.m_data.map->optVal)
+            );
+          }()
+        )
+      );
+    case DataTag::ArrLikeMapN:
+      return impl(
+        BArrLikeN,
+        folly::sformat(
+          "([{}])",
+          showElem(t.m_data.mapn->key, t.m_data.mapn->val)
+        )
+      );
+    case DataTag::ArrLikeVal:
+      return impl(
+        BArrLikeN, folly::sformat("~{}", array_string(t.m_data.aval))
+      );
+    case DataTag::Str:
+      return impl(BStr, folly::sformat("={}", escaped_string(t.m_data.sval)));
+    case DataTag::Int: return impl(BInt, folly::sformat("={}", t.m_data.ival));
+    case DataTag::Dbl: return impl(BDbl, folly::sformat("={}", t.m_data.dval));
+    case DataTag::None: return gather(bits);
     }
-    break;
-  case DataTag::Record:
-    switch (t.m_data.drec.type) {
-    case DRecord::Exact:
-      folly::toAppend("=", show(t.m_data.drec.rec), &ret);
-      break;
-    case DRecord::Sub:
-      folly::toAppend("<=", show(t.m_data.drec.rec), &ret);
-      break;
+    not_reached();
+  };
+
+  // Produce the string, then perform the TInitNull special processing
+  // as described above.
+  auto ret = [&] {
+    auto gathered = gatherForSpec(t.bits());
+    // If there trep has TInitNull in it, but the gathering only
+    // matched one thing, it was a Opt* type, and it was already
+    // turned into ?, so we're done. If not, redo the gathering with
+    // the TInitNull removed. Add it to the front of the resultant
+    // string.
+    if (couldBe(t.bits(), BInitNull) && gathered.second > 1) {
+      gathered = gatherForSpec(t.bits() & ~BInitNull);
+      return folly::sformat(
+        "?{}{}{}",
+        gathered.second > 1 ? "{" : "",
+        gathered.first,
+        gathered.second > 1 ? "}" : ""
+      );
     }
-    break;
-  case DataTag::None:
-    break;
-  case DataTag::ArrLikePacked:
-    folly::format(
-      &ret,
-      "({}){}",
-      [&] {
-        using namespace folly::gen;
-        return from(t.m_data.packed->elems)
-          | map([&] (const Type& t) { return show(t); })
-          | unsplit<std::string>(",");
-      }(),
-      provtag_string(t.m_data.packed->provenance)
-    );
-    break;
-  case DataTag::ArrLikePackedN:
-    folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
-    break;
-  case DataTag::ArrLikeMap:
-    folly::format(
-      &ret,
-      "({}{}){}",
-      [&] {
-        using namespace folly::gen;
-        return from(t.m_data.map->map)
-          | map([&] (const std::pair<TypedValue,Type>& kv) {
-              return showElem(from_cell(kv.first), kv.second);
-            })
-          | unsplit<std::string>(",");
-      }(),
-      [&] {
-        if (!t.m_data.map->hasOptElements()) return std::string{};
-        return folly::sformat(
-          ",...[{}]",
-          showElem(t.m_data.map->optKey, t.m_data.map->optVal)
-        );
-      }(),
-      provtag_string(t.m_data.map->provenance)
-    );
-    break;
-  case DataTag::ArrLikeMapN:
-    folly::format(
-      &ret,
-      "([{}])",
-      showElem(t.m_data.mapn->key, t.m_data.mapn->val)
-    );
-    break;
+    return gathered.first;
+  }();
+
+  // Finally, print any array provenance if applicable. Static arrays
+  // already print it out, so avoid double printing it.
+  if (RO::EvalArrayProvenance && t.m_dataTag != DataTag::ArrLikeVal) {
+    if (auto const tag = t.m_ham.rawProvTag()) {
+      folly::format(&ret, " [{}]", tag->toString());
+    }
   }
 
   return ret;

@@ -60,18 +60,23 @@ struct RepoAuthType {
     TAG(Null)                                     \
     TAG(Int)                                      \
     TAG(OptInt)                                   \
+    TAG(UninitInt)                                \
     TAG(Dbl)                                      \
     TAG(OptDbl)                                   \
     TAG(Res)                                      \
     TAG(OptRes)                                   \
     TAG(Bool)                                     \
     TAG(OptBool)                                  \
+    TAG(UninitBool)                               \
     TAG(SStr)                                     \
     TAG(OptSStr)                                  \
+    TAG(UninitSStr)                               \
     TAG(Str)                                      \
     TAG(OptStr)                                   \
+    TAG(UninitStr)                                \
     TAG(Obj)                                      \
     TAG(OptObj)                                   \
+    TAG(UninitObj)                                \
     TAG(Func)                                     \
     TAG(OptFunc)                                  \
     TAG(Cls)                                      \
@@ -82,6 +87,9 @@ struct RepoAuthType {
     TAG(OptRecord)                                \
     TAG(LazyCls)                                  \
     TAG(OptLazyCls)                               \
+    TAG(Num)                                      \
+    TAG(OptNum)                                   \
+    TAG(InitPrim)                                 \
     TAG(InitUnc)                                  \
     TAG(Unc)                                      \
     TAG(UncArrKey)                                \
@@ -96,6 +104,7 @@ struct RepoAuthType {
     TAG(ArrKeyCompat)                             \
     TAG(OptUncArrKeyCompat)                       \
     TAG(OptArrKeyCompat)                          \
+    TAG(NonNull)                                  \
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     /* Types where array() may be non-null. */    \
@@ -141,11 +150,15 @@ struct RepoAuthType {
     TAG(OptSArrLike)                              \
     TAG(ArrLike)                                  \
     TAG(OptArrLike)                               \
+    TAG(ArrLikeCompat)                            \
+    TAG(OptArrLikeCompat)                         \
     /* Types where clsName() will be non-null. */ \
     TAG(ExactObj)                                 \
     TAG(SubObj)                                   \
     TAG(OptExactObj)                              \
     TAG(OptSubObj)                                \
+    TAG(UninitExactObj)                           \
+    TAG(UninitSubObj)                             \
     TAG(ExactCls)                                 \
     TAG(SubCls)                                   \
     TAG(OptExactCls)                              \
@@ -167,6 +180,7 @@ struct RepoAuthType {
     m_data.set(static_cast<uint16_t>(tag), sd);
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:
+    case Tag::UninitSubObj: case Tag::UninitExactObj:
     case Tag::SubObj:    case Tag::ExactObj:
     case Tag::OptSubCls: case Tag::OptExactCls:
     case Tag::SubCls:    case Tag::ExactCls:
@@ -223,6 +237,7 @@ struct RepoAuthType {
     switch (tag()) {
     case Tag::SubObj:    case Tag::ExactObj:
     case Tag::OptSubObj: case Tag::OptExactObj:
+    case Tag::UninitSubObj: case Tag::UninitExactObj:
     case Tag::SubCls:    case Tag::ExactCls:
     case Tag::OptSubCls: case Tag::OptExactCls:
       return true;
@@ -268,6 +283,7 @@ struct RepoAuthType {
     case Tag::Dictish:    case Tag::SDictish:
     case Tag::OptArrLike: case Tag::OptSArrLike:
     case Tag::ArrLike:    case Tag::SArrLike:
+    case Tag::ArrLikeCompat: case Tag::OptArrLikeCompat:
       return true;
     default:
       return false;

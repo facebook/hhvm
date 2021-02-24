@@ -223,8 +223,8 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
 
     if (eh.m_parentIndex != -1) {
       auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
-      assert(it != end(ret.ehMap));
-      assert(it->second < node.idx);
+      assertx(it != end(ret.ehMap));
+      assertx(it->second < node.idx);
       node.parent = it->second;
       auto& parent = func.exnNodes[node.parent];
       node.depth = parent.depth + 1;
@@ -307,7 +307,7 @@ void populate_block(ParseUnitState& puState,
     // Final case is the default, and must have a litstr id of -1.
     DEBUG_ONLY auto const defId = decode<Id>(pc);
     auto const defOff = decode<Offset>(pc);
-    assert(defId == -1);
+    assertx(defId == -1);
     ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc()));
     return ret;
   };
@@ -344,7 +344,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
-#define IMM_BA(n)      assert(next == past);     \
+#define IMM_BA(n)      assertx(next == past);     \
                        auto target##n = findBlock(  \
                          opPC + decode<Offset>(pc) - ue.bc());
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
@@ -411,15 +411,15 @@ void populate_block(ParseUnitState& puState,
       b.srcLoc = srcLocIx;                                         \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
       blk.hhbcs.push_back(std::move(b));                           \
-      assert(pc == next);                                          \
+      assertx(pc == next);                                         \
     }                                                              \
     break;
 
-  assert(pc != past);
+  assertx(pc != past);
   do {
     auto const opPC = pc;
     auto const next = pc + instrLen(opPC);
-    assert(next <= past);
+    assertx(next <= past);
 
     auto const srcLoc = match<php::SrcLoc>(
       puState.srcLocInfo,
@@ -585,7 +585,7 @@ void build_cfg(ParseUnitState& puState,
 
     if (auto const eh = Func::findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
-      assert(it != end(exnTreeInfo.ehMap));
+      assertx(it != end(exnTreeInfo.ehMap));
       block->exnNodeId = it->second;
       block->throwExit = func.exnNodes[it->second].region.catchEntry;
     }
@@ -1044,7 +1044,7 @@ void assign_closure_context(const ParseUnitState& puState,
   auto const representative = find_closure_context(puState, *it);
   if (debug) {
     for (++it; it != end(clIt->second); ++it) {
-      assert(find_closure_context(puState, *it) == representative);
+      assertx(find_closure_context(puState, *it) == representative);
     }
   }
   clo->closureContextCls = representative;
@@ -1130,7 +1130,7 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
   for (auto& fe : ue.fevec()) {
     auto func = parse_func(puState, ret.get(), nullptr, *fe);
-    assert(!fe->pce());
+    assertx(!fe->pce());
     ret->funcs.push_back(std::move(func));
   }
 
@@ -1153,7 +1153,7 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
   find_additional_metadata(puState, ret.get());
 
-  assert(check(*ret));
+  assertx(check(*ret));
 
   std::lock_guard<std::mutex> _{prog.lock};
   for (auto const item : puState.constPassFuncs) {

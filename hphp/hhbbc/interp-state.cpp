@@ -248,7 +248,7 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
     return;
   }
 
-  assert(types.size() == current.size());
+  assertx(types.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
     current[i] |= std::move(types[i]);
   }
@@ -267,10 +267,10 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     return true;
   }
 
-  assert(src.initialized);
-  assert(dst.locals.size() == src.locals.size());
-  assert(dst.iters.size() == src.iters.size());
-  assert(dst.stack.size() == src.stack.size());
+  assertx(src.initialized);
+  assertx(dst.locals.size() == src.locals.size());
+  assertx(dst.iters.size() == src.iters.size());
+  assertx(dst.stack.size() == src.stack.size());
 
   if (src.unreachable) {
     // If we're coming from unreachable code and the dst is already
@@ -374,7 +374,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
             }
             l = next;
           } while (l != i && l != NoLocalId);
-          assert(l == i || killSet == dstSet);
+          assertx(l == i || killSet == dstSet);
           changed = true;
         }
       } else {
@@ -388,7 +388,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 }
 
 bool merge_into(State& dst, const State& src) {
-  return merge_impl(dst, src, union_of);
+  return merge_impl<Type(Type, Type)>(dst, src, union_of);
 }
 
 bool widen_into(State& dst, const State& src) {

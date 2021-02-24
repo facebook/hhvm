@@ -336,7 +336,7 @@ void analyze_iteratively(Index& index, php::Program& program,
         index.refine_class_constants(fa.ctx, fa.resolvedConstants, deps);
       }
       for (auto& kv : fa.closureUseTypes) {
-        assert(is_closure(*kv.first));
+        assertx(is_closure(*kv.first));
         if (index.refine_closure_use_vars(kv.first, kv.second)) {
           auto const func = find_method(kv.first, s_invoke.get());
           always_assert_flog(
@@ -462,7 +462,7 @@ void final_pass(Index& index,
         auto const ctx = AnalysisContext { context.unit, func, context.cls };
         optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
       }
-      assert(check(*unit));
+      assertx(check(*unit));
       state_after("optimize", *unit);
       if (!dump_dir.empty()) {
         if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
@@ -568,7 +568,7 @@ void whole_program(php::ProgramPtr program,
 
   std::thread cleanup_pre;
   if (!options.NoOptimizations) {
-    assert(check(*program));
+    assertx(check(*program));
     prop_type_hint_pass(index, *program);
     index.rewrite_default_initial_values(*program);
     index.use_class_dependencies(false);

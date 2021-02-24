@@ -49,6 +49,29 @@ enum class Effects {
   AlwaysThrows  // Always throws an exception
 };
 
+// Combine two effects, in the sense that either of them might happen
+// (therefore AlwaysThrows becomes just Throws if mixed with something
+// else).
+Effects unionEffects(Effects e1, Effects e2) {
+  if (e1 == e2) return e1;
+  if (e1 == Effects::Throws || e2 == Effects::Throws ||
+      e1 == Effects::AlwaysThrows || e2 == Effects::AlwaysThrows) {
+    return Effects::Throws;
+  }
+  return Effects::SideEffect;
+}
+
+// There's no good default for Effects when you want to union them
+// together. Instead you want to start with the first Effect you
+// see. This keeps the Effect from taking a value until you union one
+// into it.
+using OptEffects = folly::Optional<Effects>;
+
+OptEffects unionEffects(OptEffects e1, Effects e2) {
+  if (!e1) return e2;
+  return unionEffects(*e1, e2);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -124,85 +147,94 @@ bool isDimBaseLoc(BaseLoc loc) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * If the current base is an array-like, update it via *_set, and
- * return whether the operation can possibly throw. Otherwise, return
- * folly::none;
+ * Update the current base via array_like_set, and return whether the
+ * operation can possibly throw.
  */
-folly::Optional<TriBool> array_do_set(ISS& env,
-                                      const Type& key,
-                                      const Type& value) {
+TriBool array_do_set(ISS& env,
+                     const Type& key,
+                     const Type& value) {
   auto& base = env.collect.mInstrState.base.type;
-  if (!base.subtypeOf(BOptArrLike)) return folly::none;
-  if (base.subtypeOf(BInitNull)) return folly::none;
+  assertx(base.couldBe(BArrLike));
 
-  auto const tag = provTagHere(env);
-  auto set = array_like_set(base, key, value, tag);
-  if (set.first.subtypeOf(BBottom)) return TriBool::Yes;
-  base = std::move(set.first);
-  return maybeOrNo(set.second);
-}
+  // array_like_set requires the key to be a TArrKey already. If it's
+  // not guaranteed to be, we assume we could throw.
+  if (!key.couldBe(BArrKey)) return TriBool::Yes;
+  auto const validKey = key.subtypeOf(BArrKey);
 
-/*
- * If the current base is an array-like, return the best known type
- * for base[key] and whether the operation can possibly
- * throw. Otherwise, return folly::none;
- */
-folly::Optional<std::pair<Type, TriBool>> array_do_elem(ISS& env,
-                                                        bool nullOnMissing,
-                                                        const Type& key) {
-  auto const& base = env.collect.mInstrState.base.type;
-  if (!base.subtypeOf(BOptArrLike)) return folly::none;
-  if (base.subtypeOf(BInitNull)) return folly::none;
-
-  auto elem = array_like_elem(base, key);
-  auto const throws = [&] {
-    switch (elem.second) {
-      case ThrowMode::None:
-        return TriBool::No;
-      case ThrowMode::MaybeMissingElement:
-      case ThrowMode::MissingElement:
-        if (nullOnMissing) {
-          elem.first |= TInitNull;
-          return TriBool::No;
-        }
-        return TriBool::Maybe;
-      case ThrowMode::MaybeBadKey:
-        if (nullOnMissing) elem.first |= TInitNull;
-        return TriBool::Maybe;
-      case ThrowMode::BadOperation:
-        // isset($a["abc"]) does not throw if $a is a vec, so we need to be
-        // conservative here.
-        if (nullOnMissing) {
-          if (base.couldBe(BVecish) && key.couldBe(BStr)) {
-            elem.first |= TInitNull;
-            if (base.subtypeOf(BOptVecish) && key.subtypeOf(BStr)) {
-              return TriBool::No;
-            }
-          }
-        }
-        return TriBool::Maybe;
-    }
-    always_assert(false);
-  }();
-
-  if (elem.first.subtypeOf(BBottom)) {
-    return std::make_pair(TBottom, TriBool::Yes);
+  auto set = array_like_set(
+    base,
+    validKey ? key : intersection_of(key, TArrKey),
+    value
+  );
+  // Check for the presence of TArrLike rather than Bottom, since the
+  // base may have contained more than just TArrLike to begin with.
+  if (!set.first.couldBe(BArrLike)) {
+    assertx(set.second);
+    return TriBool::Yes;
   }
-  return std::make_pair(std::move(elem.first), throws);
+
+  base = std::move(set.first);
+  return maybeOrNo(set.second || !validKey);
 }
 
 /*
- * If the current base is an array-like, update it via *_newelem, and
- * return whether the newelem can throw; otherwise return folly::none.
+ * Look up the specified key via array_like_elem and return the
+ * associated value, along with whether the lookup can throw and if
+ * the value is definitely present.
+ *
+ * If excludeKeyset is true, we remove any TKeyset types from the
+ * array before doing the lookup. This is useful for the cases where a
+ * keyset would fatal, but other types wouldn't.
  */
-folly::Optional<TriBool> array_do_newelem(ISS& env, const Type& value) {
-  auto& base = env.collect.mInstrState.base.type;
-  if (!base.subtypeOf(BOptArrLike)) return folly::none;
-  if (base.subtypeOf(BInitNull)) return folly::none;
+struct ElemResult {
+  Type elem;
+  TriBool throws;
+  bool present;
+};
+ElemResult array_do_elem(ISS& env, const Type& key,
+                         bool excludeKeyset = false) {
+  auto const& base = env.collect.mInstrState.base.type;
+  assertx(base.couldBe(BArrLike));
 
-  auto const tag = provTagHere(env);
-  auto update = array_like_newelem(base, value, tag);
-  if (update.first.subtypeOf(BBottom)) return TriBool::Yes;
+  // If the key can't possibly be good, or the array is entirely a
+  // keyset (and we exclude keysets), we'll always throw.
+  if (!key.couldBe(BArrKey)) return ElemResult { TBottom, TriBool::Yes, false };
+  if (excludeKeyset && base.subtypeAmong(BKeyset, BArrLike)) {
+    return ElemResult { TBottom, TriBool::Yes, false };
+  }
+
+  // Otherwise remove the problematic parts of the key or value. If we
+  // have to remove anything, assume we could possibly throw.
+  auto const validKey = key.subtypeOf(BArrKey);
+  auto const validArr = !excludeKeyset || base.subtypeAmong(BKVish, BArrLike);
+  auto r = array_like_elem(
+    validArr ? base : intersection_of(base, TKVish),
+    validKey ? key : intersection_of(key, TArrKey)
+  );
+
+  return ElemResult {
+    std::move(r.first),
+    maybeOrNo(!validKey || !validArr),
+    r.second
+  };
+}
+
+/*
+ * Update the current base via array_like_newelem, and return whether
+ * the newelem can throw.
+ */
+TriBool array_do_newelem(ISS& env, const Type& value) {
+  auto& base = env.collect.mInstrState.base.type;
+  assertx(base.couldBe(BArrLike));
+
+  auto update = array_like_newelem(base, value);
+  // Check for the presence of TArrLike rather than Bottom, since the
+  // base may have contained more than just TArrLike to begin with.
+  if (!update.first.couldBe(BArrLike)) {
+    assertx(update.second);
+    return TriBool::Yes;
+  }
+
   base = std::move(update.first);
   return maybeOrNo(update.second);
 }
@@ -210,7 +242,7 @@ folly::Optional<TriBool> array_do_newelem(ISS& env, const Type& value) {
 //////////////////////////////////////////////////////////////////////
 
 void setLocalForBase(ISS& env, Type ty, LocalId firstKeyLoc) {
-  assert(mustBeInLocal(env.collect.mInstrState.base));
+  assertx(mustBeInLocal(env.collect.mInstrState.base));
   if (env.collect.mInstrState.base.locLocal == NoLocalId) {
     return killLocals(env);
   }
@@ -229,11 +261,11 @@ void setLocalForBase(ISS& env, Type ty, LocalId firstKeyLoc) {
 }
 
 void setStackForBase(ISS& env, Type ty) {
-  assert(mustBeInStack(env.collect.mInstrState.base));
+  assertx(mustBeInStack(env.collect.mInstrState.base));
 
   auto const locSlot = env.collect.mInstrState.base.locSlot;
   FTRACE(4, "      stk[{:02}] := {}\n", locSlot, show(ty));
-  assert(locSlot < env.state.stack.size());
+  assertx(locSlot < env.state.stack.size());
 
   env.state.stack[locSlot] = StackElem { std::move(ty), NoLocalId };
 }
@@ -254,7 +286,7 @@ void setStaticForBase(ISS& env, Type ty) {
     env.collect.props,
     base.locTy,
     nameTy,
-    std::move(ty)
+    remove_uninit(std::move(ty))
   );
 }
 
@@ -263,12 +295,12 @@ void setStaticForBase(ISS& env, Type ty) {
 // intermediate defining dims.
 Type currentChainType(ISS& env, Type val) {
   auto it = env.collect.mInstrState.arrayChain.end();
-  auto const tag = provTagHere(env);
   while (it != env.collect.mInstrState.arrayChain.begin()) {
+    if (val.is(BBottom)) break;
     --it;
     assertx(it->base.subtypeOf(BArrLike));
-    val = array_like_set(it->base, it->key, val, tag).first;
-    if (val.subtypeOf(BBottom)) return TBottom;
+    assertx(it->key.subtypeOf(BArrKey));
+    val = array_like_set(it->base, it->key, val).first;
   }
   return val;
 }
@@ -276,16 +308,21 @@ Type currentChainType(ISS& env, Type val) {
 Type resolveArrayChain(ISS& env, Type val) {
   static UNUSED const char prefix[] = "              ";
   FTRACE(5, "{}chain {}\n", prefix, show(val));
-  auto const tag = provTagHere(env);
   do {
+    if (val.is(BBottom)) {
+      // If val is Bottom, the update isn't actually going to happen,
+      // so we don't need to unwind the chain.
+      env.collect.mInstrState.arrayChain.clear();
+      break;
+    }
     auto arr = std::move(env.collect.mInstrState.arrayChain.back().base);
     auto key = std::move(env.collect.mInstrState.arrayChain.back().key);
     env.collect.mInstrState.arrayChain.pop_back();
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
     assertx(arr.subtypeOf(BArrLike));
-    val = array_like_set(std::move(arr), key, val, tag).first;
-    if (val.subtypeOf(BBottom)) env.collect.mInstrState.arrayChain.clear();
+    assertx(key.subtypeOf(BArrKey));
+    val = array_like_set(std::move(arr), key, val).first;
   } while (!env.collect.mInstrState.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));
   return val;
@@ -321,12 +358,22 @@ bool updateBaseWithType(ISS& env,
   return true;
 }
 
+// Whether its worthwhile to refine the base's type based on knowing
+// that certain types would have fatalled (and therefore the base can
+// no longer be those types after the op). This is only worthwhile if
+// the base is flow sensitive (IE, a local or stack slot). This is
+// just an optimization so its always legal to say no.
+bool shouldRefineBase(ISS& env) {
+  auto const& base = env.collect.mInstrState.base;
+  return mustBeInLocal(base) || mustBeInStack(base);
+}
+
 void startBase(ISS& env, Base base) {
   auto& oldState = env.collect.mInstrState;
-  assert(oldState.base.loc == BaseLoc::None);
-  assert(oldState.arrayChain.empty());
-  assert(isInitialBaseLoc(base.loc));
-  assert(!base.type.subtypeOf(TBottom));
+  assertx(oldState.base.loc == BaseLoc::None);
+  assertx(oldState.arrayChain.empty());
+  assertx(isInitialBaseLoc(base.loc));
+  assertx(!base.type.subtypeOf(TBottom));
 
   oldState.effectFree = env.flags.effectFree;
   oldState.extraPop = false;
@@ -338,7 +385,7 @@ void startBase(ISS& env, Base base) {
 // "effect-free" (see updateBaseWithType).
 bool endBase(ISS& env, bool update = true, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assert(state.base.loc != BaseLoc::None);
+  assertx(state.base.loc != BaseLoc::None);
 
   FTRACE(5, "    endBase: {}\n", show(*env.ctx.func, state.base));
 
@@ -363,9 +410,9 @@ bool moveBase(ISS& env,
               bool update = true,
               LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assert(state.base.loc != BaseLoc::None);
-  assert(isDimBaseLoc(newBase.loc));
-  assert(!state.base.type.subtypeOf(BBottom));
+  assertx(state.base.loc != BaseLoc::None);
+  assertx(isDimBaseLoc(newBase.loc));
+  assertx(!state.base.type.subtypeOf(BBottom));
 
   FTRACE(5, "    moveBase: {} -> {}\n",
          show(*env.ctx.func, state.base),
@@ -388,20 +435,23 @@ bool moveBase(ISS& env,
 // Return true if the base is updated and that update is considered
 // "effect-free" (see updateBaseWithType).
 bool extendArrChain(ISS& env, Type key, Type arr,
-                    Type val, bool update = true,
-                    LocalId keyLoc = NoLocalId) {
+                    Type val, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
   assertx(state.base.loc != BaseLoc::None);
-  // NB: The various array operation functions can accept Opt arrays
-  // (they just ignore the Opt portion). However we still do not allow
-  // putting Opt arrays in the chain, since (in general) its not clear
-  // how to deal with the Optness with resolving the chain. Currently
-  // the only case where we set up chains with possible Optness is for
-  // ElemD, and there we'd fatal, so we remove the Optness before
-  // calling this.
+  // NB: The various array operation functions can accept arbitrary
+  // types as long as they contain TArrLike.  However we still do not
+  // allow putting anything but TArrLike in the chain, since (in
+  // general) its not clear how to deal with the other types when
+  // resolving the chain. Currently the only case where we set up
+  // array chains is ElemD or ElemU. For ElemD, most of the common
+  // other types just fatal, so we can simply remove them (including
+  // TInitNull). For ElemU we do the same thing, but less types
+  // qualify.
   assertx(arr.subtypeOf(BArrLike));
+  assertx(key.subtypeOf(BArrKey));
   assertx(!state.base.type.subtypeOf(BBottom));
   assertx(!val.subtypeOf(BBottom));
+  assertx(!key.subtypeOf(BBottom));
 
   state.arrayChain.emplace_back(
     CollectedInfo::MInstrState::ArrayChainEnt{
@@ -415,14 +465,11 @@ bool extendArrChain(ISS& env, Type key, Type arr,
   auto const firstKeyLoc = state.arrayChain.data()->keyLoc;
 
   FTRACE(5, "    extendArrChain: {}\n", show(*env.ctx.func, state));
-  if (update) {
-    return updateBaseWithType(
-      env,
-      currentChainType(env, state.base.type),
-      firstKeyLoc
-    );
-  }
-  return true;
+  return updateBaseWithType(
+    env,
+    currentChainType(env, state.base.type),
+    firstKeyLoc
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -557,53 +604,7 @@ Promotion handleElemUDBasePromos(ISS& env) {
   return promotion;
 }
 
-// Handle the general effects that can happen to the base for ElemU or
-// ElemD operations. This operations will COW the base. This is only
-// the general effects. It is up to the caller to also incorporate any
-// changes specific to the operation (if one cannot predict the
-// changes, use pessimizeBaseForElemUD instead).
-void handleElemUDEffects(ISS& env) {
-  auto& base = env.collect.mInstrState.base.type;
-  // Remove staticness from the types which will get COWed.
-  base = loosen_aggregate_staticness(std::move(base));
-}
-
-// Handle the effects that can happen to the base for ElemU or ElemD
-// operations in a pessimistic manner. This is used when one cannot or
-// doesn't wish to model the effects of that particular operation
-// precisely.
-void pessimizeBaseForElemUD(ISS& env) {
-  auto& base = env.collect.mInstrState.base.type;
-  // We cannot predict what will happen to the base in further member
-  // operations, so remove what we know about the values. We also need
-  // to remove staticness to account for COW.
-  base = loosen_aggregate_staticness(loosen_array_values(std::move(base)));
-}
-
 //////////////////////////////////////////////////////////////////////
-
-// Helper function for ending the base. Takes the current aggregated
-// effects up until this point, and whether the base underwent any
-// promotions. Returns an updated aggregated effects, taking into
-// account any effects from the base write-back.
-Effects endBaseWithEffects(ISS& env, Effects effects, bool update,
-                           Promotion basePromo, LocalId keyLoc = NoLocalId) {
-  // Use endUnreachableBase for always throwing cases
-  assertx(effects != Effects::AlwaysThrows);
-  // End the base. We request a base update if the caller requested,
-  // or if a base promotion happened (if the base promoted, we need to
-  // record the new type into it).
-  auto const effectFree =
-    endBase(env, update || basePromo != Promotion::No, keyLoc);
-  // If we might throw because of base promotion, it doesn't matter
-  // what other effects are.
-  if (basePromo == Promotion::YesMightThrow) return Effects::Throws;
-  // Special case: if we don't have any other effects, but writing to
-  // the base is side-effectful, then we can be nothrow (but not
-  // effect_free).
-  if (!effectFree && effects == Effects::None) return Effects::SideEffect;
-  return effects;
-}
 
 // Helper function for ending the base when we know this member
 // instruction will always throw.
@@ -612,6 +613,39 @@ Effects endUnreachableBase(ISS& env, Promotion basePromo,
   // If we promoted the base, we still need to reflect that
   if (basePromo != Promotion::No) endBase(env, true, keyLoc);
   return Effects::AlwaysThrows;
+}
+
+// Helper function for ending the base. Takes the current aggregated
+// effects up until this point, and whether the base underwent any
+// promotions. Returns an updated aggregated effects, taking into
+// account any effects from the base write-back. The given lambda will
+// be called after the base is updated (this is needed because you
+// don't want to modify the stack until after the base write back has
+// occurred).
+template <typename F>
+Effects endBaseWithEffects(ISS& env, Effects effects, bool update,
+                           Promotion basePromo,
+                           const F& finish,
+                           LocalId keyLoc = NoLocalId) {
+  if (effects == Effects::AlwaysThrows) {
+    auto const e = endUnreachableBase(env, basePromo, keyLoc);
+    finish();
+    return e;
+  }
+  // End the base. We request a base update if the caller requested,
+  // or if a base promotion happened (if the base promoted, we need to
+  // record the new type into it).
+  auto const effectFree =
+    endBase(env, update || basePromo != Promotion::No, keyLoc);
+  finish();
+  // If we might throw because of base promotion, it doesn't matter
+  // what other effects are.
+  if (basePromo == Promotion::YesMightThrow) return Effects::Throws;
+  // Special case: if we don't have any other effects, but writing to
+  // the base is side-effectful, then we can be nothrow (but not
+  // effect_free).
+  if (!effectFree && effects == Effects::None) return Effects::SideEffect;
+  return effects;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -625,7 +659,8 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
           mode == MOpMode::Warn ||
           mode == MOpMode::InOut);
 
-  auto const& base = env.collect.mInstrState.base.type;
+  auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
   // If we're using MOpMode::InOut, then the base has to be a ArrLike
   // or we'll throw.
@@ -635,78 +670,104 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
     if (!base.subtypeOf(BArrLike)) inOutFail = true;
   }
 
-  // Null and False silently push Null. True, Int, Dbl, Resources,
-  // Func-likes, and RClsMeth push Null but warn first. ClsMeth will
-  // behave the same as RClsMeth with the right setting.
   auto const warnsWithNull =
-    BTrue | BNum | BRes | BFuncLike | BRClsMeth |
+    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth |
     (!RO::EvalIsCompatibleClsMethType ? BClsMeth : BBottom);
   auto const justNull = BNull | BFalse;
-  if (base.subtypeOf(warnsWithNull | justNull)) {
-    return {
-      TInitNull,
-      (base.subtypeOf(justNull) && !inOutFail)
-        ? Effects::None
-        : Effects::Throws
-    };
-  }
+  auto const DEBUG_ONLY handled =
+    warnsWithNull | justNull | BClsMeth |
+    BStr | BCls | BLazyCls | BObj | BRecord | BArrLike;
 
+  // Can't static assert because warnsWithNull depends on
+  // RuntimeOptions.
+  assertx(handled == BCell);
+
+  OptEffects effects;
+  auto ty = TBottom;
+
+  // These emit a warning and push InitNull
+  if (base.couldBe(warnsWithNull)) {
+    effects = unionEffects(effects, Effects::Throws);
+    ty |= TInitNull;
+  }
+  // These silently push InitNull
+  if (base.couldBe(justNull)) {
+    effects = unionEffects(
+      effects,
+      inOutFail ? Effects::Throws : Effects::None
+    );
+    ty |= TInitNull;
+  }
   // Strings will return a static string (a character from itself or
-  // an empty string). ClsLikes will convert to its equivalent string
+  // an empty string). Class-likes will convert to its equivalent string
   // first.
-  if (base.subtypeOf(BOptStr | BOptClsLike)) {
+  if (base.couldBe(BStr | BCls | BLazyCls)) {
     auto const isNoThrow =
       !inOutFail &&
       mode != MOpMode::Warn &&
       key.subtypeOf(BArrKey) &&
-      (!base.couldBe(BClsLike) ||
+      (!base.couldBe(BCls | BLazyCls) ||
        !RuntimeOption::EvalRaiseClassConversionWarning);
-    return {
-      base.couldBe(BNull) ? TOptSStr : TSStr,
+    effects = unionEffects(
+      effects,
       isNoThrow ? Effects::None : Effects::Throws
-    };
+    );
+    ty |= TSStr;
   }
-
   // With the right setting, ClsMeth will behave like an equivalent
   // varray/vec (but will not actually promote). This is the same as a
   // 2 element vec/varray containing static strings.
-  if (RO::EvalIsCompatibleClsMethType && base.subtypeOf(BOptClsMeth)) {
+  if (RO::EvalIsCompatibleClsMethType && base.couldBe(BClsMeth)) {
     auto const isNoThrow =
       !inOutFail &&
       mode == MOpMode::None &&
       !RuntimeOption::EvalRaiseClsMethConversionWarning;
-    return {
-      TOptSStr,
+    effects = unionEffects(
+      effects,
       isNoThrow ? Effects::None : Effects::Throws
-    };
+    );
+    ty |= TOptSStr;
   }
+  // These can throw and push anything.
+  if (base.couldBe(BObj | BRecord)) {
+    effects = unionEffects(effects, Effects::Throws);
+    ty |= TInitCell;
+  }
+  // If it's an array, we can determine the exact element.
+  if (base.couldBe(BArrLike)) {
+    auto elem = array_do_elem(env, key);
+    if (elem.throws == TriBool::Yes) {
+      // Key is bad
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+    } else {
+      auto mightThrow = elem.throws != TriBool::No;
+      // If the mode is MOpMode::None, we'll use TInitNull if the key
+      // is missing. Otherwise, we'll throw.
+      if (!elem.present) {
+        if (mode == MOpMode::None) {
+          elem.elem |= TInitNull;
+        } else {
+          mightThrow = true;
+        }
+      }
 
-  // If its an OptArrLike, we can determine the element type. If we're
-  // in MOpMode::None, array_do_elem will automatically add TInitNull
-  // for a misssing key.
-  if (auto elem = array_do_elem(env, mode == MOpMode::None, key)) {
-    if (elem->second == TriBool::Yes) {
-      // The element definitely doesn't exist. If the base could be
-      // null, then we might throw or get InitNull. Otherwise we know
-      // we'll throw.
-      if (!base.couldBe(BNull)) return { TBottom, Effects::AlwaysThrows };
-      return { TInitNull, Effects::Throws };
+      if (elem.elem.is(BBottom)) {
+        // Key definitely doesn't exist. We'll always throw. Note that
+        // this can't happen if mode is MOpMode::None because we added
+        // TInitNull to the type above.
+        effects = unionEffects(effects, Effects::AlwaysThrows);
+      } else {
+        ty |= std::move(elem.elem);
+        effects = unionEffects(
+          effects,
+          !mightThrow && !inOutFail ? Effects::None : Effects::Throws
+        );
+      }
     }
-    // Otherwise the element might exist (or definitely doesn't exist
-    // and array_do_elem added TInitNull).
-    return {
-      base.couldBe(BNull)
-        ? union_of(TInitNull, std::move(elem->first))
-        : std::move(elem->first),
-      (elem->second == TriBool::No && !inOutFail)
-        ? Effects::None
-        : Effects::Throws
-    };
   }
 
-  // Otherwise its some mix of things we cannot disentangle. Be
-  // pessimistic.
-  return { TInitCell, Effects::Throws };
+  assertx(effects.has_value());
+  return { std::move(ty), *effects };
 }
 
 // Helper function for SetOpElem/IncDecElem final operations. Reads
@@ -720,108 +781,173 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
-  auto const stack = [&] (Type ty, Effects effects) {
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-    return effects;
-  };
+  auto const throws = BNull | BFalse | BStr;
+  auto const null =
+    BTrue | BNum | BRes | BFunc | BRFunc |
+    BCls | BLazyCls | BClsMeth | BRClsMeth;
+  auto const handled = throws | null | BArrLike | BObj | BRecord;
 
-  auto const end = [&] (Type ty, bool update, Effects effects) {
-    return stack(
-      std::move(ty),
-      endBaseWithEffects(env, effects, update, promo, keyLoc)
-    );
-  };
-  auto const unreachable = [&] {
-    return stack(
-      TBottom,
-      endUnreachableBase(env, promo, keyLoc)
-    );
-  };
+  static_assert(handled == BCell);
 
-  // Invalid bases which will either always throw, or warn and push a
-  // null value onto the stack.
-  auto const throws = BNull | BFalse | BStr | BKeyset;
-  auto const warnsAndNull =
-    BTrue | BNum | BRes | BFuncLike | BClsLike | BClsMethLike;
-  if (base.subtypeOf(throws | warnsAndNull)) {
-    if (base.subtypeOf(throws)) return unreachable();
-    return end(TInitNull, false, Effects::Throws);
+  OptEffects effects;
+  auto pushed = TBottom;
+  auto refine = BBottom;
+  auto update = false;
+
+  // Always throws
+  if (base.couldBe(throws)) {
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= throws;
+  }
+  // Raises a warning and pushes null
+  if (base.couldBe(null)) {
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitNull;
+  }
+  // Objects can throw and push anything
+  if (base.couldBe(BObj | BRecord)) {
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitCell;
+  }
+  // Records can throw and push anything. Since we might be mutating
+  // the record, record an update.
+  if (base.couldBe(BRecord)) {
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitCell;
+    update = true;
+  }
+  if (base.couldBe(BArrLike)) {
+    auto const unreachable = [&] {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BArrLike;
+    };
+
+    [&] {
+      // For the array portion, we can analyze the effects precisely
+      auto elem = array_do_elem(env, key, true);
+      if (elem.elem.is(BBottom) || elem.throws == TriBool::Yes) {
+        // Element doesn't exist or key is bad. Always throws.
+        unreachable();
+        return;
+      }
+
+      // Keysets will throw, so we can assume the base does not
+      // contain them afterwards.
+      if (base.couldBe(BKeyset)) base = remove_keyset(std::move(base));
+
+      // We'll have already have COWed the array if the setop throws,
+      // so we need to manually remove staticness and force a base
+      // update.
+      base = loosen_array_staticness(std::move(base));
+      update = true;
+
+      // Perform the op
+      auto [toSet, toPush, opEffects] = op(std::move(elem.elem));
+      if (opEffects == Effects::AlwaysThrows) {
+        // The op will always throw. We've already COWed the base, so we
+        // still need to update the base type.
+        unreachable();
+        return;
+      }
+
+      // Write the element back into the array
+      auto const set = array_do_set(env, key, toSet);
+      if (set == TriBool::Yes) {
+        // The set will always throw. In theory this can happen if we do
+        // something like read a string out of a keyset, turn it into
+        // something that's not an array key, then try to write it back.
+        unreachable();
+        return;
+      }
+
+      auto const maybeThrows =
+        !elem.present ||
+        elem.throws == TriBool::Maybe ||
+        set == TriBool::Maybe;
+      effects = unionEffects(
+        effects,
+        maybeThrows ? Effects::Throws : opEffects
+      );
+      pushed |= std::move(toPush);
+    }();
   }
 
-  // If its an OptArrLike, we can attempt to analyze the effects
-  // precisely
-  if (auto elem = array_do_elem(env, false, key)) {
-    // Element doesn't exist. Always throws
-    if (elem->second == TriBool::Yes) return unreachable();
-
-    // If the op throws, we'll have already have COWed the array, so
-    // we need to manually remove staticness.
-    handleElemUDEffects(env);
-
-    // If the base is actually null, we'll throw. Therefore we can
-    // remove the null when analyzing the result.
-    auto const couldBeNull = base.couldBe(BNull);
-    if (couldBeNull) base = unopt(std::move(base));
-
-    // Perform the op
-    auto [toSet, toPush, opEffects] = op(std::move(elem->first));
-    if (opEffects == Effects::AlwaysThrows) {
-      // The op will always throw. We've already COWed the base, so we
-      // still need to update the base type.
-      endBase(env, true, keyLoc);
-      return stack(TBottom, Effects::AlwaysThrows);
-    }
-
-    // Write the element back into the array
-    auto const set = array_do_set(env, key, toSet);
-    assertx(set);
-    if (*set == TriBool::Yes) {
-      // The set will always throw. In theory this can happen if do
-      // something like read a string out of a keyset, turn it into
-      // something that's not an array key, then try to write it back.
-      endBase(env, true, keyLoc);
-      return stack(TBottom, Effects::AlwaysThrows);
-    }
-
-    auto const maybeThrows =
-      couldBeNull ||
-      (elem->second == TriBool::Maybe) ||
-      (*set == TriBool::Maybe);
-
-    return end(
-      std::move(toPush),
-      true,
-      maybeThrows ? Effects::Throws : opEffects
-    );
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
   }
 
-  // Otherwise its something we cannot analyze. Pessimize the base
-  // (because we don't know what will be written back) and assume we
-  // can throw and anything can be pushed.
-  pessimizeBaseForElemUD(env);
-  return end(TInitCell, true, Effects::Throws);
-}
+  assertx(effects.has_value());
 
-// Helper function for SetOpNewElem/IncDecNewElemm final
-// operations. These all either throw or push null.
-Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
-  auto const& base = env.collect.mInstrState.base.type;
-
-  // These always throw
-  if (base.subtypeOf(BNull | BFalse | BStr | BArrLike | BObj |
-                     BClsMeth | BRecord)) {
+  // We have to update the base even if we'll always throw to account
+  // for potential COWing of the array (it could be in a static for
+  // example).
+  if (*effects == Effects::AlwaysThrows && update) {
+    assertx(pushed.is(BBottom));
+    endBase(env, true, keyLoc);
     discard(env, nDiscard);
     push(env, TBottom);
     return Effects::AlwaysThrows;
   }
 
-  // And these raise a warning and push null.
-  endBase(env, false);
-  discard(env, nDiscard);
-  push(env, TInitNull);
-  return Effects::Throws;
+  return endBaseWithEffects(
+    env, *effects, update, promo,
+    [&] {
+      discard(env, nDiscard);
+      push(env, std::move(pushed));
+    },
+    keyLoc
+  );
+}
+
+// Helper function for SetOpNewElem/IncDecNewElemm final
+// operations. These all either throw or push null.
+Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
+  auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
+
+  auto const alwaysThrow =
+    BNull | BFalse | BStr | BArrLike | BObj | BClsMeth | BRecord;
+  auto const null =
+    BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls;
+  auto const handled = alwaysThrow | null;
+
+  static_assert(handled == BCell);
+
+  OptEffects effects;
+  auto pushed = TBottom;
+  auto refine = BBottom;
+  auto update = false;
+
+  // These always throw
+  if (base.couldBe(alwaysThrow)) {
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= alwaysThrow;
+  }
+  // These raise a warning and push InitNull
+  if (base.couldBe(null)) {
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitNull;
+  }
+
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
+  }
+
+  assertx(effects.has_value());
+
+  return endBaseWithEffects(
+    env, *effects, update, Promotion::No,
+    [&] {
+      discard(env, nDiscard);
+      push(env, std::move(pushed));
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -915,10 +1041,10 @@ Effects miProp(ISS& env, bool, MOpMode mode, Type key) {
    * the base to a null value in tvScratch.  The base may also legitimately be
    * an object and our next base is in an object property. Conservatively treat
    * all these cases as "possibly" being inside of an object property with
-   * "Prop" with locType TTop.
+   * "Prop" with locType TCell.
    */
   moveBase(env,
-           Base { TInitCell, BaseLoc::Prop, TTop, name },
+           Base { TInitCell, BaseLoc::Prop, TCell, name },
            update);
   return Effects::Throws;
 }
@@ -929,15 +1055,15 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
 
   if (!isDefine && !isUnset) {
     // An Elem operation which doesn't mutate the base at all
-    auto elem = elemHelper(env, mode, std::move(key));
-    if (elem.second != Effects::AlwaysThrows) {
-      // Since we're not mutating the base, we don't need to use an
-      // array chain here.
+    auto [elem, effects] = elemHelper(env, mode, std::move(key));
+    if (effects != Effects::AlwaysThrows) {
+      // Since this Dim is not mutating the base, we don't need to use
+      // an array chain here.
       moveBase(
-        env, Base { std::move(elem.first), BaseLoc::Elem }, false, keyLoc
+        env, Base { std::move(elem), BaseLoc::Elem }, false, keyLoc
       );
     }
-    return elem.second;
+    return effects;
   }
 
   // ElemD or ElemU. The base might mutate here. First handle any base
@@ -945,11 +1071,14 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
   // These are similar to endBaseWithEffects, but moves the base or
   // extends the array chain instead.
   auto const move = [&] (Type ty, bool update, Effects effects) {
-    assertx(effects != Effects::AlwaysThrows);
+    if (effects == Effects::AlwaysThrows) {
+      return endUnreachableBase(env, promo, keyLoc);
+    }
     auto const effectFree = moveBase(
       env,
       Base { std::move(ty), BaseLoc::Elem },
@@ -962,91 +1091,269 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   };
   auto const extend = [&] (Type ty, Effects effects) {
     assertx(effects != Effects::AlwaysThrows);
+    if (!key.subtypeOf(BArrKey)) {
+      assertx(effects == Effects::Throws);
+      key = intersection_of(std::move(key), TArrKey);
+      assertx(!key.is(BBottom));
+    }
     auto const effectFree =
-      extendArrChain(env, std::move(key), base, std::move(ty), true, keyLoc);
+      extendArrChain(env, std::move(key), base, std::move(ty), keyLoc);
     if (promo == Promotion::YesMightThrow) return Effects::Throws;
     if (!effectFree && effects == Effects::None) return Effects::SideEffect;
     return effects;
-  };
-  auto const unreachable = [&] {
-    return endUnreachableBase(env, promo, keyLoc);
   };
 
   if (isUnset) {
     // ElemU. These types either always throw, or set the base to
     // Uninit.
     auto const alwaysThrows =
-      BClsLike | BFuncLike | BStr | BClsMethLike | BRecord | BKeyset;
+      BCls | BLazyCls | BFunc | BRFunc | BStr | BClsMeth |
+      BRClsMeth | BRecord;
     auto const movesToUninit = BPrim | BRes;
+    auto const handled =
+      alwaysThrows | movesToUninit | BObj | BArrLike;
 
-    if (base.subtypeOf(alwaysThrows | movesToUninit)) {
-      if (base.subtypeOf(alwaysThrows)) return unreachable();
-      return move(
-        TUninit, false,
-        base.couldBe(alwaysThrows) ? Effects::Throws : Effects::None
+    static_assert(handled == BCell);
+
+    // It is quite unfortunate that InitNull doesn't always throw, as
+    // this means we cannot use an array chain with a nullable array
+    // (which is common).
+    if (base.couldBe(BArrLike) && base.subtypeOf(alwaysThrows | BArrLike)) {
+      auto elem = array_do_elem(env, key, true);
+      if (elem.throws == TriBool::Yes) {
+        // We'll always throw
+        return endUnreachableBase(env, promo, keyLoc);
+      }
+      if (!elem.present) elem.elem |= TInitNull;
+      auto const maybeAlwaysThrows = base.couldBe(alwaysThrows);
+      // Keysets will throw, so we can assume the base does not
+      // contain them afterwards.
+      if (base.couldBe(BKeyset)) base = remove_keyset(std::move(base));
+      base = loosen_array_staticness(std::move(base)); // Handle COW
+      // We can safely remove the always throws bits, since if we get
+      // to the next op, it means they weren't present.
+      if (maybeAlwaysThrows) base = remove_bits(std::move(base), alwaysThrows);
+      return extend(
+        std::move(elem.elem),
+        (maybeAlwaysThrows || elem.throws == TriBool::Maybe)
+          ? Effects::Throws : Effects::None
       );
     }
 
-    // Normally we allow OptArrLike for array_do_elem, but only
-    // ArrLike here. We don't want to deal with potential nulls in the
-    // array chain.
-    if (!base.couldBe(BNull)) {
-      if (auto elem = array_do_elem(env, false, key)) {
-        if (elem->second == TriBool::Yes) return unreachable();
-        handleElemUDEffects(env); // Handle COW
-        return extend(
-          std::move(elem->first),
-          elem->second == TriBool::Maybe ? Effects::Throws : Effects::None
+    OptEffects effects;
+    auto ty = TBottom;
+    auto update = false;
+    auto refine = BBottom;
+
+    // These always raise an error
+    if (base.couldBe(alwaysThrows)) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= alwaysThrows;
+    }
+    // These silently set the base to uninit
+    if (base.couldBe(movesToUninit)) {
+      effects = unionEffects(effects, Effects::None);
+      ty |= TUninit;
+    }
+    // Objects can throw and retrieve anything
+    if (base.couldBe(BObj)) {
+      effects = unionEffects(effects, Effects::Throws);
+      ty |= TInitCell;
+    }
+    // For arrays we can do a precise lookup
+    if (base.couldBe(BArrLike)) {
+      auto elem = array_do_elem(env, key, true);
+      if (elem.throws == TriBool::Yes) {
+        // Bad key or the element never exists. We'll always throw.
+        effects = unionEffects(effects, Effects::AlwaysThrows);
+        refine |= BArrLike;
+      } else {
+        if (!elem.present) elem.elem |= TInitNull;
+        // Keysets will throw, so we can assume the base does not
+        // contain them afterwards.
+        if (base.couldBe(BKeyset)) base = remove_keyset(std::move(base));
+        // Since we're not using an array chain here, we need to
+        // pessimize the array (since we won't be able to track
+        // further changes to its inner structure).
+        base = loosen_array_staticness(loosen_array_values(std::move(base)));
+        update = true;
+        effects = unionEffects(
+          effects,
+          elem.throws == TriBool::Maybe
+            ? Effects::Throws
+            : Effects::None
         );
+        ty |= std::move(elem.elem);
       }
     }
+
+    // Refine the base and remove bits that will always throw
+    if (refine && shouldRefineBase(env)) {
+      base = remove_bits(std::move(base), refine);
+      update = true;
+    }
+
+    assertx(effects.has_value());
+
+    return move(std::move(ty), update, *effects);
   } else {
     assertx(isDefine);
 
     // ElemD. These types either always throw, or emit a warning and
     // push InitNull.
-    auto const alwaysThrows = BNull | BFalse | BStr | BKeyset;
+    auto const alwaysThrows = BNull | BFalse | BStr;
     auto const warnsAndNull =
-      BTrue | BNum | BRes | BFuncLike | BClsLike | BClsMethLike;
+      BTrue | BNum | BRes | BFunc | BRFunc | BCls | BLazyCls |
+      BClsMeth | BRClsMeth;
+    auto const handled =
+      alwaysThrows | warnsAndNull | BObj | BRecord | BArrLike;
 
-    if (base.subtypeOf(alwaysThrows | warnsAndNull)) {
-      if (base.subtypeOf(alwaysThrows)) return unreachable();
-      return move(TInitNull, false, Effects::Throws);
-    }
+    static_assert(handled == BCell);
 
-    // We allow OptArrLike here because we'll remove the optness
-    // anyways (see below).
-    if (auto elem = array_do_elem(env, false, key)) {
-      if (elem->second == TriBool::Yes) return unreachable();
-      auto const couldBeNull = base.couldBe(BNull);
-      // If it was null, we'd have fataled, so it cannot be null
-      // afterwards.
-      if (couldBeNull) base = unopt(std::move(base));
-      handleElemUDEffects(env); // Handle COW
+    // As a special case, if we just have an array, we can extend an
+    // array chain and track the modifications to the inner array
+    // structure. We also allow the types which always throw since
+    // they don't affect the structure (if we get one at runtime,
+    // we'll just throw without modifying anything).
+    if (base.couldBe(BArrLike) && base.subtypeOf(alwaysThrows | BArrLike)) {
+      auto elem = array_do_elem(env, key, true);
+      if (elem.elem.is(BBottom) || elem.throws == TriBool::Yes) {
+        // We'll always throw
+        return endUnreachableBase(env, promo, keyLoc);
+      }
+      auto const maybeAlwaysThrows = base.couldBe(alwaysThrows);
+      // Keysets will throw, so we can assume the base does not
+      // contain them afterwards.
+      if (base.couldBe(BKeyset)) base = remove_keyset(std::move(base));
+      base = loosen_array_staticness(std::move(base)); // Handle COW
+      // We can safely remove the always throws bits, since if we get
+      // to the next op, it means they weren't present.
+      if (maybeAlwaysThrows) base = remove_bits(std::move(base), alwaysThrows);
+      auto const mightThrow =
+        maybeAlwaysThrows ||
+        !elem.present ||
+        elem.throws == TriBool::Maybe;
       return extend(
-        std::move(elem->first),
-        (couldBeNull || elem->second == TriBool::Maybe)
-          ? Effects::Throws
-          : Effects::None
+        std::move(elem.elem),
+        mightThrow ? Effects::Throws : Effects::None
       );
     }
-  }
 
-  // Something else. Be pessimistic.
-  pessimizeBaseForElemUD(env);
-  return move(TInitCell, true, Effects::Throws);
+    OptEffects effects;
+    auto ty = TBottom;
+    auto update = false;
+    auto refine = BBottom;
+
+    // These always raise an error
+    if (base.couldBe(alwaysThrows)) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= alwaysThrows;
+    }
+    // These emit a warning and push InitNull
+    if (base.couldBe(warnsAndNull)) {
+      effects = unionEffects(effects, Effects::Throws);
+      ty |= TInitNull;
+    }
+    // Objects can throw and push anything
+    if (base.couldBe(BObj)) {
+      effects = unionEffects(effects, Effects::Throws);
+      ty |= TInitCell;
+    }
+    // Records can throw and push anything as well. Since we might be
+    // mutating the record, we need to perform an update.
+    if (base.couldBe(BRecord)) {
+      effects = unionEffects(effects, Effects::Throws);
+      ty |= TInitCell;
+      update = true;
+    }
+    // For arrays we can lookup the specific element
+    if (base.couldBe(BArrLike)) {
+      auto elem = array_do_elem(env, key, true);
+      if (elem.elem.is(BBottom) || elem.throws == TriBool::Yes) {
+        // Bad key or the element never exists. We'll always throw.
+        effects = unionEffects(effects, Effects::AlwaysThrows);
+        refine |= BArrLike;
+      } else {
+        // Keysets will throw, so we can assume the base does not
+        // contain them afterwards.
+        if (base.couldBe(BKeyset)) base = remove_keyset(std::move(base));
+        // Since we're not using an array chain here, we need to
+        // pessimize the array (since we won't be able to track
+        // further changes to its inner structure).
+        base = loosen_array_staticness(loosen_array_values(std::move(base)));
+        update = true;
+        effects = unionEffects(
+          effects,
+          (!elem.present || elem.throws == TriBool::Maybe)
+            ? Effects::Throws
+            : Effects::None
+        );
+        ty |= std::move(elem.elem);
+      }
+    }
+
+    // Refine the base and remove bits that will always throw
+    if (refine && shouldRefineBase(env)) {
+      base = remove_bits(std::move(base), refine);
+      update = true;
+    }
+
+    assertx(effects.has_value());
+
+    return move(std::move(ty), update, *effects);
+  }
 }
 
 Effects miNewElem(ISS& env) {
   // NewElem. These all either throw or raise a warning and set the
   // base to Uninit.
-  auto const& base = env.collect.mInstrState.base.type;
-  if (base.subtypeOf(BNull | BFalse | BArrLike | BObj | BClsMeth | BRecord) ||
-      base.subtypeOf(sempty())) {
-    return Effects::AlwaysThrows;
+  auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
+
+  auto const alwaysThrows =
+    BNull | BFalse | BArrLike | BObj | BClsMeth | BRecord;
+  auto const uninit =
+    BTrue | BNum | BRes | BRFunc | BFunc |
+    BRClsMeth | BCls | BLazyCls;
+  auto const handled = alwaysThrows | uninit | BStr;
+
+  static_assert(handled == BCell);
+
+  OptEffects effects;
+  auto newBase = TBottom;
+  auto update = false;
+  auto refine = BBottom;
+
+  if (base.couldBe(alwaysThrows)) {
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= alwaysThrows;
   }
-  moveBase(env, Base { TUninit, BaseLoc::Elem }, false);
-  return Effects::Throws;
+  if (base.couldBe(uninit)) {
+    effects = unionEffects(effects, Effects::Throws);
+    newBase |= TUninit;
+  }
+  if (base.couldBe(BStr)) {
+    if (is_specialized_string(base) && sval_of(base)->empty()) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BStr;
+    } else {
+      effects = unionEffects(effects, Effects::Throws);
+      newBase |= TUninit;
+    }
+  }
+
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
+  }
+
+  assertx(effects.has_value());
+  assertx(*effects == Effects::Throws || *effects == Effects::AlwaysThrows);
+  if (*effects != Effects::AlwaysThrows) {
+    moveBase(env, Base { std::move(newBase), BaseLoc::Elem }, update);
+  }
+  return *effects;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1082,6 +1389,8 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard,
   auto const name = mStringKey(key);
   discard(env, nDiscard);
 
+  auto const& base = env.collect.mInstrState.base.type;
+
   if (name) {
     if (mustBeThisObj(env, env.collect.mInstrState.base)) {
       if (auto const t = thisPropAsCell(env, name)) {
@@ -1094,13 +1403,21 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard,
         return elem->ty.couldBe(BUninit) ? Effects::Throws : Effects::None;
       }
     }
-    auto ty = to_cell(
-      env.index.lookup_public_prop(
-        objcls(env.collect.mInstrState.base.type), sval(name)
-      )
-    );
+    auto ty = [&] {
+      if (!base.couldBe(BObj)) return TInitNull;
+      auto t = to_cell(
+        env.index.lookup_public_prop(
+          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          sval(name)
+        )
+      );
+      if (!base.subtypeOf(BObj)) t = opt(std::move(t));
+      return t;
+    }();
+    auto const e =
+      ty.subtypeOf(BBottom) ? Effects::AlwaysThrows : Effects::Throws;
     push(env, std::move(ty));
-    return ty.subtypeOf(BBottom) ? Effects::AlwaysThrows : Effects::Throws;
+    return e;
   }
 
   push(env, TInitCell);
@@ -1144,7 +1461,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
     return finish(t1);
   }
 
-  moveBase(env, Base { TInitCell, BaseLoc::Prop, TTop, name });
+  moveBase(env, Base { TInitCell, BaseLoc::Prop, TCell, name });
   return finish(TInitCell);
 }
 
@@ -1153,14 +1470,24 @@ Effects miFinalSetOpProp(ISS& env, int32_t nDiscard,
   auto const name = mStringKey(key);
   auto const rhsTy = popC(env);
 
-  auto const lhsTy = [&] {
+  auto const& base = env.collect.mInstrState.base.type;
+
+  if (!base.couldBe(BObj)) {
+    endBase(env);
+    discard(env, nDiscard);
+    push(env, TInitNull);
+    return Effects::Throws;
+  }
+
+  auto lhsTy = [&] {
     if (name) {
       if (mustBeThisObj(env, env.collect.mInstrState.base)) {
         if (auto const t = thisPropAsCell(env, name)) return *t;
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(env.collect.mInstrState.base.type), sval(name)
+          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          sval(name)
         )
       );
     }
@@ -1171,8 +1498,9 @@ Effects miFinalSetOpProp(ISS& env, int32_t nDiscard,
     push(env, TBottom);
     return Effects::AlwaysThrows;
   }
+  if (!base.subtypeOf(BObj)) lhsTy = opt(std::move(lhsTy));
 
-  auto const resultTy = env.collect.mInstrState.base.type.subtypeOf(TObj)
+  auto const resultTy = base.subtypeOf(BObj)
     ? typeSetOp(subop, lhsTy, rhsTy)
     : TInitCell;
 
@@ -1200,14 +1528,24 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
                           IncDecOp subop, const Type& key) {
   auto const name = mStringKey(key);
 
-  auto const postPropTy = [&] {
+  auto const& base = env.collect.mInstrState.base.type;
+
+  if (!base.couldBe(BObj)) {
+    endBase(env);
+    discard(env, nDiscard);
+    push(env, TInitNull);
+    return Effects::Throws;
+  }
+
+  auto postPropTy = [&] {
     if (name) {
       if (mustBeThisObj(env, env.collect.mInstrState.base)) {
         if (auto const t = thisPropAsCell(env, name)) return *t;
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(env.collect.mInstrState.base.type), sval(name)
+          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          sval(name)
         )
       );
     }
@@ -1218,8 +1556,9 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
     push(env, TBottom);
     return Effects::AlwaysThrows;
   }
+  if (!base.subtypeOf(BObj)) postPropTy = opt(std::move(postPropTy));
 
-  auto const prePropTy = env.collect.mInstrState.base.type.subtypeOf(TObj)
+  auto const prePropTy = base.subtypeOf(TObj)
     ? typeIncDec(subop, postPropTy)
     : TInitCell;
   if (prePropTy.subtypeOf(BBottom)) {
@@ -1261,123 +1600,162 @@ Effects miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
 
 Effects miFinalCGetElem(ISS& env, int32_t nDiscard,
                         const Type& key, MOpMode mode) {
-  auto elem = elemHelper(env, mode, key);
+  auto [elem, effects] = elemHelper(env, mode, key);
   discard(env, nDiscard);
-  push(
-    env,
-    elem.second == Effects::AlwaysThrows
-      ? TBottom
-      : std::move(elem.first)
-  );
-  return elem.second;
+  push(env, std::move(elem));
+  return effects;
 }
 
-Effects miFinalIssetElem(ISS& env, int32_t nDiscard, const Type& key) {
-  auto const& base = env.collect.mInstrState.base.type;
+Effects miFinalIssetElem(ISS& env,
+                         int32_t nDiscard,
+                         const Type& key) {
+  auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
-  auto const finish = [&] (Type ty, Effects effects) {
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-    return effects;
-  };
+  auto const pushesFalse =
+    BNull | BBool | BNum | BRes | BFunc | BRFunc | BRClsMeth |
+   (!RO::EvalIsCompatibleClsMethType ? BClsMeth : BBottom);
+  auto const handled = pushesFalse | BArrLike;
 
-  auto const pushesFalse = BNull | BBool | BNum | BRes | BFuncLike | BRClsMeth |
-    (!RO::EvalIsCompatibleClsMethType ? BClsMeth : BBottom);
-  if (base.subtypeOf(pushesFalse)) return finish(TFalse, Effects::None);
+  OptEffects effects;
+  auto pushed = TBottom;
 
-  if (auto elem = array_do_elem(env, true, key)) {
-    if (elem->second == TriBool::Yes) {
-      if (base.couldBe(BNull)) return finish(TFalse, Effects::Throws);
-      return finish(TBottom, Effects::AlwaysThrows);
+  if (base.couldBe(pushesFalse)) {
+    effects = unionEffects(effects, Effects::None);
+    pushed |= TFalse;
+  }
+  if (base.couldBe(BArrLike)) {
+    auto const elem = array_do_elem(env, key);
+    if (elem.throws == TriBool::Yes) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+    } else {
+      effects = unionEffects(
+        effects,
+        elem.throws == TriBool::Maybe
+          ? Effects::Throws
+          : Effects::None
+      );
+
+      if (elem.elem.subtypeOf(BNull)) {
+        pushed |= TFalse;
+      } else if (elem.present && !elem.elem.couldBe(BNull)) {
+        pushed |= TTrue;
+      } else {
+        pushed |= TBool;
+      }
     }
-    auto const effects = (elem->second == TriBool::Maybe)
-      ? Effects::Throws
-      : Effects::None;
-
-    if (elem->first.subtypeOf(BNull)) return finish(TFalse, effects);
-    if (!elem->first.couldBe(BNull) && !base.couldBe(BNull)) {
-      return finish(TTrue, effects);
-    }
-    return finish(TBool, effects);
   }
 
-  return finish(TBool, Effects::Throws);
+  if (!base.subtypeOf(handled)) {
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TBool;
+  }
+
+  assertx(effects.has_value());
+  discard(env, nDiscard);
+  push(env, std::move(pushed));
+  return *effects;
 }
 
 Effects miFinalSetElem(ISS& env,
                        int32_t nDiscard,
                        const Type& key,
                        LocalId keyLoc) {
-  auto rhs = popC(env);
+  auto const rhs = popC(env);
 
   // First handle base promotions
   auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
-  auto const stack = [&] (Type ty, Effects effects) {
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-    return effects;
-  };
-
-  auto const end = [&] (Type ty, bool update, Effects effects) {
-    return stack(
-      std::move(ty),
-      endBaseWithEffects(env, effects, update, promo, keyLoc)
-    );
-  };
-  auto const unreachable = [&] {
-    return stack(
-      TBottom,
-      endUnreachableBase(env, promo, keyLoc)
-    );
-  };
-
-  // These will either always throw, or raise a warning and push null.
-  auto const alwaysThrows = BNull | BFalse | BKeyset;
+  auto const alwaysThrows = BNull | BFalse;
   auto const pushesNull =
-    BTrue | BNum | BRes | BFuncLike | BClsLike | BClsMethLike;
-  if (base.subtypeOf(alwaysThrows | pushesNull)) {
-    if (base.subtypeOf(alwaysThrows)) return unreachable();
-    return end(TInitNull, false, Effects::Throws);
+    BTrue | BNum | BRes | BFunc | BRFunc |
+    BCls | BLazyCls | BClsMeth | BRClsMeth;
+  auto const handled =
+    alwaysThrows | pushesNull | BObj | BRecord | BStr | BArrLike;
+
+  static_assert(handled == BCell);
+
+  OptEffects effects;
+  auto pushed = TBottom;
+  auto update = false;
+  auto refine = BBottom;
+
+  if (base.couldBe(pushesNull)) {
+    // These emit a warning and push null
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitNull;
+  }
+  if (base.couldBe(alwaysThrows)) {
+    // These always raise a fatal
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= alwaysThrows;
+  }
+  if (base.couldBe(BStr)) {
+    // String is a special case here. It will throw on empty strings,
+    // and otherwise can return null or a static string (and possibly
+    // warn). We don't bother predicting the effects of the set on the
+    // string here, so be pessimistic and forget what we know about
+    // the base in regards to staticness and values.
+    if (is_specialized_string(base) && sval_of(base)->empty()) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BStr;
+    } else {
+      effects = unionEffects(effects, Effects::Throws);
+      base = loosen_string_staticness(loosen_string_values(std::move(base)));
+      update = true;
+      pushed |= TOptSStr;
+    }
+  }
+  if (base.couldBe(BObj)) {
+    // Objects can throw but otherwise don't affect the base and push
+    // the rhs.
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= rhs;
+  }
+  if (base.couldBe(BRecord)) {
+    // Records can throw but otherwise don't affect the base and push
+    // the rhs. Record an update since we're potentially mutating it.
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= rhs;
+    update = true;
+  }
+  if (base.couldBe(BArrLike)) {
+    // Arrays will set the value and push the right hande side of the
+    // assignment (keysets will always fatal because you can't do a
+    // set on them).
+    auto const doesThrow = array_do_set(env, key, rhs);
+    if (doesThrow == TriBool::Yes) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BArrLike;
+    } else {
+      effects = unionEffects(
+        effects,
+        doesThrow == TriBool::No ? Effects::None : Effects::Throws
+      );
+      pushed |= rhs;
+      update = true;
+    }
   }
 
-  // String is a special case here. It will throw on empty strings,
-  // and otherwise can return null or a static string (and possibly
-  // warn). We don't bother predicting the effects of the set on the
-  // string here, so be pessimistic and forget what we know about the
-  // base in regards to staticness and values.
-  if (base.subtypeOf(BOptStr)) {
-    if (base.subtypeOf(sempty())) return unreachable();
-    base = loosen_staticness(loosen_values(std::move(base)));
-    return end(TOptSStr, true, Effects::Throws);
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
   }
 
-  if (auto const set = array_do_set(env, key, rhs)) {
-    if (*set == TriBool::Yes) return unreachable();
-    auto const couldBeNull = base.couldBe(BNull);
-    // If it was null, we'd have fataled, so it cannot be null
-    // afterwards.
-    if (couldBeNull) base = unopt(std::move(base));
-    return end(
-      std::move(rhs),
-      true,
-      (couldBeNull || *set == TriBool::Maybe) ? Effects::Throws : Effects::None
-    );
-  }
+  assertx(effects.has_value());
 
-  // In most cases, the right hand side of the set is what's pushed
-  // onto the stack. The exceptions are the special types above which
-  // push null, or the string case described above.
-  auto lhs = std::move(rhs);
-  if (base.couldBe(pushesNull)) lhs = union_of(std::move(lhs), TInitNull);
-  if (base.couldBe(BStr))       lhs = union_of(std::move(lhs), TOptSStr);
-
-  // We can't determine how the base is changing here, so be
-  // pessimistic and drop values and staticness.
-  base = loosen_staticness(loosen_values(std::move(base)));
-  return end(std::move(lhs), true, Effects::Throws);
+  return endBaseWithEffects(
+    env, *effects, update, promo,
+    [&] {
+      discard(env, nDiscard);
+      push(env, std::move(pushed));
+    },
+    keyLoc
+  );
 }
 
 Effects miFinalSetOpElem(ISS& env, int32_t nDiscard,
@@ -1414,127 +1792,142 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
-  auto const end = [&] (bool update, Effects effects) {
-    auto const e = endBaseWithEffects(env, effects, update, promo);
-    discard(env, nDiscard);
-    return e;
-  };
-
-  // These either always throw, or silently does nothing (ElemUnset
-  // doesn't push anything and ends the base, so there's nothing else
-  // to do).
   auto const doesNothing = BNull | BBool | BNum | BRes;
   auto const alwaysThrows =
-    BFuncLike | BClsLike | BStr | BRecord | BClsMethLike;
-  if (base.subtypeOf(doesNothing | alwaysThrows)) {
-    if (base.subtypeOf(alwaysThrows)) {
-      auto const e = endUnreachableBase(env, promo);
-      discard(env, nDiscard);
-      return e;
+    BFunc | BRFunc | BCls | BLazyCls | BStr | BRecord | BClsMeth | BRClsMeth;
+  auto const handled = doesNothing | alwaysThrows | BArrLike | BObj;
+
+  static_assert(handled == BCell);
+
+  OptEffects effects;
+  auto update = false;
+  auto refine = BBottom;
+
+  // These silently does nothing
+  if (base.couldBe(doesNothing)) {
+    effects = unionEffects(effects, Effects::None);
+  }
+  // These always raise an error
+  if (base.couldBe(alwaysThrows)) {
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= alwaysThrows;
+  }
+  // Objects can throw but otherwise do not affect the base
+  if (base.couldBe(BObj)) {
+    effects = unionEffects(effects, Effects::Throws);
+  }
+  if (base.couldBe(BArrLike)) {
+    // Unset doesn't throw for a missing element on dicts, keysets, or
+    // darrays, only if the key is invalid. Vecs and varrays silently do
+    // nothing for string keys, but can throw with int keys.
+    if (!key.couldBe(BArrKey)) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BArrLike;
+    } else {
+      auto e = key.subtypeOf(BArrKey) ? Effects::None : Effects::Throws;
+      if (base.couldBe(BVecish) && key.couldBe(BInt)) e = Effects::Throws;
+      effects = unionEffects(effects, e);
+
+      // We purposefully do not model the effects of unset on array
+      // structure. This lets us assume that if we have array structure,
+      // we also have no tombstones. Pessimize the base which drops array
+      // structure and also remove emptiness information.
+      if (!base.subtypeAmong(BVecish, BArrLike) || key.couldBe(BInt)) {
+        base = loosen_array_staticness(loosen_array_values(std::move(base)));
+        base = loosen_emptiness(std::move(base));
+        update = true;
+      }
     }
-    return end(
-      false,
-      base.subtypeOf(doesNothing) ? Effects::None : Effects::Throws
-    );
   }
 
-  // Special case for varray or vec with string keys. These silently
-  // do nothing.
-  if (base.subtypeOf(BOptVecish)) {
-    if (key.subtypeOf(BStr)) return end(false, Effects::None);
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
   }
 
-  // Unset doesn't throw for a missing element on dicts, keysets, or
-  // darrays, only if the key is invalid. Vecs and varrays silently do
-  // nothing for string keys, but can throw with int keys.
-  auto const noThrow = base.subtypeOf(
-    doesNothing |
-    (key.subtypeOf(BArrKey) ? (BDictish | BKeyset) : BBottom) |
-    (key.subtypeOf(BStr) ? BVecish : BBottom)
+  assertx(effects.has_value());
+
+  return endBaseWithEffects(
+    env, *effects, update, promo,
+    [&] { discard(env, nDiscard); }
   );
-
-  // We purposefully do not model the effects of unset on array
-  // structure. This lets us assume that if we have array structure,
-  // we also have no tombstones. Pessimize the base which drops array
-  // structure and also remove emptiness information.
-  pessimizeBaseForElemUD(env);
-  base = loosen_emptiness(std::move(base));
-  return end(true, noThrow ? Effects::None : Effects::Throws);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Final new elem ops
 
 Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
-  auto rhs = popC(env);
+  auto const rhs = popC(env);
 
   // First handle base promotions
   auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
+  assertx(!base.is(BBottom));
 
-  auto const stack = [&] (Type ty, Effects effects) {
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-    return effects;
-  };
-
-  // These all either throw or warn and push null.
   auto const pushesNull =
-    BTrue | BNum | BRes | BFuncLike | BClsLike | BClsMethLike;
-  auto const throws = BNull | BStr | BRecord | BFalse;
+    BTrue | BNum | BRes | BFunc | BRFunc | BCls |
+    BLazyCls | BClsMeth | BRClsMeth;
+  auto const alwaysThrows = BNull | BStr | BRecord | BFalse;
+  auto const handled = pushesNull | alwaysThrows | BObj | BArrLike;
 
-  if (base.subtypeOf(pushesNull | throws)) {
-    if (base.subtypeOf(throws)) {
-      return stack(TBottom, endUnreachableBase(env, promo));
+  static_assert(handled == BCell);
+
+  OptEffects effects;
+  auto pushed = TBottom;
+  auto update = false;
+  auto refine = BBottom;
+
+  if (base.couldBe(pushesNull)) {
+    // These emit a warning and push null
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= TInitNull;
+  }
+  if (base.couldBe(alwaysThrows)) {
+    // These always raise a fatal
+    effects = unionEffects(effects, Effects::AlwaysThrows);
+    refine |= alwaysThrows;
+  }
+  if (base.couldBe(BObj)) {
+    // Objects can throw but otherwise don't affect the base and push
+    // the rhs.
+    effects = unionEffects(effects, Effects::Throws);
+    pushed |= rhs;
+  }
+  if (base.couldBe(BArrLike)) {
+    // Arrays will add a new element and push the right hand side of the
+    // assignment.
+    auto const doesThrow = array_do_newelem(env, rhs);
+    if (doesThrow == TriBool::Yes) {
+      effects = unionEffects(effects, Effects::AlwaysThrows);
+      refine |= BArrLike;
+    } else {
+      effects = unionEffects(
+        effects,
+        doesThrow == TriBool::No ? Effects::None : Effects::Throws
+      );
+      pushed |= rhs;
+      update = true;
     }
-    return stack(
-      TInitNull,
-      endBaseWithEffects(env, Effects::Throws, false, promo)
-    );
   }
 
-  // Arrays will add a new element and push the right hand side of the
-  // assignment.
-  auto const couldBeNull = base.couldBe(BInitNull);
-  if (auto doesThrow = array_do_newelem(env, rhs)) {
-    if (*doesThrow == TriBool::Yes) {
-      return stack(TBottom, endUnreachableBase(env, promo));
-    }
-    // If it was null, we'd have fataled, so it cannot be null
-    // afterwards.
-    if (couldBeNull) base = unopt(std::move(base));
-
-    return stack(
-      std::move(rhs),
-      endBaseWithEffects(
-        env,
-        *doesThrow == TriBool::No && !couldBeNull
-          ? Effects::None
-          : Effects::Throws,
-        true,
-        promo
-      )
-    );
+  // Refine the base and remove bits that will always throw
+  if (refine && shouldRefineBase(env)) {
+    base = remove_bits(std::move(base), refine);
+    update = true;
   }
 
-  // We'll push the right hande side of the assignment in every case,
-  // except for the special cases above which will push null instead,
-  // so take that into account.
-  auto ty = base.couldBe(pushesNull)
-    ? union_of(std::move(rhs), TInitNull)
-    : std::move(rhs);
+  assertx(effects.has_value());
 
-  // We don't know what we're doing to the base, so pessimize it. In
-  // addition, we're potentially adding new elements, so we need to
-  // add non-emptiness bits.
-  pessimizeBaseForElemUD(env);
-  base = add_nonemptiness(std::move(base));
-
-  return stack(
-    std::move(ty),
-    endBaseWithEffects(env, Effects::Throws, true, promo)
+  return endBaseWithEffects(
+    env, *effects, update, promo,
+    [&] {
+      discard(env, nDiscard);
+      push(env, std::move(pushed));
+    }
   );
 }
 
@@ -1712,7 +2105,7 @@ void in(ISS& env, const bc::BaseL& op) {
 }
 
 void in(ISS& env, const bc::BaseC& op) {
-  assert(op.arg1 < env.state.stack.size());
+  assertx(op.arg1 < env.state.stack.size());
   auto ty = topC(env, op.arg1);
   if (ty.subtypeOf(BBottom)) return unreachable(env);
   effect_free(env);
@@ -1990,7 +2383,7 @@ void in(ISS& env, const bc::UnsetM& op) {
     if (mcodeIsProp(op.mkey.mcode)) {
       return miFinalUnsetProp(env, op.arg1, key->first);
     } else {
-      assert(mcodeIsElem(op.mkey.mcode));
+      assertx(mcodeIsElem(op.mkey.mcode));
       return miFinalUnsetElem(env, op.arg1, key->first);
     }
   }();

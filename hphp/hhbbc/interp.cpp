@@ -145,7 +145,7 @@ ArrayData** add_elem_array(ISS& env) {
       case Op::Dict:    return &bc.Dict.arr1;
       case Op::Keyset:  return &bc.Keyset.arr1;
       case Op::Vec:     return &bc.Vec.arr1;
-      case Op::Concat: return nullptr;
+      case Op::Concat:  return nullptr;
       default:          not_reached();
     }
   }();
@@ -201,11 +201,9 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
  * add_elem array cached in the interp state and should write to it directly.
  */
 template <typename Fn>
-bool mutate_add_elem_array(ISS& env, ProvTag loc, Fn&& mutate) {
+bool mutate_add_elem_array(ISS& env, Fn&& mutate) {
   auto const arr = add_elem_array(env);
   if (!arr) return false;
-
-  assertx(!RuntimeOption::EvalArrayProvenance || loc.valid());
 
   if (!RuntimeOption::EvalArrayProvenance) {
     mutate(arr);
@@ -214,29 +212,24 @@ bool mutate_add_elem_array(ISS& env, ProvTag loc, Fn&& mutate) {
 
   // We need to propagate the provenance info in case we promote *arr from
   // static to counted (or if its representation changes in some other way)...
-  auto const tag = ProvTag::FromSArr(*arr);
+  auto const ham = HAMSandwich::FromSArr(*arr);
 
   mutate(arr);
 
   // ...which means we'll have to setTag if
   //   - the array still needs a tag AND
-  // either:
-  //   - the array had no tag coming into this op OR
   //   - the set op cleared the provenance bit somehow
   //     (representation changed or we CoWed a static array)
-  if (arrprov::arrayWantsTag(*arr)) {
-    if (tag == ProvTag::NoTag) {
-      arrprov::setTag(*arr, loc.get());
-    } else if (!arrprov::getTag(*arr).valid()) {
-      arrprov::setTag(*arr, tag.get());
-    }
+  if (arrprov::arrayWantsTag(*arr) && !arrprov::getTag(*arr).valid()) {
+    auto const tag = ham.rawProvTag();
+    assertx(tag.has_value());
+    assertx(tag->valid());
+    arrprov::setTag(*arr, *tag);
   }
 
   // Make sure that, if provenance is enabled and the array wants a tag, we
   // definitely assigned one leaving this op.
-  assertx(!loc.valid() ||
-          !arrprov::arrayWantsTag(*arr) ||
-          arrprov::getTag(*arr).valid());
+  assertx(!arrprov::arrayWantsTag(*arr) || arrprov::getTag(*arr).valid());
   return true;
 }
 
@@ -458,7 +451,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
       auto ef = !env.flags.reduced || env.flags.effectFree;
       Trace::Indent _;
       for (auto const& bc : bcs) {
-        assert(
+        assertx(
           env.flags.jmpDest == NoBlockId &&
           "you can't use impl with branching opcodes before last position"
         );
@@ -487,7 +480,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
   env.flags.effectFree      = true;
 
   for (auto const& bc : bcs) {
-    assert(env.flags.jmpDest == NoBlockId &&
+    assertx(env.flags.jmpDest == NoBlockId &&
            "you can't use impl with branching opcodes before last position");
 
     auto const wasPEI = env.flags.wasPEI;
@@ -551,7 +544,7 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
       }
     }
     equivFirst = findLocEquiv(env, equivFirst);
-    assert(equivFirst != NoLocalId);
+    assertx(equivFirst != NoLocalId);
   } while (equivFirst != range.first);
 
   return bestRange;
@@ -892,26 +885,26 @@ void in(ISS& env, const bc::String& op) {
 }
 
 void in(ISS& env, const bc::Array& op) {
-  assert(op.arr1->isPHPArrayType());
+  assertx(op.arr1->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || op.arr1->isNotDVArray());
   effect_free(env);
   push(env, aval(op.arr1));
 }
 
 void in(ISS& env, const bc::Vec& op) {
-  assert(op.arr1->isVecType());
+  assertx(op.arr1->isVecType());
   effect_free(env);
   push(env, vec_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Dict& op) {
-  assert(op.arr1->isDictType());
+  assertx(op.arr1->isDictType());
   effect_free(env);
   push(env, dict_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Keyset& op) {
-  assert(op.arr1->isKeysetType());
+  assertx(op.arr1->isKeysetType());
   effect_free(env);
   push(env, keyset_val(op.arr1));
 }
@@ -951,7 +944,10 @@ void in(ISS& env, const bc::NewStructDArray& op) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
-    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
+    map.emplace_front(
+      make_tv<KindOfPersistentString>(*--it),
+      MapElem::SStrKey(popC(env))
+    );
   }
   push(env, arr_map_darray(std::move(map), provTagHere(env)));
   effect_free(env);
@@ -961,7 +957,10 @@ void in(ISS& env, const bc::NewStructDArray& op) {
 void in(ISS& env, const bc::NewStructDict& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
-    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
+    map.emplace_front(
+      make_tv<KindOfPersistentString>(*--it),
+      MapElem::SStrKey(popC(env))
+    );
   }
   push(env, dict_map(std::move(map)));
   effect_free(env);
@@ -981,71 +980,82 @@ void in(ISS& env, const bc::NewVec& op) {
 }
 
 void in(ISS& env, const bc::NewKeysetArray& op) {
-  assert(op.arg1 > 0);
+  assertx(op.arg1 > 0);
   auto map = MapElems{};
   auto ty = TBottom;
   auto useMap = true;
   auto bad = false;
-  auto mayThrow = false;
+  auto effectful = false;
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto const promotion = promote_classlike_to_key(popC(env));
-    auto const k = disect_strict_key(promotion.first);
-    mayThrow |= k.mayThrow || (promotion.second == Promotion::YesMightThrow);
-    if (k.type == TBottom) {
+    auto [key, promotion] = promote_classlike_to_key(popC(env));
+
+    auto const keyValid = key.subtypeOf(BArrKey);
+    if (!keyValid) key = intersection_of(std::move(key), TArrKey);
+    if (key.is(BBottom)) {
       bad = true;
       useMap = false;
+      effectful = true;
     }
+
     if (useMap) {
-      if (auto const v = k.tv()) {
-        map.emplace_front(*v, k.type);
+      if (auto const v = tv(key)) {
+        map.emplace_front(*v, MapElem::KeyFromType(key, key));
       } else {
         useMap = false;
       }
     }
-    ty |= std::move(k.type);
+
+    ty |= std::move(key);
+    effectful |= !keyValid || (promotion == Promotion::YesMightThrow);
   }
-  if (!mayThrow) effect_free(env);
+
+  if (!effectful) {
+    effect_free(env);
+    constprop(env);
+  }
+
   if (useMap) {
     push(env, keyset_map(std::move(map)));
-    if (!mayThrow) constprop(env);
   } else if (!bad) {
     push(env, keyset_n(ty));
   } else {
+    assertx(effectful);
     unreachable(env);
     push(env, TBottom);
   }
 }
 
-void in(ISS& env, const bc::AddElemC& /*op*/) {
+void in(ISS& env, const bc::AddElemC&) {
   auto const v = topC(env, 0);
-  auto const promotion = promote_classlike_to_key(topC(env, 1));
-  auto const k = promotion.first;
-  auto const promoteMayThrow = (promotion.second == Promotion::YesMightThrow);
+  auto const [k, promotion] = promote_classlike_to_key(topC(env, 1));
+  auto const promoteMayThrow = (promotion == Promotion::YesMightThrow);
 
   auto inTy = (env.state.stack.end() - 3).unspecialize();
 
-  auto const tag = provTagHere(env);
-
-  auto outTy = [&] (Type ty) -> folly::Optional<std::pair<Type,bool>> {
-    if (ty.subtypeOf(BDictish)) return dictish_set(std::move(ty), k, v, tag);
+  auto outTy = [&] (const Type& key) -> folly::Optional<Type> {
+    if (!key.subtypeOf(BArrKey)) return folly::none;
+    if (inTy.subtypeOf(BDictish)) {
+      auto const r = array_like_set(std::move(inTy), key, v);
+      if (!r.second) return r.first;
+    }
     return folly::none;
-  }(std::move(inTy));
+  }(k);
 
-  if (outTy && !outTy->second && !promoteMayThrow && will_reduce(env)) {
+  if (outTy && !promoteMayThrow && will_reduce(env)) {
     if (!env.trackedElems.empty() &&
         env.trackedElems.back().depth + 3 == env.state.stack.size()) {
-      auto const handled = [&] {
-        if (!k.subtypeOf(BArrKey)) return false;
-        auto ktv = tv(k);
+      auto const handled = [&] (const Type& key) {
+        if (!key.subtypeOf(BArrKey)) return false;
+        auto ktv = tv(key);
         if (!ktv) return false;
         auto vtv = tv(v);
         if (!vtv) return false;
-        return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
+        return mutate_add_elem_array(env, [&](ArrayData** arr) {
           *arr = (*arr)->setMove(*ktv, *vtv);
         });
-      }();
+      }(k);
       if (handled) {
-        (env.state.stack.end() - 3)->type = std::move(outTy->first);
+        (env.state.stack.end() - 3)->type = std::move(*outTy);
         reduce(env, bc::PopC {}, bc::PopC {});
         ITRACE(2, "(addelem* -> {}\n",
                show(env.ctx.func,
@@ -1053,43 +1063,35 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
         return;
       }
     } else {
-      if (start_add_elem(env, outTy->first, Op::AddElemC)) {
-        return;
-      }
+      if (start_add_elem(env, *outTy, Op::AddElemC)) return;
     }
   }
 
   discard(env, 3);
   finish_tracked_elems(env, env.state.stack.size());
 
-  if (!outTy) {
-    return push(env, union_of(TArr, TDict));
-  }
+  if (!outTy) return push(env, TInitCell);
 
-  if (outTy->first.subtypeOf(BBottom)) {
+  if (outTy->subtypeOf(BBottom)) {
     unreachable(env);
-  } else if (!outTy->second && !promoteMayThrow) {
+  } else if (!promoteMayThrow) {
     effect_free(env);
     constprop(env);
   }
-  push(env, std::move(outTy->first));
+  push(env, std::move(*outTy));
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {
   auto v = topC(env);
   auto inTy = (env.state.stack.end() - 2).unspecialize();
 
-  auto const tag = provTagHere(env);
-
-  auto outTy = [&] (Type ty) -> folly::Optional<Type> {
-    if (ty.subtypeOf(BVecish)) {
-      return vecish_newelem(std::move(ty), std::move(v), tag).first;
-    }
-    if (ty.subtypeOf(BKeyset)) {
-      return keyset_newelem(std::move(ty), std::move(v)).first;
+  auto outTy = [&] () -> folly::Optional<Type> {
+    if (inTy.subtypeOf(BVecish | BKeyset)) {
+      auto const r = array_like_newelem(std::move(inTy), v);
+      if (!r.second) return r.first;
     }
     return folly::none;
-  }(std::move(inTy));
+  }();
 
   if (outTy && will_reduce(env)) {
     if (!env.trackedElems.empty() &&
@@ -1097,7 +1099,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
       auto const handled = [&] {
         auto vtv = tv(v);
         if (!vtv) return false;
-        return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
+        return mutate_add_elem_array(env, [&](ArrayData** arr) {
           *arr = (*arr)->appendMove(*vtv);
         });
       }();
@@ -1119,11 +1121,9 @@ void in(ISS& env, const bc::AddNewElemC&) {
   discard(env, 2);
   finish_tracked_elems(env, env.state.stack.size());
 
-  if (!outTy) {
-    return push(env, TInitCell);
-  }
+  if (!outTy) return push(env, TInitCell);
 
-  if (outTy->subtypeOf(BBottom)) {
+  if (outTy->is(BBottom)) {
     unreachable(env);
   } else {
     constprop(env);
@@ -1174,7 +1174,7 @@ void in(ISS& env, const bc::CnsE& op) {
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const& t1 = topC(env);
-  if (is_specialized_cls(t1)) {
+  if (t1.subtypeOf(BCls) && is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     auto const finish = [&] {
       reduce(env, bc::PopC { },
@@ -1214,15 +1214,15 @@ void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
 
 void in(ISS& env, const bc::ClassName& op) {
   auto const ty = topC(env);
-  if (is_specialized_cls(ty)) {
+  if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
     auto const dcls = dcls_of(ty);
     if (dcls.type == DCls::Exact) {
       return reduce(env,
                     bc::PopC {},
                     bc::String { dcls.cls.name() });
     }
+    effect_free(env);
   }
-  if (ty.subtypeOf(TCls)) effect_free(env);
   popC(env);
   push(env, TSStr);
 }
@@ -1600,7 +1600,9 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
     return refineLocation(env, location, [&] (Type t) {
       if (ty.subtypeOf(BNull)) {
         t = remove_uninit(std::move(t));
-        if (is_opt(t)) t = unopt(std::move(t));
+        if (t.couldBe(BInitNull) && !t.subtypeOf(BInitNull)) {
+          t = unopt(std::move(t));
+        }
         return t;
       } else if (ty.strictSubtypeOf(TBool) && t.subtypeOf(BBool)) {
         return ty == TFalse ? TTrue : TFalse;
@@ -1765,7 +1767,7 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   auto const needsRuntimeProvenance =
     RO::EvalArrayProvenance &&
     env.ctx.func->attrs & AttrProvenanceSkipFrame &&
-    target.subtypeOf(kProvBits);
+    target.subtypeOf(BVArr | BDArr);
 
   if (fn && !needsRuntimeProvenance) {
     if (auto val = tv(t)) {
@@ -1775,8 +1777,8 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
         if (!tvIsArrayLike(*val)) return false;
         auto const ad = val->m_data.parr;
         if (!ad->isLegacyArray()) return false;
-        return (ad->isDArray() && target == TDict) ||
-               (ad->isVArray() && target == TVec);
+        return (ad->isDArray() && target.is(BDict)) ||
+               (ad->isVArray() && target.is(BVec));
       }();
       if (!may_raise_notice) {
         if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
@@ -1811,13 +1813,13 @@ void in(ISS& env, const bc::CastKeyset&) {
 
 void in(ISS& env, const bc::CastVArray&)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  arrprov::TagOverride tag_override{provTagHere(env).get()};
+  arrprov::TagOverride tag_override{provTagHere(env)};
   castImpl(env, TVArr, tvCastToVArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  arrprov::TagOverride tag_override{provTagHere(env).get()};
+  arrprov::TagOverride tag_override{provTagHere(env)};
   castImpl(env, TDArr, tvCastToDArrayInPlace);
 }
 
@@ -1846,7 +1848,8 @@ void in(ISS& env, const bc::Print& /*op*/) {
 void in(ISS& env, const bc::Clone& /*op*/) {
   auto val = popC(env);
   if (!val.subtypeOf(BObj)) {
-    val = is_opt(val) ? unopt(std::move(val)) : TObj;
+    val &= TObj;
+    if (val.is(BBottom)) unreachable(env);
   }
   push(env, std::move(val));
 }
@@ -1934,9 +1937,10 @@ bool isTypeHelper(ISS& env,
   auto const was_false = [&] (Type t) {
     auto tinit = remove_uninit(t);
     if (testTy.subtypeOf(BNull)) {
-      return is_opt(tinit) ? unopt(tinit) : tinit;
+      return (tinit.couldBe(BInitNull) && !tinit.subtypeOf(BInitNull))
+        ? unopt(std::move(tinit)) : tinit;
     }
-    if (is_opt(tinit)) {
+    if (t.couldBe(BInitNull) && !t.subtypeOf(BInitNull)) {
       assertx(!testTy.couldBe(BNull));
       if (unopt(tinit).subtypeOf(testTy)) return TNull;
     }
@@ -2035,7 +2039,10 @@ bool instanceOfJmpImpl(ISS& env,
 
   // If we have an optional type, whose unopt is guaranteed to pass
   // the instanceof check, then failing to pass implies it was null.
-  auto const fail_implies_null = is_opt(val) && unopt(val).subtypeOf(instTy);
+  auto const fail_implies_null =
+    val.couldBe(BInitNull) &&
+    !val.subtypeOf(BInitNull) &&
+    unopt(val).subtypeOf(instTy);
 
   discard(env, 1);
   auto const negate = jmp.op == Op::JmpNZ;
@@ -2095,7 +2102,10 @@ bool isTypeStructCJmpImpl(ISS& env,
 
   // If we have an optional type, whose unopt is guaranteed to pass
   // the instanceof check, then failing to pass implies it was null.
-  auto const fail_implies_null = is_opt(val) && unopt(val).subtypeOf(instTy);
+  auto const fail_implies_null =
+    val.couldBe(BInitNull) &&
+    !val.subtypeOf(BInitNull) &&
+    unopt(val).subtypeOf(instTy);
 
   discard(env, 1);
 
@@ -2456,6 +2466,12 @@ void in(ISS& env, const bc::ClassGetC& op) {
   if (t.subtypeOf(BCls)) return reduce(env, bc::Nop {});
   popC(env);
 
+  if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
+
   if (t.subtypeOf(BObj)) {
     effect_free(env);
     push(env, objcls(t));
@@ -2479,101 +2495,60 @@ void in(ISS& env, const bc::ClassGetTS& op) {
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   if (!ts.couldBe(requiredTSType)) {
     push(env, TBottom);
+    push(env, TBottom);
     return;
   }
 
   auto const& genericsType =
-    RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    RuntimeOption::EvalHackArrDVArrs ? TOptVec : TOptVArr;
 
   push(env, TCls);
-  push(env, opt(genericsType));
+  push(env, genericsType);
 }
 
-void in(ISS& env, const bc::AKExists& /*op*/) {
-  auto const base = popC(env);
-  auto const promotion = promote_classlike_to_key(popC(env));
-  auto const key = promotion.first;
-  // Bases other than array-like or object will raise a warning and return
-  // false.
-  if (!base.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
-    return push(env, TFalse);
+void in(ISS& env, const bc::AKExists&) {
+  auto const [base, promotion1] = promote_clsmeth_to_vecish(popC(env));
+  auto const [key, promotion2] = promote_classlike_to_key(popC(env));
+
+  auto result = TBottom;
+  auto effectFree =
+    promotion1 != Promotion::YesMightThrow &&
+    promotion2 != Promotion::YesMightThrow;
+
+  if (!base.subtypeOf(BObj | BArrLike)) {
+    effectFree = false;
+    result |= TFalse;
   }
 
-  // Push the returned type and annotate effects appropriately, taking into
-  // account if the base might be null. Allowing for a possibly null base lets
-  // us capture more cases.
-  auto const finish = [&] (const Type& t, bool mayThrow) {
-    if (base.couldBe(BInitNull)) return push(env, union_of(t, TFalse));
-    mayThrow |= (promotion.second == Promotion::YesMightThrow);
-    if (!mayThrow) {
-      constprop(env);
-      effect_free(env);
-    }
-    if (base.subtypeOf(BBottom)) unreachable(env);
-    return push(env, t);
-  };
-
-  // Helper for Hack arrays. "validKey" is the set of key types which can return
-  // a value from AKExists. "silentKey" is the set of key types which will
-  // silently return false (anything else throws). The Hack array elem functions
-  // will treat values of "silentKey" as throwing, so we must identify those
-  // cases and deal with them.
-  auto const hackArr = [&] (std::pair<Type, ThrowMode> elem,
-                            const Type& validKey,
-                            const Type& silentKey) {
-    switch (elem.second) {
-      case ThrowMode::None:
-        assertx(key.subtypeOf(validKey));
-        return finish(TTrue, false);
-      case ThrowMode::MaybeMissingElement:
-        assertx(key.subtypeOf(validKey));
-        return finish(TBool, false);
-      case ThrowMode::MissingElement:
-        assertx(key.subtypeOf(validKey));
-        return finish(TFalse, false);
-      case ThrowMode::MaybeBadKey:
-        assertx(key.couldBe(validKey));
-        return finish(
-          elem.first.subtypeOf(BBottom) ? TFalse : TBool,
-          !key.subtypeOf(BArrKeyCompat)
-        );
-      case ThrowMode::BadOperation:
-        assertx(!key.couldBe(validKey));
-        return finish(key.couldBe(silentKey) ? TFalse : TBottom, true);
-    }
-  };
-
-  // Vecs will throw for any key other than Int or Str, and will silently
-  // return false for Str.
-  if (base.subtypeOrNull(BVec)) {
-    if (key.subtypeOf(BStr)) return finish(TFalse, false);
-    return hackArr(vecish_elem(base, key), TInt, TStr);
+  if (base.couldBe(BObj)) {
+    effectFree = false;
+    result |= TBool;
   }
-
-  // Dicts and keysets will throw for any key other than Int or Str.
-  if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
-    auto const elem = base.subtypeOrNull(BDict)
-      ? dictish_elem(base, key)
-      : keyset_elem(base, key);
-    return hackArr(elem, TArrKeyCompat, TBottom);
-  }
-
-  if (base.subtypeOrNull(BArr)) {
-    // Unlike Idx, AKExists will transform a null key on arrays into the static
-    // empty string, so we don't need to do any fixups here.
-    auto const elem = array_like_elem(base, key, TBottom, true);
-    switch (elem.second) {
-      case ThrowMode::None:                return finish(TTrue, false);
-      case ThrowMode::MaybeMissingElement: return finish(TBool, false);
-      case ThrowMode::MissingElement:      return finish(TFalse, false);
-      case ThrowMode::MaybeBadKey:
-        return finish(elem.first.subtypeOf(BBottom) ? TFalse : TBool, true);
-      case ThrowMode::BadOperation:        always_assert(false);
+  if (base.couldBe(BArrLike)) {
+    auto const validKey = key.subtypeOf(BArrKey);
+    if (!validKey) effectFree = false;
+    if (key.couldBe(BArrKey)) {
+      auto const elem =
+        array_like_elem(base, validKey ? key : intersection_of(key, TArrKey));
+      if (elem.first.is(BBottom)) {
+        result |= TFalse;
+      } else if (elem.second) {
+        result |= TTrue;
+      } else {
+        result |= TBool;
+      }
     }
   }
 
-  // Objects or other unions of possible bases
-  push(env, TBool);
+  if (result.is(BBottom)) {
+    assertx(!effectFree);
+    unreachable(env);
+  }
+  if (effectFree) {
+    constprop(env);
+    effect_free(env);
+  }
+  push(env, std::move(result));
 }
 
 const StaticString
@@ -2599,7 +2574,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // usual). Converting an object to a memo key might invoke PHP code if it has
   // the IMemoizeParam interface, and if it doesn't, we'll throw.
   if (!locCouldBeUninit(env, op.nloc1.id) &&
-      !inTy.couldBeAny(TObj, TArr, TVec, TDict)) {
+      !inTy.couldBe(BObj | BVecish | BDictish)) {
     effect_free(env);
     constprop(env);
   }
@@ -2650,7 +2625,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     case MK::StrOrNull:
       // A nullable string. The key will either be the string or the integer
       // zero.
-      if (inTy.subtypeOrNull(BStr)) {
+      if (inTy.subtypeOf(BOptStr)) {
         return reduce(
           env,
           bc::CGetL { op.nloc1 },
@@ -2663,7 +2638,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     case MK::IntOrNull:
       // A nullable int. The key will either be the integer, or the static empty
       // string.
-      if (inTy.subtypeOrNull(BInt)) {
+      if (inTy.subtypeOf(BOptInt)) {
         return reduce(
           env,
           bc::CGetL { op.nloc1 },
@@ -2675,7 +2650,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       break;
     case MK::BoolOrNull:
       // A nullable bool. The key will either be 0, 1, or 2.
-      if (inTy.subtypeOrNull(BBool)) {
+      if (inTy.subtypeOf(BOptBool)) {
         return reduce(
           env,
           bc::CGetL { op.nloc1 },
@@ -2695,7 +2670,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     case MK::DblOrNull:
       // A nullable double. The key will be an integer, or the static empty
       // string.
-      if (inTy.subtypeOrNull(BDbl)) {
+      if (inTy.subtypeOf(BOptDbl)) {
         return reduce(
           env,
           bc::CGetL { op.nloc1 },
@@ -2770,7 +2745,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
 
   // Integer keys are always mapped to themselves
   if (inTy.subtypeOf(BInt)) return reduce(env, bc::CGetL { op.nloc1 });
-  if (inTy.subtypeOrNull(BInt)) {
+  if (inTy.subtypeOf(BOptInt)) {
     return reduce(
       env,
       bc::CGetL { op.nloc1 },
@@ -2792,8 +2767,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // A memo key can be an integer if the input might be an integer, and is a
   // string otherwise. Booleans and nulls are always static strings.
   auto keyTy = [&]{
-    if (inTy.subtypeOrNull(BBool)) return TSStr;
-    if (inTy.couldBe(BInt))        return union_of(TInt, TStr);
+    if (inTy.subtypeOf(BOptBool)) return TSStr;
+    if (inTy.couldBe(BInt))       return union_of(TInt, TStr);
     return TStr;
   }();
   push(env, std::move(keyTy));
@@ -2920,10 +2895,10 @@ void in(ISS& env, const bc::InstanceOfD& op) {
       push(env, r);
     };
     if (!interface_supports_non_objects(rcls->name())) {
-      auto testTy = subObj(*rcls);
+      auto const testTy = subObj(*rcls);
       if (t1.subtypeOf(testTy)) return result(TTrue);
       if (!t1.couldBe(testTy)) return result(TFalse);
-      if (is_opt(t1)) {
+      if (t1.couldBe(BInitNull) && !t1.subtypeOf(BInitNull)) {
         t1 = unopt(std::move(t1));
         if (t1.subtypeOf(testTy)) {
           return reduce(env, bc::IsTypeC { IsTypeOp::Null }, bc::Not {});
@@ -3260,7 +3235,7 @@ void in(ISS& env, const bc::ThrowAsTypeStructException& op) {
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   assertx(op.arg1 > 0);
   auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
   auto const first = tv(topC(env));
   if (first && isValidTSType(*first, false)) {
     auto const ts = first->m_data.parr;
@@ -3303,7 +3278,7 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   }
   if (!valid) return unreachable(env);
   nothrow(env);
-  push(env, Type{requiredTSType});
+  push(env, requiredTSType);
 }
 
 void in(ISS& env, const bc::RecordReifiedGeneric& op) {
@@ -3786,13 +3761,13 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
       for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
       return unreachable(env);
     }
-    if (is_specialized_vec(ty)) {
+    if (is_specialized_array_like(ty)) {
       for (int32_t i = 1; i < numRets; i++) {
-        push(env, vecish_elem(ty, ival(i)).first);
+        push(env, array_like_elem(ty, ival(i)).first);
       }
-      push(env, vecish_elem(ty, ival(0)).first);
+      push(env, array_like_elem(ty, ival(0)).first);
     } else {
-      for (int32_t i = 0; i < numRets; i++) push(env, TInitCell);
+      for (int32_t i = 0; i < numRets; ++i) push(env, TInitCell);
     }
     return;
   }
@@ -3835,9 +3810,7 @@ void fcallKnownImpl(
     auto ty = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, func)
       : env.index.lookup_return_type(env.ctx, args, context, func);
-    if (nullsafe) {
-      ty = union_of(std::move(ty), TInitNull);
-    }
+    if (nullsafe) ty = opt(std::move(ty));
     return ty;
   }();
 
@@ -3993,7 +3966,7 @@ void in(ISS& env, const bc::ResolveMethCaller& op) {
 
 void in(ISS& env, const bc::ResolveRFunc& op) {
   popC(env);
-  push(env, TFuncLike);
+  push(env, union_of(TFunc, TRFunc));
 }
 
 void in(ISS& env, const bc::ResolveObjMethod& op) {
@@ -4039,7 +4012,7 @@ void resolveClsMethodSImpl(ISS& env, SpecialClsRef ref, LSString meth_name) {
   if (!reifiedVersion || !rfunc.couldHaveReifiedGenerics()) {
     push(env, TClsMeth);
   } else {
-    push(env, TClsMethLike);
+    push(env, union_of(TClsMeth, TRClsMeth));
   }
 }
 
@@ -4061,12 +4034,12 @@ void in(ISS& env, const bc::ResolveClsMethodS& op) {
 void in(ISS& env, const bc::ResolveRClsMethod&) {
   popC(env);
   popC(env);
-  push(env, TClsMethLike);
+  push(env, union_of(TClsMeth, TRClsMeth));
 }
 
 void in(ISS& env, const bc::ResolveRClsMethodD&) {
   popC(env);
-  push(env, TClsMethLike);
+  push(env, union_of(TClsMeth, TRClsMeth));
 }
 
 void in(ISS& env, const bc::ResolveRClsMethodS& op) {
@@ -4081,7 +4054,7 @@ void in(ISS& env, const bc::ResolveClass& op) {
   } else {
     // If the class is not resolved,
     // it might not be unique or it might not be a valid classname.
-    push(env, TArrKeyCompat);
+    push(env, union_of(TArrKey, TCls, TLazyCls));
   }
 }
 
@@ -4186,7 +4159,9 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   }
 
   auto const ctx = getCallContext(env, op.fca);
-  auto const ctxTy = intersection_of(input, TObj);
+  auto const ctxTy = input.couldBe(BObj)
+    ? intersection_of(input, TObj)
+    : TObj;
   auto const clsTy = objcls(ctxTy);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 
@@ -4216,7 +4191,9 @@ void in(ISS& env, const bc::FCallObjMethodD& op) {
     }
 
     auto const input = topC(env, op.fca.numInputs() + 1);
-    auto const clsTy = objcls(intersection_of(input, TObj));
+    auto const clsTy = input.couldBe(BObj)
+      ? objcls(intersection_of(input, TObj))
+      : TCls;
     auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
     if (!rfunc.couldHaveReifiedGenerics()) {
       return reduce(
@@ -4244,7 +4221,9 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
   }
 
   auto const input = topC(env, op.fca.numInputs() + 2);
-  auto const clsTy = objcls(intersection_of(input, TObj));
+  auto const clsTy = input.couldBe(BObj)
+    ? objcls(intersection_of(input, TObj))
+    : TCls;
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   if (!rfunc.mightCareAboutDynCalls()) {
     return reduce(
@@ -4477,7 +4456,7 @@ void in(ISS& env, const bc::NewObjS& op) {
 
 void in(ISS& env, const bc::NewObj& op) {
   auto const cls = topC(env);
-  if (!is_specialized_cls(cls)) {
+  if (!cls.subtypeOf(BCls) || !is_specialized_cls(cls)) {
     popC(env);
     push(env, TObj);
     return;
@@ -4509,7 +4488,7 @@ void in(ISS& env, const bc::NewObjR& op) {
     );
   }
 
-  if (!is_specialized_cls(cls)) {
+  if (!cls.subtypeOf(BCls) || !is_specialized_cls(cls)) {
     popC(env);
     popC(env);
     push(env, TObj);
@@ -4625,7 +4604,7 @@ void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
     }
   };
 
-  assert(iterIsDead(env, ita.iterId));
+  assertx(iterIsDead(env, ita.iterId));
 
   if (!ity.mayThrowOnInit) {
     if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
@@ -4901,7 +4880,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * We assume that if this opcode doesn't throw, the parameter was of the
    * specified type.
    */
-  Type tcT;
+  auto tcT = TTop;
   for (auto const& constraint : tcs) {
     if (constraint->hasConstraint() && !constraint->isTypeVar() &&
       !constraint->isTypeConstant()) {
@@ -5007,8 +4986,9 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
         stackT |= TVArr;
         dont_reduce = true;
       }
-      if (tcT.couldBe(TArr)) {
-        stackT |= TArr;
+      if (tcT.couldBe(BVArr | BDArr)) {
+        stackT |= TVArr;
+        stackT |= TDArr;
         dont_reduce = true;
       }
     }
@@ -5032,13 +5012,14 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
   // split these translations, it will rarely in practice return null.
   if (reduce_this &&
       !dont_reduce &&
-      is_opt(stackT) &&
+      stackT.couldBe(BInitNull) &&
+      !stackT.subtypeOf(BInitNull) &&
       std::all_of(std::begin(tcs), std::end(tcs),
                   [&](const TypeConstraint* constraint) {
                     return constraint->isThis() &&
                            !constraint->isNullable() &&
                            env.index.satisfies_constraint(
-                               env.ctx, unopt(stackT), *constraint);
+                             env.ctx, unopt(stackT), *constraint);
                     }
                   )
   ) {
@@ -5131,7 +5112,7 @@ void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
 
   auto const equiv = topStkEquiv(env);
 
-  if (is_opt(stackT)) stackT = unopt(std::move(stackT));
+  stackT = unopt(std::move(stackT));
 
   popC(env);
   push(env, stackT, equiv);
@@ -5244,138 +5225,98 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
-namespace {
-
-void idxImpl(ISS& env, bool arraysOnly) {
-  auto const def  = popC(env);
-  auto const promotion = promote_classlike_to_key(popC(env));
-  auto const key = promotion.first;
+void in(ISS& env, const bc::Idx&) {
+  auto const def = popC(env);
+  auto const [key, promotion] = promote_classlike_to_key(popC(env));
   auto const base = popC(env);
 
-  if (key.subtypeOf(BInitNull)) {
-    // A null key, regardless of whether we're ArrayIdx or Idx will always
-    // silently return the default value, regardless of the base type.
-    constprop(env);
-    effect_free(env);
-    return push(env, def);
-  }
+  assertx(!def.is(BBottom));
 
-  // Push the returned type and annotate effects appropriately, taking into
-  // account if the base might be null. Allowing for a possibly null base lets
-  // us capture more cases.
-  auto const finish = [&] (const Type& t, bool canThrow) {
-    // A null base will raise if we're ArrayIdx. For Idx, it will silently
-    // return the default value.
-    auto const baseMaybeNull = base.couldBe(BInitNull);
-    canThrow |= (promotion.second == Promotion::YesMightThrow);
-    if (!canThrow && (!arraysOnly || !baseMaybeNull)) {
+  auto effectFree = promotion != Promotion::YesMightThrow;
+  auto result = TBottom;
+
+  auto const finish = [&] {
+    if (result.is(BBottom)) {
+      assertx(!effectFree);
+      unreachable(env);
+    }
+    if (effectFree) {
       constprop(env);
       effect_free(env);
     }
-    if (!arraysOnly && baseMaybeNull) return push(env, union_of(t, def));
-    if (t.subtypeOf(BBottom)) unreachable(env);
-    return push(env, t);
+    push(env, std::move(result));
   };
 
-  if (arraysOnly) {
-    // If ArrayIdx, we'll raise an error for anything other than array-like and
-    // null. This op is only terminal if null isn't possible.
-    if (!base.couldBe(BArr | BVec | BDict | BKeyset | BClsMeth)) {
-      return finish(key.couldBe(BInitNull) ? def : TBottom, true);
+  if (key.couldBe(BNull)) result |= def;
+  if (key.subtypeOf(BNull)) return finish();
+
+  if (!base.subtypeOf(BArrLike | BObj | BStr)) result |= def;
+
+  if (base.couldBe(BArrLike)) {
+    if (!key.subtypeOf(BOptArrKey)) effectFree = false;
+    if (key.couldBe(BArrKey)) {
+      auto elem = array_like_elem(
+        base,
+        key.subtypeOf(BArrKey) ? key : intersection_of(key, TArrKey)
+      );
+      result |= std::move(elem.first);
+      if (!elem.second) result |= def;
     }
-  } else if (
-    !base.couldBe(BArr | BVec | BDict | BKeyset | BStr | BObj | BClsMeth)) {
-    // Otherwise, any strange bases for Idx will just return the default value
-    // without raising.
-    return finish(def, false);
+  }
+  if (base.couldBe(BObj)) {
+    result |= TInitCell;
+    effectFree = false;
+  }
+  if (base.couldBe(BStr)) {
+    result |= TSStr;
+    result |= def;
+    if (!key.subtypeOf(BOptArrKey)) effectFree = false;
   }
 
-  // Helper for Hack arrays. "validKey" is the set key types which can return a
-  // value from Idx. "silentKey" is the set of key types which will silently
-  // return null (anything else throws). The Hack array elem functions will
-  // treat values of "silentKey" as throwing, so we must identify those cases
-  // and deal with them.
-  auto const hackArr = [&] (std::pair<Type, ThrowMode> elem,
-                            const Type& validKey,
-                            const Type& silentKey) {
-    switch (elem.second) {
-      case ThrowMode::None:
-      case ThrowMode::MaybeMissingElement:
-      case ThrowMode::MissingElement:
-        assertx(key.subtypeOf(validKey));
-        return finish(elem.first, false);
-      case ThrowMode::MaybeBadKey:
-        assertx(key.couldBe(validKey));
-        if (key.couldBe(silentKey)) elem.first |= def;
-        return finish(elem.first, !key.subtypeOf(BOptArrKeyCompat));
-      case ThrowMode::BadOperation:
-        assertx(!key.couldBe(validKey));
-        return finish(key.couldBe(silentKey) ? def : TBottom, true);
+  finish();
+}
+
+void in(ISS& env, const bc::ArrayIdx&) {
+  auto def = popC(env);
+  auto const [key, promotion1] = promote_classlike_to_key(popC(env));
+  auto const [base, promotion2] = promote_clsmeth_to_vecish(popC(env));
+
+  assertx(!def.is(BBottom));
+
+  auto effectFree =
+    promotion1 != Promotion::YesMightThrow &&
+    promotion2 != Promotion::YesMightThrow;
+  auto result = TBottom;
+
+  auto const finish = [&] {
+    if (result.is(BBottom)) {
+      assertx(!effectFree);
+      unreachable(env);
     }
+    if (effectFree) {
+      constprop(env);
+      effect_free(env);
+    }
+    push(env, std::move(result));
   };
 
-  if (base.subtypeOrNull(BVec)) {
-    // Vecs will throw for any key other than Int, Str, or Null, and will
-    // silently return the default value for the latter two.
-    if (key.subtypeOrNull(BStr)) return finish(def, false);
-    return hackArr(vecish_elem(base, key, def), TInt, TOptStr);
-  }
+  if (key.couldBe(BNull)) result |= def;
+  if (key.subtypeOf(BNull)) return finish();
 
-  if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
-    // Dicts and keysets will throw for any key other than Int, Str, or Null,
-    // and will silently return the default value for Null.
-    auto const elem = base.subtypeOrNull(BDict)
-      ? dictish_elem(base, key, def)
-      : keyset_elem(base, key, def);
-    return hackArr(elem, TArrKeyCompat, TInitNull);
-  }
+  if (!base.subtypeOf(BArrLike)) effectFree = false;
+  if (!base.couldBe(BArrLike)) return finish();
 
-  if (base.subtypeOrNull(BArr)) {
-    // A possibly null key is more complicated for arrays. array_elem() will
-    // transform a null key into an empty string (matching the semantics of
-    // array access), but that's not what Idx does. So, attempt to remove
-    // nullish from the key first. If we can't, it just means we'll get a more
-    // conservative value.
-    auto maybeNull = false;
-    auto const fixedKey = [&]{
-      if (key.couldBe(TInitNull)) {
-        maybeNull = true;
-        if (is_nullish(key)) return unnullish(key);
-      }
-      return key;
-    }();
+  if (!key.subtypeOf(BOptArrKey)) effectFree = false;
+  if (!key.couldBe(BArrKey)) return finish();
 
-    auto elem = array_like_elem(base, fixedKey, def, true);
-    // If the key was null, Idx will return the default value, so add to the
-    // return type.
-    if (maybeNull) elem.first |= def;
-
-    switch (elem.second) {
-      case ThrowMode::None:
-      case ThrowMode::MaybeMissingElement:
-      case ThrowMode::MissingElement:
-        return finish(elem.first, false);
-      case ThrowMode::MaybeBadKey:
-        return finish(elem.first, true);
-      case ThrowMode::BadOperation:
-        always_assert(false);
-    }
-  }
-
-  if (!arraysOnly && base.subtypeOrNull(BStr)) {
-    // Idx on a string always produces a string or the default value (without
-    // ever raising).
-    return finish(union_of(TStr, def), false);
-  }
-
-  // Objects or other unions of possible bases
-  push(env, TInitCell);
+  auto elem = array_like_elem(
+    base,
+    key.subtypeOf(BArrKey) ? key : intersection_of(key, TArrKey)
+  );
+  result |= std::move(elem.first);
+  if (!elem.second) result |= std::move(def);
+  finish();
 }
-
-}
-
-void in(ISS& env, const bc::Idx&)      { idxImpl(env, false); }
-void in(ISS& env, const bc::ArrayIdx&) { idxImpl(env, true);  }
 
 namespace {
 void implArrayMarkLegacy(ISS& env, bool legacy) {

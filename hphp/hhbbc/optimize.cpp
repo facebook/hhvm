@@ -123,10 +123,10 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   if (!options.InsertStackAssertions) return;
 
-  assert(obviousStackOutputs.size() == state.stack.size());
+  assertx(obviousStackOutputs.size() == state.stack.size());
 
   auto const assert_stack = [&] (size_t idx) {
-    assert(idx < state.stack.size());
+    assertx(idx < state.stack.size());
     if (obviousStackOutputs[state.stack.size() - idx - 1]) return;
     if (ignoresStackInput(bcode.op)) return;
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
@@ -258,7 +258,9 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::BareThis:
     if (auto tt = thisType(interp.index, interp.ctx)) {
       auto t = interp.state.stack.back().type;
-      if (is_opt(t)) t = unopt(std::move(t));
+      if (t.couldBe(BInitNull) && !t.subtypeOf(BInitNull)) {
+        t = unopt(std::move(t));
+      }
       return !t.strictSubtypeOf(*tt);
     }
     return true;
@@ -458,7 +460,7 @@ void visit_blocks(const char* what, VisitContext& visit, Fun&& fun) {
     // was made that changes the block output state.
     fun(visit, bid, state);
   }
-  assert(check(*visit.func));
+  assertx(check(*visit.func));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -762,7 +764,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
       split_critical_edges(index, ainfo, func);
       if (global_dce(index, ainfo, func)) again = true;
       if (control_flow_opts(ainfo, func)) again = true;
-      assert(check(*func));
+      assertx(check(*func));
       /*
        * Global DCE can change types of locals across blocks.  See
        * dce.cpp for an explanation.
@@ -840,30 +842,30 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfDouble:
       return bc::Double { cell.m_data.dbl };
     case KindOfString:
-      assert(cell.m_data.pstr->isStatic());
+      assertx(cell.m_data.pstr->isStatic());
     case KindOfPersistentString:
       return bc::String { cell.m_data.pstr };
     case KindOfVec:
-      assert(cell.m_data.parr->isStatic());
+      assertx(cell.m_data.parr->isStatic());
     case KindOfPersistentVec:
-      assert(cell.m_data.parr->isVecType());
+      assertx(cell.m_data.parr->isVecType());
       return bc::Vec { cell.m_data.parr };
     case KindOfDict:
-      assert(cell.m_data.parr->isStatic());
+      assertx(cell.m_data.parr->isStatic());
     case KindOfPersistentDict:
-      assert(cell.m_data.parr->isDictType());
+      assertx(cell.m_data.parr->isDictType());
       return bc::Dict { cell.m_data.parr };
     case KindOfKeyset:
-      assert(cell.m_data.parr->isStatic());
+      assertx(cell.m_data.parr->isStatic());
     case KindOfPersistentKeyset:
-      assert(cell.m_data.parr->isKeysetType());
+      assertx(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
     case KindOfDArray:
     case KindOfVArray:
-      assert(cell.m_data.parr->isStatic());
+      assertx(cell.m_data.parr->isStatic());
     case KindOfPersistentDArray:
     case KindOfPersistentVArray:
-      assert(cell.m_data.parr->isPHPArrayType());
+      assertx(cell.m_data.parr->isPHPArrayType());
       return bc::Array { cell.m_data.parr };
 
     case KindOfResource:

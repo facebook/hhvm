@@ -127,14 +127,16 @@ TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
   auto const ty = getArg(env, func, fca, 0);
   // Returns null and raises a warning when input is an array, resource, or
   // object.
-  if (ty.subtypeOfAny(TPrim, TStr)) effect_free(env);
-  return ty.subtypeOfAny(TPrim, TStr) ? TInt : TOptInt;
+  if (ty.subtypeOf(BPrim | BStr)) effect_free(env);
+  return ty.subtypeOf(BPrim | BStr) ? TInt : TOptInt;
 }
 
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  if (!handle_function_exists(env, getArg(env, func, fca, 0))) return NoReduced{};
+  if (!handle_function_exists(env, getArg(env, func, fca, 0))) {
+    return NoReduced{};
+  }
   constprop(env);
   return TTrue;
 }
@@ -224,7 +226,7 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
     }();
   }
 
-  if (!ty.couldBe(BObj | BArr | BVec | BDict | BKeyset)) {
+  if (!ty.couldBe(BObj | BArrLike)) {
     constprop(env);
     effect_free(env);
   }
@@ -242,11 +244,10 @@ TypeOrReduced builtin_is_callable(ISS& env, const php::Func* func,
   auto const ty = getArg(env, func, fca, 0);
   if (ty == TInitCell) return NoReduced{};
   auto const res = [&]() -> folly::Optional<bool> {
-    auto constexpr BFuncPtr = BClsMeth | BFunc;
-    if (ty.subtypeOf(BFuncPtr)) return true;
-    if (ty.subtypeOf(BArrLikeE) ||
-        ty.subtypeOf(BKeyset) ||
-        !ty.couldBe(BFuncPtr | BArr | BVec | BDict | BObj | BStr)) {
+    if (ty.subtypeOf(BClsMeth | BFunc)) return true;
+    if (ty.subtypeOf(BArrLikeE | BKeyset) ||
+        !ty.couldBe(BClsMeth | BFunc | BVArr | BDArr |
+                    BVec | BDict | BObj | BStr)) {
       return false;
     }
     return {};
@@ -263,14 +264,13 @@ TypeOrReduced builtin_is_list_like(ISS& env, const php::Func* func,
   assertx(fca.numArgs() == 1);
   auto const ty = getArg(env, func, fca, 0);
 
-  if (!ty.couldBe(TClsMeth)) {
+  if (!ty.couldBe(BClsMeth)) {
     constprop(env);
     effect_free(env);
   }
 
-  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) return TFalse;
-
-  if (ty.subtypeOfAny(TVec, TVArr, TClsMeth)) return TTrue;
+  if (!ty.couldBe(BArrLike | BClsMeth)) return TFalse;
+  if (ty.subtypeOf(BVec | BVArr | BClsMeth)) return TTrue;
 
   switch (categorize_array(ty).cat) {
     case Type::ArrayCat::Empty:
@@ -486,7 +486,7 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 }
 
 bool handle_function_exists(ISS& env, const Type& name) {
-  if (!name.strictSubtypeOf(TStr)) return false;
+  if (!name.strictSubtypeOf(BStr)) return false;
   auto const v = tv(name);
   if (!v) return false;
   auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
@@ -498,7 +498,7 @@ folly::Optional<Type> const_fold(ISS& env,
                                  uint32_t numExtraInputs,
                                  const php::Func& phpFunc,
                                  bool variadicsPacked) {
-  assert(phpFunc.attrs & AttrIsFoldable);
+  assertx(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<TypedValue> args(nArgs);
   auto const firstArgPos = numExtraInputs + nArgs - 1;
@@ -540,21 +540,21 @@ folly::Optional<Type> const_fold(ISS& env,
 
   FTRACE(1, "invoking: {}\n", func->fullName()->data());
 
-  assert(!RuntimeOption::EvalJit);
+  assertx(!RuntimeOption::EvalJit);
   return eval_cell(
     [&] {
       auto retVal = g_context->invokeFuncFew(
         func, cls, args.size(), args.data(), false, false);
 
       if (tvIsArrayLike(retVal)) {
-        if (auto const tag = provTagHere(env).get()) {
-          arrprov::TagOverride _(tag);
+        if (auto const tag = provTagHere(env)) {
+          arrprov::TagOverride _{tag};
           auto const tagged = arrprov::tagTvRecursively(retVal, /*flags=*/0);
           tvMove(tagged, retVal);
         }
       }
 
-      assert(tvIsPlausible(retVal));
+      assertx(tvIsPlausible(retVal));
       return retVal;
     }
   );

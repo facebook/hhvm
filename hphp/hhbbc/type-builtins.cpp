@@ -77,14 +77,14 @@ bool is_collection_method_returning_this(const php::Class* cls,
 }
 
 Type native_function_return_type(const php::Func* f) {
-  assert(f->nativeInfo);
+  assertx(f->nativeInfo);
 
   // Infer the type from the HNI declaration
   auto t = [&]{
     auto const hni = f->nativeInfo->returnType;
     return hni ? from_DataType(*hni) : TInitCell;
   }();
-  if (t.subtypeOf(BArr)) {
+  if (t.subtypeOf(BVArr | BDArr)) {
     if (f->retTypeConstraint.isVArray()) {
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       t = TVArr;
@@ -96,12 +96,11 @@ Type native_function_return_type(const php::Func* f) {
 
   // Non-simple types (ones that are represented by pointers) can always
   // possibly be null.
-  if (t.subtypeOfAny(TStr, TArr, TVec, TDict,
-                     TKeyset, TObj, TRes)) {
-    t |= TInitNull;
+  if (t.subtypeOf(BStr | BArrLike | BObj | BRes)) {
+    t = opt(std::move(t));
   } else {
     // Otherwise it should be a simple type or possibly everything.
-    assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
+    assertx(t == TInitCell || t.subtypeOf(BBool | BInt | BDbl | BNull));
   }
 
   t = remove_uninit(std::move(t));
@@ -119,7 +118,7 @@ Type native_function_return_type(const php::Func* f) {
       continue;
     }
     auto t = from_DataType(*dt);
-    if (p.typeConstraint.isNullable()) t |= TInitNull;
+    if (p.typeConstraint.isNullable()) t = opt(std::move(t));
     types.emplace_back(remove_uninit(std::move(t)));
   }
   std::reverse(types.begin()+1, types.end());

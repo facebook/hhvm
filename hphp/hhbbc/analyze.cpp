@@ -94,9 +94,9 @@ State entry_state(const Index& index, const Context& ctx,
       }
     }
     auto const maybeThisType = thisType(index, ctx);
-    auto const thisType = maybeThisType ? *maybeThisType : TObj;
+    auto thisType = maybeThisType ? *maybeThisType : TObj;
     if (index.lookup_this_available(ctx.func)) return thisType;
-    return opt(thisType);
+    return opt(std::move(thisType));
   }();
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
@@ -149,8 +149,8 @@ State entry_state(const Index& index, const Context& ctx,
    */
   if (ctx.func->isReified) {
     // Currently closures cannot be reified
-    assert(!ctx.func->isClosureBody);
-    assert(locId < ret.locals.size());
+    assertx(!ctx.func->isClosureBody);
+    assertx(locId < ret.locals.size());
     ret.locals[locId++] = get_type_of_reified_list(ctx.func->userAttributes);
   }
 
@@ -433,7 +433,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * In this case, we leave the return type as TBottom, to indicate
    * the same to callers.
    */
-  assert(ai.inferredReturn.subtypeOf(BCell));
+  assertx(ai.inferredReturn.subtypeOf(BCell));
 
   // For debugging, print the final input states for each block.
   FTRACE(2, "{}", [&] {
@@ -575,7 +575,7 @@ FuncAnalysis analyze_func_inline(const Index& index,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts) {
-  assert(!ctx.func->isClosureBody);
+  assertx(!ctx.func->isClosureBody);
   auto const knownArgs = KnownArgs { thisType, args };
   return do_analyze(index, ctx, nullptr, &knownArgs,
                     opts | CollectionOpts::Inlining);
@@ -645,7 +645,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_all(loosen_arraylike(cellTy));
+      auto t = loosen_vecish_or_dictish(loosen_all(cellTy));
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit

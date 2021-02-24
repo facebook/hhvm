@@ -249,7 +249,7 @@ void doRet(ISS& env, Type t, bool hasEffects) {
   IgnoreUsedParams _{env};
 
   readAllLocals(env);
-  assert(env.state.stack.empty());
+  assertx(env.state.stack.empty());
   env.flags.retParam = NoLocalId;
   env.flags.returned = t;
   if (!hasEffects) {
@@ -265,29 +265,29 @@ void hasInvariantIterBase(ISS& env) {
 // eval stack
 
 Type popT(ISS& env) {
-  assert(!env.state.stack.empty());
+  assertx(!env.state.stack.empty());
   auto const ret = env.state.stack.back().type;
   FTRACE(2, "    pop:  {}\n", show(ret));
-  assert(ret.subtypeOf(BCell));
+  assertx(ret.subtypeOf(BCell));
   env.state.stack.pop_elem();
   return ret;
 }
 
 Type popC(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(BInitCell));
+  assertx(v.subtypeOf(BInitCell));
   return v;
 }
 
 Type popU(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(BUninit));
+  assertx(v.subtypeOf(BUninit));
   return v;
 }
 
 Type popCU(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(BCell));
+  assertx(v.subtypeOf(BCell));
   return v;
 }
 
@@ -300,12 +300,12 @@ void discard(ISS& env, int n) {
 }
 
 const Type& topT(ISS& env, uint32_t idx = 0) {
-  assert(idx < env.state.stack.size());
+  assertx(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].type;
 }
 
 const Type& topC(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(BInitCell));
+  assertx(topT(env, i).subtypeOf(BInitCell));
   return topT(env, i);
 }
 
@@ -328,9 +328,9 @@ void push(ISS& env, Type t, LocalId l) {
 }
 
 void discardAR(ISS& env, uint32_t idx) {
-  assert(topT(env, idx).subtypeOf(BUninit));
-  assert(topT(env, idx + 1).subtypeOf(BUninit));
-  assert(topT(env, idx + 2).subtypeOf(BCell));
+  assertx(topT(env, idx).subtypeOf(BUninit));
+  assertx(topT(env, idx + 1).subtypeOf(BUninit));
+  assertx(topT(env, idx + 2).subtypeOf(BCell));
   auto& stack = env.state.stack;
   stack.erase(stack.end() - idx - 3, stack.end() - idx);
   if (idx && stack[stack.size() - idx].equivLoc == StackDupId) {
@@ -351,8 +351,8 @@ void setThisAvailable(ISS& env) {
       !env.state.thisType.subtypeOf(BOptObj)) {
     return unreachable(env);
   }
-  if (is_opt(env.state.thisType)) {
-    env.state.thisType = unopt(env.state.thisType);
+  if (env.state.thisType.couldBe(BInitNull)) {
+    env.state.thisType = unopt(std::move(env.state.thisType));
   }
 }
 
@@ -375,7 +375,7 @@ Type thisType(ISS& env) {
 
 Type thisTypeNonNull(ISS& env) {
   if (!env.state.thisType.couldBe(TObj)) return TBottom;
-  if (is_opt(env.state.thisType)) return unopt(env.state.thisType);
+  if (env.state.thisType.couldBe(BInitNull)) return unopt(env.state.thisType);
   return env.state.thisType;
 }
 
@@ -516,7 +516,7 @@ void mayReadLocal(ISS& env, uint32_t id) {
 // Find a local which is equivalent to the given local
 LocalId findLocEquiv(ISS& env, LocalId l) {
   if (l >= env.state.equivLocals.size()) return NoLocalId;
-  assert(env.state.equivLocals[l] == NoLocalId ||
+  assertx(env.state.equivLocals[l] == NoLocalId ||
          !is_volatile_local(env.ctx.func, l));
   return env.state.equivLocals[l];
 }
@@ -569,7 +569,7 @@ void killLocEquiv(State& state, LocalId l) {
   do {
     loc = state.equivLocals[loc];
   } while (state.equivLocals[loc] != l);
-  assert(loc != l);
+  assertx(loc != l);
   if (state.equivLocals[l] == loc) {
     state.equivLocals[loc] = NoLocalId;
   } else {
@@ -610,7 +610,7 @@ void addLocEquiv(ISS& env,
 
 // Obtain a local which is equivalent to the given stack value
 LocalId topStkLocal(const State& state, uint32_t idx = 0) {
-  assert(idx < state.stack.size());
+  assertx(idx < state.stack.size());
   auto const equiv = state.stack[state.stack.size() - idx - 1].equivLoc;
   return equiv > MaxLocalId ? NoLocalId : equiv;
 }
@@ -620,7 +620,7 @@ LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
 
 // Obtain a location which is equivalent to the given stack value
 LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
-  assert(idx < env.state.stack.size());
+  assertx(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].equivLoc;
 }
 
@@ -950,10 +950,10 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const elem = thisPropRaw(env, name);
   if (!elem) return;
-  auto const adjusted = adjust_type_for_prop(
+  auto adjusted = adjust_type_for_prop(
     env.index, *env.ctx.cls, elem->tc,
-    loosen_all(loosen_arraylike(type)));
-  elem->ty |= adjusted;
+    loosen_vecish_or_dictish(loosen_all(type)));
+  elem->ty |= std::move(adjusted);
 }
 
 /*
@@ -997,8 +997,8 @@ void killPrivateStatics(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // misc
 
-ProvTag provTagHere(ISS& env) {
-  if (!RuntimeOption::EvalArrayProvenance) return arrprov::Tag{};
+arrprov::Tag provTagHere(ISS& env) {
+  if (!RO::EvalArrayProvenance) return arrprov::Tag{};
   auto const idx = env.srcLoc;
   // We might have a negative index into the srcLoc table if the
   // bytecode was copied from another unit, e.g. from a trait ${X}inits

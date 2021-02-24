@@ -50,7 +50,7 @@ struct ContextHash;
 struct CallContext;
 struct PropertiesInfo;
 
-extern const Type TTop;
+extern const Type TCell;
 
 namespace php {
 struct Class;
@@ -395,6 +395,13 @@ struct Record {
    * A typical example is with "non unique" records.
    */
   bool mustBeSubtypeOf(const Record& o) const;
+
+  /*
+   * Returns false if this record is definitely not going to be a subtype
+   * of `o' at runtime.  If this function returns true, this may
+   * still not be a subtype of `o' at runtime, it just may not be known.
+   */
+  bool maybeSubtypeOf(const Record& o) const;
 
   /*
    * If this function return false, it is known that this record
@@ -757,7 +764,7 @@ struct Index {
    * arbitrary unions, or intersection).
    */
   Type lookup_constraint(Context, const TypeConstraint&,
-                         const Type& t = TTop) const;
+                         const Type& t = TCell) const;
 
   /*
    * If this function returns true, it is safe to assume that Type t
@@ -805,7 +812,7 @@ struct Index {
 
   /*
    * If func is effect-free when called with args, and it returns a constant,
-   * return that constant; otherwise return TTop.
+   * return that constant; otherwise return TInitCell.
    */
   Type lookup_foldable_return_type(Context ctx,
                                    const php::Func* func,

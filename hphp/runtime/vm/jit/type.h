@@ -339,7 +339,8 @@ constexpr bool operator>(Mem a, Mem b) {
   c(InitCell,            INIT_CELL_UNION)                               \
   c(Cell,                kUninit|kInitCell)                             \
   c(FuncLike,            kFunc|kRFunc)                                  \
-  c(ClsMethLike,         kClsMeth|kRClsMeth)
+  c(ClsMethLike,         kClsMeth|kRClsMeth)                            \
+  c(NonNull,             kInitCell & ~kNull)
 
 /*
  * Adding a new runtime type needs updating numRuntime variable.
@@ -993,4 +994,3 @@ namespace std {
 #define incl_HPHP_JIT_TYPE_INL_H_
 #include "hphp/runtime/vm/jit/type-inl.h"
 #undef incl_HPHP_JIT_TYPE_INL_H_
-

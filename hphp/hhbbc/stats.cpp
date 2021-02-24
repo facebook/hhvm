@@ -59,26 +59,31 @@ TRACE_SET_MOD(hhbbc_stats);
 
 //////////////////////////////////////////////////////////////////////
 
-#define STAT_TYPES                              \
-  X(Cell)                                       \
-  X(InitCell)                                   \
-  X(Unc)                                        \
-  X(InitUnc)                                    \
-  X(Obj)                                        \
-  X(OptObj)                                     \
-  X(Arr)                                        \
-  X(SArr)                                       \
-  X(ArrE)                                       \
-  X(ArrN)                                       \
-  X(SArrN)                                      \
-  X(SArrE)                                      \
-  X(Null)                                       \
-  X(Bottom)
+#define SPEC_TYPES(X)                                                \
+  X(wh, "wait handle", is_specialized_wait_handle)                   \
+  X(obj_sub, "sub obj", is_sub_obj)                                  \
+  X(obj_exact, "exact obj", is_exact_obj)                            \
+  X(cls_sub, "sub class", is_sub_cls)                                \
+  X(cls_exact, "exact class", is_exact_cls)                          \
+  X(arr_val, "array value", is_specialized_array_like_arrval)        \
+  X(arr_packedn, "array packedn", is_specialized_array_like_packedn) \
+  X(arr_packed, "array packed", is_specialized_array_like_packed)    \
+  X(arr_mapn, "array mapn", is_specialized_array_like_mapn)          \
+  X(arr_map, "array map", is_specialized_array_like_map)             \
+  X(str, "string", is_specialized_string)                            \
+  X(int, "int", is_specialized_int)                                  \
+  X(dbl, "double", is_specialized_double)                            \
+  X(record, "record", is_specialized_record)                         \
 
 struct TypeStat {
-#define X(x) std::atomic<uint64_t> sub_##x; \
-             std::atomic<uint64_t> eq_##x;
-  STAT_TYPES
+#define X(y, ...)                               \
+  std::atomic<uint64_t> sub_##y{};              \
+  std::atomic<uint64_t> eq_##y{};
+  HHBBC_TYPE_PREDEFINED(X)
+#undef X
+
+#define X(y, ...) std::atomic<uint64_t> spec_##y;
+  SPEC_TYPES(X)
 #undef X
 };
 
@@ -99,23 +104,25 @@ constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS 0 ;
 }
 
 struct Stats {
-  std::array<std::atomic<uint64_t>,Op_count> op_counts;
-  std::array<std::atomic<uint64_t>,kNumRATTags> ratL_tags;
-  std::array<std::atomic<uint64_t>,kNumRATTags> ratStk_tags;
-  std::atomic<uint64_t> ratL_specialized_array;
-  std::atomic<uint64_t> ratStk_specialized_array;
-  std::atomic<uint64_t> totalClasses;
-  std::atomic<uint64_t> totalRecords;
-  std::atomic<uint64_t> totalFunctions;
-  std::atomic<uint64_t> totalMethods;
-  std::atomic<uint64_t> persistentSPropsPub;
-  std::atomic<uint64_t> persistentSPropsProt;
-  std::atomic<uint64_t> persistentSPropsPriv;
-  std::atomic<uint64_t> totalSProps;
+  std::array<std::atomic<uint64_t>,Op_count> op_counts{};
+  std::array<std::atomic<uint64_t>,kNumRATTags> ratL_tags{};
+  std::array<std::atomic<uint64_t>,kNumRATTags> ratStk_tags{};
+  std::atomic<uint64_t> ratL_specialized_array{};
+  std::atomic<uint64_t> ratStk_specialized_array{};
+  std::atomic<uint64_t> totalClasses{};
+  std::atomic<uint64_t> totalRecords{};
+  std::atomic<uint64_t> totalFunctions{};
+  std::atomic<uint64_t> totalMethods{};
+  std::atomic<uint64_t> effectfulFuncs{};
+  std::atomic<uint64_t> effectFreeFuncs{};
+  std::atomic<uint64_t> persistentSPropsPub{};
+  std::atomic<uint64_t> persistentSPropsProt{};
+  std::atomic<uint64_t> persistentSPropsPriv{};
+  std::atomic<uint64_t> totalSProps{};
   TypeStat returns;
   TypeStat privateProps;
+  TypeStat publicStatics;
   TypeStat privateStatics;
-  TypeStat cgetmBase;
   TypeStat iterInitBase;
 };
 
@@ -124,13 +131,31 @@ namespace {
 void type_stat_string(std::string& ret,
                       const std::string& prefix,
                       const TypeStat& st) {
-#define X(x)                                    \
-  folly::format(&ret, "  {}_=_{: <9} {: >8}\n",  \
-    prefix, #x ":", st.eq_##x.load());          \
-  folly::format(&ret, "  {}_<_{: <9} {: >8}\n",  \
-    prefix, #x ":", st.sub_##x.load());
-  STAT_TYPES
+#define X(y, ...)                                               \
+  if (st.eq_##y.load() > 0) {                                   \
+    folly::format(&ret, "  {: <32}  {: >12}\n",                 \
+                  folly::sformat("{}_=_{}", prefix, #y ":"),    \
+                  st.eq_##y.load());                            \
+  }                                                             \
+  if (st.sub_##y.load() > 0) {                                  \
+    folly::format(&ret, "  {: <32}  {: >12}\n",                 \
+                  folly::sformat("{}_<_{}", prefix, #y ":"),    \
+                  st.sub_##y.load());                           \
+  }
+  HHBBC_TYPE_PREDEFINED(X)
 #undef X
+
+  ret += "\n";
+
+#define X(y, z, ...)                                                  \
+  if (st.spec_##y.load() > 0) {                                       \
+    folly::format(&ret, "  {: <32}  {: >12}\n",                       \
+                  folly::sformat("{}_specialized {}", prefix, z ":"), \
+                  st.spec_##y.load());                                \
+  }
+  SPEC_TYPES(X)
+#undef X
+
   ret += "\n";
 }
 
@@ -138,9 +163,10 @@ std::string show(const Stats& stats) {
   auto ret = std::string{};
 
   for (auto i = uint32_t{}; i < stats.op_counts.size(); ++i) {
+    if (stats.op_counts[i].load() == 0) continue;
     folly::format(
       &ret,
-      "  {: >20}:  {: >15}\n",
+      "  {: >30}:  {: >15}\n",
       opcodeToName(static_cast<Op>(i)),
       stats.op_counts[i].load()
     );
@@ -149,25 +175,30 @@ std::string show(const Stats& stats) {
 
   type_stat_string(ret, "ret",            stats.returns);
   type_stat_string(ret, "priv_prop",      stats.privateProps);
+  type_stat_string(ret, "pub_static",     stats.publicStatics);
   type_stat_string(ret, "priv_static",    stats.privateStatics);
-  type_stat_string(ret, "cgetm_base",     stats.cgetmBase);
   type_stat_string(ret, "iterInit_base",  stats.iterInitBase);
 
   folly::format(
     &ret,
-    "       total_methods:  {: >8}\n"
-    "         total_funcs:  {: >8}\n"
-    "       total_classes:  {: >8}\n"
-    "       total_records:  {: >8}\n"
+    "            total_methods:  {: >12}\n"
+    "              total_funcs:  {: >12}\n"
+    "            total_classes:  {: >12}\n"
+    "            total_records:  {: >12}\n"
     "\n"
-    "        total_sprops:      {: >8}\n"
-    "   persistent_sprops_pub:  {: >8}\n"
-    "   persistent_sprops_prot: {: >8}\n"
-    "   persistent_sprops_priv: {: >8}\n",
+    "          effectful_funcs:  {: >12}\n"
+    "        effect_free_funcs:  {: >12}\n"
+    "\n"
+    "             total_sprops:  {: >12}\n"
+    "    persistent_sprops_pub:  {: >12}\n"
+    "   persistent_sprops_prot:  {: >12}\n"
+    "   persistent_sprops_priv:  {: >12}\n",
     stats.totalMethods.load(),
     stats.totalFunctions.load(),
     stats.totalClasses.load(),
     stats.totalRecords.load(),
+    stats.effectfulFuncs.load(),
+    stats.effectFreeFuncs.load(),
     stats.totalSProps.load(),
     stats.persistentSPropsPub.load(),
     stats.persistentSPropsProt.load(),
@@ -178,32 +209,68 @@ std::string show(const Stats& stats) {
   using T = RepoAuthType::Tag;
   using U = std::underlying_type<T>::type;
 #define TAG(x)                                                          \
-  folly::format(&ret, "  {: >24}:  {: >8}\n"                            \
-                      "  {: >24}:  {: >8}\n",                           \
-                      "RATL_" #x,                                       \
-                      stats.ratL_tags[static_cast<U>(T::x)].load(),     \
-                      "RATStk_" #x,                                     \
-                      stats.ratStk_tags[static_cast<U>(T::x)].load());
+  if (stats.ratL_tags[static_cast<U>(T::x)].load() > 0 ||               \
+      stats.ratStk_tags[static_cast<U>(T::x)].load() > 0) {             \
+    folly::format(&ret,                                                 \
+                  "  {: >28}:  {: >12}\n"                               \
+                  "  {: >28}:  {: >12}\n",                              \
+                  "RATL_" #x,                                           \
+                  stats.ratL_tags[static_cast<U>(T::x)].load(),         \
+                  "RATStk_" #x,                                         \
+                  stats.ratStk_tags[static_cast<U>(T::x)].load());      \
+  }
   REPO_AUTH_TYPE_TAGS
 #undef TAG
 
-  folly::format(&ret, "  {: >24}:  {: >8}\n"
-                      "  {: >24}:  {: >8}\n",
-                      "RATL_Arr_Special",
-                      stats.ratL_specialized_array.load(),
-                      "RATStk_Arr_Special",
-                      stats.ratStk_specialized_array.load());
+  if (stats.ratL_specialized_array.load() > 0 ||
+      stats.ratStk_specialized_array.load() > 0) {
+    folly::format(&ret,
+                  "  {: >28}:  {: >12}\n"
+                  "  {: >28}:  {: >12}\n",
+                  "RATL_Arr_Special",
+                  stats.ratL_specialized_array.load(),
+                  "RATStk_Arr_Special",
+                  stats.ratStk_specialized_array.load());
+  }
 
   return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_sub_obj(const Type& t) {
+  return
+    is_specialized_obj(t) &&
+    !is_specialized_wait_handle(t) &&
+    dobj_of(t).type == DObj::Sub;
+}
+bool is_exact_obj(const Type& t) {
+  return
+    is_specialized_cls(t) &&
+    !is_specialized_wait_handle(t) &&
+    dobj_of(t).type == DObj::Exact;
+}
+
+bool is_sub_cls(const Type& t) {
+  return is_specialized_cls(t) && dcls_of(t).type == DCls::Sub;
+}
+bool is_exact_cls(const Type& t) {
+  return is_specialized_cls(t) && dcls_of(t).type == DCls::Exact;
+}
+
 void add_type(TypeStat& stat, const Type& t) {
-#define X(x)                                    \
-  if (t.strictSubtypeOf(T##x)) ++stat.sub_##x;  \
-  if (t == T##x) ++stat.eq_##x;
-  STAT_TYPES
+#define X(y, ...)                                     \
+  if (t.subtypeOf(B##y)) {                            \
+    if (B##y == BBottom || !t.is(BBottom)) {          \
+      if (t.strictSubtypeOf(B##y)) ++stat.sub_##y;    \
+      else ++stat.eq_##y;                             \
+    }                                                 \
+  }
+  HHBBC_TYPE_PREDEFINED(X)
+#undef X
+
+#define X(a, b, c) if (c(t)) ++stat.spec_##a;
+  SPEC_TYPES(X)
 #undef X
 }
 
@@ -270,7 +337,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 
   using U = std::underlying_type<RepoAuthType::Tag>::type;
   auto const tagInt = static_cast<U>(rat.tag());
-  assert(tagInt < stats.ratL_tags.size());
+  assertx(tagInt < stats.ratL_tags.size());
   if (bc.op == Op::AssertRATL) {
     ++stats.ratL_tags[tagInt];
   } else {
@@ -291,8 +358,13 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
-  auto const ty = index.lookup_return_type_raw(&func);
+  if (index.is_effect_free(&func)) {
+    ++stats.effectFreeFuncs;
+  } else {
+    ++stats.effectfulFuncs;
+  }
 
+  auto const ty = index.lookup_return_type_raw(&func);
   add_type(stats.returns, ty);
 
   auto const cf = php::WideFunc::cns(&func);
@@ -338,10 +410,13 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   ++stats.totalClasses;
   stats.totalMethods += cls.methods.size();
 
-  for (auto& kv : index.lookup_private_props(&cls)) {
+  for (auto const& kv : index.lookup_private_props(&cls)) {
     add_type(stats.privateProps, kv.second.ty);
   }
-  for (auto& kv : index.lookup_private_statics(&cls)) {
+  for (auto const& kv : index.lookup_public_statics(&cls)) {
+    add_type(stats.publicStatics, kv.second.ty);
+  }
+  for (auto const& kv : index.lookup_private_statics(&cls)) {
     add_type(stats.privateStatics, kv.second.ty);
   }
 

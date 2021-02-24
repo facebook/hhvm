@@ -672,10 +672,11 @@ SString Record::name() const {
   );
 }
 
-bool Record::mustBeSubtypeOf(const Record& o) const {
+template <bool returnTrueOnMaybe>
+bool Record::subtypeOfImpl(const Record& o) const {
   auto s1 = val.left();
   auto s2 = o.val.left();
-  if (s1 || s2) return s1 == s2;
+  if (s1 || s2) return returnTrueOnMaybe || s1 == s2;
   auto r1 = val.right();
   auto r2 = o.val.right();
   assertx(r1 && r2);
@@ -683,6 +684,14 @@ bool Record::mustBeSubtypeOf(const Record& o) const {
     return r1->baseList[r2->baseList.size() - 1] == r2;
   }
   return false;
+}
+
+bool Record::mustBeSubtypeOf(const Record& o) const {
+  return subtypeOfImpl<false>(o);
+}
+
+bool Record::maybeSubtypeOf(const Record& o) const {
+  return subtypeOfImpl<true>(o);
 }
 
 bool Record::couldBeOverriden() const {
@@ -752,6 +761,8 @@ bool Class::maybeSubtypeOf(const Class& o) const {
 }
 
 bool Class::couldBe(const Class& o) const {
+  if (same(o)) return true;
+
   // If either types are not unique return true
   if (val.left() || o.val.left()) return true;
 
@@ -872,6 +883,7 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();
   auto const c2 = o.val.right();
+  if (c1 == c2) return res::Class { c1 };
   // Walk the arrays of base classes until they match. For common ancestors
   // to exist they must be on both sides of the baseList at the same positions
   ClassInfo* ancestor = nullptr;
@@ -926,7 +938,7 @@ SString Func::name() const {
       auto const name = fa->possibleFuncs()->front()->first;
       if (debug) {
         for (DEBUG_ONLY auto const f : fa->possibleFuncs()) {
-          assert(f->first->isame(name));
+          assertx(f->first->isame(name));
         }
       }
       return name;
@@ -1331,7 +1343,7 @@ FuncInfo* create_func_info(IndexData& data, const php::Func* f) {
     if (f->nativeInfo) {
       std::lock_guard<std::mutex> g{func_info_mutex};
       if (fi->func) {
-        assert(fi->func == f);
+        assertx(fi->func == f);
         return fi;
       }
       // We'd infer this anyway when we look at the bytecode body
@@ -1342,7 +1354,7 @@ FuncInfo* create_func_info(IndexData& data, const php::Func* f) {
     fi->func = f;
   }
 
-  assert(fi->func == f);
+  assertx(fi->func == f);
   return fi;
 }
 
@@ -1543,8 +1555,8 @@ bool build_class_constants(BuildClsInfo& info,
     if (c.isAbstract) continue;
 
     if (existing->val) {
-      
-      // A constant from a declared interface collides with a constant 
+
+      // A constant from a declared interface collides with a constant
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
@@ -1904,7 +1916,7 @@ bool enforce_in_maybe_sealed_parent_whitelist(
   // if our parent isn't sealed, then we're fine.
   if (!parent || !(parent->cls->attrs & AttrSealed)) return true;
   const UserAttributeMap& parent_attrs = parent->cls->userAttributes;
-  assert(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  assertx(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
   const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
   bool in_sealed_whitelist = false;
   IterateV(parent_sealed_attr.m_data.parr,
@@ -3049,7 +3061,7 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
     auto& vtable = classes.back().vtable;
     for (auto& pair : cinfo->implInterfaces) {
       auto it = index.ifaceSlotMap.find(pair.second->cls);
-      assert(it != end(index.ifaceSlotMap));
+      assertx(it != end(index.ifaceSlotMap));
       auto const slot = it->second;
       if (slot >= vtable.size()) vtable.resize(slot + 1);
       vtable[slot] = pair.second->cls;
@@ -3204,7 +3216,7 @@ void compute_iface_vtables(IndexData& index) {
 
   // Make sure we have an initialized entry for each slot for the sort below.
   for (Slot slot = 0; slot < max_slot; ++slot) {
-    assert(slot_uses.count(slot));
+    assertx(slot_uses.count(slot));
   }
 
   // Finally, sort and reassign slots so the most frequently used slots come
@@ -3604,7 +3616,7 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
    * possible resolutions, HHBBC cannot deduce anything about by-val vs inout.
    * So the caller should make sure not calling this in single-unit mode.
    */
-  assert(RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::RepoAuthoritative);
 
   if (begin(range) == end(range)) {
     return func_param_prep_default();
@@ -3642,7 +3654,7 @@ folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
    * possible resolutions, HHBBC cannot deduce anything about inout args.
    * So the caller should make sure not calling this in single-unit mode.
    */
-  assert(RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::RepoAuthoritative);
 
   if (begin(range) == end(range)) {
     return func_num_inout_default();
@@ -4785,7 +4797,7 @@ Index::resolve_type_name_internal(SString inName) const {
         return { AnnotType::Object, nullable, cinfo };
       }
       auto const& tc = cinfo->cls->enumBaseTy;
-      assert(!tc.isNullable());
+      assertx(!tc.isNullable());
       if (tc.type() != AnnotType::Object) {
         auto const type = tc.type() == AnnotType::Mixed ?
           AnnotType::ArrayKey : tc.type();
@@ -4842,23 +4854,25 @@ Index::ConstraintResolution Index::resolve_named_type(
   if (res.type == AnnotType::Object) {
     auto resolve = [&] (const res::Class& rcls) -> folly::Optional<Type> {
       if (!interface_supports_non_objects(rcls.name()) ||
-          candidate.subtypeOrNull(BObj)) {
+          candidate.subtypeOf(BOptObj)) {
         return subObj(rcls);
       }
 
-      if (candidate.subtypeOrNull(BArr)) {
-        if (interface_supports_arrlike(rcls.name())) return TArr;
-      } else if (candidate.subtypeOrNull(BVec)) {
+      if (candidate.subtypeOf(BInitNull | BVArr | BDArr)) {
+        if (interface_supports_arrlike(rcls.name())) {
+          return union_of(TVArr, TDArr);
+        }
+      } else if (candidate.subtypeOf(BOptVec)) {
         if (interface_supports_arrlike(rcls.name())) return TVec;
-      } else if (candidate.subtypeOrNull(BDict)) {
+      } else if (candidate.subtypeOf(BOptDict)) {
         if (interface_supports_arrlike(rcls.name())) return TDict;
-      } else if (candidate.subtypeOrNull(BKeyset)) {
+      } else if (candidate.subtypeOf(BOptKeyset)) {
         if (interface_supports_arrlike(rcls.name())) return TKeyset;
-      } else if (candidate.subtypeOrNull(BStr)) {
+      } else if (candidate.subtypeOf(BOptStr)) {
         if (interface_supports_string(rcls.name())) return TStr;
-      } else if (candidate.subtypeOrNull(BInt)) {
+      } else if (candidate.subtypeOf(BOptInt)) {
         if (interface_supports_int(rcls.name())) return TInt;
-      } else if (candidate.subtypeOrNull(BDbl)) {
+      } else if (candidate.subtypeOf(BOptDbl)) {
         if (interface_supports_double(rcls.name())) return TDbl;
       }
       return folly::none;
@@ -4987,7 +5001,7 @@ res::Func Index::resolve_method(Context ctx,
   // We need to revisit the hasPrivateAncestor code if we start being
   // able to look up methods on interfaces (currently they have empty
   // method tables).
-  assert(!(cinfo->cls->attrs & AttrInterface));
+  assertx(!(cinfo->cls->attrs & AttrInterface));
 
   /*
    * If our candidate method has a private ancestor, unless it is
@@ -5074,7 +5088,7 @@ Index::resolve_func_helper(const php::Func* func, SString name) const {
 
   // single resolution, in whole-program mode, that's it
   if (RuntimeOption::RepoAuthoritative) {
-    assert(func->attrs & AttrUnique);
+    assertx(func->attrs & AttrUnique);
     return do_resolve(func);
   }
 
@@ -5210,8 +5224,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
     case AnnotMetaType::Nonnull:
       if (candidate.subtypeOf(BInitNull)) return TBottom;
       if (!candidate.couldBe(BInitNull))  return candidate;
-      if (is_opt(candidate))              return unopt(candidate);
-      break;
+      return unopt(candidate);
     case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return setctx(subObj(*s));
       break;
@@ -5233,19 +5246,19 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       if (candidate.subtypeOf(BVArr)) return TVArr;
       if (candidate.subtypeOf(BDArr)) return TDArr;
-      break;
+      return union_of(TVArr, TDArr);
     case AnnotMetaType::VecOrDict:
       if (candidate.subtypeOf(BVec)) return TVec;
       if (candidate.subtypeOf(BDict)) return TDict;
-      break;
+      return union_of(TVec, TDict);
     case AnnotMetaType::ArrayLike:
       if (candidate.subtypeOf(BVArr)) return TVArr;
       if (candidate.subtypeOf(BDArr)) return TDArr;
-      if (candidate.subtypeOf(BArr)) return TArr;
+      if (candidate.subtypeOf(BVArr | BDArr)) return union_of(TVArr, TDArr);
       if (candidate.subtypeOf(BVec)) return TVec;
       if (candidate.subtypeOf(BDict)) return TDict;
       if (candidate.subtypeOf(BKeyset)) return TKeyset;
-      break;
+      return TArrLike;
     }
     return ConstraintResolution{ folly::none, false };
   }();
@@ -5374,7 +5387,7 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
       // We'll add a dependency to make sure we're re-run if it
       // resolves anything.
       auto const cinit = it->second->cls->methods.back().get();
-      assert(cinit->name == s_86cinit.get());
+      assertx(cinit->name == s_86cinit.get());
       add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
       return nullptr;
     }
@@ -5424,8 +5437,8 @@ Type Index::lookup_foldable_return_type(Context ctx,
   static __thread Context base_ctx;
 
   // Don't fold functions when staticness mismatches
-  if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TTop;
-  if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TTop;
+  if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TInitCell;
+  if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TInitCell;
 
   auto const& finfo = *func_info(*m_data, func);
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
@@ -5473,14 +5486,14 @@ Type Index::lookup_foldable_return_type(Context ctx,
       func->name,
       showArgs(calleeCtx.args),
       CallContextHashCompare{}.hash(calleeCtx));
-    return TTop;
+    return TInitCell;
   }
 
   if (!interp_nesting_level) {
     base_ctx = ctx;
   } else if (interp_nesting_level > max_interp_nexting_level) {
     add_dependency(*m_data, func, base_ctx, Dep::InlineDepthLimit);
-    return TTop;
+    return TInitCell;
   }
 
   auto const contextType = [&] {
@@ -5495,11 +5508,11 @@ Type Index::lookup_foldable_return_type(Context ctx,
       calleeCtx.args,
       CollectionOpts::EffectFreeOnly
     );
-    return fa.effectFree ? fa.inferredReturn : TTop;
+    return fa.effectFree ? fa.inferredReturn : TInitCell;
   }();
 
   if (!is_scalar(contextType)) {
-    return TTop;
+    return TInitCell;
   }
 
   ContextRetTyMap::accessor acc;
@@ -5580,7 +5593,7 @@ Type Index::lookup_return_type(Context caller,
 CompactVector<Type>
 Index::lookup_closure_use_vars(const php::Func* func,
                                bool move) const {
-  assert(func->isClosureBody);
+  assertx(func->isClosureBody);
 
   auto const numUseVars = closure_num_use_vars(func);
   if (!numUseVars) return {};
@@ -5636,7 +5649,7 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
       return func_num_inout(mte->second.func);
     },
     [&] (FuncFamily* fam) -> folly::Optional<uint32_t> {
-      assert(RuntimeOption::RepoAuthoritative);
+      assertx(RuntimeOption::RepoAuthoritative);
       return num_inout_from_set(fam->possibleFuncs());
     }
   );
@@ -5676,7 +5689,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       return func_param_prep(mte->second.func, paramId);
     },
     [&] (FuncFamily* fam) {
-      assert(RuntimeOption::RepoAuthoritative);
+      assertx(RuntimeOption::RepoAuthoritative);
       return prep_kind_from_set(fam->possibleFuncs(), paramId);
     }
   );
@@ -6327,7 +6340,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 
 bool Index::refine_closure_use_vars(const php::Class* cls,
                                     const CompactVector<Type>& vars) {
-  assert(is_closure(*cls));
+  assertx(is_closure(*cls));
 
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
     always_assert_flog(

@@ -81,9 +81,11 @@ Type typeToInt(Type ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeAdd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvAdd))           return *t;
+  if (auto t = eval_const(t1, t2, tvAdd))             return *t;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
+    return union_of(TVArr,TDArr);
+  }
   if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
   if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
   if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
@@ -91,10 +93,12 @@ Type typeAdd(Type t1, Type t2) {
 }
 
 Type typeAddO(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvAddO))          return *t;
+  if (auto t = eval_const(t1, t2, tvAddO))            return *t;
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
+    return union_of(TVArr, TDArr);
+  }
   if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
   if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
   if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
@@ -180,7 +184,7 @@ Type typeIncDec(IncDecOp op, Type t) {
     }
 
     // No-op on bool, array, resource, object.
-    if (t.subtypeOfAny(TBool, TArr, TRes, TObj, TVec, TDict, TKeyset)) return t;
+    if (t.subtypeOf(BBool | BArrLike | BRes | BObj)) return t;
 
     return TInitCell;
   }
@@ -225,8 +229,9 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
     // at runtime it will not be static.  For now just throw that
     // away.  TODO(#3696042): should be able to loosen_staticness here.
     if (resultTy->subtypeOf(BStr)) resultTy = TStr;
-    else if (resultTy->subtypeOf(BArr)) resultTy = TArr;
-    else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
+    else if (resultTy->subtypeOf(BVArr | BDArr)) {
+      resultTy = union_of(TVArr, TDArr);
+    } else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
     else if (resultTy->subtypeOf(BDict)) resultTy = TDict;
     else if (resultTy->subtypeOf(BKeyset)) resultTy = TKeyset;
 
@@ -272,7 +277,7 @@ Type typeSame(const Type& a, const Type& b) {
 
 Type typeNSame(const Type& a, const Type& b) {
   auto const ty = typeSame(a, b);
-  assert(ty.subtypeOf(BBool));
+  assertx(ty.subtypeOf(BBool));
   return ty.subtypeOf(BFalse) ? TTrue :
          ty.subtypeOf(BTrue) ? TFalse :
          TBool;

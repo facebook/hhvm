@@ -46,26 +46,31 @@ struct COutputConfig {
     include_header: bool,
     output_file: *const c_char,
 }
-impl std::convert::From<&COutputConfig> for RustOutputConfig {
-    fn from(output_config: &COutputConfig) -> RustOutputConfig {
-        RustOutputConfig {
+
+impl RustOutputConfig {
+    /// Returns `None` if `output_config` is null.
+    ///
+    /// # Safety
+    /// * `output_config` must be a valid, aligned pointer to a `COutputConfig`,
+    ///   which must not be accessed through another pointer during this function call.
+    /// * The COutputConfig's `output_file` must be a valid null-terminated C string or nullptr.
+    #[cfg(unix)]
+    unsafe fn from_c_output_config(output_config: *const COutputConfig) -> Option<Self> {
+        let output_config = output_config.as_ref()?;
+        Some(Self {
             include_header: output_config.include_header,
             output_file: if output_config.output_file.is_null() {
                 None
             } else {
-                // We rely on the C caller that
-                // `output_config.output_file` be a properly
-                // initialized null-terminated C string and we do not
-                // check that the bytes it contains are valid UTF-8.
-                Some(String::from(unsafe {
-                    cpp_helper::cstr::to_str(output_config.output_file)
-                }))
+                std::ffi::CStr::from_ptr(output_config.output_file)
+                    .to_str()
+                    .ok()
+                    .map(|s| s.to_owned())
             },
-        }
+        })
     }
 }
 
-#[cfg(unix)]
 #[repr(C)]
 struct CEnv {
     filepath: *const c_char,
@@ -75,30 +80,33 @@ struct CEnv {
     num_config_list: usize,
     flags: u8,
 }
-impl<'a> std::convert::From<&CEnv> for compile::Env<&'a str> {
-    fn from(env: &CEnv) -> compile::Env<&'a str> {
+
+impl CEnv {
+    /// Returns `None` if `env` is null.
+    ///
+    /// # Safety
+    /// * `env` must be a valid, aligned pointer to a `CEnv` which is not
+    ///   accessed through another pointer for lifetime `'a` (note that this
+    ///   lifetime is arbitrarily chosen by the caller)
+    /// * Contents of the CEnv must be valid nul-terminated C strings
+    ///   containing valid UTF-8, or arrays of same
+    #[cfg(unix)]
+    pub unsafe fn to_compile_env<'a>(env: *const CEnv) -> Option<compile::Env<&'a str>> {
         use std::os::unix::ffi::OsStrExt;
-        compile::Env {
-            // Safety: We rely on the C caller that `env.filepath` be
-            // a properly initialized null-terminated C string
+
+        let env = env.as_ref()?;
+
+        Some(compile::Env {
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
-                std::path::PathBuf::from(std::ffi::OsStr::from_bytes(unsafe {
-                    cpp_helper::cstr::to_u8(env.filepath)
-                })),
+                std::path::PathBuf::from(std::ffi::OsStr::from_bytes(
+                    std::ffi::CStr::from_ptr(env.filepath).to_bytes(),
+                )),
             ),
-            // Safety: We rely on the C caller that `env.config_jsons`
-            // be a pointer to `env.num_config_jsons` properly
-            // initialized null-terminated C strings.
-            config_jsons: unsafe {
-                cpp_helper::cstr::to_vec(env.config_jsons, env.num_config_jsons)
-            },
-            // We rely on the C caller that `env.config_list` be a
-            // pointer to `env.num_config_list` properly initialized
-            // null-terminated C strings.
-            config_list: unsafe { cpp_helper::cstr::to_vec(env.config_list, env.num_config_list) },
+            config_jsons: cpp_helper::cstr::to_vec(env.config_jsons, env.num_config_jsons),
+            config_list: cpp_helper::cstr::to_vec(env.config_list, env.num_config_list),
             flags: compile::EnvFlags::from_bits(env.flags).unwrap(),
-        }
+        })
     }
 }
 
@@ -122,34 +130,30 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
     err_buf: usize,
 ) -> *const c_char {
     // Safety: We rely on the C caller that `env` can be legitmately
-    // reinterpreted as a `*const CBuf` and that on doing so, it
-    // points to a valid properly initialized value.
-    let err_buf: &cpp_helper::CBuf = cpp_helper::from_ptr(err_buf, std::convert::identity).unwrap();
+    // reinterpreted as a `*const CBuf` and that on doing so, it is
+    // non-null is well aligned and points to a valid properly
+    // initialized value.
+    let err_buf: &cpp_helper::CBuf = (err_buf as *const cpp_helper::CBuf).as_ref().unwrap();
     let buf_len: c_int = err_buf.buf_len;
-    // Safety : We rely on the C aller that `err_buf.buf` be valid for
+    // Safety : We rely on the C caller that `err_buf.buf` be valid for
     // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
     let buf: &mut [u8] = cpp_helper::cstr::to_mut_u8(err_buf.buf, buf_len);
     // Safety: We rely on the C caller that `output_cfg` can be
     // legitmately reinterpreted as a `*const COutputConfig` and that
     // on doing so, it points to a valid properly initialized value.
-    let _output_config: RustOutputConfig = cpp_helper::from_ptr(
-        output_cfg,
-        <RustOutputConfig as std::convert::From<&COutputConfig>>::from,
-    )
-    .unwrap();
+    let _output_config: Option<RustOutputConfig> =
+        RustOutputConfig::from_c_output_config(output_cfg as *const COutputConfig);
     // Safety: We rely on the C caller that `source_text` be a
     // properly iniitalized null-terminated C string.
-    let text: &[u8] = cpp_helper::cstr::to_u8(source_text);
+    let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
     let job_builder = move || {
         move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
             // Safety: We rely on the C caller that `env` can be
-            // legitmately reinterpreted as a `*const CBuf` and that
+            // legitmately reinterpreted as a `*const CEnv` and that
             // on doing so, it points to a valid properly initialized
             // value.
-            let env =
-                cpp_helper::from_ptr(env, <compile::Env<&str> as std::convert::From<&CEnv>>::from)
-                    .unwrap();
+            let env: compile::Env<&str> = CEnv::to_compile_env(env as *const CEnv).unwrap();
             let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
             let mut w = String::new();
             match compile::from_text_(&env, stack_limit, &mut w, source_text) {
@@ -169,12 +173,10 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
         // some HHVM tests.
         if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
             // Safety : We rely on the C caller that `env` can be
-            // legitmately reinterpreted as a `*const CBuf` and that
+            // legitmately reinterpreted as a `*const CEnv` and that
             // on doing so, it points to a valid properly initialized
             // value.
-            let env =
-                cpp_helper::from_ptr(env, <compile::Env<&str> as std::convert::From<&CEnv>>::from)
-                    .unwrap();
+            let env = CEnv::to_compile_env(env as *const CEnv).unwrap();
             eprintln!(
                 "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
                 (stack_size_tried - stack_slack(stack_size_tried)) / KI,

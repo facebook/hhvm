@@ -26,9 +26,17 @@ struct CParserEnv {
     array_unification: bool,
     interpret_soft_types_as_like_types: bool,
 }
-impl std::convert::From<&CParserEnv> for parser_core_types::parser_env::ParserEnv {
-    fn from(env: &CParserEnv) -> parser_core_types::parser_env::ParserEnv {
-        parser_core_types::parser_env::ParserEnv {
+
+impl CParserEnv {
+    /// Returns `None` if `env` is null.
+    ///
+    /// # Safety
+    /// * `env` must be a valid, aligned pointer to a `CParserEnv`
+    unsafe fn to_parser_env(
+        env: *const CParserEnv,
+    ) -> Option<parser_core_types::parser_env::ParserEnv> {
+        let env = env.as_ref()?;
+        Some(parser_core_types::parser_env::ParserEnv {
             codegen: env.codegen,
             hhvm_compat_mode: env.hhvm_compat_mode,
             php5_compat_mode: env.php5_compat_mode,
@@ -41,7 +49,7 @@ impl std::convert::From<&CParserEnv> for parser_core_types::parser_env::ParserEn
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
             array_unification: env.array_unification,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
-        }
+        })
     }
 }
 
@@ -79,11 +87,8 @@ unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
     // Safety : We rely on the C caller that `env` can be legitmately
     // reinterpreted as a `*const CParserEnv` and that on doing so, it
     // points to a valid properly initialized value.
-    let env: parser_core_types::parser_env::ParserEnv = cpp_helper::from_ptr(
-        env,
-        <parser_core_types::parser_env::ParserEnv as std::convert::From<&CParserEnv>>::from,
-    )
-    .unwrap();
+    let env: parser_core_types::parser_env::ParserEnv =
+        CParserEnv::to_parser_env(env as *const CParserEnv).unwrap();
     let indexed_source = parser_core_types::indexed_source_text::IndexedSourceText::new(
         parser_core_types::source_text::SourceText::make(ocamlrep::rc::RcOc::new(filepath), text),
     );

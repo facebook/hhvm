@@ -59,6 +59,9 @@ struct FixedVector {
   explicit FixedVector(const std::vector<T>& sourceVec) {
     move(sourceVec);
   }
+  explicit FixedVector(std::vector<T>&& sourceVec) {
+    move(std::move(sourceVec));
+  }
 
   FixedVector(FixedVector<T>&& fv) {
     swap(fv);
@@ -118,7 +121,7 @@ struct FixedVector {
 
 private:
   template<class Src>
-  void move(Src& sourceVec) {
+  void move(Src&& sourceVec) {
     auto const neededSize = sourceVec.size();
 
     if (neededSize >> 16) {
@@ -161,4 +164,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

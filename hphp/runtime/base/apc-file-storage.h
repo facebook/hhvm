@@ -19,9 +19,10 @@
 #include <atomic>
 #include <string>
 #include <mutex>
-#include <vector>
 
 #include "hphp/util/hash.h"
+
+#include <tbb/concurrent_vector.h>
 
 namespace HPHP {
 
@@ -59,9 +60,9 @@ private:
   std::atomic_uint_fast64_t m_current{~0ull};
   size_t m_chunkSize{0};
   StorageState m_state{StorageState::Invalid};
-  std::vector<char*> m_chunks;
-  std::vector<std::string> m_fileNames;
-  std::vector<int> m_fds;
+  tbb::concurrent_vector<char*> m_chunks;
+  tbb::concurrent_vector<std::string> m_fileNames;
+  tbb::concurrent_vector<int> m_fds;
   std::string m_prefix;
 
   // This lock is needed when manipulating chunks.
@@ -77,4 +78,3 @@ extern APCFileStorage s_apc_file_storage;
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -476,8 +476,6 @@ To string conversions:
 
 | ConvObjToStr,                 D(Str), S(Obj),                           PRc
 
-| ConvResToStr,                 D(Str), S(Res),                           PRc
-
 | ConvTVToStr,                  D(Str), S(Cell),                          PRc
 
 

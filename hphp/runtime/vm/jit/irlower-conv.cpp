@@ -343,7 +343,6 @@ void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(ConvIntToStr);
 IMPL_OPCODE_CALL(ConvDblToStr);
 IMPL_OPCODE_CALL(ConvObjToStr);
-IMPL_OPCODE_CALL(ConvResToStr);
 IMPL_OPCODE_CALL(ConvTVToStr);
 
 ///////////////////////////////////////////////////////////////////////////////

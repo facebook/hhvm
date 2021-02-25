@@ -334,7 +334,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvObjToStr:
   case ConvObjToVArr:
   case ConvObjToVec:
-  case ConvResToStr:
   case Count:
   case CreateAAWH:
   case DictGet:

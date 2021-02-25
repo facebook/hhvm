@@ -236,14 +236,6 @@ StringData* convObjToStrHelper(ObjectData* o) {
   return o->invokeToString().detach();
 }
 
-StringData* convResToStrHelper(ResourceHdr* r, ConvNoticeLevel level,
-                               const StringData* notice_reason) {
-  handleConvNoticeLevel(level, "resource", "string", notice_reason);
-  // toString() returns a counted String; detach() it to move ownership
-  // of the count to the caller
-  return r->data()->o_toString().detach();
-}
-
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }

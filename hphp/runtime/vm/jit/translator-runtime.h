@@ -78,8 +78,6 @@ double convTVToDblHelper(TypedValue tv);
 StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
-StringData* convResToStrHelper(ResourceHdr* o, ConvNoticeLevel level,
-                               const StringData* notice_reason);
 
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void throwUndefVariable(StringData* nm);

@@ -1911,7 +1911,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToDbl:
   case ConvObjToInt:
   case ConvTVToInt:
-  case ConvResToStr:
   case ConcatStr3:
   case ConcatStr4:
   case ConvTVToDbl:

@@ -2246,9 +2246,6 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
     return src;
   }
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
-  if (srcType <= TRes) {
-    return gen(env, ConvResToStr, *notice_data, catchTrace, src);
-  }
   if (srcType <= TClsMeth) {
     auto const message = cns(env, s_msgClsMethToStr.get());
     gen(env, ThrowInvalidOperation, catchTrace, message);

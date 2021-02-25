@@ -314,7 +314,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvTVToBool:
   case ConvObjToBool:
   case ConvObjToStr:
-  case ConvResToStr:
   case ConvTVToStr:
   case ConvArrLikeToVec:
   case ConvObjToVec:

@@ -34,7 +34,7 @@ pub fn parse_script<'src, 'arena>(
     stack_limit: Option<&'src StackLimit>,
 ) -> (Syntax<'arena>, Vec<SyntaxError>, State<'arena>) {
     let tf = TokenFactory::new(arena);
-    let sc = SmartConstructors::new(State { arena }, tf);
+    let sc = WithKind::new(SmartConstructors::new(State { arena }, tf));
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

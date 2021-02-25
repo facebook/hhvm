@@ -72,41 +72,52 @@ unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
     source_text: *const libc::c_char,
     env: usize,
 ) -> *const libc::c_char {
-    use std::os::unix::ffi::OsStrExt;
-    // Safety: We rely on the C caller that `filename` be a properly
-    // initialized nul-terminated C string.
-    let filepath = oxidized::relative_path::RelativePath::make(
-        oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(
-            std::ffi::CStr::from_ptr(filename).to_bytes(),
-        )),
-    );
-    // Safety : We rely on the C caller that `text` be a properly
-    // iniitalized nul-terminated C string.
-    let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
-    // Safety : We rely on the C caller that `env` can be legitmately
-    // reinterpreted as a `*const CParserEnv` and that on doing so, it
-    // points to a valid properly initialized value.
-    let env: parser_core_types::parser_env::ParserEnv =
-        CParserEnv::to_parser_env(env as *const CParserEnv).unwrap();
-    let indexed_source = parser_core_types::indexed_source_text::IndexedSourceText::new(
-        parser_core_types::source_text::SourceText::make(ocamlrep::rc::RcOc::new(filepath), text),
-    );
-    let alloc = bumpalo::Bump::new();
-    let mut serializer = serde_json::Serializer::new(std::vec![]);
-    let stack_limit: std::option::Option<&stack_limit::StackLimit> = None;
-    match positioned_full_trivia_parser::parse_script_to_json(
-        &alloc,
-        &mut serializer,
-        &indexed_source,
-        env,
-        stack_limit,
-    ) {
-        Ok(()) => {
-            // Safety : No runtime assertion is made that `v` contains no
-            // 0 bytes.
-            std::ffi::CString::from_vec_unchecked(serializer.into_inner()).into_raw()
+    match std::panic::catch_unwind(|| {
+        use std::os::unix::ffi::OsStrExt;
+        // Safety: We rely on the C caller that `filename` be a properly
+        // initialized nul-terminated C string.
+        let filepath = oxidized::relative_path::RelativePath::make(
+            oxidized::relative_path::Prefix::Dummy,
+            std::path::PathBuf::from(std::ffi::OsStr::from_bytes(
+                std::ffi::CStr::from_ptr(filename).to_bytes(),
+            )),
+        );
+        // Safety : We rely on the C caller that `text` be a properly
+        // iniitalized nul-terminated C string.
+        let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
+        // Safety : We rely on the C caller that `env` can be legitmately
+        // reinterpreted as a `*const CParserEnv` and that on doing so, it
+        // points to a valid properly initialized value.
+        let env: parser_core_types::parser_env::ParserEnv =
+            CParserEnv::to_parser_env(env as *const CParserEnv).unwrap();
+        let indexed_source = parser_core_types::indexed_source_text::IndexedSourceText::new(
+            parser_core_types::source_text::SourceText::make(
+                ocamlrep::rc::RcOc::new(filepath),
+                text,
+            ),
+        );
+        let alloc = bumpalo::Bump::new();
+        let mut serializer = serde_json::Serializer::new(std::vec![]);
+        let stack_limit: std::option::Option<&stack_limit::StackLimit> = None;
+        match positioned_full_trivia_parser::parse_script_to_json(
+            &alloc,
+            &mut serializer,
+            &indexed_source,
+            env,
+            stack_limit,
+        ) {
+            Ok(()) => {
+                // Safety : No runtime assertion is made that `v` contains no
+                // 0 bytes.
+                std::ffi::CString::from_vec_unchecked(serializer.into_inner()).into_raw()
+            }
+            _ => std::ptr::null(),
         }
-        _ => std::ptr::null(),
+    }) {
+        Ok(ptr) => ptr,
+        Err(_) => {
+            eprintln!("Error: panic in ffi function parse_positioned_full_trivia_cpp_ffi");
+            std::ptr::null()
+        }
     }
 }

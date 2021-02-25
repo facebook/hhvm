@@ -144,105 +144,114 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
     output_cfg: usize,
     err_buf: usize,
 ) -> *const c_char {
-    // Safety: We rely on the C caller that `env` can be legitmately
-    // reinterpreted as a `*const CErrBuf` and that on doing so, it is
-    // non-null is well aligned and points to a valid properly
-    // initialized value.
-    let err_buf: &CErrBuf = (err_buf as *const CErrBuf).as_ref().unwrap();
-    let buf_len: c_int = err_buf.buf_len;
-    // Safety : We rely on the C caller that `err_buf.buf` be valid for
-    // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
-    let buf: &mut [u8] = std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, buf_len as usize);
+    match std::panic::catch_unwind(|| {
+        // Safety: We rely on the C caller that `env` can be legitmately
+        // reinterpreted as a `*const CErrBuf` and that on doing so, it is
+        // non-null is well aligned and points to a valid properly
+        // initialized value.
+        let err_buf: &CErrBuf = (err_buf as *const CErrBuf).as_ref().unwrap();
+        let buf_len: c_int = err_buf.buf_len;
+        // Safety : We rely on the C caller that `err_buf.buf` be valid for
+        // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
+        let buf: &mut [u8] =
+            std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, buf_len as usize);
 
-    // Safety: We rely on the C caller that `output_cfg` can be
-    // legitmately reinterpreted as a `*const COutputConfig` and that
-    // on doing so, it points to a valid properly initialized value.
-    let _output_config: Option<RustOutputConfig> =
-        RustOutputConfig::from_c_output_config(output_cfg as *const COutputConfig);
-    // Safety: We rely on the C caller that `source_text` be a
-    // properly iniitalized null-terminated C string.
-    let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
+        // Safety: We rely on the C caller that `output_cfg` can be
+        // legitmately reinterpreted as a `*const COutputConfig` and that
+        // on doing so, it points to a valid properly initialized value.
+        let _output_config: Option<RustOutputConfig> =
+            RustOutputConfig::from_c_output_config(output_cfg as *const COutputConfig);
+        // Safety: We rely on the C caller that `source_text` be a
+        // properly iniitalized null-terminated C string.
+        let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-    let job_builder = move || {
-        move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-            // Safety: We rely on the C caller that `env` can be
-            // legitmately reinterpreted as a `*const CEnv` and that
-            // on doing so, it points to a valid properly initialized
-            // value.
-            let env: compile::Env<&str> = CEnv::to_compile_env(env as *const CEnv).unwrap();
-            let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-            let mut w = String::new();
-            match compile::from_text_(&env, stack_limit, &mut w, source_text) {
-                Ok(_) => {
-                    //print_output(w, output_config, &env.filepath, profile)?;
-                    Ok(w)
+        let job_builder = move || {
+            move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+                // Safety: We rely on the C caller that `env` can be
+                // legitmately reinterpreted as a `*const CEnv` and that
+                // on doing so, it points to a valid properly initialized
+                // value.
+                let env: compile::Env<&str> = CEnv::to_compile_env(env as *const CEnv).unwrap();
+                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+                let mut w = String::new();
+                match compile::from_text_(&env, stack_limit, &mut w, source_text) {
+                    Ok(_) => {
+                        //print_output(w, output_config, &env.filepath, profile)?;
+                        Ok(w)
+                    }
+                    Err(e) => Err(anyhow!("{}", e)),
                 }
-                Err(e) => Err(anyhow!("{}", e)),
             }
-        }
-    };
-    // Assume peak is 2.5x of stack. This is initial estimation, need
-    // to be improved later.
-    let stack_slack = |stack_size| stack_size * 6 / 10;
-    let on_retry = &mut |stack_size_tried: usize| {
-        // Not always printing warning here because this would fail
-        // some HHVM tests.
-        if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            // Safety : We rely on the C caller that `env` can be
-            // legitmately reinterpreted as a `*const CEnv` and that
-            // on doing so, it points to a valid properly initialized
-            // value.
-            let env = CEnv::to_compile_env(env as *const CEnv).unwrap();
-            eprintln!(
-                "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                env.filepath.path_str(),
-            );
-        }
-    };
-    let job = stack_limit::retry::Job {
-        nonmain_stack_min: 13 * MI,
-        // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
-        // rust compiler produce inconsistent binary.
-        nonmain_stack_max: Some(7 * GI),
-        ..Default::default()
-    };
-
-    let r: Result<String, String> = job
-        .with_elastic_stack(job_builder, on_retry, stack_slack)
-        .map_err(|e| format!("{}", e))
-        .expect("compile_ffi: compile_from_text_cpp_ffi: retry failed")
-        .map_err(|e| e.to_string());
-    match r {
-        Ok(out) => {
-            let cs = std::ffi::CString::new(out)
-                .expect("compile_ffi: compile_from_text_cpp_ffi: String::new failed");
-            cs.into_raw() as *const c_char
-        }
-        Err(e) => {
-            if e.len() >= buf.len() {
-                warn!("Provided error buffer too is too small.");
-                warn!(
-                    "Expected at least {} bytes but got {}",
-                    e.len() + 1,
-                    buf.len()
+        };
+        // Assume peak is 2.5x of stack. This is initial estimation, need
+        // to be improved later.
+        let stack_slack = |stack_size| stack_size * 6 / 10;
+        let on_retry = &mut |stack_size_tried: usize| {
+            // Not always printing warning here because this would fail
+            // some HHVM tests.
+            if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
+                // Safety : We rely on the C caller that `env` can be
+                // legitmately reinterpreted as a `*const CEnv` and that
+                // on doing so, it points to a valid properly initialized
+                // value.
+                let env = CEnv::to_compile_env(env as *const CEnv).unwrap();
+                eprintln!(
+                    "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
+                    (stack_size_tried - stack_slack(stack_size_tried)) / KI,
+                    env.filepath.path_str(),
                 );
-            } else {
-                // Safety:
-                //   - `e` must be valid for reads of `e.len() *
-                //     size_of::<u8>()` bytes;
-                //   - `buf` must be valid for writes of of `e.len() *
-                //     size_of::<u8>()` bytes;
-                //   - The region of memory beginning at `e` with a
-                //     size of of `e.len() * size_of::<u8>()` bytes must
-                //     not overlap with the region of memory beginning
-                //     at `buf` with the same size;
-                //   - Even if the of `e.len() * size_of::<u8>()` is
-                //     `0`, the pointers must be non-null and properly
-                //     aligned.
-                std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len());
-                buf[e.len()] = 0;
             }
+        };
+        let job = stack_limit::retry::Job {
+            nonmain_stack_min: 13 * MI,
+            // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
+            // rust compiler produce inconsistent binary.
+            nonmain_stack_max: Some(7 * GI),
+            ..Default::default()
+        };
+
+        match job
+            .with_elastic_stack(job_builder, on_retry, stack_slack)
+            .map_err(|e| format!("{}", e))
+            .expect("compile_ffi: compile_from_text_cpp_ffi: retry failed")
+            .map_err(|e| e.to_string())
+        {
+            Ok(out) => {
+                let cs = std::ffi::CString::new(out)
+                    .expect("compile_ffi: compile_from_text_cpp_ffi: String::new failed");
+                cs.into_raw() as *const c_char
+            }
+            Err(e) => {
+                if e.len() >= buf.len() {
+                    warn!("Provided error buffer too small.");
+                    warn!(
+                        "Expected at least {} bytes but got {}.",
+                        e.len() + 1,
+                        buf.len()
+                    );
+                } else {
+                    // Safety:
+                    //   - `e` must be valid for reads of `e.len() *
+                    //     size_of::<u8>()` bytes;
+                    //   - `buf` must be valid for writes of of `e.len() *
+                    //     size_of::<u8>()` bytes;
+                    //   - The region of memory beginning at `e` with a
+                    //     size of of `e.len() * size_of::<u8>()` bytes must
+                    //     not overlap with the region of memory beginning
+                    //     at `buf` with the same size;
+                    //   - Even if the of `e.len() * size_of::<u8>()` is
+                    //     `0`, the pointers must be non-null and properly
+                    //     aligned.
+                    std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len());
+                    buf[e.len()] = 0;
+                }
+                std::ptr::null()
+            }
+        }
+    }) {
+        Ok(ptr) => ptr,
+        Err(_) => {
+            eprintln!("Error: panic in ffi function compile_from_text_cpp_ffi");
             std::ptr::null()
         }
     }

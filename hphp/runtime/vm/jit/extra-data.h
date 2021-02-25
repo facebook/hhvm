@@ -2483,7 +2483,7 @@ struct ConvNoticeData : IRExtraData {
   }
 
   ConvNoticeLevel level;
-  const StringData* reason;
+  union { const StringData* reason; int64_t reasonIntVal; };
 };
 
 //////////////////////////////////////////////////////////////////////

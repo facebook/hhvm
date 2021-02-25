@@ -636,6 +636,8 @@ public:
    */
   bool isEmpty() const;
 
+  bool isSystemLib() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Info arrays.                                                      [static]
 

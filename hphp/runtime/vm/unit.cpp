@@ -1313,6 +1313,10 @@ void Unit::mergeImpl(MergeInfo* mi) {
   }
 }
 
+bool Unit::isSystemLib() const {
+  return FileUtil::isSystemName(m_origFilepath->slice());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Info arrays.
 

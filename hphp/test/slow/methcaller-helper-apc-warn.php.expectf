@@ -1,0 +1,58 @@
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 19
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 20
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 21
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 22
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 23
+
+Warning: Storing meth_caller in APC in %s/methcaller-helper-apc-warn.php on line 24
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "m"
+}
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "m"
+}
+vec(1) {
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+vec(1) {
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+dict(1) {
+  ["a"]=>
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+dict(1) {
+  ["a"]=>
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}

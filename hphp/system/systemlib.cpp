@@ -120,6 +120,8 @@ Class* s_AssertionErrorClass;
 Class* s_DivisionByZeroErrorClass;
 Class* s_ParseErrorClass;
 Class* s_TypeErrorClass;
+Class* s_MethCallerHelperClass;
+Class* s_DynMethCallerHelperClass;
 
 Object AllocStdClassObject() {
   return Object{s_stdclassClass};

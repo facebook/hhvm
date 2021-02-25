@@ -2246,6 +2246,21 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       serializeVariant(init_null().asTypedValue());
       return;
     }
+    if (type == VariableSerializer::Type::APCSerialize) {
+      if (cls == SystemLib::s_MethCallerHelperClass) {
+        if (RO::EvalForbidMethCallerAPCSerialize == 1) {
+          raise_warning("Storing meth_caller in APC");
+        } else if (RO::EvalForbidMethCallerAPCSerialize > 1) {
+          SystemLib::throwInvalidOperationExceptionObject(
+            VarNR{s_invalidMethCaller.get()}
+          );
+        }
+      } else if (cls == SystemLib::s_DynMethCallerHelperClass) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCaller.get()}
+        );
+      }
+    }
     if (obj->getVMClass()->rtAttribute(Class::HasSleep)) {
       handleSleep = true;
       ret = const_cast<ObjectData*>(obj)->invokeSleep();

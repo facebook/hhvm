@@ -1215,6 +1215,15 @@ struct RuntimeOption {
   /* trigger E_USER_WARNING error when getClassName()/getMethodName()
    * is used on __SystemLib\MethCallerHelper */                         \
   F(bool, NoticeOnMethCallerHelperUse, false)                           \
+  /*                                                                    \
+   * Control dynamic calls to functions and dynamic constructs of       \
+   * classes which haven't opted into being called that way.            \
+   *                                                                    \
+   * 0 - Do nothing                                                     \
+   * 1 - Warn if meth_caller is apc serialized                          \
+   * 2 - Throw exception if meth_caller is apc serialized               \
+   */                                                                   \
+  F(int32_t, ForbidMethCallerAPCSerialize, 0)                           \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   /* Enables Hack records. */                                           \

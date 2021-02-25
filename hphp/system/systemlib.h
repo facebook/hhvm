@@ -99,6 +99,8 @@ extern Class* s_AssertionErrorClass;
 extern Class* s_DivisionByZeroErrorClass;
 extern Class* s_ParseErrorClass;
 extern Class* s_TypeErrorClass;
+extern Class* s_MethCallerHelperClass;
+extern Class* s_DynMethCallerHelperClass;
 
 Object AllocStdClassObject();
 Object AllocPinitSentinel();

@@ -667,6 +667,25 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
 
+  if (m_preClass->attrs() & AttrEnum) {
+    auto const& ie = m_extra->m_includedEnums;
+    for (size_t i = 0; i < ie.size(); ++i) {
+      auto const penum = ie[i]->m_preClass.get();
+      auto const included_enum = Class::get(penum->namedEntity(),
+                                            penum->name(), tryAutoload);
+      if (included_enum != ie[i]) {
+        if (!included_enum) {
+          parent = ie[i].get();
+          return Avail::Fail;
+        }
+        if (UNLIKELY(ie[i]->isZombie())) {
+          const_cast<Class*>(this)->destroy();
+        }
+        return Avail::False;
+      }
+    }
+  }
+
   for (size_t i = 0; i < m_declInterfaces.size(); i++) {
     auto di = m_declInterfaces[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];

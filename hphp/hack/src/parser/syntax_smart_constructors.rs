@@ -5,7 +5,6 @@
 
 mod syntax_smart_constructors_generated;
 
-use parser_core_types::syntax_by_ref::arena_state::State as ArenaState;
 use smart_constructors::NoState;
 
 pub use crate::syntax_smart_constructors_generated::*;
@@ -15,9 +14,5 @@ pub trait StateType<R>: Clone {
 }
 
 impl<R> StateType<R> for NoState {
-    fn next(&mut self, _inputs: &[&R]) {}
-}
-
-impl<R> StateType<R> for ArenaState<'_> {
     fn next(&mut self, _inputs: &[&R]) {}
 }

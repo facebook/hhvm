@@ -19,6 +19,8 @@
  *)
 
 open Hh_prelude
+module MinimalToken = Full_fidelity_minimal_token
+module MinimalTrivia = Full_fidelity_minimal_trivia
 module Trivia = Full_fidelity_positioned_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
@@ -39,7 +41,7 @@ module LazyTrivia : sig
 
   val leading :
     t ->
-    (int -> int -> Rust_lazy_trivia_ffi.RustPositionedTrivium.t list) ->
+    (int -> int -> Trivia.MinimalTrivia.t list) ->
     Trivia.SourceText.t ->
     int ->
     int ->
@@ -47,7 +49,7 @@ module LazyTrivia : sig
 
   val trailing :
     t ->
-    (int -> int -> Rust_lazy_trivia_ffi.RustPositionedTrivium.t list) ->
+    (int -> int -> Trivia.MinimalTrivia.t list) ->
     Trivia.SourceText.t ->
     int ->
     int ->
@@ -186,20 +188,14 @@ end = struct
       []
     else
       let trivia = scanner offset width in
-      Trivia.from_rust_trivia source_text trivia
+      Trivia.from_minimal_list source_text trivia offset
 
   let leading trivia scanner source_text offset width =
     match to_internal trivia with
     | Packed _ -> load_trivia scanner source_text offset width
     | Expanded (leading, _) -> leading
 
-  let trailing
-      (trivia : t)
-      (scanner :
-        int -> int -> Rust_lazy_trivia_ffi.RustPositionedTrivium.t list)
-      (source_text : Trivia.SourceText.t)
-      (offset : int)
-      (width : int) =
+  let trailing trivia scanner source_text offset width =
     match to_internal trivia with
     | Packed _ -> load_trivia scanner source_text offset width
     | Expanded (_, trailing) -> trailing
@@ -391,6 +387,24 @@ let trailing_text token =
 
 let text token =
   SourceText.sub (source_text token) (start_offset token) (width token)
+
+let from_minimal source_text minimal_token offset =
+  let kind = MinimalToken.kind minimal_token in
+  let leading_width = MinimalToken.leading_width minimal_token in
+  let width = MinimalToken.width minimal_token in
+  let leading =
+    Trivia.from_minimal_list
+      source_text
+      (MinimalToken.leading minimal_token)
+      offset
+  in
+  let trailing =
+    Trivia.from_minimal_list
+      source_text
+      (MinimalToken.trailing minimal_token)
+      (offset + leading_width + width)
+  in
+  make kind source_text offset width leading trailing
 
 let concatenate b e =
   {

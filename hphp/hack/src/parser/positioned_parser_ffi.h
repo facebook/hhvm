@@ -4,10 +4,10 @@
  This source code is licensed under the MIT license found in the
  LICENSE file in the "hack" directory of this source tree.
 */
-#if !defined(POSITIONED_FULL_TRIVIA_PARSER_FFI_H)
-#  define POSITIONED_FULL_TRIVIA_PARSER_FFI_H
+#if !defined(POSITIONED_PARSER_FFI_H)
+#  define POSITIONED_PARSER_FFI_H
 
-struct parse_positioned_full_trivia_environment {
+struct parse_positioned_environment {
   bool codegen;
   bool hhvm_compat_mode;
   bool php5_compat_mode;
@@ -25,14 +25,14 @@ struct parse_positioned_full_trivia_environment {
 #  if defined(__cplusplus)
 extern "C" {
 #  endif /*defined(__cplusplus)*/
-char const* parse_positioned_full_trivia_cpp_ffi(
+char const* parse_positioned_cpp_ffi(
     char const* filename
   , char const* source_text
-  , parse_positioned_full_trivia_environment const* env);
+  , parse_positioned_environment const* env);
 
-void parse_positioned_full_trivia_free_string_cpp_ffi(char const*);
+void parse_positioned_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
 #  endif /*defined(__cplusplus)*/
 
-#endif/*!defined(POSITIONED_FULL_TRIVIA_PARSER_FFI_H)*/
+#endif/*!defined(POSITIONED_PARSER_FFI_H)*/

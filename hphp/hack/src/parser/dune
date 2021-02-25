@@ -55,6 +55,8 @@
    full_fidelity_editable_syntax
    full_fidelity_editable_token
    full_fidelity_editable_trivia
+   full_fidelity_minimal_token
+   full_fidelity_minimal_trivia
    full_fidelity_operator_generated
    full_fidelity_operator
    full_fidelity_parser

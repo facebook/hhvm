@@ -112,7 +112,7 @@ impl Allocator for Pool {
 ///
 /// Panics upon attempts to re-enter `to_ocaml`.
 #[inline(always)]
-pub unsafe fn to_ocaml<T: ToOcamlRep + ?Sized>(value: &T) -> usize {
+pub unsafe fn to_ocaml<T: ToOcamlRep>(value: &T) -> usize {
     let pool = Pool::new();
     let result = pool.add_root(value);
     result.to_bits()

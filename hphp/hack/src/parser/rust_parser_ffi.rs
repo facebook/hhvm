@@ -8,14 +8,14 @@ use bumpalo::Bump;
 
 use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep};
-use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml, Pool};
+use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use operator::{Assoc, Operator};
 use oxidized::file_info::Mode;
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
+use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::{
-    parser_env::ParserEnv, source_text::SourceText,
-    syntax_by_ref::positioned_trivia::PositionedTrivia, syntax_error::SyntaxError,
-    syntax_tree::SyntaxTree, token_kind::TokenKind,
+    minimal_trivia::MinimalTrivium, parser_env::ParserEnv, source_text::SourceText,
+    syntax_error::SyntaxError, token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::{StackLimit, KI, MI};
@@ -212,40 +212,23 @@ macro_rules! parse_with_arena {
     };
 }
 
-pub fn scan_trivia<'a, F>(
-    source_text: SourceText<'a>,
-    offset: usize,
-    width: usize,
-    f: F,
-) -> UnsafeOcamlPtr
-where
-    F: for<'b> Fn(&'b Bump, &'b SourceText<'b>, usize, usize) -> PositionedTrivia<'b>,
-{
-    let arena = Bump::new();
-    let r = f(&arena, &source_text, offset, width);
-    unsafe { UnsafeOcamlPtr::new(to_ocaml(r.as_slice())) }
-}
-
 ocaml_ffi! {
     fn rust_parse_mode(source_text: SourceText) -> Option<file_info::Mode> {
         let (_, mode) = parse_mode(&source_text);
         mode
     }
 
-    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_leading_xhp_trivia)
+    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_leading_xhp_trivia(&source_text, offset, width)
     }
-
-    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_trailing_xhp_trivia)
+    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize, _width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_trailing_xhp_trivia(&source_text, offset)
     }
-
-    fn scan_leading_php_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_leading_php_trivia)
+    fn scan_leading_php_trivia(source_text: SourceText, offset: usize, width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_leading_php_trivia(&source_text, offset, width)
     }
-
-    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_trailing_php_trivia)
+    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize, _width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_trailing_php_trivia(&source_text, offset)
     }
 
     fn trailing_from_token(token: TokenKind) -> Operator {

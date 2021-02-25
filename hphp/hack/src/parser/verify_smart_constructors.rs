@@ -6,16 +6,11 @@
 mod verify_smart_constructors_generated;
 
 use parser_core_types::{
-    syntax_by_ref::{
-        has_arena::HasArena,
-        positioned_syntax::PositionedSyntax,
-        positioned_token::{PositionedToken, TokenFactory},
-    },
-    syntax_kind::SyntaxKind,
+    positioned_syntax::PositionedSyntax, positioned_token::PositionedToken,
+    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl,
 };
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
-use bumpalo::Bump;
 use ocaml::core::mlvalues::Value;
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
@@ -24,17 +19,13 @@ use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 // improve build times.
 
 #[derive(Clone)]
-pub struct State<'a> {
+pub struct State {
     stack: Vec<SyntaxKind>,
-    arena: &'a Bump,
 }
 
-impl<'a> State<'a> {
-    pub fn new(arena: &'a Bump) -> Self {
-        State {
-            stack: vec![],
-            arena,
-        }
+impl State {
+    pub fn new() -> Self {
+        State { stack: vec![] }
     }
 
     pub fn push(&mut self, kind: SyntaxKind) {
@@ -65,39 +56,33 @@ impl<'a> State<'a> {
     }
 }
 
-impl<'a> StateType<PositionedSyntax<'a>> for State<'a> {
+impl StateType<PositionedSyntax> for State {
     fn next(&mut self, _inputs: &[&PositionedSyntax]) {}
-}
-
-impl<'a> HasArena<'a> for State<'a> {
-    fn get_arena(&self) -> &'a Bump {
-        self.arena
-    }
 }
 
 pub use crate::verify_smart_constructors_generated::*;
 
 #[derive(Clone)]
-pub struct VerifySmartConstructors<'a> {
-    pub state: State<'a>,
-    pub token_factory: TokenFactory<'a>,
+pub struct VerifySmartConstructors {
+    pub state: State,
+    pub token_factory: SimpleTokenFactoryImpl<PositionedToken>,
 }
 
-impl<'a> VerifySmartConstructors<'a> {
-    pub fn new(arena: &'a Bump) -> Self {
+impl VerifySmartConstructors {
+    pub fn new() -> Self {
         Self {
-            state: State::new(arena),
-            token_factory: TokenFactory::new(arena),
+            state: State::new(),
+            token_factory: SimpleTokenFactoryImpl::new(),
         }
     }
 }
 
-impl<'a> SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>
-    for VerifySmartConstructors<'a>
+impl SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>
+    for VerifySmartConstructors
 {
 }
 
-impl ToOcaml for State<'_> {
+impl ToOcaml for State {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         to_list(self.stack(), context)
     }

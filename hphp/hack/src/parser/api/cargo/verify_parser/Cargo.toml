@@ -8,7 +8,6 @@ edition = "2018"
 path = "../../verify_parser.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
 parser = { path = "../../../core" }
 stack_limit = { path = "../../../../utils/stack_limit" }
 verify_smart_constructors = { path = "../../../cargo/verify_parser" }

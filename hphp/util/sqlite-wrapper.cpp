@@ -87,6 +87,13 @@ SQLite::~SQLite() {
   m_dbc = nullptr;
 }
 
+void SQLite::analyze() {
+  int rc = sqlite3_exec(m_dbc, "ANALYZE", nullptr, nullptr, nullptr);
+  if (rc != SQLITE_OK) {
+    throw SQLiteExc{rc, "ANALYZE"};
+  }
+}
+
 SQLite SQLite::connect(const std::string& path, OpenMode mode) {
   return connect(path.c_str(), mode);
 }

@@ -54,6 +54,16 @@ struct SQLite {
   SQLite& operator=(SQLite&&) noexcept;
   ~SQLite();
 
+  /**
+   * Run `ANALYZE` to improve query planning.
+   *
+   * We recommend you run this method after creating the DB and
+   * loading it with data.
+   *
+   * https://sqlite.org/lang_analyze.html
+   */
+  void analyze();
+
   enum class OpenMode {
     ReadOnly = 1,
     ReadWrite = 2
@@ -149,6 +159,19 @@ struct SQLite {
    * https://www.sqlite.org/pragma.html#pragma_synchronous
    */
   void setSynchronousLevel(SynchronousLevel lvl);
+
+  /**
+   * True iff this wrapper points to a valid SQLite connection.
+   *
+   * This will be false if we've moved a connection out of this object.
+   */
+  operator bool() const noexcept {
+    return m_dbc != nullptr;
+  }
+
+  bool operator!() const noexcept {
+    return m_dbc == nullptr;
+  }
 
   /**
    * True iff the database is read-only.

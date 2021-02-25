@@ -1526,6 +1526,8 @@ void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
   }
 }
 
+const StaticString s_invalidMethCaller("Cannot store meth_caller in APC");
+
 void VariableSerializer::serializeFunc(const Func* func) {
   auto const name = func->fullName();
   switch (getType()) {
@@ -1554,9 +1556,14 @@ void VariableSerializer::serializeFunc(const Func* func) {
     case Type::JSON:
       write(func->nameStr());
       break;
+    case Type::APCSerialize:
+      if (func->isMethCaller()) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCaller.get()}
+        );
+      }
     case Type::Serialize:
     case Type::Internal:
-    case Type::APCSerialize:
     case Type::DebuggerSerialize:
       invalidFuncConversion("string");
       break;

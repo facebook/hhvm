@@ -102,13 +102,16 @@ bool DataWalker::visitTypedValue(TypedValue rval,
     features.hasObjectOrResource = true;
   } else if (rval.m_type == KindOfRFunc) {
     features.hasObjectOrResource = true;
-  } else if (serialize_funcs && rval.m_type == KindOfFunc) {
+  } else if (rval.m_type == KindOfFunc) {
+    if (!serialize_funcs) features.hasObjectOrResource = true;
+    if (rval.m_data.pfunc->isMethCaller()) features.hasObjectOrResource = true;
     if (!rval.m_data.pfunc->isPersistent()) features.hasObjectOrResource = true;
   } else if (rval.m_type == KindOfClass) {
     if (!rval.m_data.pclass->isPersistent()) {
       features.hasObjectOrResource = true;
     }
-  } else if (serialize_clsmeth && rval.m_type == KindOfClsMeth) {
+  } else if (rval.m_type == KindOfClsMeth) {
+    if (!serialize_clsmeth) features.hasObjectOrResource = true;
     if (!rval.m_data.pclsmeth->getCls()->isPersistent()) {
       features.hasObjectOrResource = true;
     }

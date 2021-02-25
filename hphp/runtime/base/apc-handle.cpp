@@ -32,6 +32,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_invalidMethCaller("Cannot store meth_caller in APC");
+
 APCHandle::Pair APCHandle::Create(const_variant_ref source,
                                   bool serialized,
                                   APCHandleLevel level,
@@ -63,6 +65,11 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCRFunc::Construct(val(cell).prfunc);
     case KindOfFunc: {
       auto const func = val(cell).pfunc;
+      if (func->isMethCaller()) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCaller.get()}
+        );
+      }
       auto const serialize_func =
         RuntimeOption::EvalAPCSerializeFuncs &&
         // Right now cls_meth() can serialize as an array, and attempting to

@@ -564,7 +564,8 @@ val member_not_found :
   typing_error_callback ->
   unit
 
-val expr_tree_unsupported_operator : string -> string -> Pos.t -> unit
+val expr_tree_unsupported_operator :
+  string -> string -> Pos.t -> is_method:bool -> unit
 
 val parent_in_trait : Pos.t -> unit
 

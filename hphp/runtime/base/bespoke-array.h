@@ -139,8 +139,6 @@ public:
   static TypedValue NvGetStr(const ArrayData* ad, const StringData* key);
   static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos);
-  static ssize_t NvGetIntPos(const ArrayData* ad, int64_t key);
-  static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* key);
   static bool ExistsInt(const ArrayData* ad, int64_t key);
   static bool ExistsStr(const ArrayData* ad, const StringData* key);
 

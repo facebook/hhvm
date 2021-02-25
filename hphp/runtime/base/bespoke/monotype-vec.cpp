@@ -228,15 +228,6 @@ TypedValue EmptyMonotypeVec::GetPosVal(const EmptyMonotypeVec*, ssize_t) {
   always_assert(false);
 }
 
-ssize_t EmptyMonotypeVec::GetIntPos(const EmptyMonotypeVec* ead, int64_t k) {
-  return 0;
-}
-
-ssize_t EmptyMonotypeVec::GetStrPos(const EmptyMonotypeVec* ead,
-                                    const StringData*) {
-  return ead->size();
-}
-
 arr_lval EmptyMonotypeVec::LvalInt(EmptyMonotypeVec* ead, int64_t k) {
   throwOOBArrayKeyException(k, ead);
 }
@@ -611,14 +602,6 @@ TypedValue MonotypeVec::GetPosKey(const MonotypeVec* mad, ssize_t pos) {
 TypedValue MonotypeVec::GetPosVal(const MonotypeVec* mad, ssize_t pos) {
   assertx(size_t(pos) < mad->size());
   return mad->typedValueUnchecked(pos);
-}
-
-ssize_t MonotypeVec::GetIntPos(const MonotypeVec* mad, int64_t k) {
-  return LIKELY(size_t(k) < mad->size()) ? k : mad->size();
-}
-
-ssize_t MonotypeVec::GetStrPos(const MonotypeVec* mad, const StringData*) {
-  return mad->size();
 }
 
 arr_lval MonotypeVec::LvalInt(MonotypeVec* mad, int64_t k) {

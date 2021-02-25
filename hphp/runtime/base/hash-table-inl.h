@@ -285,22 +285,6 @@ TypedValue HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
 #endif
 
 template<typename ArrayType, typename ElmType>
-ssize_t HashTable<ArrayType, ElmType>::NvGetIntPos(const ArrayData* ad,
-                                                   int64_t k) {
-  auto a = asArrayType(ad);
-  auto i = a->find(k, hash_int64(k));
-  return LIKELY(validPos(i)) ? i : a->m_used;
-}
-
-template<typename ArrayType, typename ElmType>
-ssize_t HashTable<ArrayType, ElmType>::NvGetStrPos(const ArrayData* ad,
-                                                   const StringData* k) {
-  auto a = asArrayType(ad);
-  auto i = a->find(k, k->hash());
-  return LIKELY(validPos(i)) ? i : a->m_used;
-}
-
-template<typename ArrayType, typename ElmType>
 TypedValue HashTable<ArrayType, ElmType>::GetPosKey(const ArrayData* ad, ssize_t pos) {
   auto a = asArrayType(ad);
   assertx(pos != a->m_used);

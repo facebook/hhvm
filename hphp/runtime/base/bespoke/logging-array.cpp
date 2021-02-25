@@ -337,14 +337,6 @@ TypedValue LoggingArray::GetPosKey(const LoggingArray* lad, ssize_t pos) {
 TypedValue LoggingArray::GetPosVal(const LoggingArray* lad, ssize_t pos) {
   return lad->wrapped->nvGetVal(pos);
 }
-ssize_t LoggingArray::GetIntPos(const LoggingArray* lad, int64_t k) {
-  logEvent(lad, ArrayOp::GetIntPos, k);
-  return lad->wrapped->nvGetIntPos(k);
-}
-ssize_t LoggingArray::GetStrPos(const LoggingArray* lad, const StringData* k) {
-  logEvent(lad, ArrayOp::GetStrPos, k);
-  return lad->wrapped->nvGetStrPos(k);
-}
 
 ssize_t LoggingArray::IterBegin(const LoggingArray* lad) {
   logEvent(lad, ArrayOp::IterBegin);

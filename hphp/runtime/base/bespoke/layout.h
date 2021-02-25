@@ -44,8 +44,6 @@ BespokeArray* maybeMonoify(ArrayData*);
   X(TypedValue, NvGetStr, const T*, const StringData*) \
   X(TypedValue, GetPosKey, const T*, ssize_t pos) \
   X(TypedValue, GetPosVal, const T*, ssize_t pos) \
-  X(ssize_t, GetIntPos, const T*, int64_t) \
-  X(ssize_t, GetStrPos, const T*, const StringData*) \
   X(ssize_t, IterBegin, const T*) \
   X(ssize_t, IterLast, const T*) \
   X(ssize_t, IterEnd, const T*) \
@@ -128,12 +126,6 @@ struct LayoutFunctionDispatcher {
   }
   static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos) {
     return Array::GetPosVal(Cast(ad, __func__), pos);
-  }
-  static ssize_t GetIntPos(const ArrayData* ad, int64_t k) {
-    return Array::GetIntPos(Cast(ad, __func__), k);
-  }
-  static ssize_t GetStrPos(const ArrayData* ad, const StringData* k) {
-    return Array::GetStrPos(Cast(ad, __func__), k);
   }
   static arr_lval LvalInt(ArrayData* ad, int64_t k) {
     return Array::LvalInt(Cast(ad, __func__), k);

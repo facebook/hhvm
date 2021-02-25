@@ -90,14 +90,6 @@ inline arr_lval ArrayData::lval(StringData* k) {
   return g_array_funcs.lvalStr[kind()](this, k);
 }
 
-inline ssize_t ArrayData::nvGetIntPos(int64_t k) const {
-  return g_array_funcs.nvGetIntPos[kind()](this, k);
-}
-
-inline ssize_t ArrayData::nvGetStrPos(const StringData* k) const {
-  return g_array_funcs.nvGetStrPos[kind()](this, k);
-}
-
 inline TypedValue ArrayData::nvGetKey(ssize_t pos) const {
   return g_array_funcs.getPosKey[kind()](this, pos);
 }

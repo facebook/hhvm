@@ -268,12 +268,6 @@ TypedValue EmptyMonotypeDict::GetPosKey(const Self* ad, ssize_t pos) {
 TypedValue EmptyMonotypeDict::GetPosVal(const Self* ad, ssize_t pos) {
   always_assert(false);
 }
-ssize_t EmptyMonotypeDict::GetIntPos(const Self* ad, int64_t k) {
-  return 0;
-}
-ssize_t EmptyMonotypeDict::GetStrPos(const Self* ad, const StringData* k) {
-  return 0;
-}
 
 ssize_t EmptyMonotypeDict::IterBegin(const Self* ad) {
   return 0;
@@ -1220,19 +1214,6 @@ TypedValue MonotypeDict<Key>::GetPosVal(const Self* mad, ssize_t pos) {
   auto const elm = mad->elmAtIndex(pos);
   assertx(elm->key != getTombstone<Key>());
   return make_tv_of_type(elm->val, mad->type());
-}
-
-template <typename Key>
-ssize_t MonotypeDict<Key>::GetIntPos(const Self* mad, int64_t k) {
-  return mad->getPosImpl(coerceKey<Key>(k));
-}
-
-template <typename Key>
-ssize_t MonotypeDict<Key>::GetStrPos(const Self* mad, const StringData* k) {
-  if (fallbackForStaticStr<Key>(k)) {
-    return StringDict::GetStrPos(reinterpret_cast<const StringDict*>(mad), k);
-  }
-  return mad->getPosImpl(coerceKey<Key>(k));
 }
 
 template <typename Key>

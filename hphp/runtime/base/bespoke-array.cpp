@@ -132,12 +132,6 @@ TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
 TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return asBespoke(ad)->vtable()->fnGetPosVal(ad, pos);
 }
-ssize_t BespokeArray::NvGetIntPos(const ArrayData* ad, int64_t key) {
-  return asBespoke(ad)->vtable()->fnGetIntPos(ad, key);
-}
-ssize_t BespokeArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
-  return asBespoke(ad)->vtable()->fnGetStrPos(ad, key);
-}
 bool BespokeArray::ExistsInt(const ArrayData* ad, int64_t key) {
   return NvGetInt(ad, key).is_init();
 }

@@ -66,8 +66,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static void ReleaseUncounted(ArrayData*);
   static TypedValue NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue NvGetStr(const ArrayData*, const StringData*);
-  static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
-  static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);

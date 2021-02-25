@@ -608,16 +608,6 @@ TypedValue PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
   return make_tv<KindOfUninit>();
 }
 
-ssize_t PackedArray::NvGetIntPos(const ArrayData* ad, int64_t k) {
-  assertx(checkInvariants(ad));
-  return LIKELY(size_t(k) < ad->m_size) ? k : ad->m_size;
-}
-
-ssize_t PackedArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
-  assertx(checkInvariants(ad));
-  return ad->m_size;
-}
-
 TypedValue PackedArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   assertx(checkInvariants(ad));
   assertx(pos != ad->m_size);

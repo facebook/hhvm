@@ -423,16 +423,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetStr)
 
   /*
-   * ssize_t NvGetIntPos(const ArrayData*, int64_t k)
-   * ssize_t NvGetStrPos(const ArrayData*, const StringData* k)
-   *
-   *   Lookup the position of an int or string key in the array.  Returns the
-   *   canonical invalid position if the key is not in the array.
-   */
-  DISPATCH(NvGetIntPos)
-  DISPATCH(NvGetStrPos)
-
-  /*
    * TypedValue GetPosKey(const ArrayData*, ssize_t pos)
    * TypedValue GetPosVal(const ArrayData*, ssize_t pos)
    *

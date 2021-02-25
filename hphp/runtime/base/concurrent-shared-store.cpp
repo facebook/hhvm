@@ -1018,7 +1018,14 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            bool limit_ttl) {
   StoreValue *sval;
   auto keyLen = key.size();
+
+  // We need to do this before we acquire any locks. Serializing objects can
+  // reenter the VM (__sleep) and certain operations may cause us to throw for
+  // types that cannot be serialized to APC.
+  auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
+
   char* const kcp = strdup(key.data());
+
   {
   SharedMutex::ReadHolder l(m_lock);
   bool present;
@@ -1032,6 +1039,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
     if (present) {
       free(kcp);
       if (!overwrite && !sval->expired()) {
+        svar.handle->unreferenceRoot();
         return false;
       }
       /*
@@ -1074,7 +1082,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       expire_ttl = adjustedMaxTTL;
     }
 
-    auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
     if (current) {
       if (sval->rawExpire() == 0 && adjustedMaxTTL != 0) {
         APCStats::getAPCStats().removeAPCValue(

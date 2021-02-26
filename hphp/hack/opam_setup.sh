@@ -24,8 +24,13 @@ OPAM_EXECUTABLE_DIR="$(dirname "$OPAM_EXECUTABLE")"
 export PATH="$OPAM_EXECUTABLE_DIR:$PATH"
 # detect if we are building inside FB by checking a specific dune file
 if [ -e "$SOURCE_ROOT/src/facebook/dune" ]; then
+  # FB script must have already set OPAMROOT, and we reuse it
   echo "FB build"
-  OPAMROOT="$SOURCE_ROOT/facebook/opam"
+  if [ -z ${OPAMROOT+x} ]; then
+    echo "OPAMROOT must be set by dune.sh"
+    exit 1
+  fi
+  echo "OPAMROOT = $OPAMROOT"
 else
   echo "Non-FB build"
   OPAMROOT="${BUILD_ROOT}/opam"

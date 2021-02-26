@@ -9,10 +9,9 @@ path = "../../instruction_sequence.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-env = { path = "../../../cargo/env" }
+hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
-hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 itertools = "0.8"
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }

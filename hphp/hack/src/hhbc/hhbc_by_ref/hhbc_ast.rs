@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc_by_ref_env::local;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CheckStarted {
     IgnoreStarted,
@@ -89,9 +91,9 @@ impl<'arena> FcallArgs<'arena> {
 
 #[derive(Clone, Debug)]
 pub struct IterArgs<'arena> {
-    pub iter_id: env::iterator::Id,
-    pub key_id: Option<hhbc_by_ref_local::Type<'arena>>,
-    pub val_id: hhbc_by_ref_local::Type<'arena>,
+    pub iter_id: hhbc_by_ref_env::iterator::Id,
+    pub key_id: Option<local::Type<'arena>>,
+    pub val_id: local::Type<'arena>,
 }
 
 pub type ClassrefId = isize;
@@ -148,11 +150,11 @@ pub enum FatalOp {
 #[derive(Clone, Debug)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadOnlyOp),
-    EL(hhbc_by_ref_local::Type<'arena>, ReadOnlyOp),
+    EL(local::Type<'arena>, ReadOnlyOp),
     ET(&'arena str, ReadOnlyOp),
     EI(i64, ReadOnlyOp),
     PC(StackIndex, ReadOnlyOp),
-    PL(hhbc_by_ref_local::Type<'arena>, ReadOnlyOp),
+    PL(local::Type<'arena>, ReadOnlyOp),
     PT(PropId<'arena>, ReadOnlyOp),
     QT(PropId<'arena>, ReadOnlyOp),
     W,
@@ -228,7 +230,7 @@ pub enum InstructLitConst<'arena> {
     CnsE(ConstId<'arena>),
     ClsCns(ConstId<'arena>),
     ClsCnsD(ConstId<'arena>, ClassId<'arena>),
-    ClsCnsL(hhbc_by_ref_local::Type<'arena>),
+    ClsCnsL(local::Type<'arena>),
     File,
     Dir,
     Method,
@@ -336,11 +338,11 @@ pub enum InstructSpecialFlow<'arena> {
 
 #[derive(Clone, Debug)]
 pub enum InstructGet<'arena> {
-    CGetL(hhbc_by_ref_local::Type<'arena>),
-    CGetQuietL(hhbc_by_ref_local::Type<'arena>),
-    CGetL2(hhbc_by_ref_local::Type<'arena>),
-    CUGetL(hhbc_by_ref_local::Type<'arena>),
-    PushL(hhbc_by_ref_local::Type<'arena>),
+    CGetL(local::Type<'arena>),
+    CGetQuietL(local::Type<'arena>),
+    CGetL2(local::Type<'arena>),
+    CUGetL(local::Type<'arena>),
+    PushL(local::Type<'arena>),
     CGetG,
     CGetS(ReadOnlyOp),
     ClassGetC,
@@ -375,12 +377,12 @@ pub enum IstypeOp {
 #[derive(Clone, Debug)]
 pub enum InstructIsset<'arena> {
     IssetC,
-    IssetL(hhbc_by_ref_local::Type<'arena>),
+    IssetL(local::Type<'arena>),
     IssetG,
     IssetS,
-    IsUnsetL(hhbc_by_ref_local::Type<'arena>),
+    IsUnsetL(local::Type<'arena>),
     IsTypeC(IstypeOp),
-    IsTypeL(hhbc_by_ref_local::Type<'arena>, IstypeOp),
+    IsTypeL(local::Type<'arena>, IstypeOp),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -428,18 +430,18 @@ pub enum InitpropOp {
 
 #[derive(Clone, Debug)]
 pub enum InstructMutator<'arena> {
-    SetL(hhbc_by_ref_local::Type<'arena>),
+    SetL(local::Type<'arena>),
     /// PopL is put in mutators since it behaves as SetL + PopC
-    PopL(hhbc_by_ref_local::Type<'arena>),
+    PopL(local::Type<'arena>),
     SetG,
     SetS(ReadOnlyOp),
-    SetOpL(hhbc_by_ref_local::Type<'arena>, EqOp),
+    SetOpL(local::Type<'arena>, EqOp),
     SetOpG(EqOp),
     SetOpS(EqOp, ReadOnlyOp),
-    IncDecL(hhbc_by_ref_local::Type<'arena>, IncdecOp),
+    IncDecL(local::Type<'arena>, IncdecOp),
     IncDecG(IncdecOp),
     IncDecS(IncdecOp, ReadOnlyOp),
-    UnsetL(hhbc_by_ref_local::Type<'arena>),
+    UnsetL(local::Type<'arena>),
     UnsetG,
     CheckProp(PropId<'arena>),
     InitProp(PropId<'arena>, InitpropOp, ReadOnlyOp),
@@ -473,9 +475,9 @@ pub enum InstructCall<'arena> {
 #[derive(Clone, Debug)]
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
-    BaseGL(hhbc_by_ref_local::Type<'arena>, MemberOpMode),
+    BaseGL(local::Type<'arena>, MemberOpMode),
     BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
-    BaseL(hhbc_by_ref_local::Type<'arena>, MemberOpMode),
+    BaseL(local::Type<'arena>, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
     Dim(MemberOpMode, MemberKey<'arena>),
@@ -495,7 +497,7 @@ pub enum InstructFinal<'arena> {
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
     IterNext(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
-    IterFree(env::iterator::Id),
+    IterFree(hhbc_by_ref_env::iterator::Id),
 }
 
 #[derive(Clone, Debug)]
@@ -555,24 +557,24 @@ pub enum InstructMisc<'arena> {
     ArrayMarkLegacy,
     ArrayUnmarkLegacy,
     TagProvenanceHere,
-    AssertRATL(hhbc_by_ref_local::Type<'arena>, RepoAuthType<'arena>),
+    AssertRATL(local::Type<'arena>, RepoAuthType<'arena>),
     AssertRATStk(StackIndex, RepoAuthType<'arena>),
     BreakTraceHint,
-    Silence(hhbc_by_ref_local::Type<'arena>, OpSilence),
-    GetMemoKeyL(hhbc_by_ref_local::Type<'arena>),
+    Silence(local::Type<'arena>, OpSilence),
+    GetMemoKeyL(local::Type<'arena>),
     CGetCUNop,
     UGetCUNop,
     MemoGet(
         hhbc_by_ref_label::Label<'arena>,
-        Option<(hhbc_by_ref_local::Type<'arena>, isize)>,
+        Option<(local::Type<'arena>, isize)>,
     ),
     MemoGetEager(
         hhbc_by_ref_label::Label<'arena>,
         hhbc_by_ref_label::Label<'arena>,
-        Option<(hhbc_by_ref_local::Type<'arena>, isize)>,
+        Option<(local::Type<'arena>, isize)>,
     ),
-    MemoSet(Option<(hhbc_by_ref_local::Type<'arena>, isize)>),
-    MemoSetEager(Option<(hhbc_by_ref_local::Type<'arena>, isize)>),
+    MemoSet(Option<(local::Type<'arena>, isize)>),
+    MemoSetEager(Option<(local::Type<'arena>, isize)>),
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
@@ -596,7 +598,7 @@ pub enum GenCreationExecution {
 pub enum AsyncFunctions<'arena> {
     WHResult,
     Await,
-    AwaitAll(Option<(hhbc_by_ref_local::Type<'arena>, isize)>),
+    AwaitAll(Option<(local::Type<'arena>, isize)>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

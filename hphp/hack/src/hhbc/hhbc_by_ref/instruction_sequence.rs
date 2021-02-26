@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::iterator::Id as IterId;
+use hhbc_by_ref_env::iterator::Id as IterId;
+use hhbc_by_ref_env::local;
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_label::Label;
-use hhbc_by_ref_local as local;
 use hhbc_by_ref_runtime::TypedValue;
 use oxidized_by_ref::ast_defs::Pos;
 use thiserror::Error;
@@ -1868,8 +1868,8 @@ mod tests {
 
     #[test]
     fn iter() {
-        let alloc = &bumpalo::Bump::new();
-
+        let a = bumpalo::Bump::new();
+        let alloc: &bumpalo::Bump = &a;
         let mk_i = || {
             Instruct::IComment(bumpalo::collections::String::from_str_in("", alloc).into_bump_str())
         };

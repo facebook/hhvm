@@ -863,8 +863,7 @@ void UnitEmitter::serde(SerDe& sd) {
         assertx(added);
       }
       assertx(fe->sn() == i);
-      fe->serdeMetaData(sd);
-      fe->serdeLineTable(sd);
+      fe->serde(sd);
       fe->setEHTabIsSorted();
       fe->finish(fe->past);
     }
@@ -876,8 +875,7 @@ void UnitEmitter::serde(SerDe& sd) {
     auto const write = [&] (FuncEmitter* fe, Id pceId) {
       sd(pceId);
       sd(fe->name);
-      fe->serdeMetaData(sd);
-      fe->serdeLineTable(sd);
+      fe->serde(sd);
     };
     for (auto const& fe : m_fes) write(fe.get(), -1);
     for (auto const pce : m_pceVec) {

@@ -672,6 +672,33 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   }
 }
 
+template<class SerDe>
+void FuncEmitter::serde(SerDe& sd) {
+  serdeMetaData(sd);
+
+  sd(
+    m_lineTable,
+    [&] (const LineEntry& prev, const LineEntry& curDelta) {
+      if (SerDe::deserializing) {
+        return LineEntry {
+          curDelta.pastOffset() + prev.pastOffset(),
+          curDelta.val() + prev.val()
+        };
+      } else {
+        return LineEntry {
+          curDelta.pastOffset() - prev.pastOffset(),
+          curDelta.val() - prev.val()
+        };
+      }
+    }
+  );
+
+  sd(m_sourceLocTab);
+}
+
+template void FuncEmitter::serde<>(BlobDecoder&);
+template void FuncEmitter::serde<>(BlobEncoder&);
+
 ///////////////////////////////////////////////////////////////////////////////
 // FuncRepoProxy.
 

@@ -143,30 +143,5 @@ inline Offset FuncEmitter::offsetOf(const unsigned char* pc) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Serialization/Deserialization
-
-template<class SerDe>
-void FuncEmitter::serdeLineTable(SerDe& sd) {
-  sd(
-    m_lineTable,
-    [&] (const LineEntry& prev, const LineEntry& curDelta) {
-      if (SerDe::deserializing) {
-        return LineEntry {
-          curDelta.pastOffset() + prev.pastOffset(),
-          curDelta.val() + prev.val()
-        };
-      } else {
-        return LineEntry {
-          curDelta.pastOffset() - prev.pastOffset(),
-          curDelta.val() - prev.val()
-        };
-      }
-    }
-  );
-
-  sd(m_sourceLocTab);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 }

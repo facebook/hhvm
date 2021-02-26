@@ -105,7 +105,7 @@ struct FuncEmitter {
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
-  template<class SerDe> void serdeLineTable(SerDe&);
+  template<class SerDe> void serde(SerDe&);
 
   /////////////////////////////////////////////////////////////////////////////
   // Metadata.

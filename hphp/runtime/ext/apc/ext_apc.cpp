@@ -57,12 +57,13 @@ using HPHP::ScopedMem;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
+// This symbol intentionally not static to expose to debugger.
 std::aligned_storage<
   sizeof(ConcurrentTableSharedStore),
   alignof(ConcurrentTableSharedStore)
 >::type s_apc_storage;
+
+namespace {
 
 using UserAPCCache = folly::AtomicHashMap<uid_t, ConcurrentTableSharedStore*>;
 

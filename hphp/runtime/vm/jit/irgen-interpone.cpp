@@ -249,6 +249,7 @@ interpOutputLocals(IRGS& env,
     case OpSetM:
     case OpIncDecM:
     case OpSetOpM:
+    case OpSetRangeM:
     case OpUnsetM:
       smashesAllLocals = true;
       break;

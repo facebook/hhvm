@@ -498,6 +498,9 @@ int64_t getStackPopped(PC pc) {
     case Op::SetOpM:
       return getImm(pc, 0).u_IVA + 1;
 
+    case Op::SetRangeM:
+      return getImm(pc, 0).u_IVA + 3;
+
     case Op::NewRecord:
     case Op::NewStructDArray:
     case Op::NewStructDict:

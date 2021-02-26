@@ -13,17 +13,17 @@ use bitflags::bitflags;
 
 bitflags! {
     pub struct HhasPropertyFlags: u16 {
-        const IS_ABSTRACT =          0b0000_0000_0001;
-        const IS_STATIC =            0b0000_0000_0010;
-        const IS_DEEP_INIT =         0b0000_0000_0100;
-        const IS_CONST =             0b0000_0000_1000;
-        const IS_LSB =               0b0000_0001_0000;
-        const IS_NO_BAD_REDECLARE =  0b0000_0010_0000;
-        const HAS_SYSTEM_INITIAL =   0b0000_0100_0000;
-        const NO_IMPLICIT_NULL =     0b0000_1000_0000;
-        const INITIAL_SATISFIES_TC = 0b0001_0000_0000;
-        const IS_LATE_INIT =         0b0100_0000_0000;
-        const IS_READONLY =          0b1000_0000_0000;
+        const IS_ABSTRACT = 1 << 0;
+        const IS_STATIC = 1 << 1;
+        const IS_DEEP_INIT = 1 << 2;
+        const IS_CONST = 1 << 3;
+        const IS_LSB = 1 << 4;
+        const IS_NO_BAD_REDECLARE = 1 << 5;
+        const HAS_SYSTEM_INITIAL = 1 << 6;
+        const NO_IMPLICIT_NULL = 1 << 7;
+        const INITIAL_SATISFIES_TC = 1 << 8;
+        const IS_LATE_INIT = 1 << 9;
+        const IS_READONLY = 1 << 10;
     }
 }
 

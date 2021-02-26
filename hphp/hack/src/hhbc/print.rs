@@ -529,6 +529,9 @@ fn print_property_attributes<W: Write>(
     if property.is_const() {
         special_attributes.push("is_const")
     }
+    if property.is_readonly() {
+        special_attributes.push("readonly")
+    }
     if property.is_deep_init() {
         special_attributes.push("deep_init")
     }

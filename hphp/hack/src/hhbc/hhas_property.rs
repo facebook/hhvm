@@ -23,6 +23,7 @@ bitflags! {
         const NO_IMPLICIT_NULL =     0b0000_1000_0000;
         const INITIAL_SATISFIES_TC = 0b0001_0000_0000;
         const IS_LATE_INIT =         0b0100_0000_0000;
+        const IS_READONLY =          0b1000_0000_0000;
     }
 }
 
@@ -73,5 +74,8 @@ impl<'a> HhasProperty<'a> {
     }
     pub fn is_static(&self) -> bool {
         self.flags.contains(HhasPropertyFlags::IS_STATIC)
+    }
+    pub fn is_readonly(&self) -> bool {
+        self.flags.contains(HhasPropertyFlags::IS_READONLY)
     }
 }

@@ -28,6 +28,7 @@ pub struct FromAstArgs<'a> {
     pub visibility: aast_defs::Visibility,
     pub is_static: bool,
     pub is_abstract: bool,
+    pub is_readonly: bool,
 }
 
 pub fn from_ast<'a>(
@@ -172,6 +173,7 @@ pub fn from_ast<'a>(
     hhas_property_flags.set(HhasPropertyFlags::IS_LSB, is_lsb);
     hhas_property_flags.set(HhasPropertyFlags::IS_CONST, is_const);
     hhas_property_flags.set(HhasPropertyFlags::IS_LATE_INIT, is_late_init);
+    hhas_property_flags.set(HhasPropertyFlags::IS_READONLY, args.is_readonly);
 
     Ok(HhasProperty {
         name: pid,

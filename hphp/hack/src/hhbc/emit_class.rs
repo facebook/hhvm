@@ -245,6 +245,7 @@ fn from_class_elt_classvars<'a>(
                     visibility: cv.visibility, // This used to be cv_kinds
                     is_static: cv.is_static,
                     is_abstract: cv.abstract_,
+                    is_readonly: cv.readonly,
                 },
             )
         })

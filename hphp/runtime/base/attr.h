@@ -142,6 +142,9 @@ enum Attr {
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //
+  // Indicates that this property was declared as readonly             //
+  AttrIsReadOnly           = (1u << 26), //       |    X     |         //
+                                         //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.             //       |          |         //
   AttrIsFoldable           = (1u << 26), //       |          |    X    //
@@ -189,4 +192,3 @@ inline const char* attrToVisibilityStr(Attr attr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

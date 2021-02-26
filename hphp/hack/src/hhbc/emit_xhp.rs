@@ -32,6 +32,7 @@ pub fn properties_for_cache<'a>(
             visibility: Visibility::Private,
             is_static: true,
             is_abstract: false,
+            is_readonly: false,
             typehint: None,
             doc_comment: None,
             user_attributes: &[],

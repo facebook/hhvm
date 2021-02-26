@@ -33,6 +33,7 @@ Array getLoaded(bool enabled_only = true);
 void moduleLoad(const IniSetting::Map& ini, Hdf hdf);
 
 // called by hphp_process_init/exit
+void cliClientInit();
 void moduleInit();
 void moduleShutdown();
 void threadInit();

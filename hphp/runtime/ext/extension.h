@@ -76,6 +76,7 @@ public:
   virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/);
   virtual void moduleInfo(Array &info);
   virtual void moduleInit();
+  virtual void cliClientInit();
   virtual void moduleShutdown();
   virtual void threadInit();
   virtual void threadShutdown();

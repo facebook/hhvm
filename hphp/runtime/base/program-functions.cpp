@@ -2076,12 +2076,6 @@ static int execute_program_impl(int argc, char** argv) {
       return 1;
     }
 
-    int ret = 0;
-    hphp_process_init();
-    SCOPE_EXIT { hphp_process_exit(); };
-
-    block_sync_signals_and_start_handler_thread();
-
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
         !RuntimeOption::EvalUnixServerPath.empty() &&
         (!po.file.empty() || !po.args.empty()) && po.mode != "eval") {
@@ -2098,6 +2092,12 @@ static int execute_program_impl(int argc, char** argv) {
         exit(255);
       }
     }
+
+    int ret = 0;
+    hphp_process_init();
+    SCOPE_EXIT { hphp_process_exit(); };
+
+    block_sync_signals_and_start_handler_thread();
 
     std::string file;
     if (new_argc > 0) {
@@ -2352,6 +2352,31 @@ void hphp_thread_exit() {
 #if USE_JEMALLOC_EXTENT_HOOKS
   arenas_thread_exit();
 #endif
+}
+
+void cli_client_init() {
+  if (*s_sessionInitialized) return;
+  Process::InitProcessStatics();
+  HHProf::Init();
+  rds::processInit();
+  rds::threadInit();
+  ExtensionRegistry::cliClientInit();
+  ServerStats::GetLogger();
+  zend_rand_init();
+  get_server_note();
+  assertx(RequestInfo::s_requestInfo.isNull());
+  RequestInfo::s_requestInfo.getCheck()->init();
+  HardwareCounter::s_counter.getCheck();
+  InitFiniNode::ThreadInit();
+  hphp_memory_cleanup();
+  g_context.getCheck();
+  AsioSession::Init();
+  Socket::clearLastError();
+  RI().onSessionInit();
+  tl_heap->resetExternalStats();
+  g_thread_safe_locale_handler->reset();
+  Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
+  *s_sessionInitialized = true;
 }
 
 void hphp_process_init() {

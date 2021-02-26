@@ -111,6 +111,9 @@ void Extension::moduleInfo(Array &info) {
 void Extension::moduleInit()
 {}
 
+void Extension::cliClientInit()
+{}
+
 void Extension::moduleShutdown()
 {}
 

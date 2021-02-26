@@ -1082,6 +1082,17 @@ struct OSExtension final : Extension {
 
   OSExtension() : Extension("hsl_os", "0.1") {}
 
+  void cliClientInit() override {
+    CLI_REGISTER_HANDLER(HSL_os_open);
+    CLI_REGISTER_HANDLER(HSL_os_mkostemps);
+    CLI_REGISTER_HANDLER(HSL_os_mkdtemp);
+    CLI_REGISTER_HANDLER(HSL_os_socket);
+    CLI_REGISTER_HANDLER(HSL_os_connect);
+    CLI_REGISTER_HANDLER(HSL_os_bind);
+    CLI_REGISTER_HANDLER(HSL_os_listen);
+    CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
+  }
+
   void moduleInit() override {
     // Remember to update the HHI :)
 

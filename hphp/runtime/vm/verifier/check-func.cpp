@@ -1639,6 +1639,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
       return true;
 
     // function calling and object construction
+    case Op::Clone:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
@@ -1837,7 +1838,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     // unsafe: misc
     case Op::CheckProp:
     case Op::InitProp:
-    case Op::Clone: // only unsafe because of __clone, we may revisit this
     case Op::Exit:
     case Op::Eval:
     case Op::Print:

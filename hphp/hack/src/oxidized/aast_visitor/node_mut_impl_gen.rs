@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25b6db76c10982de5322827e5c871ea6>>
+// @generated SignedSource<<bf80016345035ad7bdfdf9cbd8d8695c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -101,7 +101,6 @@ impl<P: Params> NodeMut<P> for Bop {
             Bop::Diff2 => Ok(()),
             Bop::Ampamp => Ok(()),
             Bop::Barbar => Ok(()),
-            Bop::LogXor => Ok(()),
             Bop::Lt => Ok(()),
             Bop::Lte => Ok(()),
             Bop::Gt => Ok(()),

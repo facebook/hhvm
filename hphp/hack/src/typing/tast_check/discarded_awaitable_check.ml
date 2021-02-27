@@ -127,10 +127,8 @@ let visitor =
       | Binop (Ast_defs.Diff2, e, (_, Null))
       | Binop (Ast_defs.Diff2, (_, Null), e) ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
-      | Binop
-          ( Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp | LogXor),
-            e1,
-            e2 ) ->
+      | Binop (Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp), e1, e2)
+        ->
         this#on_expr (env, disallow_due_to_cast ctx env) e1;
         this#on_expr (env, disallow_due_to_cast ctx env) e2
       | Binop (Ast_defs.QuestionQuestion, e1, e2) ->

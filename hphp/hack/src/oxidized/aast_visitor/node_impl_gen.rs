@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8d9e0b0ec1a12c5904cb1702ddc8b5f7>>
+// @generated SignedSource<<e1841711df3a15053adeb1a55fdd3d22>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -101,7 +101,6 @@ impl<P: Params> Node<P> for Bop {
             Bop::Diff2 => Ok(()),
             Bop::Ampamp => Ok(()),
             Bop::Barbar => Ok(()),
-            Bop::LogXor => Ok(()),
             Bop::Lt => Ok(()),
             Bop::Lte => Ok(()),
             Bop::Gt => Ok(()),

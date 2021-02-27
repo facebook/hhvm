@@ -272,7 +272,6 @@ pub enum InstructOperator {
     Mod,
     Pow,
     Sqrt,
-    Xor,
     Not,
     Same,
     NSame,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac554a96e997634bf3cfa486c40077e2>>
+// @generated SignedSource<<7e14de26f8c384fdbf7fe318bcd73e87>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -254,7 +254,6 @@ pub enum Bop {
     Diff2,
     Ampamp,
     Barbar,
-    LogXor,
     Lt,
     Lte,
     Gt,

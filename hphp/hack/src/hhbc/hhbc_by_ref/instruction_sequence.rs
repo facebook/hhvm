@@ -606,10 +606,6 @@ pub mod instr {
         instr(alloc, Instruct::IOp(InstructOperator::Not))
     }
 
-    pub fn xor<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Xor))
-    }
-
     pub fn bitnot<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(alloc, Instruct::IOp(InstructOperator::BitNot))
     }

@@ -75,7 +75,6 @@ and bop =
   | Diff2
   | Ampamp
   | Barbar
-  | LogXor
   | Lt
   | Lte
   | Gt

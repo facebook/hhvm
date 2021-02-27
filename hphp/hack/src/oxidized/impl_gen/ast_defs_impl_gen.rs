@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<279a96355dc95258c2fb66f03ea228c2>>
+// @generated SignedSource<<3e99cd2d613ce1861ba0c1a826152af6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -305,9 +305,6 @@ impl Bop {
     pub fn mk_barbar() -> Self {
         Bop::Barbar
     }
-    pub fn mk_log_xor() -> Self {
-        Bop::LogXor
-    }
     pub fn mk_lt() -> Self {
         Bop::Lt
     }
@@ -413,12 +410,6 @@ impl Bop {
     pub fn is_barbar(&self) -> bool {
         match self {
             Bop::Barbar => true,
-            _ => false,
-        }
-    }
-    pub fn is_log_xor(&self) -> bool {
-        match self {
-            Bop::LogXor => true,
             _ => false,
         }
     }

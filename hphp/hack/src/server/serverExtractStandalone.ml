@@ -1275,7 +1275,6 @@ end = struct
     | Ast_defs.Diff2 -> Fmt.string ppf "diff2"
     | Ast_defs.Ampamp -> Fmt.string ppf "&&"
     | Ast_defs.Barbar -> Fmt.string ppf "||"
-    | Ast_defs.LogXor -> Fmt.string ppf "xor"
     | Ast_defs.Lt -> Fmt.string ppf "<"
     | Ast_defs.Lte -> Fmt.string ppf "<="
     | Ast_defs.Gt -> Fmt.string ppf ">"

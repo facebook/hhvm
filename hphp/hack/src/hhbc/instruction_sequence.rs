@@ -524,10 +524,6 @@ pub mod instr {
         instr(Instruct::IOp(InstructOperator::Not))
     }
 
-    pub fn xor() -> InstrSeq {
-        instr(Instruct::IOp(InstructOperator::Xor))
-    }
-
     pub fn bitnot() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::BitNot))
     }

@@ -395,8 +395,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       let env = Typing_substring.sub_string p2 env ty2 in
       make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
   | Ast_defs.Barbar
-  | Ast_defs.Ampamp
-  | Ast_defs.LogXor ->
+  | Ast_defs.Ampamp ->
     make_result env te1 te2 (MakeType.bool (Reason.Rlogic_ret p))
   | Ast_defs.QuestionQuestion
   | Ast_defs.Eq _

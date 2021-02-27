@@ -1153,8 +1153,8 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     (env, ty)
   | A.Binop
       ( ( Ast_defs.(
-            ( Eqeqeq | Diff2 | Barbar | Ampamp | LogXor | Eqeq | Diff | Lt | Lte
-            | Gt | Gte | Cmp )) as op ),
+            ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
+            | Gte | Cmp )) as op ),
         e1,
         e2 ) ->
     let (env, ty1) = expr env e1 in
@@ -1162,7 +1162,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     let deps =
       let gather_policies =
         match op with
-        | Ast_defs.(Eqeqeq | Diff2 | Barbar | Ampamp | LogXor) ->
+        | Ast_defs.(Eqeqeq | Diff2 | Barbar | Ampamp) ->
           (* === and !== check for object identity, the resulting
              boolean is thus governed by the object policies of
              the two operands

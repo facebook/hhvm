@@ -4216,7 +4216,6 @@ fn from_binop(opts: &Options, op: &ast_defs::Bop) -> Result {
         B::Cmp => instr::cmp(),
         B::Percent => instr::mod_(),
         B::Xor => instr::bitxor(),
-        B::LogXor => instr::xor(),
         B::Eq(_) => return Err(Unrecoverable("assignment is emitted differently".into())),
         B::QuestionQuestion => {
             return Err(Unrecoverable(

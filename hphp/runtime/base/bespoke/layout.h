@@ -212,37 +212,14 @@ constexpr LayoutFunctions fromArray() {
  * A bespoke::Layout can represent either both the concrete layout of a given
  * BespokeArray or some abstract type that's a union of concrete layouts.
  *
- * bespoke::Layout also maintains the type hierarchy of bespoke layouts.
- * Bespoke layouts form a lattice, with BespokeTop as the top type and the null
- * layout as the bottom type. Each layout specifies its set of immediate
- * parents and whether or not it is "liveable"--whether it is sufficiently
- * general to be used as a guard type for a live translation. The type
- * hierarchy satisfies the following constraints:
+ * bespoke::Layout* also forms a type lattice. BespokeTop is the top type, and
+ * the null layout is the bottom type. We construct this lattice incrementally:
+ * a layout must declare edges to its (pre-existing) parents on construction.
+ * This constraint means that layout creation order is a topological sort.
  *
- *   1) When a layout is initialized, all of its parents must have already been
- *   initialized. This ensures that the type hierarchy is a DAG. Each layout
- *   other than BespokeTop must have at least one parent.
- *
- *   2) The supplied parents of each node are immediate parents. That is, no
- *   supplied parent can be an ancestor of another supplied parent. This
- *   ensures that the parent edges form a covering relation and simplifies the
- *   process of computing joins and meets.
- *
- *   3) The type hierarchy forms a join semilattice. That is, the least upper
- *   bound of every pair of layouts exists (this is trivial as we have
- *   BespokeTop) and is unique. Together with our bottom type, this implies
- *   that the type hierarchy is a lattice in which both least upper bounds and
- *   greatest lower bounds are unique.
- *
- *   4) Each layout has a distinct least liveable ancestor. This is equivalent
- *   to the constraint that each liveable layout is the unique parent of each
- *   of its non-liveable immediate children. This makes the process of
- *   converting a layout to a liveable layout unambiguous.
- *
- * These constraints are validated upon the creation of each layout in debug
- * mode. If the constraints are satisfied, we are left with a DAG corresponding
- * to the covering relation of a valid lattice, in which join and meet can be
- * implemented by simple BFS.
+ * (NOTE: Parent edges do not need to form a covering relation on the lattice.
+ * The set of all ancestors of a given layout is defined by the transitive
+ * closure of the parent edges.)
  *
  * Once the type hierarchy has been created, we supply the standard <=, meet
  * (&), and join (|) operations for the layouts, which are used from ArraySpec
@@ -360,7 +337,6 @@ private:
   MaskAndCompare computeMaskAndCompare() const;
 
   bool isDescendantOfDebug(const Layout* other) const;
-  const Layout* nearestBoundDebug(bool upward, const Layout* other) const;
 
   struct Initializer;
   static Initializer s_initializer;

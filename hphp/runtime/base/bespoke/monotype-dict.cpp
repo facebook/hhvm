@@ -53,17 +53,16 @@ uint16_t packSizeIndexAndAuxBits(uint8_t index, uint8_t aux) {
 
 constexpr LayoutIndex kBaseLayoutIndex = {1 << 11};
 
+constexpr size_t kMinSizeIndex = 7;
+constexpr size_t kMinSizeBytes = 128;
 
-constexpr uint8_t kMinSizeIndex = 7;
+static_assert(sizeof(EmptyMonotypeDict) <= kMinSizeBytes);
+static_assert(kMinSizeBytes == kSizeIndex2Size[kMinSizeIndex]);
 
-constexpr size_t kEmptyMonotypeDictSize =
-  MemoryManager::sizeIndex2Size(kMinSizeIndex);
-
-std::aligned_storage<kEmptyMonotypeDictSize, 16>::type s_emptyDict;
-std::aligned_storage<kEmptyMonotypeDictSize, 16>::type s_emptyDArray;
-std::aligned_storage<kEmptyMonotypeDictSize, 16>::type s_emptyMarkedDict;
-std::aligned_storage<kEmptyMonotypeDictSize, 16>::type s_emptyMarkedDArray;
-
+std::aligned_storage<kMinSizeBytes, 16>::type s_emptyDict;
+std::aligned_storage<kMinSizeBytes, 16>::type s_emptyDArray;
+std::aligned_storage<kMinSizeBytes, 16>::type s_emptyMarkedDict;
+std::aligned_storage<kMinSizeBytes, 16>::type s_emptyMarkedDArray;
 
 const LayoutFunctions* emptyVtable() {
   static auto const result = fromArray<EmptyMonotypeDict>();
@@ -85,33 +84,6 @@ const LayoutFunctions* staticStrVtable() {
   return &result;
 }
 
-template <typename Key>
-const LayoutFunctions* emptyOrMonotypeVtable() {
-  static auto const result = [] {
-    auto res = fromArray<MonotypeDict<Key>>();
-    res.fnHeapSize = nullptr;
-    res.fnEscalateToVanilla = nullptr;
-    res.fnConvertToUncounted = nullptr;
-    res.fnPostSort = nullptr;
-    res.fnToDVArray = nullptr;
-    res.fnToHackArr = nullptr;
-    res.fnSetLegacyArray = nullptr;
-
-    return res;
-  }();
-
-  return &result;
-}
-
-const LayoutFunctions* emptyOrMonotypeVtable(KeyTypes kt) {
-  switch (kt) {
-    case KeyTypes::Ints:          return emptyOrMonotypeVtable<int64_t>();
-    case KeyTypes::Strings:       return emptyOrMonotypeVtable<StringData*>();
-    case KeyTypes::StaticStrings: return emptyOrMonotypeVtable<StaticStrPtr>();
-    default: always_assert(false);
-  }
-}
-
 constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
 
@@ -120,7 +92,7 @@ using StringDict = MonotypeDict<StringData*>;
 constexpr LayoutIndex getEmptyLayoutIndex() {
   auto constexpr offset = 4 * (1 << 8);
   auto constexpr base = kBaseLayoutIndex.raw;
-  auto constexpr type = KindOfUninit;
+  auto constexpr type = kExtraInvalidDataType;
   static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
   return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
 }
@@ -158,36 +130,31 @@ Layout::LayoutSet getTopMonotypeDictParents(KeyTypes kt) {
     : AbstractLayout::GetBespokeTopIndex()};
 }
 
-Layout::LayoutSet getEmptyOrMonotypeDictParents(KeyTypes kt, DataType type) {
-  if (kt == KeyTypes::StaticStrings) {
-    return {TopMonotypeDictLayout::Index(kt),
-            EmptyOrMonotypeDictLayout::Index(KeyTypes::Strings, type)};
-  }
-  return {TopMonotypeDictLayout::Index(kt)};
-}
-
-Layout::LayoutSet getAllEmptyOrMonotypeDictLayouts() {
+Layout::LayoutSet getAllMonotypeDictLayouts() {
   Layout::LayoutSet result;
-  using L = EmptyOrMonotypeDictLayout;
-#define DT(name, value) {                                     \
-    auto const type = KindOf##name;                           \
-    if (type == dt_modulo_persistence(type)) {                \
-      result.insert(L::Index(KeyTypes::Ints, type));          \
-      result.insert(L::Index(KeyTypes::Strings, type));       \
-      result.insert(L::Index(KeyTypes::StaticStrings, type)); \
-    }                                                         \
+#define DT(name, value) {                                                      \
+    auto const type = KindOf##name;                                            \
+    if (type != KindOfUninit) {                                                \
+      result.insert(MonotypeDictLayout::Index(KeyTypes::Ints, type));          \
+      result.insert(MonotypeDictLayout::Index(KeyTypes::Strings, type));       \
+      result.insert(MonotypeDictLayout::Index(KeyTypes::StaticStrings, type)); \
+    }                                                                          \
   }
   DATATYPES
 #undef DT
   return result;
 }
 
-LayoutIndex getMonotypeParentLayout(KeyTypes kt, DataType dt) {
-  if (!hasPersistentFlavor(dt) || isRefcountedType(dt)) {
-    return EmptyOrMonotypeDictLayout::Index(kt, dt_modulo_persistence(dt));
+Layout::LayoutSet getMonotypeParentLayouts(KeyTypes kt, DataType dt) {
+  Layout::LayoutSet result;
+  if (kt == KeyTypes::StaticStrings) {
+    result.insert(MonotypeDictLayout::Index(KeyTypes::Strings, dt));
   }
-
-  return MonotypeDictLayout::Index(kt, dt_modulo_persistence(dt));
+  if (hasPersistentFlavor(dt) && !isRefcountedType(dt)) {
+    result.insert(MonotypeDictLayout::Index(kt, dt_with_rc(dt)));
+  }
+  result.insert(TopMonotypeDictLayout::Index(kt));
+  return result;
 }
 
 }
@@ -217,10 +184,12 @@ bool EmptyMonotypeDict::checkInvariants() const {
   assertx(m_extra_lo16 == 0);
   assertx(isDArray() || isDictType());
   assertx(layoutIndex() == getEmptyLayoutIndex());
+
   auto const DEBUG_ONLY mad =
     reinterpret_cast<const MonotypeDict<int64_t>*>(this);
-  assertx(mad->type() == KindOfUninit);
+  assertx(mad->hasEmptyLayout());
   assertx(mad->sizeIndex() == kMinSizeIndex);
+  assertx(mad->type() == kExtraInvalidDataType);
   assertx(mad->used() == 0);
 
   return true;
@@ -229,7 +198,7 @@ bool EmptyMonotypeDict::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////////////
 
 size_t EmptyMonotypeDict::HeapSize(const Self*) {
-  return sizeof(EmptyMonotypeDict);
+  return kMinSizeBytes;
 }
 void EmptyMonotypeDict::Scan(const Self* ad, type_scan::Scanner& scanner) {
 }
@@ -243,10 +212,15 @@ ArrayData* EmptyMonotypeDict::EscalateToVanilla(
 }
 void EmptyMonotypeDict::ConvertToUncounted(
     Self* ad, DataWalker::PointerMap* seen) {
+  // All EmptyMonotypeDicts are static, so we should never make them uncounted.
+  always_assert(false);
 }
 void EmptyMonotypeDict::ReleaseUncounted(Self* ad) {
+  // All EmptyMonotypeDicts are static, so we should never release them.
+  always_assert(false);
 }
 void EmptyMonotypeDict::Release(Self* ad) {
+  // All EmptyMonotypeDicts are static, so we should never release them.
   always_assert(false);
 }
 
@@ -578,14 +552,16 @@ bool MonotypeDict<Key>::checkInvariants() const {
   assertx(size() <= used());
   assertx(IMPLIES(!isZombie(), used() <= numElms()));
 
-  // We may call StringDict's methods on a dict of static strings.
-  if (layoutIndex() != getEmptyLayoutIndex()) {
+  // In order to make fewer virtual calls, we pun certain layouts with others:
+  //   - We may call StringDict's methods on a dict of static strings.
+  //   - We may call any MonotypeDict's methods on an EmptyMonotypeDict.
+  if (hasEmptyLayout()) {
+    reinterpret_cast<const EmptyMonotypeDict*>(this)->checkInvariants();
+  } else {
     assertx(isRealType(type()));
     assertx(layoutIndex() == getLayoutIndex<Key>(type()) ||
             (std::is_same<Self, StringDict>::value &&
              layoutIndex() == getLayoutIndex<StaticStrPtr>(type())));
-  } else {
-    reinterpret_cast<const EmptyMonotypeDict*>(this)->checkInvariants();
   }
 
   return true;
@@ -667,6 +643,7 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   auto const hash_pos = find<Remove>(key, getHash(key)).hash_pos;
   if (hash_pos < 0) return this;
 
+  assertx(!hasEmptyLayout());
   auto const mad = cowCheck() ? copy() : this;
   auto& index = mad->indices()[hash_pos];
   auto const elm = mad->elmAtIndex(index);
@@ -708,6 +685,7 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
 
+  assertx(!hasEmptyLayout());
   auto const mad = cowCheck() ? copy() : this;
   auto const elm = old - elms() + mad->elms();
   assertx(keysEqual(elm->key, key));
@@ -723,15 +701,16 @@ template <typename Key> template <typename K>
 ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
   auto const dt = type();
   if (key == getTombstone<Key>() ||
-      (dt != KindOfUninit && !equivDataTypes(dt, v.type()))) {
+      (dt != kExtraInvalidDataType && !equivDataTypes(dt, v.type()))) {
     auto const ad = escalateWithCapacity(size() + 1, __func__);
     auto const result = ad->setMove(k, v);
     assertx(ad == result);
     if (decReleaseCheck()) Release(this);
     return result;
   }
+
   auto const result = prepareForInsert();
-  if (dt == KindOfUninit) {
+  if (dt == kExtraInvalidDataType) {
     result->setLayoutIndex(getLayoutIndex<Key>(v.type()));
   } else if (dt != v.type()) {
     result->setLayoutIndex(getLayoutIndex<Key>(dt_with_rc(dt)));
@@ -750,6 +729,10 @@ ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
     result->m_size++;
   }
   if (result != this && decReleaseCheck()) Release(this);
+
+  assertx(result->checkInvariants());
+  assertx(result->hasExactlyOneRef());
+  assertx(!result->hasEmptyLayout());
   return result;
 }
 
@@ -941,6 +924,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
 
 template <typename Key>
 MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
+  assertx(!hasEmptyLayout());
   auto const mem = tl_heap->objMallocIndex(index);
   auto const ad = reinterpret_cast<MonotypeDict<Key>*>(mem);
 
@@ -1095,6 +1079,11 @@ void MonotypeDict<Key>::setZombie() {
 template <typename Key>
 bool MonotypeDict<Key>::isZombie() const {
   return m_extra_lo16 == uint16_t(-1);
+}
+
+template <typename Key>
+bool MonotypeDict<Key>::hasEmptyLayout() const {
+  return layoutIndex() == getEmptyLayoutIndex();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1355,7 +1344,9 @@ ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::ToDVArray(Self* madIn, bool copy) {
-  if (madIn->isDArray()) return madIn;
+  assertx(madIn->isDictType());
+  if (madIn->empty()) return EmptyMonotypeDict::GetDArray(false);
+
   auto const mad = copy ? madIn->copy() : madIn;
   mad->m_kind = HeaderKind::BespokeDArray;
   assertx(mad->checkInvariants());
@@ -1364,7 +1355,9 @@ ArrayData* MonotypeDict<Key>::ToDVArray(Self* madIn, bool copy) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::ToHackArr(Self* madIn, bool copy) {
-  if (madIn->isDictType()) return madIn;
+  assertx(madIn->isDArray());
+  if (madIn->empty()) return EmptyMonotypeDict::GetDict(false);
+
   auto const mad = copy ? madIn->copy() : madIn;
   mad->m_kind = HeaderKind::BespokeDict;
   mad->setLegacyArrayInPlace(false);
@@ -1405,6 +1398,10 @@ ArrayData* MonotypeDict<Key>::PostSort(Self* mad, ArrayData* vad) {
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetLegacyArray(
     Self* madIn, bool copy, bool legacy) {
+  if (madIn->empty()) {
+    return madIn->isDictType() ? EmptyMonotypeDict::GetDict(legacy)
+                               : EmptyMonotypeDict::GetDArray(legacy);
+  }
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
@@ -1445,34 +1442,6 @@ Type resultKeyType(KeyTypes kt) {
   }
   not_reached();
 }
-
-ArrayLayout setTypeImpl(KeyTypes kt, DataType dt, Type key, Type val) {
-  if (!key.maybe(TInt|TStr))  return ArrayLayout::Bottom();
-  if (!val.maybe(TInitCell))  return ArrayLayout::Bottom();
-  if (!key.isKnownDataType()) return ArrayLayout::Top();
-  if (!val.isKnownDataType()) return ArrayLayout::Top();
-
-  auto const keyType = [&]{
-    switch (kt) {
-      case KeyTypes::StaticStrings:
-        if (key <= TStaticStr) return KeyTypes::StaticStrings;
-        /* fallthrough */
-      case KeyTypes::Strings:
-        return key <= TStr ? KeyTypes::Strings : KeyTypes::Any;
-      case KeyTypes::Ints:
-        return key <= TInt ? KeyTypes::Ints : KeyTypes::Any;
-      default:
-        always_assert(false);
-    }
-  }();
-  if (keyType == KeyTypes::Any) return ArrayLayout::Vanilla();
-
-  auto const base = val.toDataType();
-  if (!equivDataTypes(base, dt)) return ArrayLayout::Vanilla();
-
-  auto const valType = base == dt ? base : dt_with_rc(base);
-  return ArrayLayout(MonotypeDictLayout::Index(keyType, valType));
-}
 }
 
 // TopMonotypeDictLayout(KeyType)
@@ -1501,35 +1470,6 @@ std::pair<Type, bool> TopMonotypeDictLayout::firstLastType(
 
 Type TopMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
   return isKey ? resultKeyType(m_keyType) : TInitCell;
-}
-
-// EmptyOrMonotypeDictLayout(KeyType, ValType)
-
-ArrayLayout EmptyOrMonotypeDictLayout::appendType(Type val) const {
-  return setType(TInt, val);
-}
-
-ArrayLayout EmptyOrMonotypeDictLayout::removeType(Type key) const {
-  return ArrayLayout(this);
-}
-
-ArrayLayout EmptyOrMonotypeDictLayout::setType(Type key, Type val) const {
-  auto const result = setTypeImpl(m_keyType, m_valType, key, val);
-  return result == ArrayLayout::Vanilla() ? ArrayLayout::Top() : result;
-}
-
-std::pair<Type, bool> EmptyOrMonotypeDictLayout::elemType(Type key) const {
-  auto const validKey = key.maybe(applicableKeyType(m_keyType));
-  return {validKey ? Type(m_valType) : TBottom, false};
-}
-
-std::pair<Type, bool> EmptyOrMonotypeDictLayout::firstLastType(
-    bool isFirst, bool isKey) const {
-  return {isKey ? resultKeyType(m_keyType) : Type(m_valType), false};
-}
-
-Type EmptyOrMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
-  return isKey ? resultKeyType(m_keyType) : Type(m_valType);
 }
 
 // EmptyMonotypeDictLayout()
@@ -1583,7 +1523,31 @@ ArrayLayout MonotypeDictLayout::removeType(Type key) const {
 }
 
 ArrayLayout MonotypeDictLayout::setType(Type key, Type val) const {
-  return setTypeImpl(m_keyType, m_valType, key, val);
+  if (!key.maybe(TInt|TStr))  return ArrayLayout::Bottom();
+  if (!val.maybe(TInitCell))  return ArrayLayout::Bottom();
+  if (!key.isKnownDataType()) return ArrayLayout::Top();
+  if (!val.isKnownDataType()) return ArrayLayout::Top();
+
+  auto const keyType = [&]{
+    switch (m_keyType) {
+      case KeyTypes::StaticStrings:
+        if (key <= TStaticStr) return KeyTypes::StaticStrings;
+        /* fallthrough */
+      case KeyTypes::Strings:
+        return key <= TStr ? KeyTypes::Strings : KeyTypes::Any;
+      case KeyTypes::Ints:
+        return key <= TInt ? KeyTypes::Ints : KeyTypes::Any;
+      default:
+        always_assert(false);
+    }
+  }();
+  if (keyType == KeyTypes::Any) return ArrayLayout::Top();
+
+  auto const base = val.toDataType();
+  if (!equivDataTypes(base, m_valType)) return ArrayLayout::Top();
+
+  auto const valType = base == m_valType ? base : dt_with_rc(base);
+  return ArrayLayout(Index(keyType, valType));
 }
 
 std::pair<Type, bool> MonotypeDictLayout::elemType(Type key) const {
@@ -1610,40 +1574,29 @@ void EmptyMonotypeDict::InitializeLayouts() {
   new TopMonotypeDictLayout(KeyTypes::Strings);
   new TopMonotypeDictLayout(KeyTypes::StaticStrings);
 
-#define DT(name, value) {                                           \
-    auto const type = KindOf##name;                                 \
-    if (type == dt_modulo_persistence(type)) {                      \
-      new EmptyOrMonotypeDictLayout(KeyTypes::Ints, type);          \
-      new EmptyOrMonotypeDictLayout(KeyTypes::Strings, type);       \
-      new EmptyOrMonotypeDictLayout(KeyTypes::StaticStrings, type); \
-    }                                                               \
+#define DT(name, value) {                                              \
+    auto const type = KindOf##name;                                    \
+    if (type == dt_modulo_persistence(type) && type != KindOfUninit) { \
+      new MonotypeDictLayout(KeyTypes::Ints, type);                    \
+      new MonotypeDictLayout(KeyTypes::Strings, type);                 \
+      new MonotypeDictLayout(KeyTypes::StaticStrings, type);           \
+    }                                                                  \
+  }
+DATATYPES
+#undef DT
+
+#define DT(name, value) {                                              \
+    auto const type = KindOf##name;                                    \
+    if (type != dt_modulo_persistence(type) && type != KindOfUninit) { \
+      new MonotypeDictLayout(KeyTypes::Ints, type);                    \
+      new MonotypeDictLayout(KeyTypes::Strings, type);                 \
+      new MonotypeDictLayout(KeyTypes::StaticStrings, type);           \
+    }                                                                  \
   }
 DATATYPES
 #undef DT
 
   new EmptyMonotypeDictLayout();
-
-#define DT(name, value) {                                    \
-    auto const type = KindOf##name;                          \
-    if (type == dt_modulo_persistence(type)) {               \
-      new MonotypeDictLayout(KeyTypes::Ints, type);          \
-      new MonotypeDictLayout(KeyTypes::Strings, type);       \
-      new MonotypeDictLayout(KeyTypes::StaticStrings, type); \
-    }                                                        \
-  }
-DATATYPES
-#undef DT
-
-#define DT(name, value) {                                    \
-    auto const type = KindOf##name;                          \
-    if (type != dt_modulo_persistence(type)) {               \
-      new MonotypeDictLayout(KeyTypes::Ints, type);          \
-      new MonotypeDictLayout(KeyTypes::Strings, type);       \
-      new MonotypeDictLayout(KeyTypes::StaticStrings, type); \
-    }                                                        \
-  }
-DATATYPES
-#undef DT
 
   auto const init = [&](EmptyMonotypeDict* ad, HeaderKind kind, bool legacy) {
     // We use kMinSizeIndex in the header of EmptyMonotypeDicts so that they
@@ -1667,8 +1620,8 @@ DATATYPES
 
 TopMonotypeDictLayout::TopMonotypeDictLayout(KeyTypes kt)
   : AbstractLayout(
-      Index(kt), folly::sformat("MonotypeDict<Empty|{},Top>", show(kt)),
-      getTopMonotypeDictParents(kt), emptyOrMonotypeVtable(kt))
+      Index(kt), folly::sformat("MonotypeDict<{},Top>", show(kt)),
+      getTopMonotypeDictParents(kt), getVtableForKeyTypes(kt))
   , m_keyType(kt)
 {}
 
@@ -1677,25 +1630,10 @@ LayoutIndex TopMonotypeDictLayout::Index(KeyTypes kt) {
   return MonotypeDictLayout::Index(kt, static_cast<DataType>(t));
 }
 
-EmptyOrMonotypeDictLayout::EmptyOrMonotypeDictLayout(KeyTypes kt, DataType type)
-  : AbstractLayout(
-      Index(kt, type),
-      folly::sformat("MonotypeDict<Empty|{},{}>", show(kt), tname(type)),
-      getEmptyOrMonotypeDictParents(kt, type), emptyOrMonotypeVtable(kt))
-  , m_keyType(kt)
-  , m_valType(type)
-{}
-
-LayoutIndex EmptyOrMonotypeDictLayout::Index(KeyTypes kt, DataType type) {
-  assertx(type == dt_modulo_persistence(type));
-  auto const t = int8_t(type) ^ int8_t(kAbstractDataTypeMask);
-  return MonotypeDictLayout::Index(kt, static_cast<DataType>(t));
-}
-
 EmptyMonotypeDictLayout::EmptyMonotypeDictLayout()
   : ConcreteLayout(
       Index(), "MonotypeDict<Empty>",
-      {getAllEmptyOrMonotypeDictLayouts()}, emptyVtable())
+      {getAllMonotypeDictLayouts()}, emptyVtable())
 {}
 
 LayoutIndex EmptyMonotypeDictLayout::Index() {
@@ -1706,7 +1644,7 @@ MonotypeDictLayout::MonotypeDictLayout(KeyTypes kt, DataType type)
   : ConcreteLayout(
       Index(kt, type),
       folly::sformat("MonotypeDict<{},{}>", show(kt), tname(type)),
-      {getMonotypeParentLayout(kt, type)},
+      getMonotypeParentLayouts(kt, type),
       getVtableForKeyTypes(kt))
   , m_keyType(kt)
   , m_valType(type)

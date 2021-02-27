@@ -200,7 +200,7 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
     if (vec) {
       return dt == KindOfUninit
         ? ArrayLayout(TopMonotypeVecLayout::Index())
-        : ArrayLayout(EmptyOrMonotypeVecLayout::Index(dt));
+        : ArrayLayout(MonotypeVecLayout::Index(dt));
     }
 
     if (dict) {
@@ -208,7 +208,7 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
       if (kt == KeyTypes::Any) return ArrayLayout::Bespoke();
       return dt == KindOfUninit
         ? ArrayLayout(TopMonotypeDictLayout::Index(kt))
-        : ArrayLayout(EmptyOrMonotypeDictLayout::Index(kt, dt));
+        : ArrayLayout(MonotypeDictLayout::Index(kt, dt));
     }
   }
 

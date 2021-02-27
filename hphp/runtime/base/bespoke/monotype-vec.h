@@ -26,8 +26,6 @@ namespace HPHP { namespace bespoke {
 struct EmptyMonotypeVec;
 
 struct MonotypeVec : public BespokeArray {
-  static constexpr size_t kMinSizeIndex = 2;
-
   /**
    * Initializes layouts for MonotypeVec and for EmptyMonotypeVec.
    * Also initializes the static values of the EmptyMonotypeVec.
@@ -126,20 +124,6 @@ struct EmptyMonotypeVecLayout : public ConcreteLayout {
 
 struct MonotypeVecLayout : public ConcreteLayout {
   explicit MonotypeVecLayout(DataType type);
-  static LayoutIndex Index(DataType type);
-
-  ArrayLayout appendType(Type val) const override;
-  ArrayLayout removeType(Type key) const override;
-  ArrayLayout setType(Type key, Type val) const override;
-  std::pair<Type, bool> elemType(Type key) const override;
-  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
-  Type iterPosType(Type pos, bool isKey) const override;
-
-  DataType m_fixedType;
-};
-
-struct EmptyOrMonotypeVecLayout : public AbstractLayout {
-  explicit EmptyOrMonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
 
   ArrayLayout appendType(Type val) const override;

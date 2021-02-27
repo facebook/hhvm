@@ -255,7 +255,7 @@ bool Layout::isDescendantOfDebug(const Layout* other) const {
 }
 
 /*
- * Compute the full set of ancestors by running upward DFS until termination.
+ * Compute the set of ancestors by running upward DFS until termination.
  */
 Layout::LayoutSet Layout::computeAncestors() const {
   BFSWalker walker(true, index());
@@ -264,8 +264,7 @@ Layout::LayoutSet Layout::computeAncestors() const {
 }
 
 /*
- * Compute the full set of descendants by running downward DFS until
- * termination.
+ * Compute the set of descendants by running downward DFS until termination.
  */
 Layout::LayoutSet Layout::computeDescendants() const {
   BFSWalker walker(false, index());
@@ -273,85 +272,13 @@ Layout::LayoutSet Layout::computeDescendants() const {
   return walker.allSeen();
 }
 
-/*
- * A less efficient implementation of least upper and greatest lower bound that
- * does not assume uniqueness. This implementation works for general DAGs and
- * is used to validate that the DAG is a lattice.
- */
-const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const {
-  assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
-  LayoutSet myClosure = upward ? computeAncestors() : computeDescendants();
-  LayoutSet otherClosure =
-    upward ? other->computeAncestors() : other->computeDescendants();
-  LayoutSet common;
-  std::set_intersection(myClosure.cbegin(), myClosure.cend(),
-                        otherClosure.cbegin(), otherClosure.cend(),
-                        std::inserter(common, common.end()));
-  LayoutSet workQ(common);
-  for (auto const item : workQ) {
-    auto const layout = FromIndex(item);
-    for (auto const rel : upward ? layout->m_parents : layout->m_children) {
-      auto const iter = common.find(rel);
-      if (iter == common.end()) continue;
-      common.erase(iter);
-    }
-  }
-
-  SCOPE_ASSERT_DETAIL("bespoke::Layout::nearestBoundDebug") {
-    std::string result = folly::sformat(
-        "Found multiple nodes when computing {} bound for {} and {}:\n",
-        upward ? "an upper" : "a lower", describe(), other->describe());
-    for (auto const item : common) {
-      result += folly::sformat("  {}\n", Layout::FromIndex(item)->describe());
-    }
-    return result;
-  };
-
-  assertx(common.size() <= 1);
-  if (common.empty()) return nullptr;
-  auto const layout = FromIndex(*common.cbegin());
-  assertx(upward ? isDescendantOfDebug(layout)
-                 : layout->isDescendantOfDebug(this));
-  assertx(upward ? other->isDescendantOfDebug(layout)
-                 : layout->isDescendantOfDebug(other));
-  return layout;
-}
-
 bool Layout::checkInvariants() const {
   if (!allowBespokeArrayLikes()) return true;
 
-  // 0. Parents are valid.
   for (auto const DEBUG_ONLY parent : m_parents) {
     auto const DEBUG_ONLY layout = FromIndex(parent);
     assertx(layout);
     assertx(layout->m_topoIndex < m_topoIndex);
-  }
-
-  // 1. The parents provided are immediate parents (i.e. the descendant graph
-  // is a covering relation).
-  {
-    LayoutSet grandparents;
-    for (auto const parent : m_parents) {
-      auto const layout = FromIndex(parent);
-      std::copy(layout->m_parents.cbegin(), layout->m_parents.cend(),
-                std::inserter(grandparents, grandparents.end()));
-    }
-    BFSWalker walker(true, grandparents);
-    auto const all = walker.allSeen();
-    LayoutSet inter;
-    std::set_intersection(all.cbegin(), all.cend(),
-                          m_parents.cbegin(), m_parents.cend(),
-                          std::inserter(inter, inter.end()));
-    assertx(inter.empty());
-  }
-
-  // 2. Least upper bound exists and is unique.
-  for (size_t i = 0; i < index().raw; i++) {
-    auto const other = s_layoutTable[i];
-    if (!other) continue;
-    auto const DEBUG_ONLY lub = nearestBoundDebug(true, other);
-    assertx(lub);
-    assertx(lub == other->nearestBoundDebug(true, this));
   }
 
   return true;
@@ -434,7 +361,6 @@ const Layout* Layout::operator|(const Layout& other) const {
   auto const lt = AncestorOrdering{};
   while (lIter != m_ancestors.cend() && rIter != other.m_ancestors.cend()) {
     if (*lIter == *rIter) {
-      assertx(*lIter == nearestBoundDebug(true, &other));
       return *lIter;
     }
     if (lt(*lIter, *rIter)) {
@@ -453,7 +379,6 @@ const Layout* Layout::operator&(const Layout& other) const {
   auto const lt = DescendantOrdering{};
   while (lIter != m_descendants.cend() && rIter != other.m_descendants.cend()) {
     if (*lIter == *rIter) {
-      assertx(*lIter == nearestBoundDebug(false, &other));
       return *lIter;
     }
     if (lt(*lIter, *rIter)) {
@@ -462,7 +387,6 @@ const Layout* Layout::operator&(const Layout& other) const {
       rIter++;
     }
   }
-  assertx(!nearestBoundDebug(false, &other));
   return nullptr;
 }
 

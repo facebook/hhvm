@@ -301,7 +301,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
     if (type == (TVec|TDict)) {
       always_assert(RO::EvalHackArrDVArrs);
-      return cmp(KindOfVec, CC_LE);
+      return cmp(KindOfVec, CC_BE);
     }
 
     if (type == TUncountedInit) {

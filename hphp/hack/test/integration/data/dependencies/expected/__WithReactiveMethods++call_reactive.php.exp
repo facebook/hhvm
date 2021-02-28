@@ -1,10 +1,8 @@
 <?hh
 class WithReactiveMethods {
-  <<__Pure>>
   public function reactive(): void {
     throw new \Exception();
   }
-  <<__Pure>>
   public function call_reactive(): void {
     $this->reactive();
   }

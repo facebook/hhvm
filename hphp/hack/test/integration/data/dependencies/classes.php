@@ -116,10 +116,8 @@ function with_parent_constructor_call(): void {
 }
 
 class WithReactiveMethods {
-  <<__Pure>>
   public function reactive(): void {}
 
-  <<__Pure>>
   public function call_reactive(): void {
     $this->reactive();
   }

@@ -30,7 +30,7 @@ function fromArrays(mixed ...$argv): Set<arraykey> {
   $ret = Rx\mutable(Set {});
   foreach ($argv as $arr) {
     if (!HH\is_any_array($arr)) {
-      throw new Exception();
+      return Rx\mutable(Set {});
     }
     hh_show($arr);
     $ret->addAll($arr);

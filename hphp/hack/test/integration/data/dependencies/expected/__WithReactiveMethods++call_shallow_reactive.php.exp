@@ -1,6 +1,5 @@
 <?hh
 class WithReactiveMethods {
-  <<__Pure>>
   public function reactive(): void {
     throw new \Exception();
   }

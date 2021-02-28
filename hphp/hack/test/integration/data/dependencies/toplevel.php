@@ -91,10 +91,8 @@ function with_built_in_constant(): int {
   return PHP_INT_MAX;
 }
 
-<<__Pure>>
 function reactive(mixed $x = null): void {}
 
-<<__Pure>>
 function call_reactive(): void {
   reactive();
 }
@@ -192,10 +190,8 @@ function with_optional_argument_dependent_context(): void {
   with_optional_argument_dependent_context_callee(null);
 }
 
-<<__Pure, __AtMostRxAsArgs>>
 function my_keys<Tk as arraykey, Tv>(
-  <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>>
-  KeyedTraversable<Tk, Tv> $traversable,
+   KeyedTraversable<Tk, Tv> $traversable,
 )[]: keyset<Tk> {
   $result = keyset[];
   foreach ($traversable as $key => $_) {

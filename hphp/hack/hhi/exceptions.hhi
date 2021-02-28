@@ -21,17 +21,11 @@ interface Throwable {
   public function getMessage(): string;
   // Documented as 'int' in PHP docs, but not actually guaranteed;
   // subclasses (e.g. PDO) can do what they want.
-  <<__Pure, __MaybeMutable>>
   public function getCode()[]: mixed;
-  <<__Pure, __MaybeMutable>>
   public function getFile()[]: string;
-  <<__Pure, __MaybeMutable>>
   public function getLine()[]: int;
-  <<__Pure, __MaybeMutable>>
   public function getTrace()[]: Container<mixed>;
-  <<__Pure, __MaybeMutable>>
   public function getTraceAsString()[]: string;
-  <<__Pure, __MaybeMutable>>
   public function getPrevious()[]: ?Throwable;
   public function __toString(): string;
   public function toString(): string;
@@ -44,27 +38,18 @@ class Error implements Throwable {
   protected int $line;
 
   /* Methods */
-  <<__Pure>>
   public function __construct (
     string $message = "",
     int $code = 0,
     ?Throwable $previous = null,
   )[];
-  <<__Pure, __MaybeMutable>>
   final public function getMessage()[]: string;
-  <<__Pure, __MaybeMutable>>
   final public function getPrevious()[]: ?Throwable;
-  <<__Pure, __MaybeMutable>>
   final public function getCode()[]: mixed;
-  <<__Pure, __MaybeMutable>>
   final public function getFile()[]: string;
-  <<__Pure, __MaybeMutable>>
   final public function getLine()[]: int;
-  <<__Pure, __MaybeMutable>>
   final public function getTrace()[]: varray<mixed>;
-  <<__Pure, __MaybeMutable>>
   final public function getTraceUntagged()[]: varray<mixed>;
-  <<__Pure, __MaybeMutable>>
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
@@ -85,7 +70,6 @@ class Exception implements Throwable {
   private varray<mixed> $trace;
   protected mixed $userMetadata;
 
-  <<__Pure>>
   public function __construct (
     protected string $message = '',
     int $code = 0,
@@ -93,24 +77,15 @@ class Exception implements Throwable {
   )[];
 
   // TODO(coeffects) How do we fix this?
-  <<__Pure, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage(): string;
-  <<__Pure, __MaybeMutable>>
   final public function getPrevious()[]: ?Exception;
-  <<__Pure, __Mutable>>
   public final function setPrevious(Exception $previous)[]: void;
-  <<__Pure, __MaybeMutable>>
   public function getCode()[]: int;
-  <<__Pure, __MaybeMutable>>
   final public function getFile()[]: string;
-  <<__Pure, __MaybeMutable>>
   final public function getLine()[]: int;
-  <<__Pure, __MaybeMutable>>
   final public function getTrace()[]: varray<mixed>;
-  <<__Pure, __MaybeMutable>>
   final public function getTraceUntagged()[]: varray<mixed>;
   final protected function __prependTrace(Container<mixed> $trace): void;
-  <<__Pure, __MaybeMutable>>
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
@@ -121,7 +96,6 @@ class Exception implements Throwable {
 }
 
 class ErrorException extends Exception {
-  <<__Pure>>
   public function __construct(
     $message = "",
     int $code = 0,
@@ -130,7 +104,6 @@ class ErrorException extends Exception {
     int $lineno = 0 /* __LINE__ */,
     ?Exception $previous = null
   )[];
-  <<__Pure, __MaybeMutable>>
   public final function getSeverity()[]: int;
 }
 

@@ -1,7 +1,5 @@
 <?hh
-<<__AtMostRxAsArgs, __Pure>>
 function my_keys<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>
   \HH\KeyedTraversable<Tk, Tv> $traversable,
 )[]: \HH\keyset<Tk> {
   throw new \Exception();

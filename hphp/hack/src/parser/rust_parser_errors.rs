@@ -3436,30 +3436,30 @@ where
                 let name = &x.name;
 
                 let (is_dynamic_name, is_self_or_parent, is_valid) =
-                // PHP langspec allows string literals, variables
-                // qualified names, static, self and parent as valid qualifiers
-                // We do not allow string literals in hack
-                match (&qualifier.children, Self::token_kind(qualifier)) {
-                    (LiteralExpression(_), _) => (false, false, false),
-                    (QualifiedName(_), _) => (false, false, true),
-                    (_, Some(TokenKind::Name))
-                    | (_, Some(TokenKind::XHPClassName))
-                    | (_, Some(TokenKind::Static)) => (false, false, true),
-                    (_, Some(TokenKind::SelfToken)) | (_, Some(TokenKind::Parent)) => {
-                        (false, true, true)
-                    }
-                    // ${}::class
-                    (PrefixUnaryExpression(x), _)
-                        if Self::token_kind(&x.operator) == Some(TokenKind::Dollar) =>
-                    {
-                        (true, false, true)
-                    }
-                    (PipeVariableExpression(_), _)
-                    | (VariableExpression(_), _)
-                    | (SimpleTypeSpecifier(_), _)
-                    | (GenericTypeSpecifier(_), _) => (true, false, true),
-                    _ => (true, false, false),
-                };
+                    // PHP langspec allows string literals, variables
+                    // qualified names, static, self and parent as valid qualifiers
+                    // We do not allow string literals in hack
+                    match (&qualifier.children, Self::token_kind(qualifier)) {
+                            (LiteralExpression(_), _) => (false, false, false),
+                            (QualifiedName(_), _) => (false, false, true),
+                            (_, Some(TokenKind::Name))
+                            | (_, Some(TokenKind::XHPClassName))
+                            | (_, Some(TokenKind::Static)) => (false, false, true),
+                            (_, Some(TokenKind::SelfToken)) | (_, Some(TokenKind::Parent)) => {
+                                (false, true, true)
+                            }
+                            // ${}::class
+                            (PrefixUnaryExpression(x), _)
+                                if Self::token_kind(&x.operator) == Some(TokenKind::Dollar) =>
+                            {
+                                (true, false, true)
+                            }
+                            (PipeVariableExpression(_), _)
+                            | (VariableExpression(_), _)
+                            | (SimpleTypeSpecifier(_), _)
+                            | (GenericTypeSpecifier(_), _) => (true, false, true),
+                            _ => (true, false, false),
+                        };
                 if !is_valid && self.env.is_typechecker() {
                     self.errors.push(Self::make_error_from_node(
                         node,
@@ -5120,8 +5120,8 @@ where
 
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
             _ => {} // Ideally we should put all the rest of the syntax here so everytime
-                    // a new syntax is added people need to consider whether the syntax
-                    // can be a valid lvalue or not. However, there are too many of them.
+            // a new syntax is added people need to consider whether the syntax
+            // can be a valid lvalue or not. However, there are too many of them.
         }
     }
 

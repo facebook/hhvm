@@ -161,39 +161,51 @@ impl<'a, T: LexableToken, V> NodeType for Syntax<'a, T, V> {
     }
 
     fn is_variable_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::VariableExpression {..})
+        matches!(self.children, SyntaxVariant::VariableExpression { .. })
     }
 
     fn is_subscript_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::SubscriptExpression {..})
+        matches!(self.children, SyntaxVariant::SubscriptExpression { .. })
     }
 
     fn is_member_selection_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::MemberSelectionExpression {..})
+        matches!(
+            self.children,
+            SyntaxVariant::MemberSelectionExpression { .. }
+        )
     }
 
     fn is_scope_resolution_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::ScopeResolutionExpression {..})
+        matches!(
+            self.children,
+            SyntaxVariant::ScopeResolutionExpression { .. }
+        )
     }
 
     fn is_object_creation_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::ObjectCreationExpression {..})
+        matches!(
+            self.children,
+            SyntaxVariant::ObjectCreationExpression { .. }
+        )
     }
 
     fn is_qualified_name(&self) -> bool {
-        matches!(self.children, SyntaxVariant::QualifiedName {..})
+        matches!(self.children, SyntaxVariant::QualifiedName { .. })
     }
 
     fn is_safe_member_selection_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::SafeMemberSelectionExpression {..})
+        matches!(
+            self.children,
+            SyntaxVariant::SafeMemberSelectionExpression { .. }
+        )
     }
 
     fn is_function_call_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::FunctionCallExpression {..})
+        matches!(self.children, SyntaxVariant::FunctionCallExpression { .. })
     }
 
     fn is_list_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::ListExpression {..})
+        matches!(self.children, SyntaxVariant::ListExpression { .. })
     }
 
     fn is_name(&self) -> bool {
@@ -201,6 +213,6 @@ impl<'a, T: LexableToken, V> NodeType for Syntax<'a, T, V> {
     }
 
     fn is_prefix_unary_expression(&self) -> bool {
-        matches!(self.children, SyntaxVariant::PrefixUnaryExpression {..})
+        matches!(self.children, SyntaxVariant::PrefixUnaryExpression { .. })
     }
 }

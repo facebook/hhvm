@@ -2286,16 +2286,16 @@ where
             let kind = lexer.scan_xhp_body();
             let w = lexer.width();
             let trailing =
-            // Trivia (leading and trailing) is semantically
-            // significant for XHPBody tokens. When we find elements or
-            // braced expressions inside the body, the trivia should be
-            // seen as leading the next token, but we should certainly
-            // keep it trailing if this is an XHPBody token.
-            if kind == TokenKind::XHPBody {
-                lexer.scan_trailing_xhp_trivia()
-            } else {
-                lexer.token_factory.trivia_factory_mut().make()
-            };
+                // Trivia (leading and trailing) is semantically
+                // significant for XHPBody tokens. When we find elements or
+                // braced expressions inside the body, the trivia should be
+                // seen as leading the next token, but we should certainly
+                // keep it trailing if this is an XHPBody token.
+                if kind == TokenKind::XHPBody {
+                    lexer.scan_trailing_xhp_trivia()
+                } else {
+                    lexer.token_factory.trivia_factory_mut().make()
+                };
             lexer
                 .token_factory
                 .make(kind, token_start, w, leading, trailing)

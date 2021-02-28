@@ -273,7 +273,10 @@ impl TypedValue {
     // String concatenation
     pub fn concat(self, v2: TypedValue) -> Option<TypedValue> {
         fn safe_to_cast(t: &TypedValue) -> bool {
-            matches!(t, TypedValue::Int(_) | TypedValue::String(_) | TypedValue::LazyClass(_))
+            matches!(
+                t,
+                TypedValue::Int(_) | TypedValue::String(_) | TypedValue::LazyClass(_)
+            )
         }
         if !safe_to_cast(&self) || !safe_to_cast(&v2) {
             return None;

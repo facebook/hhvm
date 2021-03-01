@@ -42,82 +42,51 @@ namespace {
 interface PlainSprintf {
   // It's common to pass floats; would be nice to type this as
   // 'number' once that type becomes available in userland.
-  <<__Pure>>
   public function format_d(mixed $s)[]: string;
-  <<__Pure>>
   public function format_s(?arraykey $s)[]: string;
-  <<__Pure>>
   public function format_u(?int $s)[]: string;
-  <<__Pure>>
   public function format_b(int $s)[]: string; // bit strings
 
   // Technically %f is locale-dependent (and thus wrong), but we don't.
-  <<__Pure>>
   public function format_f(mixed $s)[]: string;
-  <<__Pure>>
   public function format_g(?float $s)[]: string;
-  <<__Pure>>
   public function format_upcase_f(?float $s)[]: string;
-  <<__Pure>>
   public function format_upcase_e(?float $s)[]: string;
-  <<__Pure>>
   public function format_e(?float $s)[]: string;
 
-  <<__Pure>>
   public function format_x(mixed $s)[]: string;
-  <<__Pure>>
   public function format_o(?int $s)[]: string;
-  <<__Pure>>
   public function format_c(?int $s)[]: string;
-  <<__Pure>>
   public function format_upcase_x(?int $s)[]: string;
 
   // %% takes no arguments
-  <<__Pure>>
   public function format_0x25()[]: string;
 
   // Modifiers that don't change the type
-  <<__Pure>>
   public function format_l()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x20()[]: PlainSprintf; // ' '
-  <<__Pure>>
   public function format_0x2b()[]: PlainSprintf; // '+'
-  <<__Pure>>
   public function format_0x2d()[]: PlainSprintf; // '-'
-  <<__Pure>>
   public function format_0x2e()[]: PlainSprintf; // '.'
-  <<__Pure>>
   public function format_0x30()[]: PlainSprintf; // '0'
-  <<__Pure>>
   public function format_0x31()[]: PlainSprintf; // ...
-  <<__Pure>>
   public function format_0x32()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x33()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x34()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x35()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x36()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x37()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x38()[]: PlainSprintf;
-  <<__Pure>>
   public function format_0x39()[]: PlainSprintf; // '9'
-  <<__Pure>>
   public function format_0x27()[]: SprintfQuote;
 }
 
 // This should really be a wildcard. It's only used once.
 interface SprintfQuote {
-  <<__Pure>>
   public function format_0x3d()[]: PlainSprintf;
 }
 
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args)[]: string;
 <<__PHPStdLib>>
 function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
@@ -128,7 +97,6 @@ namespace HH {
 
 // Results in an \HH\InvariantException whose message is the result of
 // calling sprintf with the arguments given this function
-<<__Pure>>
 function invariant_violation(FormatString<\PlainSprintf> $fmt, ...$fmt_args)[]: noreturn;
 
 }

@@ -49,7 +49,6 @@ namespace HH\Lib\_Private\_Regex {
    * is no error, a 2-tuple with 2 nulls is returned. If there is an error, a
    * 2-tuple with the error number in the second position is returned.
    */
-  <<__Pure>>
   function match<T as \HH\Lib\Regex\Match>(
     string $haystack,
     \HH\Lib\Regex\Pattern<T> $pattern,
@@ -63,7 +62,6 @@ namespace HH\Lib\_Private\_Regex {
    * match is a success and returns the $haystack unmodified). On error, a
    * 2-tuple with the error number in the second position is returned.
    */
-  <<__Pure>>
   function replace(
     string $haystack,
     \HH\Lib\Regex\Pattern<\HH\Lib\Regex\Match> $pattern,

@@ -8,31 +8,31 @@
  *
  */
 
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_add($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_store($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_fetch($key, inout $success) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_delete($key) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_cache_info(string $cache_type = "", bool $limited = false) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_clear_cache(string $cache_id = "") { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_sma_info(bool $limited = false) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_inc(string $key, int $step, inout $success) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_dec(string $key, int $step, inout $success) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_cas(string $key, int $old_cas, int $new_cas) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_exists($key) { }
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_extend_ttl(string $key, int $ttl): bool;
-<<__PHPStdLib, __NonRx('APC')>>
+<<__PHPStdLib>>
 function apc_size(string $key): ?int;
 
 // The following are php std lib functions not supported by HHVM:

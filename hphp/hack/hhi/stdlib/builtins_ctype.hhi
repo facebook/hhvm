@@ -8,25 +8,25 @@
  *
  */
 
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_alnum($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_alpha($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_cntrl($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_digit($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_graph($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_lower($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_print($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_punct($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_space($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_upper($text)[] { }
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ctype_xdigit($text)[] { }

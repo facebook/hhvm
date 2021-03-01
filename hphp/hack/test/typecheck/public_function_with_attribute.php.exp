@@ -1,4 +1,0 @@
-File "public_function_with_attribute.php", line 3, characters 1-6:
-Encountered unexpected text `public`, was expecting a statement. (Parsing[1002])
-File "public_function_with_attribute.php", line 3, characters 8-8:
-Encountered unexpected token `public`. (Parsing[1002])

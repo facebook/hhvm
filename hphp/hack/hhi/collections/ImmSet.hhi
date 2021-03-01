@@ -51,15 +51,13 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `ImmSet`
    *              (e.g., `array`). If `null`, then an empty `ImmSet` is created.
    */
-  <<__Pure, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[];
+  public function __construct(?Traversable<Tv> $it)[];
 
   /**
    * Checks if the current `ImmSet` is empty.
    *
    * @return - `true` if the current `ImmSet` is empty; `false` otherwise.
    */
-  <<__Pure, __MaybeMutable>>
   public function isEmpty()[]: bool;
 
   /**
@@ -67,7 +65,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - The number of elements in the current `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function count()[]: int;
 
   /**
@@ -77,7 +74,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - `true` if the specified value is present in the current `ImmSet`;
    *           `false` otherwise.
    */
-  <<__Pure, __MaybeMutable>>
   public function contains(arraykey $k)[]: bool;
 
   /**
@@ -90,7 +86,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toKeysArray()[]: varray<Tv>;
 
   /**
@@ -101,7 +96,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toValuesArray()[]: varray<Tv>;
 
   /**
@@ -113,7 +107,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmSet`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator()[]: \HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
@@ -130,8 +123,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - An `ImmSet` with the values from the `Traversable`; or an empty
    *           `ImmSet` if the `Traversable` is `null`.
    */
-  <<__Pure, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items)[]: ImmSet<Tv>;
+  public static function fromItems(?Traversable<Tv> $items)[]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing all the values from the specified
@@ -141,7 +133,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - An `ImmSet` with the values from the passed `array`(s).
    */
-  <<__Pure>>
   public static function fromArrays(...$argv)[]: ImmSet<Tv>;
 
   /**
@@ -154,7 +145,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - An `ImmSet` built from the keys of the specified container.
    */
-  <<__Pure>>
   public static function fromKeysOf<Tk as arraykey>(
     ?KeyedContainer<Tk,mixed> $container
   )[]: ImmSet<Tk>;
@@ -164,7 +154,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - The `string` `"ImmSet"`.
    */
-  <<__Pure, __MaybeMutable>>
   public function __toString()[]: string;
 
   /**
@@ -174,7 +163,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - an `ImmVector` (integer-indexed) with the values of the current
    *           `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmVector()[]: ImmVector<Tv>;
 
   /**
@@ -187,7 +175,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           `ImmSet`, with each key of the `ImmMap` being the same as its
    *           value.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmMap()[]: ImmMap<arraykey, Tv>;
 
   /**
@@ -197,7 +184,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - an `ImmSet` that is a copy of the current `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmSet()[]: ImmSet<Tv>;
 
   /**
@@ -207,7 +193,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - an `ImmSet` that is a copy of the current `ImmSet`.
    */
-  <<__Pure, __MaybeMutable>>
   public function immutable()[]: ImmSet<Tv>;
 
   /**
@@ -218,7 +203,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - The `Iterable` view of the current `ImmSet`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function items()[]: \HH\Rx\Iterable<Tv>;
 
   /**
@@ -228,7 +212,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function values()[]: ImmVector<Tv>;
 
   /**
@@ -240,7 +223,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function keys()[]: ImmVector<arraykey>;
 
   /**
@@ -256,7 +238,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function lazy()[]: \HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
@@ -275,8 +256,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
+  public function map<Tu as arraykey>((function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -295,8 +275,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - an `ImmSet` containing the values after a user-specified
    *           operation on the current `ImmSet`'s values is applied.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
+  public function mapWithKey<Tu as arraykey>((function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -313,8 +292,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
+  public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -334,8 +312,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           condition is applied to the values of the current `ImmSet`.
    *
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]:
+  public function filterWithKey((function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]:
     ImmSet<Tv>;
 
   /**
@@ -354,9 +331,8 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           with the provided `Traversable`; one of these must be empty or
    *           an exception is thrown.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
-    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    Traversable<Tu> $traversable
   )[]: ImmSet<nothing>;
 
   /**
@@ -373,7 +349,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet` up
    *           to `n` elements.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function take(int $n)[]: ImmSet<Tv>;
 
   /**
@@ -389,8 +364,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet` up
    *           until the callback returns `false`.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
+  public function takeWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after the `n`-th element of the
@@ -407,7 +381,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet`
    *           containing values after the specified `n`-th element.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function skip(int $n)[]: ImmSet<Tv>;
 
   /**
@@ -424,8 +397,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet`
    *           starting after the callback returns `true`.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
+  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns a subset of the current `ImmSet` starting from a given key up to,
@@ -446,7 +418,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           starting at `$start` up to but not including the element
    *           `$start + $len`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len)[]: ImmSet<Tv>;
 
   /**
@@ -463,9 +434,8 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
-    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    Traversable<Tu> $traversable
   )[]: ImmVector<Tu>;
 
   /**
@@ -476,7 +446,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The first value in the current `ImmSet`, or `null` if the
    *           current `ImmSet` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function firstValue()[]: ?Tv;
 
   /**
@@ -489,7 +458,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The first value in the current `ImmSet`, or `null` if the
    *           current `ImmSet` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function firstKey()[]: ?arraykey;
 
   /**
@@ -500,7 +468,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The last value in the current `ImmSet`, or `null` if the current
    *           `ImmSet` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function lastValue()[]: ?Tv;
 
   /**
@@ -513,12 +480,9 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @return - The last value in the current `ImmSet`, or `null` if the current
    *           `ImmSet` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function lastKey()[]: ?arraykey;
-
-  <<__Pure, __MaybeMutable>> /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>;
-  <<__Pure, __MaybeMutable>> /* HH_FIXME[0001] */
+ /* HH_FIXME[0002] */
+  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<Tv, Tv>;
 }
 

@@ -25,12 +25,11 @@ class Child implements Parent_ {
   public function foo(AnyArray<int, int> $f): void {} // error
 }
 
-<<__Pure, __MutableReturn>>
 function fromArrays(mixed ...$argv): Set<arraykey> {
-  $ret = Rx\mutable(Set {});
+  $ret = Set {};
   foreach ($argv as $arr) {
     if (!HH\is_any_array($arr)) {
-      return Rx\mutable(Set {});
+      return Set {};
     }
     hh_show($arr);
     $ret->addAll($arr);

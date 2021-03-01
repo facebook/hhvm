@@ -83,7 +83,6 @@ function m(mixed $m): void {
 <<__Memoize>>
 function memoized(AnyArray<int, AnyArray<string, string>> $a): void {}
 
-<<__Pure>>
 function purefn(AnyArray<int, string> $a): void {
   $a[42];
   foreach ($a as $k => $v) {}

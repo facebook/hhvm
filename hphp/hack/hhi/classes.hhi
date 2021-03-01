@@ -201,6 +201,5 @@ final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, \Exception): void) $callback) {}
 }
 
-<<__Pure>>
-function is_class(<<__MaybeMutable>> mixed $arg)[]: bool;
+function is_class(mixed $arg)[]: bool;
 } // namespace HH

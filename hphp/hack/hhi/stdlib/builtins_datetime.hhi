@@ -220,20 +220,13 @@ class DateTimeZone {
   const ALL = 0;
   const ALL_WITH_BC = 0;
   const PER_COUNTRY = 0;
-  <<__Pure>>
   public function __construct(string $timezone)[];
-  <<__Pure>>
   public function getLocation()[]: darray { }
-  <<__Pure>>
   public function getName()[]: string { }
-  <<__Pure>>
   public function getOffset(DateTimeInterface $datetime)[];
-  <<__Pure>>
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
                                  int $timestamp_end = PHP_INT_MAX)[];
-  <<__Pure>>
   static public function listAbbreviations()[];
-  <<__Pure>>
   static public function listIdentifiers(int $what = 2047, string $country = '')[];
 }
 

@@ -44,8 +44,6 @@
     test_duplicated_file
     test_failed_decl
     test_failed_naming
-    test_function_arg_rx_if_implements1
-    test_function_arg_rx_if_implements2
     test_funptr
     test_gconst_file
     test_get_dependent_classes
@@ -61,7 +59,6 @@
     test_new_file
     test_property_initializer
     test_property_initializer2
-    test_rx_if_implements
     test_server_hover
     test_serverConfig_overrides
     test_unbound_name
@@ -243,27 +240,12 @@
   (deps test_all.exe)
   (action (run ./test_all.exe decl_decl)))
 
-(alias
-  (name rx_if_implements)
-  (deps test_all.exe)
-  (action (run ./test_all.exe rx_if_implements)))
-
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
-
-(alias
-  (name function_arg_rx_if_implements1)
-  (deps test_all.exe)
-  (action (run ./test_all.exe function_arg_rx_if_implements1)))
-
-(alias
-  (name function_arg_rx_if_implements2)
-  (deps test_all.exe)
-  (action (run ./test_all.exe function_arg_rx_if_implements2)))
 
 (alias
   (name lazy_decl_idempotence)
@@ -355,10 +337,7 @@
     (alias decl_decl)
     (alias property_initializer)
     (alias property_initializer2)
-    (alias rx_if_implements)
-    (alias function_arg_rx_if_implements1)
-    (alias function_arg_rx_if_implements2)
-    (alias lazy_decl_idempotence)
+   (alias lazy_decl_idempotence)
     (alias ignore_fixme_hhi)
     (alias interrupt)
     (alias interrupt2)))

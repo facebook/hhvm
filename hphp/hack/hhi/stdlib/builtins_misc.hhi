@@ -12,15 +12,10 @@ namespace HH {
 function server_warmup_status(): string;
 function execution_context(): string;
 
-<<__Pure>>
 function array_mark_legacy<T>(T $in, bool $recursive = false)[]: T;
-<<__Pure>>
 function array_unmark_legacy<T>(T $in, bool $recursive = false)[]: T;
-<<__Pure>>
 function array_mark_legacy_recursive<T>(T $in)[]: T;
-<<__Pure>>
 function array_unmark_legacy_recursive<T>(T $in)[]: T;
-<<__Pure>>
 function is_array_marked_legacy(mixed $in)[]: bool;
 }
 namespace {
@@ -42,7 +37,7 @@ function defined(string $name, bool $autoload = true);
 function get_browser($user_agent = null, $return_array = false);
 <<__PHPStdLib>>
 function ignore_user_abort(bool $setting = false);
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function pack(string $format, ...$args)[];
 <<__PHPStdLib>>
 function sleep(int $seconds);
@@ -54,12 +49,12 @@ function time_nanosleep(int $seconds, int $nanoseconds);
 function time_sleep_until(float $timestamp);
 <<__PHPStdLib>>
 function uniqid(string $prefix = "", bool $more_entropy = false);
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function unpack(string $format, string $data)[];
 <<__PHPStdLib>>
 function sys_getloadavg();
 <<__PHPStdLib>>
 function hphp_process_abort($magic);
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function hphp_to_string($v)[];
 }

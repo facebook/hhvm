@@ -15,43 +15,35 @@ function get_declared_classes();
 function get_declared_interfaces();
 <<__PHPStdLib>>
 function get_declared_traits();
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function enum_exists(string $class_name, bool $autoload = true)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function class_exists(string $class_name, bool $autoload = true)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function interface_exists(string $interface_name, bool $autoload = true)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function trait_exists(string $trait_name, bool $autoload = true)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function get_class_methods($class_or_object)[]: ?varray_or_darray<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);
-<<__Pure>>
-function get_class(<<__MaybeMutable>> $object)[];
-<<__Pure>>
-function get_parent_class(<<__MaybeMutable>> $object = null)[];
-<<__PHPStdLib, __Pure>>
-function is_a(<<__MaybeMutable>> $class_or_object, string $class_name, bool $allow_string = false)[]: bool;
-<<__PHPStdLib, __Pure>>
+function get_class($object)[];
+function get_parent_class($object = null)[];
+<<__PHPStdLib>>
+function is_a($class_or_object, string $class_name, bool $allow_string = false)[]: bool;
+<<__PHPStdLib>>
 function is_subclass_of($class_or_object, string $class_name, bool $allow_string = true)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function method_exists($class_or_object, string $method_name)[]: bool;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function property_exists($class_or_object, string $property)[]: ?bool;
-<<__Pure>>
-function get_object_vars(<<__MaybeMutable>> $object)[]: ?darray;
+function get_object_vars($object)[]: ?darray;
 }
 
 namespace HH {
-<<__Pure>>
 function class_meth_get_class(mixed $class_meth)[]: string;
-<<__Pure>>
 function class_meth_get_method(mixed $class_meth)[]: string;
-<<__Pure>>
 function meth_caller_get_class(mixed $meth_caller)[]: string;
-<<__Pure>>
 function meth_caller_get_method(mixed $meth_caller)[]: string;
-<<__Pure>>
 function class_get_class_name(mixed $class)[]: string;
 }

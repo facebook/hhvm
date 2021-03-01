@@ -10,6 +10,7 @@ import sqlite3
 import stat
 import time
 import unittest
+import sys
 from typing import Optional, TextIO
 
 import common_tests
@@ -147,7 +148,7 @@ watchman_init_timeout = 1
         )
 
         self.assertTrue(
-            result1.returned_values.get_edges_added() > 0,
+            result1.returned_values.get_edges_added() == 0,
             "class_1 has no dependencies",
         )
 

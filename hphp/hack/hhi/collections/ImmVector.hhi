@@ -56,15 +56,13 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *              (e.g., `array`). If `null`, then an empty `ImmVector` is
    *              created.
    */
-  <<__Pure, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it)[];
+  public function __construct(?Traversable<Tv> $it)[];
 
   /**
    * Checks if the current `ImmVector` is empty.
    *
    * @return - `true` if the current `ImmVector` is empty; `false` otherwise.
    */
-  <<__Pure, __MaybeMutable>>
   public function isEmpty()[]: bool;
 
   /**
@@ -72,7 +70,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - The number of elements in the current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function count()[]: int;
 
   /**
@@ -88,7 +85,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The value at the specified key; or an exception if the key does
    *           not exist.
    */
-  <<__Pure, __MaybeMutable>>
   public function at(int $k)[]: Tv;
 
   /**
@@ -102,7 +98,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The value at the specified key; or `null` if the key does not
    *           exist.
    */
-  <<__Pure, __MaybeMutable>>
   public function get(int $k)[]: ?Tv;
 
   /**
@@ -113,7 +108,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Pure, __MaybeMutable>>
   public function containsKey(mixed $k)[]: bool;
 
   /**
@@ -123,7 +117,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - An `array` containing the values from the current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toValuesArray()[]: varray<Tv>;
 
   /**
@@ -131,7 +124,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - An `array` with the integer keys from the current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toKeysArray()[]: varray<Tv>;
 
   /**
@@ -140,7 +132,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmVector`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator()[]: \HH\Rx\KeyedIterator<int, Tv>;
 
   /**
@@ -155,7 +146,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Pure, __MaybeMutable>>
   public function linearSearch(mixed $search_value)[]: int;
 
   /**
@@ -172,8 +162,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` with the values from the `Traversable`; or an
    *           empty `ImmVector` if the `Traversable` is `null`.
    */
-  <<__Pure, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items)[]: ImmVector<Tv>;
+  public static function fromItems(?Traversable<Tv> $items)[]: ImmVector<Tv>;
 
   /**
    * Creates an `ImmVector` from the keys of the specified container.
@@ -186,7 +175,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - An `ImmVector` built from the keys of the specified container.
    */
-  <<__Pure>>
   public static function fromKeysOf<Tk as arraykey>(
     ?KeyedContainer<Tk, mixed> $container,
   )[]: ImmVector<Tk>;
@@ -197,7 +185,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - The `string` `"ImmVector"`.
    */
-  <<__Pure, __MaybeMutable>>
   public function __toString()[]: string;
 
   /**
@@ -208,7 +195,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - The `Iterable` view of the current `ImmVector`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function items()[]: \HH\Rx\Iterable<Tv>;
 
   /**
@@ -228,7 +214,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - The current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmVector()[]: ImmVector<Tv>;
 
   /**
@@ -240,7 +225,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An integer-keyed `ImmMap` with the values of the current
    *           `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmMap()[]: ImmMap<int, Tv>;
 
   /**
@@ -249,7 +233,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - An `ImmSet` with the current values of the current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function toImmSet()[]: ImmSet<Tv> where Tv as arraykey;
 
   /**
@@ -269,7 +252,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @return - The current `ImmVector`.
    */
-  <<__Pure, __MaybeMutable>>
   public function immutable()[]: ImmVector<Tv>;
 
   /**
@@ -285,7 +267,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function lazy()[]: \HH\Rx\KeyedIterable<int, Tv>;
 
   /**
@@ -301,7 +282,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - A new `ImmVector` containing the values of the current
    *           `ImmVector`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function values()[]: ImmVector<Tv>;
 
   /**
@@ -311,7 +291,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` containing, as values, the integer keys of the
    *           current `ImmVector`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function keys()[]: ImmVector<int>;
 
   /**
@@ -330,8 +309,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmVector<Tu>;
+  public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the results of applying an operation to
@@ -349,8 +327,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           user-specified operation to each key/value pair of the current
    *           `ImmVector` in turn.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: Tu) $fn)[ctx $fn]:
+  public function mapWithKey<Tu>((function(int, Tv)[_]: Tu) $fn)[ctx $fn]:
     ImmVector<Tu>;
 
   /**
@@ -369,8 +346,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
+  public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
@@ -391,8 +367,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           applied to the corresponding key/value pairs.
    *
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: bool) $fn)[ctx $fn]:
+  public function filterWithKey((function(int, Tv)[_]: bool) $fn)[ctx $fn]:
     ImmVector<Tv>;
 
   /**
@@ -410,8 +385,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` that combines the values of the current
    *           `ImmVector` with the provided `Traversable`.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable)[]:
+  public function zip<Tu>(Traversable<Tu> $traversable)[]:
     ImmVector<Pair<Tv, Tu>>;
 
   /**
@@ -431,7 +405,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` that is a subset of the current `ImmVector` up to
    *           `$n` elements.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function take(int $n)[]: ImmVector<Tv>;
 
   /**
@@ -448,8 +421,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` that is a subset of the current `ImmVector` up
    *           until when the callback returns `false`.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
+  public function takeWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values after the `$n`-th element of
@@ -469,7 +441,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - An `ImmVector` that is a subset of the current `ImmVector`
    *           containing values after the specified `$n`-th element.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function skip(int $n)[]: ImmVector<Tv>;
 
   /**
@@ -489,8 +460,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           starting with the value for which the callback first returns
    *           `false`.
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
+  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns a subset of the current `ImmVector` starting from a given key up
@@ -517,7 +487,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           starting at `$start` up to but not including the element
    *           `$start + $len`.
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len)[]: ImmVector<Tv>;
 
   /**
@@ -538,9 +507,8 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
-    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    Traversable<Tu> $traversable
   )[]: ImmVector<Tu>;
 
   /**
@@ -549,7 +517,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The first value in the current `ImmVector`, or `null` if the
    *           current `ImmVector` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function firstValue()[]: ?Tv;
 
   /**
@@ -558,7 +525,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The first key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function firstKey()[]: ?int;
 
   /**
@@ -567,7 +533,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The last value in the current `ImmVector`, or `null` if the
    *           current `ImmVector` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function lastValue()[]: ?Tv;
 
   /**
@@ -576,12 +541,9 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @return - The last key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
-  <<__Pure, __MaybeMutable>>
   public function lastKey()[]: ?int;
-
-  <<__Pure, __MaybeMutable>> /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>;
-  <<__Pure, __MaybeMutable>> /* HH_FIXME[0001] */
+ /* HH_FIXME[0002] */
+  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
   public function toDArray()[]: darray<int, Tv>;
 }
 

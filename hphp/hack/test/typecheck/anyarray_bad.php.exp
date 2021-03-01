@@ -1,4 +1,4 @@
-File "anyarray_bad.php", line 35, characters 5-17:
+File "anyarray_bad.php", line 34, characters 5-17:
   AnyArray<arraykey, mixed>
 File "anyarray_bad.php", line 10, characters 15-20:
 Invalid argument (Typing[4110])
@@ -36,13 +36,13 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   Expected `int`
   File "anyarray_bad.php", line 21, characters 32-39:
   But got `arraykey`
-File "anyarray_bad.php", line 38, characters 10-13:
+File "anyarray_bad.php", line 37, characters 10-13:
 Invalid return type (Typing[4110])
-  File "anyarray_bad.php", line 29, characters 42-49:
+  File "anyarray_bad.php", line 28, characters 42-49:
   Expected `arraykey`
-  File "anyarray_bad.php", line 29, characters 42-49:
+  File "anyarray_bad.php", line 28, characters 42-49:
   This type argument to `Set` must match exactly (it is invariant)
-  File "anyarray_bad.php", line 32, characters 10-24:
+  File "anyarray_bad.php", line 31, characters 10-24:
   But got `mixed` from the argument to this \HH\is_any_array test
   File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`

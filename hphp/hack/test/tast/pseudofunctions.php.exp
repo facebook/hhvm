@@ -126,52 +126,5 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
-  (Fun
-     { f_span = [24:1-28:2]; f_annotation = (); f_mode = Mpartial;
-       f_readonly_ret = None;
-       f_ret = ((void), (Some ([25:21-25], (Hprim Tvoid))));
-       f_name = ([25:10-17], "\\rx_test"); f_tparams = [];
-       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_ctxs = None; f_unsafe_ctxs = None;
-       f_body =
-       { fb_ast =
-         [([26:3-32],
-           (Expr
-              (([26:3-31], C),
-               (Binop ((Eq None), (([26:3-5], C), (Lvar ([26:3-5], $c))),
-                  (([26:8-31], C),
-                   (Call (
-                      (([26:8-22], (function<T>(C $x): C)),
-                       (Id ([26:8-22], "\\HH\\Rx\\mutable"))),
-                      [((C), ([26:8-22], (Happly (([Pos.none], "_"), []))))],
-                      [(([26:23-30], C),
-                        (New ((([26:27-28], C), (CI ([26:27-28], "\\C"))),
-                           [], [], None, ([26:27-28], _))))
-                        ],
-                      None)))
-                  )))));
-           ([27:3-27],
-            (Expr
-               (([27:3-26], C),
-                (Binop ((Eq None), (([27:3-6], C), (Lvar ([27:3-6], $c1))),
-                   (([27:9-26], C),
-                    (Call (
-                       (([27:9-22], (function<T>(C $x): C)),
-                        (Id ([27:9-22], "\\HH\\Rx\\freeze"))),
-                       [((C), ([27:9-22], (Happly (([Pos.none], "_"), []))))],
-                       [(([27:23-25], C), (Lvar ([27:23-25], $c)))], None)))
-                   )))))
-           ];
-         fb_annotation = () };
-       f_fun_kind = FSync;
-       f_user_attributes =
-       [{ ua_name = ([24:3-9], "__Pure"); ua_params = [] }];
-       f_file_attributes = []; f_external = false;
-       f_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
-         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false })
   ]

@@ -17,60 +17,54 @@
 // isset, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
 namespace {
-<<__Pure>>
-function isset(<<__MaybeMutable>> $x)[]: bool;
-<<__Pure>>
-function unset(<<__MaybeMutable>> $x)[]: void;
+function isset($x)[]: bool;
+function unset($x)[]: void;
 //
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function array_fill<T>(int $start_index, int $num, T $value)[]: varray_or_darray<T>;
 // TODO make non-nullable once Thrift files are fixed
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function chr(int $ascii)[]: string;
-<<__PHPStdLib, __Pure>>
-function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL)[]: int; // count takes Countable or array. We'll need to hardcode this...
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
+function count(mixed $x, int $mode = COUNT_NORMAL)[]: int; // count takes Countable or array. We'll need to hardcode this...
+<<__PHPStdLib>>
 function dechex(int $number)[]: string;
-<<__PHPStdLib, __Pure>>
-function implode(string $glue, <<__MaybeMutable>> $pieces)[]: string; // could be Container<Stringish>
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
+function implode(string $glue, $pieces)[]: string; // could be Container<Stringish>
+<<__PHPStdLib>>
 function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF)[]: varray<string>; // : array<string> & false for '' delimiter
 }
 
 namespace HH {
-<<__Pure>>
-function is_vec(<<__MaybeMutable>> mixed $arg)[]: bool;
-<<__Pure>>
-function is_dict(<<__MaybeMutable>> mixed $arg)[]: bool;
-<<__Pure>>
-function is_keyset(<<__MaybeMutable>> mixed $arg)[]: bool;
+function is_vec(mixed $arg)[]: bool;
+function is_dict(mixed $arg)[]: bool;
+function is_keyset(mixed $arg)[]: bool;
 
 /**
  * @returns True if `$arg` is a `varray`, `darray`, `dict`, `vec`, or `keyset`.
  * Otherwise returns false.
  */
-<<__Pure>>
-function is_any_array(<<__MaybeMutable>> mixed $arg)[]: bool;
+function is_any_array(mixed $arg)[]: bool;
 }
 
 namespace {
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function ord(string $string)[]: int;
 <<__PHPStdLib>>
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function intval($v, int $base = 10)[]: int;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function doubleval($v)[]: float;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function floatval($v)[]: float;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function strval($v)[]: string;
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function boolval($v)[]: bool;
 
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function get_class_constants(string $class_name)[]: darray<string, mixed>;
 
 // the return value is an instance with class $class
@@ -138,16 +132,11 @@ namespace HH {
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
   function clear_instance_memoization($obj) : bool;
 
-  <<__Pure>>
-  function is_list_like(<<__MaybeMutable>> mixed $arg)[]: bool;
-  <<__Pure>>
-  function is_class_meth(<<__MaybeMutable>> mixed $arg)[]: bool;
-  <<__Pure>>
-  function is_meth_caller(<<__MaybeMutable>> mixed $arg)[]: bool;
-  <<__Pure>>
-  function is_fun(<<__MaybeMutable>> mixed $arg)[]: bool;
+  function is_list_like(mixed $arg)[]: bool;
+  function is_class_meth(mixed $arg)[]: bool;
+  function is_meth_caller(mixed $arg)[]: bool;
+  function is_fun(mixed $arg)[]: bool;
 
-  <<__Pure>>
   function set_frame_metadata(mixed $metadata)[]: void;
 
   // Code coverage

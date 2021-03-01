@@ -20,9 +20,3 @@ function test(C $c): void {
   invariant(true, 'foo');
   invariant_violation('foo');
 }
-
-<<__Pure>>
-function rx_test(): void {
-  $c = \HH\Rx\mutable(new C());
-  $c1 = \HH\Rx\freeze($c);
-}

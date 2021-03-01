@@ -10,7 +10,7 @@
 
 <<__PHPStdLib>>
 function spl_classes();
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function spl_object_hash($obj)[];
 <<__PHPStdLib>>
 function hphp_object_pointer($obj);

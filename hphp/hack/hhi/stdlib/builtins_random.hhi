@@ -8,8 +8,8 @@
  *
  */
 
-<<__PHPStdLib, __NonRx('Randomness')>>
+<<__PHPStdLib>>
 function random_bytes(int $length): string;
 
-<<__PHPStdLib, __NonRx('Randomness')>>
+<<__PHPStdLib>>
 function random_int(int $min, int $max): int;

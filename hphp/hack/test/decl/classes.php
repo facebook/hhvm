@@ -18,22 +18,6 @@ class MyClass {
     await HH\Asio\usleep(500000);
     yield 0 => "test";
   }
-
-  <<__Pure>>
-  public function reactive_function(): void {}
-
-  <<__Pure>>
-  public function reactive_function_mutable_args(
-    <<__Mutable>> MyClass $a,
-    <<__MaybeMutable>> MyClass $b,
-    <<__OwnedMutable>> MyClass $c,
-  ): void {
-  }
-
-  <<__Pure, __MutableReturn>>
-  public function mutable_return(): MyClass {
-    return \HH\Rx\mutable(new MyClass());
-  }
 }
 
 abstract class MyAbstractClass {}

@@ -186,117 +186,6 @@
                    ~returns_readonly:false ~readonly_this:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
-         { Shallow_decl_defs.sm_name = ([23:19-36], "reactive_function");
-           sm_reactivity = (Some (Decl_defs.Method_pure None));
-           sm_type =
-           (Rwitness (root|classes.php line 23, characters 19-35),
-            (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
-                 ft_implicit_params =
-                 { capability = (CapDefaults [23:19-36]) };
-                 ft_ret =
-                 { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes.php line 23, characters 40-43),
-                    (Tprim Tvoid))
-                   };
-                 ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
-                 ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
-         { Shallow_decl_defs.sm_name =
-           ([26:19-49], "reactive_function_mutable_args");
-           sm_reactivity = (Some (Decl_defs.Method_pure None));
-           sm_type =
-           (Rwitness (root|classes.php line 26, characters 19-48),
-            (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
-                 ft_params =
-                 [{ fp_pos = [27:27-29]; fp_name = (Some "$a");
-                    fp_type =
-                    { et_enforced = false;
-                      et_type =
-                      (Rhint (root|classes.php line 27, characters 19-25),
-                       (Tapply (([27:19-26], "\\MyClass"), [])))
-                      };
-                    fp_rx_annotation = None;
-                    fp_flags =
-                    (make_fp_flags
-                      ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
-                      ~accept_disposable:false ~has_default:false
-                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                      ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                     };
-                   { fp_pos = [28:32-34]; fp_name = (Some "$b");
-                     fp_type =
-                     { et_enforced = false;
-                       et_type =
-                       (Rhint (root|classes.php line 28, characters 24-30),
-                        (Tapply (([28:24-31], "\\MyClass"), [])))
-                       };
-                     fp_rx_annotation = None;
-                     fp_flags =
-                     (make_fp_flags
-                       ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
-                       ~accept_disposable:false ~has_default:false
-                       ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                       ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                      };
-                   { fp_pos = [29:32-34]; fp_name = (Some "$c");
-                     fp_type =
-                     { et_enforced = false;
-                       et_type =
-                       (Rhint (root|classes.php line 29, characters 24-30),
-                        (Tapply (([29:24-31], "\\MyClass"), [])))
-                       };
-                     fp_rx_annotation = None;
-                     fp_flags =
-                     (make_fp_flags
-                       ~mutability:(Some Typing_defs_core.Param_owned_mutable)
-                       ~accept_disposable:false ~has_default:false
-                       ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                       ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                      }
-                   ];
-                 ft_implicit_params =
-                 { capability = (CapDefaults [26:19-49]) };
-                 ft_ret =
-                 { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes.php line 30, characters 6-9),
-                    (Tprim Tvoid))
-                   };
-                 ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
-                 ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
-         { Shallow_decl_defs.sm_name = ([34:19-33], "mutable_return");
-           sm_reactivity = (Some (Decl_defs.Method_pure None));
-           sm_type =
-           (Rwitness (root|classes.php line 34, characters 19-32),
-            (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
-                 ft_implicit_params =
-                 { capability = (CapDefaults [34:19-33]) };
-                 ft_ret =
-                 { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes.php line 34, characters 37-43),
-                    (Tapply (([34:37-44], "\\MyClass"), [])))
-                   };
-                 ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:true ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
-                 ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -304,7 +193,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
-        sc_name = ([39:16-31], "\\MyAbstractClass"); sc_tparams = [];
+        sc_name = ([23:16-31], "\\MyAbstractClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
@@ -315,7 +204,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([40:13-25], "\\MyFinalClass"); sc_tparams = [];
+        sc_name = ([24:13-25], "\\MyFinalClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
@@ -326,7 +215,7 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
-        sc_name = ([41:22-35], "\\MyStaticClass"); sc_tparams = [];
+        sc_name = ([25:22-35], "\\MyStaticClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
@@ -337,52 +226,52 @@
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([43:7-35], "\\MyConstructorPropertiesClass");
+        sc_name = ([27:7-35], "\\MyConstructorPropertiesClass");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_name = ([45:20-28], "private");
+        [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint (root|classes.php line 45, characters 13-18),
+           (Some (Rhint (root|classes.php line 29, characters 13-18),
                   (Tprim Tstring)));
            sp_visibility = Private; sp_flags = needs_init };
-          { Shallow_decl_defs.sp_name = ([46:22-32], "protected");
+          { Shallow_decl_defs.sp_name = ([30:22-32], "protected");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint (root|classes.php line 46, characters 15-20),
+            (Some (Rhint (root|classes.php line 30, characters 15-20),
                    (Tprim Tstring)));
             sp_visibility = Protected; sp_flags = needs_init };
-          { Shallow_decl_defs.sp_name = ([47:19-26], "public");
+          { Shallow_decl_defs.sp_name = ([31:19-26], "public");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint (root|classes.php line 47, characters 12-17),
+            (Some (Rhint (root|classes.php line 31, characters 12-17),
                    (Tprim Tstring)));
             sp_visibility = Public; sp_flags = needs_init };
-          { Shallow_decl_defs.sp_name = ([48:19-30], "hasDefault");
+          { Shallow_decl_defs.sp_name = ([32:19-30], "hasDefault");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint (root|classes.php line 48, characters 12-17),
+            (Some (Rhint (root|classes.php line 32, characters 12-17),
                    (Tprim Tstring)));
             sp_visibility = Public; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
-        (Some { Shallow_decl_defs.sm_name = ([44:19-30], "__construct");
+        (Some { Shallow_decl_defs.sm_name = ([28:19-30], "__construct");
                 sm_reactivity = None;
                 sm_type =
-                (Rwitness (root|classes.php line 44, characters 19-29),
+                (Rwitness (root|classes.php line 28, characters 19-29),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
                       ft_params =
-                      [{ fp_pos = [45:20-28]; fp_name = (Some "$private");
+                      [{ fp_pos = [29:20-28]; fp_name = (Some "$private");
                          fp_type =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|classes.php line 45, characters 13-18),
+                           (Rhint (root|classes.php line 29, characters 13-18),
                             (Tprim Tstring))
                            };
                          fp_rx_annotation = None;
@@ -393,11 +282,11 @@
                            ~ifc_external:false ~ifc_can_call:false
                            ~is_atom:false ~readonly:false);
                           };
-                        { fp_pos = [46:22-32]; fp_name = (Some "$protected");
+                        { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
                           { et_enforced = false;
                             et_type =
-                            (Rhint (root|classes.php line 46, characters 15-20),
+                            (Rhint (root|classes.php line 30, characters 15-20),
                              (Tprim Tstring))
                             };
                           fp_rx_annotation = None;
@@ -408,11 +297,11 @@
                             ~ifc_external:false ~ifc_can_call:false
                             ~is_atom:false ~readonly:false);
                            };
-                        { fp_pos = [47:19-26]; fp_name = (Some "$public");
+                        { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
                           { et_enforced = false;
                             et_type =
-                            (Rhint (root|classes.php line 47, characters 12-17),
+                            (Rhint (root|classes.php line 31, characters 12-17),
                              (Tprim Tstring))
                             };
                           fp_rx_annotation = None;
@@ -423,12 +312,12 @@
                             ~ifc_external:false ~ifc_can_call:false
                             ~is_atom:false ~readonly:false);
                            };
-                        { fp_pos = [48:19-30];
+                        { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
                           fp_type =
                           { et_enforced = false;
                             et_type =
-                            (Rhint (root|classes.php line 48, characters 12-17),
+                            (Rhint (root|classes.php line 32, characters 12-17),
                              (Tprim Tstring))
                             };
                           fp_rx_annotation = None;
@@ -441,11 +330,11 @@
                            }
                         ];
                       ft_implicit_params =
-                      { capability = (CapDefaults [44:19-30]) };
+                      { capability = (CapDefaults [28:19-30]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|classes.php line 44, characters 19-29),
+                        (Rwitness (root|classes.php line 28, characters 19-29),
                          (Tprim Tvoid))
                         };
                       ft_flags =

@@ -578,153 +578,43 @@
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [46:10-28]; fe_php_std_lib = false }));
-  ("\\reactive_function",
-   (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_type =
-        (Rwitness (root|functions.php line 51, characters 10-26),
-         (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [51:10-27]) };
-              ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|functions.php line 51, characters 31-34),
-                 (Tprim Tvoid))
-                };
-              ft_flags =
-              (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [51:10-27]; fe_php_std_lib = false }));
-  ("\\reactive_function_mutable_args",
-   (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_type =
-        (Rwitness (root|functions.php line 54, characters 10-39),
-         (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
-              ft_params =
-              [{ fp_pos = [55:25-27]; fp_name = (Some "$a");
-                 fp_type =
-                 { et_enforced = false;
-                   et_type =
-                   (Rhint (root|functions.php line 55, characters 17-23),
-                    (Tapply (([55:17-24], "\\Typedef"), [])))
-                   };
-                 fp_rx_annotation = None;
-                 fp_flags =
-                 (make_fp_flags
-                   ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
-                   ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                  };
-                { fp_pos = [56:30-32]; fp_name = (Some "$b");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|functions.php line 56, characters 22-28),
-                     (Tapply (([56:22-29], "\\Typedef"), [])))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags
-                    ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
-                    ~accept_disposable:false ~has_default:false
-                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                   };
-                { fp_pos = [57:30-32]; fp_name = (Some "$c");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|functions.php line 57, characters 22-28),
-                     (Tapply (([57:22-29], "\\Typedef"), [])))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags
-                    ~mutability:(Some Typing_defs_core.Param_owned_mutable)
-                    ~accept_disposable:false ~has_default:false
-                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                    ~ifc_can_call:false ~is_atom:false ~readonly:false);
-                   }
-                ];
-              ft_implicit_params = { capability = (CapDefaults [54:10-40]) };
-              ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|functions.php line 58, characters 4-7),
-                 (Tprim Tvoid))
-                };
-              ft_flags =
-              (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [54:10-40]; fe_php_std_lib = false }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([61:7-8], "\\C"); sc_tparams = [];
+        sc_name = ([50:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
-  ("\\make",
-   (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_type =
-        (Rwitness (root|functions.php line 64, characters 10-13),
-         (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [64:10-14]) };
-              ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|functions.php line 64, characters 18-18),
-                 (Tapply (([64:18-19], "\\C"), [])))
-                };
-              ft_flags =
-              (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:true ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
-              ft_reactive = Pure {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [64:10-14]; fe_php_std_lib = false }));
   ("\\null_type_hint",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|functions.php line 68, characters 10-23),
+        (Rwitness (root|functions.php line 52, characters 10-23),
          (Tfun
             { ft_arity = (Fstandard ());
               ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([68:25-26], "T"); tp_tparams = [];
+                 tp_name = ([52:25-26], "T"); tp_tparams = [];
                  tp_constraints =
                  [(Constraint_as,
-                   (Rhint (root|functions.php line 68, characters 30-36),
+                   (Rhint (root|functions.php line 52, characters 30-36),
                     (Tunion [])))
                    ];
                  tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [68:42-44]; fp_name = (Some "$x");
+              [{ fp_pos = [52:42-44]; fp_name = (Some "$x");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|functions.php line 68, characters 39-40),
+                   (Rhint (root|functions.php line 52, characters 39-40),
                     (Toption
-                       (Rhint (root|functions.php line 68, characters 40-40),
+                       (Rhint (root|functions.php line 52, characters 40-40),
                         (Tgeneric ("T", [])))))
                    };
                  fp_rx_annotation = None;
@@ -735,11 +625,11 @@
                    ~readonly:false);
                   }
                 ];
-              ft_implicit_params = { capability = (CapDefaults [68:10-24]) };
+              ft_implicit_params = { capability = (CapDefaults [52:10-24]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|functions.php line 68, characters 47-50),
+                (Rhint (root|functions.php line 52, characters 47-50),
                  (Tprim Tnull))
                 };
               ft_flags =
@@ -747,21 +637,21 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [68:10-24]; fe_php_std_lib = false }));
+        fe_pos = [52:10-24]; fe_php_std_lib = false }));
   ("\\resource_type_hint",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|functions.php line 72, characters 10-27),
+        (Rwitness (root|functions.php line 56, characters 10-27),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [72:38-40]; fp_name = (Some "$i");
+              [{ fp_pos = [56:38-40]; fp_name = (Some "$i");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|functions.php line 72, characters 29-36),
+                   (Rhint (root|functions.php line 56, characters 29-36),
                     (Tprim Tresource))
                    };
                  fp_rx_annotation = None;
@@ -772,11 +662,11 @@
                    ~readonly:false);
                   }
                 ];
-              ft_implicit_params = { capability = (CapDefaults [72:10-28]) };
+              ft_implicit_params = { capability = (CapDefaults [56:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|functions.php line 72, characters 43-50),
+                (Rhint (root|functions.php line 56, characters 43-50),
                  (Tprim Tresource))
                 };
               ft_flags =
@@ -784,20 +674,20 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [72:10-28]; fe_php_std_lib = false }));
+        fe_pos = [56:10-28]; fe_php_std_lib = false }));
   ("\\noreturn_type_hint",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|functions.php line 76, characters 10-27),
+        (Rwitness (root|functions.php line 60, characters 10-27),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [76:10-28]) };
+              ft_implicit_params = { capability = (CapDefaults [60:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|functions.php line 76, characters 32-39),
+                (Rhint (root|functions.php line 60, characters 32-39),
                  (Tprim Tnoreturn))
                 };
               ft_flags =
@@ -805,20 +695,20 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [76:10-28]; fe_php_std_lib = false }));
+        fe_pos = [60:10-28]; fe_php_std_lib = false }));
   ("\\variadic_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|functions.php line 81, characters 10-26),
+        (Rwitness (root|functions.php line 65, characters 10-26),
          (Tfun
             { ft_arity =
               (Fvariadic (
-                 { fp_pos = [81:37-42]; fp_name = (Some "$args");
+                 { fp_pos = [65:37-42]; fp_name = (Some "$args");
                    fp_type =
                    { et_enforced = false;
                      et_type =
-                     (Rvar_param (root|functions.php line 81, characters 37-41),
+                     (Rvar_param (root|functions.php line 65, characters 37-41),
                       Tmixed)
                      };
                    fp_rx_annotation = None;
@@ -830,11 +720,11 @@
                     }
                  ));
               ft_tparams = []; ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [81:10-27]) };
+              ft_implicit_params = { capability = (CapDefaults [65:10-27]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|functions.php line 81, characters 45-48),
+                (Rhint (root|functions.php line 65, characters 45-48),
                  (Tprim Tvoid))
                 };
               ft_flags =
@@ -842,7 +732,7 @@
                 ~returns_mutable:false ~returns_void_to_rx:false
                 ~returns_readonly:false ~readonly_this:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [81:10-27]; fe_php_std_lib = false }))
+        fe_pos = [65:10-27]; fe_php_std_lib = false }))
   ]
 
 They matched!

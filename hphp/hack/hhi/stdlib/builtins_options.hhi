@@ -107,7 +107,7 @@ function set_pre_timeout_handler(
   int $seconds, (function(HH\Awaitable<mixed>): void) $callback): void;
 <<__PHPStdLib>>
 function sys_get_temp_dir();
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function version_compare(string $version1, string $version2, string $sop = "")[];
 <<__PHPStdLib>>
 function gc_enabled();

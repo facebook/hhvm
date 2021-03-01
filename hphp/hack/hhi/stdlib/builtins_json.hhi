@@ -54,7 +54,7 @@ const int JSON_FB_FORCE_HACK_ARRAYS = 0;
 
 <<__PHPStdLib>>
 function json_encode(mixed $value, int $options = 0, int $depth = 512);
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function json_encode_with_error(
   mixed $value,
   inout ?(int, string) $error,
@@ -63,7 +63,7 @@ function json_encode_with_error(
 )[];
 <<__PHPStdLib>>
 function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0);
-<<__PHPStdLib, __Pure>>
+<<__PHPStdLib>>
 function json_decode_with_error(
   string $json,
   inout ?(int, string) $error,
@@ -71,7 +71,7 @@ function json_decode_with_error(
   int $depth = 512,
   int $options = 0,
 )[];
-<<__PHPStdLib, __NonRx('Reads from a global')>>
+<<__PHPStdLib>>
 function json_last_error();
-<<__PHPStdLib, __NonRx('Reads from a global')>>
+<<__PHPStdLib>>
 function json_last_error_msg();

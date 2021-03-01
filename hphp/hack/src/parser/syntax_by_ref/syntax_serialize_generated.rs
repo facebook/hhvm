@@ -1375,8 +1375,8 @@ ss.serialize_field("dictionary_type_members", &self.with(members))?;
 ss.serialize_field("dictionary_type_right_angle", &self.with(right_angle))?;
       ss.end()
 } 
-SyntaxVariant::ClosureTypeSpecifier (ClosureTypeSpecifierChildren{outer_left_paren,function_keyword,inner_left_paren,parameter_list,inner_right_paren,contexts,colon,return_type,outer_right_paren} ) => {
-      let mut ss = s.serialize_struct("", 10)?;
+SyntaxVariant::ClosureTypeSpecifier (ClosureTypeSpecifierChildren{outer_left_paren,function_keyword,inner_left_paren,parameter_list,inner_right_paren,contexts,colon,readonly_return,return_type,outer_right_paren} ) => {
+      let mut ss = s.serialize_struct("", 11)?;
       ss.serialize_field("kind", "closure_type_specifier")?;
       ss.serialize_field("closure_outer_left_paren", &self.with(outer_left_paren))?;
 ss.serialize_field("closure_function_keyword", &self.with(function_keyword))?;
@@ -1385,14 +1385,16 @@ ss.serialize_field("closure_parameter_list", &self.with(parameter_list))?;
 ss.serialize_field("closure_inner_right_paren", &self.with(inner_right_paren))?;
 ss.serialize_field("closure_contexts", &self.with(contexts))?;
 ss.serialize_field("closure_colon", &self.with(colon))?;
+ss.serialize_field("closure_readonly_return", &self.with(readonly_return))?;
 ss.serialize_field("closure_return_type", &self.with(return_type))?;
 ss.serialize_field("closure_outer_right_paren", &self.with(outer_right_paren))?;
       ss.end()
 } 
-SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{call_convention,type_} ) => {
-      let mut ss = s.serialize_struct("", 3)?;
+SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{call_convention,readonly,type_} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "closure_parameter_type_specifier")?;
       ss.serialize_field("closure_parameter_call_convention", &self.with(call_convention))?;
+ss.serialize_field("closure_parameter_readonly", &self.with(readonly))?;
 ss.serialize_field("closure_parameter_type", &self.with(type_))?;
       ss.end()
 } 

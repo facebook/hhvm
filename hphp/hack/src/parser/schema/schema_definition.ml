@@ -2130,6 +2130,7 @@ let schema : schema_node list =
           ("inner_right_paren", Token);
           ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", Token);
+          ("readonly_return", ZeroOrOne Token);
           ("return_type", Aggregate Specifier);
           ("outer_right_paren", Token);
         ];
@@ -2142,7 +2143,11 @@ let schema : schema_node list =
       prefix = "closure_parameter";
       aggregates = [Specifier];
       fields =
-        [("call_convention", ZeroOrOne Token); ("type", Aggregate Specifier)];
+        [
+          ("call_convention", ZeroOrOne Token);
+          ("readonly", ZeroOrOne Token);
+          ("type", Aggregate Specifier);
+        ];
     };
     {
       kind_name = "ClassnameTypeSpecifier";

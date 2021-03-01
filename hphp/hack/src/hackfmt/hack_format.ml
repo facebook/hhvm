@@ -2224,6 +2224,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_inner_right_paren = inner_right_p;
           closure_contexts = ctxs;
           closure_colon = colon;
+          closure_readonly_return = readonly;
           closure_return_type = ret_type;
           closure_outer_right_paren = outer_right_p;
         } ->
@@ -2237,15 +2238,25 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env ctxs;
           t env colon;
           when_present colon space;
+          t env readonly;
+          when_present readonly space;
           t env ret_type;
           t env outer_right_p;
         ]
     | Syntax.ClosureParameterTypeSpecifier
         {
           closure_parameter_call_convention = callconv;
+          closure_parameter_readonly = readonly;
           closure_parameter_type = cp_type;
         } ->
-      Concat [t env callconv; when_present callconv space; t env cp_type]
+      Concat
+        [
+          t env callconv;
+          when_present callconv space;
+          t env readonly;
+          when_present readonly space;
+          t env cp_type;
+        ]
     | Syntax.ClassnameTypeSpecifier
         {
           classname_keyword = kw;

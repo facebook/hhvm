@@ -5988,6 +5988,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         {
           closure_outer_right_paren = validate_token x.closure_outer_right_paren;
           closure_return_type = validate_specifier x.closure_return_type;
+          closure_readonly_return =
+            validate_option_with validate_token x.closure_readonly_return;
           closure_colon = validate_token x.closure_colon;
           closure_contexts =
             validate_option_with validate_contexts x.closure_contexts;
@@ -6023,6 +6025,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             closure_contexts =
               invalidate_option_with invalidate_contexts x.closure_contexts;
             closure_colon = invalidate_token x.closure_colon;
+            closure_readonly_return =
+              invalidate_option_with invalidate_token x.closure_readonly_return;
             closure_return_type = invalidate_specifier x.closure_return_type;
             closure_outer_right_paren =
               invalidate_token x.closure_outer_right_paren;
@@ -6036,6 +6040,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       ( v,
         {
           closure_parameter_type = validate_specifier x.closure_parameter_type;
+          closure_parameter_readonly =
+            validate_option_with validate_token x.closure_parameter_readonly;
           closure_parameter_call_convention =
             validate_option_with
               validate_token
@@ -6054,6 +6060,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_token
                 x.closure_parameter_call_convention;
+            closure_parameter_readonly =
+              invalidate_option_with
+                invalidate_token
+                x.closure_parameter_readonly;
             closure_parameter_type =
               invalidate_specifier x.closure_parameter_type;
           };

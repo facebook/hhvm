@@ -446,6 +446,24 @@ where
     // SPEC
     //
     // TODO: Add this to the specification.
+    // (This work is tracked by task T85043839.)
+    //
+    // readonly:
+    //   readonly
+
+    fn parse_readonly_opt(&mut self) -> S::R {
+        match self.peek_token_kind() {
+            TokenKind::Readonly => {
+                let token = self.next_token();
+                S!(make_token, self, token)
+            }
+            _ => S!(make_missing, self, self.pos()),
+        }
+    }
+
+    // SPEC
+    //
+    // TODO: Add this to the specification.
     // (This work is tracked by task T22582676.)
     //
     // closure-param-type-specifier-list:
@@ -487,6 +505,7 @@ where
             }
             _ => {
                 let callconv = self.parse_call_convention_opt();
+                let readonly = self.parse_readonly_opt();
                 let ts = self.parse_type_specifier(false, true);
                 match self.peek_token_kind() {
                     TokenKind::DotDotDot => {
@@ -494,7 +513,13 @@ where
                         let token = S!(make_token, self, token);
                         S!(make_variadic_parameter, self, callconv, ts, token)
                     }
-                    _ => S!(make_closure_parameter_type_specifier, self, callconv, ts),
+                    _ => S!(
+                        make_closure_parameter_type_specifier,
+                        self,
+                        callconv,
+                        readonly,
+                        ts
+                    ),
                 }
             }
         }
@@ -802,6 +827,7 @@ where
         };
         let ctxs = self.parse_contexts();
         let col = self.require_colon();
+        let readonly = self.parse_readonly_opt();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
         S!(
@@ -814,6 +840,7 @@ where
             irp,
             ctxs,
             col,
+            readonly,
             ret,
             orp
         )

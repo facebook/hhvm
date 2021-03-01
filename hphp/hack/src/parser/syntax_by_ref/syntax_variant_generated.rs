@@ -1391,6 +1391,7 @@ pub struct ClosureTypeSpecifierChildren<'a, T, V> {
     pub inner_right_paren: Syntax<'a, T, V>,
     pub contexts: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
+    pub readonly_return: Syntax<'a, T, V>,
     pub return_type: Syntax<'a, T, V>,
     pub outer_right_paren: Syntax<'a, T, V>,
 }
@@ -1398,6 +1399,7 @@ pub struct ClosureTypeSpecifierChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
     pub call_convention: Syntax<'a, T, V>,
+    pub readonly: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
 }
 

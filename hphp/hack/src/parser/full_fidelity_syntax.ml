@@ -2260,6 +2260,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           } ->
@@ -2270,12 +2271,18 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_inner_right_paren in
         let acc = f acc closure_contexts in
         let acc = f acc closure_colon in
+        let acc = f acc closure_readonly_return in
         let acc = f acc closure_return_type in
         let acc = f acc closure_outer_right_paren in
         acc
       | ClosureParameterTypeSpecifier
-          { closure_parameter_call_convention; closure_parameter_type } ->
+          {
+            closure_parameter_call_convention;
+            closure_parameter_readonly;
+            closure_parameter_type;
+          } ->
         let acc = f acc closure_parameter_call_convention in
+        let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
         acc
       | ClassnameTypeSpecifier
@@ -3888,6 +3895,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           } ->
@@ -3899,12 +3907,21 @@ module WithToken (Token : TokenType) = struct
           closure_inner_right_paren;
           closure_contexts;
           closure_colon;
+          closure_readonly_return;
           closure_return_type;
           closure_outer_right_paren;
         ]
       | ClosureParameterTypeSpecifier
-          { closure_parameter_call_convention; closure_parameter_type } ->
-        [closure_parameter_call_convention; closure_parameter_type]
+          {
+            closure_parameter_call_convention;
+            closure_parameter_readonly;
+            closure_parameter_type;
+          } ->
+        [
+          closure_parameter_call_convention;
+          closure_parameter_readonly;
+          closure_parameter_type;
+        ]
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -5514,6 +5531,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           } ->
@@ -5525,12 +5543,21 @@ module WithToken (Token : TokenType) = struct
           "closure_inner_right_paren";
           "closure_contexts";
           "closure_colon";
+          "closure_readonly_return";
           "closure_return_type";
           "closure_outer_right_paren";
         ]
       | ClosureParameterTypeSpecifier
-          { closure_parameter_call_convention; closure_parameter_type } ->
-        ["closure_parameter_call_convention"; "closure_parameter_type"]
+          {
+            closure_parameter_call_convention;
+            closure_parameter_readonly;
+            closure_parameter_type;
+          } ->
+        [
+          "closure_parameter_call_convention";
+          "closure_parameter_readonly";
+          "closure_parameter_type";
+        ]
       | ClassnameTypeSpecifier
           {
             classname_keyword;
@@ -7350,6 +7377,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           ] ) ->
@@ -7362,13 +7390,22 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           }
       | ( SyntaxKind.ClosureParameterTypeSpecifier,
-          [closure_parameter_call_convention; closure_parameter_type] ) ->
+          [
+            closure_parameter_call_convention;
+            closure_parameter_readonly;
+            closure_parameter_type;
+          ] ) ->
         ClosureParameterTypeSpecifier
-          { closure_parameter_call_convention; closure_parameter_type }
+          {
+            closure_parameter_call_convention;
+            closure_parameter_readonly;
+            closure_parameter_type;
+          }
       | ( SyntaxKind.ClassnameTypeSpecifier,
           [
             classname_keyword;
@@ -9670,6 +9707,7 @@ module WithToken (Token : TokenType) = struct
           closure_inner_right_paren
           closure_contexts
           closure_colon
+          closure_readonly_return
           closure_return_type
           closure_outer_right_paren =
         let syntax =
@@ -9682,6 +9720,7 @@ module WithToken (Token : TokenType) = struct
               closure_inner_right_paren;
               closure_contexts;
               closure_colon;
+              closure_readonly_return;
               closure_return_type;
               closure_outer_right_paren;
             }
@@ -9690,10 +9729,16 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_closure_parameter_type_specifier
-          closure_parameter_call_convention closure_parameter_type =
+          closure_parameter_call_convention
+          closure_parameter_readonly
+          closure_parameter_type =
         let syntax =
           ClosureParameterTypeSpecifier
-            { closure_parameter_call_convention; closure_parameter_type }
+            {
+              closure_parameter_call_convention;
+              closure_parameter_readonly;
+              closure_parameter_type;
+            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -10054,6 +10099,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           } =
@@ -10066,6 +10112,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           }
@@ -10225,6 +10272,7 @@ module WithToken (Token : TokenType) = struct
               closure_inner_right_paren;
               closure_contexts;
               closure_colon;
+              closure_readonly_return;
               closure_return_type;
               closure_outer_right_paren;
             } ->
@@ -10236,6 +10284,7 @@ module WithToken (Token : TokenType) = struct
             closure_inner_right_paren;
             closure_contexts;
             closure_colon;
+            closure_readonly_return;
             closure_return_type;
             closure_outer_right_paren;
           }

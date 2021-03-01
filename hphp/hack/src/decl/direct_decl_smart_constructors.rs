@@ -4700,6 +4700,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _inner_right_paren: Self::R,
         capability: Self::R,
         _colon: Self::R,
+        readonly_ret: Self::R,
         return_type: Self::R,
         outer_right_paren: Self::R,
     ) -> Self::R {
@@ -4714,6 +4715,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 }
                 ParamMode::FPnormal => {}
             };
+
+            if fp.readonly {
+                flags |= FunParamFlags::READONLY;
+            }
 
             self.alloc(FunParam {
                 pos: self.get_pos(hint),
@@ -4752,6 +4757,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         if mutability.is_some() {
             flags |= FunTypeFlags::RETURNS_MUTABLE;
         }
+        if readonly_ret.is_token(TokenKind::Readonly) {
+            flags |= FunTypeFlags::RETURNS_READONLY;
+        }
 
         self.hint_ty(
             pos,
@@ -4772,7 +4780,12 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         )
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, inout: Self::R, hint: Self::R) -> Self::R {
+    fn make_closure_parameter_type_specifier(
+        &mut self,
+        inout: Self::R,
+        readonly: Self::R,
+        hint: Self::R,
+    ) -> Self::R {
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
         } else {
@@ -4783,7 +4796,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             visibility: Node::Ignored(SK::Missing),
             kind,
             hint,
-            readonly: false,
+            readonly: readonly.is_token(TokenKind::Readonly),
             pos: self.get_pos(hint),
             name: Some(""),
             variadic: false,

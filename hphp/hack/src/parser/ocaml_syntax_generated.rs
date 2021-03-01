@@ -3288,7 +3288,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_closure_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
+    fn make_closure_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
@@ -3298,7 +3298,8 @@ where
           arg5.value, 
           arg6.value, 
           arg7.value, 
-          arg8.value
+          arg8.value, 
+          arg9.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -3314,16 +3315,18 @@ where
               arg5.syntax, 
               arg6.syntax, 
               arg7.syntax, 
-              arg8.syntax
+              arg8.syntax, 
+              arg9.syntax
           ],
       );
       Self { syntax, value }
     }
 
-    fn make_closure_parameter_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
+    fn make_closure_parameter_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = &[
           arg0.value, 
-          arg1.value
+          arg1.value, 
+          arg2.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -3332,7 +3335,8 @@ where
           &value,
           &[
               arg0.syntax, 
-              arg1.syntax
+              arg1.syntax, 
+              arg2.syntax
           ],
       );
       Self { syntax, value }

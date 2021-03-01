@@ -159,6 +159,7 @@ struct
     closure_inner_right_paren: t;
     closure_contexts: t;
     closure_colon: t;
+    closure_readonly_return: t;
     closure_return_type: t;
     closure_outer_right_paren: t;
   }
@@ -1040,11 +1041,13 @@ struct
         closure_inner_right_paren: t;
         closure_contexts: t;
         closure_colon: t;
+        closure_readonly_return: t;
         closure_return_type: t;
         closure_outer_right_paren: t;
       }
     | ClosureParameterTypeSpecifier of {
         closure_parameter_call_convention: t;
+        closure_parameter_readonly: t;
         closure_parameter_type: t;
       }
     | ClassnameTypeSpecifier of {
@@ -2457,12 +2460,14 @@ struct
     closure_inner_right_paren: Token.t value;
     closure_contexts: contexts option value;
     closure_colon: Token.t value;
+    closure_readonly_return: Token.t option value;
     closure_return_type: specifier value;
     closure_outer_right_paren: Token.t value;
   }
 
   and closure_parameter_type_specifier = {
     closure_parameter_call_convention: Token.t option value;
+    closure_parameter_readonly: Token.t option value;
     closure_parameter_type: specifier value;
   }
 

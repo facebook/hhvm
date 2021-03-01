@@ -1661,7 +1661,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, function_keyword: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, contexts: Self, colon: Self, return_type: Self, outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, function_keyword: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, return_type: Self, outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(ctx.get_arena().alloc(ClosureTypeSpecifierChildren {
             outer_left_paren,
             function_keyword,
@@ -1670,6 +1670,7 @@ where
             inner_right_paren,
             contexts,
             colon,
+            readonly_return,
             return_type,
             outer_right_paren,
         }));
@@ -1677,9 +1678,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(ctx: &C, call_convention: Self, type_: Self) -> Self {
+    fn make_closure_parameter_type_specifier(ctx: &C, call_convention: Self, readonly: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(ctx.get_arena().alloc(ClosureParameterTypeSpecifierChildren {
             call_convention,
+            readonly,
             type_,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

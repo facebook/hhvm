@@ -241,7 +241,7 @@ void beginInlining(IRGS& env,
   // Callee checks and input initialization.
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
-  emitCalleeCoeffectChecks(env, target, callFlags);
+  emitCalleeCoeffectChecks(env, target, callFlags, numArgsInclUnpack);
   emitCalleeImplicitContextChecks(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 

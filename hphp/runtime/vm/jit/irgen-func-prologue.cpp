@@ -255,7 +255,7 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
-                              SSATmp* callFlags) {
+                              SSATmp* callFlags, uint32_t argc) {
   assertx(callee);
   assertx(callFlags);
 
@@ -264,7 +264,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     auto result = cns(env, callee->staticCoeffects().toRequired().value());
     if (!callee->hasCoeffectRules()) return result;
     for (auto const& rule : callee->getCoeffectRules()) {
-      if (auto const coeffect = rule.emitJit()) {
+      if (auto const coeffect = rule.emitJit(env, callee, argc)) {
         result = gen(env, AndInt, result, coeffect);
       }
     }
@@ -360,7 +360,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
-  emitCalleeCoeffectChecks(env, callee, callFlags);
+  emitCalleeCoeffectChecks(env, callee, callFlags, argc);
   emitCalleeImplicitContextChecks(env, callee);
 
   // Emit early stack overflow check if necessary.

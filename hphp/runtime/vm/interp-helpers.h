@@ -148,14 +148,16 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
  * Returns true if yes, otherwise raise a warning and return false or raise
  * an exception.
  */
-inline bool calleeCoeffectChecks(const Func* callee, const CallFlags flags) {
+inline bool calleeCoeffectChecks(const Func* callee,
+                                 const CallFlags flags,
+                                 uint32_t numArgsInclUnpack) {
   if (!CoeffectsConfig::enabled()) return true;
   auto const providedCoeffects = flags.coeffects();
   auto const requiredCoeffects = [&] {
     auto required = callee->staticCoeffects().toRequired();
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
-      if (auto const coeffect = rule.emit()) {
+      if (auto const coeffect = rule.emit(callee, numArgsInclUnpack)) {
         required &= *coeffect;
       }
     }

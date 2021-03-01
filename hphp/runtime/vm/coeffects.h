@@ -24,17 +24,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 namespace jit {
 struct SSATmp;
+namespace irgen {
+struct IRGS;
+}
 }
 ///////////////////////////////////////////////////////////////////////////////
 struct RuntimeCoeffects {
   using storage_t = uint16_t;
 
-  static RuntimeCoeffects none() {
-    return RuntimeCoeffects{0};
-  }
-
   static RuntimeCoeffects fromValue(uint16_t value) {
     return RuntimeCoeffects{value};
+  }
+
+  static RuntimeCoeffects none() {
+    return RuntimeCoeffects::fromValue(0);
+  }
+
+  static RuntimeCoeffects full() {
+    return RuntimeCoeffects::fromValue(std::numeric_limits<storage_t>::max());
   }
 
   uint16_t value() const { return m_data; }
@@ -140,8 +147,8 @@ struct CoeffectRule final {
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
-  folly::Optional<RuntimeCoeffects> emit() const;
-  jit::SSATmp* emitJit() const;
+  folly::Optional<RuntimeCoeffects> emit(const Func*, uint32_t) const;
+  jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*, uint32_t) const;
 
   folly::Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;

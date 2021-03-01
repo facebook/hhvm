@@ -1,0 +1,4 @@
+in f
+
+Warning: Call to f() requires [rx] coeffects but pure() provided [] in %s on line 12
+in f

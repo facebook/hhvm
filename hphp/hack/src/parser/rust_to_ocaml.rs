@@ -235,7 +235,7 @@ impl ToOcaml for PositionedTokenByRef<'_> {
         let trailing_width = usize_to_ocaml(self.trailing_width());
 
         let trivia =
-            usize_to_ocaml((self.leading().kinds.bits() | self.trailing().kinds.bits()) as usize);
+            usize_to_ocaml((self.leading_kinds().bits() | self.trailing_kinds().bits()) as usize);
         // From full_fidelity_positioned_token.ml:
         // type t = {
         //   kind: TokenKind.t;

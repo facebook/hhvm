@@ -5,17 +5,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::positioned_trivia::PositionedTrivia;
-use crate::compact_trivia::CompactTrivia;
 
-pub type PositionedValue<'a> = internal::PositionedValue<'a, CompactTrivia>;
+pub type PositionedValue<'a> = internal::PositionedValue<'a, usize>;
 pub type PositionedValueFullTrivia<'a> = internal::PositionedValue<'a, PositionedTrivia<'a>>;
 
 mod internal {
     use crate::{
         lexable_token::LexableToken,
-        lexable_trivia::LexableTrivia,
         syntax::{SyntaxValueType, SyntaxValueWithKind},
-        syntax_by_ref::positioned_token::internal::PositionedToken,
+        syntax_by_ref::positioned_token::internal::{PositionedToken, TriviaRep},
         syntax_kind::SyntaxKind,
         token_kind::TokenKind,
     };
@@ -34,7 +32,7 @@ mod internal {
 
     impl<'a, Trivia> PositionedValue<'a, Trivia>
     where
-        Trivia: LexableTrivia + Clone,
+        Trivia: TriviaRep + Clone,
     {
         pub fn width(&self) -> usize {
             match self {
@@ -122,7 +120,7 @@ mod internal {
 
     impl<'a, Trivia: 'a> SyntaxValueType<PositionedToken<'a, Trivia>> for PositionedValue<'a, Trivia>
     where
-        Trivia: LexableTrivia + Clone,
+        Trivia: TriviaRep + Clone,
     {
         fn from_values<'b>(child_values: impl Iterator<Item = &'b Self>) -> Self
         where
@@ -216,7 +214,7 @@ mod internal {
 
     impl<'a, Trivia: std::fmt::Debug> SyntaxValueWithKind for PositionedValue<'a, Trivia>
     where
-        Trivia: LexableTrivia + Clone,
+        Trivia: TriviaRep + Clone,
     {
         fn is_missing(&self) -> bool {
             matches!(self, PositionedValue::Missing { .. })

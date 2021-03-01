@@ -46,8 +46,8 @@ impl<'a> Serialize for WithContext<'a, PositionedTokenFullTrivia<'a>> {
         ss.serialize_field("leading_width", &self.1.leading_width())?;
         ss.serialize_field("width", &width)?;
         ss.serialize_field("trailing_width", &self.1.trailing_width())?;
-        ss.serialize_field("leading", &self.with(self.1.leading().as_slice()))?;
-        ss.serialize_field("trailing", &self.with(self.1.trailing().as_slice()))?;
+        ss.serialize_field("leading", &self.with(self.1.clone_leading().as_slice()))?;
+        ss.serialize_field("trailing", &self.with(self.1.clone_trailing().as_slice()))?;
         ss.serialize_field(
             "line_number",
             &self.0.offset_to_position(token_offset as isize).0,

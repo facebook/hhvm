@@ -67,6 +67,11 @@ RuntimeCoeffects StaticCoeffects::toRequired() const {
   return RuntimeCoeffects::fromValue(val);
 }
 
+RuntimeCoeffects& RuntimeCoeffects::operator&=(const RuntimeCoeffects o) {
+  m_data &= o.m_data;
+  return *this;
+}
+
 StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
   return (*this = CoeffectsConfig::combine(*this, o));
 }
@@ -86,6 +91,20 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
                                     m_name->toCppString());
     case Type::CCThis:
       return folly::to<std::string>("this::", m_name->toCppString());
+    case Type::Invalid:
+      always_assert(false);
+  }
+  not_reached();
+}
+
+folly::Optional<RuntimeCoeffects> CoeffectRule::emit() const {
+  switch (m_type) {
+    case Type::ConditionalReactiveImplements:
+    case Type::ConditionalReactiveArgImplements:
+    case Type::FunParam:
+    case Type::CCThis:
+    case Type::CCParam:
+      return folly::none;
     case Type::Invalid:
       always_assert(false);
   }

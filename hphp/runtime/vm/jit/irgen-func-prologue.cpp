@@ -260,23 +260,39 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   assertx(callFlags);
 
   if (!CoeffectsConfig::enabled()) return;
-  auto const requiredCoeffects = callee->staticCoeffects().toRequired();
+  auto const requiredCoeffects = [&] {
+    auto result = cns(env, callee->staticCoeffects().toRequired().value());
+    if (!callee->hasCoeffectRules()) return result;
+    for (auto const& rule : callee->getCoeffectRules()) {
+      if (auto const coeffect = rule.emitJit()) {
+        result = gen(env, AndInt, result, coeffect);
+      }
+    }
+    return result;
+  }();
+
   ifThen(
     env,
     [&] (Block* taken) {
       // providedCoeffects & (~requiredCoeffects) == 0
+
       auto const providedCoeffects =
         gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
-      auto const requiredCoeffectsFlipped = (~requiredCoeffects.value()) &
-        ((1 << CoeffectsConfig::numUsedBits()) - 1);
+
+      // The unused higher order bits of requiredCoeffects will be 0
+      // We want to flip the used lower order bits
+      auto const mask = (1 << CoeffectsConfig::numUsedBits()) - 1;
+      auto const requiredCoeffectsFlipped =
+        gen(env, XorInt, requiredCoeffects, cns(env, mask));
+
       auto const cond =
-        gen(env, AndInt, providedCoeffects, cns(env, requiredCoeffectsFlipped));
+        gen(env, AndInt, providedCoeffects, requiredCoeffectsFlipped);
       gen(env, JmpNZero, taken, cond);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags,
-          cns(env, requiredCoeffects.value()));
+          requiredCoeffects);
     }
   );
 }

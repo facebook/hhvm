@@ -151,9 +151,16 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
 inline bool calleeCoeffectChecks(const Func* callee, const CallFlags flags) {
   if (!CoeffectsConfig::enabled()) return true;
   auto const providedCoeffects = flags.coeffects();
-  // Coeffect rules are not tracked yet, so assume the callee has a more
-  // permissive context than it would otherwise have with coeffect rules
-  auto const requiredCoeffects = callee->staticCoeffects().toRequired();
+  auto const requiredCoeffects = [&] {
+    auto required = callee->staticCoeffects().toRequired();
+    if (!callee->hasCoeffectRules()) return required;
+    for (auto const& rule : callee->getCoeffectRules()) {
+      if (auto const coeffect = rule.emit()) {
+        required &= *coeffect;
+      }
+    }
+    return required;
+  }();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
   raiseCoeffectsCallViolation(callee, flags, requiredCoeffects);
   return false;

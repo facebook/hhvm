@@ -22,6 +22,10 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+namespace jit {
+struct SSATmp;
+}
+///////////////////////////////////////////////////////////////////////////////
 struct RuntimeCoeffects {
   using storage_t = uint16_t;
 
@@ -46,6 +50,9 @@ struct RuntimeCoeffects {
   }
 
   bool canCallWithWarning(const RuntimeCoeffects) const;
+
+  // This operator is equivalent to | of [coeffectA | coeffectB]
+  RuntimeCoeffects& operator&=(const RuntimeCoeffects);
 
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
@@ -133,6 +140,8 @@ struct CoeffectRule final {
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
+  folly::Optional<RuntimeCoeffects> emit() const;
+  jit::SSATmp* emitJit() const;
 
   folly::Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;

@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../verify_smart_constructors.rs"
 
 [dependencies]
+bumpalo = { version = "3.2.1", features = ["collections"] }
 ocaml = "0.8"
 parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }

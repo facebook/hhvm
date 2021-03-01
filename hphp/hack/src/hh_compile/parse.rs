@@ -37,6 +37,7 @@ enum Parser {
     Aast,
     Positioned,
     PositionedByRef,
+    PositionedWithFullTrivia,
     DirectDecl,
 }
 
@@ -78,6 +79,20 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
             let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
             let source_text = SourceText::make(RcOc::new(path), content.as_slice());
             match parser {
+                Parser::PositionedWithFullTrivia => {
+                    let stdout = std::io::stdout();
+                    let w = stdout.lock();
+                    let mut s = serde_json::Serializer::new(w);
+                    let arena = bumpalo::Bump::new();
+                    let src = IndexedSourceText::new(source_text);
+                    positioned_full_trivia_parser::parse_script_to_json(
+                        &arena,
+                        &mut s,
+                        &src,
+                        env,
+                        Some(stack_limit),
+                    )?
+                }
                 Parser::PositionedByRef => {
                     let arena = bumpalo::Bump::new();
                     let (_, _, _) = positioned_by_ref_parser::parse_script(

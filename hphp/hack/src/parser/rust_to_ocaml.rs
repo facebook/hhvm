@@ -12,7 +12,6 @@ use ocamlpool_rust::utils::*;
 use ocamlrep_ocamlpool::add_to_ambient_pool;
 use parser_core_types::{
     lexable_token::LexableToken,
-    minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia,
     positioned_syntax::PositionedValue,
     positioned_token::PositionedToken,
@@ -20,6 +19,7 @@ use parser_core_types::{
     source_text::SourceText,
     syntax::*,
     syntax_by_ref::{
+        arena_state::State as ArenaState,
         positioned_token::PositionedToken as PositionedTokenByRef,
         positioned_value::PositionedValue as PositionedValueByRef, syntax::Syntax as SyntaxByRef,
         syntax_variant_generated::SyntaxVariant as SyntaxVariantByRef,
@@ -85,12 +85,6 @@ impl ToOcaml for TriviaKind {
 }
 
 impl ToOcaml for MinimalTrivia {
-    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        add_to_ambient_pool(self)
-    }
-}
-
-impl ToOcaml for MinimalToken {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         add_to_ambient_pool(self)
     }
@@ -240,7 +234,8 @@ impl ToOcaml for PositionedTokenByRef<'_> {
         let width = usize_to_ocaml(self.width());
         let trailing_width = usize_to_ocaml(self.trailing_width());
 
-        let trivia = usize_to_ocaml((self.leading().bits() | self.trailing().bits()) as usize);
+        let trivia =
+            usize_to_ocaml((self.leading().kinds.bits() | self.trailing().kinds.bits()) as usize);
         // From full_fidelity_positioned_token.ml:
         // type t = {
         //   kind: TokenKind.t;
@@ -408,5 +403,11 @@ where
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         // don't serialize .1 (source text) as it is not part the real state we care about
         self.0.to_ocaml(_context)
+    }
+}
+
+impl ToOcaml for ArenaState<'_> {
+    unsafe fn to_ocaml(&self, c: &SerializationContext) -> Value {
+        NoState.to_ocaml(c)
     }
 }

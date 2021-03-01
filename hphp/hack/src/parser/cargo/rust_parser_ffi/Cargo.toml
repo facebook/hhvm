@@ -10,12 +10,12 @@ path = "../../rust_parser_ffi.rs"
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
 libc = "0.2.86"
-minimal_parser = { path = "../../api/cargo/minimal_parser" }
 mode_parser = { path = "../mode_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 operator = { path = "../operator" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
+positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 stack_limit = { path = "../../../utils/stack_limit" }

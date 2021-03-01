@@ -303,7 +303,6 @@ dependencies = [
  "anyhow",
  "atty",
  "compile_rust",
- "cpp_helper",
  "libc",
  "log",
  "ocamlrep",
@@ -345,13 +344,6 @@ name = "core_utils_rust"
 version = "0.0.0"
 dependencies = [
  "pretty_assertions",
-]
-
-[[package]]
-name = "cpp_helper"
-version = "0.0.0"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -1179,6 +1171,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 
 [[package]]
+name = "full_fidelity_schema_version_number"
+version = "0.0.0"
+
+[[package]]
 name = "generator_rust"
 version = "0.0.0"
 dependencies = [
@@ -1305,8 +1301,10 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
+ "positioned_full_trivia_parser",
  "positioned_parser",
  "rayon",
+ "serde_json",
  "stack_limit",
  "structopt",
  "strum",
@@ -1852,13 +1850,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "minimal_parser"
-version = "0.0.0"
-dependencies = [
- "parser",
-]
-
-[[package]]
 name = "mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -2172,6 +2163,7 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
+ "serde",
 ]
 
 [[package]]
@@ -2197,12 +2189,9 @@ name = "positioned_by_ref_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "ocaml",
  "parser",
  "positioned_smart_constructors",
- "rust_to_ocaml",
  "stack_limit",
- "syntax_smart_constructors",
 ]
 
 [[package]]
@@ -2214,6 +2203,18 @@ dependencies = [
  "oxidized",
  "positioned_by_ref_parser",
  "rust_parser_ffi",
+]
+
+[[package]]
+name = "positioned_full_trivia_parser"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "full_fidelity_schema_version_number",
+ "parser",
+ "positioned_smart_constructors",
+ "serde",
+ "stack_limit",
 ]
 
 [[package]]
@@ -2229,16 +2230,11 @@ dependencies = [
 name = "positioned_parser_ffi"
 version = "0.0.0"
 dependencies = [
- "cpp_helper",
- "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
- "parser_core_types",
  "positioned_parser",
  "rust_parser_ffi",
- "smart_constructors",
- "stack_limit",
 ]
 
 [[package]]
@@ -2465,7 +2461,6 @@ dependencies = [
 name = "rescan_trivia"
 version = "0.0.0"
 dependencies = [
- "minimal_parser",
  "parser",
  "positioned_parser",
 ]
@@ -2533,7 +2528,6 @@ dependencies = [
 name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
- "cpp_helper",
  "facts_rust",
  "hhbc_string_utils_rust",
  "libc",
@@ -2576,13 +2570,13 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "libc",
- "minimal_parser",
  "mode_parser",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "operator",
  "oxidized",
  "parser_core_types",
+ "positioned_by_ref_parser",
  "rust_to_ocaml",
  "stack_limit",
 ]
@@ -2961,6 +2955,7 @@ checksum = "05c78687fb1a80548ae3250346c3db86a80a7cdd77bda190189f2d0a0987c81a"
 name = "verify_parser"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "parser",
  "stack_limit",
  "verify_smart_constructors",
@@ -2981,6 +2976,7 @@ dependencies = [
 name = "verify_smart_constructors"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
  "ocaml",
  "parser_core_types",
  "rust_to_ocaml",

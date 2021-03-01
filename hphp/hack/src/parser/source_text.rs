@@ -63,6 +63,10 @@ impl<'a> SourceText<'a> {
         self.0.text
     }
 
+    pub fn text_as_str(&self) -> &'a str {
+        unsafe { std::str::from_utf8_unchecked(self.0.text) }
+    }
+
     pub fn length(&self) -> usize {
         self.text().len()
     }

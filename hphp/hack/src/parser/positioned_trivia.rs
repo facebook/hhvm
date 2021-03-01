@@ -7,8 +7,9 @@
 use crate::lexable_trivia::{LexableTrivia, LexableTrivium};
 use crate::source_text::SourceText;
 use crate::trivia_kind::TriviaKind;
+use ocamlrep_derive::ToOcamlRep;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, ToOcamlRep)]
 pub struct PositionedTrivium {
     pub kind: TriviaKind,
     pub offset: usize,

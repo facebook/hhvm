@@ -21,8 +21,10 @@ options = { path = "../hhbc/cargo/options" }
 oxidized = { path = "../oxidized" }
 parser_core_types = { path = "../parser/cargo/core_types" }
 positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parser" }
+positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 rayon = "1.2"
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
 stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.21"
 strum = "0.19"

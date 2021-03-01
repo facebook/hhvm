@@ -1485,7 +1485,9 @@ RuntimeCoeffects Class::clsCtxCnsGet(const StringData* name) const {
 }
 
 TypedValue Class::clsCnsGet(const StringData* clsCnsName,
-                            ClsCnsLookup what) const {
+                            ConstModifiers::Kind what,
+                            bool resolve) const {
+  always_assert(what != ConstModifiers::Kind::Context);
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
   if (!cnsVal) return make_tv<KindOfUninit>();
@@ -1512,15 +1514,14 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
           assertx(resolved->isHAMSafeDArray());
           return make_persistent_array_like_tv(resolved);
         }
-        if (what == ClsCnsLookup::ValueAndPartialTypes) {
-          return make_tv<KindOfUninit>();
-        }
         break;
       }
       case ConstModifiers::Kind::Context:
-        always_assert(false && "Cannot load context constants");
+        not_reached();
     }
   }
+
+  if (!resolve) return make_tv<KindOfUninit>();
 
   /*
    * We use a sentinel static array to mark constants that are being evaluated
@@ -1591,11 +1592,6 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   };
 
   if (cns.kind() == ConstModifiers::Kind::Type) {
-    // Resolve type constant, if needed
-    if (what == ClsCnsLookup::ValueAndPartialTypes) {
-      clsCnsData.remove(StrNR{clsCnsName});
-      return make_tv<KindOfUninit>();
-    }
     Array resolvedTS;
     bool persistent = true;
     try {
@@ -1672,21 +1668,14 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
 const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
                                      Slot& clsCnsInd,
-                                     ClsCnsLookup what) const {
+                                     ConstModifiers::Kind what) const {
+  always_assert(what != ConstModifiers::Kind::Context);
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) return nullptr;
   if (m_constants[clsCnsInd].isAbstract()) return nullptr;
 
   auto const kind = m_constants[clsCnsInd].kind();
-  switch (kind) {
-    case ConstModifiers::Kind::Value:
-      break;
-    case ConstModifiers::Kind::Type:
-      if (what == ClsCnsLookup::ValueOnly) return nullptr;
-      break;
-    case ConstModifiers::Kind::Context:
-      return nullptr;
-  }
+  if (kind != what) return nullptr;
 
   auto const ret = &m_constants[clsCnsInd].val;
   assertx(IMPLIES(kind == ConstModifiers::Kind::Value, tvIsPlausible(*ret)));

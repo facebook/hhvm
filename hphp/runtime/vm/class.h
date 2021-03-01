@@ -98,12 +98,6 @@ struct StaticMultiPropData {
   TypedValue val;
 };
 
-enum class ClsCnsLookup {
-  ValueOnly,
-  ValueAndTypes,
-  ValueAndPartialTypes,
-};
-
 /*
  * Class kinds---classes, interfaces, traits, and enums.
  *
@@ -1075,11 +1069,14 @@ public:
    * Look up the actual value of a class constant.  Perform dynamic
    * initialization if necessary.
    *
+   * If resolve not is set, then returns an unresolved structure.
+   *
    * Return a TypedValue containing KindOfUninit if this class has no
    * such constant.
    */
   TypedValue clsCnsGet(const StringData* clsCnsName,
-                       ClsCnsLookup what = ClsCnsLookup::ValueOnly) const;
+                       ConstModifiers::Kind what = ConstModifiers::Kind::Value,
+                       bool resolve = true) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require dynamic
@@ -1095,7 +1092,8 @@ public:
    */
   const TypedValue* cnsNameToTV(const StringData* clsCnsName,
                                 Slot& clsCnsInd,
-                                ClsCnsLookup what = ClsCnsLookup::ValueOnly) const;
+                                ConstModifiers::Kind what
+                                  = ConstModifiers::Kind::Value) const;
 
   /*
    * Get the slot for a constant with name, which can optionally be abstract and

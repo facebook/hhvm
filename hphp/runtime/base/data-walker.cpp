@@ -133,16 +133,29 @@ inline bool DataWalker::markVisited(
 inline void DataWalker::objectFeature(ObjectData* pobj,
                                       DataFeature& features) const {
   if (pobj->isCollection()) return;
-  if ((m_features & LookupFeature::DetectSerializable) &&
-       pobj->instanceof(SystemLib::s_SerializableClass)) {
+  if (m_feature == LookupFeature::DetectSerializable &&
+      pobj->instanceof(SystemLib::s_SerializableClass)) {
     features.hasSerializable = true;
   }
 }
 
 inline bool DataWalker::canStopWalk(DataFeature& features) const {
+  /*
+   * This encodes some assumptions about our callers and our implementation:
+   *
+   * Those who pass DetectNonPersistable need to know if the data isCircular,
+   * and only if it's not do they care whether it hasNonPersistable; because of
+   * this we can only stop early if both are true for these callers.
+   *
+   * On the other hand, those that pass DetectSerializable react the same to
+   * a result of isCircular and hasSerializable, so for these callers we can
+   * stop if either is true (callers not passing DetectSerializable are not
+   * affected by this logic since we only do the check needed to set
+   * hasSerializable when passed DetectSerializable).
+   */
   auto nonPersistableCheck =
     features.hasNonPersistable ||
-    !(m_features & LookupFeature::DetectNonPersistable);
+    m_feature != LookupFeature::DetectNonPersistable;
   auto defaultChecks = features.isCircular || features.hasSerializable;
   return nonPersistableCheck && defaultChecks;
 }

@@ -103,8 +103,8 @@ val btw_nocheck : 'a pos -> 'a pos -> 'a pos
 
 val is_hhi : t -> bool
 
-(* Fill in the gap "between" first position and second position.
- * Not valid if from different files or second position precedes first *)
+(** Fill in the gap "between" first position and second position.
+    Not valid if from different files or second position precedes first *)
 val btw : t -> t -> t
 
 (* Symmetric version of above: order doesn't matter *)

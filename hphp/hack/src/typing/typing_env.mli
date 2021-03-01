@@ -62,9 +62,9 @@ val expand_type : env -> locl_ty -> env * locl_ty
 
 val expand_internal_type : env -> internal_type -> env * internal_type
 
-val get_shape_field_name : Ast_defs.shape_field_name -> string
+val get_shape_field_name : tshape_field_name -> string
 
-val get_shape_field_name_pos : Ast_defs.shape_field_name -> Pos.t
+val get_shape_field_name_pos : tshape_field_name -> Pos_or_decl.t
 
 val empty :
   ?origin:Decl_counters.origin ->

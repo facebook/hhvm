@@ -92,7 +92,7 @@ let rec strip_ty ty =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
-      let shape_fields = Nast.ShapeMap.map strip_field shape_fields in
+      let shape_fields = TShapeMap.map strip_field shape_fields in
       Tshape (shape_kind, shape_fields)
     | Taccess _ -> ty
     | Tunapplied_alias _ ->

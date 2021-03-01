@@ -13,7 +13,6 @@ open Typing_defs
 module Env = Typing_env
 module MkType = Typing_make_type
 module Reason = Typing_reason
-module SM = Nast.ShapeMap
 module TySet = Typing_set
 module Utils = Typing_utils
 
@@ -181,7 +180,7 @@ let rec intersect env ~r ty1 ty2 =
 
 and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
   let (env, fdm) =
-    SM.merge_env env fdm1 fdm2 ~combine:(fun env _sfn sft1 sft2 ->
+    TShapeMap.merge_env env fdm1 fdm2 ~combine:(fun env _sfn sft1 sft2 ->
         match ((shape_kind1, sft1), (shape_kind2, sft2)) with
         | ((_, None), (_, None))
         | ((_, Some { sft_optional = true; _ }), (Closed_shape, None))

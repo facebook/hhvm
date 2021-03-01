@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5091d422d2d26d55502406f92f3fc7c9>>
+// @generated SignedSource<<6107ed5b0a5b230e609a56222aafadce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,7 +14,7 @@ use super::node::Node;
 use super::visitor::Visitor;
 use crate::{
     aast_defs::*, ast_defs::*, decl_defs::*, direct_decl_parser::*, shallow_decl_defs::*,
-    shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
+    t_shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
 };
 impl<'a> Node<'a> for ArgPosition {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
@@ -378,6 +378,51 @@ impl<'a> Node<'a> for ParamRxAnnotation<'a> {
         match self {
             ParamRxAnnotation::ParamRxVar => {}
             ParamRxAnnotation::ParamRxIfImpl(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for PosByteString<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_pos_byte_string(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PosByteString(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for PosId<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_pos_id(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PosId(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for PosString<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_pos_string(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PosString(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }
@@ -783,28 +828,6 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ShapeField<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shape_field(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ShapeField(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ShapeFieldName<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shape_field_name(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ShapeFieldName::SFlitInt(ref __binding_0) => __binding_0.accept(v),
-            ShapeFieldName::SFlitStr(ref __binding_0) => __binding_0.accept(v),
-            ShapeFieldName::SFclassConst(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
 impl<'a> Node<'a> for ShapeFieldType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_shape_field_type(self)
@@ -831,6 +854,16 @@ impl<'a> Node<'a> for ShapeKind {
         match self {
             ShapeKind::ClosedShape => {}
             ShapeKind::OpenShape => {}
+        }
+    }
+}
+impl<'a> Node<'a> for TShapeField<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tshape_field(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TShapeField(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -899,6 +932,18 @@ impl<'a> Node<'a> for Tprim {
             Tprim::Tnum => {}
             Tprim::Tarraykey => {}
             Tprim::Tnoreturn => {}
+        }
+    }
+}
+impl<'a> Node<'a> for TshapeFieldName<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tshape_field_name(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TshapeFieldName::TSFlitInt(ref __binding_0) => __binding_0.accept(v),
+            TshapeFieldName::TSFlitStr(ref __binding_0) => __binding_0.accept(v),
+            TshapeFieldName::TSFclassConst(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

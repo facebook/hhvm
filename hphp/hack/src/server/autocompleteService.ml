@@ -14,7 +14,6 @@ open String_utils
 open SearchUtils
 include AutocompleteTypes
 open Tast
-module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
 module Cls = Decl_provider.Class
@@ -147,7 +146,7 @@ let autocomplete_trait_only = autocomplete_token Actrait_only None
 
 let autocomplete_new cid env =
   match cid with
-  | Nast.CI sid -> autocomplete_token Acnew (Some env) sid
+  | Aast.CI sid -> autocomplete_token Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
@@ -169,14 +168,14 @@ let autocomplete_shape_key env fields id =
       Pos.length (fst id) > AutocompleteTypes.autocomplete_token_length
     in
     let prefix = strip_suffix (snd id) in
-    let add (name : Ast_defs.shape_field_name) =
+    let add (name : Typing_defs.tshape_field_name) =
       let (code, kind, ty) =
         match name with
-        | Ast_defs.SFlit_int (pos, str) ->
+        | Typing_defs.TSFlit_int (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
           (str, SI_Literal, Typing_defs.mk (reason, ty))
-        | Ast_defs.SFlit_str (pos, str) ->
+        | Typing_defs.TSFlit_str (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote =
@@ -186,7 +185,7 @@ let autocomplete_shape_key env fields id =
               "'"
           in
           (quote ^ str ^ quote, SI_Literal, Typing_defs.mk (reason, ty))
-        | Ast_defs.SFclass_const ((pos, cid), (_, mid)) ->
+        | Typing_defs.TSFclass_const ((pos, cid), (_, mid)) ->
           ( Printf.sprintf "%s::%s" cid mid,
             SI_ClassConstant,
             Typing_defs.mk (Reason.Rwitness pos, Typing_defs.make_tany ()) )
@@ -194,7 +193,7 @@ let autocomplete_shape_key env fields id =
       if (not have_prefix) || string_starts_with code prefix then
         add_partial_result code (Phase.decl ty) kind None
     in
-    List.iter (Ast_defs.ShapeMap.keys fields) ~f:add
+    List.iter (TShapeMap.keys fields) ~f:add
   )
 
 let autocomplete_member ~is_static env class_ cid id =
@@ -205,7 +204,7 @@ let autocomplete_member ~is_static env class_ cid id =
     (* Detect usage of "parent::|" which can use both static and instance *)
     let match_both_static_and_instance =
       match cid with
-      | Some Nast.CIparent -> true
+      | Some Aast.CIparent -> true
       | _ -> false
     in
     ac_env := Some env;
@@ -518,7 +517,7 @@ let visitor =
        use that as the search term. *)
       let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
       autocomplete_id trimmed_sid env;
-      let cid = Nast.CI sid in
+      let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function

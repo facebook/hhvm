@@ -41,6 +41,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
+  hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/deps/typing_deps_mode.ml                                      \
   hphp/hack/src/errors/errors.ml                                              \
@@ -96,6 +97,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/decl/decl_defs.ml                                             \
+  hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
@@ -143,7 +145,7 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs"                  \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_reason.rs"                \
   --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs"        \
-  --input "hphp/hack/src/oxidized_by_ref/manual/shape_map.rs"                 \
+  --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs"               \
   --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \
   --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
   --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \

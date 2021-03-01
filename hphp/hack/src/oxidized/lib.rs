@@ -54,6 +54,7 @@ pub use gen::namespace_env;
 pub use gen::naming_types;
 pub use gen::nast;
 pub use gen::parser_options;
+pub use gen::pos_or_decl;
 pub use gen::prim_defs;
 pub use gen::scoured_comments;
 pub use gen::typechecker_options;

@@ -17,7 +17,7 @@ module MakeType = Typing_make_type
 let is_object env ty =
   Typing_solver.is_sub_type env ty (MakeType.ty_object (get_reason ty))
 
-let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
+let sub_string (p : Pos.t) (env : env) (ty : locl_ty) : env =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
    * We test against ?(arraykey | bool | float | resource | object | dynamic |

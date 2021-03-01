@@ -62,7 +62,7 @@ let check_param : env -> Nast.fun_param -> unit =
     | Tvarray_or_darray (_, ty) ->
       check_memoizable env ty
     | Tshape (_, fdm) ->
-      ShapeMap.iter
+      TShapeMap.iter
         begin
           fun _ { sft_ty; _ } ->
           check_memoizable env sft_ty

@@ -197,11 +197,11 @@ and hint_ p env = function
     let fdm =
       List.fold_left
         ~f:(fun acc i ->
-          ShapeMap.add
-            i.sfi_name
+          TShapeMap.add
+            (TShapeField.of_ast (fun p -> p) i.sfi_name)
             (shape_field_info_to_shape_field_type env i)
             acc)
-        ~init:ShapeMap.empty
+        ~init:TShapeMap.empty
         nsi_field_map
     in
     Tshape (shape_kind, fdm)

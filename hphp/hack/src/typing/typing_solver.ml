@@ -319,8 +319,7 @@ let ty_equal_shallow env ty1 ty2 =
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal
          (fun (k1, v1) (k2, v2) ->
-           Ast_defs.ShapeField.equal k1 k2
-           && Bool.equal v1.sft_optional v2.sft_optional)
+           TShapeField.equal k1 k2 && Bool.equal v1.sft_optional v2.sft_optional)
          (ShapeFieldMap.elements fdm1)
          (ShapeFieldMap.elements fdm2)
   | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2

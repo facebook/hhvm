@@ -100,7 +100,8 @@ class type ['env] type_mapper_type =
       'env ->
       Typing_reason.t ->
       Typing_defs.shape_kind ->
-      Typing_defs.locl_phase Typing_defs.shape_field_type Ast_defs.ShapeMap.t ->
+      Typing_defs.locl_phase Typing_defs.shape_field_type
+      Typing_defs.TShapeMap.t ->
       'env * Typing_defs.locl_ty
 
     method on_tvarray :

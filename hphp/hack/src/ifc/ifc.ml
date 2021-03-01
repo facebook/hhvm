@@ -77,7 +77,7 @@ let rec policy_occurrences pty =
       | Closed_shape -> []
       | Open_shape ty -> [policy_occurrences ty]
     in
-    Nast.ShapeMap.values sh_fields |> List.fold ~f ~init |> on_list
+    Typing_defs.TShapeMap.values sh_fields |> List.fold ~f ~init |> on_list
 
 exception SubtypeFailure of string * ptype * ptype
 
@@ -207,7 +207,7 @@ let rec subtype ~pos t1 t2 acc =
       | (None, None) -> (acc, None)
     in
     let (acc, _) =
-      Nast.ShapeMap.merge_env ~combine acc s1.sh_fields s2.sh_fields
+      Typing_defs.TShapeMap.merge_env ~combine acc s1.sh_fields s2.sh_fields
     in
     acc
   | (Tunion tl, _) ->
@@ -445,7 +445,7 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
         let (env, p) = freshen_pol_cov env sft.sft_policy in
         (env, { sft_ty = ty; sft_policy = p; sft_optional = sft.sft_optional })
       in
-      let (env, sh_fields) = Nast.ShapeMap.map_env f env sh_fields in
+      let (env, sh_fields) = Typing_defs.TShapeMap.map_env f env sh_fields in
       let (env, sh_kind) =
         match sh_kind with
         | Open_shape ty ->
@@ -485,7 +485,7 @@ let rec object_policy = function
       | Open_shape ty -> object_policy ty
       | Closed_shape -> PSet.empty
     in
-    Nast.ShapeMap.fold f sh_fields pols
+    Typing_defs.TShapeMap.fold f sh_fields pols
 
 let add_dependencies pl t = L.(pl <* PSet.elements (object_policy t))
 
@@ -599,7 +599,9 @@ let may_throw ~pos renv env pc_deps exn_ty =
   let env = Env.acc env (add_dependencies deps renv.re_exn ~pos) in
   env
 
-let shape_field_name renv ix =
+let shape_field_name : ptype renv_ -> _ -> Typing_defs.tshape_field_name option
+    =
+ fun renv ix ->
   let ix =
     (* The utility function does not expect a TAST *)
     let ((p, _), e) = ix in
@@ -613,7 +615,7 @@ let shape_field_name renv ix =
       | _ -> None)
   in
   match Typing_utils.shape_field_name_ this ix with
-  | Ok fld -> Some fld
+  | Ok fld -> Some (Typing_defs.TShapeField.of_ast (fun p -> p) fld)
   | Error _ -> None
 
 let call_special ~pos renv env args ret = function
@@ -637,7 +639,7 @@ let call_special ~pos renv env args ret = function
       }
     in
     let tshape =
-      let sh_fields = Nast.ShapeMap.singleton key field in
+      let sh_fields = Typing_defs.TShapeMap.singleton key field in
       Tshape { sh_fields; sh_kind = Open_shape (Tinter []) }
     in
     let env =
@@ -768,7 +770,7 @@ let array_like_with_default ~cow ~shape ~klass ~tuple ~dynamic ~pos renv ty =
           a_length = Env.new_policy_var renv "fake_length";
         }
     else if shape then
-      Tshape { sh_kind = Closed_shape; sh_fields = A.ShapeMap.empty }
+      Tshape { sh_kind = Closed_shape; sh_fields = Typing_defs.TShapeMap.empty }
     else if tuple then
       Ttuple []
     else
@@ -939,7 +941,7 @@ let rec assign
               Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
             in
             let sh_fields =
-              Nast.ShapeMap.add
+              Typing_defs.TShapeMap.add
                 key
                 { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
                 sh_fields
@@ -1380,7 +1382,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         let sft =
           Option.(
             shape_field_name renv ix_exp >>= fun f ->
-            Nast.ShapeMap.find_opt f sh_fields)
+            Typing_defs.TShapeMap.find_opt f sh_fields)
         in
         begin
           match sft with
@@ -1493,9 +1495,15 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     let f (env, m) (key, e) =
       let (env, t) = expr env e in
       let sft = { sft_ty = t; sft_optional = false; sft_policy = p } in
-      (env, Nast.ShapeMap.add key sft m)
+      ( env,
+        Typing_defs.TShapeMap.add
+          (Typing_defs.TShapeField.of_ast (fun p -> p) key)
+          sft
+          m )
     in
-    let (env, sh_fields) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
+    let (env, sh_fields) =
+      List.fold ~f ~init:(env, Typing_defs.TShapeMap.empty) s
+    in
     (env, Tshape { sh_kind = Closed_shape; sh_fields })
   | A.Is (e, _hint) ->
     let (env, ety) = expr env e in

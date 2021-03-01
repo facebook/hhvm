@@ -127,7 +127,7 @@ let overload_extract_from_awaitable_list env p tyl =
     ~init:(env, [])
 
 let overload_extract_from_awaitable_shape env p fdm =
-  Nast.ShapeMap.map_env
+  TShapeMap.map_env
     begin
       fun env _key (tk, tv) ->
       let (env, rtv) = overload_extract_from_awaitable env p tv in

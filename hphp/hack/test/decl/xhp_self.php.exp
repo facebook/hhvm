@@ -25,7 +25,7 @@
            stc_type =
            (Some (Rhint (root|xhp_self.php line 6, characters 23-39),
                   (Tshape (Typing_defs_core.Closed_shape,
-                     { (SFlit_str ([6:29-32], "x")) ->
+                     { (Typing_defs_core.TSFlit_str ([6:29-32], "x")) ->
                        { sft_optional = false;
                          sft_ty =
                          (Rhint (root|xhp_self.php line 6, characters 36-38),

@@ -71,7 +71,7 @@ end
 
 type shallow_class_const = {
   scc_abstract: bool;
-  scc_name: Ast_defs.id;
+  scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
 }
 [@@deriving eq, show]
@@ -79,15 +79,15 @@ type shallow_class_const = {
 type shallow_typeconst = {
   stc_abstract: typeconst_abstract_kind;
   stc_as_constraint: decl_ty option;
-  stc_name: Ast_defs.id;
+  stc_name: Typing_defs.pos_id;
   stc_type: decl_ty option;
-  stc_enforceable: Pos.t * bool;
-  stc_reifiable: Pos.t option;
+  stc_enforceable: Pos_or_decl.t * bool;
+  stc_reifiable: Pos_or_decl.t option;
 }
 [@@deriving eq, show]
 
 type shallow_prop = {
-  sp_name: Ast_defs.id;
+  sp_name: Typing_defs.pos_id;
   sp_xhp_attr: xhp_attr option;
   sp_type: decl_ty option;
   sp_visibility: Ast_defs.visibility;
@@ -96,7 +96,7 @@ type shallow_prop = {
 [@@deriving eq, show]
 
 type shallow_method = {
-  sm_name: Ast_defs.id;
+  sm_name: Typing_defs.pos_id;
   sm_reactivity: Decl_defs.method_reactivity option;
   sm_type: decl_ty;
   sm_visibility: Ast_defs.visibility;
@@ -111,7 +111,7 @@ type shallow_class = {
   sc_is_xhp: bool;
   sc_has_xhp_keyword: bool;
   sc_kind: Ast_defs.class_kind;
-  sc_name: Ast_defs.id;
+  sc_name: Typing_defs.pos_id;
   sc_tparams: decl_tparam list;
   sc_where_constraints: decl_where_constraint list;
   sc_extends: decl_ty list;

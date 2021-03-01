@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Aast
+module ShapeSet = Ast_defs.ShapeSet
 
 let get_pos name =
   match name with
@@ -18,10 +19,10 @@ let get_pos name =
 
 let error_if_duplicate_names fdl =
   let _ =
-    List.fold_left fdl ~init:Ast_defs.ShapeSet.empty ~f:(fun seen (name, _) ->
-        if Ast_defs.ShapeSet.mem name seen then
+    List.fold_left fdl ~init:ShapeSet.empty ~f:(fun seen (name, _) ->
+        if ShapeSet.mem name seen then
           Errors.fd_name_already_bound (get_pos name);
-        Ast_defs.ShapeSet.add name seen)
+        ShapeSet.add name seen)
   in
   ()
 

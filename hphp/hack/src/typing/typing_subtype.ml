@@ -24,8 +24,6 @@ module Cls = Decl_provider.Class
 module ITySet = Internal_type_set
 module MakeType = Typing_make_type
 module Partial = Partial_provider
-module ShapeMap = Nast.ShapeMap
-module ShapeSet = Ast_defs.ShapeSet
 module Nast = Aast
 
 (* We maintain a "visited" set for subtype goals. We do this only
@@ -1346,7 +1344,7 @@ and simplify_subtype_i
             ~init:(env, TL.valid)
             ~f:(fun res sft ->
               res &&& simplify_subtype ~subtype_env sft.sft_ty ty_super)
-            (Nast.ShapeMap.values sftl)
+            (TShapeMap.values sftl)
         | (_, Tclass ((_, class_id), _, tyargs)) ->
           let class_def_sub = Typing_env.get_class env class_id in
           (match class_def_sub with
@@ -1801,7 +1799,7 @@ and simplify_subtype_shape
         Such a field cannot be given a value, and so is effectively not present.
   *)
   let shape_projection field_name shape_kind shape_map r =
-    match ShapeMap.find_opt field_name shape_map with
+    match TShapeMap.find_opt field_name shape_map with
     | Some { sft_ty; sft_optional } ->
       begin
         match (deref sft_ty, sft_optional) with
@@ -1902,11 +1900,11 @@ and simplify_subtype_shape
       env
   (* Otherwise, all projections must subtype *)
   | _ ->
-    ShapeSet.fold
+    TShapeSet.fold
       (shape_project_and_simplify_subtype
          (r_sub, shape_kind_sub, fdm_sub)
          (r_super, shape_kind_super, fdm_super))
-      (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
+      (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
       (env, TL.valid)
 
 and simplify_subtype_has_member

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<95297473789b3bc4e9d6c33e00799209>>
+// @generated SignedSource<<eb0cce5e2c5891f06d2bf59b62d683e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -169,7 +169,7 @@ pub struct DeclClassType<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub name: &'a str,
-    pub pos: &'a pos::Pos<'a>,
+    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub tparams: &'a [&'a Tparam<'a>],
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
     /// class name to the subst_context that must be applied to that class

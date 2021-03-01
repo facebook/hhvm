@@ -20,8 +20,8 @@
           stc_type =
           (Some (Rhint (root|shape_self.php line 6, characters 27-58),
                  (Tshape (Typing_defs_core.Closed_shape,
-                    { (SFclass_const (([7:5-9], "\\TestClass"),
-                         ([7:11-14], "KEY"))) ->
+                    { (Typing_defs_core.TSFclass_const (
+                         ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
                       { sft_optional = false;
                         sft_ty =
                         (Rhint (root|shape_self.php line 7, characters 18-20),

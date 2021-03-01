@@ -5,25 +5,27 @@
        td_type =
        (Rhint (root|shape_type_key_types.php line 3, characters 14-98),
         (Tshape (Typing_defs_core.Closed_shape,
-           { (SFlit_str ([4:3-4], "0")) ->
+           { (Typing_defs_core.TSFlit_str ([4:3-4], "0")) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shape_type_key_types.php line 4, characters 8-10),
                 (Tprim Tint))
                };
-             (SFlit_str ([5:3-6], "s")) ->
+             (Typing_defs_core.TSFlit_str ([5:3-6], "s")) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shape_type_key_types.php line 5, characters 10-15),
                 (Tprim Tstring))
                };
-             (SFclass_const (([7:3-4], "\\C"), ([7:6-9], "KEY"))) ->
+             (Typing_defs_core.TSFclass_const (([7:3-4], "\\C"),
+                ([7:6-9], "KEY"))) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shape_type_key_types.php line 7, characters 13-18),
                 (Tprim Tstring))
                };
-             (SFclass_const (([6:3-4], "\\C"), ([6:6-11], "class"))) ->
+             (Typing_defs_core.TSFclass_const (([6:3-4], "\\C"),
+                ([6:6-11], "class"))) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shape_type_key_types.php line 6, characters 15-26),

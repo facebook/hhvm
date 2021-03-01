@@ -8,13 +8,11 @@
  *)
 
 open Hh_prelude
-open Aast
 open Typing_defs
 open Type_validator
 module Env = Tast_env
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
-module Nast = Aast
 
 let validator =
   object (this)
@@ -182,7 +180,7 @@ let validator =
       this#check_for_wildcards acc tyl "tuple"
 
     method! on_tshape acc _ _ fdm =
-      let tyl = ShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
+      let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
       let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
       this#check_for_wildcards acc tyl "shape"
 
@@ -193,16 +191,16 @@ let validator =
       match
         (Env.get_reified acc.env name, Env.get_enforceable acc.env name)
       with
-      | (Nast.Erased, _) ->
+      | (Aast.Erased, _) ->
         this#invalid acc r "an erased generic type parameter"
-      | (Nast.SoftReified, _) ->
+      | (Aast.SoftReified, _) ->
         this#invalid acc r "a soft reified generic type parameter"
-      | (Nast.Reified, false) ->
+      | (Aast.Reified, false) ->
         this#invalid
           acc
           r
           "a reified type parameter that is not marked `<<__Enforceable>>`"
-      | (Nast.Reified, true) -> acc
+      | (Aast.Reified, true) -> acc
   end
 
 let validate_hint = validator#validate_hint ?reification:None

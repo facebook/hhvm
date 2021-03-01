@@ -106,6 +106,7 @@ tast::MutabilityEnv
 tast::Reactivity
 tast::TypeParamMutability
 tast::ValKind
+t_shape_map::TShapeMap
 typing_cont_key::TypingContKey
 typing_defs_core::Capability
 typing_defs_core::CeVisibility
@@ -122,8 +123,12 @@ typing_defs_core::InternalType
 typing_defs_core::ParamMode
 typing_defs_core::ParamMutability
 typing_defs_core::ParamRxAnnotation
+typing_defs_core::PosByteString
+typing_defs_core::PosId
+typing_defs_core::PosString
 typing_defs_core::Reactivity
 typing_defs_core::ShapeKind
+typing_defs_core::TshapeFieldName
 typing_defs_core::Ty_
 typing_defs_core::ValKind
 typing_defs_core::XhpAttr
@@ -140,6 +145,9 @@ typing_defs::FunTparamsKind
 typing_defs::InternalType
 typing_defs::ParamMode
 typing_defs::ParamMutability
+typing_defs::PosByteString
+typing_defs::PosId
+typing_defs::PosString
 typing_defs::RecordFieldReq
 typing_defs::ShapeKind
 typing_defs::Ty_

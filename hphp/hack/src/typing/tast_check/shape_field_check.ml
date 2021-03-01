@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Ast_defs
 open Aast
 open Typing_defs
 module Aast = Aast_defs
@@ -19,7 +18,7 @@ let shapes_key_exists env shape field_name =
   match get_node shape with
   | Tshape (shape_kind, fields) ->
     begin
-      match ShapeMap.find_opt field_name fields with
+      match TShapeMap.find_opt field_name fields with
       | None ->
         begin
           match shape_kind with
@@ -42,7 +41,7 @@ let shapes_key_exists env shape field_name =
   | _ -> `Unknown
 
 let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
-  match shapes_key_exists env shape (SFlit_str field_name) with
+  match shapes_key_exists env shape (TSFlit_str field_name) with
   | `DoesExist pos2 ->
     Errors.shapes_key_exists_always_true pos1 (snd field_name) pos2
   | `DoesNotExist (pos2, reason) ->
@@ -51,7 +50,7 @@ let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
 
 let shapes_method_access_with_non_existent_field
     pos1 env method_name ((_, shape), _) field_name =
-  match shapes_key_exists env shape (SFlit_str field_name) with
+  match shapes_key_exists env shape (TSFlit_str field_name) with
   | `DoesExist _ -> Lint.shape_idx_access_required_field pos1 (snd field_name)
   | `DoesNotExist (pos2, reason) ->
     Errors.shapes_method_access_with_non_existent_field
@@ -63,7 +62,7 @@ let shapes_method_access_with_non_existent_field
   | `Unknown -> ()
 
 let shape_access_with_non_existent_field pos1 env ((_, shape), _) field_name =
-  match shapes_key_exists env shape (SFlit_str field_name) with
+  match shapes_key_exists env shape (TSFlit_str field_name) with
   | `DoesNotExist (pos2, reason) ->
     Errors.shape_access_with_non_existent_field
       pos1

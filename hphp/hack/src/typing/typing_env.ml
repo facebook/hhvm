@@ -308,15 +308,15 @@ let wrap_ty_in_var env r ty =
   wrap_inference_env_call env (fun env -> Inf.wrap_ty_in_var env r ty)
 
 let get_shape_field_name = function
-  | Ast_defs.SFlit_int (_, s)
-  | Ast_defs.SFlit_str (_, s) ->
+  | Typing_defs.TSFlit_int (_, s)
+  | Typing_defs.TSFlit_str (_, s) ->
     s
-  | Ast_defs.SFclass_const ((_, s1), (_, s2)) -> s1 ^ "::" ^ s2
+  | Typing_defs.TSFclass_const ((_, s1), (_, s2)) -> s1 ^ "::" ^ s2
 
 let get_shape_field_name_pos = function
-  | Ast_defs.SFlit_int (p, _)
-  | Ast_defs.SFlit_str (p, _)
-  | Ast_defs.SFclass_const ((p, _), _) ->
+  | Typing_defs.TSFlit_int (p, _)
+  | Typing_defs.TSFlit_str (p, _)
+  | Typing_defs.TSFclass_const ((p, _), _) ->
     p
 
 let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
@@ -1443,7 +1443,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tintersection tyl ->
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | Tshape (_, m) ->
-      Nast.ShapeMap.fold
+      TShapeMap.fold
         (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
         m
         (env, ISet.empty, ISet.empty)

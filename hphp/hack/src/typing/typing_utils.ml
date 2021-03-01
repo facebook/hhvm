@@ -118,7 +118,7 @@ type expand_typeconst =
   ?as_tyvar_with_cnstr:bool ->
   locl_ty ->
   Aast.sid ->
-  root_pos:Pos.t ->
+  root_pos:Pos_or_decl.t ->
   on_error:Errors.typing_error_callback ->
   allow_abstract_tconst:bool ->
   env * locl_ty
@@ -504,7 +504,9 @@ let shape_field_name_ this field =
       | None -> Error `Expected_class)
     | _ -> Error `Invalid_shape_field_name)
 
-let shape_field_name env (p, field) =
+let shape_field_name :
+    env -> Pos.t * Nast.expr_ -> Ast_defs.shape_field_name option =
+ fun env (p, field) ->
   let this =
     lazy
       (match Env.get_self_ty env with
@@ -578,7 +580,7 @@ end
 (* Function parameters *)
 (*****************************************************************************)
 
-let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
+let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
   {
     fp_pos = pos;
     fp_name = None;

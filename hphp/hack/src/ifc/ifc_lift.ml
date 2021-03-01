@@ -153,7 +153,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
         Open_shape tmixed
       | Type.Closed_shape -> Closed_shape
     in
-    Tshape { sh_kind; sh_fields = Nast.ShapeMap.map lift fields }
+    Tshape { sh_kind; sh_fields = Typing_defs.TShapeMap.map lift fields }
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tany _sentinel -> fail "Tany"

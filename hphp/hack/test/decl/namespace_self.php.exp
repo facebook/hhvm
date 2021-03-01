@@ -26,8 +26,8 @@
            stc_type =
            (Some (Rhint (root|namespace_self.php line 9, characters 23-61),
                   (Tshape (Typing_defs_core.Closed_shape,
-                     { (SFclass_const (([10:5-9], "\\NS1\\NS2\\C"),
-                          ([10:11-14], "KEY"))) ->
+                     { (Typing_defs_core.TSFclass_const (
+                          ([10:5-9], "\\NS1\\NS2\\C"), ([10:11-14], "KEY"))) ->
                        { sft_optional = false;
                          sft_ty =
                          (Rhint (root|namespace_self.php line 10, characters 18-27),

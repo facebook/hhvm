@@ -6,11 +6,17 @@
 use std::cmp::Ordering;
 
 use crate::aast_defs::Tprim;
-use crate::ast_defs::ParamKind;
+use crate::ast_defs::{Id, ParamKind};
 use crate::ident::Ident;
 use crate::pos::Pos;
 use crate::typing_defs_core::*;
 use crate::typing_reason::Reason;
+
+impl<'a> From<Id<'a>> for PosId<'a> {
+    fn from(Id(pos, id): Id<'a>) -> Self {
+        PosId(pos, id)
+    }
+}
 
 // Compare two types syntactically, ignoring reason information and other
 // small differences that do not affect type inference behaviour. This

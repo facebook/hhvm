@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37bcda8641b1297cc17414e2137c1b29>>
+// @generated SignedSource<<9cedfdcf6b454e76713592b7e9aa7c4c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,7 +18,28 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+pub use crate::t_shape_map;
 pub use crate::typing_reason as reason;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct PosId<'a>(
+    pub &'a pos_or_decl::PosOrDecl<'a>,
+    pub &'a ast_defs::Id_<'a>,
+);
+impl<'a> TrivialDrop for PosId<'a> {}
 
 #[derive(
     Clone,
@@ -181,6 +202,63 @@ impl TrivialDrop for ShapeKind {}
     Copy,
     Debug,
     Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct PosString<'a>(pub &'a pos_or_decl::PosOrDecl<'a>, pub &'a str);
+impl<'a> TrivialDrop for PosString<'a> {}
+
+pub type TByteString<'a> = str;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct PosByteString<'a>(pub &'a pos_or_decl::PosOrDecl<'a>, pub &'a bstr::BStr);
+impl<'a> TrivialDrop for PosByteString<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum TshapeFieldName<'a> {
+    TSFlitInt(&'a PosString<'a>),
+    TSFlitStr(&'a PosByteString<'a>),
+    TSFclassConst(&'a (PosId<'a>, PosString<'a>)),
+}
+impl<'a> TrivialDrop for TshapeFieldName<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -301,7 +379,7 @@ impl TrivialDrop for DependentType {}
     ToOcamlRep
 )]
 pub struct UserAttribute<'a> {
-    pub name: aast::Sid<'a>,
+    pub name: PosId<'a>,
     pub classname_params: &'a [&'a str],
 }
 impl<'a> TrivialDrop for UserAttribute<'a> {}
@@ -321,7 +399,7 @@ impl<'a> TrivialDrop for UserAttribute<'a> {}
 )]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
-    pub name: ast_defs::Id<'a>,
+    pub name: PosId<'a>,
     pub tparams: &'a [&'a Tparam<'a>],
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, &'a Ty<'a>)],
     pub reified: oxidized::aast::ReifyKind,
@@ -398,7 +476,7 @@ pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
-    Tapply(&'a (nast::Sid<'a>, &'a [&'a Ty<'a>])),
+    Tapply(&'a (PosId<'a>, &'a [&'a Ty<'a>])),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -454,7 +532,7 @@ pub enum Ty_<'a> {
     Tshape(
         &'a (
             ShapeKind,
-            nast::shape_map::ShapeMap<'a, &'a ShapeFieldType<'a>>,
+            t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),
     ),
     Tvar(ident::Ident),
@@ -526,7 +604,7 @@ pub enum Ty_<'a> {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
-    Tclass(&'a (nast::Sid<'a>, Exact, &'a [&'a Ty<'a>])),
+    Tclass(&'a (PosId<'a>, Exact, &'a [&'a Ty<'a>])),
 }
 impl<'a> TrivialDrop for Ty_<'a> {}
 
@@ -543,7 +621,7 @@ impl<'a> TrivialDrop for Ty_<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct TaccessType<'a>(pub &'a Ty<'a>, pub nast::Sid<'a>);
+pub struct TaccessType<'a>(pub &'a Ty<'a>, pub PosId<'a>);
 impl<'a> TrivialDrop for TaccessType<'a> {}
 
 /// represents reactivity of function
@@ -601,7 +679,7 @@ impl<'a> TrivialDrop for Reactivity<'a> {}
     ToOcamlRep
 )]
 pub enum Capability<'a> {
-    CapDefaults(&'a pos::Pos<'a>),
+    CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
     CapTy(&'a Ty<'a>),
 }
 impl<'a> TrivialDrop for Capability<'a> {}
@@ -734,7 +812,7 @@ impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
     ToOcamlRep
 )]
 pub struct FunParam<'a> {
-    pub pos: &'a pos::Pos<'a>,
+    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub name: Option<&'a str>,
     pub type_: &'a PossiblyEnforcedTy<'a>,
     pub rx_annotation: Option<ParamRxAnnotation<'a>>,

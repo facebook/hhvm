@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3348b8bb9db87f6013c7ff283c104e16>>
+// @generated SignedSource<<daff4efb58d52504f31b085a39a10ac9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -36,7 +36,7 @@ pub use typing_defs::ConstDecl;
 )]
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
-    pub name: ast_defs::Id<'a>,
+    pub name: typing_defs::PosId<'a>,
     pub type_: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}
@@ -57,10 +57,10 @@ impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 pub struct ShallowTypeconst<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub as_constraint: Option<&'a Ty<'a>>,
-    pub name: ast_defs::Id<'a>,
+    pub name: typing_defs::PosId<'a>,
     pub type_: Option<&'a Ty<'a>>,
-    pub enforceable: (&'a pos::Pos<'a>, bool),
-    pub reifiable: Option<&'a pos::Pos<'a>>,
+    pub enforceable: (&'a pos_or_decl::PosOrDecl<'a>, bool),
+    pub reifiable: Option<&'a pos_or_decl::PosOrDecl<'a>>,
 }
 impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
 
@@ -78,7 +78,7 @@ impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
     ToOcamlRep
 )]
 pub struct ShallowProp<'a> {
-    pub name: ast_defs::Id<'a>,
+    pub name: typing_defs::PosId<'a>,
     pub xhp_attr: Option<XhpAttr>,
     pub type_: Option<&'a Ty<'a>>,
     pub visibility: oxidized::ast_defs::Visibility,
@@ -100,7 +100,7 @@ impl<'a> TrivialDrop for ShallowProp<'a> {}
     ToOcamlRep
 )]
 pub struct ShallowMethod<'a> {
-    pub name: ast_defs::Id<'a>,
+    pub name: typing_defs::PosId<'a>,
     pub reactivity: Option<decl_defs::MethodReactivity<'a>>,
     pub type_: &'a Ty<'a>,
     pub visibility: oxidized::ast_defs::Visibility,
@@ -128,7 +128,7 @@ pub struct ShallowClass<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassKind,
-    pub name: ast_defs::Id<'a>,
+    pub name: typing_defs::PosId<'a>,
     pub tparams: &'a [&'a Tparam<'a>],
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
     pub extends: &'a [&'a Ty<'a>],

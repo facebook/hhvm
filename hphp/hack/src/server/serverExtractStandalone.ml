@@ -615,13 +615,13 @@ end = struct
           List.iter tyl ~f:(add_dep ctx env ~this)
 
         method! on_tshape _ _ _ fdm =
-          Nast.ShapeMap.iter
+          Typing_defs.TShapeMap.iter
             (fun name Typing_defs.{ sft_ty; _ } ->
               (match name with
-              | Ast_defs.SFlit_int _
-              | Ast_defs.SFlit_str _ ->
+              | Typing_defs.TSFlit_int _
+              | Typing_defs.TSFlit_str _ ->
                 ()
-              | Ast_defs.SFclass_const ((_, c), (_, s)) ->
+              | Typing_defs.TSFclass_const ((_, c), (_, s)) ->
                 do_add_dep ctx env (Typing_deps.Dep.Class c);
                 do_add_dep ctx env (Typing_deps.Dep.Const (c, s)));
               add_dep ctx env ~this sft_ty)

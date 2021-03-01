@@ -371,7 +371,7 @@ module Simple = struct
       (* Because type constants cannot depend on type parameters,
        we allow Foo::the_type even if Foo has type parameters *)
       check_well_kinded_type ~allow_missing_targs:true env ty
-    | Tshape (_, map) -> Nast.ShapeMap.iter (fun _ sft -> check sft.sft_ty) map
+    | Tshape (_, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
       check_possibly_enforced_ty env ft.ft_ret;
       List.iter ft.ft_params (fun p -> check_possibly_enforced_ty env p.fp_type)

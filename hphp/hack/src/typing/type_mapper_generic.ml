@@ -55,7 +55,7 @@ class type ['env] type_mapper_type =
       'env -> Reason.t -> dependent_type -> locl_ty -> 'env * locl_ty
 
     method on_tclass :
-      'env -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'env * locl_ty
+      'env -> Reason.t -> pos_id -> exact -> locl_ty list -> 'env * locl_ty
 
     method on_tobject : 'env -> Reason.t -> 'env * locl_ty
 
@@ -63,7 +63,7 @@ class type ['env] type_mapper_type =
       'env ->
       Reason.t ->
       shape_kind ->
-      locl_phase shape_field_type Nast.ShapeMap.t ->
+      locl_phase shape_field_type TShapeMap.t ->
       'env * locl_ty
 
     method on_tvarray : 'env -> Reason.t -> locl_ty -> 'env * locl_ty
@@ -76,8 +76,7 @@ class type ['env] type_mapper_type =
     method on_tvec_or_dict :
       'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
 
-    method on_taccess :
-      'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
+    method on_taccess : 'env -> Reason.t -> locl_ty -> pos_id -> 'env * locl_ty
 
     method on_type : 'env -> locl_ty -> 'env * locl_ty
 

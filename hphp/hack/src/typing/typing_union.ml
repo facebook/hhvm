@@ -425,7 +425,7 @@ and union_tylists_w_variances env tparams tyl1 tyl2 =
 and union_shapes env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2) =
   let shape_kind = union_shape_kind shape_kind1 shape_kind2 in
   let ((env, shape_kind), fdm) =
-    Nast.ShapeMap.merge_env
+    TShapeMap.merge_env
       (env, shape_kind)
       fdm1
       fdm2

@@ -82,7 +82,7 @@ let rec ptype fmt ty =
       fprintf fmt "<%a, %a>" policy sft_policy ptype sft_ty
     in
     fprintf fmt "shape(";
-    Nast.ShapeMap.pp field fmt sh_fields;
+    Typing_defs.TShapeMap.pp field fmt sh_fields;
     (match sh_kind with
     | Closed_shape -> fprintf fmt ")"
     | Open_shape ty -> fprintf fmt ", <%a>)" ptype ty)

@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Common
-open Aast
 open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason
@@ -21,12 +20,13 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   match deref ty with
   | (r, Tshape (shape_kind, fields)) ->
     begin
-      match ShapeMap.find_opt field_name fields with
+      match TShapeMap.find_opt field_name fields with
       | None ->
         let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
         let sft = { sft_optional = true; sft_ty = element_ty } in
         ( env,
-          Some (mk (r, Tshape (shape_kind, ShapeMap.add field_name sft fields)))
+          Some
+            (mk (r, Tshape (shape_kind, TShapeMap.add field_name sft fields)))
         )
       | Some _ -> (env, Some ty)
     end
@@ -52,7 +52,7 @@ let refine_shape field_name pos env shape =
     env
     (Reason.Rwitness pos)
     shape
-    (mk (Reason.Rnone, Tshape (Open_shape, ShapeMap.singleton field_name sft)))
+    (mk (Reason.Rnone, Tshape (Open_shape, TShapeMap.singleton field_name sft)))
 
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
@@ -79,13 +79,16 @@ let rec shrink_shape pos field_name env shape =
   | Tshape (shape_kind, fields) ->
     let fields =
       match shape_kind with
-      | Closed_shape -> ShapeMap.remove field_name fields
+      | Closed_shape -> TShapeMap.remove field_name fields
       | Open_shape ->
         let printable_name = TUtils.get_printable_shape_field_name field_name in
         let nothing =
           MakeType.nothing (Reason.Runset_field (pos, printable_name))
         in
-        ShapeMap.add field_name { sft_ty = nothing; sft_optional = true } fields
+        TShapeMap.add
+          field_name
+          { sft_ty = nothing; sft_optional = true }
+          fields
     in
     let result = mk (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
     (env, result)
@@ -107,6 +110,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
   match TUtils.shape_field_name env (p, field) with
   | None -> (env, shape_ty)
   | Some field ->
+    let field = TShapeField.of_ast (fun p -> p) field in
     let (env, shape_ty) =
       Typing_solver.expand_type_and_narrow
         ~description_of_expected:"a shape"
@@ -121,7 +125,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
       match deref shape_ty with
       | (r, Tshape (shape_kind, ftm)) ->
         let (env, field_type) =
-          match ShapeMap.find_opt field ftm with
+          match TShapeMap.find_opt field ftm with
           | Some { sft_ty; _ } ->
             let (env, sft_ty) = Typing_solver.non_null env p sft_ty in
             (env, { sft_optional = false; sft_ty })
@@ -132,7 +136,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
                 sft_ty = MakeType.nonnull (Reason.Rwitness p);
               } )
         in
-        let ftm = ShapeMap.add field field_type ftm in
+        let ftm = TShapeMap.add field field_type ftm in
         (env, mk (r, Tshape (shape_kind, ftm)))
       | _ ->
         (* This should be an error, but it is already raised when
@@ -149,7 +153,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk
     ( Reason.Rshape (shape_pos, fun_name),
-      Tshape (Open_shape, Nast.ShapeMap.singleton field_name field_ty) )
+      Tshape (Open_shape, TShapeMap.singleton field_name field_ty) )
 
 (* Is a given field required in a given shape?
  *
@@ -198,6 +202,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
     match TUtils.shape_field_name env field with
     | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
+      let field_name = TShapeField.of_ast (fun p -> p) field_name in
       let fake_super_shape_ty =
         make_idx_fake_super_shape
           shape_pos
@@ -251,6 +256,7 @@ let at env ~expr_pos ~shape_pos shape_ty field =
     match TUtils.shape_field_name env field with
     | None -> (env, TUtils.mk_tany env (fst field))
     | Some field_name ->
+      let field_name = TShapeField.of_ast (fun p -> p) field_name in
       let fake_super_shape_ty =
         make_idx_fake_super_shape
           shape_pos
@@ -274,7 +280,9 @@ let at env ~expr_pos ~shape_pos shape_ty field =
 let remove_key p env shape_ty field =
   match TUtils.shape_field_name env field with
   | None -> (env, TUtils.mk_tany env (fst field))
-  | Some field_name -> shrink_shape p field_name env shape_ty
+  | Some field_name ->
+    let field_name = TShapeField.of_ast (fun p -> p) field_name in
+    shrink_shape p field_name env shape_ty
 
 let to_collection env shape_ty res return_type =
   let mapper =
@@ -288,15 +296,15 @@ let to_collection env shape_ty res return_type =
       method! on_tshape env r shape_kind fdm =
         match shape_kind with
         | Closed_shape ->
-          let keys = ShapeMap.keys fdm in
+          let keys = TShapeMap.keys fdm in
           let (env, keys) =
             List.map_env env keys (fun env key ->
                 match key with
-                | Ast_defs.SFlit_int (p, _) ->
+                | Typing_defs.TSFlit_int (p, _) ->
                   (env, MakeType.int (Reason.Rwitness p))
-                | Ast_defs.SFlit_str (p, _) ->
+                | Typing_defs.TSFlit_str (p, _) ->
                   (env, MakeType.string (Reason.Rwitness p))
-                | Ast_defs.SFclass_const ((p, cid), (_, mid)) ->
+                | Typing_defs.TSFclass_const ((p, cid), (_, mid)) ->
                   begin
                     match Env.get_class env cid with
                     | Some class_ ->
@@ -310,7 +318,7 @@ let to_collection env shape_ty res return_type =
                   end)
           in
           let (env, key) = Typing_union.union_list env r keys in
-          let values = ShapeMap.values fdm in
+          let values = TShapeMap.values fdm in
           let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
           let (env, value) = Typing_union.union_list env r values in
           return_type env (get_reason res) key value

@@ -12,7 +12,7 @@ open Typing_env_types
 
 val check_class_access :
   use_pos:Pos.t ->
-  def_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
   env ->
   ce_visibility * bool ->
   Nast.class_id_ ->
@@ -20,12 +20,13 @@ val check_class_access :
   unit
 
 val check_obj_access :
-  use_pos:Pos.t -> def_pos:Pos.t -> env -> ce_visibility -> unit
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> env -> ce_visibility -> unit
 
 val check_inst_meth_access :
-  use_pos:Pos.t -> def_pos:Pos.t -> ce_visibility -> unit
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit
 
-val check_deprecated : use_pos:Pos.t -> def_pos:Pos.t -> string option -> unit
+val check_deprecated :
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string option -> unit
 
 val is_visible :
   env ->

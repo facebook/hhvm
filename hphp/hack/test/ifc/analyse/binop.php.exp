@@ -86,7 +86,8 @@ Analyzing \is_:
 * Params:
   { $x ->
     (\A<A, A_lump> | <$x> |
-       shape({ (SFlit_str ([32:31-36], "fld")) -> <$x'2, <$x'1>> })) }
+       shape({ (Typing_defs_core.TSFlit_str ([32:31-36], "fld")) ->
+               <$x'2, <$x'1>> })) }
 * Final environment:
   Deps: {}
   Constraints:
@@ -96,5 +97,6 @@ Analyzing \is_:
   Locals:
     { $x ->
       (\A<A'1, A_lump'1> | <$x'3> |
-         shape({ (SFlit_str ([32:31-36], "fld")) -> <$x'5, <$x'4>> })) }
+         shape({ (Typing_defs_core.TSFlit_str ([32:31-36], "fld")) ->
+                 <$x'5, <$x'4>> })) }
 

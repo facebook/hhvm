@@ -47,7 +47,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_tfun : 'a -> Reason.t -> decl_fun_type -> 'a
 
-    method on_tapply : 'a -> Reason.t -> Aast.sid -> decl_ty list -> 'a
+    method on_tapply : 'a -> Reason.t -> pos_id -> decl_ty list -> 'a
 
     method on_ttuple : 'a -> Reason.t -> decl_ty list -> 'a
 
@@ -59,7 +59,7 @@ class type ['a] decl_type_visitor_type =
       'a ->
       Reason.t ->
       shape_kind ->
-      decl_phase shape_field_type Nast.ShapeMap.t ->
+      decl_phase shape_field_type TShapeMap.t ->
       'a
 
     method on_taccess : 'a -> Reason.t -> decl_phase taccess_type -> 'a
@@ -135,7 +135,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_tshape acc _ _ fdm =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
-      Nast.ShapeMap.fold f fdm acc
+      TShapeMap.fold f fdm acc
 
     method on_type acc ty =
       let (r, x) = deref ty in
@@ -215,10 +215,10 @@ class type ['a] locl_type_visitor_type =
       'a ->
       Reason.t ->
       shape_kind ->
-      locl_phase shape_field_type Nast.ShapeMap.t ->
+      locl_phase shape_field_type TShapeMap.t ->
       'a
 
-    method on_tclass : 'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
+    method on_tclass : 'a -> Reason.t -> pos_id -> exact -> locl_ty list -> 'a
 
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
 
@@ -284,7 +284,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tshape acc _ _ fdm =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
-      Nast.ShapeMap.fold f fdm acc
+      TShapeMap.fold f fdm acc
 
     method on_tclass acc _ _ _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc

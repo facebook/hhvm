@@ -63,9 +63,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       (print_ty_exn ft.ft_ret.et_type)
   | Ttuple tyl -> "(" ^ print_tyl_exn tyl ^ ")"
   | Tshape (shape_kind, fdm) ->
-    let fields =
-      List.map (Nast.ShapeMap.elements fdm) ~f:print_shape_field_exn
-    in
+    let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =
       match shape_kind with
       | Closed_shape -> fields
@@ -112,7 +110,7 @@ and print_shape_field_exn (name, { sft_optional; sft_ty; _ }) =
 and print_shape_field_name name =
   let s = Typing_env.get_shape_field_name name in
   match name with
-  | Ast_defs.SFlit_str _ -> "'" ^ s ^ "'"
+  | Typing_defs.TSFlit_str _ -> "'" ^ s ^ "'"
   | _ -> s
 
 let print ?(allow_nothing = false) ty =

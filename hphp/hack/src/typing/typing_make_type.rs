@@ -12,8 +12,6 @@ use naming_special_names_rust::{classes, collections};
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::tany_sentinel::TanySentinel;
 use oxidized_by_ref::{
-    aast_defs::Sid,
-    ast_defs::Id,
     ident,
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
 };
@@ -32,25 +30,25 @@ pub struct TypeBuilder<'a> {
     // This makes more sense than inheriting the position from the use
     // But for now, let's just put none as the position
     // TODO: we might consider creating a SymbolBuilder type
-    id_traversable: Id<'a>,
-    id_keyed_traversable: Id<'a>,
-    id_keyed_container: Id<'a>,
-    id_awaitable: Id<'a>,
-    id_generator: Id<'a>,
-    id_async_generator: Id<'a>,
-    id_async_iterator: Id<'a>,
-    id_async_keyed_iterator: Id<'a>,
-    id_pair: Id<'a>,
-    id_dict: Id<'a>,
-    id_keyset: Id<'a>,
-    id_vec: Id<'a>,
-    id_container: Id<'a>,
-    id_throwable: Id<'a>,
-    id_datetime: Id<'a>,
-    id_datetime_immutable: Id<'a>,
-    id_const_vector: Id<'a>,
-    id_const_collection: Id<'a>,
-    id_collection: Id<'a>,
+    id_traversable: PosId<'a>,
+    id_keyed_traversable: PosId<'a>,
+    id_keyed_container: PosId<'a>,
+    id_awaitable: PosId<'a>,
+    id_generator: PosId<'a>,
+    id_async_generator: PosId<'a>,
+    id_async_iterator: PosId<'a>,
+    id_async_keyed_iterator: PosId<'a>,
+    id_pair: PosId<'a>,
+    id_dict: PosId<'a>,
+    id_keyset: PosId<'a>,
+    id_vec: PosId<'a>,
+    id_container: PosId<'a>,
+    id_throwable: PosId<'a>,
+    id_datetime: PosId<'a>,
+    id_datetime_immutable: PosId<'a>,
+    id_const_vector: PosId<'a>,
+    id_const_collection: PosId<'a>,
+    id_collection: PosId<'a>,
 
     /// The allocator.
     ///
@@ -72,8 +70,8 @@ impl<'a> Arena for TypeBuilder<'a> {
 // Perhaps best is to actually *resolve* well-known classes
 // as though they appear in the source, so we get the position
 // from the definition e.g. in hhi file.
-fn mk_special_id(name: &'static str) -> Id<'static> {
-    Id(Pos::none(), name)
+fn mk_special_id(name: &'static str) -> PosId<'static> {
+    PosId(Pos::none(), name)
 }
 
 impl<'a> TypeBuilder<'a> {
@@ -136,7 +134,7 @@ impl<'a> TypeBuilder<'a> {
     pub fn class(
         &'a self,
         reason: &'a Reason<'a>,
-        name: Sid<'a>,
+        name: PosId<'a>,
         tys: &'a [&'a Ty<'a>],
     ) -> &'a Ty<'a> {
         self.mk(

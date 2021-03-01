@@ -140,7 +140,7 @@
             [(Constraint_as,
               (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 13-28),
                (Tshape (Typing_defs_core.Closed_shape,
-                  { (SFlit_str ([15:19-22], "a")) ->
+                  { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
                     { sft_optional = false;
                       sft_ty =
                       (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 26-27),

@@ -3125,7 +3125,8 @@ and expr_
         let fdme =
           List.map
             ~f:(fun (k, v) ->
-              match ShapeMap.find_opt k expected_fdm with
+              let tk = TShapeField.of_ast (fun p -> p) k in
+              match TShapeMap.find_opt tk expected_fdm with
               | None -> (k, (v, None))
               | Some sft -> (k, (v, Some (ExpectedTy.make pos ur sft.sft_ty))))
             fdm
@@ -3152,11 +3153,13 @@ and expr_
     in
     let fdm =
       List.fold_left
-        ~f:(fun acc (k, v) -> ShapeMap.add k v acc)
-        ~init:ShapeMap.empty
+        ~f:(fun acc (k, v) ->
+          let tk = TShapeField.of_ast (fun p -> p) k in
+          TShapeMap.add tk v acc)
+        ~init:TShapeMap.empty
         fdm
     in
-    let env = check_shape_keys_validity env p (ShapeMap.keys fdm) in
+    let env = check_shape_keys_validity env p (List.map tfdm ~f:fst) in
     (* Fields are fully known, because this shape is constructed
      * using shape keyword and we know exactly what fields are set. *)
     make_result
@@ -3984,7 +3987,9 @@ and shape_field_pos = function
   | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
     Pos.btw cls_pos mem_pos
 
-and check_shape_keys_validity env pos keys =
+and check_shape_keys_validity :
+    env -> pos -> Ast_defs.shape_field_name list -> env =
+ fun env pos keys ->
   (* If the key is a class constant, get its class name and type. *)
   let get_field_info env key =
     let key_pos = shape_field_pos key in
@@ -7228,6 +7233,7 @@ and key_exists env pos shape field =
       match TUtils.shape_field_name env field with
       | None -> (env, shape_ty)
       | Some field_name ->
+        let field_name = TShapeField.of_ast (fun p -> p) field_name in
         Typing_shapes.refine_shape field_name pos env shape_ty)
 
 and string2 env idl =

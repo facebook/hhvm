@@ -119,11 +119,11 @@ let mro_passthrough_abstract_typeconst = 1 lsl 6
 
 type mro_element = {
   mro_name: string;  (** The class's name *)
-  mro_use_pos: Pos.t;
+  mro_use_pos: Pos_or_decl.t;
       (** The position at which this element was directly included in the hierarchy.
           If C extends B extends A, the use_pos of A in C's linearization will be the
           position of the class name A in the line "class B extends A". *)
-  mro_ty_pos: Pos.t;
+  mro_ty_pos: Pos_or_decl.t;
       (** Like mro_use_pos, but includes type arguments (if any). *)
   mro_flags: int;
       (** Bitflag which specifies in what contexts that element of the linearization should or
@@ -144,7 +144,7 @@ type mro_element = {
           duplicate mro_elements at all--we include these in the linearization only
           for error detection. The string is the name of the class through which this
           trait was most recently included (as a duplicate). *)
-  mro_required_at: Pos.t option;
+  mro_required_at: Pos_or_decl.t option;
       (** If this element is included in the linearization because it was directly
           required by some ancestor, this will be [Some], and the position will be
           the location where this requirement was most recently included into the
@@ -182,7 +182,7 @@ type decl_class_type = {
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
   dc_name: string;
-  dc_pos: Pos.t;
+  dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;
   dc_where_constraints: decl_where_constraint list;
   dc_substs: subst_context SMap.t;

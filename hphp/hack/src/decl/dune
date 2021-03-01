@@ -171,6 +171,7 @@
   (name decl_defs)
   (modules decl_defs)
   (libraries
+    pos_or_decl
     typing_defs
     utils_core)
   (preprocess (pps ppx_deriving.std)))

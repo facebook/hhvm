@@ -319,7 +319,7 @@ let rec get_typarams tenv root env (ty : decl_ty) =
   | Ttuple tyl ->
     List.fold_left tyl ~init:empty ~f:get_typarams_union
   | Tshape (_, m) ->
-    Nast.ShapeMap.fold
+    TShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)
       m
       empty

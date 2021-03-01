@@ -103,7 +103,8 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
       match TUtils.shape_field_name env index_expr with
       | None -> (env, None)
       | Some field ->
-        (match ShapeMap.find_opt field fdm with
+        let field = TShapeField.of_ast (fun p -> p) field in
+        (match TShapeMap.find_opt field fdm with
         (* If field is in the lower bound but is optional, then no upper bound makes sense
          * unless this is a null-coalesce access *)
         | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
@@ -111,10 +112,10 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
         | _ ->
           let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
           let upper_fdm =
-            ShapeMap.add
+            TShapeMap.add
               field
               { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
-              ShapeMap.empty
+              TShapeMap.empty
           in
           let upper_shape_ty = mk (r, Tshape (Open_shape, upper_fdm)) in
           (env, Some upper_shape_ty))
@@ -417,8 +418,9 @@ let rec array_get
                don't report another one for a missing field *)
               (env, err_witness env p)
             | Some field ->
+              let field = TShapeField.of_ast (fun p -> p) field in
               begin
-                match ShapeMap.find_opt field fdm with
+                match TShapeMap.find_opt field fdm with
                 | None ->
                   Errors.undefined_field
                     ~use_pos:p
@@ -429,8 +431,8 @@ let rec array_get
                   if sft_optional then (
                     let declared_field =
                       List.find_exn
-                        ~f:(fun x -> Ast_defs.ShapeField.equal field x)
-                        (ShapeMap.keys fdm)
+                        ~f:(fun x -> TShapeField.equal field x)
+                        (TShapeMap.keys fdm)
                     in
                     Errors.array_get_with_optional_field
                       p
@@ -789,8 +791,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           match TUtils.shape_field_name env key with
           | None -> error
           | Some field ->
+            let field = TShapeField.of_ast (fun p -> p) field in
             let fdm' =
-              ShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
+              TShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
             in
             (env, mk (r, Tshape (shape_kind, fdm')))
         end

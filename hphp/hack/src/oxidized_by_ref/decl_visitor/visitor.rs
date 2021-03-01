@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a3949bd56397d58287ce6991c71d04ba>>
+// @generated SignedSource<<89f80c0dada0a96d6d108d5d9d9d0352>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,7 +12,7 @@
 use super::node::Node;
 use crate::{
     aast_defs::*, ast_defs::*, decl_defs::*, direct_decl_parser::*, shallow_decl_defs::*,
-    shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
+    t_shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
 };
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
@@ -85,6 +85,15 @@ pub trait Visitor<'a> {
     fn visit_param_rx_annotation(&mut self, p: &'a ParamRxAnnotation<'a>) {
         p.recurse(self.object())
     }
+    fn visit_pos_byte_string(&mut self, p: &'a PosByteString<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_pos_id(&mut self, p: &'a PosId<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_pos_string(&mut self, p: &'a PosString<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_possibly_enforced_ty(&mut self, p: &'a PossiblyEnforcedTy<'a>) {
         p.recurse(self.object())
     }
@@ -118,16 +127,13 @@ pub trait Visitor<'a> {
     fn visit_shallow_typeconst(&mut self, p: &'a ShallowTypeconst<'a>) {
         p.recurse(self.object())
     }
-    fn visit_shape_field(&mut self, p: &'a ShapeField<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_shape_field_name(&mut self, p: &'a ShapeFieldName<'a>) {
-        p.recurse(self.object())
-    }
     fn visit_shape_field_type(&mut self, p: &'a ShapeFieldType<'a>) {
         p.recurse(self.object())
     }
     fn visit_shape_kind(&mut self, p: &'a ShapeKind) {
+        p.recurse(self.object())
+    }
+    fn visit_tshape_field(&mut self, p: &'a TShapeField<'a>) {
         p.recurse(self.object())
     }
     fn visit_taccess_type(&mut self, p: &'a TaccessType<'a>) {
@@ -137,6 +143,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_tprim(&mut self, p: &'a Tprim) {
+        p.recurse(self.object())
+    }
+    fn visit_tshape_field_name(&mut self, p: &'a TshapeFieldName<'a>) {
         p.recurse(self.object())
     }
     fn visit_ty(&mut self, p: &'a Ty<'a>) {

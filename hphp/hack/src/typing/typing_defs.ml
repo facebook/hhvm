@@ -12,7 +12,7 @@ open Typing_defs_flags
 include Typing_defs_core
 
 type const_decl = {
-  cd_pos: Pos.t;
+  cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
 }
 [@@deriving show]
@@ -22,7 +22,7 @@ type class_elt = {
   ce_type: decl_ty Lazy.t;
   ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
-  ce_pos: Pos.t Lazy.t;  (** pos of the type of the elt *)
+  ce_pos: Pos_or_decl.t Lazy.t;  (** pos of the type of the elt *)
   ce_flags: int;
 }
 [@@deriving show]
@@ -30,7 +30,7 @@ type class_elt = {
 type fun_elt = {
   fe_deprecated: string option;
   fe_type: decl_ty;
-  fe_pos: Pos.t;
+  fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
 }
 [@@deriving show]
@@ -38,7 +38,7 @@ type fun_elt = {
 type class_const = {
   cc_synthesized: bool;
   cc_abstract: bool;
-  cc_pos: Pos.t;
+  cc_pos: Pos_or_decl.t;
   cc_type: decl_ty;
   cc_origin: string;
       (** identifies the class from which this const originates *)
@@ -51,11 +51,11 @@ type record_field_req =
 [@@deriving show]
 
 type record_def_type = {
-  rdt_name: Nast.sid;
-  rdt_extends: Nast.sid option;
-  rdt_fields: (Nast.sid * record_field_req) list;
+  rdt_name: pos_id;
+  rdt_extends: pos_id option;
+  rdt_fields: (pos_id * record_field_req) list;
   rdt_abstract: bool;
-  rdt_pos: Pos.t;
+  rdt_pos: Pos_or_decl.t;
 }
 [@@deriving show]
 
@@ -73,7 +73,7 @@ type record_def_type = {
  * }
  * ```
  *)
-type requirement = Pos.t * decl_ty
+type requirement = Pos_or_decl.t * decl_ty
 
 and class_type = {
   tc_need_init: bool;
@@ -92,7 +92,7 @@ and class_type = {
   tc_has_xhp_keyword: bool;
   tc_is_disposable: bool;
   tc_name: string;
-  tc_pos: Pos.t;
+  tc_pos: Pos_or_decl.t;
   tc_tparams: decl_tparam list;
   tc_where_constraints: decl_where_constraint list;
   tc_consts: class_const SMap.t;
@@ -123,12 +123,12 @@ and typeconst_abstract_kind =
 and typeconst_type = {
   ttc_abstract: typeconst_abstract_kind;
   ttc_synthesized: bool;
-  ttc_name: Nast.sid;
+  ttc_name: pos_id;
   ttc_as_constraint: decl_ty option;
   ttc_type: decl_ty option;
   ttc_origin: string;
-  ttc_enforceable: Pos.t * bool;
-  ttc_reifiable: Pos.t option;
+  ttc_enforceable: Pos_or_decl.t * bool;
+  ttc_reifiable: Pos_or_decl.t option;
   ttc_concretized: bool;
 }
 
@@ -141,7 +141,7 @@ and enum_type = {
 [@@deriving show]
 
 type typedef_type = {
-  td_pos: Pos.t;
+  td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
   td_constraint: decl_ty option;
@@ -170,7 +170,7 @@ type deserialization_error =
 
 (** Tracks information about how a type was expanded *)
 type expand_env = {
-  type_expansions: (bool * Pos.t * string) list;
+  type_expansions: (bool * Pos_or_decl.t * string) list;
       (** A list of the type defs and type access we have expanded thus far. Used
        * to prevent entering into a cycle when expanding these types.
        * If the boolean is set, then emit an error because we were checking the
@@ -354,20 +354,20 @@ module DependentKind = struct
 end
 
 module ShapeFieldMap = struct
-  include Nast.ShapeMap
+  include TShapeMap
 
   let map_and_rekey shape_map key_f value_f =
     let f_over_shape_field_type ({ sft_ty; _ } as shape_field_type) =
       { shape_field_type with sft_ty = value_f sft_ty }
     in
-    Nast.ShapeMap.map_and_rekey shape_map key_f f_over_shape_field_type
+    TShapeMap.map_and_rekey shape_map key_f f_over_shape_field_type
 
   let map_env f env shape_map =
     let f_over_shape_field_type env _key ({ sft_ty; _ } as shape_field_type) =
       let (env, sft_ty) = f env sft_ty in
       (env, { shape_field_type with sft_ty })
     in
-    Nast.ShapeMap.map_env f_over_shape_field_type env shape_map
+    TShapeMap.map_env f_over_shape_field_type env shape_map
 
   let map f shape_map = map_and_rekey shape_map (fun x -> x) f
 
@@ -375,7 +375,7 @@ module ShapeFieldMap = struct
     let f_over_shape_field_type shape_map_key { sft_ty; _ } =
       f shape_map_key sft_ty
     in
-    Nast.ShapeMap.iter f_over_shape_field_type shape_map
+    TShapeMap.iter f_over_shape_field_type shape_map
 
   let iter_values f = iter (fun _ -> f)
 end
@@ -535,11 +535,11 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | 0 ->
           List.compare
             (fun (k1, v1) (k2, v2) ->
-              match Ast_defs.ShapeField.compare k1 k2 with
+              match TShapeField.compare k1 k2 with
               | 0 -> shape_field_type_compare v1 v2
               | n -> n)
-            (Nast.ShapeMap.elements fields1)
-            (Nast.ShapeMap.elements fields2)
+            (TShapeMap.elements fields1)
+            (TShapeMap.elements fields2)
         | n -> n
       end
     | (Tvar v1, Tvar v2) -> compare v1 v2
@@ -955,9 +955,9 @@ let rec equal_decl_ty_ ty_1 ty_2 =
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal
          (fun (k1, v1) (k2, v2) ->
-           Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
-         (Nast.ShapeMap.elements fields1)
-         (Nast.ShapeMap.elements fields2)
+           TShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
+         (TShapeMap.elements fields1)
+         (TShapeMap.elements fields2)
   | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
   | (Tany _, _)
   | (Terr, _)
@@ -1058,11 +1058,13 @@ and equal_decl_fun_param param1 param2 =
 and equal_decl_ft_params params1 params2 =
   List.equal equal_decl_fun_param params1 params2
 
-and equal_decl_ft_implicit_params { capability = cap1 } { capability = cap2 } =
+and equal_decl_ft_implicit_params :
+    decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool =
+ fun { capability = cap1 } { capability = cap2 } ->
   (* TODO(coeffects): could rework this so that implicit defaults and explicit
    * [defaults] are considered equal *)
   match (cap1, cap2) with
-  | (CapDefaults p1, CapDefaults p2) -> Pos.equal p1 p2
+  | (CapDefaults p1, CapDefaults p2) -> Pos_or_decl.equal p1 p2
   | (CapTy c1, CapTy c2) -> equal_decl_ty c1 c2
   | (CapDefaults _, CapTy _)
   | (CapTy _, CapDefaults _) ->
@@ -1091,7 +1093,7 @@ let equal_decl_where_constraint c1 c2 =
 
 let equal_decl_tparam tp1 tp2 =
   Ast_defs.equal_variance tp1.tp_variance tp2.tp_variance
-  && Ast_defs.equal_id tp1.tp_name tp2.tp_name
+  && Positioned.equal Ast_defs.equal_id_ tp1.tp_name tp2.tp_name
   && List.equal
        (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
        tp1.tp_constraints
@@ -1103,7 +1105,7 @@ let equal_decl_tparam tp1 tp2 =
        tp2.tp_user_attributes
 
 let equal_typedef_type tt1 tt2 =
-  Pos.equal tt1.td_pos tt2.td_pos
+  Pos_or_decl.equal tt1.td_pos tt2.td_pos
   && Aast.equal_typedef_visibility tt1.td_vis tt2.td_vis
   && List.equal equal_decl_tparam tt1.td_tparams tt2.td_tparams
   && Option.equal equal_decl_ty tt1.td_constraint tt2.td_constraint
@@ -1112,10 +1114,11 @@ let equal_typedef_type tt1 tt2 =
 let equal_fun_elt fe1 fe2 =
   Option.equal String.equal fe1.fe_deprecated fe2.fe_deprecated
   && equal_decl_ty fe1.fe_type fe2.fe_type
-  && Pos.equal fe1.fe_pos fe2.fe_pos
+  && Pos_or_decl.equal fe1.fe_pos fe2.fe_pos
 
 let equal_const_decl cd1 cd2 =
-  Pos.equal cd1.cd_pos cd2.cd_pos && equal_decl_ty cd1.cd_type cd2.cd_type
+  Pos_or_decl.equal cd1.cd_pos cd2.cd_pos
+  && equal_decl_ty cd1.cd_type cd2.cd_type
 
 let get_ce_abstract ce = is_set ce_flags_abstract ce.ce_flags
 

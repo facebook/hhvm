@@ -105,7 +105,7 @@ and cow_array = {
 
 and shape = {
   sh_kind: shape_kind;
-  sh_fields: shape_field_type Nast.ShapeMap.t;
+  sh_fields: shape_field_type Typing_defs.TShapeMap.t;
 }
 
 and shape_kind =

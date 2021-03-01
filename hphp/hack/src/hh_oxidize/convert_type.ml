@@ -129,6 +129,8 @@ let rec core_type ?(seen_indirection = false) ct =
     "bstr::BString"
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
     "&'a bstr::BStr"
+  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->
+    "&'a bstr::BStr"
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with

@@ -45,7 +45,7 @@ let rec ptype fty fpol = function
     let field { sft_optional; sft_policy; sft_ty } =
       { sft_optional; sft_policy = fpol sft_policy; sft_ty = fty sft_ty }
     in
-    Tshape { sh_kind; sh_fields = Nast.ShapeMap.map field sh_fields }
+    Tshape { sh_kind; sh_fields = Typing_defs.TShapeMap.map field sh_fields }
   | Tdynamic pol -> Tdynamic (fpol pol)
 
 and fun_ fty fpol f =
@@ -107,7 +107,7 @@ let iter_ptype2 fty fpol pt1 pt2 =
       | (Open_shape t1, Open_shape t2) -> fty t1 t2
       | (_, _) -> invalid_arg "iter_ptype2"
     end;
-    ignore (Nast.ShapeMap.merge combine s1.sh_fields s2.sh_fields)
+    ignore (Typing_defs.TShapeMap.merge combine s1.sh_fields s2.sh_fields)
   | _ -> invalid_arg "iter_ptype2"
 
 (* "fprop: int -> prop -> prop" takes as first argument the

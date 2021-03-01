@@ -86,7 +86,7 @@ module Full = struct
     let compare (k1, _) (k2, _) =
       String.compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)
     in
-    let fields = List.sort ~compare (Nast.ShapeMap.bindings fdm) in
+    let fields = List.sort ~compare (TShapeMap.bindings fdm) in
     List.map fields f_field
 
   let rec fun_type ~ty to_doc st env ft =
@@ -239,7 +239,7 @@ module Full = struct
       let f_field (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =
           match shape_map_key with
-          | Ast_defs.SFlit_str _ -> text "'"
+          | Typing_defs.TSFlit_str _ -> text "'"
           | _ -> Nothing
         in
         Concat
@@ -915,9 +915,9 @@ module Json = struct
       let shape_field_name_to_json shape_field =
         (* TODO: need to update userland tooling? *)
         match shape_field with
-        | Ast_defs.SFlit_int (_, s) -> Hh_json.JSON_Number s
-        | Ast_defs.SFlit_str (_, s) -> Hh_json.JSON_String s
-        | Ast_defs.SFclass_const ((_, s1), (_, s2)) ->
+        | Typing_defs.TSFlit_int (_, s) -> Hh_json.JSON_Number s
+        | Typing_defs.TSFlit_str (_, s) -> Hh_json.JSON_String s
+        | Typing_defs.TSFclass_const ((_, s1), (_, s2)) ->
           Hh_json.JSON_Array [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
       in
       obj
@@ -978,7 +978,7 @@ module Json = struct
       @@ kind p "shape"
       @ is_array false
       @ [("fields_known", JSON_Bool fields_known)]
-      @ fields (Nast.ShapeMap.bindings fl)
+      @ fields (TShapeMap.bindings fl)
     | (p, Tunion []) -> obj @@ kind p "nothing"
     | (_, Tunion [ty]) -> from_type env ty
     | (p, Tunion tyl) -> obj @@ kind p "union" @ args tyl
@@ -1260,7 +1260,7 @@ module Json = struct
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
           let unserialize_field field_json ~keytrace :
-              ( Ast_defs.shape_field_name
+              ( Typing_defs.tshape_field_name
                 * locl_phase Typing_defs.shape_field_type,
                 deserialization_error )
               result =
@@ -1272,13 +1272,13 @@ module Json = struct
             begin
               match name with
               | Hh_json.JSON_Number name ->
-                Ok (Ast_defs.SFlit_int (dummy_pos, name))
+                Ok (Typing_defs.TSFlit_int (dummy_pos, name))
               | Hh_json.JSON_String name ->
-                Ok (Ast_defs.SFlit_str (dummy_pos, name))
+                Ok (Typing_defs.TSFlit_str (dummy_pos, name))
               | Hh_json.JSON_Array
                   [Hh_json.JSON_String name1; Hh_json.JSON_String name2] ->
                 Ok
-                  (Ast_defs.SFclass_const
+                  (Typing_defs.TSFclass_const
                      ((dummy_pos, name1), (dummy_pos, name2)))
               | _ ->
                 deserialization_error
@@ -1322,10 +1322,8 @@ module Json = struct
                 Open_shape
             in
             let fields =
-              List.fold
-                fields
-                ~init:Nast.ShapeMap.empty
-                ~f:(fun shape_map (k, v) -> Nast.ShapeMap.add k v shape_map)
+              List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->
+                  TShapeMap.add k v shape_map)
             in
             ty (Tshape (shape_kind, fields))
         | "union" ->

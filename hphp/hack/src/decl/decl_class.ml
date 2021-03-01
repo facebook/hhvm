@@ -38,7 +38,7 @@ let rec apply_substs substs class_context (pos, ty) =
     apply_substs substs next_class_context (pos, Inst.instantiate subst ty)
 
 let element_to_class_elt
-    (pty : (Pos.t * decl_ty) lazy_t)
+    (pty : (Pos_or_decl.t * decl_ty) lazy_t)
     {
       elt_flags = ce_flags;
       elt_origin = ce_origin;

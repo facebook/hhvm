@@ -5,13 +5,13 @@
        td_type =
        (Rhint (root|shapes.php line 3, characters 19-56),
         (Tshape (Typing_defs_core.Open_shape,
-           { (SFlit_str ([3:25-28], "x")) ->
+           { (Typing_defs_core.TSFlit_str ([3:25-28], "x")) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shapes.php line 3, characters 32-36),
                 (Tprim Tfloat))
                };
-             (SFlit_str ([3:39-42], "y")) ->
+             (Typing_defs_core.TSFlit_str ([3:39-42], "y")) ->
              { sft_optional = false;
                sft_ty =
                (Rhint (root|shapes.php line 3, characters 46-50),
@@ -34,13 +34,13 @@
                    et_type =
                    (Rhint (root|shapes.php line 5, characters 22-54),
                     (Tshape (Typing_defs_core.Closed_shape,
-                       { (SFlit_str ([5:28-31], "x")) ->
+                       { (Typing_defs_core.TSFlit_str ([5:28-31], "x")) ->
                          { sft_optional = false;
                            sft_ty =
                            (Rhint (root|shapes.php line 5, characters 35-39),
                             (Tprim Tfloat))
                            };
-                         (SFlit_str ([5:42-45], "y")) ->
+                         (Typing_defs_core.TSFlit_str ([5:42-45], "y")) ->
                          { sft_optional = false;
                            sft_ty =
                            (Rhint (root|shapes.php line 5, characters 49-53),
@@ -99,13 +99,13 @@
                 et_type =
                 (Rhint (root|shapes.php line 11, characters 4-41),
                  (Tshape (Typing_defs_core.Open_shape,
-                    { (SFlit_str ([11:10-13], "x")) ->
+                    { (Typing_defs_core.TSFlit_str ([11:10-13], "x")) ->
                       { sft_optional = false;
                         sft_ty =
                         (Rhint (root|shapes.php line 11, characters 17-21),
                          (Tprim Tfloat))
                         };
-                      (SFlit_str ([11:24-27], "y")) ->
+                      (Typing_defs_core.TSFlit_str ([11:24-27], "y")) ->
                       { sft_optional = false;
                         sft_ty =
                         (Rhint (root|shapes.php line 11, characters 31-35),
@@ -179,18 +179,18 @@
         td_type =
         (Rhint (root|shapes.php line 20, characters 3-71),
          (Tshape (Typing_defs_core.Closed_shape,
-            { (SFlit_str ([20:27-34], "coord")) ->
+            { (Typing_defs_core.TSFlit_str ([20:27-34], "coord")) ->
               { sft_optional = false;
                 sft_ty =
                 (Rhint (root|shapes.php line 20, characters 38-70),
                  (Tshape (Typing_defs_core.Closed_shape,
-                    { (SFlit_str ([20:44-47], "x")) ->
+                    { (Typing_defs_core.TSFlit_str ([20:44-47], "x")) ->
                       { sft_optional = false;
                         sft_ty =
                         (Rhint (root|shapes.php line 20, characters 51-55),
                          (Tprim Tfloat))
                         };
-                      (SFlit_str ([20:58-61], "y")) ->
+                      (Typing_defs_core.TSFlit_str ([20:58-61], "y")) ->
                       { sft_optional = false;
                         sft_ty =
                         (Rhint (root|shapes.php line 20, characters 65-69),
@@ -198,7 +198,7 @@
                         } }
                     )))
                 };
-              (SFlit_str ([20:10-15], "tag")) ->
+              (Typing_defs_core.TSFlit_str ([20:10-15], "tag")) ->
               { sft_optional = true;
                 sft_ty =
                 (Rhint (root|shapes.php line 20, characters 19-24),

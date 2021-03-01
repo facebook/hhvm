@@ -200,8 +200,9 @@ void unbindLink(rds::Link<T, M>* link, rds::Symbol symbol) {
 }
 
 bool shouldUsePersistentHandles(const Class* cls) {
-  return (!SystemLib::s_inited || RO::RepoAuthoritative) &&
-         cls->verifyPersistent();
+  const auto isPersistent = cls->isPersistent();
+  cls->verifyPersistence();
+  return isPersistent;
 }
 
 /*
@@ -1694,23 +1695,17 @@ Slot Class::clsCnsSlot(
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-bool Class::verifyPersistent() const {
-  if (!(attrs() & AttrPersistent)) return false;
-  if (m_parent.get() && !classHasPersistentRDS(m_parent.get())) {
-    return false;
+void Class::verifyPersistence() const {
+  if (!debug) return;
+  if (!isPersistent()) return;
+  assertx(preClass()->unit()->isSystemLib() || RO::RepoAuthoritative);
+  assertx(!m_parent || classHasPersistentRDS(m_parent.get()));
+  for (DEBUG_ONLY int i = 0; i < m_interfaces.size(); i++) {
+    assertx(classHasPersistentRDS(m_interfaces[i]));
   }
-  int numIfaces = m_interfaces.size();
-  for (int i = 0; i < numIfaces; i++) {
-    if (!classHasPersistentRDS(m_interfaces[i])) {
-      return false;
-    }
+  for (DEBUG_ONLY auto const& usedTrait : m_extra->m_usedTraits) {
+    assertx(classHasPersistentRDS(usedTrait.get()));
   }
-  for (auto const& usedTrait : m_extra->m_usedTraits) {
-    if (!classHasPersistentRDS(usedTrait.get())) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void Class::setInstanceBits() {

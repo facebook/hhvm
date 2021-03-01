@@ -1297,10 +1297,9 @@ public:
   // Avoiding adding methods to this section.
 
   /*
-   * Whether this class can be made persistent---i.e., if AttrPersistent is set
-   * and all parents, interfaces, and traits for this class are persistent.
+   * Verify that the AttrPersistent is set correctly.
    */
-  bool verifyPersistent() const;
+  void verifyPersistence() const;
 
   /*
    * Set the instance bits on this class.

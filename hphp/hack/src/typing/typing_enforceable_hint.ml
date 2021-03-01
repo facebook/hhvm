@@ -151,6 +151,11 @@ let validator =
       else
         this#invalid acc r "an array type"
 
+    method! on_tunion acc r tyl =
+      match tyl with
+      | [] -> this#invalid acc r "the `nothing` type"
+      | _ -> super#on_tunion acc r tyl
+
     method! on_tintersection acc r _ =
       this#invalid
         acc

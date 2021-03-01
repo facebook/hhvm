@@ -1,0 +1,4 @@
+File "invalid_as_nothing.php", line 5, characters 9-15:
+Invalid `as` expression hint (Typing[4195])
+  File "invalid_as_nothing.php", line 5, characters 9-15:
+  The `as` operator cannot be used with the `nothing` type

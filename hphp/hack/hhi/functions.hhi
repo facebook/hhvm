@@ -132,7 +132,7 @@ namespace HH {
   function autoload_path_to_type_aliases(string $path): vec<string>;
 
   newtype ParseTree = darray<string, mixed>;
-  function ffp_parse_string(string $program): ParseTree;
+  function ffp_parse_string(string $program)[]: ParseTree;
 
   function clear_static_memoization(?string $cls, ?string $func = null) : bool;
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;

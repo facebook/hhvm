@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<325a550a952253895baa659d87b8d315>>
+// @generated SignedSource<<8b000396fdf10c68ced0f800c9315a3f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -98,6 +98,7 @@ pub enum Reason<'a> {
     RdynamicCall(&'a pos::Pos<'a>),
     RdynamicConstruct(&'a pos::Pos<'a>),
     RidxDict(&'a pos::Pos<'a>),
+    RsetElement(&'a pos::Pos<'a>),
     RmissingRequiredField(&'a (&'a pos::Pos<'a>, &'a str)),
     RmissingOptionalField(&'a (&'a pos::Pos<'a>, &'a str)),
     RunsetField(&'a (&'a pos::Pos<'a>, &'a str)),
@@ -245,6 +246,7 @@ pub enum Ureason<'a> {
     URxhp(&'a (&'a str, &'a str)),
     URxhpSpread,
     URindex(&'a str),
+    URelement(&'a str),
     URparam,
     URparamInout,
     URarrayValue,

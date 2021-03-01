@@ -92,6 +92,7 @@ type t =
   | Rdynamic_call of Pos.t
   | Rdynamic_construct of Pos.t
   | Ridx_dict of Pos.t
+  | Rset_element of Pos.t
   | Rmissing_required_field of Pos.t * string
   | Rmissing_optional_field of Pos.t * string
   | Runset_field of Pos.t * string
@@ -150,6 +151,7 @@ type ureason =
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
   | URxhp_spread
   | URindex of string
+  | URelement of string
   | URparam
   | URparam_inout
   | URarray_value
@@ -177,6 +179,8 @@ val index_array : ureason
 val index_tuple : ureason
 
 val index_class : string -> ureason
+
+val set_element : string -> ureason
 
 val string_of_ureason : ureason -> string
 

@@ -74,6 +74,7 @@ impl<'a> Reason<'a> {
             | RdynamicCall(p)
             | RdynamicConstruct(p)
             | RidxDict(p)
+            | RsetElement(p)
             | RmissingRequiredField((p, _))
             | RmissingOptionalField((p, _))
             | RunsetField((p, _))

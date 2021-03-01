@@ -1574,7 +1574,7 @@ and expr_
           | Set
           | ImmSet
           | Keyset ->
-            arraykey_value p class_name
+            arraykey_value p class_name true
           | Vector
           | ImmVector
           | Vec ->
@@ -1703,7 +1703,7 @@ and expr_
         (Reason.Rtype_variable_generics (p, "Tk", strip_ns name))
         env
         kl
-        (arraykey_value p name)
+        (arraykey_value p name false)
     in
     let (env, tvl, v) =
       compute_exprs_and_supertype
@@ -4286,13 +4286,19 @@ and array_value ~(expected : ExpectedTy.t option) env x =
   (env, (te, ty))
 
 and arraykey_value
-    p class_name ~(expected : ExpectedTy.t option) env ((pos, _) as x) =
+    p class_name is_set ~(expected : ExpectedTy.t option) env ((pos, _) as x) =
   let (env, (te, ty)) = array_value ~expected env x in
-  let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
+  let (ty_arraykey, reason) =
+    if is_set then
+      ( MakeType.arraykey (Reason.Rset_element pos),
+        Reason.set_element class_name )
+    else
+      (MakeType.arraykey (Reason.Ridx_dict pos), Reason.index_class class_name)
+  in
   let env =
     Typing_coercion.coerce_type
       p
-      (Reason.index_class class_name)
+      reason
       env
       ty
       { et_type = ty_arraykey; et_enforced = true }

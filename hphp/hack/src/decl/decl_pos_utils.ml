@@ -82,6 +82,7 @@ struct
     | Rdynamic_call p -> Rdynamic_call (pos p)
     | Rdynamic_construct p -> Rdynamic_construct (pos p)
     | Ridx_dict p -> Ridx_dict (pos p)
+    | Rset_element p -> Rset_element (pos p)
     | Rmissing_required_field (p, n) -> Rmissing_required_field (pos p, n)
     | Rmissing_optional_field (p, n) -> Rmissing_optional_field (pos p, n)
     | Runset_field (p, n) -> Runset_field (pos p, n)

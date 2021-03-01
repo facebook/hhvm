@@ -73,6 +73,7 @@ type t =
   | Rdynamic_call of Pos.t
   | Rdynamic_construct of Pos.t
   | Ridx_dict of Pos.t
+  | Rset_element of Pos.t
   | Rmissing_required_field of Pos.t * string
   | Rmissing_optional_field of Pos.t * string
   | Runset_field of Pos.t * string
@@ -410,6 +411,13 @@ let rec to_string prefix r =
         ^ " because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`"
       );
     ]
+  | Rset_element _ ->
+    [
+      ( p,
+        prefix
+        ^ " because only array keys can be used as elements of `keyset` or `Set`"
+      );
+    ]
   | Rmissing_required_field (p, name) ->
     [
       ( p,
@@ -569,6 +577,7 @@ and to_raw_pos r =
   | Rdynamic_call p -> p
   | Rdynamic_construct p -> p
   | Ridx_dict p -> p
+  | Rset_element p -> p
   | Rmissing_required_field (p, _) -> p
   | Rmissing_optional_field (p, _) -> p
   | Runset_field (p, _) -> p
@@ -689,6 +698,7 @@ let to_constructor_string r =
   | Rdynamic_call _ -> "Rdynamic_call"
   | Rdynamic_construct _ -> "Rdynamic_construct"
   | Ridx_dict _ -> "Ridx_dict"
+  | Rset_element _ -> "Rset_element"
   | Rmissing_required_field _ -> "Rmissing_required_field"
   | Rmissing_optional_field _ -> "Rmissing_optional_field"
   | Runset_field _ -> "Runset_field"
@@ -748,6 +758,7 @@ type ureason =
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
   | URxhp_spread
   | URindex of string
+  | URelement of string
   | URparam
   | URparam_inout
   | URarray_value
@@ -776,6 +787,8 @@ let index_tuple = URindex "tuple"
 
 let index_class s = URindex (strip_ns s)
 
+let set_element s = URelement (strip_ns s)
+
 let string_of_ureason = function
   | URnone -> "Typing error"
   | URreturn -> "Invalid return type"
@@ -796,6 +809,7 @@ let string_of_ureason = function
     ^ (strip_ns cls |> Markdown_lite.md_codify)
   | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
   | URindex s -> "Invalid index type for this " ^ strip_ns s
+  | URelement s -> "Invalid element type for this " ^ strip_ns s
   | URparam -> "Invalid argument"
   | URparam_inout -> "Invalid argument to an `inout` parameter"
   | URarray_value -> "Incompatible field values"

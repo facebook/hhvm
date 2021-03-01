@@ -1,2 +1,0 @@
-File "mayberx3.php", line 4, characters 14-29:
-`<<__AtMostRxAsFunc>>` attribute can only be put on parameters of conditionally reactive functions or methods annotated with `<<__AtMostRxAsArgs>>` attribute. (NastCheck[3063])

@@ -1,4 +1,0 @@
-File "mutable_inout1.php", line 3, characters 21-45:
-`__Mutable`, `__MaybeMutable` and `__OwnedMutable` annotations are not allowed on inout parameters. (Parsing[1002])
-File "mutable_inout1.php", line 8, characters 21-45:
-`__Mutable`, `__MaybeMutable` and `__OwnedMutable` annotations are not allowed on inout parameters. (Parsing[1002])

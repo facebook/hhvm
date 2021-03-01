@@ -1,6 +1,0 @@
-File "pure_overridden_class.php", line 8, characters 19-22:
-The method `pure` is not compatible with the overridden method (Typing[4341])
-  File "pure_overridden_class.php", line 4, characters 19-22:
-  This function is pure.
-  File "pure_overridden_class.php", line 8, characters 19-22:
-  This function is normal.

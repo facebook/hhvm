@@ -1,6 +1,0 @@
-File "rx_if_implements18.php", line 19, characters 28-34:
-The method `mayberx` is not compatible with the overridden method (Typing[4341])
-  File "rx_if_implements18.php", line 14, characters 28-34:
-  This function is conditionally shallow reactive (condition type: \Rx1).
-  File "rx_if_implements18.php", line 19, characters 28-34:
-  This function is conditionally shallow reactive (condition type: \Rx2).

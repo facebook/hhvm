@@ -1,2 +1,0 @@
-File "test_mutable_nonreactive.php", line 7, characters 32-33:
-The method `foo` has a mutable parameter (or mutable `this`), so it must be marked reactive with ``. (NastCheck[3053])

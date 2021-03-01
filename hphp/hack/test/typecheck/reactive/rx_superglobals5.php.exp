@@ -1,4 +1,0 @@
-File "rx_superglobals5.php", line 4, characters 8-14:
-Variable `$_FILES` is undefined, not always defined, or unset afterwards. (Naming[2050])
-File "rx_superglobals5.php", line 4, characters 8-14:
-Superglobal `$_FILES` cannot be used in a reactive context. (Typing[4227])

@@ -1,6 +1,0 @@
-File "reactive_calls4.php", line 25, characters 17-31:
-Invalid argument (Typing[4203])
-  File "reactive_calls4.php", line 13, characters 24-45:
-  This function is reactive.
-  File "reactive_calls4.php", line 8, characters 27-44:
-  This function is normal.

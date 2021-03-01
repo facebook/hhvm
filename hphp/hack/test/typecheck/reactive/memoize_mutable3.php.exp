@@ -1,2 +1,0 @@
-File "memoize_mutable3.php", line 3, characters 22-30:
-Memoized functions cannot have mutable `$this`. (Parsing[1002])

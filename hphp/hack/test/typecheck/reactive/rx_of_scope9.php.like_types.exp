@@ -1,4 +1,0 @@
-File "rx_of_scope9.php", line 8, characters 17-20:
-Reactive functions can only call other reactive functions. (Typing[4200])
-  File "rx_of_scope9.php", line 7, characters 41-57:
-  This function is normal.

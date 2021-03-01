@@ -1,2 +1,0 @@
-File "mutable_or_immutable1.php", line 3, characters 3-16:
-The `__MaybeMutable` attribute cannot be used on a function. (Typing[4231])

@@ -1,2 +1,0 @@
-File "test_mutable_return3.php", line 4, characters 19-20:
-The method `f1` is annotated with `<<__MutableReturn>>`,  so it must be marked reactive with ``. (NastCheck[3055])

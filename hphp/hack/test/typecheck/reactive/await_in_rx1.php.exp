@@ -1,6 +1,0 @@
-File "await_in_rx1.php", line 10, characters 8-10:
-Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_rx1.php", line 8, characters 20-21:
-  The local (enclosing) context provides the capability set {Rx, WriteProperty}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

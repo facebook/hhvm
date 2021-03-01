@@ -1,2 +1,0 @@
-File "rx_move5.php", line 11, characters 11-12:
-Variable `$a` is undefined, not always defined, or unset afterwards. (Naming[2050])

@@ -1,4 +1,0 @@
-File "parse_missing_reactivity4.php", line 4, characters 1-28:
-`__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Pure`. (Parsing[1002])
-File "parse_missing_reactivity4.php", line 4, characters 3-16:
-The `__OnlyRxIfImpl` attribute cannot be used on a function. (Typing[4231])

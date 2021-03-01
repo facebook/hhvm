@@ -1,4 +1,0 @@
-File "rx_if_implements33.php", line 28, characters 12-22:
-Reactive functions can only call other reactive functions. (Typing[4200])
-  File "rx_if_implements33.php", line 19, characters 19-19:
-  This function is normal.

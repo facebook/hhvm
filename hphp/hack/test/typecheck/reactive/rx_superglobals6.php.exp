@@ -1,4 +1,0 @@
-File "rx_superglobals6.php", line 4, characters 8-15:
-Variable `$_COOKIE` is undefined, not always defined, or unset afterwards. (Naming[2050])
-File "rx_superglobals6.php", line 4, characters 8-15:
-Superglobal `$_COOKIE` cannot be used in a reactive context. (Typing[4227])

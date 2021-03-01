@@ -1,6 +1,0 @@
-File "rx_if_implements36.php", line 14, characters 19-19:
-The method `f` is not compatible with the overridden method (Typing[4341])
-  File "rx_if_implements36.php", line 8, characters 19-19:
-  This function is conditionally reactive (condition type: \Rx).
-  File "rx_if_implements36.php", line 14, characters 19-19:
-  This function is normal.

@@ -1,2 +1,0 @@
-File "mutability_flavors9.php", line 8, characters 3-4:
-Cannot assign mutable value to immutable local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

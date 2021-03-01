@@ -55,7 +55,7 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
     auto const seenArrs = apcExtension::ShareUncounted ?
       req::make_unique<DataWalker::PointerMap>() : nullptr;
     // only need to call traverseData() on the toplevel array
-    DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
+    DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
     DataWalker::DataFeature features =
       walker.traverseData(arr, seenArrs.get());
     if (features.isCircular) {
@@ -63,7 +63,7 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
       return serialized(s.get());
     }
 
-    if (apcExtension::UseUncounted && !features.hasObjectOrResource &&
+    if (apcExtension::UseUncounted && !features.hasNonPersistable &&
         !arr->empty()) {
       auto const base_size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() :

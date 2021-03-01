@@ -44,7 +44,7 @@ struct DataWalker {
   enum class LookupFeature {
     Default                  = 0x0,
     DetectSerializable       = 0x1,
-    HasObjectOrResource      = 0x2
+    DetectNonPersistable     = 0x2
   };
 
   /*
@@ -55,16 +55,16 @@ struct DataWalker {
     DataFeature()
       : isCircular(false)
       , hasSerializable(false)
-      , hasObjectOrResource(false) {
+      , hasNonPersistable(false) {
     }
 
     // whether the data graph is not a tree in a user-visible way (either
     // circular or DAG of types with reference semantics like objects).
     unsigned isCircular : 1;
-    // whether the data graph contains serializable objects
+    // whether the data graph contains objects implementing Serializable
     unsigned hasSerializable : 1;
-    // whether the data graph contains any object or resource
-    unsigned hasObjectOrResource : 1;
+    // whether the data graph contains anything that can't be made persistent
+    unsigned hasNonPersistable : 1;
   };
 
   using PointerSet = req::fast_set<const HeapObject*,

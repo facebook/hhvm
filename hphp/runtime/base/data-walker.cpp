@@ -94,26 +94,26 @@ bool DataWalker::visitTypedValue(TypedValue rval,
   auto const serialize_clsmeth = RO::EvalAPCSerializeClsMeth;
 
   if (rval.m_type == KindOfObject) {
-    features.hasObjectOrResource = true;
+    features.hasNonPersistable = true;
     traverseData(rval.m_data.pobj, features, visited);
   } else if (isArrayLikeType(rval.m_type)) {
     traverseData(rval.m_data.parr, features, visited, seenArrs);
   } else if (rval.m_type == KindOfResource) {
-    features.hasObjectOrResource = true;
+    features.hasNonPersistable = true;
   } else if (rval.m_type == KindOfRFunc) {
-    features.hasObjectOrResource = true;
+    features.hasNonPersistable = true;
   } else if (rval.m_type == KindOfFunc) {
-    if (!serialize_funcs) features.hasObjectOrResource = true;
-    if (rval.m_data.pfunc->isMethCaller()) features.hasObjectOrResource = true;
-    if (!rval.m_data.pfunc->isPersistent()) features.hasObjectOrResource = true;
+    if (!serialize_funcs) features.hasNonPersistable = true;
+    if (rval.m_data.pfunc->isMethCaller()) features.hasNonPersistable = true;
+    if (!rval.m_data.pfunc->isPersistent()) features.hasNonPersistable = true;
   } else if (rval.m_type == KindOfClass) {
     if (!rval.m_data.pclass->isPersistent()) {
-      features.hasObjectOrResource = true;
+      features.hasNonPersistable = true;
     }
   } else if (rval.m_type == KindOfClsMeth) {
-    if (!serialize_clsmeth) features.hasObjectOrResource = true;
+    if (!serialize_clsmeth) features.hasNonPersistable = true;
     if (!rval.m_data.pclsmeth->getCls()->isPersistent()) {
-      features.hasObjectOrResource = true;
+      features.hasNonPersistable = true;
     }
   }
   return canStopWalk(features);
@@ -140,11 +140,11 @@ inline void DataWalker::objectFeature(ObjectData* pobj,
 }
 
 inline bool DataWalker::canStopWalk(DataFeature& features) const {
-  auto objectCheck =
-    features.hasObjectOrResource ||
-    !(m_features & LookupFeature::HasObjectOrResource);
+  auto nonPersistableCheck =
+    features.hasNonPersistable ||
+    !(m_features & LookupFeature::DetectNonPersistable);
   auto defaultChecks = features.isCircular || features.hasSerializable;
-  return objectCheck && defaultChecks;
+  return nonPersistableCheck && defaultChecks;
 }
 
 //////////////////////////////////////////////////////////////////////

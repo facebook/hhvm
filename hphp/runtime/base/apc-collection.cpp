@@ -100,10 +100,10 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
    */
   if (level == APCHandleLevel::Inner && apcExtension::UseUncounted &&
       !array->empty()) {
-    DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
+    DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
     auto const features = walker.traverseData(const_cast<ArrayData*>(array));
     assertx(!features.isCircular);
-    if (!features.hasObjectOrResource) {
+    if (!features.hasNonPersistable) {
       auto const makeUncounted = [&] () {
         auto const ad = const_cast<ArrayData*>(array);
         if (isVectorCollection(obj->collectionType())) {

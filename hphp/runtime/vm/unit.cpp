@@ -281,7 +281,6 @@ namespace {
 
 void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
   bool const isPersistent = newRecord->isPersistent();
-  assertx(isPersistent == (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative));
   assertx(!isPersistent || newRecord->verifyPersistent());
   nameList->m_cachedRecordDesc.bind(
     isPersistent? rds::Mode::Persistent : rds::Mode::Normal,
@@ -1180,7 +1179,9 @@ void Unit::mergeImpl(MergeInfo* mi) {
         case MergeKind::Class: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_class);
-          if (Class::def((PreClass*)obj, failIsFatal)) {
+          auto cls = (PreClass*)obj;
+          assertx(cls->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+          if (Class::def(cls, failIsFatal)) {
             madeProgress = true;
             define.reset(i);
           }
@@ -1254,6 +1255,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_record);
           auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
           auto const r = lookupPreRecordId(recordId);
+          assertx(r->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
           if (defRecordDesc(r, failIsFatal)) {
             madeProgress = true;
             define.reset(i);

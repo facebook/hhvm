@@ -432,6 +432,7 @@ function get_options($argv) {
     'failure-file:' => '',
     '*wholecfg' => '',
     '*hhas-round-trip' => '',
+    '*use-internal-compiler' => '',
     'color' => 'c',
     'no-fun' => '',
     'no-skipif' => '',
@@ -936,6 +937,10 @@ function hhvm_cmd_impl(
 
     if (!isset($options['repo'])) {
       $args[] = '-vEval.StressUnitSerde=true';
+    }
+
+    if (isset($options['use-internal-compiler'])) {
+      $args[] = '-vEval.HackCompilerUseCompilerPool=false';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

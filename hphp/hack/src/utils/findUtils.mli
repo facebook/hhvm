@@ -7,12 +7,16 @@
  *
  *)
 
+(** The file extensions we are interested, each in the form ".ext" *)
+val extensions : string list
+
 val is_dot_file : string -> bool
 
 val is_hack : string -> bool
 
 val has_ancestor : string -> string -> bool
 
+(** Filter the relative path. This will reject files not in [extensions] and maybe more. *)
 val file_filter : string -> bool
 
 val path_filter : Relative_path.t -> bool

@@ -3540,7 +3540,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             "id": "did-change-watched-files",
                             "method": "workspace/didChangeWatchedFiles",
                             "registerOptions": {
-                                "watchers": [{"globPattern": "**", "kind": 7}]
+                                "watchers": [
+                                    {
+                                        "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
+                                        "kind": 7,
+                                    }
+                                ]
                             },
                         }
                     ]

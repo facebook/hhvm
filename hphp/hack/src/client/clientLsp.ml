@@ -3424,19 +3424,19 @@ let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
     }
 
 let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
+  (* We want a glob-pattern like "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}".
+  I'm constructing it from FindUtils.extensions so our glob-pattern doesn't get out
+  of sync with FindUtils.file_filter. *)
+  let extensions =
+    List.map FindUtils.extensions ~f:(fun s -> String_utils.lstrip s ".")
+  in
+  let globPattern =
+    Printf.sprintf "**/*.{%s}" (extensions |> String.concat ~sep:",")
+  in
   let registration_options =
     DidChangeWatchedFilesRegistrationOptions
       {
-        DidChangeWatchedFiles.watchers =
-          [
-            {
-              DidChangeWatchedFiles.globPattern
-              (* We could be more precise here, but some language clients (such as
-          LanguageClient-neovim) don't currently support rich glob patterns.
-          We'll do further filtering at a later stage. *) =
-                "**";
-            };
-          ];
+        DidChangeWatchedFiles.watchers = [{ DidChangeWatchedFiles.globPattern }];
       }
   in
   let registration =

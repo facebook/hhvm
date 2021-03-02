@@ -4631,6 +4631,7 @@ let handle_tick
     ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :
     result_telemetry option Lwt.t =
   EventLogger.recheck_disk_files ();
+  HackEventLogger.Memory.profile_if_needed ();
   (* Update the hh_server_status global variable, either by asking the monitor
   during In_init, or reading it from Main_env: *)
   latest_hh_server_status := get_hh_server_status !state;

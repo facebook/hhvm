@@ -421,6 +421,10 @@ module CGroup = struct
     ()
 end
 
+module Memory = struct
+  let profile_if_needed () = ()
+end
+
 module ProfileDecl = struct
   let count_decl
       ~kind:_

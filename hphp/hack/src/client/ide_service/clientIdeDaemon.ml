@@ -1087,6 +1087,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
   let rec flush_event_logger () : unit Lwt.t =
     let%lwt () = Lwt_unix.sleep 0.5 in
+    HackEventLogger.Memory.profile_if_needed ();
     Lwt.async EventLoggerLwt.flush;
     EventLogger.recheck_disk_files ();
     flush_event_logger ()

@@ -47,18 +47,21 @@ namespace HPHP { namespace bespoke {
 //  - Bit 3: unset iff subtype of MonotypeDict<Empty|Str,Top>
 //
 // Bit 0 is less constrained. For MonotypeDict, when it is unset, it means the
-// layout is one of the static-string keyed layouts. We have space here to add
-// kStructLayoutByte = 0b1111.
+// layout is one of the static-string keyed layouts. For MonotypeVec, when it
+// is unset, it means the layout is the empty singleton. We have space here to
+// add kStructLayoutByte = 0b1111.
 //
 // This encoding is the one that uses the fewest number of bits (resulting in
 // the smallest vtable) for our current set of layout families.
 //
 constexpr uint8_t kLoggingLayoutByte               = 0b1110;
 constexpr uint8_t kMonotypeVecLayoutByte           = 0b1101;
+constexpr uint8_t kEmptyMonotypeVecLayoutByte      = 0b1100;
 constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b1011;
 constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b0111;
 constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b0110;
 constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b0010;
+constexpr uint8_t kMaxLayoutByte = kLoggingLayoutByte;
 
 // Log that we're calling the given function for the given array.
 void logBespokeDispatch(const BespokeArray* bad, const char* fn);
@@ -104,6 +107,14 @@ struct LayoutFunctions {
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 };
+
+struct LayoutFunctionsDispatch {
+#define X(Return, Name, Args...) Return (*fn##Name[kMaxLayoutByte + 1])(Args);
+  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+#undef X
+};
+
+extern LayoutFunctionsDispatch g_layout_funcs;
 
 /**
  * Provides an interface between LayoutFunctions, which exposes methods

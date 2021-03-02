@@ -378,7 +378,7 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
 template <typename Key>
 constexpr LayoutIndex getLayoutIndex(DataType type, LayoutIndex old) {
   if constexpr (std::is_same<Key, StringData*>::value) {
-    if ((old.raw >> 8) == kStaticStrMonotypeDictLayoutByte) {
+    if (old.byte() == kStaticStrMonotypeDictLayoutByte) {
       return getLayoutIndex<StaticStrPtr>(type);
     }
   }
@@ -460,7 +460,7 @@ bool loosenToStr(const StringData* input) {
 template <typename Key>
 bool tightenToStaticStr(const StringData* input, LayoutIndex index) {
   if constexpr (std::is_same<Key, StringData*>::value) {
-    auto const byte = index.raw >> 8;
+    auto const byte = index.byte();
     return byte == kStaticStrMonotypeDictLayoutByte && input->isStatic();
   }
   return false;
@@ -1681,7 +1681,7 @@ LayoutIndex MonotypeDictLayout::Index(KeyTypes kt, DataType type) {
 }
 
 bool isMonotypeDictLayout(LayoutIndex index) {
-  auto const byte = index.raw >> 8;
+  auto const byte = index.byte();
   return byte == kIntMonotypeDictLayoutByte ||
          byte == kStrMonotypeDictLayoutByte ||
          byte == kStaticStrMonotypeDictLayoutByte ||

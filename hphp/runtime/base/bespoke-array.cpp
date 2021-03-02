@@ -27,6 +27,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+using bespoke::g_layout_funcs;
+
+uint8_t getLayoutByte(const ArrayData* ad) {
+  auto const result = BespokeArray::asBespoke(ad)->layoutIndex().byte();
+  assertx(g_layout_funcs.fnRelease[result] != nullptr);
+  return result;
+}
+}
+
 BespokeArray* BespokeArray::asBespoke(ArrayData* ad) {
   auto ret = reinterpret_cast<BespokeArray*>(ad);
   assertx(ret->checkInvariants());
@@ -49,21 +59,20 @@ void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
 }
 
 size_t BespokeArray::heapSize() const {
-  return vtable()->fnHeapSize(this);
+  return g_layout_funcs.fnHeapSize[getLayoutByte(this)](this);
 }
 void BespokeArray::scan(type_scan::Scanner& scan) const {
-  return vtable()->fnScan(this, scan);
+  return g_layout_funcs.fnScan[getLayoutByte(this)](this, scan);
 }
 
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
-  return asBespoke(ad)->vtable()->fnEscalateToVanilla(ad, reason);
+  return g_layout_funcs.fnEscalateToVanilla[getLayoutByte(ad)](ad, reason);
 }
 
 bool BespokeArray::checkInvariants() const {
   assertx(!isVanilla());
   assertx(kindIsValid());
   assertx(!isSampledArray());
-  assertx(vtable() != nullptr);
   static_assert(ArrayData::kDefaultVanillaArrayExtra == uint32_t(-1));
   DEBUG_ONLY auto constexpr kVanillaLayoutIndex = uint16_t(-1);
   assertx(m_extra_hi16 != kVanillaLayoutIndex);
@@ -99,12 +108,12 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {
   if (!ad->uncountedDecRef()) return;
-  auto const vtable = asBespoke(ad)->vtable();
-  vtable->fnReleaseUncounted(ad);
+  auto const byte = getLayoutByte(ad);
+  g_layout_funcs.fnReleaseUncounted[byte](ad);
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  auto const bytes = vtable->fnHeapSize(ad);
+  auto const bytes = g_layout_funcs.fnHeapSize[byte](ad);
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
   uncounted_sized_free(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }
@@ -113,24 +122,24 @@ void BespokeArray::ReleaseUncounted(ArrayData* ad) {
 
 // ArrayData interface
 void BespokeArray::Release(ArrayData* ad) {
-  asBespoke(ad)->vtable()->fnRelease(ad);
+  g_layout_funcs.fnRelease[getLayoutByte(ad)](ad);
 }
 bool BespokeArray::IsVectorData(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->fnIsVectorData(ad);
+  return g_layout_funcs.fnIsVectorData[getLayoutByte(ad)](ad);
 }
 
 // RO access
 TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
-  return asBespoke(ad)->vtable()->fnNvGetInt(ad, key);
+  return g_layout_funcs.fnNvGetInt[getLayoutByte(ad)](ad, key);
 }
 TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
-  return asBespoke(ad)->vtable()->fnNvGetStr(ad, key);
+  return g_layout_funcs.fnNvGetStr[getLayoutByte(ad)](ad, key);
 }
 TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnGetPosKey(ad, pos);
+  return g_layout_funcs.fnGetPosKey[getLayoutByte(ad)](ad, pos);
 }
 TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnGetPosVal(ad, pos);
+  return g_layout_funcs.fnGetPosVal[getLayoutByte(ad)](ad, pos);
 }
 bool BespokeArray::ExistsInt(const ArrayData* ad, int64_t key) {
   return NvGetInt(ad, key).is_init();
@@ -141,53 +150,53 @@ bool BespokeArray::ExistsStr(const ArrayData* ad, const StringData* key) {
 
 // iteration
 ssize_t BespokeArray::IterBegin(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->fnIterBegin(ad);
+  return g_layout_funcs.fnIterBegin[getLayoutByte(ad)](ad);
 }
 ssize_t BespokeArray::IterLast(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->fnIterLast(ad);
+  return g_layout_funcs.fnIterLast[getLayoutByte(ad)](ad);
 }
 ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->fnIterEnd(ad);
+  return g_layout_funcs.fnIterEnd[getLayoutByte(ad)](ad);
 }
 ssize_t BespokeArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnIterAdvance(ad, pos);
+  return g_layout_funcs.fnIterAdvance[getLayoutByte(ad)](ad, pos);
 }
 ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnIterRewind(ad, pos);
+  return g_layout_funcs.fnIterRewind[getLayoutByte(ad)](ad, pos);
 }
 
 // RW access
 arr_lval BespokeArray::LvalInt(ArrayData* ad, int64_t key) {
-  return asBespoke(ad)->vtable()->fnLvalInt(ad, key);
+  return g_layout_funcs.fnLvalInt[getLayoutByte(ad)](ad, key);
 }
 arr_lval BespokeArray::LvalStr(ArrayData* ad, StringData* key) {
-  return asBespoke(ad)->vtable()->fnLvalStr(ad, key);
+  return g_layout_funcs.fnLvalStr[getLayoutByte(ad)](ad, key);
 }
 tv_lval BespokeArray::ElemInt(
-    tv_lval lvalIn, int64_t key, bool throwOnMissing) {
-  auto const ad = lvalIn.val().parr;
-  return asBespoke(ad)->vtable()->fnElemInt(lvalIn, key, throwOnMissing);
+    tv_lval lval, int64_t key, bool throwOnMissing) {
+  auto const ad = lval.val().parr;
+  return g_layout_funcs.fnElemInt[getLayoutByte(ad)](lval, key, throwOnMissing);
 }
 tv_lval BespokeArray::ElemStr(
-    tv_lval lvalIn, StringData* key, bool throwOnMissing) {
-  auto const ad = lvalIn.val().parr;
-  return asBespoke(ad)->vtable()->fnElemStr(lvalIn, key, throwOnMissing);
+    tv_lval lval, StringData* key, bool throwOnMissing) {
+  auto const ad = lval.val().parr;
+  return g_layout_funcs.fnElemStr[getLayoutByte(ad)](lval, key, throwOnMissing);
 }
 
 // insertion
 ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnSetIntMove(ad, key, v);
+  return g_layout_funcs.fnSetIntMove[getLayoutByte(ad)](ad, key, v);
 }
 ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnSetStrMove(ad, key, v);
+  return g_layout_funcs.fnSetStrMove[getLayoutByte(ad)](ad, key, v);
 }
 
 // deletion
 ArrayData* BespokeArray::RemoveInt(ArrayData* ad, int64_t key) {
-  return asBespoke(ad)->vtable()->fnRemoveInt(ad, key);
+  return g_layout_funcs.fnRemoveInt[getLayoutByte(ad)](ad, key);
 }
 ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
-  return asBespoke(ad)->vtable()->fnRemoveStr(ad, key);
+  return g_layout_funcs.fnRemoveStr[getLayoutByte(ad)](ad, key);
 }
 
 // sorting
@@ -197,21 +206,21 @@ ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     if (ad->isVecType()) return ad->toDict(true);
   }
   assertx(!ad->empty());
-  return asBespoke(ad)->vtable()->fnPreSort(ad, sf);
+  return g_layout_funcs.fnPreSort[getLayoutByte(ad)](ad, sf);
 }
 ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
   assertx(vad->isVanilla());
   if (ad->toDataType() != vad->toDataType()) return vad;
   assertx(vad->hasExactlyOneRef());
-  return asBespoke(ad)->vtable()->fnPostSort(ad, vad);
+  return g_layout_funcs.fnPostSort[getLayoutByte(ad)](ad, vad);
 }
 
 // high-level ops
 ArrayData* BespokeArray::AppendMove(ArrayData* ad, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnAppendMove(ad, v);
+  return g_layout_funcs.fnAppendMove[getLayoutByte(ad)](ad, v);
 }
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
-  return asBespoke(ad)->vtable()->fnPop(ad, out);
+  return g_layout_funcs.fnPop[getLayoutByte(ad)](ad, out);
 }
 void BespokeArray::OnSetEvalScalar(ArrayData*) {
   always_assert(false);
@@ -222,13 +231,13 @@ ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }
 ArrayData* BespokeArray::ToDVArray(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->fnToDVArray(ad, copy);
+  return g_layout_funcs.fnToDVArray[getLayoutByte(ad)](ad, copy);
 }
 ArrayData* BespokeArray::ToHackArr(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->fnToHackArr(ad, copy);
+  return g_layout_funcs.fnToHackArr[getLayoutByte(ad)](ad, copy);
 }
 ArrayData* BespokeArray::SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
-  return asBespoke(ad)->vtable()->fnSetLegacyArray(ad, copy, legacy);
+  return g_layout_funcs.fnSetLegacyArray[getLayoutByte(ad)](ad, copy, legacy);
 }
 
 //////////////////////////////////////////////////////////////////////////////

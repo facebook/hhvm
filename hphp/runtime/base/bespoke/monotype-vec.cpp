@@ -93,7 +93,7 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
   auto constexpr type = kExtraInvalidDataType;
-  auto constexpr base = uint16_t(kMonotypeVecLayoutByte << 8);
+  auto constexpr base = uint16_t(kEmptyMonotypeVecLayoutByte << 8);
   return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 
@@ -946,7 +946,8 @@ LayoutIndex MonotypeVecLayout::Index(DataType type) {
 }
 
 bool isMonotypeVecLayout(LayoutIndex index) {
-  return (index.raw >> 8) == kMonotypeVecLayoutByte;
+  auto const byte = index.byte();
+  return byte == kMonotypeVecLayoutByte || byte == kEmptyMonotypeVecLayoutByte;
 }
 
 }}

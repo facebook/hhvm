@@ -84,6 +84,9 @@ struct LayoutIndex {
   bool operator!=(LayoutIndex o) const { return raw != o.raw; }
   bool operator<(LayoutIndex o) const { return raw < o.raw; }
 
+  // We use the high byte of the index for type tests and virtual dispatch.
+  uint8_t byte() const { return raw >> 8; }
+
 public:
   uint16_t raw;
 };

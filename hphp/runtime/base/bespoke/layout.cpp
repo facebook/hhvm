@@ -43,7 +43,7 @@ using namespace jit;
 
 namespace {
 
-auto constexpr kMaxNumLayouts = ((kLoggingLayoutByte + 1) << 8);
+auto constexpr kMaxNumLayouts = ((kMaxLayoutByte + 1) << 8);
 
 std::atomic<size_t> s_topoIndex;
 std::array<Layout*, kMaxNumLayouts> s_layoutTable;
@@ -86,6 +86,8 @@ folly::Optional<LayoutTest> compute2ByteTest(
 }
 
 }
+
+LayoutFunctionsDispatch g_layout_funcs;
 
 Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents,
                const LayoutFunctions* vtable)
@@ -521,8 +523,13 @@ ConcreteLayout::ConcreteLayout(LayoutIndex index,
   : Layout(index, std::move(description), std::move(parents), vtable)
 {
   assertx(vtable);
-#define X(Return, Name, Args...) \
-  assertx(vtable->fn##Name);
+  auto const byte = index.byte();
+#define X(Return, Name, Args...) {                          \
+    assertx(vtable->fn##Name);                              \
+    auto& entry = g_layout_funcs.fn##Name[byte];            \
+    assertx(entry == nullptr || entry == vtable->fn##Name); \
+    entry = vtable->fn##Name;                               \
+  }
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 }

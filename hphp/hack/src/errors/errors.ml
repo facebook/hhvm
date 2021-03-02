@@ -5769,6 +5769,12 @@ let invalid_meth_caller_calling_convention call_pos param_pos convention =
         "This is why I think this method uses the `inout` calling convention" );
     ]
 
+let unsafe_cast pos =
+  add
+    (Typing.err_code Typing.UnsafeCast)
+    pos
+    "This cast violates type safety and may lead to unexpected behavior at runtime."
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

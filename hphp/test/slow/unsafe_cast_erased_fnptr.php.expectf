@@ -1,0 +1,1 @@
+Fatal error: Failure to resolve undefined function unsafe_cast() in %s/test/slow/unsafe_cast_erased_fnptr.php on line 7

@@ -689,6 +689,7 @@ module Typing = struct
     | StrictStrConcatTypeMismatch [@value 4414]
     | StrictStrInterpTypeMismatch [@value 4415]
     | InvalidMethCallerCallingConvention [@value 4416]
+    | UnsafeCast [@value 4417]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

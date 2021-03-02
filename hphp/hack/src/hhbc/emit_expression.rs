@@ -2387,6 +2387,9 @@ fn emit_special_function(
                 })
                 .collect::<Result<_>>()?,
         ))),
+        ("unsafe_cast", &[]) => Ok(Some(instr::null())),
+        ("unsafe_cast", args) => Ok(Some(emit_expr(e, env, &args[0])?)),
+
         ("HH\\invariant", args) if args.len() >= 2 => {
             let l = e.label_gen_mut().next_regular();
             let expr_id = tast::Expr(

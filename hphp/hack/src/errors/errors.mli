@@ -1539,3 +1539,5 @@ val explicit_readonly_cast : string -> Pos.t -> Pos.t -> unit
 val readonly_method_call : Pos.t -> Pos.t -> unit
 
 val invalid_meth_caller_calling_convention : Pos.t -> Pos.t -> string -> unit
+
+val unsafe_cast : Pos.t -> unit

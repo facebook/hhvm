@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function f() must be of type string, int given in %s/test/slow/unsafe_cast_erased.php on line 6

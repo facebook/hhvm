@@ -4580,6 +4580,11 @@ and dispatch_call
       | echo when String.equal echo SN.SpecialFunctions.echo ->
         let (env, tel, _) = exprs ~accept_using_var:true env el in
         make_call_special env id tel (MakeType.void (Reason.Rwitness pos))
+      (* `unsafe_cast` *)
+      | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
+        ->
+        Errors.unsafe_cast p;
+        dispatch_id env id
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->
         let (env, tel, _) =

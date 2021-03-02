@@ -471,6 +471,8 @@ module PseudoFunctions = struct
 
   let die = "\\die"
 
+  let unsafe_cast = "\\unsafe_cast"
+
   let all_pseudo_functions =
     HashSet.of_list
       [
@@ -485,6 +487,7 @@ module PseudoFunctions = struct
         empty;
         exit;
         die;
+        unsafe_cast;
       ]
 
   let is_pseudo_function x = HashSet.mem all_pseudo_functions x
@@ -526,6 +529,7 @@ module StdlibFunctions = struct
         array_filter;
         type_structure;
         array_map;
+        PseudoFunctions.unsafe_cast;
       ]
 
   let needs_special_dispatch x = Hash_set.mem special_dispatch x

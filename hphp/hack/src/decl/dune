@@ -51,6 +51,7 @@
     decl_fun_utils
     decl_folded_class
     decl_heap
+    decl_hint
     decl_nast
     decl_pos_utils
     full_fidelity
@@ -71,6 +72,7 @@
     decl_env
     decl_fun_utils
     decl_heap
+    decl_hint
     decl_init_check
     decl_pos_utils
     decl_reference

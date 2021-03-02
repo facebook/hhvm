@@ -43,7 +43,7 @@ val make_param_ty :
 
 (** Make function parameter for the partial-mode ellipsis parameter (unnamed, and untyped) *)
 val make_ellipsis_param_ty :
-  Pos.t -> 'a Typing_defs.ty Typing_defs_core.fun_param
+  Decl_env.env -> Pos.t -> 'a Typing_defs.ty Typing_defs_core.fun_param
 
 val ret_from_fun_kind :
   ?is_constructor:Aast.mutable_return ->

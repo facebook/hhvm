@@ -31,8 +31,8 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 (** An "ancestor" is what we call the immediate parents of a type whose linearization
 we're working on. *)
 type ancestor = {
-  ty_pos: Pos.t;
-  class_name: Pos.t * string;
+  ty_pos: Pos_or_decl.t;
+  class_name: pos_id;
   type_args: decl_ty list;
   source: source_type;
       (** Just to remember where we originally picked up this ancestor type -
@@ -127,8 +127,8 @@ let emitted_mro_elements_equal a b =
 let empty_mro_element =
   {
     mro_name = "";
-    mro_use_pos = Pos.none;
-    mro_ty_pos = Pos.none;
+    mro_use_pos = Pos_or_decl.none;
+    mro_ty_pos = Pos_or_decl.none;
     mro_flags = 0;
     mro_type_args = [];
     mro_cyclic = None;

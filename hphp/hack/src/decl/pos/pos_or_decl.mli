@@ -21,3 +21,5 @@ val btw : t -> t -> t
 
 (** Compress a position to be stored in the decl heap. *)
 val make_decl_pos : Pos.t -> Decl_reference.t -> t
+
+val is_hhi : t -> bool

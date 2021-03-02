@@ -197,13 +197,14 @@ let hint_to_type ~is_lambda ~default env reason hint =
   Option.value (hint_to_type_opt ~is_lambda env reason hint) ~default
 
 let make_param_ty env ~is_lambda param =
+  let param_pos = Decl_env.make_decl_pos env param.param_pos in
   let ty =
-    let r = Reason.Rwitness param.param_pos in
+    let r = Reason.Rwitness param_pos in
     hint_to_type
       ~is_lambda
       ~default:(mk (r, Typing_defs.make_tany ()))
       env
-      (Reason.Rglobal_fun_param param.param_pos)
+      (Reason.Rglobal_fun_param param_pos)
       (hint_of_type_hint param.param_type_hint)
   in
   let ty =
@@ -211,7 +212,7 @@ let make_param_ty env ~is_lambda param =
     | t when param.param_is_variadic ->
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      mk (Reason.Rvar_param param.param_pos, t)
+      mk (Reason.Rvar_param param_pos, t)
     | _ -> ty
   in
   let module UA = SN.UserAttributes in
@@ -234,7 +235,7 @@ let make_param_ty env ~is_lambda param =
              Param_rx_if_impl (conditionally_reactive_attribute_to_hint env v))
   in
   {
-    fp_pos = param.param_pos;
+    fp_pos = param_pos;
     fp_name = Some param.param_name;
     fp_type = { et_type = ty; et_enforced = false };
     fp_flags =
@@ -251,8 +252,11 @@ let make_param_ty env ~is_lambda param =
     fp_rx_annotation = rx_annotation;
   }
 
-(* Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
-let make_ellipsis_param_ty pos =
+(** Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
+let make_ellipsis_param_ty :
+    Decl_env.env -> Pos.t -> 'phase ty Typing_defs_core.fun_param =
+ fun env pos ->
+  let pos = Decl_env.make_decl_pos env pos in
   let r = Reason.Rwitness pos in
   let ty = mk (r, Typing_defs.make_tany ()) in
   {
@@ -273,6 +277,7 @@ let make_ellipsis_param_ty pos =
   }
 
 let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind hint =
+  let pos = Decl_env.make_decl_pos env pos in
   let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then

@@ -12,7 +12,7 @@ val aast_tparam_to_decl_tparam :
   Decl_env.env -> Nast.tparam -> Typing_defs.decl_ty Typing_defs.tparam
 
 val aast_user_attribute_to_decl_user_attribute :
-  Nast.user_attribute -> Typing_defs.user_attribute
+  Decl_env.env -> Nast.user_attribute -> Typing_defs.user_attribute
 
 val aast_contexts_to_decl_capability :
   Decl_env.env ->

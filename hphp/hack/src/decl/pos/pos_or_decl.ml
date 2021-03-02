@@ -12,5 +12,13 @@ let none : t = Pos.none
 
 let btw = Pos.btw
 
+let get_raw_pos : t -> Pos.t option = (fun p -> Some p)
+
 let make_decl_pos : Pos.t -> Decl_reference.t -> t =
  (fun p _decl -> (* TODO *) p)
+
+let is_hhi : t -> bool =
+ fun p ->
+  match get_raw_pos p with
+  | None -> (* TODO T81321312 *) false
+  | Some p -> Pos.is_hhi p

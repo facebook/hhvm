@@ -653,7 +653,7 @@ let make_depend_on_constructor env class_name =
 
 let make_depend_on_class_def env x cd =
   match cd with
-  | Some cd when Pos.is_hhi (Cls.pos cd) -> ()
+  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
 let print_size _kind _name obj =
@@ -678,7 +678,7 @@ let get_typedef env x =
          x)
   in
   match res with
-  | Some td when Pos.is_hhi td.td_pos -> res
+  | Some td when Pos_or_decl.is_hhi td.td_pos -> res
   | _ ->
     make_depend_on_class env x;
     res
@@ -714,7 +714,7 @@ let get_class_or_typedef env x =
 let get_class_dep env x =
   let res = get_class env x in
   match res with
-  | Some cd when Pos.is_hhi (Cls.pos cd) -> res
+  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> res
   | _ ->
     Decl_env.add_extends_dependency env.decl_env x;
     res
@@ -730,7 +730,7 @@ let get_fun env x =
          x)
   in
   match res with
-  | Some fd when Pos.is_hhi fd.fe_pos -> res
+  | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res
   | _ ->
     let dep = Typing_deps.Dep.Fun x in
     Option.iter env.decl_env.Decl_env.droot (fun root ->
@@ -772,7 +772,7 @@ let is_enum_class env x =
   | None -> false
 
 let get_typeconst env class_ mid =
-  if not (Pos.is_hhi (Cls.pos class_)) then begin
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
     let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
     Option.iter env.decl_env.droot (fun root ->
@@ -782,7 +782,7 @@ let get_typeconst env class_ mid =
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
-  if not (Pos.is_hhi (Cls.pos class_)) then begin
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
     let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
     Option.iter env.decl_env.droot (fun root ->
@@ -801,7 +801,7 @@ let get_gconst env cst_name =
       cst_name
   in
   match res with
-  | Some cst when Pos.is_hhi cst.cd_pos -> res
+  | Some cst when Pos_or_decl.is_hhi cst.cd_pos -> res
   | _ ->
     let dep = Dep.GConst cst_name in
     Option.iter env.decl_env.droot (fun root ->
@@ -819,7 +819,7 @@ let get_static_member is_method env class_ mid =
     else
       Cls.get_sprop class_ mid
   in
-  if not (Pos.is_hhi (Cls.pos class_)) then begin
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
     make_depend_on_class env (Cls.name class_);
     let add_dep x =
       let dep =
@@ -890,7 +890,7 @@ let get_member is_method env class_ mid =
     else
       Cls.get_prop class_ mid
   in
-  if not (Pos.is_hhi (Cls.pos class_)) then
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then
     make_depend_on_class env (Cls.name class_);
   Option.iter ce_opt (fun ce ->
       add_dep (Cls.name class_);
@@ -908,7 +908,7 @@ let suggest_member is_method class_ mid =
   suggest_member members mid
 
 let get_construct env class_ =
-  if not (Pos.is_hhi (Cls.pos class_)) then begin
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
     make_depend_on_constructor env (Cls.name class_);
     Option.iter
       (fst (Cls.construct class_))

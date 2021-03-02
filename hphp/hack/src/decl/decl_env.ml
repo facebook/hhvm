@@ -34,7 +34,7 @@ let tcopt env = Provider_context.get_tcopt env.ctx
 
 let deps_mode env = Provider_context.get_deps_mode env.ctx
 
-let is_hhi cd = Pos.is_hhi cd.dc_pos
+let is_hhi cd = Pos_or_decl.is_hhi cd.dc_pos
 
 let add_wclass env x =
   let dep = Dep.Class x in

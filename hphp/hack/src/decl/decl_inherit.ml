@@ -441,7 +441,7 @@ let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
     Decl_heap.class_entries option =
   match SMap.find_opt class_name classes with
   | Some (class_, _) as heap_entries ->
-    if not (Pos.is_hhi class_.dc_pos) then
+    if not (Pos_or_decl.is_hhi class_.dc_pos) then
       Decl_env.add_extends_dependency env class_name;
     heap_entries
   | None ->
@@ -450,7 +450,7 @@ let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
       Decl_env.add_extends_dependency env class_name;
       None
     | Some class_ ->
-      if not (Pos.is_hhi class_.dc_pos) then
+      if not (Pos_or_decl.is_hhi class_.dc_pos) then
         Decl_env.add_extends_dependency env class_name;
       Some (class_, None))
 

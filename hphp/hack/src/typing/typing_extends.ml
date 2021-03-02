@@ -552,7 +552,7 @@ let check_members
           | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
           | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
         in
-        if not (Pos.is_hhi (Cls.pos parent_class)) then
+        if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
             (Env.get_deps_mode env)
             (Dep.Class (Cls.name class_))
@@ -664,7 +664,7 @@ let check_constructors
       if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then begin
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
         let cstr = Inst.instantiate_ce subst cstr in
-        if not (Pos.is_hhi (Cls.pos parent_class)) then
+        if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
             (Env.get_deps_mode env)
             (Dep.Class (Cls.name class_))

@@ -64,7 +64,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       Fvariadic (FunUtils.make_param_ty env ~is_lambda param)
-    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty p)
+    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty env p)
     | FVnonVariadic -> Fstandard
   in
   let tparams = List.map f.f_tparams (FunUtils.type_param env) in
@@ -80,6 +80,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let fe_php_std_lib =
     Naming_attributes.mem SN.UserAttributes.uaPHPStdLib f.f_user_attributes
   in
+  let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
       ( Reason.Rwitness (fst f.f_name),
@@ -106,49 +107,71 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
             ft_ifc_decl = ifc_decl;
           } )
   in
-  { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_php_std_lib }
+  { fe_pos; fe_type; fe_deprecated; fe_php_std_lib }
 
 (*****************************************************************************)
 (* Dealing with records *)
 (*****************************************************************************)
 
-let record_def_decl (rd : Nast.record_def) : Typing_defs.record_def_type =
+let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
+    Typing_defs.record_def_type =
+  let {
+    rd_annotation = _;
+    rd_name;
+    rd_doc_comment = _;
+    rd_emit_id = _;
+    rd_extends;
+    rd_abstract;
+    rd_fields;
+    rd_namespace = _;
+    rd_span;
+    rd_user_attributes = _;
+  } =
+    rd
+  in
+  let env =
+    {
+      Decl_env.mode = FileInfo.Mstrict;
+      droot = Some (Typing_deps.Dep.RecordDef (Ast_defs.get_id rd_name));
+      ctx;
+    }
+  in
   let extends =
-    match rd.rd_extends with
+    match rd_extends with
     (* The only valid type hint for record parents is a record
        name. Records do not support generics. *)
     | Some (_, Happly (id, [])) -> Some id
     | _ -> None
   in
   let fields =
-    List.map rd.rd_fields ~f:(fun (id, _, default) ->
+    List.map rd_fields ~f:(fun (id, _, default) ->
+        let id = Decl_env.make_decl_posed env id in
         match default with
         | Some _ -> (id, Typing_defs.HasDefaultValue)
         | None -> (id, ValueRequired))
   in
   {
-    rdt_name = rd.rd_name;
-    rdt_extends = extends;
+    rdt_name = Decl_env.make_decl_posed env rd_name;
+    rdt_extends = Option.map ~f:(Decl_env.make_decl_posed env) extends;
     rdt_fields = fields;
-    rdt_abstract = rd.rd_abstract;
-    rdt_pos = rd.rd_span;
+    rdt_abstract = rd_abstract;
+    rdt_pos = Decl_env.make_decl_pos env rd_span;
   }
 
 let record_def_naming_and_decl (ctx : Provider_context.t) (rd : Nast.record_def)
     : string * Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
-  let tdecl = record_def_decl rd in
+  let tdecl = record_def_decl ctx rd in
   (snd rd.rd_name, tdecl)
 
 (*****************************************************************************)
 (* Dealing with typedefs *)
 (*****************************************************************************)
-
-let typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
+and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     Typing_defs.typedef_type =
   let {
     t_annotation = ();
-    t_name = (td_pos, tid);
+    t_name = (name_pos, tid);
     t_tparams = params;
     t_constraint = tcstr;
     t_kind = concrete_type;
@@ -166,6 +189,7 @@ let typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_tparams = List.map params (FunUtils.type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
+  let td_pos = Decl_env.make_decl_pos env name_pos in
   { td_vis; td_tparams; td_constraint; td_type; td_pos }
 
 let typedef_naming_and_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
@@ -199,12 +223,16 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
     | Some h -> Decl_hint.hint env h
     | None ->
       (match Decl_utils.infer_const value with
-      | Some tprim -> mk (Reason.Rwitness value_pos, Tprim tprim)
+      | Some tprim ->
+        mk (Reason.Rwitness (Decl_env.make_decl_pos env value_pos), Tprim tprim)
       (* A NAST check will take care of rejecting constants that have neither
        * an initializer nor a literal initializer *)
-      | None -> mk (Reason.Rwitness name_pos, Typing_defs.make_tany ()))
+      | None ->
+        mk
+          ( Reason.Rwitness (Decl_env.make_decl_pos env name_pos),
+            Typing_defs.make_tany () ))
   in
-  { cd_pos = cst_span; cd_type }
+  { cd_pos = Decl_env.make_decl_pos env cst_span; cd_type }
 
 let const_naming_and_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
     string * Typing_defs.const_decl =

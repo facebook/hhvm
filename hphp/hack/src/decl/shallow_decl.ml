@@ -16,9 +16,9 @@ open Typing_defs
 module Attrs = Naming_attributes
 module FunUtils = Decl_fun_utils
 
-let class_const env c cc =
+let class_const env c (cc : Nast.class_const) =
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
-  let pos = fst name in
+  let pos = Decl_env.make_decl_pos env (fst name) in
   match c.c_kind with
   | Ast_defs.Ctrait
   | Ast_defs.Cnormal
@@ -33,7 +33,10 @@ let class_const env c cc =
       | (None, Some (e_pos, e_)) ->
         begin
           match Decl_utils.infer_const e_ with
-          | Some tprim -> (mk (Reason.Rwitness e_pos, Tprim tprim), false)
+          | Some tprim ->
+            ( mk
+                (Reason.Rwitness (Decl_env.make_decl_pos env e_pos), Tprim tprim),
+              false )
           | None ->
             (* Typing will take care of rejecting constants that have neither
              * an initializer nor a literal initializer *)
@@ -45,7 +48,12 @@ let class_const env c cc =
         let r = Reason.Rwitness pos in
         (mk (r, Typing_defs.make_tany ()), true)
     in
-    Some { scc_abstract = abstract; scc_name = name; scc_type = ty }
+    Some
+      {
+        scc_abstract = abstract;
+        scc_name = Decl_env.make_decl_posed env name;
+        scc_type = ty;
+      }
 
 let typeconst_abstract_kind env = function
   | Aast.TCAbstract default ->
@@ -67,7 +75,7 @@ let typeconst env c tc =
     let attributes = tc.c_tconst_user_attributes in
     let enforceable =
       match Attrs.find SN.UserAttributes.uaEnforceable attributes with
-      | Some { ua_name = (pos, _); _ } -> (pos, true)
+      | Some { ua_name = (pos, _); _ } -> (Decl_env.make_decl_pos env pos, true)
       | None -> (Pos.none, false)
     in
     let reifiable =
@@ -78,11 +86,11 @@ let typeconst env c tc =
     Some
       {
         stc_abstract = typeconst_abstract_kind env tc.c_tconst_abstract;
-        stc_name = tc.c_tconst_name;
+        stc_name = Decl_env.make_decl_posed env tc.c_tconst_name;
         stc_as_constraint = as_constraint;
         stc_type = ty;
         stc_enforceable = enforceable;
-        stc_reifiable = reifiable;
+        stc_reifiable = Option.map ~f:(Decl_env.make_decl_pos env) reifiable;
       }
 
 let make_xhp_attr cv =
@@ -97,7 +105,7 @@ let make_xhp_attr cv =
       })
 
 let prop env cv =
-  let cv_pos = fst cv.cv_id in
+  let cv_pos = Decl_env.make_decl_pos env @@ fst cv.cv_id in
   let ty =
     FunUtils.hint_to_type_opt
       env
@@ -111,7 +119,7 @@ let prop env cv =
     Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
   in
   {
-    sp_name = cv.cv_id;
+    sp_name = Decl_env.make_decl_posed env cv.cv_id;
     sp_xhp_attr = make_xhp_attr cv;
     sp_type = ty;
     sp_visibility = cv.cv_visibility;
@@ -127,7 +135,7 @@ let prop env cv =
   }
 
 and static_prop env cv =
-  let (cv_pos, cv_name) = cv.cv_id in
+  let (cv_pos, cv_name) = Decl_env.make_decl_posed env cv.cv_id in
   let ty =
     FunUtils.hint_to_type_opt
       env
@@ -187,7 +195,7 @@ let method_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       Fvariadic (FunUtils.make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty p)
+    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty env p)
     | FVnonVariadic -> Fstandard
   in
   let tparams = List.map m.m_tparams (FunUtils.type_param env) in
@@ -216,7 +224,7 @@ let method_type env m =
 
 let method_ env m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
-  let (pos, _) = m.m_name in
+  let (pos, _) = Decl_env.make_decl_posed env m.m_name in
   let has_dynamicallycallable =
     Attrs.mem SN.UserAttributes.uaDynamicallyCallable m.m_user_attributes
   in
@@ -242,7 +250,7 @@ let method_ env m =
       m.m_user_attributes
   in
   {
-    sm_name = m.m_name;
+    sm_name = Decl_env.make_decl_posed env m.m_name;
     sm_reactivity = reactivity;
     sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
@@ -288,7 +296,7 @@ let class_ ctx c =
       sc_is_xhp = c.c_is_xhp;
       sc_has_xhp_keyword = c.c_has_xhp_keyword;
       sc_kind = c.c_kind;
-      sc_name = c.c_name;
+      sc_name = Decl_env.make_decl_posed env c.c_name;
       sc_tparams = List.map c.c_tparams (FunUtils.type_param env);
       sc_where_constraints = where_constraints;
       sc_extends;
@@ -308,7 +316,7 @@ let class_ ctx c =
       sc_user_attributes =
         List.map
           c.c_user_attributes
-          ~f:Decl_hint.aast_user_attribute_to_decl_user_attribute;
+          ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env);
       sc_enum_type = Option.map c.c_enum (enum_type hint);
     }
   in

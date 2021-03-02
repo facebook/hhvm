@@ -183,7 +183,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     every bit of information used by Decl_linearize is checked here! *)
 let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
   let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
-  Aast.equal_sid c1.sc_name c2.sc_name
+  Typing_defs.equal_pos_id c1.sc_name c2.sc_name
   && Ast_defs.equal_class_kind c1.sc_kind c2.sc_kind
   && Option.equal
        equal_shallow_method

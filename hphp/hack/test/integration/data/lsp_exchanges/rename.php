@@ -19,17 +19,17 @@ class TestClass { // 2. Rename TestClass
    *
    *
    */
-  public function deprecated_method(int $x, string $y, int $v, ...): int {
+  public function deprecated_method(int $x, string $y, int $v, mixed ...$_): int {
     return $x;
   }
 
   // 8. Rename depr_static
-  public static function depr_static(int $x, string $y, int $v, ...): int {
+  public static function depr_static(int $x, string $y, int $v, mixed ...$_): int {
     return $x;
   }
 
   // 9. Rename depr_async
-  public async function depr_async(int $x, int $v, ...): Awaitable<int> {
+  public async function depr_async(int $x, int $v, mixed ...$_): Awaitable<int> {
     return $x;
   }
 

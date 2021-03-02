@@ -1,2 +1,2 @@
-File "unnamed_variadic_method_parameter.php", line 4, characters 19-19:
+File "ellipsis_class_method.php", line 6, characters 19-22:
 Cannot use `...` without a **type hint** and **parameter name** in strict mode. (Typing[4223])

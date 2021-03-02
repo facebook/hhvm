@@ -536,7 +536,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, mixed ...$args): int {\n    return $this->new_and_improved($x, $y, $v, ...$args);\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, mixed ...$_): int {\n    return $this->new_and_improved($x, $y, $v, ...$_);\n  }\n"
           }
         ]
       }
@@ -572,7 +572,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, mixed ...$args): int {\n    return self::new_static_method($x, $y, $v, ...$args);\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, mixed ...$_): int {\n    return self::new_static_method($x, $y, $v, ...$_);\n  }\n"
           }
         ]
       }
@@ -608,7 +608,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, mixed ...$args): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...$args);\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, mixed ...$_): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...$_);\n  }\n"
           }
         ]
       }

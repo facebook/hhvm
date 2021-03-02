@@ -217,8 +217,7 @@ let make_param_local_ty env decl_hint param =
   Typing_reactivity.disallow_atmost_rx_as_rxfunc_on_non_functions env param ty;
   (env, ty)
 
-let get_callable_variadicity
-    ?(is_function = false) ~partial_callback ~pos env variadicity_decl_ty =
+let get_callable_variadicity ~partial_callback ~pos env variadicity_decl_ty =
   function
   | FVvariadicArg vparam ->
     let (env, ty) = make_param_local_ty env variadicity_decl_ty vparam in
@@ -226,7 +225,7 @@ let get_callable_variadicity
     let (env, t_variadic) = Typing.bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
-    if is_function && Partial.should_check_error (Env.get_mode env) 4223 then
+    if Partial.should_check_error (Env.get_mode env) 4223 then
       Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
     (env, Aast.FVellipsis p)
   | FVnonVariadic -> (env, Aast.FVnonVariadic)
@@ -388,7 +387,6 @@ let fun_def ctx f :
       in
       let (env, t_variadic) =
         get_callable_variadicity
-          ~is_function:true
           ~pos
           ~partial_callback
           env

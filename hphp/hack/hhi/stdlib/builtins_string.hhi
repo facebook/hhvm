@@ -56,11 +56,11 @@ function strtolower(string $str)[];
 <<__PHPStdLib>>
 function strtoupper(string $str)[];
 <<__PHPStdLib>>
-function ucfirst(string $str);
+function ucfirst(string $str)[];
 <<__PHPStdLib>>
-function lcfirst(string $str);
+function lcfirst(string $str)[];
 <<__PHPStdLib>>
-function ucwords(string $str, string $delimiters = " \t\r\n\f\v");
+function ucwords(string $str, string $delimiters = " \t\r\n\f\v")[];
 <<__PHPStdLib>>
 function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]/*: string*/;
 <<__PHPStdLib>>

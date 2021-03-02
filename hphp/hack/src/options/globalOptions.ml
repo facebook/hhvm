@@ -119,6 +119,7 @@ type t = {
   po_array_unification: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
+  tco_ignore_unsafe_cast: bool;
   tco_readonly: bool;
 }
 [@@deriving eq, show]
@@ -300,6 +301,7 @@ let default =
     po_array_unification = false;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
+    tco_ignore_unsafe_cast = false;
     tco_readonly = false;
   }
 
@@ -434,6 +436,7 @@ let make
       default.po_interpret_soft_types_as_like_types)
     ?(tco_enable_strict_string_concat_interp =
       default.tco_enable_strict_string_concat_interp)
+    ?(tco_ignore_unsafe_cast = default.tco_ignore_unsafe_cast)
     ?(tco_readonly = default.tco_readonly)
     () =
   {
@@ -548,6 +551,7 @@ let make
     po_array_unification;
     po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp;
+    tco_ignore_unsafe_cast;
     tco_readonly;
   }
 
@@ -801,3 +805,5 @@ let po_interpret_soft_types_as_like_types t =
 
 let tco_enable_strict_string_concat_interp t =
   t.tco_enable_strict_string_concat_interp
+
+let tco_ignore_unsafe_cast t = t.tco_ignore_unsafe_cast

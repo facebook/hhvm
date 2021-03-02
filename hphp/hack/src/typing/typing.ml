@@ -4583,8 +4583,17 @@ and dispatch_call
       (* `unsafe_cast` *)
       | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
         ->
-        Errors.unsafe_cast p;
-        dispatch_id env id
+        if
+          Int.(List.length el = 1)
+          && TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env)
+        then
+          let original_expr = List.hd_exn el in
+          expr env original_expr
+        else (
+          Errors.unsafe_cast p;
+          (* dispatch_id also covers arity errors *)
+          dispatch_id env id
+        )
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->
         let (env, tel, _) =

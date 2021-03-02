@@ -241,6 +241,7 @@ let () =
       ignored_flag "--enable-strict-string-concat-interp";
       ignored_arg "--extra-builtin";
       ignored_flag "--disallow-inst-meth";
+      ignored_flag "--ignore-unsafe-cast";
     ]
     set_file
     usage;

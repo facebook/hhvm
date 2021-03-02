@@ -292,6 +292,8 @@ type t = {
   po_interpret_soft_types_as_like_types: bool;
   (* Restricts string concatenation and interpolation to arraykeys *)
   tco_enable_strict_string_concat_interp: bool;
+  (* Ignores unsafe_cast and retains the original type of the expression *)
+  tco_ignore_unsafe_cast: bool;
   (* Enable Unstable feature readonly tast check *)
   tco_readonly: bool;
 }
@@ -408,6 +410,7 @@ val make :
   ?po_array_unification:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
+  ?tco_ignore_unsafe_cast:bool ->
   ?tco_readonly:bool ->
   unit ->
   t
@@ -661,6 +664,8 @@ val po_array_unification : t -> bool
 val po_interpret_soft_types_as_like_types : t -> bool
 
 val tco_enable_strict_string_concat_interp : t -> bool
+
+val tco_ignore_unsafe_cast : t -> bool
 
 val tco_readonly : t -> bool
 

@@ -432,6 +432,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "interpret_soft_types_as_like_types" config)
       ?tco_enable_strict_string_concat_interp:
         (bool_opt "enable_strict_string_concat_interp" config)
+      ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

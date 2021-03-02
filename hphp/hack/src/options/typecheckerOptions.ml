@@ -177,6 +177,8 @@ let interpret_soft_types_as_like_types =
 let enable_strict_string_concat_interp =
   GlobalOptions.tco_enable_strict_string_concat_interp
 
+let ignore_unsafe_cast = GlobalOptions.tco_ignore_unsafe_cast
+
 let set_readonly = GlobalOptions.set_tco_readonly
 
 let readonly = GlobalOptions.tco_readonly

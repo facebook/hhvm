@@ -283,6 +283,7 @@ let parse_options () =
   let array_unification = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
+  let ignore_unsafe_cast = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -667,6 +668,9 @@ let parse_options () =
         "Require arguments are arraykey types in string concatenation and
         interpolation."
       );
+      ( "--ignore-unsafe-cast",
+        Arg.Set ignore_unsafe_cast,
+        "Ignore unsafe_cast and retain the original type of the expression" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -806,6 +810,7 @@ let parse_options () =
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
+      ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -525,8 +525,10 @@ type t = {
   tico_invalidate_smart: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   use_direct_decl_parser: bool;
-  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold. In case of profile_type_check_twice we judge by the second type check. *)
+  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
+  (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
+  profile_type_check_memory_threshold_mb: int;
   (* The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
   profile_type_check_twice: bool;
   (* The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
@@ -620,11 +622,12 @@ let default =
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
     profile_type_check_duration_threshold = 0.05;
+    (* seconds *)
+    profile_type_check_memory_threshold_mb = 100;
     profile_type_check_twice = false;
     profile_decling = Typing_service_types.DeclingOff;
     profile_owner = None;
     profile_desc = "";
-    (* seconds *)
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
@@ -1140,6 +1143,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.profile_type_check_duration_threshold
       config
   in
+  let profile_type_check_memory_threshold_mb =
+    int_
+      "profile_type_check_memory_threshold_mb"
+      ~default:default.profile_type_check_memory_threshold_mb
+      config
+  in
   let profile_type_check_twice =
     bool_if_min_version
       "profile_type_check_twice"
@@ -1258,6 +1267,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_smart;
     use_direct_decl_parser;
     profile_type_check_duration_threshold;
+    profile_type_check_memory_threshold_mb;
     profile_type_check_twice;
     profile_decling;
     profile_owner;

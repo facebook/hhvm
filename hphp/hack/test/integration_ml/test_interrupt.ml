@@ -80,6 +80,7 @@ let test () =
       profile_log = false;
       profile_type_check_twice = false;
       profile_type_check_duration_threshold = 0.;
+      profile_type_check_memory_threshold_mb = 0;
       profile_decling = Typing_service_types.DeclingOff;
     }
   in

@@ -136,6 +136,7 @@ let test_dep_graph_blob () =
             recheck_id = None;
             profile_log = false;
             profile_type_check_duration_threshold = 0.0;
+            profile_type_check_memory_threshold_mb = 0;
             profile_type_check_twice = false;
             profile_decling = Typing_service_types.DeclingOff;
           }

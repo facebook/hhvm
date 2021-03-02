@@ -102,4 +102,6 @@ let get_check_info genv env : Typing_service_types.check_info =
       genv.local_config.ServerLocalConfig.profile_type_check_twice;
     profile_type_check_duration_threshold =
       genv.local_config.ServerLocalConfig.profile_type_check_duration_threshold;
+    profile_type_check_memory_threshold_mb =
+      genv.local_config.ServerLocalConfig.profile_type_check_memory_threshold_mb;
   }

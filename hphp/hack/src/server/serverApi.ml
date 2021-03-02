@@ -210,6 +210,7 @@ let make_remote_server_api
             profile_type_check_twice = false;
             profile_decling = Typing_service_types.DeclingOff;
             profile_type_check_duration_threshold = 0.0;
+            profile_type_check_memory_threshold_mb = 0;
           }
         in
         (* TODO: use the telemetry *)

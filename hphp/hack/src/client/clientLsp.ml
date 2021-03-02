@@ -1332,9 +1332,7 @@ and reconnect_from_lost_if_necessary
       match (state, reason) with
       | (Lost_server _, `Force_regain) -> true
       | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
-          `Event
-            (Client_message (_, (RequestMessage _ | NotificationMessage _))) )
-        ->
+          `Event (Client_message (_, RequestMessage _)) ) ->
         true
       | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
           `Event Tick ) ->

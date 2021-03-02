@@ -317,35 +317,33 @@ let profile_log
   let (start_time, start_counters) = start_counters in
   let (end_time, end_counters) = end_counters in
   let duration = end_time -. start_time in
-  let profile = Telemetry.diff ~all:false ~prev:start_counters end_counters in
-  let (duration_second_run, profile_second_run) =
-    match second_run_end_counters with
-    | Some (time, counters) ->
-      let duration = time -. end_time in
-      let profile = Telemetry.diff ~all:false ~prev:end_counters counters in
-      (Some duration, Some profile)
-    | None -> (None, None)
+  let duration_second_run =
+    Option.map second_run_end_counters ~f:(fun (time, _) -> time -. end_time)
   in
-  let { deferred_decls; _ } = result in
-  let times_checked = file.deferred_count + 1 in
-  let files_to_declare = List.length deferred_decls in
-  (* "deciding_time" is what we compare against the threshold, *)
-  (* to see if we should log. *)
   let deciding_time = Option.value duration_second_run ~default:duration in
+  (* "deciding_time" is what we compare against the threshold, to see if we should log. *)
+  (* We'll also log if it had been previously deferred, or if it's being deferred right now. *)
   let should_log =
     Float.(deciding_time >= check_info.profile_type_check_duration_threshold)
-    || times_checked > 1
-    || files_to_declare > 0
+    || file.deferred_count > 0
+    || not (List.is_empty result.deferred_decls)
   in
-  if should_log then (
+  if should_log then begin
+    let profile = Telemetry.diff ~all:false ~prev:start_counters end_counters in
+    let profile_second_run =
+      Option.map second_run_end_counters ~f:(fun (_, counters) ->
+          Telemetry.diff ~all:false ~prev:end_counters counters)
+    in
     let filesize_opt =
       try Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
       with Unix.Unix_error _ -> None
     in
     let deferment_telemetry =
       Telemetry.create ()
-      |> Telemetry.int_ ~key:"times_checked" ~value:times_checked
-      |> Telemetry.int_ ~key:"files_to_declare" ~value:files_to_declare
+      |> Telemetry.int_ ~key:"times_checked" ~value:(file.deferred_count + 1)
+      |> Telemetry.int_
+           ~key:"files_to_declare"
+           ~value:(List.length result.deferred_decls)
     in
     let telemetry =
       Telemetry.create ()
@@ -367,16 +365,16 @@ let profile_log
     Hh_logger.log
       "%s [%s] %fs%s"
       (Relative_path.suffix file.path)
-      ( if files_to_declare > 0 then
-        "discover-decl-deps"
+      ( if List.is_empty result.deferred_decls then
+        "type-check"
       else
-        "type-check" )
+        "discover-decl-deps" )
       (Option.value duration_second_run ~default:duration)
       ( if SharedMem.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry
       else
         "" )
-  )
+  end
 
 let read_counters () : Counters.time_in_sec * Telemetry.t =
   let typecheck_time = Counters.read_time Counters.Category.Typecheck in

@@ -1518,7 +1518,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::Div:
     case Op::Mod:
     case Op::Pow:
-    case Op::Xor:
     case Op::Not:
     case Op::Same:
     case Op::NSame:

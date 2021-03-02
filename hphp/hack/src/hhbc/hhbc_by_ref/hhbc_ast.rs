@@ -250,7 +250,6 @@ pub enum InstructOperator<'arena> {
     Div,
     Mod,
     Pow,
-    Xor,
     Not,
     Same,
     NSame,

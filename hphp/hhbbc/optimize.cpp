@@ -214,7 +214,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Concat:
   case Op::ConcatN:
   case Op::Not:
-  case Op::Xor:
   case Op::Same:
   case Op::NSame:
   case Op::Eq:

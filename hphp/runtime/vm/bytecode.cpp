@@ -1545,12 +1545,6 @@ OPTBLD_INLINE void iopBitXor() {
   implTvBinOp(tvBitXor);
 }
 
-OPTBLD_INLINE void iopXor() {
-  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) -> bool {
-    return tvToBool(c1) ^ tvToBool(c2);
-  });
-}
-
 OPTBLD_INLINE void iopSame() {
   implTvBinOpBool(tvSame);
 }

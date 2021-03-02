@@ -1053,10 +1053,6 @@ Pow    [C C]  ->  [C:Int|Dbl]
   Power. Pushes $2 raised to the power of $1 onto the stack. This instruction
   never throws a fatal error.
 
-Xor    [C C]  ->  [C:Bool]
-
-  Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.
-
 Not    [C]  ->  [C:Bool]
 
   Logical not (!). Pushes (!(bool)$1) onto the stack.

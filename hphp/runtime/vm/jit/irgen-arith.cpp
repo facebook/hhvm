@@ -1802,16 +1802,6 @@ void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
   PUNT(IncDecL);
 }
 
-void emitXor(IRGS& env) {
-  auto const btr = popC(env);
-  auto const btl = popC(env);
-  auto const tr = gen(env, ConvTVToBool, btr);
-  auto const tl = gen(env, ConvTVToBool, btl);
-  push(env, gen(env, XorBool, tl, tr));
-  decRef(env, btl);
-  decRef(env, btr);
-}
-
 void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);

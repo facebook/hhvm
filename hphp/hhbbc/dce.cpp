@@ -1602,7 +1602,6 @@ void dce(Env& env, const bc::Shl&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Sub&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::SubO&)             { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::Xor&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::LateBoundCls&)     { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Self&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Parent&)           { pushRemovableIfNoThrow(env); }

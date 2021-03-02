@@ -1707,12 +1707,6 @@ void in(ISS& env, const bc::Cmp&) {
   binOpInt64Impl(env, [&] (TypedValue c1, TypedValue c2) { return tvCompare(c1, c2); });
 }
 
-void in(ISS& env, const bc::Xor&) {
-  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) {
-    return tvToBool(c1) ^ tvToBool(c2);
-  });
-}
-
 void castBoolImpl(ISS& env, const Type& t, bool negate) {
   nothrow(env);
   constprop(env);

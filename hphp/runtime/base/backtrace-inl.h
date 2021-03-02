@@ -85,6 +85,21 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm);
 }
 
 template<class L>
+void walkStackFrom(
+    L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
+    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+  backtrace_detail::BTContext ctx;
+
+  auto frm = initBTContextAt(ctx, ip, initFrm);
+
+  if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
+
+  for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
+    if (ArrayData::call_helper(func, frm.fp, frm.pc)) return;
+  }
+}
+
+template<class L>
 void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
   using namespace backtrace_detail;
 
@@ -99,15 +114,7 @@ void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
   // If there are no VM frames, we're done.
   if (!frm || !rds::header()) return;
 
-  BTContext ctx;
-
-  frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
-
-  if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
-
-  for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
-    if (ArrayData::call_helper(func, frm.fp, frm.pc)) return;
-  }
+  walkStackFrom(func, frm, vmJitReturnAddr(), skipTop, visitedWHs);
 }
 
 template<class L>

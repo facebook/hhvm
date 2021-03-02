@@ -48,6 +48,19 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
 
 namespace jit {
 
+ActRec* findVMFrameForDebug() {
+  DECLARE_FRAME_POINTER(framePtr);
+  auto rbp = (ActRec*) framePtr;
+
+  while (!isVMFrame(rbp, true)) {
+    auto const nextRbp = rbp->m_sfp;
+    if (nextRbp == nullptr || nextRbp == rbp) return nullptr;
+    rbp = nextRbp;
+  }
+
+  return rbp;
+}
+
 std::string Fixup::show() const {
   if (!isValid()) return "invalid";
   if (isIndirect()) {

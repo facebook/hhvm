@@ -33,6 +33,8 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
+ActRec* findVMFrameForDebug();
+
 /*
  * The Fixup map allows us to reconstruct the state of the VM registers (fp,
  * sp, and pc) from an up-stack invocation record.  Each range of bytes in the

@@ -136,14 +136,8 @@ void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
   g_context->write(debug_string_backtrace(false, ignore_args, limit));
 }
 
-String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
-                              int64_t limit /* = 0 */) {
-  Array bt;
+String stringify_backtrace(const Array& bt, bool ignore_args) {
   StringBuffer buf;
-  bt = createBacktrace(BacktraceArgs()
-                       .skipTop(skip)
-                       .ignoreArgs(ignore_args)
-                       .setLimit(limit));
   int i = 0;
   for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
     Array frame = it.second().toArray();
@@ -185,6 +179,16 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     buf.append('\n');
   }
   return buf.detach();
+}
+
+String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
+                              int64_t limit /* = 0 */) {
+  Array bt;
+  bt = createBacktrace(BacktraceArgs()
+                       .skipTop(skip)
+                       .ignoreArgs(ignore_args)
+                       .setLimit(limit));
+  return stringify_backtrace(bt, ignore_args);
 }
 
 Array HHVM_FUNCTION(error_get_last) {

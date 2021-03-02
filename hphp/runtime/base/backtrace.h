@@ -337,6 +337,7 @@ struct BTFrame {
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
+Array createCrashBacktrace(BTFrame frame, jit::CTCA addr);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop);
@@ -365,6 +366,11 @@ BTFrame getARFromWH(
  */
 template<typename L>
 void walkStack(L func, bool skipTop = false);
+
+template<class L>
+void walkStackFrom(
+    L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
+    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs);
 
 namespace backtrace_detail {
 

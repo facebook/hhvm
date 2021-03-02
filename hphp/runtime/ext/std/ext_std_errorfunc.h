@@ -61,6 +61,7 @@ ArrayData* debug_backtrace_jit(int64_t options);
 ResourceHdr* debug_backtrace_fast();
 String debug_string_backtrace(bool skip, bool ignore_args = false,
                               int64_t limit = 0);
+String stringify_backtrace(const Array& bt, bool ignore_args);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

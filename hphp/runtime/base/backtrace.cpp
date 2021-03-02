@@ -521,6 +521,18 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   return bt;
 }
 
+Array createCrashBacktrace(BTFrame frame, jit::CTCA addr) {
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+
+  CompactTraceData trace;
+  walkStackFrom([&] (ActRec* fp, Offset prevPc) {
+    if (fp->func()->isNoInjection()) return;
+    trace.insert(fp, prevPc);
+  }, frame, addr, false, visitedWHs);
+
+  return trace.extract();
+}
+
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
   std::set<std::string> strings;
   std::vector<folly::StringPiece> files;

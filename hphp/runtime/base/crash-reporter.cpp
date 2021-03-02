@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -37,6 +38,9 @@
 #include "hphp/util/stack-trace.h"
 
 #include <signal.h>
+#if defined(__x86_64__) && defined(__linux__)
+#include <ucontext.h>
+#endif
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Stdio.h>
@@ -59,6 +63,7 @@ enum class CrashReportStage {
   ReportTrap,
   ReportCppStack,
   ReportPhpStack,
+  ReportApproximatePhpStack,
   DumpTransDB,
   SendEmail,
   Log,
@@ -79,7 +84,7 @@ static void bt_timeout_handler(int sig) {
   abort();
 }
 
-static void bt_handler(int sigin, siginfo_t* info, void*) {
+static void bt_handler(int sigin, siginfo_t* info, void* args) {
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
@@ -111,6 +116,9 @@ static void bt_handler(int sigin, siginfo_t* info, void*) {
   static int sig = sigin;
   static folly::Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
+#if defined(__x86_64__) && defined(__linux__)
+  static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
+#endif
 
   switch (s_crash_report_stage) {
     case CrashReportStage::DumpRingBuffer:
@@ -198,11 +206,10 @@ static void bt_handler(int sigin, siginfo_t* info, void*) {
       st->printStackTrace(fd);
       // fall through
     case CrashReportStage::ReportPhpStack:
-      s_crash_report_stage = CrashReportStage::DumpTransDB;
-
       // flush so if php stack-walking crashes, we still have this output so far
       ::fsync(fd);
 
+      s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
       // Don't attempt to determine function arguments in the PHP backtrace, as
       // that might involve re-entering the VM.
       if (!g_context.isNull() && !tl_sweeping) {
@@ -213,6 +220,34 @@ static void bt_handler(int sigin, siginfo_t* info, void*) {
                 ).data());
       }
       ::close(fd);
+
+      s_crash_report_stage = CrashReportStage::DumpTransDB;
+
+      // fall through
+    case CrashReportStage::ReportApproximatePhpStack:
+      if (s_crash_report_stage == CrashReportStage::ReportApproximatePhpStack) {
+        // We were unable to find a fixup for the backtrace; scan the stack to
+        // find a VM frame, fake the vmpc, and attempt again.
+        s_crash_report_stage = CrashReportStage::DumpTransDB;
+
+        if (auto const ar = jit::findVMFrameForDebug()) {
+          auto const frame = BTFrame { ar, ar->func()->base() };
+          auto const addr = [&] () -> jit::CTCA {
+            if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
+#if defined(__x86_64__) && defined(__linux__)
+            return (jit::CTCA) sig_rip;
+#else
+            return (jit::CTCA) 0;
+#endif
+          }();
+          auto const trace = createCrashBacktrace(frame, (jit::CTCA) addr);
+
+          dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+                  stringify_backtrace(trace, true).data());
+          ::close(fd);
+        }
+      }
+
       // fall through
     case CrashReportStage::DumpTransDB:
       s_crash_report_stage = CrashReportStage::SendEmail;

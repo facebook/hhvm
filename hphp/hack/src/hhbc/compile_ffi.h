@@ -18,12 +18,57 @@ enum env_flags {
   , DISABLE_TOPLEVEL_ENUMERATION=1 << 4
 };
 
-struct environment {
+enum hhbc_flags {
+  LTR_ASSIGN=1 << 0
+  , UVS=1 << 1
+  , HACK_ARR_COMPAT_NOTICES=1 << 2
+  , HACK_ARR_DV_ARRS=1 << 3
+  , AUTHORITATIVE=1 << 4
+  , JIT_ENABLE_RENAME_FUNCTION=1 << 5
+  , LOG_EXTERN_COMPILER_PERF=1 << 6
+  , ENABLE_INTRINSICS_EXTENSION=1 << 7
+  , DISABLE_NONTOPLEVEL_DECLARATIONS=1 << 8
+  , DISABLE_STATIC_CLOSURES=1 << 9
+  , EMIT_CLS_METH_POINTERS=1 << 10
+  , EMIT_METH_CALLER_FUNC_POINTERS=1 << 11
+  , RX_IS_ENABLED=1 << 12
+  , ARRAY_PROVENANCE=1 << 13
+  , HACK_ARR_DV_ARR_MARK=1 << 14
+  , FOLD_LAZY_CLASS_KEYS=1 << 15
+  , EMIT_INST_METH_POINTERS=1 << 16
+};
+
+enum parser_flags {
+   ABSTRACT_STATIC_PROPS=1 << 0
+  , ALLOW_NEW_ATTRIBUTE_SYNTAX=1 << 1
+  , ALLOW_UNSTABLE_FEATURES=1 << 2
+  , CONST_DEFAULT_FUNC_ARGS=1 << 3
+  , CONST_STATIC_PROPS=1 << 4
+  , DISABLE_ARRAY=1 << 5
+  , DISABLE_ARRAY_CAST=1 << 6
+  , DISABLE_ARRAY_TYPEHINT=1 << 7
+  , DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8
+  , DISABLE_UNSET_CLASS_CONST=1 << 9
+  , DISALLOW_INST_METH=1 << 10
+  , DISABLE_XHP_ELEMENT_MANGLING=1 << 11
+  , DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12
+  , DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13
+  , DISALLOW_HASH_COMMENTS=1 << 14
+  , ENABLE_COROUTINES=1 << 15
+  , ENABLE_ENUM_CLASSES=1 << 16
+  , ENABLE_XHP_CLASS_MODIFIER=1 << 17
+  , DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18
+  , ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19
+};
+
+struct native_environment {
   char const* filepath;
-  char const* const* config_jsons;
-  size_t num_config_jsons;
-  char const* const* config_list;
-  size_t num_config_list;
+  char const * aliased_namespaces;
+  char const * include_roots;
+  int32_t emit_class_pointers;
+  int32_t check_int_overflow;
+  uint32_t hhbc_flags;
+  uint32_t parser_flags;
   uint8_t flags;
 };
 
@@ -41,7 +86,7 @@ struct buf_t {
 extern "C" {
 #  endif /*defined(__cplusplus)*/
 char const* compile_from_text_cpp_ffi(
-       environment const* env
+       native_environment const* env
      , char const* source_text
      , output_config const* config
      , buf_t* error_buf );

@@ -133,7 +133,7 @@ impl<T> Arg<T> {
         &mut self.global_value
     }
 
-    fn new(global_value: T) -> Arg<T> {
+    pub fn new(global_value: T) -> Arg<T> {
         Arg { global_value }
     }
 }

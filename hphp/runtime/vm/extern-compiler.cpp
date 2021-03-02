@@ -1099,28 +1099,83 @@ CompilerResult hackc_compile(
     }	
     flags |= DUMP_SYMBOL_REFS;
     
-    std::vector<const char*> config_jsons;
-    config_jsons.push_back(s_bound_config.c_str());
-    config_jsons.push_back(s_misc_config.c_str());
+    auto const parser_flags = options.getParserFlags();
     
-    std::string json_header = folly::toJson(options.toDynamic());
-    config_jsons.push_back(json_header.c_str());
+    std::uint32_t hhbc_flags = 0;	
+    if (options.emitInstMethPointers()) {
+      hhbc_flags |= EMIT_INST_METH_POINTERS;
+    }	
+    if (options.ltrAssign()) {
+      hhbc_flags |= LTR_ASSIGN;
+    }	
+    if (options.uvs()) {
+      hhbc_flags |= UVS;
+    }	 
+    if (RuntimeOption::EvalHackArrCompatNotices) {
+      hhbc_flags |= HACK_ARR_COMPAT_NOTICES;
+    }	 
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      hhbc_flags |= HACK_ARR_DV_ARRS;
+    }	 
+    if (RuntimeOption::RepoAuthoritative) {
+      hhbc_flags |= AUTHORITATIVE;
+    }		
+    if (RuntimeOption::EvalJitEnableRenameFunction) {
+      hhbc_flags |= JIT_ENABLE_RENAME_FUNCTION;
+    }	
+    if (RuntimeOption::EvalLogExternCompilerPerf) {
+      hhbc_flags |= LOG_EXTERN_COMPILER_PERF;
+    }	 
+    if (RuntimeOption::EnableIntrinsicsExtension) {
+      hhbc_flags |= ENABLE_INTRINSICS_EXTENSION;
+    }		
+    if (RuntimeOption::DisableNontoplevelDeclarations) {
+      hhbc_flags |= DISABLE_NONTOPLEVEL_DECLARATIONS;
+    }	
+    if (RuntimeOption::DisableStaticClosures) {
+      hhbc_flags |= DISABLE_STATIC_CLOSURES;
+    }	 
+    if (RuntimeOption::EvalEmitClsMethPointers) {
+      hhbc_flags |= EMIT_CLS_METH_POINTERS;
+    }		
+    if (RuntimeOption::EvalEmitMethCallerFuncPointers) {
+      hhbc_flags |= EMIT_METH_CALLER_FUNC_POINTERS;
+    }	
+    if (RuntimeOption::EvalRxIsEnabled) {
+      hhbc_flags |= RX_IS_ENABLED;
+    }	    
+    if (RuntimeOption::EvalArrayProvenance) {
+      hhbc_flags |= ARRAY_PROVENANCE;
+    }	 
+    if (RuntimeOption::EvalHackArrDVArrMark) {
+      hhbc_flags |= HACK_ARR_DV_ARR_MARK;
+    }		
+    if (RuntimeOption::EvalFoldLazyClassKeys) {
+      hhbc_flags |= FOLD_LAZY_CLASS_KEYS;
+    }	 
+    
+    folly::dynamic aliased_namespaces = ConfigBuilder()
+        .addField("hhvm.aliased_namespaces", options.aliasedNamespaces())
+        .toString();        
+                                                                 
+    native_environment const native_env = {
+      filename,
+      aliased_namespaces.data(),
+      s_misc_config.data(),
+      RuntimeOption::EvalEmitClassPointers, 
+      RuntimeOption::CheckIntOverflow, 
+      hhbc_flags,
+      parser_flags,
+      flags
+    };
     
     output_config const output{true, nullptr};
-    environment const env{
-      filename
-      , config_jsons.data()
-      , config_jsons.size()
-      , nullptr // config_list.data()
-      , 0       // config_list.size()
-      , flags
-    };
     
     std::array<char, 256> buf;
     buf.fill(0);
     buf_t error_buf {buf.data(), buf.size()};
     
-    auto const hhas = compile_from_text_cpp_ffi(&env, code, &output, &error_buf);
+    auto const hhas = compile_from_text_cpp_ffi(&native_env, code, &output, &error_buf);
     if (hhas) { 
       return assemble_string_handle_errors(code,
                                            hhas,

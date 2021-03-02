@@ -80,16 +80,17 @@ impl RustOutputConfig {
 }
 
 #[repr(C)]
-struct CEnv {
+struct CNativeEnv {
     filepath: *const c_char,
-    config_jsons: *const *const c_char,
-    num_config_jsons: usize,
-    config_list: *const *const c_char,
-    num_config_list: usize,
+    aliased_namespaces: *const c_char,
+    include_roots: *const c_char,
+    emit_class_pointers: i32,
+    check_int_overflow: i32,
+    hhbc_flags: u32,
+    parser_flags: u32,
     flags: u8,
 }
-
-impl CEnv {
+impl CNativeEnv {
     /// Returns `None` if `env` is null.
     ///
     /// # Safety
@@ -99,28 +100,31 @@ impl CEnv {
     /// * Contents of the CEnv must be valid nul-terminated C strings
     ///   containing valid UTF-8, or arrays of same
     #[cfg(unix)]
-    pub unsafe fn to_compile_env<'a>(env: *const CEnv) -> Option<compile::Env<&'a str>> {
+    pub unsafe fn to_compile_env<'a>(
+        env: *const CNativeEnv,
+    ) -> Option<compile::NativeEnv<&'a str>> {
         use std::os::unix::ffi::OsStrExt;
 
         let env = env.as_ref()?;
 
-        let to_vec = |cstrs: *const *const c_char, num_cstrs: usize| -> std::vec::Vec<&str> {
-            std::slice::from_raw_parts(cstrs, num_cstrs)
-                .iter()
-                .map(|&s| std::str::from_utf8_unchecked(std::ffi::CStr::from_ptr(s).to_bytes()))
-                .collect()
-        };
-
-        Some(compile::Env {
+        Some(compile::NativeEnv {
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
                 std::path::PathBuf::from(std::ffi::OsStr::from_bytes(
                     std::ffi::CStr::from_ptr(env.filepath).to_bytes(),
                 )),
             ),
-            config_jsons: to_vec(env.config_jsons, env.num_config_jsons),
-            config_list: to_vec(env.config_list, env.num_config_list),
-            flags: compile::EnvFlags::from_bits(env.flags).unwrap(),
+            aliased_namespaces: std::str::from_utf8_unchecked(
+                std::ffi::CStr::from_ptr(env.aliased_namespaces).to_bytes(),
+            ),
+            include_roots: std::str::from_utf8_unchecked(
+                std::ffi::CStr::from_ptr(env.include_roots).to_bytes(),
+            ),
+            emit_class_pointers: env.emit_class_pointers,
+            check_int_overflow: env.check_int_overflow,
+            hhbc_flags: compile::HHBCFlags::from_bits(env.hhbc_flags)?,
+            parser_flags: compile::ParserFlags::from_bits(env.parser_flags)?,
+            flags: compile::EnvFlags::from_bits(env.flags)?,
         })
     }
 }
@@ -171,10 +175,18 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
-                let env: compile::Env<&str> = CEnv::to_compile_env(env as *const CEnv).unwrap();
+                let native_env: compile::NativeEnv<&str> =
+                    CNativeEnv::to_compile_env(env as *const CNativeEnv).unwrap();
+                let env = compile::Env::<&str> {
+                    filepath: native_env.filepath.clone(),
+                    config_jsons: vec![],
+                    config_list: vec![],
+                    flags: native_env.flags,
+                };
                 let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
                 let mut w = String::new();
-                match compile::from_text_(&env, stack_limit, &mut w, source_text) {
+                match compile::from_text_(&env, stack_limit, &mut w, source_text, Some(&native_env))
+                {
                     Ok(_) => {
                         //print_output(w, output_config, &env.filepath, profile)?;
                         Ok(w)
@@ -194,7 +206,7 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
-                let env = CEnv::to_compile_env(env as *const CEnv).unwrap();
+                let env = CNativeEnv::to_compile_env(env as *const CNativeEnv).unwrap();
                 eprintln!(
                     "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
                     (stack_size_tried - stack_slack(stack_size_tried)) / KI,
@@ -272,7 +284,7 @@ extern "C" fn compile_from_text_ffi(
                         unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
                     let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
                     let mut w = String::new();
-                    match compile::from_text_(&env, stack_limit, &mut w, source_text) {
+                    match compile::from_text_(&env, stack_limit, &mut w, source_text, None) {
                         Ok(profile) => print_output(w, output_config, &env.filepath, profile),
                         Err(e) => Err(anyhow!("{}", e)),
                     }

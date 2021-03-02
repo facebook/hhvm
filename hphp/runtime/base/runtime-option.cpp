@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -258,6 +259,71 @@ bool walkDirTree(std::string fpath, F func) {
 
 RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
+}
+
+std::uint32_t RepoOptions::getParserFlags() const {
+  std::uint32_t parser_flags = 0;   
+  if (AbstractStaticProps) {
+    parser_flags |= ABSTRACT_STATIC_PROPS;
+  }	
+  if (AllowNewAttributeSyntax) {
+    parser_flags |= ALLOW_NEW_ATTRIBUTE_SYNTAX;
+  }	
+  if (AllowUnstableFeatures) {
+    parser_flags |= ALLOW_UNSTABLE_FEATURES;
+  }
+  if (ConstDefaultFuncArgs) {
+    parser_flags |= CONST_DEFAULT_FUNC_ARGS;
+  }  
+  if (ConstStaticProps) {
+    parser_flags |= CONST_STATIC_PROPS;
+  }	   
+  if (DisableArray) {
+    parser_flags |= DISABLE_ARRAY;
+  }	
+  if (DisableArrayCast) {
+    parser_flags |= DISABLE_ARRAY_CAST;
+  }		
+  if (DisableArrayTypehint) {
+    parser_flags |= DISABLE_ARRAY_TYPEHINT;
+  }		 
+  if (DisableLvalAsAnExpression) {
+    parser_flags |= DISABLE_LVAL_AS_AN_EXPRESSION;
+  }	
+  if (DisableUnsetClassConst) {
+    parser_flags |= DISABLE_UNSET_CLASS_CONST;
+  }	
+  if (DisallowInstMeth) {
+    parser_flags |= DISALLOW_INST_METH;
+  }	
+  if (DisableXHPElementMangling) {
+    parser_flags |= DISABLE_XHP_ELEMENT_MANGLING;
+  }	
+  if (DisallowFunAndClsMethPseudoFuncs) {
+    parser_flags |= DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
+  }	
+  if (DisallowFuncPtrsInConstants) {
+    parser_flags |= DISALLOW_FUNC_PTRS_IN_CONSTANTS;
+  }	
+  if (DisallowHashComments) {
+    parser_flags |= DISALLOW_HASH_COMMENTS;
+  }		
+  if (EnableCoroutines) {
+    parser_flags |= ENABLE_COROUTINES;
+  }	 
+  if (EnableEnumClasses) {
+    parser_flags |= ENABLE_ENUM_CLASSES;
+  }	 
+  if (EnableXHPClassModifier) {
+    parser_flags |= ENABLE_XHP_CLASS_MODIFIER;
+  }	
+  if (RuntimeOption::EnableClassLevelWhereClauses) {
+    parser_flags |= ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
+  }	
+  if (DisallowDynamicMethCallerArgs) {
+    parser_flags |= DISALLOW_DYNAMIC_METH_CALLER_ARGS;
+  }	   
+  return parser_flags;
 }
 
 const RepoOptions& RepoOptions::forFile(const char* path) {

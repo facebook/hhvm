@@ -20,7 +20,9 @@ use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use options::{LangFlags, Options, Php7Flags, PhpismFlags};
+use options::{
+    Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
+};
 use oxidized::{
     ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -42,9 +44,20 @@ pub struct Env<STR: AsRef<str>> {
     pub flags: EnvFlags,
 }
 
+#[derive(Debug)]
+pub struct NativeEnv<STR: AsRef<str>> {
+    pub filepath: RelativePath,
+    pub aliased_namespaces: STR,
+    pub include_roots: STR,
+    pub emit_class_pointers: i32,
+    pub check_int_overflow: i32,
+    pub hhbc_flags: HHBCFlags,
+    pub parser_flags: ParserFlags,
+    pub flags: EnvFlags,
+}
+
 bitflags! {
     // Note: these flags are intentionally packed into bits to overcome
-
     // the limitation of to-OCaml FFI functions having at most 5 parameters
     pub struct EnvFlags: u8 {
         const IS_SYSTEMLIB = 1 << 0;
@@ -53,11 +66,222 @@ bitflags! {
         const DUMP_SYMBOL_REFS = 1 << 3;
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
     }
+
+}
+bitflags! {
+      pub struct HHBCFlags: u32 {
+        const LTR_ASSIGN=1 << 0;
+        const UVS=1 << 1;
+        const HACK_ARR_COMPAT_NOTICES=1 << 2;
+        const HACK_ARR_DV_ARRS=1 << 3;
+        const AUTHORITATIVE=1 << 4;
+        const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
+        const LOG_EXTERN_COMPILER_PERF=1 << 6;
+        const ENABLE_INTRINSICS_EXTENSION=1 << 7;
+        const DISABLE_NONTOPLEVEL_DECLARATIONS=1 << 8;
+        const DISABLE_STATIC_CLOSURES=1 << 9;
+        const EMIT_CLS_METH_POINTERS=1 << 10;
+        const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
+        const RX_IS_ENABLED=1 << 12;
+        const ARRAY_PROVENANCE=1 << 13;
+        const HACK_ARR_DV_ARR_MARK=1 << 14;
+        const FOLD_LAZY_CLASS_KEYS=1 << 15;
+        const EMIT_INST_METH_POINTERS=1 << 16;
+    }
+}
+bitflags! {
+    pub struct ParserFlags: u32 {
+        const ABSTRACT_STATIC_PROPS=1 << 0;
+        const ALLOW_NEW_ATTRIBUTE_SYNTAX=1 << 1;
+        const ALLOW_UNSTABLE_FEATURES=1 << 2;
+        const CONST_DEFAULT_FUNC_ARGS=1 << 3;
+        const CONST_STATIC_PROPS=1 << 4;
+        const DISABLE_ARRAY=1 << 5;
+        const DISABLE_ARRAY_CAST=1 << 6;
+        const DISABLE_ARRAY_TYPEHINT=1 << 7;
+        const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
+        const DISABLE_UNSET_CLASS_CONST=1 << 9;
+        const DISALLOW_INST_METH=1 << 10;
+        const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
+        const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
+        const DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13;
+        const DISALLOW_HASH_COMMENTS=1 << 14;
+        const ENABLE_COROUTINES=1 << 15;
+        const ENABLE_ENUM_CLASSES=1 << 16;
+        const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
+        const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
+        const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19;
+  }
 }
 
 impl FromOcamlRep for EnvFlags {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         Ok(EnvFlags::from_bits(value.as_int().unwrap() as u8).unwrap())
+    }
+}
+
+impl HHBCFlags {
+    fn to_php7_flags(self) -> Php7Flags {
+        let mut f = Php7Flags::empty();
+        if self.contains(HHBCFlags::UVS) {
+            f |= Php7Flags::UVS;
+        }
+        if self.contains(HHBCFlags::LTR_ASSIGN) {
+            f |= Php7Flags::LTR_ASSIGN;
+        }
+        f
+    }
+
+    fn to_hhvm_flags(self) -> HhvmFlags {
+        let mut f = HhvmFlags::empty();
+        if self.contains(HHBCFlags::ARRAY_PROVENANCE) {
+            f |= HhvmFlags::ARRAY_PROVENANCE;
+        }
+        if self.contains(HHBCFlags::EMIT_CLS_METH_POINTERS) {
+            f |= HhvmFlags::EMIT_CLS_METH_POINTERS;
+        }
+        if self.contains(HHBCFlags::EMIT_INST_METH_POINTERS) {
+            f |= HhvmFlags::EMIT_INST_METH_POINTERS;
+        }
+        if self.contains(HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS) {
+            f |= HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS;
+        }
+        if self.contains(HHBCFlags::ENABLE_INTRINSICS_EXTENSION) {
+            f |= HhvmFlags::ENABLE_INTRINSICS_EXTENSION;
+        }
+        if self.contains(HHBCFlags::FOLD_LAZY_CLASS_KEYS) {
+            f |= HhvmFlags::FOLD_LAZY_CLASS_KEYS;
+        }
+        if self.contains(HHBCFlags::HACK_ARR_COMPAT_NOTICES) {
+            f |= HhvmFlags::HACK_ARR_COMPAT_NOTICES;
+        }
+        if self.contains(HHBCFlags::HACK_ARR_DV_ARR_MARK) {
+            f |= HhvmFlags::HACK_ARR_DV_ARR_MARK;
+        }
+        if self.contains(HHBCFlags::HACK_ARR_DV_ARRS) {
+            f |= HhvmFlags::HACK_ARR_DV_ARRS;
+        }
+        if self.contains(HHBCFlags::JIT_ENABLE_RENAME_FUNCTION) {
+            f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;
+        }
+        if self.contains(HHBCFlags::LOG_EXTERN_COMPILER_PERF) {
+            f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
+        }
+        if self.contains(HHBCFlags::RX_IS_ENABLED) {
+            f |= HhvmFlags::RX_IS_ENABLED;
+        }
+        f
+    }
+
+    fn to_php_flags(self) -> PhpismFlags {
+        let mut f = PhpismFlags::empty();
+        if self.contains(HHBCFlags::DISABLE_NONTOPLEVEL_DECLARATIONS) {
+            f |= PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS;
+        }
+        if self.contains(HHBCFlags::DISABLE_STATIC_CLOSURES) {
+            f |= PhpismFlags::DISABLE_STATIC_CLOSURES;
+        }
+        f
+    }
+
+    fn to_repo_flags(self) -> RepoFlags {
+        let mut f = RepoFlags::empty();
+        if self.contains(HHBCFlags::AUTHORITATIVE) {
+            f |= RepoFlags::AUTHORITATIVE;
+        }
+        f
+    }
+}
+
+impl ParserFlags {
+    fn to_lang_flags(self) -> LangFlags {
+        let mut f = LangFlags::empty();
+        if self.contains(ParserFlags::ABSTRACT_STATIC_PROPS) {
+            f |= LangFlags::ABSTRACT_STATIC_PROPS;
+        }
+        if self.contains(ParserFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX) {
+            f |= LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
+        }
+        if self.contains(ParserFlags::ALLOW_UNSTABLE_FEATURES) {
+            f |= LangFlags::ALLOW_UNSTABLE_FEATURES;
+        }
+        if self.contains(ParserFlags::CONST_DEFAULT_FUNC_ARGS) {
+            f |= LangFlags::CONST_DEFAULT_FUNC_ARGS;
+        }
+        if self.contains(ParserFlags::CONST_STATIC_PROPS) {
+            f |= LangFlags::CONST_STATIC_PROPS;
+        }
+        if self.contains(ParserFlags::DISABLE_ARRAY) {
+            f |= LangFlags::DISABLE_ARRAY;
+        }
+        if self.contains(ParserFlags::DISABLE_ARRAY_CAST) {
+            f |= LangFlags::DISABLE_ARRAY_CAST;
+        }
+        if self.contains(ParserFlags::DISABLE_ARRAY_TYPEHINT) {
+            f |= LangFlags::DISABLE_ARRAY_TYPEHINT;
+        }
+        if self.contains(ParserFlags::DISABLE_LVAL_AS_AN_EXPRESSION) {
+            f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
+        }
+        if self.contains(ParserFlags::DISABLE_UNSET_CLASS_CONST) {
+            f |= LangFlags::DISABLE_UNSET_CLASS_CONST;
+        }
+        if self.contains(ParserFlags::DISALLOW_INST_METH) {
+            f |= LangFlags::DISALLOW_INST_METH;
+        }
+        if self.contains(ParserFlags::DISABLE_XHP_ELEMENT_MANGLING) {
+            f |= LangFlags::DISABLE_XHP_ELEMENT_MANGLING;
+        }
+        if self.contains(ParserFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS) {
+            f |= LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
+        }
+        if self.contains(ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
+            f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
+        }
+        if self.contains(ParserFlags::DISALLOW_HASH_COMMENTS) {
+            f |= LangFlags::DISALLOW_HASH_COMMENTS;
+        }
+        if self.contains(ParserFlags::ENABLE_COROUTINES) {
+            f |= LangFlags::ENABLE_COROUTINES;
+        }
+        if self.contains(ParserFlags::ENABLE_ENUM_CLASSES) {
+            f |= LangFlags::ENABLE_ENUM_CLASSES;
+        }
+        if self.contains(ParserFlags::ENABLE_XHP_CLASS_MODIFIER) {
+            f |= LangFlags::ENABLE_XHP_CLASS_MODIFIER;
+        }
+        if self.contains(ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
+            f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
+        }
+        if self.contains(ParserFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS) {
+            f |= LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS;
+        }
+        f
+    }
+}
+
+impl<S: AsRef<str>> NativeEnv<S> {
+    pub fn to_options(native_env: &NativeEnv<S>) -> Options {
+        let hhbc_flags = native_env.hhbc_flags;
+        let config = [&native_env.aliased_namespaces, &native_env.include_roots];
+        let opts = Options::from_configs(&config, &[]).unwrap();
+        let hhvm = Hhvm {
+            aliased_namespaces: opts.hhvm.aliased_namespaces,
+            include_roots: opts.hhvm.include_roots,
+            flags: hhbc_flags.to_hhvm_flags(),
+            emit_class_pointers: Arg::new(native_env.emit_class_pointers.to_string()),
+            hack_lang: HackLang {
+                flags: native_env.parser_flags.to_lang_flags(),
+                check_int_overflow: Arg::new(native_env.check_int_overflow.to_string()),
+            },
+        };
+        Options {
+            hhvm,
+            php7_flags: hhbc_flags.to_php7_flags(),
+            phpism_flags: hhbc_flags.to_php_flags(),
+            repo_flags: hhbc_flags.to_repo_flags(),
+            ..Default::default()
+        }
     }
 }
 
@@ -117,7 +341,7 @@ where
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    from_text_(env, stack_limit, writer, source_text)
+    from_text_(env, stack_limit, writer, source_text, None)
 }
 
 pub fn from_text_<W, S: AsRef<str>>(
@@ -125,13 +349,17 @@ pub fn from_text_<W, S: AsRef<str>>(
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
+    native_env: Option<&NativeEnv<S>>,
 ) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
-    let opts =
-        Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
+    let opts = match native_env {
+        None => Options::from_configs(&env.config_jsons, &env.config_list)
+            .map_err(anyhow::Error::msg)?,
+        Some(native_env) => NativeEnv::to_options(&native_env),
+    };
 
     let (mut parse_result, parsing_t) = time(|| {
         parse_file(

@@ -8,9 +8,9 @@ import shlex
 import shutil
 import sqlite3
 import stat
+import sys
 import time
 import unittest
-import sys
 from typing import Optional, TextIO
 
 import common_tests

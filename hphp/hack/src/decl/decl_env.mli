@@ -31,3 +31,7 @@ val get_construct :
   Decl_defs.element option * Typing_defs.consistent_kind
 
 val add_constructor_dependency : env -> string -> unit
+
+val make_decl_pos : env -> Pos.t -> Pos_or_decl.t
+
+val make_decl_posed : env -> Pos.t * 'a -> Pos_or_decl.t * 'a

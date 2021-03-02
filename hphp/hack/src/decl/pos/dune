@@ -2,5 +2,6 @@
   (name pos_or_decl)
   (wrapped false)
   (libraries
+    decl_reference
     pos)
   (preprocess (pps ppx_deriving.std)))

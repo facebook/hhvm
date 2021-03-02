@@ -129,6 +129,24 @@ module Dep = struct
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
 
+  let to_decl_reference : type a. a variant -> Decl_reference.t = function
+    | Class s -> Decl_reference.ClassInterfaceTrait s
+    | Const (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | Extends s -> Decl_reference.ClassInterfaceTrait s
+    | AllMembers s -> Decl_reference.ClassInterfaceTrait s
+    | Cstr s -> Decl_reference.ClassInterfaceTrait s
+    | Prop (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | SProp (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | Method (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | SMethod (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | GConst s
+    | GConstName s ->
+      Decl_reference.GlobalConstant s
+    | RecordDef s -> Decl_reference.Record s
+    | Fun s
+    | FunName s ->
+      Decl_reference.Function s
+
   let to_debug_string = string_of_int
 
   let of_debug_string = int_of_string

@@ -17,6 +17,19 @@ type env = {
   ctx: Provider_context.t;
 }
 
+let root_decl_reference env =
+  env.droot |> Option.map ~f:Typing_deps.Dep.to_decl_reference
+
+let make_decl_pos env pos =
+  (* TODO: fail if root_decl_reference returns None *)
+  Option.fold (root_decl_reference env) ~init:pos ~f:(fun pos decl ->
+      Pos_or_decl.make_decl_pos pos decl)
+
+let make_decl_posed env pos =
+  (* TODO: fail if root_decl_reference returns None *)
+  Option.fold (root_decl_reference env) ~init:pos ~f:(fun pos decl ->
+      Positioned.make_for_decl pos decl)
+
 let tcopt env = Provider_context.get_tcopt env.ctx
 
 let deps_mode env = Provider_context.get_deps_mode env.ctx

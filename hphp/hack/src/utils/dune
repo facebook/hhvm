@@ -129,6 +129,13 @@
     utils_core))
 
 (library
+  (name decl_reference)
+  (wrapped false)
+  (modules
+    decl_reference)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))) ; See T41851208
+
+(library
   (name pos)
   (wrapped false)
   (modules

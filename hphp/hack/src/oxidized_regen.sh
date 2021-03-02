@@ -53,6 +53,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
+  hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
 
 # Add exports in oxidized/lib.rs from oxidized/gen/mod.rs.
@@ -124,6 +125,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
+  hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
 
 # Add exports in oxidized_by_ref/lib.rs from oxidized_by_ref/gen/mod.rs.

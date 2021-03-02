@@ -73,6 +73,7 @@
     decl_heap
     decl_init_check
     decl_pos_utils
+    decl_reference
     decl_utils
     full_fidelity
     naming

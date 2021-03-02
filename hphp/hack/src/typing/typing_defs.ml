@@ -1093,7 +1093,7 @@ let equal_decl_where_constraint c1 c2 =
 
 let equal_decl_tparam tp1 tp2 =
   Ast_defs.equal_variance tp1.tp_variance tp2.tp_variance
-  && Positioned.equal Ast_defs.equal_id_ tp1.tp_name tp2.tp_name
+  && equal_pos_id tp1.tp_name tp2.tp_name
   && List.equal
        (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
        tp1.tp_constraints

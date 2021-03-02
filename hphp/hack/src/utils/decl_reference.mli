@@ -6,11 +6,9 @@
  *
  *)
 
-type t = Pos.t [@@deriving eq, ord, show]
-
-let none : t = Pos.none
-
-let btw = Pos.btw
-
-let make_decl_pos : Pos.t -> Decl_reference.t -> t =
- (fun p _decl -> (* TODO *) p)
+type t =
+  | GlobalConstant of string
+  | Function of string
+  | ClassInterfaceTrait of string
+  | Record of string
+[@@deriving eq, show, ord]

@@ -28,6 +28,7 @@ decl_defs::ConditionTypeName
 decl_defs::LinearizationKind
 decl_defs::MethodReactivity
 decl_defs::SourceType
+decl_reference::DeclReference
 errors::AppliedFixme
 errors::FilesT
 errors::FileT

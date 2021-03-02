@@ -18,3 +18,6 @@ val none : t
 (** Fill in the gap "between" first position and second position.
     Not valid if from different files or second position precedes first *)
 val btw : t -> t -> t
+
+(** Compress a position to be stored in the decl heap. *)
+val make_decl_pos : Pos.t -> Decl_reference.t -> t

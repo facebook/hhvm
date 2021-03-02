@@ -621,7 +621,7 @@ module Pp = struct
     | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
     | Tapply (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tapply (@,";
-      let () = Positioned.pp Ast_defs.pp_id_ fmt a0 in
+      let () = pp_pos_id fmt a0 in
       Format.fprintf fmt ",@ ";
       Format.fprintf fmt "@[<2>[";
       ignore
@@ -743,7 +743,7 @@ module Pp = struct
     | Tobject -> Format.pp_print_string fmt "Tobject"
     | Tclass (a0, a2, a1) ->
       Format.fprintf fmt "(@[<2>Tclass (@,";
-      Positioned.pp Ast_defs.pp_id_ fmt a0;
+      pp_pos_id fmt a0;
       Format.fprintf fmt ",@ ";
       pp_exact fmt a2;
       Format.fprintf fmt ",@ ";
@@ -778,7 +778,7 @@ module Pp = struct
     pp_ty fmt a0;
     Format.fprintf fmt ",@ ";
     Format.fprintf fmt "@[<2>[";
-    Positioned.pp Ast_defs.pp_id_ fmt a1;
+    pp_pos_id fmt a1;
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
 

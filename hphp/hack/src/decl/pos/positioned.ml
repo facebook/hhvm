@@ -6,4 +6,5 @@
  *
  *)
 
-type 'a t = Pos_or_decl.t * 'a [@@deriving show, eq, ord]
+let make_for_decl : type a. Pos.t * a -> Decl_reference.t -> Pos_or_decl.t * a =
+ (fun (p, x) decl -> (Pos_or_decl.make_decl_pos p decl, x))

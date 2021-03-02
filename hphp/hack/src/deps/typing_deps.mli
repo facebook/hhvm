@@ -78,6 +78,8 @@ module Dep : sig
 
   val extract_name : 'a variant -> string
 
+  val to_decl_reference : 'a variant -> Decl_reference.t
+
   val to_debug_string : t -> string
 
   val of_debug_string : string -> t

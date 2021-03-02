@@ -6,4 +6,5 @@
  *
  *)
 
-type 'a t = Pos_or_decl.t * 'a [@@deriving show, eq, ord]
+(** Compress the position of a positioned value to be stored in the decl heap. *)
+val make_for_decl : Pos.t * 'a -> Decl_reference.t -> Pos_or_decl.t * 'a

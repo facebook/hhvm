@@ -17,6 +17,7 @@
     typing_deps_mode)
   (libraries
     collections
+    decl_reference
     depgraph
     file_info
     heap_shared_mem

@@ -134,12 +134,18 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-# libcompile_ffi_stubs.a is built by dune so we need som magic to expose it as
-# a library target to cmake for other targets (e.g. hhvm) to depend on.
+# libcompile_ffi_stubs.a and librust_facts_ffi_stubs.a are built by dune so we
+# need some magic to expose them as library targets to cmake for other targets
+# (e.g. hhvm) to depend on.
 set(LIBCOMPILE_PATH "${DUNE_BUILD_DIR}/libcompile_ffi_stubs.a")
 add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(libcompile_ffi_stubs hack_dune)
 set_target_properties(libcompile_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBCOMPILE_PATH})
+
+set(LIBRUST_PATH "${DUNE_BUILD_DIR}/librust_facts_ffi_stubs.a")
+add_library(librust_facts_ffi_stubs STATIC IMPORTED GLOBAL)
+add_dependencies(librust_facts_ffi_stubs hack_dune)
+set_target_properties(librust_facts_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 

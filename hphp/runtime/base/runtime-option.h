@@ -130,12 +130,23 @@ struct RepoOptions {
     // bigger problems.
     return m_sha1 == o.m_sha1;
   }
+  
+  // Getters for the parser options we pass to HackC for extracting facts
+  bool allowNewAttributeSyntax() const noexcept {
+    return AllowNewAttributeSyntax;
+  }
+  bool enableXHPClassModifier() const noexcept {
+    return EnableXHPClassModifier; 
+  }
+  bool disableXHPElementMangling() const noexcept {
+    return DisableXHPElementMangling; 
+  }
 
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
 
   static const RepoOptions& forFile(const char* path);
-
+  
 private:
   RepoOptions() = default;
   explicit RepoOptions(const char* str, const char* file);
@@ -143,17 +154,17 @@ private:
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
   void calcCacheKey();
-
-#define N(t, n, ...) t n;
-#define P(t, n, ...) t n;
-#define H(t, n, ...) t n;
-#define E(t, n, ...) t n;
-PARSERFLAGS()
-AUTOLOADFLAGS()
-#undef N
-#undef P
-#undef H
-#undef E
+  
+  #define N(t, n, ...) t n;
+  #define P(t, n, ...) t n;
+  #define H(t, n, ...) t n;
+  #define E(t, n, ...) t n;
+  PARSERFLAGS()
+  AUTOLOADFLAGS()
+  #undef N
+  #undef P
+  #undef H
+  #undef E
 
   std::string m_path;
   struct stat m_stat;

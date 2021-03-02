@@ -32,8 +32,11 @@
 #include <folly/FileUtil.h>
 #include <folly/system/ThreadName.h>
 
+#include "hphp/hack/src/facts/rust_facts_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -1248,18 +1251,49 @@ ParseFactsResult extract_facts(
   int len,
   const RepoOptions& options
 ) {
-  size_t maxRetries;
-  bool verboseErrors;
-  std::tie(maxRetries, verboseErrors) =
-    s_manager.get_hackc_pool().getMaxRetriesAndVerbosity();
-  return extract_facts_worker(
-    dynamic_cast<const CompilerGuard&>(facts_parser),
-    filename,
-    code,
-    len,
-    maxRetries,
-    verboseErrors,
-    options);
+  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {  
+    size_t maxRetries;
+    bool verboseErrors;
+    std::tie(maxRetries, verboseErrors) =
+      s_manager.get_hackc_pool().getMaxRetriesAndVerbosity();
+    return extract_facts_worker(
+      dynamic_cast<const CompilerGuard&>(facts_parser),
+      filename,
+      code,
+      len,
+      maxRetries,
+      verboseErrors,
+      options);
+  } else {
+    int32_t flags =
+      1 << 0 |  //php5_compat_mode
+      1 << 1 |  //hhvm_compat_mode
+      options.allowNewAttributeSyntax()   << 2 |
+      options.enableXHPClassModifier()    << 3 |
+      options.disableXHPElementMangling() << 4;
+        
+    auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
+      try {
+        auto const facts = extract_as_json_cpp_ffi(flags, filename.data(), source_text, false);
+        return FactsJSONString { facts };  
+      } catch (const std::exception& e) {
+        return FactsJSONString{ "" }; // Swallow errors from HackC
+      } 
+    };
+
+    if (code && code[0] != '\0') {
+      return get_facts(code);
+    } else {
+      auto w = Stream::getWrapperFromURI(StrNR(filename));
+      if (!(w && dynamic_cast<FileStreamWrapper*>(w))) {
+        throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
+      }
+      const auto f = w->open(StrNR(filename), "r", 0, nullptr);
+      if (!f) throwErrno("Failed to extract facts: Could not read source code.");
+      auto const str = f->read();
+      return get_facts(str.data());
+    }
+  }
 }
 
 FfpResult ffp_parse_file(

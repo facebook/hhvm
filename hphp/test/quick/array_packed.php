@@ -1,7 +1,7 @@
 <?hh
 
 function test($x) {
-  // each of these should "just work" but stresses NewPackedArray logic.
+  // each of these should "just work" but stresses NewVArray/NewDArray logic.
   $a = varray[$x, 1, 2]; var_dump($a);
   $a = varray[$x,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; var_dump($a);
   $a = varray[0,$x,0,0,0,0,0,8]; var_dump($a);

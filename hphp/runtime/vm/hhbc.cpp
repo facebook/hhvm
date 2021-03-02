@@ -451,8 +451,8 @@ int instrNumPops(PC pc) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // NewPackedArray and some final member operations specify how
-  // many values are popped in their first immediate
+  // Some final member operations specify how many values are popped in their
+  // first immediate.
   if (n == -3) return getImm(pc, 0).u_IVA;
   // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
   // 2 cells/uninits reserved for ActRec and (numRets - 1) uninit values.

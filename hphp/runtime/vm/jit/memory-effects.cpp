@@ -1118,8 +1118,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewStructDArray:
   case NewStructDict:
     {
-      // NewStructArray is reading elements from the stack, but writes to a
-      // completely new array, so we can treat the store set as empty.
+      // NewStruct{Dict,DArray} is reading elements from the stack, but writes
+      // to a completely new array, so we can treat the store set as empty.
       auto const extra = inst.extra<NewStructData>();
       auto const stack_in = AStack {
         inst.src(0),

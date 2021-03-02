@@ -1,7 +1,3 @@
-#
-# NewStructArray
-#
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   String "two"

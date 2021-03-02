@@ -832,41 +832,11 @@ LazyClass <litstr id>                []  ->  [C:LazyClass]
 
   Push immediate. Pushes %1 onto the stack.
 
-NewArray <capacity hint>    []  ->  [C:Arr]
-
-  New array, with a capacity hint. Creates a new array and pushes it onto the
-  stack. The implementation may make use of the hint in %1 to pre-size the
-  array. The hint %1 must be greater than or equal to 0.
-
-NewMixedArray <capacity hint>    []  ->  [C:Arr]
-
-  New array in mixed mode, with a capacity hint. Creates a new array and pushes
-  it onto the stack. The implementation may make use of the hint in %1 to
-  pre-size the array. The hint %1 must be greater than or equal to 0.
-
 NewDictArray <capacity hint>    []  ->  [C:Dict]
 
   New dict, with a capacity hint. Creates a new dict and pushes
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
-
-NewPackedArray <num elems>    [C..C]  ->  [C]
-
-  New array. Creates a new array from the top %1 cells on the stack, pops those
-  cells, then pushes the new array onto the stack. Elements are pushed on the
-  stack in array insertion order and are implicitly numbered from 0 to %1 - 1.
-  $1 is at index %i - 1, $2 at %1-2, and so on; $(%1) is at index 0.
-
-NewStructArray <litstr id vector>    [C..C]  ->  [C]
-
-  New array. Creates a new array from the names given in %1 and values from the
-  stack. The vector of litstr ids gives the element names, one value for each
-  name is popped from the stack. Names are in array insertion order, and values
-  were pushed onto the stack in insertion order, so are added to the array in
-  reverse order (the topmost value will become the last element in the array).
-  For example:
-
-    NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
 NewStructDArray <litstr id vector>    [C..C]  ->  [C]
 
@@ -1204,10 +1174,6 @@ CastString    [C]  ->  [C:Str]
   is an object that implements the __toString method, the string cast returns
   $1->__toString(). If $1 is an object that does not implement __toString
   method, the string cast throws a fatal error.
-
-CastArray    [C]  ->  [C:Arr]
-
-  Cast to array ((array)). Pushes (array)$1 onto the stack.
 
 CastVec       [C]  ->  [C:Vec]
 

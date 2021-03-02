@@ -52,10 +52,6 @@ type t = {
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
-  profile_type_check_duration_threshold: float;
-  profile_type_check_twice: bool;
-  profile_owner: string option;
-  profile_desc: string;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
   tco_coeffects: bool;
@@ -237,10 +233,6 @@ let default =
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
-    profile_type_check_duration_threshold = 0.05;
-    profile_type_check_twice = false;
-    profile_owner = None;
-    profile_desc = "";
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
     tco_coeffects = true;
@@ -360,11 +352,6 @@ let make
       default.po_disable_lval_as_an_expression)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
-    ?(profile_type_check_duration_threshold =
-      default.profile_type_check_duration_threshold)
-    ?(profile_type_check_twice = default.profile_type_check_twice)
-    ?profile_owner
-    ?(profile_desc = default.profile_desc)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
@@ -494,10 +481,6 @@ let make
     po_disable_lval_as_an_expression;
     tco_shallow_class_decl;
     po_rust_parser_errors;
-    profile_type_check_duration_threshold;
-    profile_type_check_twice;
-    profile_owner;
-    profile_desc;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
     tco_coeffects;
@@ -665,15 +648,6 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 
 let po_rust_parser_errors t = t.po_rust_parser_errors
-
-let profile_type_check_duration_threshold t =
-  t.profile_type_check_duration_threshold
-
-let profile_type_check_twice t = t.profile_type_check_twice
-
-let profile_owner t = t.profile_owner
-
-let profile_desc t = t.profile_desc
 
 let tco_like_type_hints t = t.tco_like_type_hints
 

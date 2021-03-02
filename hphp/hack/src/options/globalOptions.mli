@@ -142,17 +142,6 @@ type t = {
   tco_shallow_class_decl: bool;
   (* Use Rust parser errors *)
   po_rust_parser_errors: bool;
-  (* The threshold (in seconds) that determines whether a file's type checking time
-      should be logged. It's only in effect if we're profiling type checking to begin
-      with. To profile, pass --profile-log to hh_server. *)
-  profile_type_check_duration_threshold: float;
-  (* When typechecking, do a second typecheck on each file. *)
-  profile_type_check_twice: bool;
-  (* Two more profile options, used solely to send to logging backend. These allow
-      the person who launches hack, to provide unique identifying keys that get
-      sent to logging, so they can correlate/sort/filter their logs as they want. *)
-  profile_owner: string option;
-  profile_desc: string;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
   (* Enables union and intersection type hints *)
@@ -351,10 +340,6 @@ val make :
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
   ?po_rust_parser_errors:bool ->
-  ?profile_type_check_duration_threshold:float ->
-  ?profile_type_check_twice:bool ->
-  ?profile_owner:string ->
-  ?profile_desc:string ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
   ?tco_coeffects:bool ->
@@ -534,14 +519,6 @@ val po_disable_lval_as_an_expression : t -> bool
 val tco_shallow_class_decl : t -> bool
 
 val po_rust_parser_errors : t -> bool
-
-val profile_type_check_duration_threshold : t -> float
-
-val profile_type_check_twice : t -> bool
-
-val profile_owner : t -> string option
-
-val profile_desc : t -> string
 
 val tco_like_type_hints : t -> bool
 

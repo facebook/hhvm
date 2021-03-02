@@ -86,6 +86,7 @@ constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
 
 using StringDict = MonotypeDict<StringData*>;
+using StaticStrDict = MonotypeDict<StaticStrPtr>;
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
   auto constexpr type = kExtraInvalidDataType;
@@ -375,6 +376,16 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
 }
 
 template <typename Key>
+constexpr LayoutIndex getLayoutIndex(DataType type, LayoutIndex old) {
+  if constexpr (std::is_same<Key, StringData*>::value) {
+    if ((old.raw >> 8) == kStaticStrMonotypeDictLayoutByte) {
+      return getLayoutIndex<StaticStrPtr>(type);
+    }
+  }
+  return getLayoutIndex<Key>(type);
+}
+
+template <typename Key>
 constexpr strhash_t getHash(Key key) {
   if constexpr (std::is_same<Key, int64_t>::value) {
     return hash_int64(key) | STRHASH_MSB;
@@ -418,7 +429,7 @@ void decRefKey(Key key) {
 // If coercion fails for a string input, the input may be a non-static  copy
 // of a static string (if Key == StaticStr). Otherwise, it's missing.
 //
-// Callers can use `fallbackForStaticStr` to check the static/non-static case.
+// Callers can use `loosenToStr` to check the static/non-static case.
 
 template <typename Key>
 Key coerceKey(int64_t input) {
@@ -439,9 +450,18 @@ Key coerceKey(const StringData* input) {
 }
 
 template <typename Key>
-bool fallbackForStaticStr(const StringData* input) {
+bool loosenToStr(const StringData* input) {
   if constexpr (std::is_same<Key, StaticStrPtr>::value) {
     return !input->isStatic();
+  }
+  return false;
+}
+
+template <typename Key>
+bool tightenToStaticStr(const StringData* input, LayoutIndex index) {
+  if constexpr (std::is_same<Key, StringData*>::value) {
+    auto const byte = index.raw >> 8;
+    return byte == kStaticStrMonotypeDictLayoutByte && input->isStatic();
   }
   return false;
 }
@@ -553,9 +573,7 @@ bool MonotypeDict<Key>::checkInvariants() const {
     reinterpret_cast<const EmptyMonotypeDict*>(this)->checkInvariants();
   } else {
     assertx(isRealType(type()));
-    assertx(layoutIndex() == getLayoutIndex<Key>(type()) ||
-            (std::is_same<Self, StringDict>::value &&
-             layoutIndex() == getLayoutIndex<StaticStrPtr>(type())));
+    assertx(layoutIndex() == getLayoutIndex<Key>(type(), layoutIndex()));
   }
 
   return true;
@@ -683,7 +701,8 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   auto const mad = cowCheck() ? copy() : this;
   auto const elm = old - elms() + mad->elms();
   assertx(keysEqual(elm->key, key));
-  mad->setLayoutIndex(getLayoutIndex<Key>(dt_modulo_persistence(dt)));
+  auto const dtp = dt_modulo_persistence(dt);
+  mad->setLayoutIndex(getLayoutIndex<Key>(dtp, layoutIndex()));
 
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
@@ -890,7 +909,9 @@ MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
   // clear the hash table), or we'll move values to a newly-allocated dict.
   auto const result = [&]{
     if (!shrink) { initHash(); return this; }
-    return MakeReserve(m_kind, isLegacyArray(), target, type());
+    auto const mad = MakeReserve(m_kind, isLegacyArray(), target, type());
+    mad->setLayoutIndex(layoutIndex());
+    return mad;
   }();
 
   auto cur = 0;
@@ -1120,7 +1141,7 @@ void MonotypeDict<Key>::ConvertToUncounted(
   });
 
   auto const newType = hasPersistentFlavor(dt) ? dt_with_persistence(dt) : dt;
-  mad->setLayoutIndex(getLayoutIndex<Key>(newType));
+  mad->setLayoutIndex(getLayoutIndex<Key>(newType, mad->layoutIndex()));
 }
 
 template <typename Key>
@@ -1171,8 +1192,10 @@ TypedValue MonotypeDict<Key>::NvGetInt(const Self* mad, int64_t k) {
 
 template <typename Key>
 TypedValue MonotypeDict<Key>::NvGetStr(const Self* mad, const StringData* k) {
-  if (fallbackForStaticStr<Key>(k)) {
+  if (loosenToStr<Key>(k)) {
     return StringDict::NvGetStr(reinterpret_cast<const StringDict*>(mad), k);
+  } else if (tightenToStaticStr<Key>(k, mad->layoutIndex())) {
+    return StaticStrDict::NvGetStr(reinterpret_cast<const StaticStrDict*>(mad), k);
   }
   return mad->getImpl(coerceKey<Key>(k));
 }
@@ -1261,9 +1284,12 @@ tv_lval MonotypeDict<Key>::ElemInt(
 template <typename Key>
 tv_lval MonotypeDict<Key>::ElemStr(
     tv_lval lvalIn, StringData* k, bool throwOnMissing) {
-  if (fallbackForStaticStr<Key>(k)) {
+  if (loosenToStr<Key>(k)) {
     return StringDict::ElemStr(lvalIn, k, throwOnMissing);
+  } else if (tightenToStaticStr<Key>(k, As(lvalIn.val().parr)->layoutIndex())) {
+    return StaticStrDict::ElemStr(lvalIn, k, throwOnMissing);
   }
+
   auto const madIn = As(lvalIn.val().parr);
   auto const lval = madIn->elemImpl(coerceKey<Key>(k), k, throwOnMissing);
   if (lval.arr != madIn) {
@@ -1281,8 +1307,10 @@ ArrayData* MonotypeDict<Key>::SetIntMove(Self* mad, int64_t k, TypedValue v) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetStrMove(Self* mad, StringData* k, TypedValue v) {
-  if (fallbackForStaticStr<Key>(k)) {
+  if (loosenToStr<Key>(k)) {
     return StringDict::SetStrMove(reinterpret_cast<StringDict*>(mad), k, v);
+  } else if (tightenToStaticStr<Key>(k, mad->layoutIndex())) {
+    return StaticStrDict::SetStrMove(reinterpret_cast<StaticStrDict*>(mad), k, v);
   }
   return mad->setImpl(coerceKey<Key>(k), k, v);
 }
@@ -1294,8 +1322,10 @@ ArrayData* MonotypeDict<Key>::RemoveInt(Self* mad, int64_t k) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::RemoveStr(Self* mad, const StringData* k) {
-  if (fallbackForStaticStr<Key>(k)) {
+  if (loosenToStr<Key>(k)) {
     return StringDict::RemoveStr(reinterpret_cast<StringDict*>(mad), k);
+  } else if (tightenToStaticStr<Key>(k, mad->layoutIndex())) {
+    return StaticStrDict::RemoveStr(reinterpret_cast<StaticStrDict*>(mad), k);
   }
   return mad->removeImpl(coerceKey<Key>(k));
 }

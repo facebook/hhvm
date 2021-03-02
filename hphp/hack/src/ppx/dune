@@ -7,4 +7,4 @@
   (kind ppx_rewriter)
   (libraries
     ocaml-compiler-libs.common
-    ocaml-migrate-parsetree))
+    ppxlib))

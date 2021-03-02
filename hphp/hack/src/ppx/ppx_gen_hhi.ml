@@ -7,14 +7,13 @@
  *
  *)
 
-open Asttypes
-open Parsetree
-open Ast_mapper
-open Ast_helper
+(* Ppxlib based PPX, used by DUNE *)
+open Ppxlib
 
 (* Turn the (name, contents) list into a PPX ast (string * string) array
  * expression *)
 let contents hhi_dir =
+  let open Ast_helper in
   Ppx_gen_hhi_common.get_hhis hhi_dir
   |> List.map (fun (name, contents) ->
          Exp.tuple
@@ -24,42 +23,31 @@ let contents hhi_dir =
            ])
   |> Exp.array
 
-(* Whenever we see [%hhi_contents], replace it with all of the hhis *)
-let ppx_gen_hhi_mapper hhi_dir =
-  {
-    default_mapper with
-    expr =
-      (fun mapper expr ->
-        match expr with
-        | {
-         pexp_desc = Pexp_extension ({ txt = "hhi_contents"; _ }, PStr []);
-         _;
-        } ->
-          contents hhi_dir
-        | other -> default_mapper.expr mapper other);
-  }
-
 let hhi_dir : string option ref = ref None
+
+(* Whenever we see [%hhi_contents], replace it with all of the hhis *)
+let expand_function ~loc:_ ~path:_ =
+  let hhi_dir =
+    match !hhi_dir with
+    | None -> raise (Arg.Bad "-hhi-dir is mandatory")
+    | Some dir -> dir
+  in
+  contents hhi_dir
+
+let extension =
+  Extension.declare
+    "hhi_contents"
+    Extension.Context.expression
+    Ast_pattern.(pstr nil)
+    expand_function
+
+let rule = Context_free.Rule.extension extension
 
 let set_hhi_dir dir = hhi_dir := Some dir
 
-let reset_args () = hhi_dir := None
-
-let args =
-  [("-hhi-dir", Arg.String set_hhi_dir, "<dir> directory of the hhi sources")]
-
-let register_driver () =
-  Migrate_parsetree.Driver.register
-    ~name:"ppx_gen_hhi"
-    ~reset_args
-    ~args
-    (module Migrate_parsetree.OCaml_current)
-    (fun _config _cookies ->
-      let hhi_dir =
-        match !hhi_dir with
-        | None -> raise (Arg.Bad "-hhi-dir is mandatory")
-        | Some dir -> dir
-      in
-      ppx_gen_hhi_mapper hhi_dir)
-
-let () = register_driver ()
+let () =
+  Driver.add_arg
+    "-hhi-dir"
+    (Arg.String set_hhi_dir)
+    ~doc:"<dir> directory of the hhis sources";
+  Driver.register_transformation ~rules:[rule] "ppx_gen_hhi"

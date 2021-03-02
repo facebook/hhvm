@@ -7,6 +7,8 @@
  *
  *)
 
+(* Ast_mapper based PPX, used by BUCK *)
+
 open Asttypes
 open Parsetree
 open Ast_mapper

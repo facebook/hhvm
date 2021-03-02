@@ -39,20 +39,23 @@ inline bool arrayTypeCouldBeBespoke(DataType t) {
 }
 
 /**
- * A MaskAndCompare consists of a base and a mask. A value v is considered to
- * be pass the check if (v & mask) == base.
+ * Low-level arithmetic that we can use to check that a bespoke array has a
+ * given bespoke layout. We have several test types so we can optimize tests.
  */
-struct MaskAndCompare {
-  uint16_t xorVal;
-  uint16_t andVal;
-  uint16_t cmpVal;
+struct LayoutTest {
+  enum Mode { And1Byte, Cmp1Byte, And2Byte, Cmp2Byte };
 
-  static MaskAndCompare fullCompare(uint16_t val) {
-    return {val, 0xffff, 0};
-  }
+  uint16_t imm;
+  Mode mode;
 
   bool accepts(uint16_t val) const {
-    return ((val ^ xorVal) & andVal) <= cmpVal;
+    switch (mode) {
+      case Mode::And1Byte: return ((val >> 8) & imm) == 0;
+      case Mode::And2Byte: return (val & imm) == 0;
+      case Mode::Cmp1Byte: return (val >> 8) == imm;
+      case Mode::Cmp2Byte: return val == imm;
+    }
+    always_assert(false);
   }
 };
 

@@ -43,9 +43,10 @@ using namespace jit;
 
 namespace {
 
+auto constexpr kMaxNumLayouts = ((kLoggingLayoutByte + 1) << 8);
+
 std::atomic<size_t> s_topoIndex;
-std::atomic<size_t> s_layoutTableIndex;
-std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
+std::array<Layout*, kMaxNumLayouts> s_layoutTable;
 std::atomic<bool> s_hierarchyFinal = false;
 std::mutex s_layoutCreationMutex;
 
@@ -53,122 +54,35 @@ LayoutFunctions s_emptyVtable;
 
 constexpr LayoutIndex kBespokeTopIndex = {0};
 
-bool isSingletonLayout(LayoutIndex index) {
-  return index == EmptyMonotypeVecLayout::Index() ||
-         index == EmptyMonotypeDictLayout::Index();
-}
-
-using Split = std::pair<uint16_t, std::vector<uint16_t>>;
-
-folly::Optional<MaskAndCompare> computeSimpleMaskAndCompare(
+bool checkLayoutTest(
     const std::vector<uint16_t>& liveVec,
-    const std::vector<uint16_t>& deadVec) {
-  uint16_t liveAgree = 0xffff;
+    const std::vector<uint16_t>& deadVec,
+    LayoutTest test) {
   for (auto const live : liveVec) {
-    auto const agree = ~(live ^ liveVec[0]);
-    liveAgree &= agree;
+    if (!test.accepts(live)) return false;
   }
-
-  const uint16_t base = liveVec[0] & liveAgree;
   for (auto const dead : deadVec) {
-    if ((dead & liveAgree) == base) {
-      return folly::none;
-    }
+    if (test.accepts(dead)) return false;
   }
-
-  return MaskAndCompare{base, liveAgree, 0};
+  return true;
 }
 
-folly::Optional<MaskAndCompare> computeXORMaskAndCompare(
+folly::Optional<LayoutTest> compute2ByteTest(
     const std::vector<uint16_t>& liveVec,
     const std::vector<uint16_t>& deadVec) {
-  std::vector<uint16_t> remainingLive(liveVec);
-  std::vector<uint16_t> remainingDead(deadVec);
+  assertx(!liveVec.empty());
+  auto const val = liveVec[0];
+  auto const cmp = LayoutTest { val, LayoutTest::Cmp2Byte };
+  if (checkLayoutTest(liveVec, deadVec, cmp)) return cmp;
 
-  // We process each bit from most significant to least significant,
-  // determining the proper assignment for that bit in the XOR and CMP
-  // values.
-  //
-  // For each bit, there three relevant scenarios:
-  //
-  // 1. All live layouts agree on this bit having value x. We should
-  // XOR with x and CMP with 0.
-  //
-  // 2. Live layouts do not agree on the bit, but dead layouts agree on
-  // it having value y. We should XOR with ~y and CMP with 1.
-  //
-  // 3. Live layouts do not agree on the bit, and neither do dead
-  // layouts.  We must exclude this bit in the mask.
-  //
-  // After each action, we remove all dead layouts that are guaranteed
-  // the fail our test and all live layouts that are guaranteed to pass
-  // it.
-  auto const recomputeLive = [&] () -> std::pair<uint16_t, uint16_t> {
-    uint16_t liveAgree = 0xffff;
-    for (auto const live : remainingLive) {
-      auto const agree = ~(live ^ remainingLive[0]);
-      liveAgree &= agree;
-    }
-    uint16_t deadAgree = 0xffff;
-    for (auto const dead : remainingDead) {
-      auto const agree = ~(dead ^ remainingDead[0]);
-      deadAgree &= agree;
-    }
-    return {liveAgree, deadAgree};
-  };
-
-  uint16_t xorVal = 0;
-  uint16_t cmpVal = 0;
-  uint16_t andVal = 0xffff;
-  auto [liveAgree, deadAgree] = recomputeLive();
-  for (int i = 0; i < 16; i++) {
-    // The bit currently being examined.
-    const uint16_t mask = (1 << (15 - i));
-
-    if (remainingDead.empty() && remainingLive.empty()) break;
-
-    if (!remainingLive.empty() && (liveAgree & mask)) {
-      xorVal |= remainingLive[0] & mask;
-    } else if (!remainingDead.empty() && (deadAgree & mask)) {
-      xorVal |= (~remainingDead[0]) & mask;
-      cmpVal |= mask;
-    } else if (remainingDead.empty()) {
-      cmpVal |= mask;
-    } else if (!remainingLive.empty()) {
-      andVal ^= mask;
-      // Nothing will be filtered out as we have not constrained our mask, so
-      // reuse the agreement sets from the prior round.
-      continue;
-    }
-
-    // The set of bits that have already been fixed and will not be masked
-    // away. This is a prefix of the set of bits that will be fixed and is used
-    // for determining which live and dead layouts must pass or fail the test,
-    // regardless of the decisions made for future (less significant) bits.
-    const uint16_t cmpMask = andVal & ~(mask - 1);
-
-    remainingDead.erase(
-      std::remove_if(remainingDead.begin(), remainingDead.end(),
-        [&](auto v) { return ((v ^ xorVal) & cmpMask) > cmpVal; }),
-      remainingDead.end());
-    remainingLive.erase(
-      std::remove_if(remainingLive.begin(), remainingLive.end(),
-        [&](auto v) { return ((v ^ xorVal) & cmpMask) < cmpVal; }),
-      remainingLive.end());
-
-    auto const [liveAgreeNew, deadAgreeNew] = recomputeLive();
-    liveAgree = liveAgreeNew;
-    deadAgree = deadAgreeNew;
+  auto imm = uint16_t(-1);
+  for (auto const live : liveVec) {
+    imm &= ~live;
   }
+  auto const and = LayoutTest { imm, LayoutTest::And2Byte };
+  if (checkLayoutTest(liveVec, deadVec, and)) return and;
 
-  if (!remainingDead.empty() && !remainingLive.empty()) {
-    return folly::none;
-  }
-
-  // If it came down to the last bit, adjust the comparison accordingly.
-  if (!remainingDead.empty()) cmpVal--;
-
-  return MaskAndCompare{xorVal, andVal, cmpVal};
+  return folly::none;
 }
 
 }
@@ -182,6 +96,7 @@ Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents,
 {
   std::lock_guard<std::mutex> lock(s_layoutCreationMutex);
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
+  assertx(m_index.raw < kMaxNumLayouts);
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
   m_topoIndex = s_topoIndex++;
@@ -296,11 +211,17 @@ struct Layout::AncestorOrdering {
   }
 };
 
+void Layout::ClearHierarchy() {
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
+    if (i != kBespokeTopIndex.raw) s_layoutTable[i] = nullptr;
+  }
+}
+
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
   std::vector<Layout*> allLayouts;
-  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
     allLayouts.push_back(layout);
@@ -312,9 +233,7 @@ void Layout::FinalizeHierarchy() {
     }
   }
 
-  // TODO(mcolavita): implement these by merging in topological order instead
-  // of repeated BFS
-  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto layout = s_layoutTable[i];
     if (!layout) continue;
     auto const descendants = layout->computeDescendants();
@@ -340,7 +259,7 @@ void Layout::FinalizeHierarchy() {
   // their children's masks if necessary.
   std::sort(allLayouts.begin(), allLayouts.end(), AncestorOrdering{});
   for (auto const layout : allLayouts) {
-    layout->m_maskAndCompare = layout->computeMaskAndCompare();
+    layout->m_layout_test = layout->computeLayoutTest();
   }
 
   s_hierarchyFinal.store(true, std::memory_order_release);
@@ -390,19 +309,6 @@ const Layout* Layout::operator&(const Layout& other) const {
   return nullptr;
 }
 
-LayoutIndex Layout::ReserveIndices(size_t count) {
-  assertx(folly::isPowTwo(count));
-  auto const padded_count = 2 * count - 1;
-  auto const base = s_layoutTableIndex.fetch_add(padded_count);
-  always_assert(base + padded_count <= kMaxIndex.raw + 1);
-  for (auto i = 0; i < padded_count; i++) {
-    s_layoutTable[base + i] = nullptr;
-  }
-  auto const result = (base + count - 1) & ~(count - 1);
-  assertx(result % count == 0);
-  return {safe_cast<uint16_t>(result)};
-}
-
 const Layout* Layout::FromIndex(LayoutIndex index) {
   auto const layout = s_layoutTable[index.raw];
   assertx(layout != nullptr);
@@ -412,14 +318,11 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
 
 std::string Layout::dumpAllLayouts() {
   std::ostringstream ss;
-
-  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
-
     ss << layout->dumpInformation();
   }
-
   return ss.str();
 }
 
@@ -434,10 +337,20 @@ std::string Layout::dumpInformation() const {
   ss << folly::format("{:04x}: {} [{}]\n", m_index.raw, describe(),
                        concreteDesc(this));
 
-  ss << folly::format("  Type test:\n");
-  ss << folly::format("    XOR {:04x}\n", m_maskAndCompare.xorVal);
-  ss << folly::format("    AND {:04x}\n", m_maskAndCompare.andVal);
-  ss << folly::format("    CMP {:04x}\n", m_maskAndCompare.cmpVal);
+  auto const test = [&]{
+    switch (m_layout_test.mode) {
+      case LayoutTest::And1Byte:
+        return folly::sformat("AND {:02x}xx", m_layout_test.imm & 0xff);
+      case LayoutTest::And2Byte:
+        return folly::sformat("AND {:04x}", m_layout_test.imm);
+      case LayoutTest::Cmp1Byte:
+        return folly::sformat("CMP {:02x}xx", m_layout_test.imm & 0xff);
+      case LayoutTest::Cmp2Byte:
+        return folly::sformat("CMP {:04x}", m_layout_test.imm);
+    }
+    always_assert(false);
+  }();
+  ss << folly::format("  Type test: {}\n", test);
 
   ss << folly::format("  Ancestors:\n");
   for (auto const ancestor : m_ancestors) {
@@ -458,7 +371,7 @@ std::string Layout::dumpInformation() const {
   return ss.str();
 }
 
-MaskAndCompare Layout::computeMaskAndCompare() const {
+LayoutTest Layout::computeLayoutTest() const {
   FTRACE_MOD(Trace::bespoke, 1, "Try: {}\n", describe());
 
   // The set of all concrete layouts that descend from the layout.
@@ -467,14 +380,12 @@ MaskAndCompare Layout::computeMaskAndCompare() const {
     if (!layout->isConcrete()) continue;
     liveVec.push_back(layout->m_index.raw);
   }
-
   assertx(!liveVec.empty());
-  if (liveVec.size() == 1) return {MaskAndCompare::fullCompare(liveVec[0])};
   std::sort(liveVec.begin(), liveVec.end());
 
   // The set of all possible concrete layouts.
   std::vector<uint16_t> allConcrete;
-  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+  for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
     if (!layout->isConcrete()) continue;
@@ -493,47 +404,61 @@ MaskAndCompare Layout::computeMaskAndCompare() const {
   auto constexpr kVanillaLayoutIndex = uint16_t(-1);
   deadVec.push_back(kVanillaLayoutIndex);
 
-  auto const check = [&] () -> MaskAndCompare {
-    // 1. Attempt to find a trivial mask to cover.
-    if (auto const result = computeSimpleMaskAndCompare(liveVec, deadVec)) {
-      return *result;
+  // Try a 1-byte test on the layout's high byte. Fall back to a 2-byte test.
+  auto const result = [&]{
+    std::vector<uint16_t> live1ByteVec;
+    for (auto const live : liveVec) {
+      live1ByteVec.push_back(live >> 8);
+    }
+    std::vector<uint16_t> dead1ByteVec;
+    for (auto const dead : deadVec) {
+      dead1ByteVec.push_back(dead >> 8);
     }
 
-    // 2. Attempt to find a single mask to cover.
-    if (auto const result = computeXORMaskAndCompare(liveVec, deadVec)) {
-      return *result;
+    if (auto const test = compute2ByteTest(live1ByteVec, dead1ByteVec)) {
+      auto one_byte = *test;
+      one_byte.mode = [&]{
+        switch (one_byte.mode) {
+          case LayoutTest::And1Byte: always_assert(false);
+          case LayoutTest::And2Byte: return LayoutTest::And1Byte;
+          case LayoutTest::Cmp1Byte: always_assert(false);
+          case LayoutTest::Cmp2Byte: return LayoutTest::Cmp1Byte;
+        }
+        always_assert(false);
+      }();
+      one_byte.imm = uint16_t(int8_t(one_byte.imm & 0xff));
+      return one_byte;
     }
 
-    // 3. Give up.
-    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeMaskAndCompare") {
+    if (auto const test = compute2ByteTest(liveVec, deadVec)) return *test;
+
+    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeLayoutTest") {
       std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
       ret += folly::sformat("  Live:\n");
       for (auto const live : liveVec) {
-        auto const layout = s_layoutTable[live];
-        ret += folly::sformat("  - {:04x}: {}\n", live, layout->describe());
+        auto const layout = s_layoutTable[live]->describe();
+        ret += folly::sformat("  - {:04x}: {}\n", live, layout);
       }
       ret += folly::sformat("  Dead:\n");
       for (auto const dead : deadVec) {
-        auto const layout = s_layoutTable[dead];
-        ret += folly::sformat("  - {:04x}: {}\n", dead, layout->describe());
+        auto const layout = dead == kVanillaLayoutIndex
+          ? "Vanilla" : s_layoutTable[dead]->describe();
+        ret += folly::sformat("  - {:04x}: {}\n", dead, layout);
       }
       return ret;
     };
+
     always_assert(false);
   }();
 
-  if (debug) {
-    // The check should pass on live values and fail on dead values.
-    for (auto const live : liveVec) always_assert(check.accepts(live));
-    for (auto const dead : deadVec) always_assert(!check.accepts(dead));
-  }
+  always_assert(checkLayoutTest(liveVec, deadVec, result));
 
-  return check;
+  return result;
 }
 
-MaskAndCompare Layout::maskAndCompare() const {
+LayoutTest Layout::getLayoutTest() const {
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
-  return m_maskAndCompare;
+  return m_layout_test;
 }
 
 struct Layout::Initializer {
@@ -582,9 +507,7 @@ AbstractLayout::AbstractLayout(LayoutIndex index,
 {}
 
 void AbstractLayout::InitializeLayouts() {
-  auto const index = Layout::ReserveIndices(1);
-  always_assert(index == kBespokeTopIndex);
-  new AbstractLayout(index, "BespokeTop", {});
+  new AbstractLayout(kBespokeTopIndex, "BespokeTop", {});
 }
 
 LayoutIndex AbstractLayout::GetBespokeTopIndex() {
@@ -638,10 +561,9 @@ ArrayData* maybeMonoifyForTesting(ArrayData* ad, LoggingProfile* profile) {
 }
 }
 
-void logBespokeDispatch(const ArrayData* ad, const char* fn) {
+void logBespokeDispatch(const BespokeArray* bad, const char* fn) {
   DEBUG_ONLY auto const sk = getSrcKey();
-  DEBUG_ONLY auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
-  DEBUG_ONLY auto const layout = Layout::FromIndex(index);
+  DEBUG_ONLY auto const layout = Layout::FromIndex(bad->layoutIndex());
   TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
             sk.valid() ? sk.getSymbol().data() : "(unknown)",
             layout->describe().data(), fn);

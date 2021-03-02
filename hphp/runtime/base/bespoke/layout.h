@@ -27,7 +27,41 @@
 
 namespace HPHP { namespace bespoke {
 
-void logBespokeDispatch(const ArrayData* ad, const char* fn);
+// Although we dynamically construct bespoke layouts, we only have a small,
+// statically-known list of "families" of these layouts.
+//
+// We restrict layout indices: the upper byte of a bespoke layout's index must
+// match the "layout byte" for its layout family. That means that we're limited
+// to 256 layouts for a given family.
+//
+// This restriction helps us in two ways:
+//
+//   1. It lets us do bespoke vtable dispatch off this byte alone.
+//
+//   2. It lets us choose indices that we can efficiently test for. All layout
+//      tests are a single "test" op. See also "unordered code" in datatype.h.
+//
+// These constants look ad-hoc. Here's what the bits mean:
+//  - Bit 1: unset iff subtype of MonotypeVec<Top>
+//  - Bit 2: unset iff subtype of MonotypeDict<Empty|Int,Top>
+//  - Bit 3: unset iff subtype of MonotypeDict<Empty|Str,Top>
+//
+// Bit 0 is less constrained. For MonotypeDict, when it is unset, it means the
+// layout is one of the static-string keyed layouts. We have space here to add
+// kStructLayoutByte = 0b1111.
+//
+// This encoding is the one that uses the fewest number of bits (resulting in
+// the smallest vtable) for our current set of layout families.
+//
+constexpr uint8_t kLoggingLayoutByte               = 0b1110;
+constexpr uint8_t kMonotypeVecLayoutByte           = 0b1101;
+constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b1011;
+constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b0111;
+constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b0110;
+constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b0010;
+
+// Log that we're calling the given function for the given array.
+void logBespokeDispatch(const BespokeArray* bad, const char* fn);
 
 // Return a monotype copy of a vanilla array, or nullptr if it's not monotype.
 BespokeArray* maybeMonoify(ArrayData*);
@@ -83,11 +117,11 @@ struct LayoutFunctions {
 template <typename Array>
 struct LayoutFunctionDispatcher {
   ALWAYS_INLINE static Array* Cast(ArrayData* ad, const char* fn) {
-    logBespokeDispatch(ad, fn);
+    logBespokeDispatch(BespokeArray::asBespoke(ad), fn);
     return Array::As(ad);
   }
   ALWAYS_INLINE static const Array* Cast(const ArrayData* ad, const char* fn) {
-    logBespokeDispatch(ad, fn);
+    logBespokeDispatch(BespokeArray::asBespoke(ad), fn);
     return Array::As(ad);
   }
 
@@ -251,17 +285,19 @@ struct Layout {
   std::string dumpInformation() const;
   virtual bool isConcrete() const { return false; }
   const LayoutFunctions* vtable() const { return m_vtable; }
+  LayoutTest getLayoutTest() const;
 
   /*
-   * In order to support efficient layout type tests in the JIT, we let
-   * layout initializers reserve aligned blocks of indices to populate.
-   *
-   *   @precondition:  `size` must be a power of two.
-   *   @postcondition: The result is a multiple of size.
+   * Access to individual layouts, or debug access to all of them.
    */
-  static LayoutIndex ReserveIndices(size_t size);
   static const Layout* FromIndex(LayoutIndex index);
   static std::string dumpAllLayouts();
+
+  /*
+   * Test-only helper to clear the existing layouts in the type hierarchy.
+   * After calling this method, the only layout will be the BespokeTop one.
+   */
+  static void ClearHierarchy();
 
   /*
    * Seals the bespoke type hierarchy. Before this is invoked, type operations
@@ -320,12 +356,6 @@ struct Layout {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Retrieve the set of masks and compares to use for a type test for this
-   * layout.
-   */
-  MaskAndCompare maskAndCompare() const;
-
 protected:
   Layout(LayoutIndex index, std::string description, LayoutSet parents,
          const LayoutFunctions* vtable);
@@ -334,7 +364,7 @@ private:
   bool checkInvariants() const;
   LayoutSet computeAncestors() const;
   LayoutSet computeDescendants() const;
-  MaskAndCompare computeMaskAndCompare() const;
+  LayoutTest computeLayoutTest() const;
 
   bool isDescendantOfDebug(const Layout* other) const;
 
@@ -352,7 +382,8 @@ private:
   LayoutSet m_children;
   std::vector<Layout*> m_descendants;
   std::vector<Layout*> m_ancestors;
-  MaskAndCompare m_maskAndCompare;
+  LayoutTest m_layout_test;
+
 protected:
   const LayoutFunctions* m_vtable;
 };

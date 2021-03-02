@@ -26,6 +26,9 @@ namespace HPHP{
 namespace bespoke {
 namespace testing {
 
+std::atomic<uint16_t> s_num_abstract_layouts;
+std::atomic<uint16_t> s_num_concrete_layouts;
+
 struct MockLayout : public Layout {
   MockLayout(const std::string& description, LayoutSet&& parents,
              LayoutIndex idx, bool concrete)
@@ -41,7 +44,6 @@ private:
 
 inline Layout* makeDummyLayout(const std::string& name,
                                std::vector<jit::ArrayLayout> parents,
-                               bespoke::LayoutIndex idx,
                                bool concrete = true) {
   using ::testing::Mock;
 
@@ -54,9 +56,27 @@ inline Layout* makeDummyLayout(const std::string& name,
       return *parent.layoutIndex();
     }
   );
-  auto const ret = new MockLayout(name, std::move(indices), idx, concrete);
+
+  // In order to support type tests, we use a 1-hot encoding to encode leaf
+  // concrete layout indices. Abstract layout indices aren't constrained.
+  auto const index = [&]() -> LayoutIndex {
+    auto constexpr base = kLoggingLayoutByte << 8;
+    if (concrete) {
+      auto const index = s_num_concrete_layouts++;
+      return {safe_cast<uint16_t>(base + (1 << index))};
+    }
+    auto const index = s_num_abstract_layouts++;
+    return {safe_cast<uint16_t>(base + 0xff - index)};
+  }();
+
+  auto const ret = new MockLayout(name, std::move(indices), index, concrete);
   Mock::AllowLeak(ret);
   return ret;
+}
+
+inline Layout* makeDummyAbstractLayout(const std::string& name,
+                                       std::vector<jit::ArrayLayout> parents) {
+  return makeDummyLayout(name, parents, false);
 }
 
 

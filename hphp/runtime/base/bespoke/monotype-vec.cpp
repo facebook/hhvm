@@ -76,9 +76,6 @@ StaticVec s_emptyMonotypeVArray;
 StaticVec s_emptyMonotypeVecMarked;
 StaticVec s_emptyMonotypeVArrayMarked;
 
-static_assert(sizeof(DataType) == 1);
-constexpr LayoutIndex kBaseLayoutIndex = {1 << 9};
-
 const LayoutFunctions* monotypeVecVtable() {
   static auto const result = fromArray<MonotypeVec>();
   return &result;
@@ -90,13 +87,14 @@ const LayoutFunctions* emptyMonotypeVecVtable() {
 }
 
 constexpr LayoutIndex getLayoutIndex(DataType type) {
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type))};
+  auto constexpr base = uint16_t(kMonotypeVecLayoutByte << 8);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
-  auto constexpr offset = (1 << 8);
   auto constexpr type = kExtraInvalidDataType;
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + uint8_t(type) + offset};
+  auto constexpr base = uint16_t(kMonotypeVecLayoutByte << 8);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 
 Layout::LayoutSet getEmptyParentLayouts() {
@@ -867,9 +865,6 @@ Type MonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 void MonotypeVec::InitializeLayouts() {
-  auto const base = Layout::ReserveIndices(1 << 9);
-  always_assert(base == kBaseLayoutIndex);
-
   new TopMonotypeVecLayout();
 
   // Create all the potentially internal concrete layouts first
@@ -951,8 +946,7 @@ LayoutIndex MonotypeVecLayout::Index(DataType type) {
 }
 
 bool isMonotypeVecLayout(LayoutIndex index) {
-  return kBaseLayoutIndex.raw <= index.raw &&
-         index.raw < 2 * kBaseLayoutIndex.raw;
+  return (index.raw >> 8) == kMonotypeVecLayoutByte;
 }
 
 }}

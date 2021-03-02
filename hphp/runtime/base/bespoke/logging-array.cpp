@@ -52,7 +52,7 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
-constexpr LayoutIndex kLayoutIndex = {1};
+constexpr LayoutIndex kLayoutIndex = {kLoggingLayoutByte << 8};
 
 std::atomic<bool> g_emitLoggingArrays;
 
@@ -192,10 +192,8 @@ void profileArrLikeProps(ObjectData* obj) {
 //////////////////////////////////////////////////////////////////////////////
 
 void LoggingArray::InitializeLayouts() {
-  auto const index = Layout::ReserveIndices(1);
-  always_assert(index == kLayoutIndex);
   static auto const s_vtable = fromArray<LoggingArray>();
-  new ConcreteLayout(index, "LoggingLayout",
+  new ConcreteLayout(kLayoutIndex, "LoggingLayout",
                      {AbstractLayout::GetBespokeTopIndex()}, &s_vtable);
 }
 

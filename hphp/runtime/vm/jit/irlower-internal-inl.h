@@ -135,65 +135,26 @@ inline Vreg materialize(Vout&, Vreg data) { return data; }
 
 template <class JmpFn>
 void emitBespokeLayoutTest(Vout& v, ArrayLayout layout, Vreg r, JmpFn doJcc) {
-  auto const check = layout.bespokeMaskAndCompare();
-  const int16_t xorVal = static_cast<int16_t>(check.xorVal);
-  const int16_t andVal = static_cast<int16_t>(check.andVal);
-  const int16_t cmpVal = static_cast<int16_t>(check.cmpVal);
+  auto const test = layout.bespokeLayoutTest();
+  auto const imm = static_cast<int16_t>(test.imm);
+  auto const sf = v.makeReg();
 
-  auto const bits = v.makeReg();
-  v << loadw{r[ArrayData::offsetOfBespokeIndex()], bits};
+  switch (test.mode) {
+    case LayoutTest::And1Byte:
+      v << testbim{imm, r[ArrayData::offsetOfBespokeIndex() + 1], sf};
+      break;
+    case LayoutTest::And2Byte:
+      v << testwim{imm, r[ArrayData::offsetOfBespokeIndex()], sf};
+      break;
+    case LayoutTest::Cmp1Byte:
+      v << cmpbim{imm, r[ArrayData::offsetOfBespokeIndex() + 1], sf};
+      break;
+    case LayoutTest::Cmp2Byte:
+      v << cmpwim{imm, r[ArrayData::offsetOfBespokeIndex()], sf};
+      break;
+  }
 
-  auto const [cmpOp, sf] = [&] {
-    auto const andUnnecessary = andVal == -1;
-    auto const cmpUnnecessary = cmpVal == 0;
-
-    if (andUnnecessary && cmpUnnecessary) {
-      auto const sf = v.makeReg();
-      v << cmpwi{xorVal, bits, sf};
-      return std::make_pair(CC_Z, sf);
-    }
-
-    {
-      // If our test can be reduced to a single bit test, do so.
-      const int16_t andXor = andVal & xorVal;
-      const int16_t andNotXor = andVal & ~xorVal;
-
-      if (andNotXor == 0 && folly::popcount(andXor) == 1 &&
-          (cmpVal == 0 || cmpVal == andXor)) {
-        auto const sf = v.makeReg();
-        v << testwi{andXor, bits, sf};
-        return std::make_pair(cmpVal == 0 ? CC_NZ : CC_Z, sf);
-      }
-    }
-
-    auto const xoredBits = v.makeReg();
-    auto const xoredSf = v.makeReg();
-    v << xorwi{xorVal, bits, xoredBits, xoredSf};
-
-    auto const [maskedBits, maskedSf] = [&] {
-      if (andUnnecessary) {
-        // If we are not masking the result, and will not change the value or any
-        // flags.
-        return std::make_pair(xoredBits, xoredSf);
-      }
-      auto const res = v.makeReg();
-      auto const resSf = v.makeReg();
-      v << andwi{andVal, xoredBits, res, resSf};
-      return std::make_pair(res, resSf);
-    }();
-
-    if (cmpUnnecessary) {
-      // If we are comparing to 0, just use the zero flag from the result of the
-      // previous ops.
-      return std::make_pair(CC_Z, maskedSf);
-    } else {
-      auto const csf = v.makeReg();
-      v << cmpwi{cmpVal, maskedBits, csf};
-      return std::make_pair(CC_BE, csf);
-    }
-  }();
-
-  doJcc(cmpOp, sf);
+  doJcc(CC_Z, sf);
   auto const doneBlock = v.makeBlock();
   v << jmp{doneBlock};
   v = doneBlock;

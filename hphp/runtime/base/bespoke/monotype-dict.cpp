@@ -51,8 +51,6 @@ uint16_t packSizeIndexAndAuxBits(uint8_t index, uint8_t aux) {
   return (static_cast<uint16_t>(index) << 8) | aux;
 }
 
-constexpr LayoutIndex kBaseLayoutIndex = {1 << 11};
-
 constexpr size_t kMinSizeIndex = 7;
 constexpr size_t kMinSizeBytes = 128;
 
@@ -90,29 +88,25 @@ constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
 using StringDict = MonotypeDict<StringData*>;
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
-  auto constexpr offset = 4 * (1 << 8);
-  auto constexpr base = kBaseLayoutIndex.raw;
   auto constexpr type = kExtraInvalidDataType;
-  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
-  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+  auto constexpr base = uint16_t(kEmptyMonotypeDictLayoutByte << 8);
+  static_assert((StringDict::intKeyMask().raw & base) == 0);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 constexpr LayoutIndex getIntLayoutIndex(DataType type) {
-  auto constexpr offset = 2 * (1 << 8);
-  auto constexpr base = kBaseLayoutIndex.raw;
-  static_assert((StringDict::intKeyMask().raw & (base + offset)) != 0);
-  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+  auto constexpr base = uint16_t(kIntMonotypeDictLayoutByte << 8);
+  static_assert((StringDict::intKeyMask().raw & base) != 0);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 constexpr LayoutIndex getStrLayoutIndex(DataType type) {
-  auto constexpr offset = 1 * (1 << 8);
-  auto constexpr base = kBaseLayoutIndex.raw;
-  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
-  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+  auto constexpr base = uint16_t(kStrMonotypeDictLayoutByte << 8);
+  static_assert((StringDict::intKeyMask().raw & base) == 0);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 constexpr LayoutIndex getStaticStrLayoutIndex(DataType type) {
-  auto constexpr offset = 0 * (1 << 8);
-  auto constexpr base = kBaseLayoutIndex.raw;
-  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
-  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+  auto constexpr base = uint16_t(kStaticStrMonotypeDictLayoutByte << 8);
+  static_assert((StringDict::intKeyMask().raw & base) == 0);
+  return LayoutIndex{uint16_t(base + uint8_t(type))};
 }
 
 const LayoutFunctions* getVtableForKeyTypes(KeyTypes kt) {
@@ -1567,9 +1561,6 @@ Type MonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 void EmptyMonotypeDict::InitializeLayouts() {
-  auto const base = Layout::ReserveIndices(1 << 11);
-  always_assert(base == kBaseLayoutIndex);
-
   new TopMonotypeDictLayout(KeyTypes::Ints);
   new TopMonotypeDictLayout(KeyTypes::Strings);
   new TopMonotypeDictLayout(KeyTypes::StaticStrings);
@@ -1660,8 +1651,11 @@ LayoutIndex MonotypeDictLayout::Index(KeyTypes kt, DataType type) {
 }
 
 bool isMonotypeDictLayout(LayoutIndex index) {
-  return kBaseLayoutIndex.raw <= index.raw &&
-         index.raw < 2 * kBaseLayoutIndex.raw;
+  auto const byte = index.raw >> 8;
+  return byte == kIntMonotypeDictLayoutByte ||
+         byte == kStrMonotypeDictLayoutByte ||
+         byte == kStaticStrMonotypeDictLayoutByte ||
+         byte == kEmptyMonotypeDictLayoutByte;
 }
 
 BespokeArray* MakeMonotypeDictFromVanilla(

@@ -148,11 +148,7 @@ TEST(Type, ArrayLayout) {
   auto const bespoke = ArrayLayout::Bespoke();
   auto const bottom  = ArrayLayout::Bottom();
   auto const foo = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1)
-    )
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
 
   EXPECT_EQ("Top",          top.describe());
@@ -1006,18 +1002,10 @@ TEST(Type, VanillaVec) {
 
 TEST(Type, BespokeVec) {
   auto const foo_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1)
-    )
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
   auto const bar_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1)
-    )
+    bespoke::testing::makeDummyLayout("bar", {ArrayLayout::Bespoke()})
   };
 
   auto const vecFoo = TVec.narrowToLayout(foo_layout);
@@ -1040,18 +1028,10 @@ TEST(Type, BespokeVec) {
 TEST(Type, BespokeVecRAT) {
   RO::EvalBespokeArrayLikeMode = 2;
   auto const foo_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1)
-    )
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
   auto const bar_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1)
-    )
+    bespoke::testing::makeDummyLayout("bar", {ArrayLayout::Bespoke()})
   };
   bespoke::selectBespokeLayouts();
 
@@ -1112,45 +1092,21 @@ TEST(Type, BespokeHierarchy) {
    * bar  bat(L) ter
    */
   RO::EvalBespokeArrayLikeMode = 2;
+  bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1),
-      false
-    )
+    bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})
   };
   auto const baz_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "baz",
-      {ArrayLayout::Bespoke()},
-      bespoke::Layout::ReserveIndices(1),
-      false
-    )
+    bespoke::testing::makeDummyAbstractLayout("baz", {ArrayLayout::Bespoke()})
   };
   auto const bar_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {foo_layout},
-      bespoke::Layout::ReserveIndices(1),
-      true
-    )
+    bespoke::testing::makeDummyLayout("bar", {foo_layout})
   };
   auto const bat_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bat",
-      {foo_layout, baz_layout},
-      bespoke::Layout::ReserveIndices(1),
-      true
-    )
+    bespoke::testing::makeDummyLayout("bat", {foo_layout, baz_layout})
   };
   auto const ter_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "ter",
-      {baz_layout},
-      bespoke::Layout::ReserveIndices(1),
-      true
-    )
+    bespoke::testing::makeDummyLayout("ter", {baz_layout})
   };
   bespoke::selectBespokeLayouts();
 
@@ -1310,63 +1266,33 @@ TEST(Type, BespokeRanges) {
    * qop
    */
   RO::EvalBespokeArrayLikeMode = 2;
-  auto const base = bespoke::Layout::ReserveIndices(1UL << 10).raw;
+  bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {ArrayLayout::Bespoke()},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b101) },
-      false
-    )
+    bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})
   };
   auto const baz_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "baz",
-      {ArrayLayout::Bespoke()},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b011) },
-      false
-    )
+    bespoke::testing::makeDummyAbstractLayout("baz", {ArrayLayout::Bespoke()})
   };
   auto const bar_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {foo_layout},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b100) },
-      false
-    )
+    bespoke::testing::makeDummyAbstractLayout("bar", {foo_layout})
   };
   auto const bat_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "bat",
-      {foo_layout, baz_layout},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b110) },
-      true
-    )
+    bespoke::testing::makeDummyLayout("bat", {foo_layout, baz_layout})
   };
   auto const ter_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "ter",
-      {baz_layout},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b010) },
-      true
-    )
+    bespoke::testing::makeDummyLayout("ter", {baz_layout})
   };
   auto const qop_layout = ArrayLayout{
-    bespoke::testing::makeDummyLayout(
-      "qup",
-      {bar_layout},
-      bespoke::LayoutIndex { static_cast<uint16_t>(base + 0b10000) },
-      true
-    )
+    bespoke::testing::makeDummyLayout("qup", {bar_layout})
   };
   bespoke::selectBespokeLayouts();
 
-  foo_layout.bespokeMaskAndCompare();
-  baz_layout.bespokeMaskAndCompare();
-  bar_layout.bespokeMaskAndCompare();
-  bat_layout.bespokeMaskAndCompare();
-  ter_layout.bespokeMaskAndCompare();
-  qop_layout.bespokeMaskAndCompare();
+  foo_layout.bespokeLayoutTest();
+  baz_layout.bespokeLayoutTest();
+  bar_layout.bespokeLayoutTest();
+  bat_layout.bespokeLayoutTest();
+  ter_layout.bespokeLayoutTest();
+  qop_layout.bespokeLayoutTest();
 }
 
 TEST(Type, PtrKinds) {

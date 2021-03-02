@@ -161,7 +161,7 @@ struct MonotypeDict : BespokeArray {
   }
   // This bit is set in our layout index iff we have int keys.
   static constexpr LayoutIndex intKeyMask() {
-    return {0x0200};
+    return {(kIntMonotypeDictLayoutByte & ~kStrMonotypeDictLayoutByte) << 8};
   }
 
 #define X(Return, Name, Args...) static Return Name(Args);

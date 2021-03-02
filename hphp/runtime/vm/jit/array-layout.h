@@ -64,7 +64,7 @@ struct ArrayLayout {
   const bespoke::Layout* bespokeLayout() const;
   folly::Optional<bespoke::LayoutIndex> layoutIndex() const;
 
-  MaskAndCompare bespokeMaskAndCompare() const;
+  LayoutTest bespokeLayoutTest() const;
 
   // Return a human-readable debug string describing the layout.
   std::string describe() const;

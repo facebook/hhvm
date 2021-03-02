@@ -45,7 +45,6 @@ let init
     ~prechecked_files:_
     ~predeclare_ide:_
     ~max_typechecker_worker_memory_mb:_
-    ~profile_type_check_duration_threshold:_
     ~profile_owner:_
     ~profile_desc:_
     ~max_times_to_defer:_ =
@@ -57,7 +56,6 @@ let init_worker
     ~custom_columns:_
     ~init_id:_
     ~time:_
-    ~profile_type_check_duration_threshold:_
     ~profile_owner:_
     ~profile_desc:_
     ~max_times_to_defer:_ =

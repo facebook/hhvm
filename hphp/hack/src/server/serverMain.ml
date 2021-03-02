@@ -1354,9 +1354,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     let max_times_to_defer =
       local_config.ServerLocalConfig.max_times_to_defer_type_checking
     in
-    let profile_type_check_duration_threshold =
-      local_config.ServerLocalConfig.profile_type_check_duration_threshold
-    in
     let profile_owner = local_config.ServerLocalConfig.profile_owner in
     let profile_desc = local_config.ServerLocalConfig.profile_desc in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
@@ -1371,7 +1368,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~init_id
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~time:(Unix.gettimeofday ())
-        ~profile_type_check_duration_threshold
         ~profile_owner
         ~profile_desc
         ~max_times_to_defer
@@ -1392,7 +1388,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~prechecked_files
         ~predeclare_ide
         ~max_typechecker_worker_memory_mb
-        ~profile_type_check_duration_threshold
         ~profile_owner
         ~profile_desc
         ~max_times_to_defer

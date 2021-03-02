@@ -565,6 +565,10 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     }
   };
 
+  if (ctx.liveTypes.size() > RuntimeOption::EvalJitTraceletLiveLocsLimit) {
+    return nullptr;
+  }
+
   do {
     Env env{ctx, kind, interp, breakAt, maxBCInstrs, inlining};
     region = form_region(env);

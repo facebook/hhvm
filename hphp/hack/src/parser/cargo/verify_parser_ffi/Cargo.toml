@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../verify_parser_ffi.rs"
+test = false
+doctest = false
 
 [dependencies]
 ocamlrep = { path = "../../../ocamlrep" }

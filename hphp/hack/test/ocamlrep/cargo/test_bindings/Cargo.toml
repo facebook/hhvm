@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../test_bindings.rs"
+test = false
+doctest = false
 
 [dependencies]
 ocamlrep = { path = "../../../../src/ocamlrep" }

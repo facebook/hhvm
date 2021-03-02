@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../aast_parser_ffi.rs"
+test = false
+doctest = false
 
 [dependencies]
 aast_parser = { path = "../aast_parser" }

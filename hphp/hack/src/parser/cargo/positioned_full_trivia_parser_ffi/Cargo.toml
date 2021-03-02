@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../positioned_full_trivia_parser_ffi.rs"
+test = false
+doctest = false
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }

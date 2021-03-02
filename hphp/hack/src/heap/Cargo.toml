@@ -7,9 +7,10 @@ edition = "2018"
 [[bin]]
 name = "dump_saved_state_depgraph"
 path = "dump_saved_state_depgraph.rs"
+test = false
 
 [dependencies]
 depgraph = { path = "../depgraph" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
-rusqlite = { version = "0.23", features = ["blob", "bundled"] }
+rusqlite = { version = "0.23", features = ["blob"] }
 structopt = "0.3.21"

@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../rust_parser_errors.rs"
+test = false
+doctest = false
 
 [dependencies]
 escaper = { path = "../../../utils/escaper" }

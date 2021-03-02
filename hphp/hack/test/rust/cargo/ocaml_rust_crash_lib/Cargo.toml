@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../ocaml_rust_crash.rs"
+test = false
+doctest = false
 
 [dependencies]
 ocaml = "0.8"

@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../decl_mode_parser.rs"
+test = false
+doctest = false
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }

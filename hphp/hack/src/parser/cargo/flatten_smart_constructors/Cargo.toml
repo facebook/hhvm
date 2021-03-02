@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../flatten_smart_constructors.rs"
+test = false
+doctest = false
 
 [dependencies]
 parser_core_types = { path = "../core_types" }

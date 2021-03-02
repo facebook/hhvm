@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "line_break_map_tests.rs"
+test = false
+doctest = false
 
 [dependencies]
 line_break_map = { path = "../line_break_map" }

@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../rescan_trivia.rs"
+test = false
+doctest = false
 
 [dependencies]
 parser = { path = "../../../core" }

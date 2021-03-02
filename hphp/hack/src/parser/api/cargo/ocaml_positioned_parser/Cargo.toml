@@ -6,6 +6,8 @@ edition = "2018"
 
 [lib]
 path = "../../ocaml_positioned_parser.rs"
+test = false
+doctest = false
 
 [dependencies]
 ocaml_syntax = { path = "../../../cargo/ocaml_syntax" }

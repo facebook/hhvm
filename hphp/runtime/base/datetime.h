@@ -244,7 +244,13 @@ public:
   int hour12() const { return (m_time->h % 12) ? (int) m_time->h % 12 : 12;}
   int minute() const { return m_time->i;}
   int second() const { return m_time->s;}
-  double fraction() const { return m_time->f;}
+  double fraction() const {
+#if TIMELIB_VERSION >= TIMELIB_MODERN
+      return m_time->us / 1000000.0;
+#else
+      return m_time->f;
+#endif
+  }
   int zoneType() const { return m_time->zone_type;}
   int beat() const;    // Swatch Beat a.k.a. Internet Time
   int dow() const;     // day of week
@@ -360,7 +366,8 @@ private:
 
   // helpers
   static Array ParseTime(timelib_time* time,
-                         struct timelib_error_container* error);
+                        timelib_error_container* error);
+
   void update();
   String rfcFormat(const String& format) const;
   String stdcFormat(const String& format) const;
@@ -368,4 +375,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

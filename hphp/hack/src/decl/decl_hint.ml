@@ -94,20 +94,32 @@ and hint_ p env = function
       {
         hf_reactive_kind = reactivity;
         hf_param_tys = hl;
-        hf_param_kinds = kl;
-        hf_param_mutability = muts;
+        hf_param_info = pil;
         hf_variadic_ty = vh;
         hf_ctxs = ctxs;
         hf_return_ty = h;
         hf_is_mutable_return = mut_ret;
+        hf_is_readonly_return = readonly_ret;
       } ->
-    let make_param ((p, _) as x) k mut =
-      let mutability =
-        match mut with
-        | Some PMutable -> Some Param_borrowed_mutable
-        | Some POwnedMutable -> Some Param_owned_mutable
-        | Some PMaybeMutable -> Some Param_maybe_mutable
-        | _ -> None
+    let make_param ((p, _) as x) param_info =
+      let (mutability, readonly, kind) =
+        match param_info with
+        | Some p ->
+          let mutability =
+            match p.hfparam_mutability with
+            | Some PMutable -> Some Param_borrowed_mutable
+            | Some POwnedMutable -> Some Param_owned_mutable
+            | Some PMaybeMutable -> Some Param_maybe_mutable
+            | _ -> None
+          in
+          let readonly =
+            match p.hfparam_readonlyness with
+            | Some Ast_defs.Readonly -> true
+            | _ -> false
+          in
+          let param_kind = get_param_mode p.hfparam_kind in
+          (mutability, readonly, param_kind)
+        | None -> (None, false, FPnormal)
       in
       {
         fp_pos = Decl_env.make_decl_pos env p;
@@ -115,7 +127,7 @@ and hint_ p env = function
         fp_type = possibly_enforced_hint env x;
         fp_flags =
           make_fp_flags
-            ~mode:(get_param_mode k)
+            ~mode:kind
             ~accept_disposable:false
             ~mutability
             ~has_default:
@@ -123,14 +135,17 @@ and hint_ p env = function
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
             ~ifc_can_call:false
-            ~is_atom:
-              false
-              (* TODO: support readonly on parameters of function parameters *)
-            ~readonly:false;
+            ~is_atom:false
+            ~readonly;
         fp_rx_annotation = None;
       }
     in
-    let paraml = List.map3_exn hl kl muts ~f:make_param in
+    let readonly_ret =
+      match readonly_ret with
+      | Some Ast_defs.Readonly -> true
+      | None -> false
+    in
+    let paraml = List.map2_exn hl pil ~f:make_param in
     let implicit_params =
       let capability = aast_contexts_to_decl_capability env ctxs p in
       { capability }
@@ -138,7 +153,7 @@ and hint_ p env = function
     let ret = possibly_enforced_hint env h in
     let arity =
       match vh with
-      | Some t -> Fvariadic (make_param t None None)
+      | Some t -> Fvariadic (make_param t None)
       | None -> Fstandard
     in
     let reactivity =
@@ -162,7 +177,7 @@ and hint_ p env = function
             ~returns_void_to_rx:false
             ~returns_mutable:mut_ret
             ~returns_readonly:
-              false (* TODO: support readonly on function type hints *)
+              readonly_ret (* TODO: support readonly on function type hints *)
             ~readonly_this:false;
         ft_reactive = reactivity;
         (* TODO: handle function parameters with <<CanCall>> *)

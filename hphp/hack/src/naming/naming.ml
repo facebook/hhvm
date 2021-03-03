@@ -380,7 +380,7 @@ and contexts env ctxs =
   in
   (pos, hl)
 
-and hfun env reactivity hl kl variadic_hint ctxs h =
+and hfun env reactivity hl il variadic_hint ctxs h readonly_ret =
   let variadic_hint = Option.map variadic_hint (hint env) in
   let (muts, hl) =
     List.map
@@ -391,6 +391,21 @@ and hfun env reactivity hl kl variadic_hint ctxs h =
         (mut, hint env h1))
       hl
     |> List.unzip
+  in
+  let il =
+    List.map2_exn il muts ~f:(fun info mut ->
+        match (info, mut) with
+        | (Some info, Some _) ->
+          Some { info with Aast.hfparam_mutability = mut }
+        | (None, Some _) ->
+          Some
+            Aast.
+              {
+                hfparam_mutability = mut;
+                hfparam_kind = None;
+                hfparam_readonlyness = None;
+              }
+        | (_, None) -> info)
   in
   let ctxs = Option.map ~f:(contexts env) ctxs in
   let (ret_mut, rh) = unwrap_mutability h in
@@ -407,12 +422,12 @@ and hfun env reactivity hl kl variadic_hint ctxs h =
       {
         hf_reactive_kind = reactivity;
         hf_param_tys = hl;
-        hf_param_kinds = kl;
-        hf_param_mutability = muts;
+        hf_param_info = il;
         hf_variadic_ty = variadic_hint;
         hf_ctxs = ctxs;
         hf_return_ty = hint ~allow_retonly:true env rh;
         hf_is_mutable_return = ret_mut;
+        hf_is_readonly_return = readonly_ret;
       }
 
 and hint_
@@ -451,14 +466,14 @@ and hint_
         {
           hf_reactive_kind = reactivity;
           hf_param_tys = hl;
-          hf_param_kinds = kl;
-          hf_param_mutability = _;
+          hf_param_info = il;
           hf_variadic_ty = variadic_hint;
           hf_ctxs = ctxs;
           hf_return_ty = h;
           hf_is_mutable_return = _;
+          hf_is_readonly_return = readonly_ret;
         } ->
-    hfun env reactivity hl kl variadic_hint ctxs h
+    hfun env reactivity hl il variadic_hint ctxs h readonly_ret
   (* Special case for Pure<function> *)
   | Aast.Happly
       ( (_, hname),
@@ -469,16 +484,16 @@ and hint_
                 {
                   hf_reactive_kind = _;
                   hf_param_tys = hl;
-                  hf_param_kinds = kl;
-                  hf_param_mutability = _;
+                  hf_param_info = il;
                   hf_variadic_ty = variadic_hint;
                   hf_ctxs = ctxs;
                   hf_return_ty = h;
                   hf_is_mutable_return = _;
+                  hf_is_readonly_return = readonly_ret;
                 } );
         ] )
     when String.equal hname SN.Rx.hPure ->
-    hfun env N.FPure hl kl variadic_hint ctxs h
+    hfun env N.FPure hl il variadic_hint ctxs h readonly_ret
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl

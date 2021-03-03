@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dab46425a4d1477826ea1d88c0c41f39>>
+// @generated SignedSource<<bb2d0632a6d21ab12a0fa6a5bb5e243a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -212,14 +212,34 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     Serialize,
     ToOcamlRep
 )]
+pub struct HfParamInfo {
+    pub kind: Option<ast_defs::ParamKind>,
+    pub mutability: Option<ParamMutability>,
+    pub readonlyness: Option<ast_defs::ReadonlyKind>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct HintFun {
     pub reactive_kind: FuncReactive,
     pub param_tys: Vec<Hint>,
-    pub param_kinds: Vec<Option<ast_defs::ParamKind>>,
-    pub param_mutability: Vec<Option<ParamMutability>>,
+    pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
     pub ctxs: Option<Contexts>,
     pub return_ty: Hint,
+    pub is_readonly_return: Option<ast_defs::ReadonlyKind>,
     pub is_mutable_return: MutableReturn,
 }
 

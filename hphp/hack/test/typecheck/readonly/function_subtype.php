@@ -41,3 +41,17 @@ class Child extends ParentClass {
 
 
 }
+
+function fnTypes(
+  (function(readonly Child) : Child) $f,
+  (function (readonly Child) : readonly Child) $f2,
+) : void {
+  $y = $f(new Child()); // error, argument is not readonly
+  $z = function(Child $x) : Child {
+    return $x;
+  };
+  // fails because the function takes mutable args which is not a subtype
+  fnTypes($z, $f2);
+  // fails because the function returns readonly Child instead of mutable Child
+  fnTypes($f2, $f2);
+}

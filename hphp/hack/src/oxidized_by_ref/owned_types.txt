@@ -1,4 +1,5 @@
 aast_defs::Tprim
+aast_defs::HfParamInfo
 aast::Tprim
 decl_defs::ConsistentKind
 decl_defs::LinearizationKind

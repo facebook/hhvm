@@ -595,17 +595,17 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hfun hfun ->
     let {
       hf_param_tys;
-      hf_param_kinds;
+      hf_param_info;
       hf_variadic_ty;
       hf_return_ty;
       hf_reactive_kind = _;
-      hf_param_mutability = _;
       hf_ctxs = _;
       hf_is_mutable_return = _;
+      hf_is_readonly_return = _;
     } =
       hfun
     in
-    List.iter2_exn hf_param_kinds hf_param_tys ~f:(hfun_param env variance);
+    List.iter2_exn hf_param_info hf_param_tys ~f:(hfun_param env variance);
     fun_arity env variance hf_variadic_ty;
     fun_ret env variance hf_return_ty
   | Happly (_, []) -> ()
@@ -624,9 +624,9 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
 
 and hint_list env variance tyl = List.iter tyl ~f:(hint env variance)
 
-and hfun_param env variance inout h =
+and hfun_param env variance info h =
   let pos = Ast_defs.get_pos h in
-  match inout with
+  match Option.bind info ~f:(fun x -> x.Aast.hfparam_kind) with
   | None ->
     let reason = (pos, Rfun_parameter, Pcontravariant) in
     let variance = flip reason variance in
@@ -646,7 +646,9 @@ and fun_ret env variance h =
   in
   hint env variance h
 
-and fun_arity env variance h = Option.iter h ~f:(hfun_param env variance None)
+and fun_arity env variance h =
+  let empty_param_info = None in
+  Option.iter h ~f:(hfun_param env variance empty_param_info)
 
 let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
  fun env variance param ->
@@ -664,7 +666,19 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
   } =
     param
   in
-  Option.iter h ~f:(hfun_param env variance param_callconv)
+  Option.iter
+    h
+    ~f:
+      (hfun_param
+         env
+         variance
+         (Some
+            Aast.
+              {
+                hfparam_kind = param_callconv;
+                hfparam_mutability = None;
+                hfparam_readonlyness = None;
+              }))
 
 let fun_variadicity : Env.t -> variance -> Nast.fun_variadicity -> unit =
  fun env variance variadicity ->

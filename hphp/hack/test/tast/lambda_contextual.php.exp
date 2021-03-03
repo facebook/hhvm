@@ -12,9 +12,10 @@
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
                       hf_param_tys = [([3:31-34], (Hprim Tint))];
-                      hf_param_kinds = [None]; hf_param_mutability = [None];
-                      hf_variadic_ty = None; hf_ctxs = None;
+                      hf_param_info = [None]; hf_variadic_ty = None;
+                      hf_ctxs = None;
                       hf_return_ty = ([3:37-40], (Hprim Tnum));
+                      hf_is_readonly_return = None;
                       hf_is_mutable_return = false }))));
          param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f";
          param_expr = None; param_readonly = None; param_callconv = None;

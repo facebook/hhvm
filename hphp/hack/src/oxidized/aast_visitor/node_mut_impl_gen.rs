@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf80016345035ad7bdfdf9cbd8d8695c>>
+// @generated SignedSource<<edafe2fc01dfc2b038d18826ae04ccaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1182,6 +1182,25 @@ impl<P: Params> NodeMut<P> for Gconst<P::Ex, P::Fb, P::En, P::Hi> {
         Ok(())
     }
 }
+impl<P: Params> NodeMut<P> for HfParamInfo {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_hf_param_info(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.kind.accept(c, v)?;
+        self.mutability.accept(c, v)?;
+        self.readonlyness.accept(c, v)?;
+        Ok(())
+    }
+}
 impl<P: Params> NodeMut<P> for Hint {
     fn accept<'node>(
         &'node mut self,
@@ -1215,11 +1234,11 @@ impl<P: Params> NodeMut<P> for HintFun {
     ) -> Result<(), P::Error> {
         self.reactive_kind.accept(c, v)?;
         self.param_tys.accept(c, v)?;
-        self.param_kinds.accept(c, v)?;
-        self.param_mutability.accept(c, v)?;
+        self.param_info.accept(c, v)?;
         self.variadic_ty.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.return_ty.accept(c, v)?;
+        self.is_readonly_return.accept(c, v)?;
         self.is_mutable_return.accept(c, v)?;
         Ok(())
     }

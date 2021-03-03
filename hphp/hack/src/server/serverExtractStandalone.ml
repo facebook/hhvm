@@ -1193,12 +1193,16 @@ end = struct
         Hfun
           {
             hf_param_tys;
-            hf_param_kinds;
+            hf_param_info;
             hf_variadic_ty;
             hf_return_ty;
             hf_ctxs;
             _;
           }) ->
+      let hf_param_kinds =
+        List.map hf_param_info ~f:(fun i ->
+            Option.bind i (fun i -> i.Aast.hfparam_kind))
+      in
       let pp_typed_param ppf kp =
         Fmt.(
           pair ~sep:nop (option @@ suffix sp pp_paramkind)

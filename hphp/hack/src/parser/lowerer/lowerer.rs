@@ -692,12 +692,22 @@ where
     fn p_closure_parameter(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
-    ) -> Result<(ast::Hint, Option<ast::ParamKind>)> {
+    ) -> Result<(ast::Hint, Option<ast::HfParamInfo>)> {
         match &node.children {
             ClosureParameterTypeSpecifier(c) => {
                 let kind = Self::mp_optional(Self::p_param_kind, &c.call_convention, env)?;
+                let mutability = None;
+                let readonlyness = Self::mp_optional(Self::p_readonly, &c.readonly, env)?;
+                let info = match (kind, mutability, readonlyness) {
+                    (None, None, None) => None,
+                    _ => Some(ast::HfParamInfo {
+                        kind,
+                        mutability,
+                        readonlyness,
+                    }),
+                };
                 let hint = Self::p_hint(&c.type_, env)?;
-                Ok((hint, kind))
+                Ok((hint, info))
             }
             _ => Self::missing_syntax("closure parameter", node, env),
         }
@@ -929,7 +939,7 @@ where
                         VariadicParameter(_) => false,
                         _ => true,
                     });
-                let (type_hints, kinds) = param_list
+                let (type_hints, info) = param_list
                     .iter()
                     .map(|p| Self::p_closure_parameter(p, env))
                     .collect::<std::result::Result<Vec<_>, _>>()?
@@ -961,12 +971,16 @@ where
                 Ok(Hfun(ast::HintFun {
                     reactive_kind: ast::FuncReactive::FNonreactive,
                     param_tys: type_hints,
-                    param_kinds: kinds,
-                    param_mutability: vec![],
+                    param_info: info,
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
                     ctxs,
                     return_ty: Self::p_hint(&c.return_type, env)?,
                     is_mutable_return: true,
+                    is_readonly_return: Self::mp_optional(
+                        Self::p_readonly,
+                        &c.readonly_return,
+                        env,
+                    )?,
                 }))
             }
             AttributizedSpecifier(c) => {

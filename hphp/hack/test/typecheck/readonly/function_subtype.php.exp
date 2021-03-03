@@ -22,3 +22,19 @@ The method `setParams` is not compatible with the overridden method (Typing[4341
   This parameter is mutable
   File "function_subtype.php", line 37, characters 17-18:
   But this parameter is readonly
+File "function_subtype.php", line 54, characters 11-12:
+Invalid argument (Typing[4411])
+  File "function_subtype.php", line 46, characters 22-26:
+  Mismatched parameter readonlyness
+  File "function_subtype.php", line 46, characters 22-26:
+  This parameter is mutable
+  File "function_subtype.php", line 50, characters 23-24:
+  But this parameter is readonly
+File "function_subtype.php", line 56, characters 11-13:
+Invalid argument (Typing[4411])
+  File "function_subtype.php", line 47, characters 3-46:
+  Function readonly return mismatch
+  File "function_subtype.php", line 47, characters 3-46:
+  This function returns a readonly value
+  File "function_subtype.php", line 46, characters 3-36:
+  This function does not return a readonly value

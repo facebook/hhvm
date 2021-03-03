@@ -78,14 +78,23 @@ and variadic_hint = hint option
 
 and contexts = pos * hint list
 
+and hf_param_info = {
+  hfparam_kind: Ast_defs.param_kind option;
+  hfparam_mutability: param_mutability option;
+  hfparam_readonlyness: Ast_defs.readonly_kind option;
+}
+
 and hint_fun = {
   hf_reactive_kind: func_reactive;
   hf_param_tys: hint list;
-  hf_param_kinds: Ast_defs.param_kind option list;
-  hf_param_mutability: param_mutability option list;
+  (* hf_param_info is None when all three are none, for perf optimization reasons.
+   It is not semantically incorrect for the record to appear with 3 None values,
+   but in practice we shouldn't lower to that, since it wastes CPU/space *)
+  hf_param_info: hf_param_info option list;
   hf_variadic_ty: variadic_hint;
   hf_ctxs: contexts option;
   hf_return_ty: hint;
+  hf_is_readonly_return: Ast_defs.readonly_kind option;
   hf_is_mutable_return: mutable_return;
 }
 

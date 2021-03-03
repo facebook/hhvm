@@ -17,9 +17,10 @@
                   (Hfun
                      { hf_reactive_kind = FNonreactive;
                        hf_param_tys = [([3:35-38], (Hprim Tint))];
-                       hf_param_kinds = [None]; hf_param_mutability = [None];
-                       hf_variadic_ty = None; hf_ctxs = None;
+                       hf_param_info = [None]; hf_variadic_ty = None;
+                       hf_ctxs = None;
                        hf_return_ty = ([3:41-44], (Hprim Tint));
+                       hf_is_readonly_return = None;
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [3:46-48];
           param_name = "$f"; param_expr = None; param_readonly = None;

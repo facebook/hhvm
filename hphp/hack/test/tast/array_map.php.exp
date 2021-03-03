@@ -12,9 +12,10 @@
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
                       hf_param_tys = [([4:13-16], (Hprim Tint))];
-                      hf_param_kinds = [None]; hf_param_mutability = [None];
-                      hf_variadic_ty = None; hf_ctxs = None;
+                      hf_param_info = [None]; hf_variadic_ty = None;
+                      hf_ctxs = None;
                       hf_return_ty = ([4:19-23], (Hprim Tbool));
+                      hf_is_readonly_return = None;
                       hf_is_mutable_return = false }))));
          param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f";
          param_expr = None; param_readonly = None; param_callconv = None;
@@ -28,10 +29,10 @@
                        hf_param_tys =
                        [([5:13-16], (Hprim Tint));
                          ([5:18-24], (Hprim Tstring))];
-                       hf_param_kinds = [None; None];
-                       hf_param_mutability = [None; None];
-                       hf_variadic_ty = None; hf_ctxs = None;
+                       hf_param_info = [None; None]; hf_variadic_ty = None;
+                       hf_ctxs = None;
                        hf_return_ty = ([5:27-31], (Hprim Tbool));
+                       hf_is_readonly_return = None;
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [5:33-35];
           param_name = "$g"; param_expr = None; param_readonly = None;
@@ -48,13 +49,13 @@
                        [([6:13-16], (Hprim Tint));
                          ([6:18-24], (Hprim Tstring));
                          ([6:26-29], (Hprim Tnum))];
-                       hf_param_kinds = [None; None; None];
-                       hf_param_mutability = [None; None; None];
+                       hf_param_info = [None; None; None];
                        hf_variadic_ty = None; hf_ctxs = None;
                        hf_return_ty =
                        ([6:32-46],
                         (Happly (([6:32-41], "\\HH\\Container"),
                            [([6:42-45], (Hprim Tint))])));
+                       hf_is_readonly_return = None;
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [6:48-50];
           param_name = "$h"; param_expr = None; param_readonly = None;
@@ -67,9 +68,10 @@
                   (Hfun
                      { hf_reactive_kind = FNonreactive;
                        hf_param_tys = [([7:13-16], (Hprim Tnum))];
-                       hf_param_kinds = [None]; hf_param_mutability = [None];
-                       hf_variadic_ty = None; hf_ctxs = None;
+                       hf_param_info = [None]; hf_variadic_ty = None;
+                       hf_ctxs = None;
                        hf_return_ty = ([7:19-23], (Hprim Tbool));
+                       hf_is_readonly_return = None;
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [7:25-27];
           param_name = "$i"; param_expr = None; param_readonly = None;

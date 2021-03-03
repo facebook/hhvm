@@ -1,6 +1,10 @@
-Linearization for class \:x:
-[\:x]
-Linearization for class \:h:
-[\:h]
-Linearization for class \:g:
-[\:g, \:x(xhp_attrs_only), \:h]
+:x:
+  :x
+
+:h:
+  :h
+
+:g:
+  :g
+  :x (xhp_attrs_only)
+  :h

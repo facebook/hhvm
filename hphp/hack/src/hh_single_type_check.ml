@@ -2125,24 +2125,29 @@ let handle_mode
     in
     Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
+        let is_first = ref true in
         List.iter classes ~f:(fun (_, classname) ->
-            Printf.printf "Linearization for class %s:\n" classname;
+            if not !is_first then Printf.printf "\n";
+            is_first := false;
             let { Decl_linearize.lin_members; _ } =
               Decl_linearize.get_linearizations ctx classname
             in
             let linearization =
               Sequence.map lin_members (fun mro ->
-                  let name = mro.Decl_defs.mro_name in
+                  let name = Utils.strip_ns mro.Decl_defs.mro_name in
+                  let env =
+                    Typing_env.empty ctx Relative_path.default ~droot:None
+                  in
                   let targs =
                     List.map
                       mro.Decl_defs.mro_type_args
-                      (Typing_print.full_decl ctx)
+                      (Typing_print.full_strip_ns_decl env)
                   in
                   let targs =
                     if List.is_empty targs then
                       ""
                     else
-                      "<" ^ String.concat ~sep:"," targs ^ ">"
+                      "<" ^ String.concat ~sep:", " targs ^ ">"
                   in
                   Decl_defs.(
                     let modifiers =
@@ -2189,10 +2194,11 @@ let handle_mode
                       ( if String.equal modifiers "" then
                         ""
                       else
-                        Printf.sprintf "(%s)" modifiers )))
+                        Printf.sprintf " (%s)" modifiers )))
               |> Sequence.to_list
             in
-            Printf.printf "[%s]\n" (String.concat ~sep:", " linearization)))
+            Printf.printf "%s:\n" (Utils.strip_ns classname);
+            List.iter linearization ~f:(Printf.printf "  %s\n")))
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -1,12 +1,27 @@
-Linearization for class \A:
-[\A]
-Linearization for class \B:
-[\B]
-Linearization for class \IA:
-[\IA(PAT)]
-Linearization for class \IB:
-[\IB(PAT)]
-Linearization for class \X:
-[\X(copy_private_members, PAT), \IA(requirement, consts_only, PAT), \IB(requirement, consts_only, PAT), \IB(PAT), \IA(PAT)]
-Linearization for class \Y:
-[\Y(copy_private_members, PAT), \IA(consts_only, PAT), \X(copy_private_members, PAT), \IA(requirement, consts_only, PAT), \IB(requirement, consts_only, PAT), \IB(PAT), \IA(PAT)]
+A:
+  A
+
+B:
+  B
+
+IA:
+  IA (PAT)
+
+IB:
+  IB (PAT)
+
+X:
+  X (copy_private_members, PAT)
+  IA (requirement, consts_only, PAT)
+  IB (requirement, consts_only, PAT)
+  IB (PAT)
+  IA (PAT)
+
+Y:
+  Y (copy_private_members, PAT)
+  IA (consts_only, PAT)
+  X (copy_private_members, PAT)
+  IA (requirement, consts_only, PAT)
+  IB (requirement, consts_only, PAT)
+  IB (PAT)
+  IA (PAT)

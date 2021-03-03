@@ -21,6 +21,8 @@ val find_policied_attribute :
 val has_return_disposable_attribute :
   Nast.user_attribute list -> Aast.mutable_return
 
+val has_constfun_attribute : Nast.user_attribute list -> bool
+
 val fun_returns_mutable : Nast.user_attribute list -> Aast.mutable_return
 
 val fun_returns_void_to_rx : Nast.user_attribute list -> Aast.mutable_return

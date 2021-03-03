@@ -1,0 +1,4 @@
+File "constfun_without_unstable.php", line 14, characters 1-14:
+Cannot use unstable feature: `readonly` (Parsing[1002])
+File "constfun_without_unstable.php", line 15, characters 14-27:
+Cannot use unstable feature: `readonly` (Parsing[1002])

@@ -16,7 +16,7 @@
              ft_flags =
              (make_ft_flags FSync None ~return_disposable:false
                ~returns_mutable:false ~returns_void_to_rx:false
-               ~returns_readonly:false ~readonly_this:false);
+               ~returns_readonly:false ~readonly_this:false ~is_const:false);
              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:10-11]; fe_php_std_lib = true }));
   ("\\C",
@@ -67,7 +67,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~readonly_this:false
+                   ~is_const:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None;
@@ -92,7 +93,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~readonly_this:false
+                   ~is_const:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None;

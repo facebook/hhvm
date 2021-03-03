@@ -170,6 +170,7 @@ let method_type env m =
   let reactivity = FunUtils.fun_reactivity env m.m_user_attributes in
   let mut = FunUtils.get_param_mutability m.m_user_attributes in
   let ifc_decl = FunUtils.find_policied_attribute m.m_user_attributes in
+  let is_const = FunUtils.has_constfun_attribute m.m_user_attributes in
   let returns_mutable = FunUtils.fun_returns_mutable m.m_user_attributes in
   let returns_void_to_rx =
     FunUtils.fun_returns_void_to_rx m.m_user_attributes
@@ -218,7 +219,8 @@ let method_type env m =
         ~return_disposable
         ~returns_void_to_rx
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
-        ~readonly_this:m.m_readonly_this;
+        ~readonly_this:m.m_readonly_this
+        ~const:is_const;
     ft_ifc_decl = ifc_decl;
   }
 

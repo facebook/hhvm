@@ -6586,6 +6586,7 @@ and call
               ~ifc_can_call:false
               ~is_atom:false
               ~readonly:false
+              ~const_function:false
           in
           {
             fp_pos = pos;
@@ -6632,6 +6633,7 @@ and call
             ~returns_void_to_rx:false
             ~returns_readonly:false
             ~readonly_this:false
+            ~const:false
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =

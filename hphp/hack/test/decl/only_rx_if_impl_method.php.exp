@@ -38,7 +38,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~readonly_this:false
+                   ~is_const:false);
                  ft_reactive =
                  Pure {(Rhint (root|only_rx_if_impl_method.php line 6, characters 28-37),
                         (Tapply (([6:28-31], "\\IRx"), [])))};

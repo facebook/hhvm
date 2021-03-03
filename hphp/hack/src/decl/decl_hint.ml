@@ -136,7 +136,8 @@ and hint_ p env = function
             ~ifc_external:false
             ~ifc_can_call:false
             ~is_atom:false
-            ~readonly;
+            ~readonly
+            ~const_function:false;
         fp_rx_annotation = None;
       }
     in
@@ -176,9 +177,16 @@ and hint_ p env = function
             ~return_disposable:false
             ~returns_void_to_rx:false
             ~returns_mutable:mut_ret
-            ~returns_readonly:
-              readonly_ret (* TODO: support readonly on function type hints *)
-            ~readonly_this:false;
+            ~returns_readonly:readonly_ret
+            ~readonly_this:
+              false
+              (* TODO: The constness of a function type hint is associated with
+            an attribute on the parameter, not on the hint itself.
+            Thus it's always false here, but we check for the attribute
+            in readonly_check.ml. When we decide actual syntax for this,
+            this will likely change.
+            *)
+            ~const:false;
         ft_reactive = reactivity;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;

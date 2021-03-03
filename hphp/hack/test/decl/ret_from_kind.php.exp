@@ -19,7 +19,7 @@
              ft_flags =
              (make_ft_flags FAsync None ~return_disposable:false
                ~returns_mutable:false ~returns_void_to_rx:false
-               ~returns_readonly:false ~readonly_this:false);
+               ~returns_readonly:false ~readonly_this:false ~is_const:false);
              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:16-29]; fe_php_std_lib = false }));
   ("\\no_hint_generator",
@@ -48,7 +48,7 @@
               ft_flags =
               (make_ft_flags FGenerator None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:10-27]; fe_php_std_lib = false }));
   ("\\no_hint_async_generator",
@@ -77,7 +77,7 @@
               ft_flags =
               (make_ft_flags FAsyncGenerator None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:16-39]; fe_php_std_lib = false }))
   ]

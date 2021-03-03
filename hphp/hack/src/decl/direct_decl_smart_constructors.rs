@@ -891,6 +891,7 @@ struct Attributes<'a> {
     returns_mutable: bool,
     late_init: bool,
     const_: bool,
+    const_fun: bool,
     lsb: bool,
     memoizelsb: bool,
     override_: bool,
@@ -1191,6 +1192,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             returns_mutable: false,
             late_init: false,
             const_: false,
+            const_fun: false,
             lsb: false,
             memoizelsb: false,
             override_: false,
@@ -1277,6 +1279,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Const" => {
                         attributes.const_ = true;
+                    }
+                    "__ConstFun" => {
+                        attributes.const_fun = true;
                     }
                     "__LSB" => {
                         attributes.lsb = true;
@@ -1526,6 +1531,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             flags |= FunTypeFlags::READONLY_THIS
         }
 
+        if attributes.const_fun {
+            flags |= FunTypeFlags::IS_CONST
+        }
+
         let ifc_decl = attributes.ifc_attribute;
 
         flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
@@ -1661,6 +1670,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
                             if attributes.atom {
                                 flags |= FunParamFlags::ATOM
+                            }
+                            if attributes.const_fun {
+                                flags |= FunParamFlags::CONST_FUNCTION
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY

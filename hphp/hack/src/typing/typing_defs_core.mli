@@ -465,6 +465,7 @@ module Flags : sig
     returns_void_to_rx:bool ->
     returns_readonly:bool ->
     readonly_this:bool ->
+    const:bool ->
     Hh_prelude.Int.t
 
   val mode_to_flags : param_mode -> int
@@ -478,6 +479,7 @@ module Flags : sig
     ifc_can_call:bool ->
     is_atom:bool ->
     readonly:bool ->
+    const_function:bool ->
     Hh_prelude.Int.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool

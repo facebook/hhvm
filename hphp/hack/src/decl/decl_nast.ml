@@ -41,6 +41,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let reactivity = FunUtils.fun_reactivity env f.f_user_attributes in
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
   let returns_mutable = FunUtils.fun_returns_mutable f.f_user_attributes in
+  let is_const = FunUtils.has_constfun_attribute f.f_user_attributes in
   let returns_void_to_rx =
     FunUtils.fun_returns_void_to_rx f.f_user_attributes
   in
@@ -102,7 +103,8 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 ~return_disposable
                 ~returns_void_to_rx
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
-                ~readonly_this:false;
+                ~readonly_this:false
+                ~const:is_const;
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )

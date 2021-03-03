@@ -24,7 +24,7 @@
              ft_flags =
              (make_ft_flags FGenerator None ~return_disposable:false
                ~returns_mutable:false ~returns_void_to_rx:false
-               ~returns_readonly:false ~readonly_this:false);
+               ~returns_readonly:false ~readonly_this:false ~is_const:false);
              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-11]; fe_php_std_lib = false }));
   ("\\g",
@@ -45,7 +45,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-11]; fe_php_std_lib = false }));
   ("\\h",
@@ -66,7 +66,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [13:10-11]; fe_php_std_lib = false }));
   ("\\i",
@@ -90,7 +90,7 @@
               ft_flags =
               (make_ft_flags FAsync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:16-17]; fe_php_std_lib = false }));
   ("\\j",
@@ -117,7 +117,7 @@
               ft_flags =
               (make_ft_flags FAsyncGenerator None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~readonly_this:false ~is_const:false);
               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [26:16-17]; fe_php_std_lib = false }))
   ]

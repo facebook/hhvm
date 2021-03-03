@@ -28,6 +28,7 @@ bitflags! {
         const IS_FUNCTION_POINTER    = 1 << 9;
         const RETURNS_READONLY       = 1 << 10;
         const READONLY_THIS          = 1 << 11;
+        const IS_CONST               = 1 << 12;
     }
 }
 
@@ -47,6 +48,8 @@ bitflags! {
         const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
 
         const READONLY       = 1 << 8;
+
+        const CONST_FUNCTION      = 1 << 9;
     }
 }
 

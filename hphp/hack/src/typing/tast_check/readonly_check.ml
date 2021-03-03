@@ -49,7 +49,9 @@ let get_local lenv id =
 
 let has_const_attribute user_attributes =
   List.exists user_attributes ~f:(fun ua ->
-      String.equal (snd ua.ua_name) Naming_special_names.UserAttributes.uaConst)
+      String.equal
+        (snd ua.ua_name)
+        Naming_special_names.UserAttributes.uaConstFun)
 
 (* Returns true if rty_sub is a subtype of rty_sup.
 TODO: Later, we'll have to consider the regular type as well, for example

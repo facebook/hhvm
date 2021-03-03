@@ -17,10 +17,9 @@
                    )))
                };
              ft_flags =
-             (make_ft_flags FAsync None ~return_disposable:false
-               ~returns_mutable:false ~returns_void_to_rx:false
+             (make_ft_flags FAsync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
-             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+             ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:16-29]; fe_php_std_lib = false }));
   ("\\no_hint_generator",
    (Shallow_decl_defs.Fun
@@ -46,10 +45,9 @@
                     )))
                 };
               ft_flags =
-              (make_ft_flags FGenerator None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
+              (make_ft_flags FGenerator ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:10-27]; fe_php_std_lib = false }));
   ("\\no_hint_async_generator",
    (Shallow_decl_defs.Fun
@@ -75,10 +73,9 @@
                     )))
                 };
               ft_flags =
-              (make_ft_flags FAsyncGenerator None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
+              (make_ft_flags FAsyncGenerator ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:16-39]; fe_php_std_lib = false }))
   ]
 

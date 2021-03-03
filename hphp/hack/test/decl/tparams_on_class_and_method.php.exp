@@ -17,7 +17,7 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([4:19-20], "f"); sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([4:19-20], "f");
           sm_type =
           (Rwitness (root|tparams_on_class_and_method.php line 4, characters 19-19),
            (Tfun
@@ -37,12 +37,11 @@
                      (Rhint (root|tparams_on_class_and_method.php line 4, characters 25-26),
                       (Tgeneric ("Ta", [])))
                      };
-                   fp_rx_annotation = None;
                    fp_flags =
-                   (make_fp_flags ~mutability:None ~accept_disposable:false
-                     ~has_default:false ~mode:Typing_defs_core.FPnormal
-                     ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                     ~readonly:false ~const_function:false);
+                   (make_fp_flags ~accept_disposable:false ~has_default:false
+                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                     ~ifc_can_call:false ~is_atom:false ~readonly:false
+                     ~const_function:false);
                     };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type =
@@ -51,9 +50,8 @@
                       (Rhint (root|tparams_on_class_and_method.php line 4, characters 32-33),
                        (Tgeneric ("Tc", [])))
                       };
-                    fp_rx_annotation = None;
                     fp_flags =
-                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                    (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
                       ~readonly:false ~const_function:false);
@@ -72,15 +70,12 @@
                         ]))
                   };
                 ft_flags =
-                (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false
+                (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
                   ~is_const:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                }));
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([8:19-20], "g");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|tparams_on_class_and_method.php line 8, characters 19-19),
             (Tfun
@@ -100,9 +95,8 @@
                       (Rhint (root|tparams_on_class_and_method.php line 8, characters 25-26),
                        (Tgeneric ("Tb", [])))
                       };
-                    fp_rx_annotation = None;
                     fp_flags =
-                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                    (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
                       ~readonly:false ~const_function:false);
@@ -114,9 +108,8 @@
                        (Rhint (root|tparams_on_class_and_method.php line 8, characters 32-33),
                         (Tgeneric ("Td", [])))
                        };
-                     fp_rx_annotation = None;
                      fp_flags =
-                     (make_fp_flags ~mutability:None ~accept_disposable:false
+                     (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
                        ~ifc_external:false ~ifc_can_call:false ~is_atom:false
                        ~readonly:false ~const_function:false);
@@ -136,12 +129,10 @@
                          ]))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }))

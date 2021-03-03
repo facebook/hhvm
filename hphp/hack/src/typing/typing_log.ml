@@ -300,9 +300,7 @@ let return_info_as_value env return_info =
         {
           return_type;
           return_disposable;
-          return_mutable;
           return_explicit;
-          return_void_to_rx;
           return_dynamically_callable;
         } =
     return_info
@@ -311,9 +309,7 @@ let return_info_as_value env return_info =
     [
       ("return_type", possibly_enforced_type_as_value env return_type);
       ("return_disposable", Bool return_disposable);
-      ("return_mutable", Bool return_mutable);
       ("return_explicit", Bool return_explicit);
-      ("return_void_to_rx", Bool return_void_to_rx);
       ("return_dynamically_callable", Bool return_dynamically_callable);
     ]
 
@@ -439,11 +435,6 @@ let log_subtype_prop env message prop =
   lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
   lnewline ()
 
-let local_mutability_as_value local_mutability =
-  local_id_map_as_value
-    (fun m -> Atom (Typing_mutability_env.to_string m))
-    local_mutability
-
 let fun_kind_to_string k =
   match k with
   | Ast_defs.FSync -> "normal"
@@ -457,49 +448,12 @@ let val_kind_to_string k =
   | Lval -> "lval"
   | LvalSubexpr -> "lval subexpression"
 
-let rec reactivity_to_string env r =
-  let from_decl opt_ty prefix =
-    prefix
-    ^
-    match opt_ty with
-    | None -> ""
-    | Some ty -> " " ^ Typing_print.debug_decl env ty
-  in
-  match r with
-  | Nonreactive -> "normal"
-  | Pure opt_ty -> from_decl opt_ty "pure"
-  | MaybeReactive r -> "maybereactive " ^ reactivity_to_string env r
-  | RxVar opt_r ->
-    "rxvar"
-    ^
-    (match opt_r with
-    | None -> ""
-    | Some r -> " " ^ reactivity_to_string env r)
-  | Cipp s ->
-    "cipp"
-    ^
-    (match s with
-    | None -> ""
-    | Some s -> "(" ^ s ^ ")")
-  | CippLocal s ->
-    "cipp_local"
-    ^
-    (match s with
-    | None -> ""
-    | Some s -> "(" ^ s ^ ")")
-  | CippGlobal -> "cipp_global"
-
 let lenv_as_value env lenv =
-  let { per_cont_env; local_using_vars; local_reactive; local_mutability } =
-    lenv
-  in
+  let { per_cont_env; local_using_vars } = lenv in
   make_map
     [
       ("per_cont_env", per_cont_env_as_value env per_cont_env);
-      ("local_mutability", local_mutability_as_value local_mutability);
       ("local_using_vars", local_id_set_as_value local_using_vars);
-      ( "local_reactive",
-        string_as_value (reactivity_to_string env local_reactive) );
     ]
 
 let param_as_value env (ty, _pos, mode) =
@@ -519,7 +473,7 @@ let genv_as_value env genv =
     static;
     val_kind;
     fun_kind;
-    fun_mutable;
+    fun_is_ctor;
     file = _;
   } =
     genv
@@ -533,6 +487,7 @@ let genv_as_value env genv =
         ("static", bool_as_value static);
         ("val_kind", string_as_value (val_kind_to_string val_kind));
         ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
+        ("fun_is_ctor", bool_as_value fun_is_ctor);
       ]
     @ (match parent with
       | Some (parent_id, parent_ty) ->
@@ -541,18 +496,14 @@ let genv_as_value env genv =
           ("parent_ty", decl_type_as_value env parent_ty);
         ]
       | None -> [])
-    @ (match self with
-      | Some (self_id, self_ty) ->
-        [
-          ("self_id", string_as_value self_id);
-          ("self_ty", type_as_value env self_ty);
-        ]
-      | None -> [])
     @
-    match fun_mutable with
-    | None -> []
-    | Some pm -> [("fun_mutable", string_as_value (show_param_mutability pm))]
-    )
+    match self with
+    | Some (self_id, self_ty) ->
+      [
+        ("self_id", string_as_value self_id);
+        ("self_ty", type_as_value env self_ty);
+      ]
+    | None -> [] )
 
 let env_as_value env =
   let {

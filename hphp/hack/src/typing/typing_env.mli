@@ -294,10 +294,6 @@ val add_upper_bound_global : env -> string -> locl_ty -> env
 
 val env_with_tpenv : env -> TPEnv.t -> env
 
-val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
-
-val get_env_mutability : env -> Typing_mutability_env.mutability_env
-
 val env_with_global_tpenv : env -> TPEnv.t -> env
 
 val add_generic_parameters : env -> decl_tparam list -> env
@@ -388,8 +384,6 @@ val copy_tyvar_from_genv_to_env :
 
 val get_all_tyvars : env -> Ident.t list
 
-val error_if_reactive_context : env -> (unit -> unit) -> unit
-
 val add_fresh_generic_parameter_by_kind :
   env -> string -> Typing_kinding_defs.kind -> env * string
 
@@ -407,22 +401,13 @@ val get_tpenv_size : env -> int
 
 val get_tpenv_tparams : env -> SSet.t
 
-val set_env_reactive : env -> reactivity -> env
-
 val set_env_function_pos : env -> Pos.t -> env
 
 val set_env_pessimize : env -> env
 
-val env_local_reactive : env -> bool
+val fun_is_constructor : env -> bool
 
-val add_mutable_var :
-  env -> Local_id.t -> Typing_mutability_env.mutability -> env
-
-val local_is_mutable : include_borrowed:bool -> env -> Local_id.t -> bool
-
-val function_is_mutable : env -> param_mutability option
-
-val set_fun_mutable : env -> param_mutability option -> env
+val set_fun_is_constructor : env -> bool -> env
 
 val env_with_locals : env -> Typing_per_cont_env.t -> env
 

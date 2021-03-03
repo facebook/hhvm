@@ -20,7 +20,6 @@ module MakeType = Typing_make_type
 (* Helper method for subtype_method_decl. See below *)
 let subtype_method
     ~(check_return : bool)
-    ~(extra_info : reactivity_extra_info)
     (env : env)
     (r_sub : Reason.t)
     (ft_sub : locl_fun_type)
@@ -29,15 +28,7 @@ let subtype_method
     (on_error : Errors.typing_error_callback) : env =
   (* This is (1) and (2) below *)
   let env =
-    subtype_funs
-      ~on_error
-      ~check_return
-      ~extra_info
-      r_sub
-      ft_sub
-      r_super
-      ft_super
-      env
+    subtype_funs ~on_error ~check_return r_sub ft_sub r_super ft_super env
   in
   (* This is (3) below *)
   let check_tparams_constraints env tparams =
@@ -134,7 +125,6 @@ let subtype_method
  *)
 let subtype_method_decl
     ~(check_return : bool)
-    ~(extra_info : reactivity_extra_info)
     (env : env)
     (r_sub : Reason.t)
     (ft_sub : decl_fun_type)
@@ -172,7 +162,6 @@ let subtype_method_decl
    * the constraints on the supertype entail the constraints on the subtype *)
   let env =
     subtype_method
-      ~extra_info
       ~check_return
       env
       r_sub

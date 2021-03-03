@@ -205,12 +205,6 @@ impl<'a> InternalType<'a> {
     }
 }
 
-impl Default for Reactivity<'_> {
-    fn default() -> Self {
-        Reactivity::Nonreactive
-    }
-}
-
 impl From<Option<ParamKind>> for ParamMode {
     fn from(callconv: Option<ParamKind>) -> Self {
         match callconv {

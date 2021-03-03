@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b75f7fc0e989ca5db22bd1b62b548df9>>
+// @generated SignedSource<<f683b5d6c72f9f6c6d9d5712499709b7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -403,13 +403,6 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_func_reactive(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut FuncReactive,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_function_ptr_id(
         &mut self,
         c: &mut <Self::P as Params>::Context,
@@ -534,13 +527,6 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node mut ParamKind,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_param_mutability(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut ParamMutability,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

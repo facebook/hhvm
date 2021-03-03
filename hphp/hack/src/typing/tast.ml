@@ -26,12 +26,6 @@ type possibly_enforced_ty = Typing_defs.locl_possibly_enforced_ty
 
 type decl_ty = Typing_defs.decl_ty
 
-type reactivity = Typing_defs.reactivity
-
-type mutability_env = Typing_mutability_env.mutability_env
-
-type type_param_mutability = Typing_defs.param_mutability
-
 type val_kind = Typing_defs.val_kind
 
 let pp_ty = Typing_defs.pp_locl_ty
@@ -42,28 +36,12 @@ let pp_decl_ty = Typing_defs.pp_decl_ty
 
 let show_decl_ty = Typing_defs.show_decl_ty
 
-let pp_reactivity fmt r = Typing_defs.pp_reactivity fmt r
-
-let show_reactivity r = Typing_defs.show_reactivity r
-
 let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
-
-let show_mutability_env _ = "<mutability-env>"
-
-let pp_mutability_env fmt _ = Format.fprintf fmt "<mutability-env>"
-
-let show_param_mutability = Typing_defs.show_param_mutability
-
-let pp_type_param_mutability fmt v =
-  Format.fprintf fmt "%s" (show_param_mutability v)
 
 type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque]
   inference_env: Typing_inference_env.t;
   tpenv: Type_parameter_env.t;
-  reactivity: reactivity;
-  local_mutability: mutability_env;
-  fun_mutable: type_param_mutability option;
   condition_types: decl_ty SMap.t;
   pessimize: bool;
 }
@@ -124,9 +102,6 @@ let empty_saved_env tcopt : saved_env =
     tcopt;
     inference_env = Typing_inference_env.empty_inference_env;
     tpenv = Type_parameter_env.empty;
-    reactivity = Typing_defs.Nonreactive;
-    local_mutability = Local_id.Map.empty;
-    fun_mutable = None;
     condition_types = SMap.empty;
     pessimize = false;
   }

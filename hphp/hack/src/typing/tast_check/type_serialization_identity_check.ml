@@ -52,7 +52,6 @@ let rec strip_ty ty =
             Typing_defs.make_fp_flags
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
-              ~mutability:None
               ~has_default:false
               ~ifc_external:false
               ~ifc_can_call:false
@@ -62,7 +61,6 @@ let rec strip_ty ty =
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos.none;
           fp_name = None;
-          fp_rx_annotation = None;
         }
       in
       let ft_params = List.map ft_params ~f:strip_param in
@@ -85,7 +83,6 @@ let rec strip_ty ty =
           ft_tparams = [];
           ft_where_constraints = [];
           ft_flags = 0;
-          ft_reactive = Nonreactive;
           ft_ifc_decl = default_ifc_fun_decl;
         }
     | Tshape (shape_kind, shape_fields) ->

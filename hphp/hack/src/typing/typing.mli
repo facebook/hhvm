@@ -69,7 +69,6 @@ val type_capability :
 
 val call :
   expected:Typing_helpers.ExpectedTy.t option ->
-  ?method_call_info:Typing_reactivity.method_call_info ->
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
   Pos.t ->

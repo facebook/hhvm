@@ -22,10 +22,9 @@
                                (Rhint (root|variadic_parameter.php line 3, characters 25-29),
                                 Tmixed)
                                };
-                             fp_rx_annotation = None;
                              fp_flags =
-                             (make_fp_flags ~mutability:None
-                               ~accept_disposable:false ~has_default:false
+                             (make_fp_flags ~accept_disposable:false
+                               ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
                                ~ifc_external:false ~ifc_can_call:false
                                ~is_atom:false ~readonly:false
@@ -43,19 +42,16 @@
                            (Tprim Tvoid))
                           };
                         ft_flags =
-                        (make_ft_flags FSync None ~return_disposable:false
-                          ~returns_mutable:false ~returns_void_to_rx:false
+                        (make_ft_flags FSync ~return_disposable:false
                           ~returns_readonly:false ~readonly_this:false
                           ~is_const:false);
-                        ft_reactive = Nonreactive;
                         ft_ifc_decl = FDPolicied {PUBLIC} }))
                   };
-                fp_rx_annotation = None;
                 fp_flags =
-                (make_fp_flags ~mutability:None ~accept_disposable:false
-                  ~has_default:false ~mode:Typing_defs_core.FPnormal
-                  ~ifc_external:false ~ifc_can_call:false ~is_atom:false
-                  ~readonly:false ~const_function:false);
+                (make_fp_flags ~accept_disposable:false ~has_default:false
+                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                  ~ifc_can_call:false ~is_atom:false ~readonly:false
+                  ~const_function:false);
                  }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-14]) };
@@ -66,10 +62,9 @@
                 (Tprim Tvoid))
                };
              ft_flags =
-             (make_ft_flags FSync None ~return_disposable:false
-               ~returns_mutable:false ~returns_void_to_rx:false
+             (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
-             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+             ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-14]; fe_php_std_lib = false }))
   ]
 

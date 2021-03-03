@@ -15,8 +15,6 @@ module Env = Typing_env
 module Log = Typing_log
 module Phase = Typing_phase
 module TySet = Typing_set
-module TR = Typing_reactivity
-module CT = Typing_subtype.ConditionTypes
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 
@@ -425,26 +423,7 @@ let expand_with_env
     let (env, res) = expand ctx env root in
     type_of_result ~ignore_errors ctx env root res
   in
-  (* If type constant has type this::ID and method has associated condition
-     type ROOTCOND_TY for the receiver - check if condition type has type
-     constant at the same path.  If yes - attach a condition type
-     ROOTCOND_TY::ID to a result type *)
-  match
-    ( deref root,
-      id,
-      TR.condition_type_from_reactivity (Typing_env_types.env_reactivity env) )
-  with
-  | ((_, Tdependent (DTthis, _)), (_, tconst), Some cond_ty) ->
-    begin
-      match CT.try_get_class_for_condition_type env cond_ty with
-      | Some (_, cls) when Cls.has_typeconst cls tconst ->
-        let cond_ty = mk (Reason.Rwitness (fst id), Taccess (cond_ty, id)) in
-        Option.value
-          (TR.try_substitute_type_with_condition env cond_ty ty)
-          ~default:(env, ty)
-      | _ -> (env, ty)
-    end
-  | _ -> (env, ty)
+  (env, ty)
 
 (* This is called with non-nested type accesses e.g. this::T1::T2 is
  * represented by (this, [T1; T2])

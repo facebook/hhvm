@@ -94,14 +94,12 @@ let rec check_hint env (pos, hint) =
   | Aast.Hfun
       Aast.
         {
-          hf_reactive_kind = _;
           hf_param_tys = hl;
           hf_param_info = _;
           (* TODO: shouldn't we be checking this hint as well? *)
           hf_variadic_ty = _;
           hf_ctxs = _;
           hf_return_ty = h;
-          hf_is_mutable_return = _;
           hf_is_readonly_return = _;
         } ->
     List.iter hl (check_hint env);

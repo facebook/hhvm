@@ -10,7 +10,6 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "openDoors");
-          sm_reactivity = None;
           sm_type =
           (Rwitness (root|classes_require.php line 4, characters 19-27),
            (Tfun
@@ -24,15 +23,12 @@
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false
+                (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
                   ~is_const:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                }));
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_require.php line 5, characters 19-28),
             (Tfun
@@ -47,12 +43,10 @@
                     (Tprim Tvoid))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -68,7 +62,6 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([9:19-22], "fly");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_require.php line 9, characters 19-21),
             (Tfun
@@ -83,12 +76,10 @@
                     (Tprim Tbool))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
           ];
@@ -111,7 +102,6 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([16:19-26], "takeOff");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_require.php line 16, characters 19-25),
             (Tfun
@@ -126,12 +116,10 @@
                     (Tprim Tbool))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
@@ -156,7 +144,6 @@
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([26:19-22], "fly");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_require.php line 26, characters 19-21),
             (Tfun
@@ -171,12 +158,10 @@
                     (Tprim Tbool))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
         sc_user_attributes = []; sc_enum_type = None }))

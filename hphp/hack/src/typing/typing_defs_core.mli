@@ -49,12 +49,6 @@ type val_kind =
   | Other
 [@@deriving eq]
 
-type param_mutability =
-  | Param_owned_mutable
-  | Param_borrowed_mutable
-  | Param_maybe_mutable
-[@@deriving eq, show]
-
 type fun_tparams_kind =
   | FTKtparams
       (** If ft_tparams is empty, the containing fun_type is a concrete function type.
@@ -334,27 +328,6 @@ and _ ty_ =
 
 and 'phase taccess_type = 'phase ty * pos_id
 
-(* represents reactivity of function
-   - None corresponds to non-reactive function
-   - Some reactivity - to reactive function with specified reactivity flavor
-
- Nonreactive <: Local -t <: Shallow -t <: Reactive -t
-
- MaybeReactive represents conditional reactivity of function that depends on
-   reactivity of function arguments
-   <<__Rx>>
-   function f(<<__MaybeRx>> $g) { ... }
-   call to function f will be treated as reactive only if $g is reactive
-  *)
-and reactivity =
-  | Nonreactive
-  | Pure of decl_ty option
-  | MaybeReactive of reactivity
-  | RxVar of reactivity option
-  | Cipp of string option
-  | CippLocal of string option
-  | CippGlobal
-
 (* Because Tfun is currently used as both a decl and locl ty, without this,
  * the HH\Contexts\defaults alias must be stored in shared memory for a
  * decl Tfun record. We can eliminate this if the majority of usages end up
@@ -376,7 +349,6 @@ and 'ty fun_type = {
   ft_params: 'ty fun_params;
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
-  ft_reactive: reactivity;
   (* Carries through the sync/async information from the aast *)
   ft_flags: int;
   ft_ifc_decl: ifc_fun_decl;
@@ -392,10 +364,6 @@ and 'ty fun_arity =
      min ; variadic param type *)
   | Fvariadic of 'ty fun_param
 
-and param_rx_annotation =
-  | Param_rx_var
-  | Param_rx_if_impl of decl_ty
-
 and 'ty possibly_enforced_ty = {
   (* True if consumer of this type enforces it at runtime *)
   et_enforced: bool;
@@ -406,7 +374,6 @@ and 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
-  fp_rx_annotation: param_rx_annotation option;
   fp_flags: int;
 }
 
@@ -414,10 +381,6 @@ and 'ty fun_params = 'ty fun_param list
 
 module Flags : sig
   val get_ft_return_disposable : 'a fun_type -> bool
-
-  val get_ft_returns_void_to_rx : 'a fun_type -> bool
-
-  val get_ft_returns_mutable : 'a fun_type -> bool
 
   val get_ft_returns_readonly : 'a fun_type -> bool
 
@@ -441,14 +404,6 @@ module Flags : sig
 
   val get_ft_is_const : 'a fun_type -> bool
 
-  val from_mutable_flags : Hh_prelude.Int.t -> param_mutability option
-
-  val to_mutable_flags : param_mutability option -> Hh_prelude.Int.t
-
-  val get_ft_param_mutable : 'a fun_type -> param_mutability option
-
-  val get_fp_mutability : 'a fun_param -> param_mutability option
-
   val get_fp_ifc_can_call : 'a fun_param -> bool
 
   val get_fp_ifc_external : 'a fun_param -> bool
@@ -463,10 +418,7 @@ module Flags : sig
 
   val make_ft_flags :
     Ast_defs.fun_kind ->
-    param_mutability option ->
     return_disposable:bool ->
-    returns_mutable:bool ->
-    returns_void_to_rx:bool ->
     returns_readonly:bool ->
     readonly_this:bool ->
     const:bool ->
@@ -477,7 +429,6 @@ module Flags : sig
   val make_fp_flags :
     mode:param_mode ->
     accept_disposable:bool ->
-    mutability:param_mutability option ->
     has_default:bool ->
     ifc_external:bool ->
     ifc_can_call:bool ->
@@ -508,8 +459,6 @@ module Pp : sig
 
   val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
-  val pp_reactivity : Format.formatter -> reactivity -> unit
-
   val pp_possibly_enforced_ty :
     (Format.formatter -> 'a ty -> unit) ->
     Format.formatter ->
@@ -532,8 +481,6 @@ module Pp : sig
   val show_decl_ty : decl_ty -> string
 
   val show_locl_ty : locl_ty -> string
-
-  val show_reactivity : reactivity -> string
 
   val pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit
 end

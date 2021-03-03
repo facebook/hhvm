@@ -25,36 +25,6 @@ module Env = Typing_env
 module EnvFromDef = Typing_env_from_def
 module MakeType = Typing_make_type
 
-let param_has_at_most_rx_as_func p =
-  let module UA = SN.UserAttributes in
-  Naming_attributes.mem UA.uaAtMostRxAsFunc p.param_user_attributes
-
-let fun_reactivity env attrs params =
-  let r = FunUtils.fun_reactivity env attrs in
-  let module UA = Naming_special_names.UserAttributes in
-  let r =
-    (* if at least one of parameters has <<__AtMostRxAsFunc>> attribute -
-      treat function reactivity as generic that is determined from the reactivity
-      of arguments annotated with __AtMostRxAsFunc. Declared reactivity is used as a
-      upper boundary of the reactivity function can have. *)
-    if List.exists params ~f:param_has_at_most_rx_as_func then
-      RxVar (Some r)
-    else
-      r
-  in
-  let r =
-    (* if at least one of arguments have <<__OnlyRxIfImpl>> attribute -
-      treat function reactivity as conditional that is determined at the callsite *)
-    if
-      List.exists params ~f:(fun { param_user_attributes = p; _ } ->
-          Naming_attributes.mem UA.uaOnlyRxIfImpl p)
-    then
-      MaybeReactive r
-    else
-      r
-  in
-  r
-
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if
   global inference is on *)
@@ -169,37 +139,7 @@ let make_param_local_ty env decl_hint param =
           env
           ty
       in
-      let condition_type =
-        FunUtils.condition_type_from_attributes
-          env.decl_env
-          param.param_user_attributes
-      in
-      begin
-        match condition_type with
-        | Some condition_type ->
-          let (env, ty) = Phase.localize ~ety_env env ty in
-          begin
-            match
-              TR.try_substitute_type_with_condition env condition_type ty
-            with
-            | Some r -> r
-            | None -> (env, ty)
-          end
-        | _
-          when Naming_attributes.mem
-                 SN.UserAttributes.uaAtMostRxAsFunc
-                 param.param_user_attributes ->
-          let (env, ty) = Phase.localize ~ety_env env ty in
-          (* expand type to track aliased function types *)
-          let (env, expanded_ty) = Env.expand_type env ty in
-          let adjusted_ty = make_function_type_rxvar expanded_ty in
-          ( env,
-            if phys_equal adjusted_ty expanded_ty then
-              ty
-            else
-              adjusted_ty )
-        | _ -> Phase.localize ~ety_env env ty
-      end
+      Phase.localize ~ety_env env ty
   in
   let ty =
     match get_node ty with
@@ -214,7 +154,6 @@ let make_param_local_ty env decl_hint param =
       MakeType.varray ~unification r arr_values
     | _ -> ty
   in
-  Typing_reactivity.disallow_atmost_rx_as_rxfunc_on_non_functions env param ty;
   (env, ty)
 
 let get_callable_variadicity ~partial_callback ~pos env variadicity_decl_ty =
@@ -321,12 +260,6 @@ let fun_def ctx f :
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
-      let reactive =
-        fun_reactivity env.decl_env f.f_user_attributes f.f_params
-      in
-      let mut = TUtils.fun_mutable f.f_user_attributes in
-      let env = Env.set_env_reactive env reactive in
-      let env = Env.set_fun_mutable env mut in
       Typing_check_decls.fun_ env f;
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
@@ -405,8 +338,6 @@ let fun_def ctx f :
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
       in
-      (* restore original reactivity *)
-      let env = Env.set_env_reactive env reactive in
       begin
         match hint_of_type_hint f.f_ret with
         | None ->
@@ -474,27 +405,14 @@ let method_def env cls m =
           SN.AttributeKinds.mthd
           m.m_user_attributes
       in
-      let reactive =
-        fun_reactivity env.decl_env m.m_user_attributes m.m_params
-      in
-      let mut =
-        match TUtils.fun_mutable m.m_user_attributes with
-        | None ->
-          (* <<__Mutable>> is implicit on constructors  *)
-          if String.equal (snd m.m_name) SN.Members.__construct then
-            Some Param_borrowed_mutable
-          else
-            None
-        | x -> x
-      in
       let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
       in
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
-      let env = Env.set_env_reactive env reactive in
-      let env = Env.set_fun_mutable env mut in
+      let is_ctor = String.equal (snd m.m_name) SN.Members.__construct in
+      let env = Env.set_fun_is_constructor env is_ctor in
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
           pos
@@ -600,8 +518,6 @@ let method_def env cls m =
           nb
           m.m_fun_kind
       in
-      (* restore original method reactivity  *)
-      let env = Env.set_env_reactive env reactive in
       let type_hint' =
         match hint_of_type_hint m.m_ret with
         | None when String.equal (snd m.m_name) SN.Members.__construct ->

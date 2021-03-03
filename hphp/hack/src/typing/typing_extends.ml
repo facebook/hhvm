@@ -223,8 +223,8 @@ let check_override
     member_name
     mem_source
     ?(ignore_fun_return = false)
-    (parent_class, parent_ty)
-    (class_, class_ty)
+    parent_class
+    class_
     parent_class_elt
     class_elt
     on_error =
@@ -320,7 +320,6 @@ let check_override
       Errors.decl_override_missing_hint pos on_error;
       env
     | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
-      let is_static = Cls.has_smethod parent_class member_name in
       let check (r1, ft1) (r2, ft2) () =
         match mem_source with
         | `FromConstructor ->
@@ -332,13 +331,6 @@ let check_override
           Typing_subtype_method.(
             (* Add deps here when we override *)
             subtype_method_decl
-              ~extra_info:
-                Typing_subtype.
-                  {
-                    method_info = Some (member_name, is_static);
-                    class_ty = Some (DeclTy class_ty);
-                    parent_class_ty = Some (DeclTy parent_ty);
-                  }
               ~check_return:(not ignore_fun_return)
               env
               r2
@@ -375,9 +367,9 @@ let check_override
   ) else
     env
 
-(* Constants and type constants with declared values in declared interfaces can never be 
+(* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
- * @precondition: both constants must not be synthesized 
+ * @precondition: both constants must not be synthesized
  *)
 let conflict_with_declared_interface
     env implements parent_class class_ parent_origin origin const_name =
@@ -424,7 +416,7 @@ let check_const_override
     class_const
     on_error =
   let check_params = should_check_params parent_class class_ in
-  (* Shared preconditons for const_interface_member_not_unique and 
+  (* Shared preconditons for const_interface_member_not_unique and
      is_bad_interface_const_override *)
   let both_are_non_synthetic_and_concrete =
     (* Synthetic  *)
@@ -499,8 +491,8 @@ let filter_privates members =
 let check_members
     check_private
     env
-    (parent_class, psubst, parent_ty)
-    (class_, subst, class_ty)
+    (parent_class, psubst)
+    (class_, subst)
     on_error
     (mem_source, parent_members, get_member) =
   let parent_members =
@@ -562,8 +554,8 @@ let check_members
           env
           member_name
           mem_source
-          (parent_class, parent_ty)
-          (class_, class_ty)
+          parent_class
+          class_
           parent_class_elt
           class_elt
           on_error
@@ -612,7 +604,6 @@ let default_constructor_ce class_ =
       ft_implicit_params = { capability = CapDefaults pos };
       ft_ret = { et_type = MakeType.void r; et_enforced = false };
       ft_flags = 0;
-      ft_reactive = Nonreactive;
       ft_ifc_decl = default_ifc_fun_decl;
     }
   in
@@ -637,8 +628,7 @@ let default_constructor_ce class_ =
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors
-    env (parent_class, parent_ty) (class_, class_ty) psubst subst on_error =
+let check_constructors env parent_class class_ psubst subst on_error =
   let consistent =
     not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
   in
@@ -675,8 +665,8 @@ let check_constructors
           "__construct"
           `FromMethod
           ~ignore_fun_return:true
-          (parent_class, parent_ty)
-          (class_, class_ty)
+          parent_class
+          class_
           parent_cstr
           cstr
           on_error
@@ -968,8 +958,7 @@ let check_consts env implements parent_class class_ psubst subst on_error =
  *   "Class ... does not correctly implement all required members"
  * message pointing at the class being checked.
  *)
-let check_class_implements
-    env implements (parent_class, parent_ty) (class_, class_ty) on_error =
+let check_class_implements env implements parent_class class_ on_error =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with
@@ -986,15 +975,7 @@ let check_class_implements
     check_consts env implements parent_class class_ psubst subst on_error
   in
   let memberl = make_all_members ~parent_class ~child_class:class_ in
-  let env =
-    check_constructors
-      env
-      (parent_class, parent_ty)
-      (class_, class_ty)
-      psubst
-      subst
-      on_error
-  in
+  let env = check_constructors env parent_class class_ psubst subst on_error in
   let check_privates : bool =
     Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
   in
@@ -1004,8 +985,8 @@ let check_class_implements
       check_members
         check_privates
         env
-        (parent_class, psubst, parent_ty)
-        (class_, subst, class_ty)
+        (parent_class, psubst)
+        (class_, subst)
         on_error)
 
 (*****************************************************************************)
@@ -1029,8 +1010,8 @@ let check_implements env implements parent_type type_to_be_checked =
     check_class_implements
       env
       implements
-      (parent_class, parent_type)
-      (class_, type_to_be_checked)
+      parent_class
+      class_
       (fun ?code:_ claim reasons ->
         (* sadly, enum error reporting requires this to keep the error in the file
            with the enum *)

@@ -1083,12 +1083,6 @@ let invalid_fun_pointer pos name =
     ^ Markdown_lite.md_codify (strip_ns name)
     ^ " is not a valid name for fun()" )
 
-let rx_move_invalid_location pos =
-  add
-    (Naming.err_code Naming.RxMoveInvalidLocation)
-    pos
-    "`Rx\\move` is only allowed in argument position or as right hand side of the assignment."
-
 let hint_message ?(modifier = "") orig hint hint_pos =
   let s =
     if
@@ -1107,16 +1101,11 @@ let hint_message ?(modifier = "") orig hint hint_pos =
   in
   (hint_pos, s)
 
-let undefined ~in_rx_scope pos var_name did_you_mean =
+let undefined pos var_name did_you_mean =
   let msg =
-    if in_rx_scope then
-      Printf.sprintf
-        "Variable %s is undefined, not always defined, or unset afterwards."
-        (Markdown_lite.md_codify var_name)
-    else
-      Printf.sprintf
-        "Variable %s is undefined, or not always defined."
-        (Markdown_lite.md_codify var_name)
+    Printf.sprintf
+      "Variable %s is undefined, or not always defined."
+      (Markdown_lite.md_codify var_name)
   in
   let suggestion =
     match did_you_mean with
@@ -1687,24 +1676,6 @@ let wildcard_param_disallowed pos =
     pos
     "Cannot use anonymous type parameter in this position."
 
-let misplaced_mutability_hint pos =
-  add
-    (Naming.err_code Naming.MisplacedMutabilityHint)
-    pos
-    "Setting mutability via type hints is only allowed for parameters of reactive function types. For other cases consider using attributes."
-
-let mutability_hint_in_non_rx_function pos =
-  add
-    (Naming.err_code Naming.MutabilityHintInNonRx)
-    pos
-    "Parameter with mutability hint cannot appear in non-reactive function type."
-
-let invalid_mutability_in_return_type_hint pos =
-  add
-    (Naming.err_code Naming.InvalidReturnMutableHint)
-    pos
-    "`OwnedMutable` is the only mutability related hint allowed in return type annotation for reactive function types."
-
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)
@@ -2016,41 +1987,6 @@ let illegal_function_name pos mname =
     pos
     ("Illegal function name: " ^ (strip_ns mname |> Markdown_lite.md_codify))
 
-let conflicting_mutable_and_maybe_mutable_attributes pos =
-  add
-    (NastCheck.err_code NastCheck.ConflictingMutableAndMaybeMutableAttributes)
-    pos
-    "Declaration cannot have both `<<__Mutable>>` and `<<__MaybeMutable>>` attributes."
-
-let mutable_methods_must_be_reactive pos name =
-  add
-    (NastCheck.err_code NastCheck.MutableMethodsMustBeReactive)
-    pos
-    ( "The method "
-    ^ (strip_ns name |> Markdown_lite.md_codify)
-    ^ " has a mutable parameter"
-    ^ " (or mutable `this`), so it must be marked reactive with `<<__Rx>>`." )
-
-let mutable_return_annotated_decls_must_be_reactive kind pos name =
-  add
-    (NastCheck.err_code NastCheck.MutableReturnAnnotatedDeclsMustBeReactive)
-    pos
-    ( "The "
-    ^ kind
-    ^ " "
-    ^ (strip_ns name |> Markdown_lite.md_codify)
-    ^ " is annotated with `<<__MutableReturn>>`, "
-    ^ " so it must be marked reactive with `<<__Rx>>`." )
-
-let maybe_mutable_methods_must_be_reactive pos name =
-  add
-    (NastCheck.err_code NastCheck.MaybeMutableMethodsMustBeReactive)
-    pos
-    ( "The method "
-    ^ (strip_ns name |> Markdown_lite.md_codify)
-    ^ " is annotated with `<<__MaybeMutable>>` attribute, or has this attribute on one of its parameters so it must be marked reactive."
-    )
-
 let entrypoint_arguments pos =
   add
     (NastCheck.err_code NastCheck.EntryPointArguments)
@@ -2105,52 +2041,6 @@ let illegal_destructor pos =
     pos
     ( "Destructors are not supported in Hack; use other patterns like "
     ^ "`IDisposable`/`using` or `try`/`catch` instead." )
-
-let multiple_conditionally_reactive_annotations pos name =
-  add
-    (NastCheck.err_code NastCheck.MultipleConditionallyReactiveAnnotations)
-    pos
-    ( "Method '"
-    ^ Markdown_lite.md_codify name
-    ^ "' has multiple `<<__OnlyRxIfImpl>>` annotations." )
-
-let rx_is_enabled_invalid_location pos =
-  add
-    (NastCheck.err_code NastCheck.RxIsEnabledInvalidLocation)
-    pos
-    ( "`HH\\Rx\\IS_ENABLED` must be the only condition in an if-statement, "
-    ^ "and that if-statement must be the only statement in the function body."
-    )
-
-let atmost_rx_as_rxfunc_invalid_location pos =
-  add
-    (NastCheck.err_code NastCheck.MaybeRxInvalidLocation)
-    pos
-    ( "`<<__AtMostRxAsFunc>>` attribute can only be put on parameters of conditionally reactive functions "
-    ^ "or methods annotated with `<<__AtMostRxAsArgs>>` attribute." )
-
-let no_atmost_rx_as_rxfunc_for_rx_if_args pos =
-  add
-    (NastCheck.err_code NastCheck.NoOnlyrxIfRxfuncForRxIfArgs)
-    pos
-    ( "Function or method annotated with `<<__AtMostRxAsArgs>>` attribute should have at least one parameter "
-    ^ "with `<<__AtMostRxAsFunc>>` or `<<__OnlyRxIfImpl>>` annotations." )
-
-let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
-  let loc =
-    if is_method then
-      "Method"
-    else
-      "Parameter"
-  in
-  add
-    (NastCheck.err_code
-       NastCheck.ConditionallyReactiveAnnotationInvalidArguments)
-    pos
-    ( loc
-    ^ " is marked with `<<__OnlyRxIfImpl>>` attribute that have "
-    ^ "invalid arguments. This attribute must have one argument and it should be the "
-    ^ "`::class` class constant." )
 
 let switch_non_terminal_default pos =
   add
@@ -2632,12 +2522,6 @@ let escaping_this pos =
     ( "`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation "
     ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
     )
-
-let escaping_mutable_object pos =
-  add
-    (Typing.err_code Typing.EscapingMutableObject)
-    pos
-    "Neither a `Mutable` nor `MaybeMutable` object may be captured by an anonymous function."
 
 let must_extend_disposable pos =
   add
@@ -3324,292 +3208,6 @@ let fun_arity_mismatch pos1 pos2 (on_error : typing_error_callback) =
     (pos1, "Number of arguments doesn't match")
     [(pos2, "Because of this definition")]
 
-let fun_reactivity_mismatch
-    pos1 kind1 pos2 kind2 (on_error : typing_error_callback) =
-  let f k = "This function is " ^ k ^ "." in
-  on_error
-    ~code:(Typing.err_code Typing.FunReactivityMismatch)
-    (pos1, f kind1)
-    [(pos2, f kind2)]
-
-let inconsistent_mutability pos1 mut1 p2_opt =
-  match p2_opt with
-  | Some (pos2, mut2) ->
-    add_list
-      (Typing.err_code Typing.InconsistentMutability)
-      (pos1, "Inconsistent mutability of local variable, here local is " ^ mut1)
-      [(pos2, "But here it is " ^ mut2)]
-  | None ->
-    add
-      (Typing.err_code Typing.InconsistentMutability)
-      pos1
-      ("Local is " ^ mut1 ^ " in one scope and immutable in another.")
-
-let inconsistent_mutability_for_conditional p_mut p_other =
-  add_list
-    (Typing.err_code Typing.InconsistentMutability)
-    ( p_mut,
-      "Inconsistent mutability of conditional expression, this branch returns owned mutable value"
-    )
-    [(p_other, "But this one does not.")]
-
-let invalid_mutability_flavor pos mut1 mut2 =
-  add
-    (Typing.err_code Typing.InvalidMutabilityFlavorInAssignment)
-    pos
-    ( "Cannot assign "
-    ^ mut2
-    ^ " value to "
-    ^ mut1
-    ^ " local variable. Mutability flavor of local variable cannot be altered."
-    )
-
-let reassign_mutable_var ~in_collection pos1 =
-  let msg =
-    if in_collection then
-      "This variable is mutable. You cannot create a new reference to it by putting it into the collection."
-    else
-      "This variable is mutable. You cannot create a new reference to it."
-  in
-  add (Typing.err_code Typing.ReassignMutableVar) pos1 msg
-
-let reassign_mutable_this ~in_collection ~is_maybe_mutable pos1 =
-  let kind =
-    if is_maybe_mutable then
-      "maybe mutable"
-    else
-      "mutable"
-  in
-  let msg =
-    if in_collection then
-      "`$this` here is "
-      ^ kind
-      ^ ". You cannot create a new reference to it by putting it into the collection."
-    else
-      "`$this` here is " ^ kind ^ ". You cannot create a new reference to it."
-  in
-  add (Typing.err_code Typing.ReassignMutableThis) pos1 msg
-
-let mutable_expression_as_multiple_mutable_arguments
-    pos param_kind prev_pos prev_param_kind =
-  add_list
-    (Typing.err_code Typing.MutableExpressionAsMultipleMutableArguments)
-    ( pos,
-      "A mutable expression may not be passed as multiple arguments where at least one matching parameter is mutable. Matching parameter here is "
-      ^ param_kind )
-    [
-      ( prev_pos,
-        "This is where it was used before, being passed as " ^ prev_param_kind
-      );
-    ]
-
-let reassign_maybe_mutable_var ~in_collection pos1 =
-  let msg =
-    if in_collection then
-      "This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection."
-    else
-      "This variable is maybe mutable. You cannot create a new reference to it."
-  in
-  add (Typing.err_code Typing.ReassignMaybeMutableVar) pos1 msg
-
-let mutable_call_on_immutable fpos pos1 rx_mutable_hint_pos =
-  let l =
-    match rx_mutable_hint_pos with
-    | Some p ->
-      [
-        ( p,
-          "Consider wrapping this expression with `Rx\\mutable` to forward mutability."
-        );
-      ]
-    | None -> []
-  in
-  let claim = (pos1, "Cannot call mutable function on immutable expression") in
-  let reasons =
-    ( fpos,
-      "This function is marked `<<__Mutable>>`, so it has a mutable `$this`." )
-    :: l
-  in
-  add_list (Typing.err_code Typing.MutableCallOnImmutable) claim reasons
-
-let immutable_call_on_mutable fpos pos1 =
-  add_list
-    (Typing.err_code Typing.ImmutableCallOnMutable)
-    (pos1, "Cannot call non-mutable function on mutable expression")
-    [(fpos, "This function is not marked as `<<__Mutable>>`.")]
-
-let mutability_mismatch
-    ~is_receiver pos1 mut1 pos2 mut2 (on_error : typing_error_callback) =
-  let msg mut =
-    let msg =
-      if is_receiver then
-        "Receiver of this function"
-      else
-        "This parameter"
-    in
-    msg ^ " is " ^ mut
-  in
-  on_error
-    ~code:(Typing.err_code Typing.MutabilityMismatch)
-    (pos1, "Incompatible mutabilities:")
-    [(pos1, msg mut1); (pos2, msg mut2)]
-
-let invalid_call_on_maybe_mutable ~fun_is_mutable pos fpos =
-  let msg =
-    "Cannot call "
-    ^ ( if fun_is_mutable then
-        "mutable"
-      else
-        "non-mutable" )
-    ^ " function on maybe mutable value."
-  in
-  add_list
-    (Typing.err_code Typing.InvalidCallMaybeMutable)
-    (pos, msg)
-    [(fpos, "This function is not marked as `<<__MaybeMutable>>`.")]
-
-let mutable_argument_mismatch param_pos arg_pos =
-  add_list
-    (Typing.err_code Typing.MutableArgumentMismatch)
-    (arg_pos, "Invalid argument")
-    [
-      (param_pos, "This parameter is marked mutable");
-      (arg_pos, "But this expression is not");
-    ]
-
-let immutable_argument_mismatch param_pos arg_pos =
-  add_list
-    (Typing.err_code Typing.ImmutableArgumentMismatch)
-    (arg_pos, "Invalid argument")
-    [
-      (param_pos, "This parameter is not marked as mutable");
-      (arg_pos, "But this expression is mutable");
-    ]
-
-let mutably_owned_argument_mismatch ~arg_is_owned_local param_pos arg_pos =
-  let arg_msg =
-    if arg_is_owned_local then
-      "Owned mutable locals used as argument should be passed via `Rx\\move` function"
-    else
-      "But this expression is not owned mutable"
-  in
-  add_list
-    (Typing.err_code Typing.ImmutableArgumentMismatch)
-    (arg_pos, "Invalid argument")
-    [
-      (param_pos, "This parameter is marked with `<<__OwnedMutable>>`");
-      (arg_pos, arg_msg);
-    ]
-
-let maybe_mutable_argument_mismatch param_pos arg_pos =
-  add_list
-    (Typing.err_code Typing.MaybeMutableArgumentMismatch)
-    (arg_pos, "Invalid argument")
-    [
-      (param_pos, "This parameter is not marked `<<__MaybeMutable>>`");
-      (arg_pos, "But this expression is maybe mutable");
-    ]
-
-let invalid_mutable_return_result error_pos function_pos value_kind =
-  add_list
-    (Typing.err_code Typing.InvalidMutableReturnResult)
-    ( error_pos,
-      "Functions marked `<<__MutableReturn>>` must return mutably owned values: mutably owned local variables and results of calling `Rx\\mutable`."
-    )
-    [
-      (function_pos, "This function is marked `<<__MutableReturn>>`");
-      (error_pos, "This expression is " ^ value_kind);
-    ]
-
-let freeze_in_nonreactive_context pos1 =
-  add
-    (Typing.err_code Typing.FreezeInNonreactiveContext)
-    pos1
-    "`\\HH\\Rx\\freeze` can only be used in reactive functions"
-
-let mutable_in_nonreactive_context pos =
-  add
-    (Typing.err_code Typing.MutableInNonreactiveContext)
-    pos
-    "`\\HH\\Rx\\mutable` can only be used in reactive functions"
-
-let move_in_nonreactive_context pos =
-  add
-    (Typing.err_code Typing.MoveInNonreactiveContext)
-    pos
-    "`\\HH\\Rx\\move` can only be used in reactive functions"
-
-let invalid_argument_type_for_condition_in_rx
-    ~is_receiver f_pos def_pos arg_pos expected_type actual_type =
-  let arg_msg =
-    if is_receiver then
-      "Receiver type"
-    else
-      "Argument type"
-  in
-  let arg_msg =
-    arg_msg
-    ^ " must be a subtype of "
-    ^ Markdown_lite.md_codify expected_type
-    ^ ", now "
-    ^ Markdown_lite.md_codify actual_type
-    ^ "."
-  in
-  add_list
-    (Typing.err_code Typing.InvalidConditionallyReactiveCall)
-    ( f_pos,
-      "Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met."
-    )
-    [(arg_pos, arg_msg); (def_pos, "This is the function declaration")]
-
-let callsite_reactivity_mismatch
-    f_pos def_pos callee_reactivity cause_pos_opt caller_reactivity =
-  add_list
-    (Typing.err_code Typing.CallSiteReactivityMismatch)
-    ( f_pos,
-      "Reactivity mismatch: "
-      ^ caller_reactivity
-      ^ " function cannot call "
-      ^ callee_reactivity
-      ^ " function." )
-    ( [(def_pos, "This is the declaration of the function being called.")]
-    @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [
-            ( cause_pos,
-              "Reactivity of this argument was used as reactivity of the callee."
-            );
-          ]) )
-
-let callsite_cipp_mismatch f_pos def_pos callee_cipp caller_cipp =
-  add_list
-    (Typing.err_code Typing.CallsiteCIPPMismatch)
-    ( f_pos,
-      "CIPP mismatch: "
-      ^ caller_cipp
-      ^ " function cannot call "
-      ^ callee_cipp
-      ^ " function." )
-    [(def_pos, "This is the declaration of the function being called.")]
-
-let invalid_argument_of_rx_mutable_function pos =
-  add
-    (Typing.err_code Typing.InvalidArgumentOfRxMutableFunction)
-    pos
-    ( "Single argument to `\\HH\\Rx\\mutable` should be an expression that yields new mutably-owned value, "
-    ^ "like `new A()`, Hack collection literal or `f()` where `f` is function annotated with `<<__MutableReturn>>` attribute."
-    )
-
-let invalid_freeze_use pos1 =
-  add
-    (Typing.err_code Typing.InvalidFreezeUse)
-    pos1
-    "`freeze` takes a single mutably-owned local variable as an argument"
-
-let invalid_move_use pos1 =
-  add
-    (Typing.err_code Typing.InvalidMoveUse)
-    pos1
-    "`move` takes a single mutably-owned local variable as an argument"
-
 let require_args_reify def_pos arg_pos =
   add_list
     (Typing.err_code Typing.RequireArgsReify)
@@ -3704,18 +3302,6 @@ let new_without_newable pos name =
     ( Markdown_lite.md_codify name
     ^ " cannot be used with `new` because it does not have the `<<__Newable>>` attribute"
     )
-
-let invalid_freeze_target pos1 var_pos var_mutability_str =
-  add_list
-    (Typing.err_code Typing.InvalidFreezeTarget)
-    (pos1, "Invalid argument - `freeze()` takes a single mutable variable")
-    [(var_pos, "This variable is " ^ var_mutability_str)]
-
-let invalid_move_target pos1 var_pos var_mutability_str =
-  add_list
-    (Typing.err_code Typing.InvalidMoveTarget)
-    (pos1, "Invalid argument - `move()` takes a single mutably-owned variable")
-    [(var_pos, "This variable is " ^ var_mutability_str)]
 
 let discarded_awaitable pos1 pos2 =
   add_list
@@ -4093,25 +3679,6 @@ let ifc_policy_mismatch
     (pos_sub, m1)
     [(pos_super, m2)]
 
-let return_void_to_rx_mismatch
-    ~pos1_has_attribute pos1 pos2 (on_error : typing_error_callback) =
-  let m1 = "This is marked `<<__ReturnsVoidToRx>>`." in
-  let m2 = "This is not marked `<<__ReturnsVoidToRx>>`." in
-  on_error
-    ~code:(Typing.err_code Typing.ReturnVoidToRxMismatch)
-    ( pos1,
-      if pos1_has_attribute then
-        m1
-      else
-        m2 )
-    [
-      ( pos2,
-        if pos1_has_attribute then
-          m2
-        else
-          m1 );
-    ]
-
 let this_as_lexical_variable pos =
   add
     (Naming.err_code Naming.ThisAsLexicalVariable)
@@ -4159,78 +3726,11 @@ let overriding_prop_const_mismatch
           m2 );
     ]
 
-let mutable_return_result_mismatch
-    pos1_has_mutable_return pos1 pos2 (on_error : typing_error_callback) =
-  let m1 = "This is marked `<<__MutableReturn>>`." in
-  let m2 = "This is not marked `<<__MutableReturn>>`." in
-  on_error
-    ~code:(Typing.err_code Typing.MutableReturnResultMismatch)
-    ( pos1,
-      if pos1_has_mutable_return then
-        m1
-      else
-        m2 )
-    [
-      ( pos2,
-        if pos1_has_mutable_return then
-          m2
-        else
-          m1 );
-    ]
-
 let php_lambda_disallowed pos =
   add
     (NastCheck.err_code NastCheck.PhpLambdaDisallowed)
     pos
     "PHP style anonymous functions are not allowed."
-
-module CoeffectEnforcedOp = struct
-  let output pos =
-    add
-      (Typing.err_code Typing.OutputInWrongContext)
-      pos
-      "`echo` or `print` are not allowed in reactive functions."
-
-  let static_property_access pos =
-    add
-      (Typing.err_code Typing.StaticPropertyInWrongContext)
-      pos
-      "Static property cannot be used in a reactive context."
-
-  let rx_enabled_in_non_rx_context pos =
-    add
-      (Typing.err_code Typing.RxEnabledInNonRxContext)
-      pos
-      "`\\HH\\Rx\\IS_ENABLED` can only be used in reactive functions."
-
-  let nonreactive_indexing is_append pos =
-    let msg =
-      if is_append then
-        "Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method."
-      else
-        "Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method."
-    in
-    add (Typing.err_code Typing.NonreactiveIndexing) pos msg
-
-  let obj_set_reactive pos =
-    let msg =
-      "This object's property is being mutated (used as an lvalue)"
-      ^ "\nYou cannot set non-mutable object properties in reactive functions"
-    in
-    add (Typing.err_code Typing.ObjSetReactive) pos msg
-
-  let invalid_unset_target_rx pos =
-    add
-      (Typing.err_code Typing.InvalidUnsetTargetInRx)
-      pos
-      "Non-mutable argument for `unset` is not allowed in reactive functions."
-
-  let non_awaited_awaitable_in_rx pos =
-    add
-      (Typing.err_code Typing.NonawaitedAwaitableInReactiveContext)
-      pos
-      "This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed."
-end
 
 (*****************************************************************************)
 (* Typing decl errors *)
@@ -4773,46 +4273,6 @@ let invalid_return_disposable pos =
   in
   add (Typing.err_code Typing.InvalidReturnDisposable) pos msg
 
-let nonreactive_function_call pos decl_pos callee_reactivity cause_pos_opt =
-  add_list
-    (Typing.err_code Typing.NonreactiveFunctionCall)
-    (pos, "Reactive functions can only call other reactive functions.")
-    ( [(decl_pos, "This function is " ^ callee_reactivity ^ ".")]
-    @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [
-            ( cause_pos,
-              "This argument caused function to be " ^ callee_reactivity ^ "."
-            );
-          ]) )
-
-let nonpure_function_call pos decl_pos callee_reactivity =
-  add_list
-    (Typing.err_code Typing.NonpureFunctionCall)
-    (pos, "Pure functions can only call other pure functions.")
-    [(decl_pos, "This function is " ^ callee_reactivity ^ ".")]
-
-let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt =
-  add_list
-    (Typing.err_code Typing.NonreactiveCallFromShallow)
-    (pos, "Shallow reactive functions cannot call non-reactive functions.")
-    ( [(decl_pos, "This function is " ^ callee_reactivity ^ ".")]
-    @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [
-            ( cause_pos,
-              "This argument caused function to be " ^ callee_reactivity ^ "."
-            );
-          ]) )
-
-let rx_parameter_condition_mismatch
-    cond pos def_pos (on_error : typing_error_callback) =
-  on_error
-    ~code:(Typing.err_code Typing.RxParameterConditionMismatch)
-    ( pos,
-      "This parameter does not satisfy "
-      ^ cond
-      ^ " condition defined on matching parameter in function super type." )
-    [(def_pos, "This is parameter declaration from the function super type.")]
-
 let inout_argument_bad_type pos msgl =
   let msg =
     "Expected argument marked `inout` to be contained in a local or "
@@ -4866,17 +4326,6 @@ let wrong_expression_kind_builtin_attribute expr_kind pos attr =
   in
   add_list (Typing.err_code Typing.WrongExpressionKindAttribute) (pos, msg1) []
 
-let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
-  add_list
-    (Typing.err_code Typing.CannotReturnBorrowedValueAsImmutable)
-    ( fun_pos,
-      "Values returned from reactive function by default are treated as immutable."
-    )
-    [
-      ( value_pos,
-        "This value is mutably borrowed and cannot be returned as immutable" );
-    ]
-
 let decl_override_missing_hint pos (on_error : typing_error_callback) =
   on_error
     ~code:(Typing.err_code Typing.DeclOverrideMissingHint)
@@ -4884,36 +4333,6 @@ let decl_override_missing_hint pos (on_error : typing_error_callback) =
       "When redeclaring class members, both declarations must have a typehint"
     )
     []
-
-let invalid_type_for_atmost_rx_as_rxfunc_parameter pos type_str =
-  add
-    (Typing.err_code Typing.InvalidTypeForOnlyrxIfRxfuncParameter)
-    pos
-    ( "Parameter annotated with `<<__AtMostRxAsFunc>>` attribute must be function, now "
-    ^ Markdown_lite.md_codify type_str
-    ^ "." )
-
-let missing_annotation_for_atmost_rx_as_rxfunc_parameter pos =
-  add
-    (Typing.err_code Typing.MissingAnnotationForOnlyrxIfRxfuncParameter)
-    pos
-    "Missing function type annotation on parameter marked with `<<__AtMostRxAsFunc>>` attribute."
-
-let superglobal_in_reactive_context pos name =
-  add
-    (Typing.err_code Typing.SuperglobalInReactiveContext)
-    pos
-    ( "Superglobal "
-    ^ Markdown_lite.md_codify name
-    ^ " cannot be used in a reactive context." )
-
-let returns_void_to_rx_function_as_non_expression_statement pos fpos =
-  add_list
-    (Typing.err_code Typing.ReturnsVoidToRxAsNonExpressionStatement)
-    ( pos,
-      "Cannot use result of function annotated with `<<__ReturnsVoidToRx>>` in reactive context"
-    )
-    [(fpos, "This is function declaration.")]
 
 let shapes_key_exists_always_true pos1 name pos2 =
   add_list
@@ -4983,12 +4402,6 @@ let ambiguous_object_access
         ^ Markdown_lite.md_codify class_subclass );
     ]
 
-let invalid_traversable_in_rx pos =
-  add
-    (Typing.err_code Typing.InvalidTraversableInRx)
-    pos
-    "Cannot traverse over non-reactive traversable in reactive code."
-
 let lateinit_with_default pos =
   add
     (Typing.err_code Typing.LateInitWithDefault)
@@ -5036,12 +4449,6 @@ let unserializable_type pos message =
     pos
     ( "Unserializable type (could not be converted to JSON and back again): "
     ^ message )
-
-let redundant_rx_condition pos =
-  add
-    (Typing.err_code Typing.RedundantRxCondition)
-    pos
-    "Reactivity condition for this method is always true, consider removing it."
 
 let invalid_arraykey code pos (cpos, ctype) (kpos, ktype) =
   add_list

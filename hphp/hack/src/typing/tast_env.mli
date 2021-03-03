@@ -270,22 +270,10 @@ val get_typedef : env -> string -> Decl_provider.typedef_decl option
 
 val is_enum : env -> string -> bool
 
-val env_reactivity : env -> Typing_defs.reactivity
-
-val function_is_mutable : env -> Tast.type_param_mutability option
-
-val local_is_mutable : include_borrowed:bool -> env -> Local_id.t -> bool
-
-val get_env_mutability : env -> Typing_mutability_env.mutability_env
-
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
-
-val set_env_reactive : env -> Typing_defs.reactivity -> env
 
 val set_allow_wildcards : env -> env
 
 val get_allow_wildcards : env -> bool
-
-val condition_type_matches : is_self:bool -> env -> Tast.ty -> Tast.ty -> bool
 
 val is_enum_class : env -> string -> bool

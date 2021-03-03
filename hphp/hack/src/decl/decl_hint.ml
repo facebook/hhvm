@@ -92,34 +92,25 @@ and hint_ p env = function
   | Hlike h -> Tlike (hint env h)
   | Hfun
       {
-        hf_reactive_kind = reactivity;
         hf_param_tys = hl;
         hf_param_info = pil;
         hf_variadic_ty = vh;
         hf_ctxs = ctxs;
         hf_return_ty = h;
-        hf_is_mutable_return = mut_ret;
         hf_is_readonly_return = readonly_ret;
       } ->
     let make_param ((p, _) as x) param_info =
-      let (mutability, readonly, kind) =
+      let (readonly, kind) =
         match param_info with
         | Some p ->
-          let mutability =
-            match p.hfparam_mutability with
-            | Some PMutable -> Some Param_borrowed_mutable
-            | Some POwnedMutable -> Some Param_owned_mutable
-            | Some PMaybeMutable -> Some Param_maybe_mutable
-            | _ -> None
-          in
           let readonly =
             match p.hfparam_readonlyness with
             | Some Ast_defs.Readonly -> true
             | _ -> false
           in
           let param_kind = get_param_mode p.hfparam_kind in
-          (mutability, readonly, param_kind)
-        | None -> (None, false, FPnormal)
+          (readonly, param_kind)
+        | None -> (false, FPnormal)
       in
       {
         fp_pos = Decl_env.make_decl_pos env p;
@@ -129,7 +120,6 @@ and hint_ p env = function
           make_fp_flags
             ~mode:kind
             ~accept_disposable:false
-            ~mutability
             ~has_default:
               false
               (* Currently do not support external and cancall on parameters of function parameters *)
@@ -138,7 +128,6 @@ and hint_ p env = function
             ~is_atom:false
             ~readonly
             ~const_function:false;
-        fp_rx_annotation = None;
       }
     in
     let readonly_ret =
@@ -157,11 +146,6 @@ and hint_ p env = function
       | Some t -> Fvariadic (make_param t None)
       | None -> Fstandard
     in
-    let reactivity =
-      match reactivity with
-      | FPure -> Pure None
-      | FNonreactive -> Nonreactive
-    in
     Tfun
       {
         ft_arity = arity;
@@ -173,10 +157,7 @@ and hint_ p env = function
         ft_flags =
           make_ft_flags
             Ast_defs.FSync
-            None
             ~return_disposable:false
-            ~returns_void_to_rx:false
-            ~returns_mutable:mut_ret
             ~returns_readonly:readonly_ret
             ~readonly_this:
               false
@@ -187,7 +168,6 @@ and hint_ p env = function
             this will likely change.
             *)
             ~const:false;
-        ft_reactive = reactivity;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;
       }

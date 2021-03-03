@@ -449,12 +449,6 @@ let unop p env uop te ty =
       let (env, is_dynamic) =
         check_dynamic_or_enforce_num env p ty (Reason.Rarith p)
       in
-      let env =
-        if Env.env_local_reactive env then
-          Typing_mutability.handle_assignment_mutability env te (Some (snd te))
-        else
-          env
-      in
       let result_ty =
         if is_dynamic then
           MakeType.dynamic (Reason.Rincdec_dynamic p)

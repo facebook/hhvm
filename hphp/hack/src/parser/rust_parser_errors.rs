@@ -183,9 +183,6 @@ struct Context<'a, Syntax> {
     pub active_methodish: Option<&'a Syntax>,
     pub active_callable: Option<&'a Syntax>,
     pub active_callable_attr_spec: Option<&'a Syntax>,
-    // true if active callable is reactive if it is a function or method, or there is a reactive
-    // proper ancestor (including lambdas) but not beyond the enclosing function or method
-    pub active_is_rx_or_enclosing_for_lambdas: bool,
     pub active_const: Option<&'a Syntax>,
     pub active_unstable_features: HashSet<UnstableFeatures>,
     pub active_expression_tree: bool,
@@ -199,7 +196,6 @@ impl<'a, Syntax> std::clone::Clone for Context<'a, Syntax> {
             active_methodish: self.active_methodish,
             active_callable: self.active_callable,
             active_callable_attr_spec: self.active_callable_attr_spec,
-            active_is_rx_or_enclosing_for_lambdas: self.active_is_rx_or_enclosing_for_lambdas,
             active_const: self.active_const,
             active_unstable_features: self.active_unstable_features.clone(),
             active_expression_tree: self.active_expression_tree,
@@ -1493,53 +1489,10 @@ where
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
     }
 
-    fn is_some_reactivity_attribute_name(name: &str) -> bool {
-        name == sn::user_attributes::REACTIVE
-            || name == sn::user_attributes::SHALLOW_REACTIVE
-            || name == sn::user_attributes::LOCAL_REACTIVE
-            || name == sn::user_attributes::NON_RX
-            || name == sn::user_attributes::PURE
-            || name == sn::user_attributes::CIPP
-            || name == sn::user_attributes::CIPP_LOCAL
-            || name == sn::user_attributes::CIPP_GLOBAL
-            || name == sn::user_attributes::CIPP_RX
-    }
-
-    fn is_some_reactivity_attribute(&self, node: S<'a, Token, Value>) -> bool {
-        match self.attr_name(node) {
-            None => false,
-            Some(name) => Self::is_some_reactivity_attribute_name(name),
-        }
-    }
-
     fn is_ifc_attribute(&self, name: &str) -> bool {
         name == sn::user_attributes::POLICIED
             || name == sn::user_attributes::INFERFLOWS
             || name == sn::user_attributes::EXTERNAL
-    }
-
-    fn attribute_first_reactivity_annotation(
-        &self,
-        node: S<'a, Token, Value>,
-    ) -> Option<S<'a, Token, Value>> {
-        match &node.children {
-            AttributeSpecification(_) | OldAttributeSpecification(_) => {
-                Self::attr_spec_to_node_list(node).find(|x| self.is_some_reactivity_attribute(x))
-            }
-            _ => None,
-        }
-    }
-
-    fn attribute_has_reactivity_annotation(&self, attr_spec: S<'a, Token, Value>) -> bool {
-        self.attribute_first_reactivity_annotation(attr_spec)
-            .is_some()
-    }
-
-    fn attribute_missing_reactivity_for_condition(&self, attr_spec: S<'a, Token, Value>) -> bool {
-        let has_attr = |attr| self.attribute_specification_contains(attr_spec, attr);
-        !(self.attribute_has_reactivity_annotation(attr_spec))
-            && (has_attr(sn::user_attributes::ONLY_RX_IF_IMPL)
-                || has_attr(sn::user_attributes::AT_MOST_RX_AS_ARGS))
     }
 
     fn check_ifc_enabled(&mut self, attrs: S<'a, Token, Value>) {
@@ -1550,160 +1503,6 @@ where
                 }
                 _ => {}
             }
-        }
-    }
-
-    fn error_if_memoize_function_returns_mutable(&mut self, attrs: S<'a, Token, Value>) {
-        let mut has_memoize = false;
-        let mut mutable_node = None;
-        let mut mut_return_node = None;
-        for node in Self::attr_spec_to_node_list(attrs) {
-            match self.attr_name(node) {
-                Some(n) if n == sn::user_attributes::MUTABLE_RETURN => mut_return_node = Some(node),
-                Some(n)
-                    if n == sn::user_attributes::MEMOIZE
-                        || n == sn::user_attributes::MEMOIZE_LSB =>
-                {
-                    has_memoize = true
-                }
-                Some(n) if n == sn::user_attributes::MUTABLE => mutable_node = Some(node),
-                _ => {}
-            }
-        }
-
-        if has_memoize {
-            if let Some(n) = mutable_node {
-                self.errors.push(Self::make_error_from_node(
-                    n,
-                    errors::mutable_parameter_in_memoize_function(true),
-                ))
-            }
-            if let Some(n) = mut_return_node {
-                self.errors.push(Self::make_error_from_node(
-                    n,
-                    errors::mutable_return_in_memoize_function,
-                ))
-            }
-        }
-    }
-
-    fn methodish_missing_reactivity_for_condition(&self, node: S<'a, Token, Value>) -> bool {
-        match &node.children {
-            MethodishDeclaration(x) => {
-                self.attribute_missing_reactivity_for_condition(&x.attribute)
-            }
-            _ => false,
-        }
-    }
-
-    fn check_nonrx_annotation(&mut self, node: S<'a, Token, Value>) {
-        let err_decl = |self_: &mut Self| {
-            self_.errors.push(Self::make_error_from_node(
-                node,
-                errors::invalid_non_rx_argument_for_declaration,
-            ))
-        };
-        let err_lambda = |self_: &mut Self| {
-            self_.errors.push(Self::make_error_from_node(
-                node,
-                errors::invalid_non_rx_argument_for_lambda,
-            ))
-        };
-        let attr_spec = match &node.children {
-            MethodishDeclaration(x) => Some((&x.attribute, true)),
-            FunctionDeclaration(x) => Some((&x.attribute_spec, true)),
-            AnonymousFunction(x) => Some((&x.attribute_spec, false)),
-            LambdaExpression(x) => Some((&x.attribute_spec, false)),
-            AwaitableCreationExpression(x) => Some((&x.attribute_spec, false)),
-            _ => None,
-        };
-
-        if let Some((node, is_decl)) = attr_spec {
-            // try find argument list
-            let args_opt = Self::attr_spec_to_node_list(node)
-                .find(|node| self.attr_name(node) == Some(sn::user_attributes::NON_RX))
-                .and_then(|x| self.attr_args(x));
-
-            let is_string_argument = |x: S<'a, Token, Value>| match &x.children {
-                LiteralExpression(x) => match &x.expression.children {
-                    Token(token) => {
-                        token.kind() == TokenKind::DoubleQuotedStringLiteral
-                            || token.kind() == TokenKind::SingleQuotedStringLiteral
-                    }
-                    _ => false,
-                },
-                _ => false,
-            };
-
-            if let Some(mut args_opt) = args_opt {
-                let first_arg = args_opt.next();
-                let second_arg = args_opt.next();
-                match (first_arg, second_arg) {
-                    // __NonRx attribute is found and argument list is empty.
-                    // This is ok for lambdas but error for declarations
-                    (None, _) => {
-                        if is_decl {
-                            err_decl(self)
-                        }
-                    }
-                    // __NonRx attribute is found with single string argument.
-                    // This is ok for declarations for not allowed for lambdas *)
-                    (Some(arg), None) if is_string_argument(arg) => {
-                        if !is_decl {
-                            err_lambda(self)
-                        }
-                    }
-                    // __NonRx attribute is found but argument list is not suitable
-                    // nor for declarations, neither for lambdas
-                    _ => {
-                        if is_decl {
-                            err_decl(self)
-                        } else {
-                            err_lambda(self)
-                        }
-                    }
-                }
-            }
-        } else {
-            // __NonRx attribute not found
-        }
-    }
-
-    fn function_missing_reactivity_for_condition(&self, node: S<'a, Token, Value>) -> bool {
-        match &node.children {
-            FunctionDeclaration(x) => {
-                self.attribute_missing_reactivity_for_condition(&x.attribute_spec)
-            }
-            _ => false,
-        }
-    }
-
-    fn attribute_multiple_reactivity_annotations(&self, attr_spec: S<'a, Token, Value>) -> bool {
-        match &attr_spec.children {
-            OldAttributeSpecification(_) | AttributeSpecification(_) => {
-                Self::attr_spec_to_node_list(attr_spec)
-                    .filter(|x| self.is_some_reactivity_attribute(x))
-                    .take(2)
-                    .count()
-                    > 1
-            }
-            _ => false,
-        }
-    }
-
-    fn methodish_multiple_reactivity_annotations(&self, node: S<'a, Token, Value>) -> bool {
-        match &node.children {
-            MethodishDeclaration(x) => self.attribute_multiple_reactivity_annotations(&x.attribute),
-            _ => false,
-        }
-    }
-
-    fn function_multiple_reactivity_annotations(&self, node: S<'a, Token, Value>) -> bool {
-        match &node.children {
-            FunctionDeclaration(x) => {
-                self.attribute_multiple_reactivity_annotations(&x.attribute_spec)
-            }
-            _ => false,
         }
     }
 
@@ -1808,24 +1607,7 @@ where
             }
             FunctionDeclaration(fd) => {
                 let function_attrs = &fd.attribute_spec;
-                self.produce_error(
-                    |self_, x| Self::function_multiple_reactivity_annotations(self_, x),
-                    node,
-                    || errors::multiple_reactivity_annotations,
-                    function_attrs,
-                );
-                self.error_if_memoize_function_returns_mutable(function_attrs);
                 self.check_ifc_enabled(function_attrs);
-
-                self.check_nonrx_annotation(node);
-
-                self.produce_error(
-                    |self_, x| Self::function_missing_reactivity_for_condition(self_, x),
-                    node,
-                    || errors::missing_reactivity_for_condition,
-                    function_attrs,
-                );
-
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
                     kind == TokenKind::Async
                 });
@@ -1838,7 +1620,6 @@ where
                     .extract_function_name(&md.function_decl_header)
                     .unwrap_or("");
                 let method_attrs = &md.attribute;
-                self.error_if_memoize_function_returns_mutable(method_attrs);
                 self.check_ifc_enabled(method_attrs);
                 self.produce_error(
                     |self_, x| self_.methodish_contains_memoize(x),
@@ -1886,39 +1667,6 @@ where
                     self.invalid_modifier_errors("Interface methods", node, |kind| {
                         kind != TokenKind::Final && kind != TokenKind::Abstract
                     });
-                };
-
-                if Self::has_modifier_static(node)
-                    && (self.attribute_specification_contains(
-                        method_attrs,
-                        sn::user_attributes::MUTABLE,
-                    ) || self.attribute_specification_contains(
-                        method_attrs,
-                        sn::user_attributes::MAYBE_MUTABLE,
-                    ))
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::mutability_annotation_on_static_method,
-                    ))
-                };
-
-                if method_name.eq_ignore_ascii_case(sn::members::__CONSTRUCT)
-                    && (self.attribute_specification_contains(
-                        method_attrs,
-                        sn::user_attributes::MUTABLE,
-                    ) || self.attribute_specification_contains(
-                        method_attrs,
-                        sn::user_attributes::MAYBE_MUTABLE,
-                    ) || self.attribute_specification_contains(
-                        method_attrs,
-                        sn::user_attributes::MUTABLE_RETURN,
-                    ))
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::mutability_annotation_on_constructor,
-                    ))
                 };
 
                 let fun_semicolon = &md.semicolon;
@@ -1971,19 +1719,6 @@ where
                         modifiers,
                     );
                 }
-                self.produce_error(
-                    |self_, x| self_.methodish_multiple_reactivity_annotations(x),
-                    node,
-                    || errors::multiple_reactivity_annotations,
-                    method_attrs,
-                );
-                self.check_nonrx_annotation(node);
-                self.produce_error(
-                    |self_, x| self_.methodish_missing_reactivity_for_condition(x),
-                    node,
-                    || errors::missing_reactivity_for_condition,
-                    method_attrs,
-                );
             }
             _ => {}
         }
@@ -2075,70 +1810,6 @@ where
             let attr = &x.attribute;
             if self.attribute_specification_contains(attr, sn::user_attributes::CONST_FUN) {
                 self.check_can_use_feature(attr, &UnstableFeatures::Readonly);
-            }
-        }
-    }
-
-    fn parameter_rx_errors(&mut self, node: S<'a, Token, Value>) {
-        if let ParameterDeclaration(x) = &node.children {
-            let spec = &x.attribute;
-            let has_owned_mutable =
-                self.attribute_specification_contains(spec, sn::user_attributes::OWNED_MUTABLE);
-
-            let has_mutable =
-                self.attribute_specification_contains(spec, sn::user_attributes::MUTABLE);
-
-            let has_maybemutable =
-                self.attribute_specification_contains(spec, sn::user_attributes::MAYBE_MUTABLE);
-
-            match (has_mutable, has_owned_mutable, has_maybemutable) {
-                (true, true, _) => self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::conflicting_mutable_and_owned_mutable_attributes,
-                )),
-                (true, _, true) => self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::conflicting_mutable_and_maybe_mutable_attributes,
-                )),
-                (_, true, true) => self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::conflicting_owned_mutable_and_maybe_mutable_attributes,
-                )),
-                _ => {}
-            }
-            let is_inout = Self::is_parameter_with_callconv(node);
-            if is_inout && (has_mutable || has_maybemutable || has_owned_mutable) {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::mutability_annotation_on_inout_parameter,
-                ))
-            }
-            if has_owned_mutable || has_mutable {
-                let attrs = self.env.context.active_callable_attr_spec;
-                let active_is_rx = self.env.context.active_is_rx_or_enclosing_for_lambdas;
-
-                let parent_func_is_memoize = attrs
-                    .map(|spec| {
-                        self.attribute_specification_contains(spec, sn::user_attributes::MEMOIZE)
-                            || self.attribute_specification_contains(
-                                spec,
-                                sn::user_attributes::MEMOIZE,
-                            )
-                    })
-                    .unwrap_or(false);
-
-                if has_owned_mutable && !active_is_rx {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::mutably_owned_attribute_on_non_rx_function,
-                    ))
-                }
-                if has_mutable && parent_func_is_memoize {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::mutable_parameter_in_memoize_function(false),
-                    ))
-                }
             }
         }
     }
@@ -2316,7 +1987,6 @@ where
     fn parameter_errors(&mut self, node: S<'a, Token, Value>) {
         let param_errors = |self_: &mut Self, params| {
             for x in Self::syntax_to_list_no_separators(params) {
-                self_.parameter_rx_errors(x);
                 self_.check_parameter_ifc(x);
                 self_.check_parameter_readonly(x);
             }
@@ -2328,7 +1998,6 @@ where
                 self.produce_error_from_check(&Self::param_with_callconv_has_default, node, || {
                     errors::error2074(callconv_text)
                 });
-                self.parameter_rx_errors(node);
 
                 self.check_type_hint(&p.type_);
                 self.check_parameter_ifc(node);
@@ -5373,13 +5042,6 @@ where
     }
 
     fn folder(&mut self, node: S<'a, Token, Value>) {
-        let has_rx_attr_mutable_hack = |self_: &mut Self, attrs| {
-            self_
-                .attribute_first_reactivity_annotation(attrs)
-                .map_or(false, |node| {
-                    self_.attr_name(node) != Some(sn::user_attributes::NON_RX)
-                })
-        };
         let mut prev_context = None;
         let mut pushed_nested_namespace = false;
 
@@ -5388,9 +5050,6 @@ where
                 *prev_context = Some(self_.env.context.clone());
                 // a _single_ variable suffices as they cannot be nested
                 self_.env.context.active_methodish = Some(node);
-                // inspect the rx attribute directly.
-                self_.env.context.active_is_rx_or_enclosing_for_lambdas =
-                    has_rx_attr_mutable_hack(self_, s);
                 self_.env.context.active_callable = Some(node);
                 self_.env.context.active_callable_attr_spec = Some(s);
             };
@@ -5516,7 +5175,6 @@ where
                 self.check_disallowed_variables(node);
                 self.dynamic_method_call_errors(node);
                 self.expression_errors(node);
-                self.check_nonrx_annotation(node);
                 self.assignment_errors(node);
             }
 
@@ -5739,7 +5397,6 @@ where
                 active_methodish: None,
                 active_callable: None,
                 active_callable_attr_spec: None,
-                active_is_rx_or_enclosing_for_lambdas: false,
                 active_const: None,
                 active_unstable_features: HashSet::new(),
                 active_expression_tree: false,

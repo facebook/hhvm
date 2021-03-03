@@ -3,61 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80b3afc5c2a43c4e78c02ebef42a0144>>
+// @generated SignedSource<<543658730cda7ab1e10dbb06545e9e23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use crate::aast_defs::*;
-impl FuncReactive {
-    pub fn mk_fpure() -> Self {
-        FuncReactive::FPure
-    }
-    pub fn mk_fnonreactive() -> Self {
-        FuncReactive::FNonreactive
-    }
-    pub fn is_fpure(&self) -> bool {
-        match self {
-            FuncReactive::FPure => true,
-            _ => false,
-        }
-    }
-    pub fn is_fnonreactive(&self) -> bool {
-        match self {
-            FuncReactive::FNonreactive => true,
-            _ => false,
-        }
-    }
-}
-impl ParamMutability {
-    pub fn mk_pmutable() -> Self {
-        ParamMutability::PMutable
-    }
-    pub fn mk_powned_mutable() -> Self {
-        ParamMutability::POwnedMutable
-    }
-    pub fn mk_pmaybe_mutable() -> Self {
-        ParamMutability::PMaybeMutable
-    }
-    pub fn is_pmutable(&self) -> bool {
-        match self {
-            ParamMutability::PMutable => true,
-            _ => false,
-        }
-    }
-    pub fn is_powned_mutable(&self) -> bool {
-        match self {
-            ParamMutability::POwnedMutable => true,
-            _ => false,
-        }
-    }
-    pub fn is_pmaybe_mutable(&self) -> bool {
-        match self {
-            ParamMutability::PMaybeMutable => true,
-            _ => false,
-        }
-    }
-}
 impl ImportFlavor {
     pub fn mk_include() -> Self {
         ImportFlavor::Include

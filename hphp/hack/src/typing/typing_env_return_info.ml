@@ -17,12 +17,8 @@ type t = {
   return_type: Typing_defs.locl_possibly_enforced_ty;
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
   return_disposable: bool;
-  (* Does the function or function type have the <<__MutableReturn>> attribute? *)
-  return_mutable: bool;
   (* Was there an explicit return type hint? *)
   return_explicit: bool;
-  (* Is function return type in rx context treated as void? *)
-  return_void_to_rx: bool;
   (* Must the function be dynamically callable? *)
   return_dynamically_callable: bool;
 }

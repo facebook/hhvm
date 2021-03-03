@@ -229,13 +229,11 @@ and hint_ ~is_atom env p h_ =
     hint env h
   | Hfun
       {
-        hf_reactive_kind = _;
         hf_param_tys = hl;
         hf_param_info = _;
         hf_variadic_ty = variadic_hint;
         hf_ctxs;
         hf_return_ty = h;
-        hf_is_mutable_return = _;
         hf_is_readonly_return = _;
       } ->
     List.iter hl (hint env);

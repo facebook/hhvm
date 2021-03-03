@@ -159,17 +159,6 @@ type linearization_kind =
   | Ancestor_types
 [@@deriving show, ord]
 
-(** name of condition type for conditional reactivity of methods.
-    If None - method is unconditionally reactive *)
-type condition_type_name = string option [@@deriving eq, show]
-
-type method_reactivity =
-  | Method_pure of condition_type_name
-  | Method_reactive of condition_type_name
-  | Method_shallow of condition_type_name
-  | Method_local of condition_type_name
-[@@deriving eq, show]
-
 type decl_class_type = {
   dc_need_init: bool;
   dc_members_fully_known: bool;
@@ -211,7 +200,6 @@ type decl_class_type = {
 
 and element = {
   elt_flags: int;
-  elt_reactivity: method_reactivity option;
   elt_origin: string;
   elt_visibility: ce_visibility;
   elt_deprecated: string option;

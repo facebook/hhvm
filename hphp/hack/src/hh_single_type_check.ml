@@ -212,7 +212,6 @@ let parse_options () =
   let disallow_array_literal = ref None in
   let dynamic_view = ref None in
   let auto_namespace_map = ref None in
-  let unsafe_rx = ref (Some false) in
   let log_inference_constraints = ref None in
   let timeout = ref None in
   let disallow_byref_dynamic_calls = ref (Some false) in
@@ -446,9 +445,6 @@ let parse_options () =
       ( "--dynamic-view",
         Arg.Unit (set_bool dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic" );
-      ( "--unsafe-rx",
-        Arg.Unit (set_bool unsafe_rx),
-        " Disables reactivity related errors" );
       ( "--get-member",
         Arg.String
           (fun class_and_member_id ->
@@ -723,7 +719,6 @@ let parse_options () =
   let tcopt =
     GlobalOptions.make
       ?po_disable_array_typehint:(Some false)
-      ?tco_unsafe_rx:!unsafe_rx
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_disallow_array_typehint:!disallow_array_typehint
       ?tco_disallow_array_literal:!disallow_array_literal

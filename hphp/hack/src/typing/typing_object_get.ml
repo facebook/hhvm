@@ -323,7 +323,6 @@ let rec obj_get_concrete_ty
                   { capability = CapTy (MakeType.intersection Reason.Rnone []) };
                 ft_ret =
                   { et_type = MakeType.void Reason.Rnone; et_enforced = false };
-                ft_reactive = Pure None;
                 ft_flags = 0;
                 ft_ifc_decl = default_ifc_fun_decl;
               }

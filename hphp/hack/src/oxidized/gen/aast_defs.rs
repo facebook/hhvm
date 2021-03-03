@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb2d0632a6d21ab12a0fa6a5bb5e243a>>
+// @generated SignedSource<<bee21cce8483ea56139c1101188f16fb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -48,51 +48,6 @@ pub struct Lid(pub Pos, pub LocalId);
 pub type Sid = ast_defs::Id;
 
 pub type IsReified = bool;
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum FuncReactive {
-    FPure,
-    FNonreactive,
-}
-impl TrivialDrop for FuncReactive {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ParamMutability {
-    PMutable,
-    POwnedMutable,
-    PMaybeMutable,
-}
-impl TrivialDrop for ParamMutability {}
 
 #[derive(
     Clone,
@@ -178,8 +133,6 @@ impl TrivialDrop for XhpChildOp {}
 )]
 pub struct Hint(pub Pos, pub Box<Hint_>);
 
-pub type MutableReturn = bool;
-
 pub type VariadicHint = Option<Hint>;
 
 #[derive(
@@ -214,7 +167,6 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
 )]
 pub struct HfParamInfo {
     pub kind: Option<ast_defs::ParamKind>,
-    pub mutability: Option<ParamMutability>,
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
 }
 
@@ -233,14 +185,12 @@ pub struct HfParamInfo {
     ToOcamlRep
 )]
 pub struct HintFun {
-    pub reactive_kind: FuncReactive,
     pub param_tys: Vec<Hint>,
     pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
     pub ctxs: Option<Contexts>,
     pub return_ty: Hint,
     pub is_readonly_return: Option<ast_defs::ReadonlyKind>,
-    pub is_mutable_return: MutableReturn,
 }
 
 #[derive(

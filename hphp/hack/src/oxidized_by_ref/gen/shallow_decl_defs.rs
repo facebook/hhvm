@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<daff4efb58d52504f31b085a39a10ac9>>
+// @generated SignedSource<<ffc07e7c8370bb9d9b29fb14676aa79b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -101,7 +101,6 @@ impl<'a> TrivialDrop for ShallowProp<'a> {}
 )]
 pub struct ShallowMethod<'a> {
     pub name: typing_defs::PosId<'a>,
-    pub reactivity: Option<decl_defs::MethodReactivity<'a>>,
     pub type_: &'a Ty<'a>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub deprecated: Option<&'a str>,

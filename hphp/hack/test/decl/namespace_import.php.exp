@@ -33,10 +33,9 @@
                  (Tapply (([15:20-24], "\\NS1\\NS2\\T"), [])))
                 };
               ft_flags =
-              (make_ft_flags FSync None ~return_disposable:false
-                ~returns_mutable:false ~returns_void_to_rx:false
+              (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:12-16]; fe_php_std_lib = false }));
   ("\\D",
    (Shallow_decl_defs.Class

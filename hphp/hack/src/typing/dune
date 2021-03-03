@@ -79,7 +79,6 @@
     typing_kinding
     typing_log
     typing_logic_helpers
-    typing_mutability
     typing_object_get
     typing_ordered_solver
     typing_ops
@@ -87,7 +86,6 @@
     typing_per_cont_ops
     typing_phase
     typing_print
-    typing_reactivity
     typing_reified_check
     typing_solver
     typing_solver_utils
@@ -210,7 +208,6 @@
     type_parameter_env
     typing_log_value
     typing_logic
-    typing_mutability_env
     typing_set
     typing_inference_env
     typing_make_type

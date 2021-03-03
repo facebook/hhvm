@@ -40,7 +40,6 @@ let visitor ctx =
         Xhp_check.handler;
         Discarded_awaitable_check.handler;
         Invalid_index_check.handler;
-        Basic_reactivity_check.handler;
         Pseudofunctions_check.handler;
         Reified_check.handler;
         Instantiability_check.handler;
@@ -48,7 +47,6 @@ let visitor ctx =
         Abstract_class_check.handler;
         Class_parent_check.handler;
         Method_type_param_check.handler;
-        Foreach_collection_reactivity_check.handler;
         Obj_get_check.handler;
         This_hint_check.handler;
         Unresolved_type_variable_check.handler;

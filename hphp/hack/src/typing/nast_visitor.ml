@@ -66,38 +66,19 @@ class virtual iter =
 
     method! on_func_body env fb =
       match fb.fb_ast with
-      | [(_, If (((_, Id (_, c)) as id), then_stmt, else_stmt))] ->
-        super#on_expr
-          { env with rx_is_enabled_allowed = String.equal SN.Rx.is_enabled c }
-          id;
+      | [(_, If (((_, Id (_, _)) as id), then_stmt, else_stmt))] ->
+        super#on_expr env id;
         self#on_block env then_stmt;
         self#on_block env else_stmt
       | _ -> super#on_func_body env fb
 
     method! on_expr env e =
       match e with
-      | (_, Call (((_, Id (_, cn)) as e1), ta, el, unpacked_element))
-        when String.equal cn SN.Rx.move ->
-        self#on_Call
-          { env with rx_move_allowed = false }
-          e1
-          ta
-          el
-          unpacked_element
       | (_, Call (e1, ta, el, unpacked_element)) ->
-        self#on_Call
-          { env with rx_move_allowed = true }
-          e1
-          ta
-          el
-          unpacked_element
+        self#on_Call env e1 ta el unpacked_element
       | (_, Binop (Ast_defs.Eq None, e1, rhs)) ->
-        self#on_Binop
-          { env with rx_move_allowed = true }
-          (Ast_defs.Eq None)
-          e1
-          rhs
-      | _ -> super#on_expr { env with rx_move_allowed = false } e
+        self#on_Binop env (Ast_defs.Eq None) e1 rhs
+      | _ -> super#on_expr env e
   end
 
 class virtual ['state] iter_with_state =

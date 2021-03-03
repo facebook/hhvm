@@ -33,7 +33,6 @@ let global_opts =
   GlobalOptions.make
     ~po_disable_xhp_element_mangling:false
     ~po_deregister_php_stdlib:true
-    ~tco_unsafe_rx:false
     ()
 
 let server_config = ServerConfig.set_tc_options server_config global_opts

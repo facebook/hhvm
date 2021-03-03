@@ -38,14 +38,6 @@ and modifier =
   | Async
   | Inout
 
-and reactivity_attributes =
-  | Rx
-  | Shallow
-  | Local
-  | Nonreactive
-  | OnlyRxIfImpl
-  | AtMostRxAsArgs
-
 and 'a t = {
   kind: kind;
   name: string;
@@ -59,7 +51,6 @@ and 'a t = {
   children: 'a t list option;
   params: 'a t list option;
   docblock: string option;
-  reactivity_attributes: reactivity_attributes list;
 }
 [@@deriving ord]
 
@@ -70,8 +61,6 @@ val to_relative : string t -> Relative_path.t t
 val string_of_kind : kind -> string
 
 val string_of_modifier : modifier -> string
-
-val string_of_reactivity_attribute : reactivity_attributes -> string
 
 val function_kind_name : string
 

@@ -43,7 +43,6 @@ let element_to_class_elt
       elt_flags = ce_flags;
       elt_origin = ce_origin;
       elt_visibility = ce_visibility;
-      elt_reactivity = _;
       elt_deprecated = ce_deprecated;
     } =
   let (ce_pos, ce_type) =

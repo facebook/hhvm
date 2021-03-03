@@ -68,7 +68,7 @@ let tests =
     ("new_file", run Test_new_file.test);
     ("property_initializer", run Test_property_initializer.test);
     ("property_initializer2", run Test_property_initializer2.test);
-     ("server_config_overrides", run Test_serverConfig_overrides.test);
+    ("server_config_overrides", run Test_serverConfig_overrides.test);
     ("server_hover", run Test_server_hover.test);
     ("unbound_name", run Test_unbound_name.test);
     ("unbound_name_2", run Test_unbound_name_2.test);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cedfdcf6b454e76713592b7e9aa7c4c>>
+// @generated SignedSource<<30b35198b2ff91df27f01498536e02bd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -124,28 +124,6 @@ pub enum ValKind {
     Other,
 }
 impl TrivialDrop for ValKind {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ParamMutability {
-    ParamOwnedMutable,
-    ParamBorrowedMutable,
-    ParamMaybeMutable,
-}
-impl TrivialDrop for ParamMutability {}
 
 #[derive(
     Clone,
@@ -624,46 +602,6 @@ impl<'a> TrivialDrop for Ty_<'a> {}
 pub struct TaccessType<'a>(pub &'a Ty<'a>, pub PosId<'a>);
 impl<'a> TrivialDrop for TaccessType<'a> {}
 
-/// represents reactivity of function
-/// - None corresponds to non-reactive function
-/// - Some reactivity - to reactive function with specified reactivity flavor
-///
-/// Nonreactive <: Local -t <: Shallow -t <: Reactive -t
-///
-/// MaybeReactive represents conditional reactivity of function that depends on
-/// reactivity of function arguments
-///
-/// ```
-///   <<__Rx>>
-///   function f(<<__MaybeRx>> $g) { ... }
-/// ```
-///
-/// call to function f will be treated as reactive only if $g is reactive
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum Reactivity<'a> {
-    Nonreactive,
-    Pure(Option<&'a Ty<'a>>),
-    MaybeReactive(&'a Reactivity<'a>),
-    RxVar(Option<&'a Reactivity<'a>>),
-    Cipp(Option<&'a str>),
-    CippLocal(Option<&'a str>),
-    CippGlobal,
-}
-impl<'a> TrivialDrop for Reactivity<'a> {}
-
 #[derive(
     Clone,
     Copy,
@@ -727,7 +665,6 @@ pub struct FunType<'a> {
     pub implicit_params: &'a FunImplicitParams<'a>,
     /// Carries through the sync/async information from the aast
     pub ret: &'a PossiblyEnforcedTy<'a>,
-    pub reactive: Reactivity<'a>,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub ifc_decl: IfcFunDecl<'a>,
 }
@@ -757,26 +694,6 @@ pub enum FunArity<'a> {
     Fvariadic(&'a FunParam<'a>),
 }
 impl<'a> TrivialDrop for FunArity<'a> {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ParamRxAnnotation<'a> {
-    ParamRxVar,
-    ParamRxIfImpl(&'a Ty<'a>),
-}
-impl<'a> TrivialDrop for ParamRxAnnotation<'a> {}
 
 #[derive(
     Clone,
@@ -815,7 +732,6 @@ pub struct FunParam<'a> {
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub name: Option<&'a str>,
     pub type_: &'a PossiblyEnforcedTy<'a>,
-    pub rx_annotation: Option<ParamRxAnnotation<'a>>,
     pub flags: typing_defs_flags::FunParamFlags,
 }
 impl<'a> TrivialDrop for FunParam<'a> {}

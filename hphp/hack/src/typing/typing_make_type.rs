@@ -376,7 +376,6 @@ impl<'a> TypeBuilder<'a> {
             flags: FunParamFlags::empty(),
             name: None,
             pos: Pos::none(),
-            rx_annotation: None,
         })
     }
     pub fn funtype(
@@ -397,7 +396,6 @@ impl<'a> TypeBuilder<'a> {
             arity: FunArity::Fstandard,
             tparams: &[],
             where_constraints: &[],
-            reactive: Reactivity::Nonreactive,
             flags: FunTypeFlags::empty(),
             ifc_decl: IfcFunDecl::FDPolicied(Some("#PUBLIC")),
         })

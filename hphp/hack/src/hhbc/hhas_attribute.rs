@@ -109,14 +109,6 @@ fn is_memoize_lsb(attr: &HhasAttribute) -> bool {
     &attr.name == ua::MEMOIZE_LSB
 }
 
-fn is_at_most_rx_as_func(attr: &HhasAttribute) -> bool {
-    &attr.name == ua::AT_MOST_RX_AS_FUNC
-}
-
-pub fn is_only_rx_if_impl(attr: &HhasAttribute) -> bool {
-    &attr.name == ua::ONLY_RX_IF_IMPL
-}
-
 pub fn has_native(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_native)
 }
@@ -163,10 +155,6 @@ pub fn has_is_memoize(attrs: &[HhasAttribute]) -> bool {
 
 pub fn has_is_memoize_lsb(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_memoize_lsb)
-}
-
-pub fn has_at_most_rx_as_func(attrs: &[HhasAttribute]) -> bool {
-    has(attrs, is_at_most_rx_as_func)
 }
 
 pub fn deprecation_info<'a>(

@@ -13,7 +13,6 @@
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "__dispose");
-          sm_reactivity = None;
           sm_type =
           (Rwitness (root|return_disposable.php line 4, characters 19-27),
            (Tfun
@@ -27,12 +26,10 @@
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false
+                (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
                   ~is_const:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                }));
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -55,10 +52,9 @@
                     )))
                 };
               ft_flags =
-              (make_ft_flags FAsync None ~return_disposable:true
-                ~returns_mutable:false ~returns_void_to_rx:false
+              (make_ft_flags FAsync ~return_disposable:true
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [8:16-19]; fe_php_std_lib = false }))
   ]
 

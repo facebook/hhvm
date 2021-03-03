@@ -93,19 +93,6 @@ let make_hover_attr_docs name =
       ^ " Normally these values cannot be passed to functions."
       ^ "\n\nYou cannot save references to `__AcceptDisposable` parameters, to ensure they are disposed at the end of their using block.";
     ]
-  | "__AtMostRxAsArgs" ->
-    [
-      "Marks a reactive function as being conditionally reactive, depending on the type of its arguments."
-      ^ "\n\nThe function is 'at most as reactive as its arguments'."
-      ^ " For example, a `__RxShallow` argument makes this function `__RxShallow`"
-      ^ "\n\nThis attribute must be used with `__OnlyRxIfImpl` or `__AtMostRxAsFunc` parameters.";
-    ]
-  | "__AtMostRxAsFunc" ->
-    [
-      "Marks a reactive function as being conditionally reactive, depending on the reactivity of this function argument."
-      ^ "\n\nThe enclosing function is 'at most as reactive as this function'."
-      ^ " For example, a `__RxShallow` function argument makes the enclosing function `__RxShallow`";
-    ]
   | "__ALWAYS_INLINE" ->
     [
       "Instructs HHVM to always inline this function."
@@ -199,24 +186,6 @@ let make_hover_attr_docs name =
       ^ " Calls with the same arguments will return the cached value."
       ^ "\n\nCaching is per-request and has Late Static Binding, so subclasses do not share the cache.";
     ]
-  | "__MaybeMutable" ->
-    [
-      "Allows a reactive function/method to accept both mutable and immutable objects."
-      ^ " This combines the restrictions of immutable objects (no modification) with mutable ones (no aliases)."
-      ^ "\n\nThis applies to the parameter specified, or `$this` when used on a method.";
-    ]
-  | "__Mutable" ->
-    [
-      "Allows mutation of the annotated object inside this reactive function/method."
-      ^ " When `__Mutable` is used on a method, allows mutation of `$this`."
-      ^ "\n\nAnnotated objects are mutably borrowed."
-      ^ "\n\nSee `__OwnedMutable` for exlusively owned objects.";
-    ]
-  | "__MutableReturn" ->
-    [
-      "Marks this reactive function/method as returning a mutable object that is owned by the caller."
-      ^ "\n\nUse Rx\\mutable at the callsite to maintain mutability of the returned object.";
-    ]
   | "__Native" ->
     [
       "Declares a native function."
@@ -233,11 +202,6 @@ let make_hover_attr_docs name =
       ^ "\n\nThis forbids abstract classes, and ensures that the constructor has a consistent signature."
       ^ " Classes must use `__ConsistentConstruct` or be final.";
     ]
-  | "__NonRx" ->
-    [
-      "Mark this function or closure as intentionally not reactive."
-      ^ " When used on methods and global functions, a reason argument is required.";
-    ]
   | "__NoFlatten" ->
     [
       "Instructs hhbbc to never inline this trait into classes that use it."
@@ -249,18 +213,7 @@ let make_hover_attr_docs name =
       ^ " Only used for testing HHVM."
       ^ "\n\nSee also `__ALWAYS_INLINE`.";
     ]
-  | "__OnlyRxIfImpl" ->
-    [
-      "Marks a reactive function as being conditionally reactive, depending on the type of the object."
-      ^ " If the object `is` the class specified, then the function is reactive."
-      ^ "\n\nWhen used on a method, refers to the type of `$this`.";
-    ]
   | "__Override" -> ["Ensures there's a parent method being overridden."]
-  | "__OwnedMutable" ->
-    [
-      "Denotes that an argument to a reactive function/method is exclusively owned by that function/method, once called."
-      ^ "\n\nThe annotated argument must be passed in via `Rx\\move` or come from an Rx\\mutable expression.";
-    ]
   | "__PHPStdLib" ->
     [
       "Ignore this built-in function or class, so the type checker errors if code uses it."
@@ -287,31 +240,6 @@ let make_hover_attr_docs name =
       "Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`."
       ^ " The function must return a fresh disposable value by either instantiating a class or "
       ^ " returning a value from another method/function marked `__ReturnDisposable`.";
-    ]
-  | "__ReturnsVoidToRx" ->
-    [
-      "Requires that reactive functions do not use the return value of this function/method."
-      ^ " This enables classes to provide a fluent builder API `->setFoo()->setBar()` but "
-      ^ " ensures that reactive functions do `$x->setFoo(); $x->setBar();`.";
-    ]
-  | "__Rx" ->
-    [
-      "Ensures this function/method is fully reactive."
-      ^ " It cannot access global state, read from unmanaged sources, or have side effects."
-      ^ " Function calls are only permitted to other `__Rx` functions."
-      ^ "\n\nFully reactive functions can use the reactive runtime, unlike `__RxShallow` and `__RxLocal`.";
-    ]
-  | "__RxLocal" ->
-    [
-      "Ensures this function/method follows the function-local rules of reactivity."
-      ^ " All the restrictions of `__Rx` apply, but calls to non-reactive functions are permitted."
-      ^ "\n\nThis allows gradual migration of code to being fully reactive.";
-    ]
-  | "__RxShallow" ->
-    [
-      "Ensures this function/method follows the function-local rules of reactivity."
-      ^ " All the restrictions of `__Rx` apply, but calls to `__RxLocal` and other `__RxShallow` functions are also permitted."
-      ^ "\n\nThis allows gradual migration of code to being fully reactive.";
     ]
   | "__Sealed" ->
     [

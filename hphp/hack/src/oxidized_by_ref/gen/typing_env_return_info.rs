@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a0e6e50711686f5fc62aa017051f7937>>
+// @generated SignedSource<<8d126888dba52c72c0e94261a5980069>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,9 +33,7 @@ use crate::*;
 pub struct TypingEnvReturnInfo<'a> {
     pub type_: &'a typing_defs::PossiblyEnforcedTy<'a>,
     pub disposable: bool,
-    pub mutable: bool,
     pub explicit: bool,
-    pub void_to_rx: bool,
     pub dynamically_callable: bool,
 }
 impl<'a> TrivialDrop for TypingEnvReturnInfo<'a> {}

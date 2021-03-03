@@ -9,7 +9,7 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None;
        sc_static_methods =
-       [{ Shallow_decl_defs.sm_name = ([5:26-27], "f"); sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([5:26-27], "f");
           sm_type =
           (Rwitness (root|memoize_lsb.php line 5, characters 26-26),
            (Tfun
@@ -23,12 +23,10 @@
                    (Tprim Tint))
                   };
                 ft_flags =
-                (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false
+                (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
                   ~is_const:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                }));
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))

@@ -21,7 +21,6 @@ use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, local, Env};
 use generator_rust as generator;
 use global_state::LazyState;
-use hhas_attribute_rust::{has_at_most_rx_as_func, is_only_rx_if_impl, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
@@ -400,42 +399,6 @@ fn make_params(
     )
 }
 
-pub fn extract_rx_if_impl_attr(
-    index: usize,
-    attrs: &Vec<HhasAttribute>,
-) -> Option<(usize, String)> {
-    attrs.iter().find_map(|attr| {
-        if is_only_rx_if_impl(&attr) {
-            match attr.arguments.iter().last() {
-                Some(TypedValue::String(s)) => Some((index, s.to_string())),
-                _ => None,
-            }
-        } else {
-            None
-        }
-    })
-}
-
-pub fn extract_rx_conds(params: &Vec<HhasParam>) -> (Vec<usize>, Vec<(usize, String)>) {
-    let rx_cond_rx_of_arg = params
-        .iter()
-        .enumerate()
-        .filter_map(|(i, p)| {
-            if has_at_most_rx_as_func(&p.user_attributes) {
-                Some(i)
-            } else {
-                None
-            }
-        })
-        .collect();
-    let rx_cond_arg_implements = params
-        .iter()
-        .enumerate()
-        .filter_map(|(i, p)| extract_rx_if_impl_attr(i, &p.user_attributes))
-        .collect();
-    (rx_cond_rx_of_arg, rx_cond_arg_implements)
-}
-
 pub fn make_body<'a>(
     emitter: &mut Emitter,
     mut body_instrs: InstrSeq,
@@ -463,7 +426,6 @@ pub fn make_body<'a>(
     } else {
         emitter.iterator().count()
     };
-    let (rx_cond_rx_of_arg, rx_cond_arg_implements) = extract_rx_conds(&params);
     Ok(HhasBody {
         body_instrs,
         decl_vars,
@@ -476,8 +438,6 @@ pub fn make_body<'a>(
         return_type_info,
         doc_comment,
         env,
-        rx_cond_rx_of_arg,
-        rx_cond_arg_implements,
     })
 }
 

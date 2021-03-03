@@ -139,18 +139,11 @@ module Naming = struct
     | AttributeClassNameConflict [@value 2085]
     | MethodNeedsVisibility [@value 2086]
     (* | ReferenceInStrictModeDEPRECATED [@value 2087] *)
-    (* | ReferenceInRxDEPRECATED [@value 2088] *)
     (* | DeclareStatementDEPRECATED [@value 2089] *)
-    (* | MisplacedRxOfScopeDEPRECATED [@value 2090] *)
-    (* | RxOfScopeAndExplicitRxDEPRECATED [@value 2091] *)
     (* | UnsupportedFeatureDEPRECATED [@value 2092] *)
     (* | TraitInterfaceConstructorPromoDEPRECATED [@value 2093] *)
     | NonstaticPropertyWithLSB [@value 2094]
     (* | ReferenceInAnonUseClauseDEPRECATED [@value 2095] *)
-    | RxMoveInvalidLocation [@value 2096]
-    | MisplacedMutabilityHint [@value 2097]
-    | MutabilityHintInNonRx [@value 2098]
-    | InvalidReturnMutableHint [@value 2099]
     (* | NoTparamsOnTypeConstsDEPRECATED [@value 2100] *)
     (* | PocketUniversesDuplicationDEPRECATED [@value 2101] *)
     | UnsupportedTraitUseAs [@value 2102]
@@ -226,31 +219,14 @@ module NastCheck = struct
     (* | ConstAttributeProhibitedDEPRECATED [@value 3048] *)
     (* | RetiredError3049DEPRECATED [@value 3049] *)
     | InoutArgumentBadExpr [@value 3050]
-    (* | MutableParamsOutsideOfSyncDEPRECATED [@value 3051] *)
-    (* | MutableAsyncMethodDEPRECATED [@value 3052] *)
-    | MutableMethodsMustBeReactive [@value 3053]
-    | MutableAttributeOnFunction [@value 3054]
-    | MutableReturnAnnotatedDeclsMustBeReactive [@value 3055]
     | IllegalDestructor [@value 3056]
-    (* | ConditionallyReactiveFunctionDEPRECATED [@value 3057] *)
-    | MultipleConditionallyReactiveAnnotations [@value 3058]
-    | ConditionallyReactiveAnnotationInvalidArguments [@value 3059]
-    (* | MissingReactivityForConditionDEPRECATED [@value 3060] *)
-    (* | MultipleReactivityAnnotationsDEPRECATED [@value 3061] *)
-    | RxIsEnabledInvalidLocation [@value 3062]
-    | MaybeRxInvalidLocation [@value 3063]
-    | NoOnlyrxIfRxfuncForRxIfArgs [@value 3064]
     | CoroutineInConstructor [@value 3065]
     (* | IllegalReturnByRefDEPRECATED [@value 3066] *)
     (* | IllegalByRefExprDEPRECATED [@value 3067] *)
     (* | VariadicByRefParamDEPRECATED [@value 3068] *)
-    | MaybeMutableAttributeOnFunction [@value 3069]
-    | ConflictingMutableAndMaybeMutableAttributes [@value 3070]
-    | MaybeMutableMethodsMustBeReactive [@value 3071]
     | RequiresFinalClass [@value 3072]
     | InterfaceUsesTrait [@value 3073]
     | NonstaticMethodInAbstractFinalClass [@value 3074]
-    (* | MutableOnStaticDEPRECATED [@value 3075] *)
     (* | ClassnameConstInstanceOfDEPRECATED [@value 3076] *)
     (* | ByRefParamOnConstructDEPRECATED [@value 3077] *)
     (* | ByRefDynamicCallDEPRECATED [@value 3078] *)
@@ -473,77 +449,37 @@ module Typing = struct
     | SelfConstParentNot [@value 4197]
     (* | ParentConstSelfNotDEPRECATED [@value 4198] *)
     (* | PartiallyValidIsAsExpressionHintDEPRECATED [@value 4199] *)
-    | NonreactiveFunctionCall [@value 4200]
-    | NonreactiveIndexing [@value 4201]
-    | ObjSetReactive [@value 4202]
-    | FunReactivityMismatch [@value 4203]
     | OverridingPropConstMismatch [@value 4204]
     | InvalidReturnDisposable [@value 4205]
     | InvalidDisposableReturnHint [@value 4206]
     | ReturnDisposableMismatch [@value 4207]
     | InoutArgumentBadType [@value 4208]
     (* | InconsistentUnsetDEPRECATED [@value 4209] *)
-    | ReassignMutableVar [@value 4210]
-    | InvalidFreezeTarget [@value 4211]
-    | InvalidFreezeUse [@value 4212]
-    | FreezeInNonreactiveContext [@value 4213]
-    | MutableCallOnImmutable [@value 4214]
-    | MutableArgumentMismatch [@value 4215]
-    | InvalidMutableReturnResult [@value 4216]
-    | MutableReturnResultMismatch [@value 4217]
-    | NonreactiveCallFromShallow [@value 4218]
     | EnumTypeTypedefNonnull [@value 4219]
-    | RxEnabledInNonRxContext [@value 4220]
-    (* | RxEnabledInLambdasDEPRECATED [@value 4221] *)
     | AmbiguousLambda [@value 4222]
     | EllipsisStrictMode [@value 4223]
     | UntypedLambdaStrictMode [@value 4224]
     (* | BindingRefInArrayDEPRECATED [@value 4225] *)
     | OutputInWrongContext [@value 4226]
-    | SuperglobalInReactiveContext [@value 4227]
     | StaticPropertyInWrongContext [@value 4228]
-    (* | StaticInReactiveContextDEPRECATED [@value 4229] *)
-    (* | GlobalInReactiveContextDEPRECATED [@value 4230] *)
     | WrongExpressionKindAttribute [@value 4231]
     (* | AttributeClassNoConstructorArgsDEPRECATED [@value 4232] *)
-    | InvalidTypeForOnlyrxIfRxfuncParameter [@value 4233]
-    | MissingAnnotationForOnlyrxIfRxfuncParameter [@value 4234]
-    | CannotReturnBorrowedValueAsImmutable [@value 4235]
     | DeclOverrideMissingHint [@value 4236]
-    | InvalidConditionallyReactiveCall [@value 4237]
     | ExtendSealed [@value 4238]
     (* | SealedFinalDEPRECATED [@value 4239] *)
     | ComparisonInvalidTypes [@value 4240]
     (* | OptionVoidDEPRECATED [@value 4241] *)
-    | MutableInNonreactiveContext [@value 4242]
-    | InvalidArgumentOfRxMutableFunction [@value 4243]
-    | LetVarImmutabilityViolation [@value 4244]
     (* | UnsealableDEPRECATED [@value 4245] *)
-    | ReturnVoidToRxMismatch [@value 4246]
-    | ReturnsVoidToRxAsNonExpressionStatement [@value 4247]
-    | NonawaitedAwaitableInReactiveContext [@value 4248]
     | ShapesKeyExistsAlwaysTrue [@value 4249]
     | ShapesKeyExistsAlwaysFalse [@value 4250]
     | ShapesMethodAccessWithNonExistentField [@value 4251]
     | NonClassMember [@value 4252]
     (* | PassingArrayCellByRefDEPRECATED [@value 4253] *)
-    | CallSiteReactivityMismatch [@value 4254]
-    | RxParameterConditionMismatch [@value 4255]
     | AmbiguousObjectAccess [@value 4256]
     (* | ExtendPPLDEPRECATED [@value 4257] *)
-    | ReassignMaybeMutableVar [@value 4258]
-    | MaybeMutableArgumentMismatch [@value 4259]
-    | ImmutableArgumentMismatch [@value 4260]
-    | ImmutableCallOnMutable [@value 4261]
-    | InvalidCallMaybeMutable [@value 4262]
-    | MutabilityMismatch [@value 4263]
     (* | InvalidPPLCallDEPRECATED [@value 4264] *)
     (* | InvalidPPLStaticCallDEPRECATED [@value 4265] *)
     (* | TypeTestInLambdaDEPRECATED [@value 4266] *)
-    | InvalidTraversableInRx [@value 4267]
-    | ReassignMutableThis [@value 4268]
-    | MutableExpressionAsMultipleMutableArguments [@value 4269]
-    | InvalidUnsetTargetInRx [@value 4270]
     | CoroutineOutsideExperimental [@value 4271]
     (* | PPLMethPointerDEPRECATED [@value 4272] *)
     (* | InvalidTruthinessTestDEPRECATED [@value 4273] *)
@@ -556,24 +492,19 @@ module Typing = struct
     | InvalidSwitchCaseValueType [@value 4280]
     | StringCast [@value 4281]
     | BadLateInitOverride [@value 4282]
-    | EscapingMutableObject [@value 4283]
     | OverrideLSB [@value 4284]
     | MultipleConcreteDefs [@value 4285]
-    | MoveInNonreactiveContext [@value 4286]
     | InvalidMoveUse [@value 4287]
     | InvalidMoveTarget [@value 4288]
     (* | IgnoredResultOfFreezeDEPRECATED [@value 4289] *)
     (* | IgnoredResultOfMoveDEPRECATED [@value 4290] *)
     | UnexpectedTy [@value 4291]
     | UnserializableType [@value 4292]
-    | InconsistentMutability [@value 4293]
-    | InvalidMutabilityFlavorInAssignment [@value 4294]
     | OptionNull [@value 4295]
     | UnknownObjectMember [@value 4296]
     | UnknownType [@value 4297]
     | InvalidArrayKeyRead [@value 4298]
     (* | ReferenceExprNotFunctionArgDEPRECATED [@value 4299] *)
-    | RedundantRxCondition [@value 4300]
     | RedeclaringMissingMethod [@value 4301]
     | InvalidEnforceableTypeArgument [@value 4302]
     | RequireArgsReify [@value 4303]

@@ -13,8 +13,6 @@ module ITySet = Internal_type_set
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
   per_cont_env: Typing_per_cont_env.t;
-  local_mutability: Typing_mutability_env.mutability_env;
-  local_reactive: reactivity;
   (* Local variables that were assigned in a `using` clause *)
   local_using_vars: Local_id.Set.t;
 }
@@ -62,8 +60,6 @@ and genv = {
   static: bool;
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;
-  fun_mutable: param_mutability option;
+  fun_is_ctor: bool;
   file: Relative_path.t;
 }
-
-val env_reactivity : env -> reactivity

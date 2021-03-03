@@ -620,7 +620,6 @@ and build_constructor
           ~readonly_prop:false;
       elt_visibility = vis;
       elt_origin = class_name;
-      elt_reactivity = None;
       elt_deprecated = method_.sm_deprecated;
     }
   in
@@ -698,7 +697,6 @@ and prop_decl
           ~readonly_prop:(sp_readonly sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
-      elt_reactivity = None;
       elt_deprecated = None;
     }
   in
@@ -735,7 +733,6 @@ and static_prop_decl
           ~readonly_prop:(sp_readonly sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
-      elt_reactivity = None;
       elt_deprecated = None;
     }
   in
@@ -835,21 +832,6 @@ and method_decl_acc
    * set the override flag in ce_flags and let typing emit an appropriate error *)
   let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
   let (pos, id) = m.sm_name in
-  let get_reactivity t =
-    match get_node t with
-    | Tfun { ft_reactive; _ } -> ft_reactive
-    | _ -> Nonreactive
-  in
-  let condition_types =
-    match get_reactivity m.sm_type with
-    | Pure (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> SSet.add cls condition_types
-        | _ -> condition_types
-      end
-    | _ -> condition_types
-  in
   let vis =
     match (SMap.find_opt id acc, m.sm_visibility) with
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
@@ -873,7 +855,6 @@ and method_decl_acc
           ~readonly_prop:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
-      elt_reactivity = m.sm_reactivity;
       elt_deprecated = m.sm_deprecated;
     }
   in

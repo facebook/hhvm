@@ -458,16 +458,6 @@ let decl_ty_con_ordinal ty_ =
   | Tintersection _ -> 21
   | Tvec_or_dict _ -> 22
 
-let reactivity_ordinal r =
-  match r with
-  | Nonreactive -> 0
-  | CippGlobal -> 1
-  | Pure _ -> 6
-  | MaybeReactive _ -> 7
-  | RxVar _ -> 8
-  | Cipp _ -> 9
-  | CippLocal _ -> 10
-
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,
@@ -646,7 +636,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       ft_ret = ret1;
       ft_params = params1;
       ft_arity = arity1;
-      ft_reactive = reactive1;
       ft_flags = flags1;
       ft_implicit_params = implicit_params1;
       ft_ifc_decl = ifc_decl1;
@@ -659,7 +648,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       ft_ret = ret2;
       ft_params = params2;
       ft_arity = arity2;
-      ft_reactive = reactive2;
       ft_flags = flags2;
       ft_implicit_params = implicit_params2;
       ft_ifc_decl = ifc_decl2;
@@ -698,14 +686,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
                             match
                               capability_compare capability1 capability2
                             with
-                            | 0 ->
-                              begin
-                                match
-                                  compare_ifc_fun_decl ifc_decl1 ifc_decl2
-                                with
-                                | 0 -> reactivity_compare reactive1 reactive2
-                                | n -> n
-                              end
+                            | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
                             | n -> n
                           end
                         | n -> n
@@ -731,25 +712,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (CapDefaults _, CapTy _) -> -1
     | (CapTy _, CapDefaults _) -> 1
     | (CapTy ty1, CapTy ty2) -> ty_compare ty1 ty2
-  and reactivity_compare r1 r2 =
-    match (r1, r2) with
-    | (Nonreactive, Nonreactive)
-    | (CippGlobal, CippGlobal) ->
-      0
-    | (Pure opt_ty1, Pure opt_ty2) ->
-      (* TODO T82455489: proper decl compare. Poly.compare will be position sensitive *)
-      Option.compare Poly.compare opt_ty1 opt_ty2
-    | (MaybeReactive r1, MaybeReactive r2) -> reactivity_compare r1 r2
-    | (RxVar opt_r1, RxVar opt_r2) ->
-      Option.compare reactivity_compare opt_r1 opt_r2
-    | (Cipp opt_s1, Cipp opt_s2)
-    | (CippLocal opt_s1, CippLocal opt_s2) ->
-      Option.compare String.compare opt_s1 opt_s2
-    | ( ( Nonreactive | CippGlobal | Pure _ | MaybeReactive _ | RxVar _ | Cipp _
-        | CippLocal _ ),
-        ( Nonreactive | CippGlobal | Pure _ | MaybeReactive _ | RxVar _ | Cipp _
-        | CippLocal _ ) ) ->
-      reactivity_ordinal r1 - reactivity_ordinal r2
   and ty_compare ty1 ty2 = ty__compare (get_node ty1) (get_node ty2) in
   ty__compare ty_1 ty_2
 
@@ -910,18 +872,6 @@ let equal_locl_fun_arity ft1 ft2 =
 
 let is_type_no_return = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
-let make_function_type_rxvar param_ty =
-  match deref param_ty with
-  | (r, Tfun tfun) -> mk (r, Tfun { tfun with ft_reactive = RxVar None })
-  | (r, Toption t) ->
-    begin
-      match deref t with
-      | (r1, Tfun tfun) ->
-        mk (r, Toption (mk (r1, Tfun { tfun with ft_reactive = RxVar None })))
-      | _ -> param_ty
-    end
-  | _ -> param_ty
-
 let rec equal_decl_ty_ ty_1 ty_2 =
   match (ty_1, ty_2) with
   | (Tany _, Tany _) -> true
@@ -1006,44 +956,12 @@ and equal_decl_fun_type fty1 fty2 =
        fty1.ft_implicit_params
        fty2.ft_implicit_params
   && equal_decl_fun_arity fty1 fty2
-  && equal_reactivity fty1.ft_reactive fty2.ft_reactive
   && Int.equal fty1.ft_flags fty2.ft_flags
-
-and equal_reactivity r1 r2 =
-  match (r1, r2) with
-  | (Nonreactive, Nonreactive) -> true
-  | (Pure ty1, Pure ty2) -> Option.equal equal_decl_ty ty1 ty2
-  | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
-  | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
-  | (Cipp s1, Cipp s2) -> Option.equal String.equal s1 s2
-  | (CippLocal s1, CippLocal s2) -> Option.equal String.equal s1 s2
-  | (CippGlobal, CippGlobal) -> true
-  | _ -> false
-
-and any_reactive r =
-  match r with
-  | Pure _
-  | MaybeReactive _
-  | RxVar _ ->
-    true
-  | Nonreactive
-  | Cipp _
-  | CippLocal _
-  | CippGlobal ->
-    false
 
 and non_public_ifc ifc =
   match ifc with
   | FDPolicied (Some "PUBLIC") -> false
   | _ -> true
-
-and equal_param_rx_annotation pa1 pa2 =
-  match (pa1, pa2) with
-  | (Param_rx_var, Param_rx_var) -> true
-  | (Param_rx_if_impl ty1, Param_rx_if_impl ty2) -> equal_decl_ty ty1 ty2
-  | (Param_rx_var, Param_rx_if_impl _)
-  | (Param_rx_if_impl _, Param_rx_var) ->
-    false
 
 and equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
 

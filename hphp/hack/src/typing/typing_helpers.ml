@@ -39,7 +39,6 @@ module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations
 module CMap = C.Map
 module Try = Typing_try
-module TR = Typing_reactivity
 module FL = FeatureLogging
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
@@ -137,16 +136,6 @@ let param_has_attribute param attr =
 
 let has_accept_disposable_attribute param =
   param_has_attribute param SN.UserAttributes.uaAcceptDisposable
-
-let get_param_mutability param =
-  if param_has_attribute param SN.UserAttributes.uaMutable then
-    Some Param_borrowed_mutable
-  else if param_has_attribute param SN.UserAttributes.uaMaybeMutable then
-    Some Param_maybe_mutable
-  else if param_has_attribute param SN.UserAttributes.uaOwnedMutable then
-    Some Param_owned_mutable
-  else
-    None
 
 let with_timeout env fun_name ~(do_ : env -> 'b) : 'b option =
   let timeout = (Env.get_tcopt env).GlobalOptions.tco_timeout in

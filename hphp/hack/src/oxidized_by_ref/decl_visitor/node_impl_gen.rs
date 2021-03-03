@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6107ed5b0a5b230e609a56222aafadce>>
+// @generated SignedSource<<eb3eeb811619fe23d7bc1f73c83d06c4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -265,8 +265,7 @@ impl<'a> Node<'a> for FunParam<'a> {
                 pos: ref __binding_0,
                 name: ref __binding_1,
                 type_: ref __binding_2,
-                rx_annotation: ref __binding_3,
-                flags: ref __binding_4,
+                flags: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
@@ -277,10 +276,7 @@ impl<'a> Node<'a> for FunParam<'a> {
                 {
                     __binding_2.accept(v)
                 }
-                {
-                    __binding_3.accept(v)
-                }
-                { __binding_4.accept(v) }
+                { __binding_3.accept(v) }
             }
         }
     }
@@ -298,9 +294,8 @@ impl<'a> Node<'a> for FunType<'a> {
                 params: ref __binding_3,
                 implicit_params: ref __binding_4,
                 ret: ref __binding_5,
-                reactive: ref __binding_6,
-                flags: ref __binding_7,
-                ifc_decl: ref __binding_8,
+                flags: ref __binding_6,
+                ifc_decl: ref __binding_7,
             } => {
                 {
                     __binding_0.accept(v)
@@ -323,10 +318,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 {
                     __binding_6.accept(v)
                 }
-                {
-                    __binding_7.accept(v)
-                }
-                { __binding_8.accept(v) }
+                { __binding_7.accept(v) }
             }
         }
     }
@@ -354,30 +346,6 @@ impl<'a> Node<'a> for IfcFunDecl<'a> {
         match self {
             IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
             IfcFunDecl::FDInferFlows => {}
-        }
-    }
-}
-impl<'a> Node<'a> for MethodReactivity<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_method_reactivity(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            MethodReactivity::MethodPure(ref __binding_0) => __binding_0.accept(v),
-            MethodReactivity::MethodReactive(ref __binding_0) => __binding_0.accept(v),
-            MethodReactivity::MethodShallow(ref __binding_0) => __binding_0.accept(v),
-            MethodReactivity::MethodLocal(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ParamRxAnnotation<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_param_rx_annotation(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ParamRxAnnotation::ParamRxVar => {}
-            ParamRxAnnotation::ParamRxIfImpl(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -441,22 +409,6 @@ impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
                 }
                 { __binding_1.accept(v) }
             }
-        }
-    }
-}
-impl<'a> Node<'a> for Reactivity<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_reactivity(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Reactivity::Nonreactive => {}
-            Reactivity::Pure(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::MaybeReactive(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::RxVar(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::Cipp(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::CippLocal(ref __binding_0) => __binding_0.accept(v),
-            Reactivity::CippGlobal => {}
         }
     }
 }
@@ -738,11 +690,10 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
         match self {
             ShallowMethod {
                 name: ref __binding_0,
-                reactivity: ref __binding_1,
-                type_: ref __binding_2,
-                visibility: ref __binding_3,
-                deprecated: ref __binding_4,
-                flags: ref __binding_5,
+                type_: ref __binding_1,
+                visibility: ref __binding_2,
+                deprecated: ref __binding_3,
+                flags: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -756,10 +707,7 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                {
-                    __binding_4.accept(v)
-                }
-                { __binding_5.accept(v) }
+                { __binding_4.accept(v) }
             }
         }
     }

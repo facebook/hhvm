@@ -255,37 +255,11 @@ module UserAttributes = struct
 
   let uaReturnDisposable = "__ReturnDisposable"
 
-  let uaPure = "__Pure"
-
-  let uaCipp = "__Cipp"
-
-  let uaCippLocal = "__CippLocal"
-
-  let uaCippGlobal = "__CippGlobal"
-
-  let uaMutable = "__Mutable"
-
-  let uaMutableReturn = "__MutableReturn"
-
-  let uaOnlyRxIfImpl = "__OnlyRxIfImpl"
-
   let uaLSB = "__LSB"
-
-  let uaAtMostRxAsFunc = "__AtMostRxAsFunc"
-
-  let uaAtMostRxAsArgs = "__AtMostRxAsArgs"
 
   let uaSealed = "__Sealed"
 
-  let uaReturnsVoidToRx = "__ReturnsVoidToRx"
-
-  let uaMaybeMutable = "__MaybeMutable"
-
   let uaLateInit = "__LateInit"
-
-  let uaOwnedMutable = "__OwnedMutable"
-
-  let uaNonRx = "__NonRx"
 
   let uaNewable = "__Newable"
 
@@ -351,22 +325,9 @@ module UserAttributes = struct
           (uaHipHopSpecific, [cls; fn; mthd]);
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd; lambda]);
-          (uaPure, [fn; mthd; lambda]);
-          (uaCipp, [fn; mthd; lambda]);
-          (uaCippLocal, [fn; mthd; lambda]);
-          (uaCippGlobal, [fn; mthd; lambda]);
-          (uaMutable, [mthd; parameter]);
-          (uaMutableReturn, [fn; mthd; lambda]);
-          (uaOnlyRxIfImpl, [parameter; mthd]);
           (uaLSB, [staticProperty]);
           (uaSealed, [cls; enumcls; enum]);
-          (uaReturnsVoidToRx, [fn; mthd; lambda]);
-          (uaMaybeMutable, [mthd; parameter]);
           (uaLateInit, [instProperty; staticProperty]);
-          (uaAtMostRxAsFunc, [parameter]);
-          (uaAtMostRxAsArgs, [fn; mthd; lambda]);
-          (uaOwnedMutable, [parameter]);
-          (uaNonRx, [fn; mthd; lambda]);
           (uaNewable, [typeparam]);
           (uaEnforceable, [typeconst; typeparam]);
           (uaExplicit, [typeparam]);
@@ -720,37 +681,6 @@ end
 
 module Rx = struct
   let is_enabled = "\\HH\\Rx\\IS_ENABLED"
-
-  let freeze = "\\HH\\Rx\\freeze"
-
-  let mutable_ = "\\HH\\Rx\\mutable"
-
-  let cTraversable = "\\HH\\Rx\\Traversable"
-
-  let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
-
-  let cAsyncIterator = "\\HH\\Rx\\AsyncIterator"
-
-  let move = "\\HH\\Rx\\move"
-
-  let hPure = "Pure"
-
-  let hRx = "Rx"
-
-  let hRxShallow = "RxShallow"
-
-  let hRxLocal = "RxLocal"
-
-  let hMutable = "Mutable"
-
-  let hMaybeMutable = "MaybeMutable"
-
-  let hOwnedMutable = "OwnedMutable"
-
-  let is_reactive_typehint =
-    let reactive_typehints = [hPure; hMutable; hMaybeMutable; hOwnedMutable] in
-    fun name ->
-      List.exists reactive_typehints ~f:(fun th -> String.equal th name)
 end
 
 module Shapes = struct

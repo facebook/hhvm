@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f62ed50aa526bb5129941eb5dabafe78>>
+// @generated SignedSource<<cf6ad708219ac1905b7b07b22ba317b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,10 +49,6 @@ pub type Sid<'a> = ast_defs::Id<'a>;
 
 pub use oxidized::aast_defs::IsReified;
 
-pub use oxidized::aast_defs::FuncReactive;
-
-pub use oxidized::aast_defs::ParamMutability;
-
 pub use oxidized::aast_defs::ImportFlavor;
 
 #[derive(
@@ -95,8 +91,6 @@ pub use oxidized::aast_defs::XhpChildOp;
 pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
 impl<'a> TrivialDrop for Hint<'a> {}
 
-pub use oxidized::aast_defs::MutableReturn;
-
 pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
 
 #[derive(
@@ -130,7 +124,6 @@ impl<'a> TrivialDrop for Contexts<'a> {}
 )]
 pub struct HfParamInfo {
     pub kind: Option<oxidized::ast_defs::ParamKind>,
-    pub mutability: Option<oxidized::aast_defs::ParamMutability>,
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
 }
 impl TrivialDrop for HfParamInfo {}
@@ -149,14 +142,12 @@ impl TrivialDrop for HfParamInfo {}
     ToOcamlRep
 )]
 pub struct HintFun<'a> {
-    pub reactive_kind: oxidized::aast_defs::FuncReactive,
     pub param_tys: &'a [&'a Hint<'a>],
     pub param_info: &'a [Option<&'a HfParamInfo>],
     pub variadic_ty: &'a VariadicHint<'a>,
     pub ctxs: Option<&'a Contexts<'a>>,
     pub return_ty: &'a Hint<'a>,
     pub is_readonly_return: Option<oxidized::ast_defs::ReadonlyKind>,
-    pub is_mutable_return: &'a oxidized::aast_defs::MutableReturn,
 }
 impl<'a> TrivialDrop for HintFun<'a> {}
 

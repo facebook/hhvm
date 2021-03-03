@@ -364,7 +364,6 @@ and union_funs env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)
   if
     equal_locl_fun_arity fty1 fty2
-    && equal_reactivity fty1.ft_reactive fty2.ft_reactive
     && Int.equal fty1.ft_flags fty2.ft_flags
     && Int.equal (ft_params_compare fty1.ft_params fty2.ft_params) 0
   then

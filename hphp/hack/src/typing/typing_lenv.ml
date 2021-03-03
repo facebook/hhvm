@@ -125,30 +125,11 @@ let join_fake lenv1 lenv2 =
   | (Some c1, None) -> c1.LEnvC.fake_members
   | (None, Some c2) -> c2.LEnvC.fake_members
 
-let merge_reactivity parent_lenv lenv1 lenv2 =
-  let nextctxopt1 = LEnvC.get_cont_option C.Next lenv1.per_cont_env in
-  let nextctxopt2 = LEnvC.get_cont_option C.Next lenv2.per_cont_env in
-  match (nextctxopt1, nextctxopt2) with
-  | (Some _, Some _)
-  | (None, None) ->
-    parent_lenv.local_reactive
-  | (Some _, None) -> lenv1.local_reactive
-  | (None, Some _) -> lenv2.local_reactive
-
 let union_lenvs_ env parent_lenv lenv1 lenv2 =
   let fake_members = join_fake lenv1 lenv2 in
   let local_using_vars = parent_lenv.local_using_vars in
-  let local_mutability =
-    Typing_mutability_env.intersect_mutability
-      parent_lenv.local_mutability
-      lenv1.local_mutability
-      lenv2.local_mutability
-  in
-  let local_reactive = merge_reactivity parent_lenv lenv1 lenv2 in
   let env = union_by_cont env lenv1 lenv2 in
-  let lenv =
-    { env.lenv with local_using_vars; local_mutability; local_reactive }
-  in
+  let lenv = { env.lenv with local_using_vars } in
   let per_cont_env =
     LEnvC.update_cont_entry C.Next lenv.per_cont_env (fun entry ->
         LEnvC.{ entry with fake_members })

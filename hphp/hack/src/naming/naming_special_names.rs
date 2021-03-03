@@ -231,45 +231,11 @@ pub mod user_attributes {
 
     pub const RETURN_DISPOSABLE: &str = "__ReturnDisposable";
 
-    pub const PURE: &str = "__Pure";
-
-    pub const CIPP: &str = "__Cipp";
-
-    pub const CIPP_LOCAL: &str = "__CippLocal";
-
-    pub const CIPP_GLOBAL: &str = "__CippGlobal";
-
-    pub const CIPP_RX: &str = "__CippRx";
-
-    pub const REACTIVE: &str = "__Rx";
-
-    pub const LOCAL_REACTIVE: &str = "__RxLocal";
-
-    pub const SHALLOW_REACTIVE: &str = "__RxShallow";
-
-    pub const MUTABLE: &str = "__Mutable";
-
-    pub const MUTABLE_RETURN: &str = "__MutableReturn";
-
-    pub const ONLY_RX_IF_IMPL: &str = "__OnlyRxIfImpl";
-
     pub const LSB: &str = "__LSB";
-
-    pub const AT_MOST_RX_AS_FUNC: &str = "__AtMostRxAsFunc";
-
-    pub const AT_MOST_RX_AS_ARGS: &str = "__AtMostRxAsArgs";
 
     pub const SEALED: &str = "__Sealed";
 
-    pub const RETURNS_VOID_TO_RX: &str = "__ReturnsVoidToRx";
-
-    pub const MAYBE_MUTABLE: &str = "__MaybeMutable";
-
     pub const LATE_INIT: &str = "__LateInit";
-
-    pub const OWNED_MUTABLE: &str = "__OwnedMutable";
-
-    pub const NON_RX: &str = "__NonRx";
 
     pub const NEWABLE: &str = "__Newable";
 
@@ -318,26 +284,9 @@ pub mod user_attributes {
             HIPHOP_SPECIFIC,
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
-            PURE,
-            CIPP,
-            CIPP_LOCAL,
-            CIPP_GLOBAL,
-            CIPP_RX,
-            REACTIVE,
-            LOCAL_REACTIVE,
-            MUTABLE,
-            MUTABLE_RETURN,
-            SHALLOW_REACTIVE,
-            ONLY_RX_IF_IMPL,
             LSB,
             SEALED,
-            RETURNS_VOID_TO_RX,
-            MAYBE_MUTABLE,
             LATE_INIT,
-            AT_MOST_RX_AS_FUNC,
-            AT_MOST_RX_AS_ARGS,
-            OWNED_MUTABLE,
-            NON_RX,
             NEWABLE,
             ENFORCEABLE,
             EXPLICIT,
@@ -768,68 +717,8 @@ pub mod hh {
 }
 
 pub mod rx {
-    pub const FREEZE: &str = "\\HH\\Rx\\freeze";
-
-    pub const MUTABLE_: &str = "\\HH\\Rx\\mutable";
-
-    pub const TRAVERSABLE: &str = "\\HH\\Rx\\Traversable";
-
     pub const IS_ENABLED: &str = "\\HH\\Rx\\IS_ENABLED";
-
-    pub const KEYED_TRAVERSABLE: &str = "\\HH\\Rx\\KeyedTraversable";
-
-    pub const ASYNC_ITERATOR: &str = "\\HH\\Rx\\AsyncIterator";
-
-    pub const MOVE: &str = "\\HH\\Rx\\move";
-
-    pub const PURE: &str = "Pure";
-
-    pub const CIPP: &str = "Cipp";
-
-    pub const CIPP_LOCAL: &str = "CippLocal";
-
-    pub const CIPP_GLOBAL: &str = "CippGlobal";
-
-    pub const CIPP_RX: &str = "CippRx";
-
-    pub const RX: &str = "Rx";
-
-    pub const RX_LOCAL: &str = "RxLocal";
-
-    pub const RX_SHALLOW: &str = "RxShallow";
-
-    pub const MUTABLE: &str = "Mutable";
-
-    pub const MAYBE_MUTABLE: &str = "MaybeMutable";
-
-    pub const OWNED_MUTABLE: &str = "OwnedMutable";
-
-    pub fn is_reactive_typehint(x: &str) -> bool {
-        use lazy_static::lazy_static;
-        use std::collections::HashSet;
-
-        lazy_static! {
-            static ref REACTIVE_TYPEHINTS: HashSet<&'static str> = vec![
-                PURE,
-                CIPP,
-                CIPP_LOCAL,
-                CIPP_GLOBAL,
-                CIPP_RX,
-                RX,
-                RX_LOCAL,
-                RX_SHALLOW,
-                MUTABLE,
-                MAYBE_MUTABLE,
-                OWNED_MUTABLE,
-            ]
-            .into_iter()
-            .collect();
-        }
-
-        REACTIVE_TYPEHINTS.contains(x)
-    }
 }
-
 pub mod coeffects {
     pub const DEFAULTS: &str = "defaults";
 

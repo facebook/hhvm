@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cd5523156e2d65acda2b1aac53d73019>>
+// @generated SignedSource<<e94f650f1df55e367a197d6d3e563c46>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1113,25 +1113,6 @@ impl<P: Params> Node<P> for FuncBody<P::Ex, P::Fb, P::En, P::Hi> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FuncReactive {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_func_reactive(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            FuncReactive::FPure => Ok(()),
-            FuncReactive::FNonreactive => Ok(()),
-        }
-    }
-}
 impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::Fb, P::En, P::Hi> {
     fn accept<'node>(
         &'node self,
@@ -1196,7 +1177,6 @@ impl<P: Params> Node<P> for HfParamInfo {
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
         self.kind.accept(c, v)?;
-        self.mutability.accept(c, v)?;
         self.readonlyness.accept(c, v)?;
         Ok(())
     }
@@ -1232,14 +1212,12 @@ impl<P: Params> Node<P> for HintFun {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
-        self.reactive_kind.accept(c, v)?;
         self.param_tys.accept(c, v)?;
         self.param_info.accept(c, v)?;
         self.variadic_ty.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.return_ty.accept(c, v)?;
         self.is_readonly_return.accept(c, v)?;
-        self.is_mutable_return.accept(c, v)?;
         Ok(())
     }
 }
@@ -1552,26 +1530,6 @@ impl<P: Params> Node<P> for ParamKind {
     ) -> Result<(), P::Error> {
         match self {
             ParamKind::Pinout => Ok(()),
-        }
-    }
-}
-impl<P: Params> Node<P> for ParamMutability {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_param_mutability(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ParamMutability::PMutable => Ok(()),
-            ParamMutability::POwnedMutable => Ok(()),
-            ParamMutability::PMaybeMutable => Ok(()),
         }
     }
 }

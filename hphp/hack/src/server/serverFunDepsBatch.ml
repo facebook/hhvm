@@ -124,17 +124,6 @@ let result_to_string result (fn, line, char) =
                           ("position", Pos.json (Pos.to_absolute def.SD.pos));
                         ]
                       in
-                      let props =
-                        if not (List.is_empty def.SD.reactivity_attributes) then
-                          let l =
-                            List.map def.SD.reactivity_attributes ~f:(fun s ->
-                                JSON_String
-                                  (SD.string_of_reactivity_attribute s))
-                          in
-                          props @ [("reactivity", JSON_Array l)]
-                        else
-                          props
-                      in
                       JSON_Object props)
               in
               JSON_Array l )

@@ -1,1 +1,0 @@
-Fatal error: `__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Pure`. in %s/test/slow/rx/missing_reactivity2.php on line 4

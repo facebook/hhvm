@@ -6,32 +6,15 @@
  *
  *)
 
-val condition_type_from_attributes :
-  Decl_env.env -> Nast.user_attribute list -> Typing_defs.decl_ty option
-
-val fun_reactivity_opt :
-  Decl_env.env -> Nast.user_attribute list -> Typing_defs.reactivity option
-
-val fun_reactivity :
-  Decl_env.env -> Nast.user_attribute list -> Typing_defs.reactivity
-
 val find_policied_attribute :
   Nast.user_attribute list -> Typing_defs.ifc_fun_decl
 
-val has_return_disposable_attribute :
-  Nast.user_attribute list -> Aast.mutable_return
+val has_return_disposable_attribute : Nast.user_attribute list -> bool
 
 val has_constfun_attribute : Nast.user_attribute list -> bool
 
-val fun_returns_mutable : Nast.user_attribute list -> Aast.mutable_return
-
-val fun_returns_void_to_rx : Nast.user_attribute list -> Aast.mutable_return
-
-val get_param_mutability :
-  Nast.user_attribute list -> Typing_defs_core.param_mutability option
-
 val hint_to_type_opt :
-  is_lambda:Aast.mutable_return ->
+  is_lambda:bool ->
   Decl_env.env ->
   Typing_reason.t ->
   Nast.xhp_attr_hint option ->
@@ -39,7 +22,7 @@ val hint_to_type_opt :
 
 val make_param_ty :
   Decl_env.env ->
-  is_lambda:Aast.mutable_return ->
+  is_lambda:bool ->
   Nast.fun_param ->
   Typing_defs.decl_ty Typing_defs_core.fun_param
 
@@ -48,8 +31,8 @@ val make_ellipsis_param_ty :
   Decl_env.env -> Pos.t -> 'a Typing_defs.ty Typing_defs_core.fun_param
 
 val ret_from_fun_kind :
-  ?is_constructor:Aast.mutable_return ->
-  is_lambda:Aast.mutable_return ->
+  ?is_constructor:bool ->
+  is_lambda:bool ->
   Decl_env.env ->
   Pos.t ->
   Ast_defs.fun_kind ->
@@ -68,6 +51,6 @@ val check_params : Nast.fun_param list -> unit
 
 val make_params :
   Decl_env.env ->
-  is_lambda:Aast.mutable_return ->
+  is_lambda:bool ->
   Nast.fun_param list ->
   Typing_defs.decl_ty Typing_defs_core.fun_param list

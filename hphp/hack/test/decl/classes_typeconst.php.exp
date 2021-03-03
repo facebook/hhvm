@@ -23,7 +23,7 @@
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([7:19-20], "f"); sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([7:19-20], "f");
           sm_type =
           (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
            (Tfun
@@ -40,15 +40,12 @@
                        [([7:30-31], "T")])))
                   };
                 ft_flags =
-                (make_ft_flags FSync None ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false
+                (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
                   ~is_const:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                }));
+                ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([11:19-20], "g");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
             (Tfun
@@ -66,12 +63,10 @@
                         [([11:30-32], "T2")])))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -95,7 +90,6 @@
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([20:28-39], "instantiate");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
             (Tfun
@@ -115,9 +109,8 @@
                                 [([20:46-56], "TConstType")]))),
                            [([20:58-59], "T")])))
                       };
-                    fp_rx_annotation = None;
                     fp_flags =
-                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                    (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false ~is_atom:false
                       ~readonly:false ~const_function:false);
@@ -135,12 +128,10 @@
                         [([20:77-87], "TConstType")])))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
           ];

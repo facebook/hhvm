@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<447971c4482f958eefc902f3e1c79fab>>
+// @generated SignedSource<<9f43293b45baa29fe2ecc50e073d743c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -19,14 +19,10 @@ use crate::*;
 
 pub use aast_defs::*;
 pub use typing_defs::PossiblyEnforcedTy;
-pub use typing_defs::Reactivity;
 pub use typing_defs::Ty;
 pub use typing_defs::ValKind;
-pub use typing_mutability_env::MutabilityEnv;
 
 pub type DeclTy<'a> = typing_defs::Ty<'a>;
-
-pub type TypeParamMutability<'a> = typing_defs::ParamMutability;
 
 #[derive(
     Clone,
@@ -45,9 +41,6 @@ pub struct SavedEnv<'a> {
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,
     pub tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
-    pub reactivity: Reactivity<'a>,
-    pub local_mutability: MutabilityEnv<'a>,
-    pub fun_mutable: Option<TypeParamMutability<'a>>,
     pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
     pub pessimize: bool,
 }

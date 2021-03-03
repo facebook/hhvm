@@ -54,7 +54,6 @@
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([10:22-30], "getProps");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|xhp_self.php line 10, characters 22-29),
             (Tfun
@@ -72,12 +71,10 @@
                         [([10:40-46], "TProps")])))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty) }
           ];

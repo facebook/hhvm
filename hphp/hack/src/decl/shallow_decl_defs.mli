@@ -97,7 +97,6 @@ type shallow_prop = {
 
 type shallow_method = {
   sm_name: Typing_defs.pos_id;
-  sm_reactivity: Decl_defs.method_reactivity option;
   sm_type: decl_ty;
   sm_visibility: Ast_defs.visibility;
   sm_deprecated: string option;

@@ -291,8 +291,7 @@ val unbound_name : Pos.t -> string -> name_context -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit
 
-val undefined :
-  in_rx_scope:bool -> Pos.t -> string -> (string * Pos.t) option -> unit
+val undefined : Pos.t -> string -> (string * Pos.t) option -> unit
 
 val this_reserved : Pos.t -> unit
 
@@ -1033,32 +1032,7 @@ val nullable_cast : Pos.t -> string -> Pos.t -> unit
 val return_disposable_mismatch :
   bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_reactivity_mismatch :
-  Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit
-
-val reassign_mutable_var : in_collection:bool -> Pos.t -> unit
-
-val mutable_call_on_immutable : Pos.t -> Pos.t -> Pos.t option -> unit
-
-val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
-
-val invalid_mutable_return_result : Pos.t -> Pos.t -> string -> unit
-
-val mutable_return_result_mismatch :
-  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val mutable_methods_must_be_reactive : Pos.t -> string -> unit
-
-val mutable_return_annotated_decls_must_be_reactive :
-  string -> Pos.t -> string -> unit
-
 val lvar_in_obj_get : Pos.t -> unit
-
-val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit
-
-val invalid_freeze_use : Pos.t -> unit
-
-val freeze_in_nonreactive_context : Pos.t -> unit
 
 val this_as_lexical_variable : Pos.t -> unit
 
@@ -1097,16 +1071,9 @@ val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
 
 val missing_xhp_required_attr : Pos.t -> string -> (Pos.t * string) list -> unit
 
-val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
-
-val nonpure_function_call : Pos.t -> Pos.t -> string -> unit
-
 val inout_argument_bad_expr : Pos.t -> unit
 
 val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
-
-val nonreactive_call_from_shallow :
-  Pos.t -> Pos.t -> string -> Pos.t option -> unit
 
 val illegal_destructor : Pos.t -> unit
 
@@ -1117,27 +1084,12 @@ val ellipsis_strict_mode :
 
 val untyped_lambda_strict_mode : Pos.t -> unit
 
-val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
-
-val conditionally_reactive_annotation_invalid_arguments :
-  is_method:bool -> Pos.t -> unit
-
-val superglobal_in_reactive_context : Pos.t -> string -> unit
-
-val rx_is_enabled_invalid_location : Pos.t -> unit
-
 val wrong_expression_kind_attribute :
   string -> Pos.t -> string -> Pos.t -> string -> string -> unit
 
 val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 
-val cannot_return_borrowed_value_as_immutable : Pos.t -> Pos.t -> unit
-
 val decl_override_missing_hint : Pos.t -> typing_error_callback -> unit
-
-val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
-
-val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
 
 val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
 
@@ -1149,20 +1101,6 @@ val self_in_non_final_function_pointer :
   Pos.t -> string option -> string -> unit
 
 val invalid_wildcard_context : Pos.t -> unit
-
-val invalid_type_for_atmost_rx_as_rxfunc_parameter : Pos.t -> string -> unit
-
-val missing_annotation_for_atmost_rx_as_rxfunc_parameter : Pos.t -> unit
-
-val mutable_in_nonreactive_context : Pos.t -> unit
-
-val invalid_argument_of_rx_mutable_function : Pos.t -> unit
-
-val return_void_to_rx_mismatch :
-  pos1_has_attribute:bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val returns_void_to_rx_function_as_non_expression_statement :
-  Pos.t -> Pos.t -> unit
 
 val shapes_key_exists_always_true : Pos.t -> string -> Pos.t -> unit
 
@@ -1199,21 +1137,6 @@ val invalid_arraykey_write : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 
 val invalid_arraykey_constraint : Pos.t -> string -> unit
 
-val invalid_argument_type_for_condition_in_rx :
-  is_receiver:bool -> Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
-
-val callsite_reactivity_mismatch :
-  Pos.t -> Pos.t -> string -> Pos.t option -> string -> unit
-
-val callsite_cipp_mismatch : Pos.t -> Pos.t -> string -> string -> unit
-
-val rx_parameter_condition_mismatch :
-  string -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val conflicting_mutable_and_maybe_mutable_attributes : Pos.t -> unit
-
-val maybe_mutable_methods_must_be_reactive : Pos.t -> string -> unit
-
 val entrypoint_arguments : Pos.t -> unit
 
 val variadic_memoize : Pos.t -> unit
@@ -1221,34 +1144,6 @@ val variadic_memoize : Pos.t -> unit
 val abstract_method_memoize : Pos.t -> unit
 
 val instance_property_in_abstract_final_class : Pos.t -> unit
-
-val reassign_maybe_mutable_var : in_collection:bool -> Pos.t -> unit
-
-val immutable_argument_mismatch : Pos.t -> Pos.t -> unit
-
-val maybe_mutable_argument_mismatch : Pos.t -> Pos.t -> unit
-
-val immutable_call_on_mutable : Pos.t -> Pos.t -> unit
-
-val invalid_call_on_maybe_mutable :
-  fun_is_mutable:bool -> Pos.t -> Pos.t -> unit
-
-val mutability_mismatch :
-  is_receiver:bool ->
-  Pos.t ->
-  string ->
-  Pos.t ->
-  string ->
-  typing_error_callback ->
-  unit
-
-val invalid_traversable_in_rx : Pos.t -> unit
-
-val reassign_mutable_this :
-  in_collection:bool -> is_maybe_mutable:bool -> Pos.t -> unit
-
-val mutable_expression_as_multiple_mutable_arguments :
-  Pos.t -> string -> Pos.t -> string -> unit
 
 val lateinit_with_default : Pos.t -> unit
 
@@ -1262,8 +1157,6 @@ val interface_use_trait : Pos.t -> unit
 
 val nonstatic_method_in_abstract_final_class : Pos.t -> unit
 
-val escaping_mutable_object : Pos.t -> unit
-
 val multiple_concrete_defs :
   Pos.t ->
   Pos.t ->
@@ -1273,12 +1166,6 @@ val multiple_concrete_defs :
   string ->
   typing_error_callback ->
   unit
-
-val move_in_nonreactive_context : Pos.t -> unit
-
-val invalid_move_target : Pos.t -> Pos.t -> string -> unit
-
-val invalid_move_use : Pos.t -> unit
 
 val require_args_reify : Pos.t -> Pos.t -> unit
 
@@ -1301,25 +1188,6 @@ val reified_generics_not_allowed : Pos.t -> unit
 val bad_function_pointer_construction : Pos.t -> unit
 
 val new_without_newable : Pos.t -> string -> unit
-
-val mutably_owned_argument_mismatch :
-  arg_is_owned_local:bool -> Pos.t -> Pos.t -> unit
-
-val rx_move_invalid_location : Pos.t -> unit
-
-val inconsistent_mutability : Pos.t -> string -> (Pos.t * string) option -> unit
-
-val invalid_mutability_flavor : Pos.t -> string -> string -> unit
-
-val inconsistent_mutability_for_conditional : Pos.t -> Pos.t -> unit
-
-val redundant_rx_condition : Pos.t -> unit
-
-val misplaced_mutability_hint : Pos.t -> unit
-
-val mutability_hint_in_non_rx_function : Pos.t -> unit
-
-val invalid_mutability_in_return_type_hint : Pos.t -> unit
 
 val typechecker_timeout : Pos.t * string -> int -> unit
 
@@ -1428,26 +1296,6 @@ val op_coeffect_error :
   string ->
   Pos.t ->
   unit
-
-module CoeffectEnforcedOp : sig
-  (* Note: All these errors will be migrated to use `op_coeffect_error` once
-  coeffects are globally enabled and Rx/Pure attributes desugar to contexts.
-  The respective error code enum values have the suffix `InWrongContext`. *)
-
-  val output : Pos.t -> unit
-
-  val static_property_access : Pos.t -> unit
-
-  val rx_enabled_in_non_rx_context : Pos.t -> unit
-
-  val nonreactive_indexing : bool -> Pos.t -> unit
-
-  val obj_set_reactive : Pos.t -> unit
-
-  val invalid_unset_target_rx : Pos.t -> unit
-
-  val non_awaited_awaitable_in_rx : Pos.t -> unit
-end
 
 val illegal_context : Pos.t -> string -> unit
 

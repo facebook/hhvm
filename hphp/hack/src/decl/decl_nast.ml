@@ -38,13 +38,8 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
 
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  let reactivity = FunUtils.fun_reactivity env f.f_user_attributes in
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
-  let returns_mutable = FunUtils.fun_returns_mutable f.f_user_attributes in
   let is_const = FunUtils.has_constfun_attribute f.f_user_attributes in
-  let returns_void_to_rx =
-    FunUtils.fun_returns_void_to_rx f.f_user_attributes
-  in
   let return_disposable =
     FunUtils.has_return_disposable_attribute f.f_user_attributes
   in
@@ -93,15 +88,10 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
             ft_params = params;
             ft_implicit_params = { capability };
             ft_ret = { et_type = ret_ty; et_enforced = false };
-            ft_reactive = reactivity;
             ft_flags =
               make_ft_flags
                 f.f_fun_kind
-                (* Functions can't be mutable because they don't have "this" *)
-                None
-                ~returns_mutable
                 ~return_disposable
-                ~returns_void_to_rx
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
                 ~readonly_this:false
                 ~const:is_const;

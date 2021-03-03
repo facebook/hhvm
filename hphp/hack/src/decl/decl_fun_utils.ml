@@ -11,54 +11,12 @@ open Hh_prelude
 open Aast
 open Typing_defs
 
-let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
-  match l with
-  (* convert class const expression to non-generic type hint *)
-  | [(p, Class_const ((_, CI cls), (_, name)))]
-    when String.equal name SN.Members.mClass ->
-    (* set Extends dependency for between class that contains
-         method and condition type *)
-    Decl_env.add_extends_dependency env (snd cls);
-    Decl_hint.hint env (p, Happly (cls, []))
-  | _ ->
-    (* error for invalid argument list was already reported during the
-       naming step, do nothing *)
-    mk (Reason.none, Typing_defs.make_tany ())
-
-let condition_type_from_attributes env user_attributes =
-  Naming_attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
-  |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
-
 let get_classname_or_literal_attribute_param = function
   | [(_, String s)] -> Some s
   | [(_, Class_const ((_, CI (_, s)), (_, name)))]
     when String.equal name SN.Members.mClass ->
     Some s
   | _ -> None
-
-let fun_reactivity_opt env user_attributes =
-  let module UA = SN.UserAttributes in
-  let rx_condition = condition_type_from_attributes env user_attributes in
-  let rec go = function
-    | [] -> None
-    | { Aast.ua_name = (_, n); ua_params } :: tl ->
-      if String.equal n UA.uaPure then
-        Some (Pure rx_condition)
-      else if String.equal n UA.uaNonRx then
-        Some Nonreactive
-      else if String.equal n UA.uaCipp then
-        Some (Cipp (get_classname_or_literal_attribute_param ua_params))
-      else if String.equal n UA.uaCippLocal then
-        Some (CippLocal (get_classname_or_literal_attribute_param ua_params))
-      else if String.equal n UA.uaCippGlobal then
-        Some CippGlobal
-      else
-        go tl
-  in
-  go user_attributes
-
-let fun_reactivity env user_attributes =
-  fun_reactivity_opt env user_attributes |> Option.value ~default:Nonreactive
 
 let find_policied_attribute user_attributes : ifc_fun_decl =
   match Naming_attributes.find SN.UserAttributes.uaPolicied user_attributes with
@@ -88,23 +46,6 @@ let has_atom_attribute user_attributes =
 
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
-
-let fun_returns_mutable user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
-
-let fun_returns_void_to_rx user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
-
-let get_param_mutability user_attributes =
-  if Naming_attributes.mem SN.UserAttributes.uaOwnedMutable user_attributes then
-    Some Param_owned_mutable
-  else if Naming_attributes.mem SN.UserAttributes.uaMutable user_attributes then
-    Some Param_borrowed_mutable
-  else if Naming_attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes
-  then
-    Some Param_maybe_mutable
-  else
-    None
 
 exception Gi_reinfer_type_not_supported
 
@@ -219,24 +160,7 @@ let make_param_ty env ~is_lambda param =
     | _ -> ty
   in
   let module UA = SN.UserAttributes in
-  let has_at_most_rx_as_func =
-    Naming_attributes.mem UA.uaAtMostRxAsFunc param.param_user_attributes
-  in
-  let ty =
-    if has_at_most_rx_as_func then
-      make_function_type_rxvar ty
-    else
-      ty
-  in
   let mode = get_param_mode param.param_callconv in
-  let rx_annotation =
-    if has_at_most_rx_as_func then
-      Some Param_rx_var
-    else
-      Naming_attributes.find UA.uaOnlyRxIfImpl param.param_user_attributes
-      |> Option.map ~f:(fun v ->
-             Param_rx_if_impl (conditionally_reactive_attribute_to_hint env v))
-  in
   {
     fp_pos = param_pos;
     fp_name = Some param.param_name;
@@ -244,7 +168,6 @@ let make_param_ty env ~is_lambda param =
     fp_flags =
       make_fp_flags
         ~mode
-        ~mutability:(get_param_mutability param.param_user_attributes)
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
         ~has_default:(Option.is_some param.param_expr)
@@ -253,7 +176,6 @@ let make_param_ty env ~is_lambda param =
         ~is_atom:(has_atom_attribute param.param_user_attributes)
         ~readonly:(Option.is_some param.param_readonly)
         ~const_function:(has_constfun_attribute param.param_user_attributes);
-    fp_rx_annotation = rx_annotation;
   }
 
 (** Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
@@ -270,7 +192,6 @@ let make_ellipsis_param_ty :
     fp_flags =
       make_fp_flags
         ~mode:FPnormal
-        ~mutability:None
         ~accept_disposable:false
         ~has_default:false
         ~ifc_external:false
@@ -278,7 +199,6 @@ let make_ellipsis_param_ty :
         ~is_atom:false
         ~readonly:false
         ~const_function:false;
-    fp_rx_annotation = None;
   }
 
 let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind hint =

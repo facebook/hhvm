@@ -59,7 +59,6 @@ let is_special_identifier =
 let is_reserved_type_hint name =
   let base_name = Utils.strip_ns name in
   SN.Typehints.is_reserved_type_hint base_name
-  || SN.Rx.is_reactive_typehint name
 
 let elaborate_type_name env ((_, name) as id) =
   if
@@ -323,11 +322,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | _ -> super#on_expr_ env expr
 
     method! on_hint_ env h =
-      let is_rx name =
-        String.equal name SN.Rx.hRx
-        || String.equal name SN.Rx.hRxLocal
-        || String.equal name SN.Rx.hRxShallow
-      in
       let is_xhp_screwup name =
         String.equal name "Xhp"
         || String.equal name ":Xhp"
@@ -335,11 +329,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       in
       match h with
       | Happly ((_, name), _) when is_xhp_screwup name -> super#on_hint_ env h
-      | Happly ((_, name), [(_, Hfun _)]) when is_rx name ->
-        super#on_hint_ env h
-      | Happly (((_, name) as x), hl) when is_rx name ->
-        let x = elaborate_type_name env x in
-        Happly (x, List.map hl ~f:(self#on_hint env))
       | Happly ((_, name), _)
         when is_reserved_type_hint name && (not @@ in_codegen env) ->
         super#on_hint_ env h

@@ -34,14 +34,6 @@ and modifier =
   | Async
   | Inout
 
-and reactivity_attributes =
-  | Rx
-  | Shallow
-  | Local
-  | Nonreactive
-  | OnlyRxIfImpl
-  | AtMostRxAsArgs
-
 and 'a t = {
   kind: kind;
   name: string;
@@ -55,7 +47,6 @@ and 'a t = {
   children: 'a t list option;
   params: 'a t list option;
   docblock: string option;
-  reactivity_attributes: reactivity_attributes list;
 }
 [@@deriving ord]
 
@@ -102,14 +93,6 @@ let string_of_modifier = function
   | Protected -> "protected"
   | Async -> "async"
   | Inout -> "inout"
-
-let string_of_reactivity_attribute = function
-  | Rx -> "reactive"
-  | Shallow -> "shallow"
-  | Local -> "local"
-  | Nonreactive -> "non_reactive"
-  | OnlyRxIfImpl -> "only_rx_if_impl"
-  | AtMostRxAsArgs -> "at_most_rx_as_args"
 
 let function_kind_name = "function"
 

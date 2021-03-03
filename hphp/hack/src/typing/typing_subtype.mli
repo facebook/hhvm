@@ -2,12 +2,6 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-type reactivity_extra_info = {
-  method_info: (* method_name *) (string * (* is_static *) bool) option;
-  class_ty: phase_ty option;
-  parent_class_ty: phase_ty option;
-}
-
 module ConditionTypes : sig
   val try_get_class_for_condition_type :
     env ->
@@ -78,17 +72,6 @@ val sub_type_with_dynamic_as_bottom :
 val sub_type_i :
   env -> internal_type -> internal_type -> Errors.typing_error_callback -> env
 
-val subtype_reactivity :
-  ?extra_info:reactivity_extra_info ->
-  ?is_call_site:bool ->
-  env ->
-  Pos.t ->
-  reactivity ->
-  Pos.t ->
-  reactivity ->
-  Errors.typing_error_callback ->
-  env
-
 val add_constraint :
   Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
 
@@ -107,7 +90,6 @@ val simplify_subtype_i :
 
 val subtype_funs :
   check_return:bool ->
-  extra_info:reactivity_extra_info ->
   on_error:Errors.typing_error_callback ->
   Reason.t ->
   locl_fun_type ->

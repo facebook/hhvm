@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3ee11e243a6e201bd48b24ed8582c236>>
+// @generated SignedSource<<38ffcfeb198464cb9a81eda2ed24b775>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,8 +40,6 @@ pub type LocalIdSetT<'a> = local_id::set::Set<'a>;
 )]
 pub struct LocalEnv<'a> {
     pub per_cont_env: &'a typing_per_cont_env::TypingPerContEnv<'a>,
-    pub local_mutability: typing_mutability_env::MutabilityEnv<'a>,
-    pub local_reactive: &'a Reactivity<'a>,
     pub local_using_vars: &'a LocalIdSetT<'a>,
 }
 impl<'a> TrivialDrop for LocalEnv<'a> {}
@@ -95,7 +93,7 @@ pub struct Genv<'a> {
     pub static_: bool,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub val_kind: typing_defs::ValKind,
-    pub fun_mutable: Option<ParamMutability>,
+    pub fun_is_ctor: bool,
     pub file: &'a relative_path::RelativePath<'a>,
 }
 impl<'a> TrivialDrop for Genv<'a> {}

@@ -5,7 +5,6 @@ open Typing_env_types
 (is a subtype of) method with signature ft_super. *)
 val subtype_method_decl :
   check_return:bool ->
-  extra_info:Typing_subtype.reactivity_extra_info ->
   env ->
   Reason.t ->
   decl_fun_type ->

@@ -118,7 +118,7 @@ impl Env {
 
 fn is_reserved_type_hint(name: &str) -> bool {
     let base_name = core_utils::strip_ns(name);
-    return sn::typehints::is_reserved_type_hint(&base_name) || sn::rx::is_reactive_typehint(name);
+    return sn::typehints::is_reserved_type_hint(&base_name);
 }
 
 struct ElaborateNamespacesVisitor {}
@@ -337,23 +337,11 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     }
 
     fn visit_hint_(&mut self, env: &mut Env, hint: &mut Hint_) -> Result<(), ()> {
-        fn is_rx(x: &str) -> bool {
-            x == sn::rx::RX || x == sn::rx::RX_LOCAL || x == sn::rx::RX_SHALLOW || x == sn::rx::PURE
-        }
         fn is_xhp_screwup(x: &str) -> bool {
             x == "Xhp" || x == ":Xhp" || x == "XHP"
         }
         match hint {
             Hint_::Happly(sid, _) if is_xhp_screwup(&sid.1) => {}
-            Hint_::Happly(sid, hints) if is_rx(&sid.1) && hints.len() == 1 => match *hints[0].1 {
-                Hint_::Hfun(_) => {}
-                _ => {
-                    env.elaborate_type_name(sid);
-                }
-            },
-            Hint_::Happly(sid, _) if is_rx(&sid.1) => {
-                env.elaborate_type_name(sid);
-            }
             Hint_::Happly(sid, _) if is_reserved_type_hint(&sid.1) && !env.in_codegen() => {}
             Hint_::Happly(sid, _) => {
                 env.elaborate_type_name(sid);

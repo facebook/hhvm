@@ -70,7 +70,6 @@ let summarize_property class_name var =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let maybe_summarize_property class_name ~skip var =
@@ -101,7 +100,6 @@ let summarize_const class_name cc =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let modifier_of_fun_kind acc = function
@@ -135,7 +133,6 @@ let summarize_typeconst class_name t =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let summarize_param param =
@@ -170,26 +167,7 @@ let summarize_param param =
     modifiers;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
-
-let get_reactivity_attributes attrs =
-  let rec go attrs acc =
-    match attrs with
-    | [] -> acc
-    | { ua_name = (_, n); _ } :: tl ->
-      let module SNUA = Naming_special_names.UserAttributes in
-      let acc =
-        if String.equal n SNUA.uaOnlyRxIfImpl then
-          OnlyRxIfImpl :: acc
-        else if String.equal n SNUA.uaAtMostRxAsArgs then
-          AtMostRxAsArgs :: acc
-        else
-          acc
-      in
-      go tl acc
-  in
-  go attrs []
 
 let summarize_method class_name m =
   let modifiers = modifier_of_fun_kind [] m.m_fun_kind in
@@ -213,7 +191,6 @@ let summarize_method class_name m =
     children = None;
     params;
     docblock = None;
-    reactivity_attributes = get_reactivity_attributes m.m_user_attributes;
   }
 
 (* Parser synthesizes AST nodes for implicit properties (defined in constructor
@@ -324,7 +301,6 @@ let summarize_class class_ ~no_children =
     children;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let summarize_record_decl rd =
@@ -345,7 +321,6 @@ let summarize_record_decl rd =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let summarize_typedef tdef =
@@ -367,7 +342,6 @@ let summarize_typedef tdef =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let summarize_fun f =
@@ -388,7 +362,6 @@ let summarize_fun f =
     children = None;
     params;
     docblock = None;
-    reactivity_attributes = get_reactivity_attributes f.f_user_attributes;
   }
 
 let summarize_gconst cst =
@@ -410,7 +383,6 @@ let summarize_gconst cst =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let summarize_local name span =
@@ -428,7 +400,6 @@ let summarize_local name span =
     children = None;
     params = None;
     docblock = None;
-    reactivity_attributes = [];
   }
 
 let outline_ast ast =
@@ -533,7 +504,6 @@ let rec print_def ~short_pos indent def =
     params;
     docblock;
     full_name = _;
-    reactivity_attributes = _;
   } =
     def
   in

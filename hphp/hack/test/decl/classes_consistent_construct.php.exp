@@ -28,7 +28,6 @@
         sc_props = []; sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([8:19-30], "__construct");
-                sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
                  (Tfun
@@ -42,11 +41,9 @@
                            (Rhint (root|classes_consistent_construct.php line 8, characters 31-31),
                             (Tapply (([8:31-32], "\\A"), [])))
                            };
-                         fp_rx_annotation = None;
                          fp_flags =
-                         (make_fp_flags ~mutability:None
-                           ~accept_disposable:false ~has_default:false
-                           ~mode:Typing_defs_core.FPnormal
+                         (make_fp_flags ~accept_disposable:false
+                           ~has_default:false ~mode:Typing_defs_core.FPnormal
                            ~ifc_external:false ~ifc_can_call:false
                            ~is_atom:false ~readonly:false
                            ~const_function:false);
@@ -61,11 +58,9 @@
                          (Tprim Tvoid))
                         };
                       ft_flags =
-                      (make_ft_flags FSync None ~return_disposable:false
-                        ~returns_mutable:false ~returns_void_to_rx:false
+                      (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false
                         ~is_const:false);
-                      ft_reactive = Nonreactive;
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty) });

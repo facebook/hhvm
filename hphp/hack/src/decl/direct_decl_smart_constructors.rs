@@ -22,7 +22,6 @@ use namespaces_rust as namespaces;
 use oxidized_by_ref::{
     aast,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
-    decl_defs::MethodReactivity,
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
     file_info::Mode,
@@ -40,10 +39,9 @@ use oxidized_by_ref::{
     t_shape_map::TShapeField,
     typing_defs::{
         self, Capability::*, ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam,
-        FunParams, FunType, IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation,
-        PosByteString, PosId, PosString, PossiblyEnforcedTy, Reactivity, RecordFieldReq,
-        ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_,
-        TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        FunParams, FunType, IfcFunDecl, ParamMode, PosByteString, PosId, PosString,
+        PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
+        TshapeFieldName, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -230,21 +228,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             result.push(item);
         }
         result.into_bump_slice()
-    }
-
-    fn unwrap_mutability(hint: Node<'a>) -> (Node<'a>, Option<ParamMutability>) {
-        match hint {
-            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\Mutable" => {
-                (Node::Ty(t), Some(ParamMutability::ParamBorrowedMutable))
-            }
-            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\OwnedMutable" => {
-                (Node::Ty(t), Some(ParamMutability::ParamOwnedMutable))
-            }
-            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\MaybeMutable" => {
-                (Node::Ty(t), Some(ParamMutability::ParamMaybeMutable))
-            }
-            _ => (hint, None),
-        }
     }
 }
 
@@ -883,21 +866,15 @@ impl<'a> Node<'a> {
 }
 
 struct Attributes<'a> {
-    reactivity: Reactivity<'a>,
-    reactivity_condition_type: Option<&'a Ty<'a>>,
-    param_mutability: Option<ParamMutability>,
     deprecated: Option<&'a str>,
     reifiable: Option<&'a Pos<'a>>,
-    returns_mutable: bool,
     late_init: bool,
     const_: bool,
     const_fun: bool,
     lsb: bool,
     memoizelsb: bool,
     override_: bool,
-    at_most_rx_as_func: bool,
     enforceable: Option<&'a Pos<'a>>,
-    returns_void_to_rx: bool,
     accept_disposable: bool,
     dynamically_callable: bool,
     returns_disposable: bool,
@@ -1184,21 +1161,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
         let mut attributes = Attributes {
-            reactivity: Reactivity::Nonreactive,
-            reactivity_condition_type: None,
-            param_mutability: None,
             deprecated: None,
             reifiable: None,
-            returns_mutable: false,
             late_init: false,
             const_: false,
             const_fun: false,
             lsb: false,
             memoizelsb: false,
             override_: false,
-            at_most_rx_as_func: false,
             enforceable: None,
-            returns_void_to_rx: false,
             accept_disposable: false,
             dynamically_callable: false,
             returns_disposable: false,
@@ -1215,58 +1186,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => return attributes,
         };
 
-        // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
-        // `reactivity_condition_type` to `Foo`.
-        attributes.reactivity_condition_type = nodes.iter().find_map(|attr| match attr {
-            Node::Attribute(UserAttributeNode {
-                name: Id(_, "__OnlyRxIfImpl"),
-                classname_params: &[param],
-                ..
-            }) => Some(self.alloc(Ty(
-                self.alloc(Reason::hint(param.full_pos)),
-                Ty_::Tapply(self.alloc((param.name.into(), &[][..]))),
-            ))),
-            _ => None,
-        });
-
-        let string_or_classname_arg = |attribute: &'a UserAttributeNode| {
-            attribute
-                .string_literal_params
-                .first()
-                .map(|&x| self.str_from_utf8(x))
-                .or_else(|| attribute.classname_params.first().map(|x| x.name.1))
-        };
         let mut ifc_already_policied = false;
 
         // Iterate in reverse, to match the behavior of OCaml decl in error conditions.
         for attribute in nodes.iter().rev() {
             if let Node::Attribute(attribute) = attribute {
                 match attribute.name.1.as_ref() {
-                    "__Pure" => {
-                        attributes.reactivity =
-                            Reactivity::Pure(attributes.reactivity_condition_type);
-                    }
-                    "__Cipp" => {
-                        attributes.reactivity = Reactivity::Cipp(string_or_classname_arg(attribute))
-                    }
-                    "__CippGlobal" => {
-                        attributes.reactivity = Reactivity::CippGlobal;
-                    }
-                    "__CippLocal" => {
-                        attributes.reactivity =
-                            Reactivity::CippLocal(string_or_classname_arg(attribute))
-                    }
-                    "__Mutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
-                    }
-                    "__MaybeMutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamMaybeMutable)
-                    }
-                    "__OwnedMutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamOwnedMutable)
-                    }
-                    "__MutableReturn" => attributes.returns_mutable = true,
-                    "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
                     "__Deprecated" => {
                         attributes.deprecated = attribute
                             .string_literal_params
@@ -1291,9 +1216,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Override" => {
                         attributes.override_ = true;
-                    }
-                    "__AtMostRxAsFunc" => {
-                        attributes.at_most_rx_as_func = true;
                     }
                     "__Enforceable" => {
                         attributes.enforceable = Some(attribute.name.0);
@@ -1413,28 +1335,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.type_parameters.iter().any(|tps| tps.contains(name))
     }
 
-    fn param_mutability_to_fun_type_flags(
-        param_mutability: Option<ParamMutability>,
-    ) -> FunTypeFlags {
-        match param_mutability {
-            Some(ParamMutability::ParamBorrowedMutable) => FunTypeFlags::MUTABLE_FLAGS_BORROWED,
-            Some(ParamMutability::ParamOwnedMutable) => FunTypeFlags::MUTABLE_FLAGS_OWNED,
-            Some(ParamMutability::ParamMaybeMutable) => FunTypeFlags::MUTABLE_FLAGS_MAYBE,
-            None => FunTypeFlags::empty(),
-        }
-    }
-
-    fn param_mutability_to_fun_param_flags(
-        param_mutability: Option<ParamMutability>,
-    ) -> FunParamFlags {
-        match param_mutability {
-            Some(ParamMutability::ParamBorrowedMutable) => FunParamFlags::MUTABLE_FLAGS_BORROWED,
-            Some(ParamMutability::ParamOwnedMutable) => FunParamFlags::MUTABLE_FLAGS_OWNED,
-            Some(ParamMutability::ParamMaybeMutable) => FunParamFlags::MUTABLE_FLAGS_MAYBE,
-            None => FunParamFlags::empty(),
-        }
-    }
-
     fn as_fun_implicit_params(
         &mut self,
         capability: Node<'a>,
@@ -1515,14 +1415,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             FunKind::FGenerator => FunTypeFlags::GENERATOR,
             FunKind::FAsyncGenerator => FunTypeFlags::ASYNC | FunTypeFlags::GENERATOR,
         };
-        if attributes.returns_mutable {
-            flags |= FunTypeFlags::RETURNS_MUTABLE;
-        }
+
         if attributes.returns_disposable {
             flags |= FunTypeFlags::RETURN_DISPOSABLE;
-        }
-        if attributes.returns_void_to_rx {
-            flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
         if header.readonly_return.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::RETURNS_READONLY;
@@ -1537,7 +1432,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
         let ifc_decl = attributes.ifc_attribute;
 
-        flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
 
@@ -1560,7 +1454,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 enforced: false,
                 type_,
             }),
-            reactive: attributes.reactivity,
             flags,
             ifc_decl,
         });
@@ -1612,30 +1505,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             let type_ = if hint.is_ignored() {
                                 self.tany_with_pos(pos)
                             } else {
-                                self.node_to_ty(hint).map(|ty| match ty {
-                                    &Ty(r, Ty_::Tfun(fun_type))
-                                        if attributes.at_most_rx_as_func =>
-                                    {
-                                        let fun_type = self.alloc(FunType {
-                                            reactive: Reactivity::RxVar(None),
-                                            ..*fun_type
-                                        });
-                                        self.alloc(Ty(r, Ty_::Tfun(fun_type)))
-                                    }
-                                    &Ty(r, Ty_::Toption(&Ty(r1, Ty_::Tfun(fun_type))))
-                                        if attributes.at_most_rx_as_func =>
-                                    {
-                                        let fun_type = self.alloc(FunType {
-                                            reactive: Reactivity::RxVar(None),
-                                            ..*fun_type
-                                        });
-                                        self.alloc(Ty(
-                                            r,
-                                            Ty_::Toption(self.alloc(Ty(r1, Ty_::Tfun(fun_type)))),
-                                        ))
-                                    }
-                                    ty => ty,
-                                })?
+                                self.node_to_ty(hint)?
                             };
                             // These are illegal here--they can only be used on
                             // parameters in a function type hint (see
@@ -1647,18 +1517,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 Ty(_, Ty_::Tapply((PosId(_, "\\MaybeMutable"), [t]))) => t,
                                 _ => type_,
                             };
-                            let mut flags = match attributes.param_mutability {
-                                Some(ParamMutability::ParamBorrowedMutable) => {
-                                    FunParamFlags::MUTABLE_FLAGS_BORROWED
-                                }
-                                Some(ParamMutability::ParamOwnedMutable) => {
-                                    FunParamFlags::MUTABLE_FLAGS_OWNED
-                                }
-                                Some(ParamMutability::ParamMaybeMutable) => {
-                                    FunParamFlags::MUTABLE_FLAGS_MAYBE
-                                }
-                                None => FunParamFlags::empty(),
-                            };
+                            let mut flags = FunParamFlags::empty();
                             if attributes.accept_disposable {
                                 flags |= FunParamFlags::ACCEPT_DISPOSABLE
                             }
@@ -1700,13 +1559,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             } else {
                                 type_
                             };
-                            let rx_annotation = if attributes.at_most_rx_as_func {
-                                Some(ParamRxAnnotation::ParamRxVar)
-                            } else {
-                                attributes
-                                    .reactivity_condition_type
-                                    .map(|ty| ParamRxAnnotation::ParamRxIfImpl(ty))
-                            };
                             let param = self.alloc(FunParam {
                                 pos,
                                 name,
@@ -1715,7 +1567,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     type_,
                                 }),
                                 flags,
-                                rx_annotation,
                             });
                             arity = match arity {
                                 FunArity::Fstandard if variadic => FunArity::Fvariadic(param),
@@ -1817,7 +1668,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let ty_ = match (base_ty, type_arguments) {
             (PosId(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
                 Ty_::Tfun(self.alloc(FunType {
-                    reactive: Reactivity::Pure(None),
                     implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
@@ -4051,15 +3901,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             s.push_str(msg);
             s.into_bump_str()
         });
-        fn get_condition_type_name<'a>(ty_opt: Option<&'a Ty<'a>>) -> Option<&'a str> {
-            ty_opt.and_then(|ty| {
-                let Ty(_, ty_) = ty;
-                match *ty_ {
-                    Ty_::Tapply(&(PosId(_, class_name), _)) => Some(class_name),
-                    _ => None,
-                }
-            })
-        }
         let mut flags = MethodFlags::empty();
         flags.set(
             MethodFlags::ABSTRACT,
@@ -4074,17 +3915,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         flags.set(MethodFlags::PHP_STD_LIB, attributes.php_std_lib);
         let method = self.alloc(ShallowMethod {
             name: id,
-            reactivity: match attributes.reactivity {
-                Reactivity::Pure(condition_type) => Some(MethodReactivity::MethodPure(
-                    get_condition_type_name(condition_type),
-                )),
-                Reactivity::Nonreactive
-                | Reactivity::MaybeReactive(_)
-                | Reactivity::RxVar(_)
-                | Reactivity::Cipp(_)
-                | Reactivity::CippLocal(_)
-                | Reactivity::CippGlobal => None,
-            },
             type_: ty,
             visibility: modifiers.visibility,
             deprecated,
@@ -4736,8 +4566,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     ) -> Self::R {
         let make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
-            let (hint, mutability) = Self::unwrap_mutability(fp.hint);
-            flags |= Self::param_mutability_to_fun_param_flags(mutability);
 
             match fp.kind {
                 ParamMode::FPinout => {
@@ -4751,14 +4579,13 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             }
 
             self.alloc(FunParam {
-                pos: self.get_pos(hint),
+                pos: self.get_pos(fp.hint),
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
                     enforced: false,
-                    type_: self.node_to_ty(hint).unwrap_or_else(|| tany()),
+                    type_: self.node_to_ty(fp.hint).unwrap_or_else(|| tany()),
                 }),
                 flags,
-                rx_annotation: None,
             })
         };
 
@@ -4775,8 +4602,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             _ => None,
         }));
 
-        let (hint, mutability) = Self::unwrap_mutability(return_type);
-        let ret = match self.node_to_ty(hint) {
+        let ret = match self.node_to_ty(return_type) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
         };
@@ -4784,9 +4610,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let implicit_params = self.as_fun_implicit_params(capability, pos);
 
         let mut flags = FunTypeFlags::empty();
-        if mutability.is_some() {
-            flags |= FunTypeFlags::RETURNS_MUTABLE;
-        }
         if readonly_ret.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::RETURNS_READONLY;
         }
@@ -4803,7 +4626,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                     enforced: false,
                     type_: ret,
                 }),
-                reactive: Reactivity::Nonreactive,
                 flags,
                 ifc_decl: default_ifc_fun_decl(),
             })),

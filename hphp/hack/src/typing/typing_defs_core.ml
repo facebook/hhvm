@@ -51,12 +51,6 @@ type val_kind =
   | Other
 [@@deriving eq]
 
-type param_mutability =
-  | Param_owned_mutable
-  | Param_borrowed_mutable
-  | Param_maybe_mutable
-[@@deriving eq, show]
-
 type fun_tparams_kind =
   | FTKtparams
       (** If ft_tparams is empty, the containing fun_type is a concrete function type.
@@ -375,31 +369,6 @@ and _ ty_ =
 
 and 'phase taccess_type = 'phase ty * pos_id
 
-(** represents reactivity of function
-   - None corresponds to non-reactive function
-   - Some reactivity - to reactive function with specified reactivity flavor
-
- Nonreactive <: Local -t <: Shallow -t <: Reactive -t
-
- MaybeReactive represents conditional reactivity of function that depends on
-   reactivity of function arguments
-
-```
-   <<__Rx>>
-   function f(<<__MaybeRx>> $g) { ... }
-```
-
-   call to function f will be treated as reactive only if $g is reactive
-  *)
-and reactivity =
-  | Nonreactive
-  | Pure of decl_ty option
-  | MaybeReactive of reactivity
-  | RxVar of reactivity option
-  | Cipp of string option
-  | CippLocal of string option
-  | CippGlobal
-
 and 'ty capability =
   | CapDefaults of Pos_or_decl.t
   | CapTy of 'ty
@@ -418,7 +387,6 @@ and 'ty fun_type = {
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
       (** Carries through the sync/async information from the aast *)
-  ft_reactive: reactivity;
   ft_flags: Typing_defs_flags.fun_type_flags;
   ft_ifc_decl: ifc_fun_decl;
 }
@@ -432,10 +400,6 @@ and 'ty fun_arity =
       (** PHP5.6-style ...$args finishes the func declaration.
           min ; variadic param type *)
 
-and param_rx_annotation =
-  | Param_rx_var
-  | Param_rx_if_impl of decl_ty
-
 and 'ty possibly_enforced_ty = {
   et_enforced: bool;
       (** True if consumer of this type enforces it at runtime *)
@@ -446,7 +410,6 @@ and 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
-  fp_rx_annotation: param_rx_annotation option;
   fp_flags: Typing_defs_flags.fun_param_flags;
 }
 
@@ -457,11 +420,6 @@ module Flags = struct
 
   let get_ft_return_disposable ft =
     is_set ft.ft_flags ft_flags_return_disposable
-
-  let get_ft_returns_void_to_rx ft =
-    is_set ft.ft_flags ft_flags_returns_void_to_rx
-
-  let get_ft_returns_mutable ft = is_set ft.ft_flags ft_flags_returns_mutable
 
   let get_ft_returns_readonly ft = is_set ft.ft_flags ft_flags_returns_readonly
 
@@ -509,28 +467,6 @@ module Flags = struct
     | (false, true) -> Ast_defs.FGenerator
     | (true, true) -> Ast_defs.FAsyncGenerator
 
-  let from_mutable_flags flags =
-    let masked = Int.bit_and flags mutable_flags_mask in
-    if Int.equal masked mutable_flags_owned then
-      Some Param_owned_mutable
-    else if Int.equal masked mutable_flags_borrowed then
-      Some Param_borrowed_mutable
-    else if Int.equal masked mutable_flags_maybe then
-      Some Param_maybe_mutable
-    else
-      None
-
-  let to_mutable_flags m =
-    match m with
-    | None -> 0x0
-    | Some Param_owned_mutable -> mutable_flags_owned
-    | Some Param_borrowed_mutable -> mutable_flags_borrowed
-    | Some Param_maybe_mutable -> mutable_flags_maybe
-
-  let get_ft_param_mutable ft = from_mutable_flags ft.ft_flags
-
-  let get_fp_mutability fp = from_mutable_flags fp.fp_flags
-
   let get_fp_ifc_external fp = is_set fp.fp_flags fp_flags_ifc_external
 
   let get_fp_ifc_can_call fp = is_set fp.fp_flags fp_flags_ifc_can_call
@@ -549,20 +485,9 @@ module Flags = struct
     | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
 
   let make_ft_flags
-      kind
-      param_mutable
-      ~return_disposable
-      ~returns_mutable
-      ~returns_void_to_rx
-      ~returns_readonly
-      ~readonly_this
-      ~const =
-    let flags =
-      Int.bit_or (to_mutable_flags param_mutable) (fun_kind_to_flags kind)
-    in
+      kind ~return_disposable ~returns_readonly ~readonly_this ~const =
+    let flags = fun_kind_to_flags kind in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
-    let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
-    let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
     let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
     let flags = set_bit ft_flags_readonly_this readonly_this flags in
     let flags = set_bit ft_flags_is_const const flags in
@@ -576,7 +501,6 @@ module Flags = struct
   let make_fp_flags
       ~mode
       ~accept_disposable
-      ~mutability
       ~has_default
       ~ifc_external
       ~ifc_can_call
@@ -584,7 +508,6 @@ module Flags = struct
       ~readonly
       ~const_function =
     let flags = mode_to_flags mode in
-    let flags = Int.bit_or (to_mutable_flags mutability) flags in
     let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
     let flags = set_bit fp_flags_has_default has_default flags in
     let flags = set_bit fp_flags_ifc_external ifc_external flags in
@@ -790,37 +713,6 @@ module Pp = struct
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
 
-  and pp_reactivity : Format.formatter -> reactivity -> unit =
-   fun fmt r ->
-    match r with
-    (* Nonreactive functions are printed in error messages as "normal", *)
-    (* But for this printing purpose, we print the same as the ast structure *)
-    | Nonreactive -> Format.pp_print_string fmt "Nonreactive"
-    | RxVar v ->
-      Format.pp_print_string fmt "RxVar {";
-      Option.iter v (pp_reactivity fmt);
-      Format.pp_print_string fmt "}"
-    | MaybeReactive v ->
-      Format.pp_print_string fmt "MaybeReactive {";
-      pp_reactivity fmt v;
-      Format.pp_print_string fmt "}"
-    | Pure None -> Format.pp_print_string fmt "Pure {}"
-    | Pure (Some ty) ->
-      Format.pp_print_string fmt "Pure {";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt "}"
-    | Cipp None -> Format.pp_print_string fmt "Cipp {}"
-    | Cipp (Some s) ->
-      Format.pp_print_string fmt "Cipp {";
-      Format.pp_print_string fmt s;
-      Format.pp_print_string fmt "}"
-    | CippLocal None -> Format.pp_print_string fmt "CippLocal {}"
-    | CippLocal (Some s) ->
-      Format.pp_print_string fmt "CippLocal {";
-      Format.pp_print_string fmt s;
-      Format.pp_print_string fmt "}"
-    | CippGlobal -> Format.pp_print_string fmt "CippGlobal"
-
   and pp_possibly_enforced_ty :
       type a. Format.formatter -> a ty possibly_enforced_ty -> unit =
    fun fmt x ->
@@ -941,26 +833,8 @@ module Pp = struct
       Format.fprintf fmt "@]";
       Format.fprintf fmt "@ ";
 
-      Format.fprintf fmt "@[";
-      Format.fprintf
-        fmt
-        "%s"
-        ([%show: param_mutability option] (get_ft_param_mutable ft));
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
       Format.fprintf fmt "@[~%s:" "return_disposable";
       Format.fprintf fmt "%B" (get_ft_return_disposable ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "returns_mutable";
-      Format.fprintf fmt "%B" (get_ft_returns_mutable ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "returns_void_to_rx";
-      Format.fprintf fmt "%B" (get_ft_returns_void_to_rx ft);
       Format.fprintf fmt "@]";
       Format.fprintf fmt "@ ";
 
@@ -983,11 +857,6 @@ module Pp = struct
 
     Format.fprintf fmt "@[%s =@ " "ft_flags";
     pp_ft_flags fmt x;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_reactive";
-    pp_reactivity fmt x.ft_reactive;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
@@ -1015,14 +884,6 @@ module Pp = struct
   and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
     let pp_fp_flags fmt fp =
       Format.fprintf fmt "@[<2>(%s@ " "make_fp_flags";
-
-      Format.fprintf fmt "@[~%s:" "mutability";
-      Format.fprintf
-        fmt
-        "%s"
-        ([%show: param_mutability option] (get_fp_mutability fp));
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
 
       Format.fprintf fmt "@[~%s:" "accept_disposable";
       Format.fprintf fmt "%B" (get_fp_accept_disposable fp);
@@ -1088,16 +949,6 @@ module Pp = struct
       Format.fprintf fmt "@]";
       Format.fprintf fmt ";@ ";
 
-      Format.fprintf fmt "@[%s =@ " "fp_rx_annotation";
-      (match x.fp_rx_annotation with
-      | None -> Format.pp_print_string fmt "None"
-      | Some x ->
-        Format.pp_print_string fmt "(Some ";
-        pp_param_rx_annotation fmt x;
-        Format.pp_print_string fmt ")");
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt ";@ ";
-
       Format.fprintf fmt "@[%s =@ " "fp_flags";
       pp_fp_flags fmt x;
       Format.fprintf fmt "@]";
@@ -1117,15 +968,6 @@ module Pp = struct
          ~init:false
          x);
     Format.fprintf fmt "@,]@]"
-
-  and pp_param_rx_annotation : Format.formatter -> param_rx_annotation -> unit =
-   fun fmt x ->
-    match x with
-    | Param_rx_var -> Format.pp_print_string fmt "Param_rx_var"
-    | Param_rx_if_impl ty ->
-      Format.pp_print_string fmt "(Param_rx_if_impl ";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt ")"
 
   and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
    (fun fmt tparam -> pp_tparam pp_ty fmt tparam)
@@ -1149,9 +991,6 @@ module Pp = struct
   let show_decl_ty x = show_ty x
 
   let show_locl_ty x = show_ty x
-
-  let show_reactivity : reactivity -> string =
-   (fun x -> Format.asprintf "%a" pp_reactivity x)
 end
 
 include Pp

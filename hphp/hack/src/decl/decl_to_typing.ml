@@ -38,7 +38,6 @@ let base_visibility origin_class_name = function
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
     sm_name = (pos, _);
-    sm_reactivity = _;
     sm_type = ty;
     sm_visibility;
     sm_deprecated;

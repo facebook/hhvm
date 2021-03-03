@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Decl_defs
 open Shallow_decl_defs
 open Aast
 open Typing_deps
@@ -167,14 +166,8 @@ and static_prop env cv =
   }
 
 let method_type env m =
-  let reactivity = FunUtils.fun_reactivity env m.m_user_attributes in
-  let mut = FunUtils.get_param_mutability m.m_user_attributes in
   let ifc_decl = FunUtils.find_policied_attribute m.m_user_attributes in
   let is_const = FunUtils.has_constfun_attribute m.m_user_attributes in
-  let returns_mutable = FunUtils.fun_returns_mutable m.m_user_attributes in
-  let returns_void_to_rx =
-    FunUtils.fun_returns_void_to_rx m.m_user_attributes
-  in
   let return_disposable =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
@@ -210,14 +203,10 @@ let method_type env m =
     ft_params = params;
     ft_implicit_params = { capability };
     ft_ret = { et_type = ret; et_enforced = false };
-    ft_reactive = reactivity;
     ft_flags =
       make_ft_flags
         m.m_fun_kind
-        mut
-        ~returns_mutable
         ~return_disposable
-        ~returns_void_to_rx
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
         ~readonly_this:m.m_readonly_this
         ~const:is_const;
@@ -234,17 +223,6 @@ let method_ env m =
     Attrs.mem SN.UserAttributes.uaPHPStdLib m.m_user_attributes
   in
   let ft = method_type env m in
-  let reactivity =
-    match ft.ft_reactive with
-    | Pure (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> Some (Method_pure (Some cls))
-        | _ -> None
-      end
-    | Pure None -> Some (Method_pure None)
-    | _ -> None
-  in
   let sm_deprecated =
     Naming_attributes_deprecated.deprecated
       ~kind:"method"
@@ -253,7 +231,6 @@ let method_ env m =
   in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
-    sm_reactivity = reactivity;
     sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
     sm_deprecated;

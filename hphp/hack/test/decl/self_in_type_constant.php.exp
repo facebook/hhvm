@@ -70,7 +70,6 @@
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:28-29], "f");
-           sm_reactivity = None;
            sm_type =
            (Rwitness (root|self_in_type_constant.php line 15, characters 28-28),
             (Tfun
@@ -88,12 +87,10 @@
                         [([15:39-40], "U")])))
                    };
                  ft_flags =
-                 (make_ft_flags FSync None ~return_disposable:false
-                   ~returns_mutable:false ~returns_void_to_rx:false
+                 (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
                    ~is_const:false);
-                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
-                 }));
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
           ];

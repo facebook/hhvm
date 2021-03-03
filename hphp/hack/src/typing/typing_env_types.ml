@@ -29,9 +29,6 @@ let pp_local_env _ _ = Printf.printf "%s\n" "<local_env>"
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
   per_cont_env: Typing_per_cont_env.t;
-  local_mutability: Typing_mutability_env.mutability_env;
-  (* Whether current environment is reactive *)
-  local_reactive: reactivity;
   (* Local variables that were assigned in a `using` clause *)
   local_using_vars: local_id_set_t;
 }
@@ -90,8 +87,6 @@ and genv = {
   static: bool;
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;
-  fun_mutable: param_mutability option;
+  fun_is_ctor: bool;
   file: Relative_path.t;
 }
-
-let env_reactivity env = env.lenv.local_reactive

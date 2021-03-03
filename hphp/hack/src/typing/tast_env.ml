@@ -200,7 +200,6 @@ let restore_saved_env env saved_env =
       {
         env.Env.genv with
         Env.tcopt = saved_env.Tast.tcopt;
-        Env.fun_mutable = saved_env.Tast.fun_mutable;
         Env.condition_types = saved_env.Tast.condition_types;
       };
     Env.inference_env =
@@ -208,12 +207,6 @@ let restore_saved_env env saved_env =
         env.Env.inference_env
         saved_env.Tast.inference_env;
     Env.global_tpenv = saved_env.Tast.tpenv;
-    Env.lenv =
-      {
-        env.Env.lenv with
-        Env.local_reactive = saved_env.Tast.reactivity;
-        Env.local_mutability = saved_env.Tast.local_mutability;
-      };
   }
 
 module EnvFromDef = Typing_env_from_def
@@ -284,23 +277,11 @@ let get_typedef = Typing_env.get_typedef
 
 let is_enum = Typing_env.is_enum
 
-let env_reactivity = Typing_env_types.env_reactivity
-
-let function_is_mutable = Typing_env.function_is_mutable
-
-let local_is_mutable = Typing_env.local_is_mutable
-
-let get_env_mutability = Typing_env.get_env_mutability
-
 let get_fun = Typing_env.get_fun
-
-let set_env_reactive = Typing_env.set_env_reactive
 
 let set_allow_wildcards env =
   { env with Typing_env_types.allow_wildcards = true }
 
 let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
-
-let condition_type_matches = Typing_reactivity.condition_type_matches
 
 let is_enum_class env c = Typing_env.is_enum_class env c

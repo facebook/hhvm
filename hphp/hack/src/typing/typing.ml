@@ -1,5 +1,4 @@
 (*
-n
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -21,7 +20,6 @@ open Typing_defs
 open Typing_env_types
 open Utils
 open Typing_helpers
-module FunUtils = Decl_fun_utils
 module TFTerm = Typing_func_terminality
 module TUtils = Typing_utils
 module Reason = Typing_reason
@@ -44,7 +42,6 @@ module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations
 module CMap = C.Map
 module Try = Typing_try
-module TR = Typing_reactivity
 module FL = FeatureLogging
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
@@ -335,26 +332,6 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
       Env.set_using_var env id
     else
       env
-  in
-  let env =
-    match get_param_mutability param with
-    | Some Param_borrowed_mutable ->
-      Env.add_mutable_var
-        env
-        id
-        (param.param_pos, Typing_mutability_env.Borrowed)
-    | Some Param_owned_mutable ->
-      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Mutable)
-    | Some Param_maybe_mutable ->
-      Env.add_mutable_var
-        env
-        id
-        (param.param_pos, Typing_mutability_env.MaybeMutable)
-    | None ->
-      Env.add_mutable_var
-        env
-        id
-        (param.param_pos, Typing_mutability_env.Immutable)
   in
   (env, tparam)
 
@@ -705,9 +682,7 @@ and stmt_ env pos st =
           {
             return_type;
             return_disposable;
-            return_mutable;
             return_explicit;
-            return_void_to_rx;
             return_dynamically_callable = _;
           } =
       Env.get_return env
@@ -728,23 +703,6 @@ and stmt_ env pos st =
     if return_disposable then enforce_return_disposable env e;
     let (env, te, rty) =
       expr ~is_using_clause:return_disposable ?expected env e
-    in
-    let env =
-      if not (equal_reactivity (env_reactivity env) Nonreactive) then
-        Typing_mutability.handle_value_in_return
-          ~function_returns_mutable:return_mutable
-          ~function_returns_void_for_rx:return_void_to_rx
-          env
-          env.function_pos
-          te
-      else
-        env
-    in
-    let return_type =
-      {
-        return_type with
-        et_type = TR.strip_condition_type_in_return env return_type.et_type;
-      }
     in
     (* This is a unify_error rather than a return_type_mismatch because the return
      * statement is the problem, not the return type itself. *)
@@ -1199,34 +1157,22 @@ and as_expr env ty1 pe e =
   (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv)
 
 and bind_as_expr env p ty1 ty2 aexpr =
-  let check_reassigned_mutable env te =
-    if Env.env_local_reactive env then
-      Typing_mutability.handle_assignment_mutability env te None
-    else
-      env
-  in
   match aexpr with
   | As_v ev ->
     let (env, te, _) = assign p env ev ty2 in
-    let env = check_reassigned_mutable env te in
     (env, Aast.As_v te)
   | Await_as_v (p, ev) ->
     let (env, te, _) = assign p env ev ty2 in
-    let env = check_reassigned_mutable env te in
     (env, Aast.Await_as_v (p, te))
   | As_kv ((p, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
     let tk = Tast.make_typed_expr p ty1 (Aast.Lvar id) in
-    let env = check_reassigned_mutable env tk in
-    let env = check_reassigned_mutable env te in
     (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
     let tk = Tast.make_typed_expr p1 ty1 (Aast.Lvar id) in
-    let env = check_reassigned_mutable env tk in
-    let env = check_reassigned_mutable env te in
     (env, Aast.Await_as_kv (p, tk, te))
   | _ ->
     (* TODO Probably impossible, should check that *)
@@ -1546,13 +1492,6 @@ and expr_
         unpacked_element
     in
     let env = forget_fake_members env p e in
-    let env =
-      Typing_reactivity.check_awaitable_immediately_awaited
-        env
-        ty
-        p
-        ~allow_awaitable
-    in
     (env, te, ty)
   in
   match e with
@@ -1922,7 +1861,6 @@ and expr_
             ft_ret = fty.ft_ret;
             (* propagate 'is_coroutine' from the method being called*)
             ft_flags = fty.ft_flags;
-            ft_reactive = fty.ft_reactive;
             ft_ifc_decl = fty.ft_ifc_decl;
           }
         in
@@ -2257,7 +2195,7 @@ and expr_
   | Binop (Ast_defs.Eq op_opt, e1, e2) ->
     let make_result env p te ty =
       let (env, te, ty) = make_result env p te ty in
-      let env = Typing_reactivity.check_assignment env te in
+      let env = Typing_local_ops.check_assignment env te in
       (env, te, ty)
     in
     (match op_opt with
@@ -2289,15 +2227,6 @@ and expr_
     | None ->
       let (env, te2, ty2) = raw_expr env e2 in
       let (env, te1, ty) = assign p env e1 ty2 in
-      let env =
-        if Env.env_local_reactive env then
-          Typing_mutability.handle_assignment_mutability
-            env
-            te1
-            (Some (snd te2))
-        else
-          env
-      in
       make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty)
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
     let c = Ast_defs.(equal_bop bop Ampamp) in
@@ -2356,19 +2285,12 @@ and expr_
       | Some (ty, pos) -> Env.set_local env dd_var ty pos
     in
     let (env, te, ty) = make_result env p (Aast.Pipe (e0, te1, te2)) ty2 in
-    let env =
-      Typing_reactivity.check_awaitable_immediately_awaited
-        env
-        ty
-        p
-        ~allow_awaitable
-    in
     (env, te, ty)
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
     let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
-    let env = Typing_reactivity.check_assignment env tuop in
+    let env = Typing_local_ops.check_assignment env te in
     (env, tuop, ty)
   | Eif (c, e1, e2) -> eif env ~expected ?in_await p c e1 e2
   | Class_const ((p, CI sid), pstr)
@@ -2800,19 +2722,10 @@ and expr_
 
     (* Is the return type declared? *)
     let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
-    let reactivity =
-      FunUtils.fun_reactivity_opt env.decl_env f.f_user_attributes
-      |> Option.value
-           ~default:(TR.strip_conditional_reactivity (env_reactivity env))
-    in
     let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
-      let old_reactivity = env_reactivity env in
-      let env = Env.set_env_reactive env reactivity in
-      let ft = { ft with ft_reactive = reactivity } in
       let (env, (tefun, ty, ft)) =
         closure_make ?ret_ty env p f ft idl is_anon
       in
-      let env = Env.set_env_reactive env old_reactivity in
       let inferred_ty =
         mk
           ( Reason.Rwitness p,
@@ -4454,37 +4367,11 @@ and dispatch_call
     if is_return_disposable_fun_type env fty && not is_using_clause then
       Errors.invalid_new_disposable p
   in
-  let dispatch_id env ((_, x) as id) =
+  let dispatch_id env ((_, _) as id) =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
       call ~expected p env fty el unpacked_element
-    in
-    let is_mutable = String.equal x SN.Rx.mutable_ in
-    let is_move = String.equal x SN.Rx.move in
-    let is_freeze = String.equal x SN.Rx.freeze in
-    (* error when rx builtins are used in non-reactive context *)
-    if not (Env.env_local_reactive env) then
-      if is_mutable then
-        Errors.mutable_in_nonreactive_context p
-      else if is_move then
-        Errors.move_in_nonreactive_context p
-      else if is_freeze then
-        Errors.freeze_in_nonreactive_context p;
-
-    (* ban unpacking when calling builtings *)
-    if (is_mutable || is_move || is_freeze) && Option.is_some unpacked_element
-    then
-      Errors.unpacking_disallowed_builtin_function p x;
-
-    (* adjust env for Rx\freeze or Rx\move calls *)
-    let env =
-      if is_freeze then
-        Typing_mutability.freeze_local p env tel
-      else if is_move then
-        Typing_mutability.move_local p env tel
-      else
-        env
     in
     make_call
       env
@@ -4512,56 +4399,39 @@ and dispatch_call
       || Env.is_static env
       || class_contains_smethod env ty1 m
     in
-    let ((env, (fty, tal)), ty) =
+    let (env, (fty, tal)) =
       match Env.get_self_ty env with
       | Some this_ty when not is_static ->
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
          *)
-        ( TOG.obj_get
-            ~inst_meth:false
-            ~is_method:true
-            ~nullsafe:None
-            ~obj_pos:pos
-            ~coerce_from_ty:None
-            ~explicit_targs:[]
-            ~class_id:e1
-            ~member_id:m
-            ~on_error:Errors.unify_error
-            ~parent_ty:ty1
-            env
-            this_ty,
-          if Nast.equal_class_id_ e1 CIparent then
-            this_ty
-          else
-            ty1 )
+        TOG.obj_get
+          ~inst_meth:false
+          ~is_method:true
+          ~nullsafe:None
+          ~obj_pos:pos
+          ~coerce_from_ty:None
+          ~explicit_targs:[]
+          ~class_id:e1
+          ~member_id:m
+          ~on_error:Errors.unify_error
+          ~parent_ty:ty1
+          env
+          this_ty
       | _ ->
-        ( class_get
-            ~coerce_from_ty:None
-            ~is_method:true
-            ~is_const:false
-            ~explicit_targs
-            env
-            ty1
-            m
-            e1,
-          ty1 )
+        class_get
+          ~coerce_from_ty:None
+          ~is_method:true
+          ~is_const:false
+          ~explicit_targs
+          env
+          ty1
+          m
+          e1
     in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
-      call
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:(Nast.equal_class_id_ e1 CIself)
-             ~is_static
-             ty
-             (snd m))
-        p
-        env
-        fty
-        el
-        unpacked_element
+      call ~expected p env fty el unpacked_element
     in
     make_call
       env
@@ -4605,9 +4475,9 @@ and dispatch_call
       (* Special function `unset` *)
       | unset when String.equal unset SN.PseudoFunctions.unset ->
         let (env, tel, _) = exprs env el in
-        let env = Typing_reactivity.check_unset_target env tel in
         if Option.is_some unpacked_element then
           Errors.unpacking_disallowed_builtin_function p unset;
+        let env = Typing_local_ops.check_unset_target env tel in
         let checked_unset_error =
           if Partial.should_check_error (Env.get_mode env) 4135 then
             Errors.unset_nonidx_in_strict
@@ -5083,20 +4953,7 @@ and dispatch_call
     in
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty)) =
-      call
-        ~nullsafe
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:false
-             ~is_static:false
-             ty1
-             (snd m))
-        p
-        env
-        tfty
-        el
-        unpacked_element
+      call ~nullsafe ~expected p env tfty el unpacked_element
     in
     make_call
       env
@@ -5185,21 +5042,7 @@ and dispatch_call
     in
     check_disposable_in_return env method_ty;
     let (env, (typed_params, typed_unpack_element, ret_ty)) =
-      call
-        ~nullsafe
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:false
-             ~is_static:false
-             receiver_ty
-             (snd meth))
-        ?in_await
-        p
-        env
-        method_ty
-        el
-        unpacked_element
+      call ~nullsafe ~expected ?in_await p env method_ty el unpacked_element
     in
     (* If the call is nullsafe AND the receiver is nullable,
        make the return type nullable too *)
@@ -6111,7 +5954,6 @@ and inout_write_back env { fp_type; _ } (_, e) =
 Returns in this order the typed expressions for the arguments, for the variadic arguments, and the return type. *)
 and call
     ~(expected : ExpectedTy.t option)
-    ?(method_call_info : TR.method_call_info option)
     ?(nullsafe : Pos.t option = None)
     ?in_await
     pos
@@ -6464,12 +6306,11 @@ and call
         | Some x -> x
         | None -> failwith "missing parameter in check_args"
       in
-      let (tel, tys) =
+      let (tel, _) =
         let l = List.map rl (fun (_, opt) -> get_param opt) in
         List.unzip l
       in
       let env = check_implicit_args env in
-      let env = TR.check_call env method_call_info pos r2 ft tys in
       let (env, typed_unpack_element, arity, did_unpack) =
         match unpacked_element with
         | None -> (env, None, List.length el, false)
@@ -6553,10 +6394,7 @@ and call
       let () = check_arity ~did_unpack pos pos_def ft arity in
       (* Variadic params cannot be inout so we can stop early *)
       let env = wfold_left2 inout_write_back env ft.ft_params el in
-      let (env, ret_ty) =
-        TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
-      in
-      (env, (tel, typed_unpack_element, ret_ty))
+      (env, (tel, typed_unpack_element, ft.ft_ret.et_type))
     | (r, Tvar _)
       when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
       (*
@@ -6580,7 +6418,6 @@ and call
             make_fp_flags
               ~mode:FPnormal (* TODO: deal with `inout` parameters *)
               ~accept_disposable:false (* TODO: deal with disposables *)
-              ~mutability:(Some Param_maybe_mutable)
               ~has_default:false
               ~ifc_external:false
               ~ifc_can_call:false
@@ -6592,7 +6429,6 @@ and call
             fp_pos = pos;
             fp_name = None;
             fp_type = MakeType.enforced ty;
-            fp_rx_annotation = None;
             fp_flags = flags;
           }
         in
@@ -6621,16 +6457,11 @@ and call
           | Some r -> MakeType.awaitable r return_ty
         in
         let ft_ret = MakeType.enforced return_ty in
-        (* A non-reactive supertype is most permissive: *)
-        let ft_reactive = Nonreactive in
         let ft_flags =
           (* Keep supertype as permissive as possible: *)
           make_ft_flags
             Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
-            (Some Param_maybe_mutable)
             ~return_disposable:false (* TODO: deal with disposable return *)
-            ~returns_mutable:false
-            ~returns_void_to_rx:false
             ~returns_readonly:false
             ~readonly_this:false
             ~const:false
@@ -6644,7 +6475,6 @@ and call
             ft_params;
             ft_implicit_params;
             ft_ret;
-            ft_reactive;
             ft_flags;
             ft_ifc_decl;
           }
@@ -6867,15 +6697,12 @@ and condition
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     let env =
       if not tparamet then
-        let env =
-          if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
-            let env = Typing_local_ops.enforce_rx_is_enabled p env in
-            let defaults = MakeType.default_capability Pos.none in
-            fst @@ Typing_coeffects.register_capabilities env defaults defaults
-          else
-            env
-        in
-        Env.set_env_reactive env Nonreactive
+        if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
+          let env = Typing_local_ops.enforce_rx_is_enabled p env in
+          let defaults = MakeType.default_capability Pos.none in
+          fst @@ Typing_coeffects.register_capabilities env defaults defaults
+        else
+          env
       else
         env
     in

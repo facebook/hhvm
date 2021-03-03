@@ -1364,7 +1364,6 @@ module Json = struct
                       make_fp_flags
                         ~mode:callconv
                         ~accept_disposable:false
-                        ~mutability:None
                         ~has_default:false
                         ~ifc_external:false
                         ~ifc_can_call:false
@@ -1374,7 +1373,6 @@ module Json = struct
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos.none;
                     fp_name = None;
-                    fp_rx_annotation = None;
                   })
           in
           params >>= fun ft_params ->
@@ -1391,7 +1389,6 @@ module Json = struct
                  ft_tparams = [];
                  ft_where_constraints = [];
                  ft_flags = 0;
-                 ft_reactive = Nonreactive;
                  ft_ifc_decl = default_ifc_fun_decl;
                })
         | _ ->

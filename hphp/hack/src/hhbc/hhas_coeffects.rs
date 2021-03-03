@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_string_utils_rust::strip_ns;
-use naming_special_names_rust::{self as sn, coeffects as c, user_attributes as attr};
+use naming_special_names_rust::{self as sn, coeffects as c};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
     aast as a,
@@ -152,7 +152,6 @@ impl HhasCoeffects {
     }
 
     pub fn from_ast<Ex, Fb, En, Hi>(
-        ast_attrs: impl AsRef<[a::UserAttribute<Ex, Fb, En, Hi>]>,
         ctxs_opt: &Option<a::Contexts>,
         params: impl AsRef<[a::FunParam<Ex, Fb, En, Hi>]>,
     ) -> Self {
@@ -171,23 +170,6 @@ impl HhasCoeffects {
                 panic!("Invalid context");
             }
         };
-
-        // From attributes
-        for attr in ast_attrs.as_ref() {
-            match attr.name.1.as_str() {
-                attr::NON_RX => static_coeffects.push(Ctx::Defaults),
-                attr::LOCAL_REACTIVE => static_coeffects.push(Ctx::RxLocal),
-                attr::SHALLOW_REACTIVE => static_coeffects.push(Ctx::RxShallow),
-                attr::REACTIVE => static_coeffects.push(Ctx::Rx),
-                attr::PURE => static_coeffects.push(Ctx::Pure),
-                _ => {}
-            }
-            match attr.name.1.as_str() {
-                attr::LOCAL_REACTIVE | attr::SHALLOW_REACTIVE | attr::REACTIVE => is_any_rx = true,
-                attr::PURE => is_pure = true,
-                _ => {}
-            }
-        }
 
         // From coeffect syntax
         if let Some(ctxs) = ctxs_opt {

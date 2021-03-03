@@ -465,30 +465,6 @@ let rec get_base_type env ty =
     end
   | _ -> ty
 
-(*****************************************************************************)
-(* Reactivity *)
-(*****************************************************************************)
-
-let reactivity_to_string env r =
-  let cond_reactive prefix t =
-    let str = Typing_print.full_decl (Env.get_ctx env) t in
-    prefix ^ " (condition type: " ^ str ^ ")"
-  in
-  let rec aux r =
-    match r with
-    | Pure None -> "pure"
-    | Pure (Some ty) -> cond_reactive "conditionally pure" ty
-    | MaybeReactive n -> "maybe (" ^ aux n ^ ")"
-    | Nonreactive -> "normal"
-    | RxVar _ -> "maybe reactive"
-    | Cipp None -> "cipp"
-    | Cipp (Some s) -> "cipp(" ^ s ^ ")"
-    | CippLocal None -> "cipp_local"
-    | CippLocal (Some s) -> "cipp_local(" ^ s ^ ")"
-    | CippGlobal -> "cipp_global"
-  in
-  aux r
-
 let get_printable_shape_field_name = Env.get_shape_field_name
 
 let shape_field_name_ this field =
@@ -589,28 +565,13 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
       make_fp_flags
         ~mode:FPnormal
         ~accept_disposable:false
-        ~mutability:None
         ~has_default:false
         ~ifc_external:false
         ~ifc_can_call:false
         ~is_atom:false
         ~readonly:false
         ~const_function:false;
-    fp_rx_annotation = None;
   }
-
-let fun_mutable user_attributes =
-  let rec go = function
-    | [] -> None
-    | { Aast.ua_name = (_, n); _ } :: _
-      when String.equal n SN.UserAttributes.uaMutable ->
-      Some Param_borrowed_mutable
-    | { Aast.ua_name = (_, n); _ } :: _
-      when String.equal n SN.UserAttributes.uaMaybeMutable ->
-      Some Param_maybe_mutable
-    | _ :: tl -> go tl
-  in
-  go user_attributes
 
 let tany = Env.tany
 

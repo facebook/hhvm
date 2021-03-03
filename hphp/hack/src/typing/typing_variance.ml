@@ -598,9 +598,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       hf_param_info;
       hf_variadic_ty;
       hf_return_ty;
-      hf_reactive_kind = _;
       hf_ctxs = _;
-      hf_is_mutable_return = _;
       hf_is_readonly_return = _;
     } =
       hfun
@@ -673,12 +671,7 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
          env
          variance
          (Some
-            Aast.
-              {
-                hfparam_kind = param_callconv;
-                hfparam_mutability = None;
-                hfparam_readonlyness = None;
-              }))
+            Aast.{ hfparam_kind = param_callconv; hfparam_readonlyness = None }))
 
 let fun_variadicity : Env.t -> variance -> Nast.fun_variadicity -> unit =
  fun env variance variadicity ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb0cce5e2c5891f06d2bf59b62d683e9>>
+// @generated SignedSource<<74f801ede66ced0325fc5b74b58ab83a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -118,32 +118,6 @@ pub enum LinearizationKind {
 }
 impl TrivialDrop for LinearizationKind {}
 
-/// name of condition type for conditional reactivity of methods.
-/// If None - method is unconditionally reactive
-pub type ConditionTypeName<'a> = Option<&'a str>;
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum MethodReactivity<'a> {
-    MethodPure(ConditionTypeName<'a>),
-    MethodReactive(ConditionTypeName<'a>),
-    MethodShallow(ConditionTypeName<'a>),
-    MethodLocal(ConditionTypeName<'a>),
-}
-impl<'a> TrivialDrop for MethodReactivity<'a> {}
-
 #[derive(
     Clone,
     Debug,
@@ -211,7 +185,6 @@ impl<'a> TrivialDrop for DeclClassType<'a> {}
 )]
 pub struct Element<'a> {
     pub flags: isize,
-    pub reactivity: Option<MethodReactivity<'a>>,
     pub origin: &'a str,
     pub visibility: CeVisibility<'a>,
     pub deprecated: Option<&'a str>,

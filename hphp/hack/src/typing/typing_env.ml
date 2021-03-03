@@ -548,19 +548,17 @@ let reinitialize_locals env =
     env
     LEnvC.(initial_locals { empty_entry with tpenv = get_tpenv env })
 
-let initial_local tpenv local_reactive =
+let initial_local tpenv =
   {
     per_cont_env = LEnvC.(initial_locals { empty_entry with tpenv });
     local_using_vars = LID.Set.empty;
-    local_mutability = LID.Map.empty;
-    local_reactive;
   }
 
 let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
     function_pos = Pos.none;
     fresh_typarams = SSet.empty;
-    lenv = initial_local TPEnv.empty Nonreactive;
+    lenv = initial_local TPEnv.empty;
     in_loop = false;
     in_try = false;
     in_case = false;
@@ -578,9 +576,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
             return_type =
               { et_type = mk (Reason.Rnone, Tunion []); et_enforced = false };
             return_disposable = false;
-            return_mutable = false;
             return_explicit = false;
-            return_void_to_rx = false;
             return_dynamically_callable = false;
           };
         params = LID.Map.empty;
@@ -590,7 +586,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         val_kind = Other;
         parent = None;
         fun_kind = Ast_defs.FSync;
-        fun_mutable = None;
+        fun_is_ctor = false;
         file;
       };
     global_tpenv = TPEnv.empty;
@@ -600,9 +596,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     big_envs = ref [];
     pessimize = false;
   }
-
-let set_env_reactive env reactive =
-  { env with lenv = { env.lenv with local_reactive = reactive } }
 
 let set_env_pessimize env =
   let pessimize_coefficient =
@@ -624,19 +617,10 @@ let set_condition_type env n ty =
 
 let get_condition_type env n = SMap.find_opt n env.genv.condition_types
 
-(* Some form (strict/shallow/local) of reactivity *)
-let env_local_reactive env =
-  not (equal_reactivity (env_reactivity env) Nonreactive)
+let fun_is_constructor env = env.genv.fun_is_ctor
 
-let function_is_mutable env = env.genv.fun_mutable
-
-let set_fun_mutable env mut =
-  { env with genv = { env.genv with fun_mutable = mut } }
-
-let error_if_reactive_context env f =
-  if env_local_reactive env && not (TypecheckerOptions.unsafe_rx env.genv.tcopt)
-  then
-    f ()
+let set_fun_is_constructor env is_ctor =
+  { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
 let make_depend_on_class env class_name =
   let dep = Dep.Class class_name in
@@ -744,11 +728,6 @@ let get_enum_constraint env x =
     (match Cls.enum_type tc with
     | None -> None
     | Some e -> e.te_constraint)
-
-let env_with_mut env local_mutability =
-  { env with lenv = { env.lenv with local_mutability } }
-
-let get_env_mutability env = env.lenv.local_mutability
 
 let get_enum env x =
   match get_class_or_typedef env x with
@@ -1081,34 +1060,15 @@ let set_using_var env x =
   }
 
 let unset_local env local =
-  let { per_cont_env; local_using_vars; local_mutability; local_reactive } =
-    env.lenv
-  in
+  let { per_cont_env; local_using_vars } = env.lenv in
   let per_cont_env =
     LEnvC.remove_from_cont C.Next local
     @@ LEnvC.remove_from_cont C.Catch local
     @@ per_cont_env
   in
   let local_using_vars = LID.Set.remove local local_using_vars in
-  let local_mutability = LID.Map.remove local local_mutability in
-  let env =
-    {
-      env with
-      lenv =
-        { per_cont_env; local_using_vars; local_mutability; local_reactive };
-    }
-  in
+  let env = { env with lenv = { per_cont_env; local_using_vars } } in
   env
-
-let add_mutable_var env local mutability_type =
-  env_with_mut env (LID.Map.add local mutability_type env.lenv.local_mutability)
-
-let local_is_mutable ~include_borrowed env id =
-  let module TME = Typing_mutability_env in
-  match LID.Map.find_opt id (get_env_mutability env) with
-  | Some (_, TME.Mutable) -> true
-  | Some (_, TME.Borrowed) -> include_borrowed
-  | _ -> false
 
 let tany env =
   let dynamic_view_enabled = TypecheckerOptions.dynamic_view (get_tcopt env) in
@@ -1127,7 +1087,6 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   let error_if_pos_provided posopt ctx =
     match posopt with
     | Some p ->
-      let in_rx_scope = env_local_reactive env in
       let lid = LID.to_string x in
       let suggest_most_similar lid =
         (* Ignore fake locals *)
@@ -1146,7 +1105,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
         | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)
         | None -> None
       in
-      Errors.undefined ~in_rx_scope p lid (suggest_most_similar lid)
+      Errors.undefined p lid (suggest_most_similar lid)
     | None -> ()
   in
   match ctx_opt with
@@ -1395,9 +1354,6 @@ let save local_tpenv env =
     Tast.tcopt = get_tcopt env;
     Tast.inference_env = env.inference_env;
     Tast.tpenv = TPEnv.union local_tpenv env.global_tpenv;
-    Tast.reactivity = env_reactivity env;
-    Tast.local_mutability = get_env_mutability env;
-    Tast.fun_mutable = function_is_mutable env;
     Tast.condition_types = env.genv.condition_types;
     Tast.pessimize = env.pessimize;
   }

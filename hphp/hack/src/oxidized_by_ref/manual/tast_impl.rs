@@ -38,9 +38,6 @@ impl Default for SavedEnv<'_> {
             tcopt: Default::default(),
             inference_env: &INFERENCE_ENV,
             tpenv: &TPENV,
-            reactivity: Default::default(),
-            local_mutability: Default::default(),
-            fun_mutable: Default::default(),
             condition_types: Default::default(),
             pessimize: Default::default(),
         }

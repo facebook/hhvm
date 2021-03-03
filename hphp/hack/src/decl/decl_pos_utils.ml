@@ -173,15 +173,10 @@ struct
       ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
       ft_ret = possibly_enforced_ty ft.ft_ret;
       ft_arity = fun_arity ft.ft_arity;
-      ft_reactive = fun_reactive ft.ft_reactive;
     }
 
   and fun_elt fe =
     { fe with fe_type = ty fe.fe_type; fe_pos = pos_or_decl fe.fe_pos }
-
-  and fun_reactive = function
-    | Pure (Some ty1) -> Pure (Some (ty ty1))
-    | r -> r
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
 
@@ -194,12 +189,7 @@ struct
       param with
       fp_pos = pos_or_decl param.fp_pos;
       fp_type = possibly_enforced_ty param.fp_type;
-      fp_rx_annotation = param_rx_annotation param.fp_rx_annotation;
     }
-
-  and param_rx_annotation = function
-    | Some (Param_rx_if_impl t) -> Some (Param_rx_if_impl (ty t))
-    | c -> c
 
   and class_const cc =
     {
@@ -360,7 +350,6 @@ struct
   and shallow_method sm =
     {
       sm_name = positioned_id sm.sm_name;
-      sm_reactivity = sm.sm_reactivity;
       sm_type = ty sm.sm_type;
       sm_visibility = sm.sm_visibility;
       sm_deprecated = sm.sm_deprecated;

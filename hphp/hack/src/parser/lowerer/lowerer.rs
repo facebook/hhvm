@@ -12,7 +12,7 @@ use hh_autoimport_rust as hh_autoimport;
 use itertools::Either;
 use lint_rust::LintError;
 use naming_special_names_rust::{
-    classes as special_classes, literal, rx, special_functions, special_idents,
+    classes as special_classes, literal, special_functions, special_idents,
     typehints as special_typehints, user_attributes as special_attrs,
 };
 use ocamlrep::rc::RcOc;
@@ -696,15 +696,10 @@ where
         match &node.children {
             ClosureParameterTypeSpecifier(c) => {
                 let kind = Self::mp_optional(Self::p_param_kind, &c.call_convention, env)?;
-                let mutability = None;
                 let readonlyness = Self::mp_optional(Self::p_readonly, &c.readonly, env)?;
-                let info = match (kind, mutability, readonlyness) {
-                    (None, None, None) => None,
-                    _ => Some(ast::HfParamInfo {
-                        kind,
-                        mutability,
-                        readonlyness,
-                    }),
+                let info = match (kind, readonlyness) {
+                    (None, None) => None,
+                    _ => Some(ast::HfParamInfo { kind, readonlyness }),
                 };
                 let hint = Self::p_hint(&c.type_, env)?;
                 Ok((hint, info))
@@ -904,29 +899,7 @@ where
                     TypeArguments(c) => Self::could_map(Self::p_hint, &c.types, env)?,
                     _ => Self::missing_syntax("generic type arguments", args, env)?,
                 };
-                if env.codegen() {
-                    let process = |name: ast::Sid, mut args: Vec<ast::Hint>| -> ast::Hint_ {
-                        if args.len() == 1 {
-                            let eq = |s| name.1.eq_ignore_ascii_case(s);
-                            if (args[0].1.is_hfun()
-                                && (eq(rx::RX)
-                                    || eq(rx::RX_LOCAL)
-                                    || eq(rx::RX_SHALLOW)
-                                    || eq(rx::PURE)))
-                                || (args[0].1.is_happly()
-                                    && (eq(rx::MUTABLE)
-                                        || eq(rx::MAYBE_MUTABLE)
-                                        || eq(rx::OWNED_MUTABLE)))
-                            {
-                                return *args.pop().unwrap().1;
-                            }
-                        }
-                        Happly(name, args)
-                    };
-                    Ok(process(name, type_args))
-                } else {
-                    Ok(Happly(name, type_args))
-                }
+                Ok(Happly(name, type_args))
             }
             NullableTypeSpecifier(c) => Ok(Hoption(Self::p_hint(&c.type_, env)?)),
             LikeTypeSpecifier(c) => Ok(Hlike(Self::p_hint(&c.type_, env)?)),
@@ -969,13 +942,11 @@ where
                 }
                 let (ctxs, _) = Self::p_contexts(&c.contexts, env)?;
                 Ok(Hfun(ast::HintFun {
-                    reactive_kind: ast::FuncReactive::FNonreactive,
                     param_tys: type_hints,
                     param_info: info,
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
                     ctxs,
                     return_ty: Self::p_hint(&c.return_type, env)?,
-                    is_mutable_return: true,
                     is_readonly_return: Self::mp_optional(
                         Self::p_readonly,
                         &c.readonly_return,

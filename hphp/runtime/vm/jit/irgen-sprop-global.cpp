@@ -413,8 +413,6 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnly
   auto val = popC(env);
   auto const ctx = curClass(env);
 
-  SSATmp* base;
-  uint32_t idx = 0;
   switch (op) {
   case InitPropOp::Static:
     {
@@ -441,16 +439,14 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnly
         );
       }
 
-      base = gen(
+      auto const base = gen(
         env,
         LdRDSAddr,
         RDSHandleData { handle },
         TPtrToSPropCell
       );
+      gen(env, StMem, base, val);
     }
-
-    gen(env, StMem, base + idx * sizeof(TypedValue), val);
-
     break;
 
   case InitPropOp::NonStatic:
@@ -459,7 +455,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnly
       auto const cls = ldCtxCls(env);
 
       const auto slot = ctx->lookupDeclProp(propName);
-      idx = ctx->propSlotToIndex(slot);
+      auto const idx = ctx->propSlotToIndex(slot);
       auto const& prop = ctx->declProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
@@ -476,8 +472,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op, ReadOnly
         );
       }
 
-      base = gen(env, LdClsInitData, cls);
-
+      auto const base = gen(env, LdClsInitData, cls);
       gen(env, StClsInitElem, IndexData{idx}, base, val);
     }
     break;

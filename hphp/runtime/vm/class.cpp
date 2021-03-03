@@ -631,7 +631,7 @@ void Class::releaseSProps() {
 
   auto init = &m_sPropCacheInit;
   if (init->bound() && rds::isNormalHandle(init->handle())) {
-    auto const symbol = rds::LinkName{"PropCacheInit", name()};
+    auto const symbol = rds::LinkName{"SPropCacheInit", name()};
     unbindLink(init, symbol);
   }
 
@@ -1209,7 +1209,7 @@ void Class::initSPropHandles() const {
     // of them.
     m_sPropCacheInit = rds::s_persistentTrue;
   } else {
-    auto const symbol = rds::LinkName{"PropCacheInit", name()};
+    auto const symbol = rds::LinkName{"SPropCacheInit", name()};
     m_sPropCacheInit.bind(rds::Mode::Normal, symbol);
   }
   rds::recordRds(m_sPropCacheInit.handle(),

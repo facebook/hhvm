@@ -196,19 +196,11 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_minute,    i);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_second,    s);
 
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   if (parsed_time->us == TIMELIB_UNSET) {
     ret.set(s_fraction, false);
   } else {
     ret.set(s_fraction, (double) parsed_time->us / 1000000.0);
   }
-#else
-  if (parsed_time->f == -99999) {
-    ret.set(s_fraction, false);
-  } else {
-    ret.set(s_fraction, parsed_time->f);
-  }
-#endif
 
   setLastErrors(error);
   {
@@ -384,13 +376,7 @@ int DateTime::offset() const {
     switch (m_time->zone_type) {
     case TIMELIB_ZONETYPE_ABBR:
     case TIMELIB_ZONETYPE_OFFSET:
-
-#if TIMELIB_VERSION >= TIMELIB_MODERN
       return m_time->z + m_time->dst * 3600;
-#else
-      return (m_time->z - (m_time->dst * 60)) * -60;
-#endif
-
     default:
       {
         bool error;
@@ -473,9 +459,7 @@ void DateTime::setTime(int hour, int minute, int second) {
   m_time->i = minute;
   m_time->s = second;
   update();
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   timelib_update_from_sse(m_time.get());
-#endif
 }
 
 void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
@@ -555,11 +539,9 @@ void DateTime::internalModify(timelib_time *t) {
       }
     }
   }
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   if (t->us != TIMELIB_UNSET) {
     m_time->us = t->us;
   }
-#endif
   internalModifyRelative(&(t->relative), t->have_relative, 1);
 }
 
@@ -571,9 +553,7 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
   m_time->relative.h = rel->h * bias;
   m_time->relative.i = rel->i * bias;
   m_time->relative.s = rel->s * bias;
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   m_time->relative.us = rel->us * bias;
-#endif
   m_time->relative.weekday = rel->weekday;
   m_time->have_relative = have_relative;
   m_time->relative.special = rel->special;
@@ -593,15 +573,11 @@ void DateTime::add(const req::ptr<DateInterval>& interval) {
 
 void DateTime::sub(const req::ptr<DateInterval>& interval) {
   timelib_rel_time *rel = interval->get();
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   timelib_time* new_time;
   new_time = timelib_sub(m_time.get(), rel);
   m_timestamp = 0;
   m_timestampSet = false;
   m_time = TimePtr(new_time, time_deleter());
-#else
-  internalModifyRelative(rel, true, rel->invert ?  1 : -1);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -735,13 +711,8 @@ String DateTime::rfcFormat(const String& format) const {
     case 'H': s.printf("%02d", (int)hour()); break;
     case 'i': s.printf("%02d", (int)minute()); break;
     case 's': s.printf("%02d", (int)second()); break;
-#if TIMELIB_VERSION >= TIMELIB_MODERN
     case 'u': s.printf("%06d", (int)m_time->us); break;
     case 'v': s.printf("%03d", (int)(m_time->us / 1000)); break;
-#else
-    case 'u': s.printf("%06d", (int)floor(fraction() * 1000000)); break;
-    case 'v': s.printf("%03d", (int)floor(fraction() * 1000)); break;
-#endif
     case 'I': s.append(!utc() && m_tz->dst(toTimeStamp(error)) ? 1 : 0);
       break;
     case 'P': rfc_colon = true; /* break intentionally missing */
@@ -762,12 +733,7 @@ String DateTime::rfcFormat(const String& format) const {
         if (m_time->zone_type != TIMELIB_ZONETYPE_OFFSET) {
           s.append(m_time->tz_abbr);
         } else {
-#if TIMELIB_VERSION >= TIMELIB_MODERN
           auto offset = m_time->z;
-#else
-          auto offset = m_time->z * -60;
-#endif
-
           char abbr[9] = {0};
           snprintf(abbr, 9, "GMT%c%02d%02d",
             ((offset < 0) ? '-' : '+'),
@@ -784,11 +750,7 @@ String DateTime::rfcFormat(const String& format) const {
         if (m_time->zone_type != TIMELIB_ZONETYPE_OFFSET) {
           s.append(m_tz->name());
         } else {
-#if TIMELIB_VERSION >= TIMELIB_MODERN
           auto offset = m_time->z;
-#else
-          auto offset = m_time->z * -60;
-#endif
           char abbr[7] = {0};
           snprintf(abbr, 7, "%c%02d:%02d",
             ((offset < 0) ? '-' : '+'),
@@ -992,11 +954,9 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   }
 
   int options = TIMELIB_NO_CLONE;
-#if TIMELIB_VERSION >= TIMELIB_MODERN
 	if (format != nullptr) {
-    	options |= TIMELIB_OVERRIDE_TIME;
+    options |= TIMELIB_OVERRIDE_TIME;
   }
-#endif
   timelib_fill_holes(t, m_time.get(), options);
   timelib_update_ts(t, m_tz->getTZInfo());
   timelib_update_from_sse(t);

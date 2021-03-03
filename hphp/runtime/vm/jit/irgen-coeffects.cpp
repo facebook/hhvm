@@ -68,8 +68,6 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
         }
       );
     }
-    case Type::ConditionalReactiveImplements:
-    case Type::ConditionalReactiveArgImplements:
     case Type::FunParam:
     case Type::CCThis:
       return nullptr;

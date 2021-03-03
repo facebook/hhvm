@@ -1980,30 +1980,6 @@ void parse_coeffects_cc_this(AsmState& as) {
   as.in.expectWs(';');
 }
 
-/*
- * directive-rx_cond_implements : name ';'
- *                              ;
- */
-void parse_rx_cond_implements(AsmState& as) {
-  auto const name = makeStaticString(read_litstr(as));
-  as.fe->coeffectRules.emplace_back(
-    CoeffectRule(CoeffectRule::CondRxImpl{}, name));
-  as.in.expectWs(';');
-}
-
-/*
- * directive-rx_cond_arg_implements : integer name ';'
- *                                  ;
- */
-void parse_rx_cond_arg_implements(AsmState& as) {
-  auto const pos = read_opcode_arg<uint32_t>(as);
-  as.in.skipWhitespace();
-  auto const name = makeStaticString(read_litstr(as));
-  as.fe->coeffectRules.emplace_back(
-    CoeffectRule(CoeffectRule::CondRxArgImpl{}, pos, name));
-  as.in.expectWs(';');
-}
-
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
@@ -2301,14 +2277,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
       if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
-      if (word == ".rx_cond_implements") {
-        parse_rx_cond_implements(as);
-        continue;
-      }
-      if (word == ".rx_cond_arg_implements") {
-        parse_rx_cond_arg_implements(as);
-        continue;
-      }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {

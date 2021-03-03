@@ -78,9 +78,6 @@ StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
 
 folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
   switch (m_type) {
-    case Type::ConditionalReactiveImplements:
-    case Type::ConditionalReactiveArgImplements:
-      return folly::none;
     case Type::FunParam:
       return folly::to<std::string>("ctx $",
                                     f->localVarName(m_index)->toCppString());
@@ -114,8 +111,6 @@ CoeffectRule::emit(const Func* f, uint32_t numArgsInclUnpack) const {
       auto const cls = tv->m_data.pobj->getVMClass();
       return cls->clsCtxCnsGet(m_name);
     }
-    case Type::ConditionalReactiveImplements:
-    case Type::ConditionalReactiveArgImplements:
     case Type::FunParam:
     case Type::CCThis:
       return folly::none;
@@ -127,15 +122,6 @@ CoeffectRule::emit(const Func* f, uint32_t numArgsInclUnpack) const {
 
 std::string CoeffectRule::getDirectiveString() const {
   switch (m_type) {
-    case Type::ConditionalReactiveImplements:
-      return folly::sformat(".rx_cond_implements \"{}\";",
-                            folly::cEscape<std::string>(
-                              m_name->toCppString()));
-    case Type::ConditionalReactiveArgImplements:
-      return folly::sformat(".rx_cond_implements_arg {} \"{}\";",
-                            m_index,
-                            folly::cEscape<std::string>(
-                              m_name->toCppString()));
     case Type::FunParam:
       return folly::sformat(".coeffects_fun_param {};", m_index);
     case Type::CCParam:
@@ -158,21 +144,6 @@ void CoeffectRule::serde(SerDe& sd) {
     (m_index)
     (m_name)
   ;
-
-  if constexpr (SerDe::deserializing) {
-    switch (m_type) {
-      case Type::ConditionalReactiveImplements:
-      case Type::ConditionalReactiveArgImplements:
-        m_ne = NamedEntity::get(m_name);
-        break;
-      case Type::FunParam:
-      case Type::CCParam:
-      case Type::CCThis:
-        break;
-      case Type::Invalid:
-        always_assert(false);
-    }
-  }
 }
 
 template void CoeffectRule::serde<>(BlobDecoder&);

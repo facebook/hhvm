@@ -103,30 +103,11 @@ static_assert(sizeof(StaticCoeffects) == sizeof(RuntimeCoeffects), "");
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CoeffectRule final {
-  struct CondRxImpl {};
-  struct CondRxArgImpl {};
-
   struct FunParam {};
   struct CCParam {};
   struct CCThis {};
 
   CoeffectRule() = default;
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Attribute based RX rules /////////////////////////////////////////////////
-
-  CoeffectRule(CondRxImpl, const StringData* name)
-    : m_type(Type::ConditionalReactiveImplements)
-    , m_name(name)
-    , m_ne(NamedEntity::get(name))
-  { assertx(name); }
-
-  CoeffectRule(CondRxArgImpl, uint32_t index, const StringData* name)
-    : m_type(Type::ConditionalReactiveArgImplements)
-    , m_index(index)
-    , m_name(name)
-    , m_ne(NamedEntity::get(name))
-  { assertx(name); }
 
   /////////////////////////////////////////////////////////////////////////////
   // Native coeffect rules ////////////////////////////////////////////////////
@@ -159,8 +140,6 @@ struct CoeffectRule final {
 private:
   enum class Type {
     Invalid = 0,
-    ConditionalReactiveImplements,
-    ConditionalReactiveArgImplements,
 
     FunParam,
     CCParam,
@@ -170,7 +149,6 @@ private:
   Type m_type{Type::Invalid};
   uint32_t m_index{0};
   LowPtr<const StringData> m_name{nullptr};
-  LowPtr<const NamedEntity> m_ne{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

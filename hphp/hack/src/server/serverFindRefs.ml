@@ -222,7 +222,8 @@ let get_action symbol (filename, file_content, line, char) =
   | SymbolOccurrence.Function -> Some (Function name)
   | SymbolOccurrence.Method (class_name, method_name) ->
     Some (Member (class_name, Method method_name))
-  | SymbolOccurrence.Property (class_name, prop_name) ->
+  | SymbolOccurrence.Property (class_name, prop_name)
+  | SymbolOccurrence.XhpLiteralAttr (class_name, prop_name) ->
     Some (Member (class_name, Property prop_name))
   | SymbolOccurrence.Record -> Some (Record name)
   | SymbolOccurrence.ClassConst (class_name, const_name) ->

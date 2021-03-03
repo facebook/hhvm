@@ -145,7 +145,8 @@ let go ctx ast result =
         Cls.get_smethod class_ method_name >>= fun m ->
         get_member_def ctx (Static_method, m.ce_origin, method_name)
     )
-  | SymbolOccurrence.Property (c_name, property_name) ->
+  | SymbolOccurrence.Property (c_name, property_name)
+  | SymbolOccurrence.XhpLiteralAttr (c_name, property_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     let property_name = clean_member_name property_name in
     begin

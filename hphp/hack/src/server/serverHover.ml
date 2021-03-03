@@ -78,8 +78,9 @@ let make_hover_full_name env_and_ty occurrence def_opt =
     Typing_defs.(
       match (occurrence, env_and_ty) with
       | ({ type_ = Method _; _ }, Some (_, _ty)) -> found_it ()
-      | ({ type_ = Property _ | ClassConst _; _ }, Some (_, ty)) when is_fun ty
-        ->
+      | ( { type_ = Property _ | ClassConst _ | XhpLiteralAttr _; _ },
+          Some (_, ty) )
+        when is_fun ty ->
         found_it ()
       | _ -> []))
 

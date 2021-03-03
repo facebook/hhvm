@@ -192,6 +192,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           [
             get_def_opt (SymbolOccurrence.Method (c_name, member)) "";
             get_def_opt (SymbolOccurrence.Property (c_name, member)) "";
+            get_def_opt (SymbolOccurrence.XhpLiteralAttr (c_name, member)) "";
             get_def_opt (SymbolOccurrence.ClassConst (c_name, member)) "";
             get_def_opt (SymbolOccurrence.Typeconst (c_name, member)) "";
           ]

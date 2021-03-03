@@ -18,7 +18,8 @@ let get_target symbol =
       | SymbolOccurrence.Function -> Some (IFunction symbol.name)
       | SymbolOccurrence.Method (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Method member_name))
-      | SymbolOccurrence.Property (class_name, member_name) ->
+      | SymbolOccurrence.Property (class_name, member_name)
+      | SymbolOccurrence.XhpLiteralAttr (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Property member_name))
       | SymbolOccurrence.ClassConst (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Class_const member_name))

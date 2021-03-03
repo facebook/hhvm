@@ -220,7 +220,8 @@ let fold_one_tast ctx target acc symbol =
     process_taccess ctx classes tc (c_name, tc_name, pos)
   | (IMember (classes, member), SO.Method (c_name, m_name))
   | (IMember (classes, member), SO.ClassConst (c_name, m_name))
-  | (IMember (classes, member), SO.Property (c_name, m_name)) ->
+  | (IMember (classes, member), SO.Property (c_name, m_name))
+  | (IMember (classes, member), SO.XhpLiteralAttr (c_name, m_name)) ->
     let mid = (pos, m_name) in
     let is_method =
       match type_ with

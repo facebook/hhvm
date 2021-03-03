@@ -51,6 +51,7 @@ let identify_symbol_response_to_json results =
       | Function -> "function"
       | LocalVar -> "local"
       | Property _ -> "property"
+      | XhpLiteralAttr _ -> "xhp_literal_attribute"
       | ClassConst _ -> "class_const"
       | Typeconst _ -> "typeconst"
       | GConst -> "global_const"

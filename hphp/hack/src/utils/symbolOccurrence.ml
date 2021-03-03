@@ -26,6 +26,7 @@ type kind =
   | Method of string * string
   | LocalVar
   | Property of string * string
+  | XhpLiteralAttr of string * string
   | ClassConst of string * string
   | Typeconst of string * string
   | GConst
@@ -51,6 +52,7 @@ let kind_to_string = function
   | Function -> "function"
   | LocalVar -> "local"
   | Property _ -> "property"
+  | XhpLiteralAttr _ -> "xhp_literal_attribute"
   | ClassConst _ -> "member_const"
   | Typeconst _ -> "typeconst"
   | GConst -> "global_const"
@@ -60,6 +62,7 @@ let enclosing_class occurrence =
   match occurrence.type_ with
   | Method (c, _)
   | Property (c, _)
+  | XhpLiteralAttr (c, _)
   | ClassConst (c, _)
   | Typeconst (c, _) ->
     Some c
@@ -82,4 +85,9 @@ let is_constructor occurrence =
 let is_class occurrence =
   match occurrence.type_ with
   | Class _ -> true
+  | _ -> false
+
+let is_xhp_literal_attr occurrence =
+  match occurrence.type_ with
+  | XhpLiteralAttr _ -> true
   | _ -> false

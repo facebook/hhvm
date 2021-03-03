@@ -43,7 +43,7 @@ let process_xml_attrs class_name attrs =
         Result_set.add
           {
             name;
-            type_ = Property (class_name, Utils.add_xhp_ns name);
+            type_ = XhpLiteralAttr (class_name, Utils.add_xhp_ns name);
             is_declaration = false;
             pos;
           }
@@ -60,6 +60,12 @@ let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
     else if is_method then
       Method (c_name, member_name)
     else
+      (*
+        Per comment in symbolOcurrence.mli, XhpLiteralAttr
+        is only used for attributes in XHP literals. Since
+        process_member is not being used to handle XML attributes
+        it is fine to define every symbol as Property.
+      *)
       Property (c_name, member_name)
   in
   Result_set.singleton

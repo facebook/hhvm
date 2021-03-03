@@ -32,6 +32,16 @@ type kind =
   | Method of string * string
   | LocalVar
   | Property of string * string
+  (*
+    XhpLiteralAttr is only used for attributes in XHP literals.
+    i.e.
+        <foo:bar my-attribute={} />
+    For all other cases, Property is used.
+    i.e.
+        $x->:my-attribute
+        or attributes in class definitions
+   *)
+  | XhpLiteralAttr of string * string
   | ClassConst of string * string
   | Typeconst of string * string
   | GConst
@@ -58,3 +68,5 @@ val get_class_name : 'a t -> string option
 val is_constructor : 'a t -> bool
 
 val is_class : 'a t -> bool
+
+val is_xhp_literal_attr : 'a t -> bool

@@ -2293,7 +2293,7 @@ let do_definition
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
-    (params : Definition.params) : Definition.result Lwt.t =
+    (params : Definition.params) : (Definition.result * bool) Lwt.t =
   let (filename, line, column) = lsp_file_position_to_hack params in
   let uri =
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
@@ -2310,11 +2310,17 @@ let do_definition
     ServerCommandTypes.GO_TO_DEFINITION (labelled_file, line, column)
   in
   let%lwt results = rpc conn ref_unblocked_time ~desc:"go-to-def" command in
-  Lwt.return
-    (List.map results ~f:(fun (_occurrence, definition) ->
-         hack_symbol_definition_to_lsp_identifier_location
-           definition
-           ~default_path:filename))
+  let locations =
+    List.map results ~f:(fun (_, definition) ->
+        hack_symbol_definition_to_lsp_identifier_location
+          definition
+          ~default_path:filename)
+  in
+  let has_xhp_attribute =
+    List.exists results ~f:(fun (occurence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurence)
+  in
+  Lwt.return (locations, has_xhp_attribute)
 
 let do_definition_local
     (ide_service : ClientIdeService.t ref)
@@ -2322,7 +2328,7 @@ let do_definition_local
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
-    (params : Definition.params) : Definition.result Lwt.t =
+    (params : Definition.params) : (Definition.result * bool) Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt results =
     ide_rpc
@@ -2332,14 +2338,18 @@ let do_definition_local
       ~ref_unblocked_time
       (ClientIdeMessage.Definition document_location)
   in
-  let results =
-    List.map results ~f:(fun (_occurrence, definition) ->
+  let locations =
+    List.map results ~f:(fun (_, definition) ->
         hack_symbol_definition_to_lsp_identifier_location
           definition
           ~default_path:
             (document_location.ClientIdeMessage.file_path |> Path.to_string))
   in
-  Lwt.return results
+  let has_xhp_attribute =
+    List.exists results ~f:(fun (occurence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurence)
+  in
+  Lwt.return (locations, has_xhp_attribute)
 
 let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
 
@@ -4147,7 +4157,7 @@ let handle_client_message
         { result_count = List.length result; result_extra_telemetry = None }
     | (_, Some ide_service, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
+      let%lwt (result, has_xhp_attribute) =
         do_definition_local
           ide_service
           env
@@ -4156,9 +4166,15 @@ let handle_client_message
           editor_open_files
           params
       in
+      let result_extra_telemetry =
+        Option.some_if
+          has_xhp_attribute
+          ( Telemetry.create ()
+          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true )
+      in
       respond_jsonrpc ~powered_by:Serverless_ide id (DefinitionResult result);
       Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+        { result_count = List.length result; result_extra_telemetry }
     | (_, Some ide_service, RequestMessage (id, TypeDefinitionRequest params))
       ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -4280,12 +4296,18 @@ let handle_client_message
     (* textDocument/definition request *)
     | (Main_loop menv, _, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
+      let%lwt (result, has_xhp_attribute) =
         do_definition menv.conn ref_unblocked_time editor_open_files params
+      in
+      let result_extra_telemetry =
+        Option.some_if
+          has_xhp_attribute
+          ( Telemetry.create ()
+          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true )
       in
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
       Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+        { result_count = List.length result; result_extra_telemetry }
     (* textDocument/completion request *)
     | (Main_loop menv, _, RequestMessage (id, CompletionRequest params)) ->
       let do_completion =

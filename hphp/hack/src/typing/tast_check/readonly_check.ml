@@ -34,24 +34,33 @@ let rty_to_str = function
   | Readonly -> "readonly"
   | Mut -> "mutable"
 
-let lenv_from_params (params : Tast.fun_param list) : rty SMap.t =
+let has_const_attribute user_attributes =
+  List.exists user_attributes ~f:(fun ua ->
+      String.equal
+        (snd ua.ua_name)
+        Naming_special_names.UserAttributes.uaConstFun)
+
+let lenv_from_params (params : Tast.fun_param list) user_attributes : rty SMap.t
+    =
   let result = SMap.empty in
+  let constfun = has_const_attribute user_attributes in
   List.fold_left
     params
     ~f:(fun acc p ->
-      SMap.add p.param_name (readonly_kind_to_rty p.param_readonly) acc)
+      SMap.add
+        p.param_name
+        (readonly_kind_to_rty
+           ( if constfun then
+             Some Ast_defs.Readonly
+           else
+             p.param_readonly ))
+        acc)
     ~init:result
 
 let get_local lenv id =
   match SMap.find_opt id lenv with
   | Some r -> r
   | None -> Mut
-
-let has_const_attribute user_attributes =
-  List.exists user_attributes ~f:(fun ua ->
-      String.equal
-        (snd ua.ua_name)
-        Naming_special_names.UserAttributes.uaConstFun)
 
 (* Returns true if rty_sub is a subtype of rty_sup.
 TODO: Later, we'll have to consider the regular type as well, for example
@@ -252,7 +261,7 @@ let check =
         {
           this_ty;
           ret_ty = Some (readonly_kind_to_rty m.m_readonly_ret, ret_pos);
-          lenv = lenv_from_params m.m_params;
+          lenv = lenv_from_params m.m_params m.m_user_attributes;
         }
       in
       ctx <- new_ctx;
@@ -262,7 +271,11 @@ let check =
       let ret_pos = Typing_defs.get_pos (fst f.f_ret) in
       let ret_ty = Some (readonly_kind_to_rty f.f_readonly_ret, ret_pos) in
       let new_ctx =
-        { this_ty = None; ret_ty; lenv = lenv_from_params f.f_params }
+        {
+          this_ty = None;
+          ret_ty;
+          lenv = lenv_from_params f.f_params f.f_user_attributes;
+        }
       in
       ctx <- new_ctx;
       super#on_fun_def env f
@@ -280,16 +293,16 @@ let check =
         (* Keep the old context for use later *)
         let old_ctx = ctx in
         (* First get the lenv from parameters, which override captured values *)
-        let new_lenv = lenv_from_params f.f_params in
-        let new_lenv = SMap.union new_lenv ctx.lenv in
         let is_const = has_const_attribute f.f_user_attributes in
         (* If the lambda is const, we need to treat the entire lenv as if it is readonly, and all parameters as readonly *)
-        let new_lenv =
+        let old_lenv =
           if is_const then
-            SMap.map (fun _ -> Readonly) new_lenv
+            SMap.map (fun _ -> Readonly) ctx.lenv
           else
-            new_lenv
+            ctx.lenv
         in
+        let new_lenv = lenv_from_params f.f_params f.f_user_attributes in
+        let new_lenv = SMap.union new_lenv old_lenv in
         let new_ctx =
           {
             this_ty = None;

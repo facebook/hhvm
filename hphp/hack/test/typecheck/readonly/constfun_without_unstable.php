@@ -12,5 +12,7 @@ class Foo {
 }
 
 <<__ConstFun>>
-function foo(<<__ConstFun>> (function(): void) $f): void {
+  function foo(<<__ConstFun>> (function(): void) $f,
+  // error, constfun only works on functions
+  <<__ConstFun>> int $x): void {
 }

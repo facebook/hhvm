@@ -15,6 +15,10 @@ class ParentClass {
     return new ParentClass();
   }
 
+  public function constFun(
+    (function (Child) : Child) $f
+  ) : void {
+  }
 
   public function setParams(readonly ParentClass $x, ParentClass $y) : void {
   }
@@ -36,6 +40,11 @@ class Child extends ParentClass {
   public function setParams(
     ParentClass $x, // Cannot override readonly parameter with mutable
     readonly ParentClass $y // ok
+  ) : void {
+  }
+
+  public function constFun(
+    <<__ConstFun>> (function (Child) : Child) $f
   ) : void {
   }
 

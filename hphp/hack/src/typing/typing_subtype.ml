@@ -2276,6 +2276,7 @@ and simplify_subtype_params
     env
     |> simplify_param_modes ~subtype_env sub super
     &&& simplify_param_readonly ~subtype_env sub super
+    &&& simplify_param_constfun ~subtype_env sub super
     &&& simplify_param_accept_disposable ~subtype_env sub super
     &&& begin
           if check_params_ifc then
@@ -2852,6 +2853,24 @@ and simplify_param_readonly ~subtype_env sub super env =
       env
   else
     valid env
+
+and simplify_param_constfun ~subtype_env sub super env =
+  (* The sub param here (as with all simplify_param_* functions)
+  is actually the parameter on ft_super, since params are contravariant *)
+  let { fp_pos = pos1; _ } = sub in
+  let { fp_pos = pos2; _ } = super in
+  match (get_fp_const_function sub, get_fp_const_function super) with
+  | (false, true) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.readonly_mismatch_on_error
+          "Mismatched constness of function parameter"
+          pos1
+          ~reason_sub:[(pos1, "This parameter is a regular function")]
+          ~reason_super:[(pos2, "But this parameter requires a const function")]
+          subtype_env.on_error)
+      env
+  | _ -> valid env
 
 and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
   match (ifc1, ifc2) with

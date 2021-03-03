@@ -477,11 +477,23 @@ void print_repo_bytecode_stats() {
   auto const input = load_input(
     [&] (size_t, std::unique_ptr<UnitEmitter> ue) {
       if (!ue) return;
-      auto pc = ue->bc();
-      auto const end = pc + ue->bcPos();
-      for (; pc < end; pc += instrLen(pc)) {
-        auto &opc = op_counts[static_cast<uint16_t>(peek_op(pc))];
-        opc.fetch_add(1, std::memory_order_relaxed);
+
+      auto countInstrs = [&](const FuncEmitter& fe) {
+        auto pc = fe.bc();
+        auto const end = pc + fe.bcPos();
+        for (; pc < end; pc += instrLen(pc)) {
+          auto &opc = op_counts[static_cast<uint16_t>(peek_op(pc))];
+          opc.fetch_add(1, std::memory_order_relaxed);
+        }
+      };
+
+      for (auto& fe : ue->fevec()) {
+        countInstrs(*fe.get());
+      }
+      for (Id i = 0; i < ue->numPreClasses(); i++) {
+        for (auto fe : ue->pce(i)->methods()) {
+          countInstrs(*fe);
+        }
       }
     }
   );

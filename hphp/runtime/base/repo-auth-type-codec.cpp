@@ -189,7 +189,7 @@ RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
   );
 }
 
-void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
+void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
   auto rawTag = static_cast<uint16_t>(rat.tag());
   if (rat.hasArrData()) rawTag |= kRATArrayDataBit;
 
@@ -197,11 +197,11 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   uint16_t permutatedTag = (rawTag << 2) | (rawTag >> 14);
   if (permutatedTag >= 0xff) {
     // Write a 0xff signal byte
-    ue.emitByte(static_cast<uint8_t>(0xff));
+    fe.emitByte(static_cast<uint8_t>(0xff));
     permutatedTag -= 0xff;
   }
   assertx(permutatedTag < 0xff);
-  ue.emitByte(static_cast<uint8_t>(permutatedTag));
+  fe.emitByte(static_cast<uint8_t>(permutatedTag));
 
   using T = RepoAuthType::Tag;
   switch (rat.tag()) {
@@ -304,7 +304,7 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::ArrLikeCompat:
   case T::OptArrLikeCompat:
     if (rat.hasArrData()) {
-      ue.emitIVA(rat.arrayId());
+      fe.emitIVA(rat.arrayId());
     }
     break;
 
@@ -318,14 +318,14 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
-    ue.emitIVA(ue.mergeLitstr(rat.clsName()));
+    fe.emitIVA(fe.ue().mergeLitstr(rat.clsName()));
     break;
 
   case T::ExactRecord:
   case T::SubRecord:
   case T::OptExactRecord:
   case T::OptSubRecord:
-    ue.emitIVA(ue.mergeLitstr(rat.recordName()));
+    fe.emitIVA(fe.ue().mergeLitstr(rat.recordName()));
     break;
 
   }

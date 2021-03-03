@@ -89,7 +89,7 @@ struct FuncEmitter {
   /*
    * Just set some fields when we start and stop emitting.
    */
-  void init(int l1, int l2, Offset base_, Attr attrs_,
+  void init(int l1, int l2, Attr attrs_,
             const StringData* docComment_);
   void finish(Offset past);
 
@@ -241,9 +241,50 @@ public:
 
   Offset offsetOf(const unsigned char* pc) const;
 
+  /*
+   * Bytecode pointer and current emit position.
+   */
+  const unsigned char* bc() const;
+  Offset bcPos() const;
+
+  /*
+   * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.
+   *
+   * Not safe to call with m_bc as the argument because we free our current
+   * bytecode stream before allocating a copy of `bc'.
+   */
+  void setBc(const unsigned char* bc, size_t bclen);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Bytecode emit.
+  //
+  // These methods emit values to bc() at bcPos() (or pos, if given) and then
+  // update bcPos(), realloc-ing the bytecode region if necessary.
+
+  void emitOp(Op op);
+  void emitByte(unsigned char n, int64_t pos = -1);
+
+  void emitInt16(uint16_t n, int64_t pos = -1);
+  void emitInt32(int n, int64_t pos = -1);
+  void emitInt64(int64_t n, int64_t pos = -1);
+  void emitDouble(double n, int64_t pos = -1);
+
+  void emitIVA(bool) = delete;
+  template<typename T> void emitIVA(T n);
+
+  void emitNamedLocal(NamedLocal loc);
+
+ private:
+  /*
+   * Bytecode emit implementation.
+   */
+  template<class T>
+  void emitImpl(T n, int64_t pos);
+
   /////////////////////////////////////////////////////////////////////////////
   // Source locations.
 
+ public:
   /*
    * Return a copy of the SrcLocTable for the Func, if it has one; otherwise,
    * return an empty table.
@@ -276,6 +317,9 @@ public:
   // Data members.
 
 private:
+  // Initial bytecode size.
+  static const size_t BCMaxInit = 64;
+
   /*
    * Metadata.
    */
@@ -285,11 +329,14 @@ private:
   int m_sn;
   Id m_id;
 
+  unsigned char* m_bc;
+  size_t m_bclen;
+  size_t m_bcmax;
+
 public:
   /*
    * Func fields.
    */
-  Offset base;
   Offset past;
   int line1;
   int line2;
@@ -380,7 +427,7 @@ struct FuncRepoProxy : public RepoProxy {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name); // throws(RepoExc)
+                const StringData* name, const unsigned char* bc, size_t bclen); // throws(RepoExc)
   };
 
   struct GetFuncsStmt : public RepoProxy::Stmt {

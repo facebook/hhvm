@@ -201,7 +201,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     auto const sp = srcLoc(env, inst, 1).reg();
     auto const spOffset = cellsToBytes(extra->spOffset.offset);
     auto const& marker = inst->marker();
-    auto const pc = marker.fixupSk().unit()->entry() + marker.fixupBcOff();
+    auto const pc = marker.fixupSk().func()->entry() + marker.fixupBcOff();
 
     auto const synced_sp = v.makeReg();
     v << lea{sp[spOffset], synced_sp};

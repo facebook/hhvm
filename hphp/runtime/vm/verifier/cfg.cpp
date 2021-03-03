@@ -39,9 +39,9 @@ Graph* GraphBuilder::build() {
  * flow boundaries.  Calls are not treated as basic-block ends.
  */
 void GraphBuilder::createBlocks() {
-  PC bc = m_unit.entry();
+  PC bc = m_func.entry();
   m_graph->param_count = m_func.numParams();
-  m_graph->first_linear = createBlock(m_func.base());
+  m_graph->first_linear = createBlock(0);
   // DV entry points
   m_graph->entries = new (m_arena) Block*[m_graph->param_count + 1];
   int dv_index = 0;
@@ -52,7 +52,7 @@ void GraphBuilder::createBlocks() {
   }
   // main entry point
   assertx(dv_index == m_graph->param_count);
-  m_graph->entries[dv_index] = createBlock(m_func.base());
+  m_graph->entries[dv_index] = createBlock(0);
   // ordinary basic block boundaries
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
@@ -67,7 +67,7 @@ void GraphBuilder::createBlocks() {
  * and end offsets
  */
 void GraphBuilder::linkBlocks() {
-  PC bc = m_unit.entry();
+  PC bc = m_func.entry();
   Block* block = m_graph->first_linear;
   block->id = m_graph->block_count++;
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
@@ -81,7 +81,7 @@ void GraphBuilder::linkBlocks() {
         ++i;
       }
     }
-    PC next_pc = !i.empty() ? i.front() : m_unit.at(m_func.past());
+    PC next_pc = !i.empty() ? i.front() : m_func.at(m_func.past());
     Block* next = at(next_pc);
     if (next) {
       block->next_linear = next;
@@ -94,7 +94,7 @@ void GraphBuilder::linkBlocks() {
       block->id = m_graph->block_count++;
     }
   }
-  block->end = m_unit.at(m_func.past());
+  block->end = m_func.at(m_func.past());
 }
 
 /**

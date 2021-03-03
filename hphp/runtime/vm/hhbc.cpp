@@ -379,7 +379,7 @@ OffsetList instrJumpTargets(PC instrs, Offset pos) {
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Func* func) {
-  auto const bcStart = func->unit()->entry();
+  auto const bcStart = func->entry();
   auto const offsets = instrJumpTargets(bcStart, opc - bcStart);
   OffsetSet offsetsSet{offsets.begin(), offsets.end()};
 

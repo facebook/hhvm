@@ -927,7 +927,7 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   pushFrameSlots(func, nlocals);
 
   vmfp() = ar;
-  vmpc() = func->unit()->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
+  vmpc() = func->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
   vmJitReturnAddr() = nullptr;
 }
 
@@ -3643,7 +3643,7 @@ OPTBLD_INLINE void iopUnsetG() {
 bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
              void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
-        vmfp()->unit()->entry(),
+        vmfp()->func()->entry(),
         int(vmfp()->func()->base()));
 
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
@@ -5718,7 +5718,7 @@ OPCODES
 
 // fast path to look up native pc; try entry point first.
 PcPair lookup_cti(const Func* func, PC pc) {
-  auto unitpc = func->unit()->entry();
+  auto unitpc = func->entry();
   auto cti_entry = func->ctiEntry();
   if (!cti_entry) {
     cti_entry = compile_cti(const_cast<Func*>(func), unitpc);

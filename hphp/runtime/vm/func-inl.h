@@ -281,11 +281,15 @@ inline const StringData* Func::docComment() const {
 // Bytecode.
 
 inline PC Func::entry() const {
-  return m_unit->entry() + shared()->m_base;
+  return shared()->m_bc;
 }
 
 inline Offset Func::base() const {
-  return shared()->m_base;
+  return 0;
+}
+
+inline Offset Func::bclen() const {
+  return shared()->m_bclen;
 }
 
 inline Offset Func::past() const {
@@ -299,7 +303,7 @@ inline Offset Func::past() const {
 }
 
 inline bool Func::contains(PC pc) const {
-  return contains(Offset(pc - unit()->entry()));
+  return contains(Offset(pc - entry()));
 }
 
 inline bool Func::contains(Offset offset) const {
@@ -310,17 +314,17 @@ inline PC Func::at(Offset off) const {
   // We don't use contains because we want to allow past becase it is often
   // used in loops
   assertx(off >= base() && off <= past());
-  return unit()->entry() + off;
+  return entry() + off;
 }
 
 inline Offset Func::offsetOf(PC pc) const {
   assertx(contains(pc));
-  return pc - unit()->entry();
+  return pc - entry();
 }
 
 inline Op Func::getOp(Offset instrOffset) const {
   assertx(contains(instrOffset));
-  return peek_op(unit()->entry() + instrOffset);
+  return peek_op(entry() + instrOffset);
 }
 
 inline Offset Func::ctiEntry() const {

@@ -393,6 +393,7 @@ struct Func final {
    * Get the function's main entrypoint.
    */
   PC entry() const;
+  Offset bclen() const;
 
   /*
    * Get the offsets of the start (base) and end (past) of the function's
@@ -1153,10 +1154,6 @@ struct Func final {
     return offsetof(Func, m_u);
   }
 
-  static constexpr ptrdiff_t sharedBaseOff() {
-    return offsetof(SharedData, m_base);
-  }
-
   static constexpr ptrdiff_t sharedInOutBitPtrOff() {
     return offsetof(SharedData, m_inoutBitPtr);
   }
@@ -1227,8 +1224,8 @@ private:
    * Properties shared by all clones of a Func.
    */
   struct SharedData : AtomicCountable {
-    SharedData(PreClass* preClass, Offset base, Offset past, int sn,
-               int line1, int line2, bool isPhpLeafFn,
+    SharedData(unsigned char const* bc, Offset bc_len, PreClass* preClass,
+               Offset past, int sn, int line1, int line2, bool isPhpLeafFn,
                const StringData* docComment);
     ~SharedData();
 
@@ -1242,7 +1239,8 @@ private:
      * here or reorder anything.
      */
     // (There's a 32-bit integer in the AtomicCountable base class here.)
-    Offset m_base;
+    Offset m_bclen{0};
+    unsigned char const* m_bc{nullptr};
     PreClass* m_preClass;
     int m_line1;
     LowStringPtr m_docComment;
@@ -1309,7 +1307,7 @@ private:
     uint16_t m_numIterators;
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 144 : 176>(), "");
+  static_assert(CheckSize<SharedData, use_lowptr ? 152 : 184>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1339,7 +1337,7 @@ private:
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     int64_t m_dynCallSampleRate;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 272 : 304>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 312>(), "");
 
   /*
    * SharedData accessors for internal use.

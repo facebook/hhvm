@@ -33,14 +33,6 @@ inline const SHA1& UnitEmitter::bcSha1() const {
   return m_bcSha1;
 }
 
-inline const unsigned char* UnitEmitter::bc() const {
-  return m_bc;
-}
-
-inline Offset UnitEmitter::bcPos() const {
-  return m_bclen;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
@@ -90,67 +82,6 @@ inline auto const& UnitEmitter::typeAliases() const {
 
 inline const std::vector<Constant>& UnitEmitter::constants() const {
   return m_constants;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Bytecode emit.
-
-inline void UnitEmitter::emitOp(Op op) {
-  encode_op(op, [&](uint8_t byte) { emitByte(byte); });
-}
-
-inline void UnitEmitter::emitByte(unsigned char n, int64_t pos) {
-  emitImpl(n, pos);
-}
-
-inline void UnitEmitter::emitInt16(uint16_t n, int64_t pos) {
-  emitImpl(n, pos);
-}
-
-inline void UnitEmitter::emitInt32(int n, int64_t pos) {
-  emitImpl(n, pos);
-}
-
-inline void UnitEmitter::emitInt64(int64_t n, int64_t pos) {
-  emitImpl(n, pos);
-}
-
-inline void UnitEmitter::emitDouble(double n, int64_t pos) {
-  emitImpl(n, pos);
-}
-
-template<typename T>
-void UnitEmitter::emitIVA(T n) {
-  if (LIKELY((n & 0x7f) == n)) {
-    emitByte((unsigned char)n);
-  } else {
-    assertx((n & 0x7fffffff) == n);
-    emitInt32((n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f));
-  }
-}
-
-inline void UnitEmitter::emitNamedLocal(NamedLocal loc) {
-  emitIVA(loc.name + 1);
-  emitIVA(loc.id);
-}
-
-template<class T>
-void UnitEmitter::emitImpl(T n, int64_t pos) {
-  auto c = (unsigned char*)&n;
-  if (pos == -1) {
-    // Make sure m_bc is large enough.
-    while (m_bclen + sizeof(T) > m_bcmax) {
-      m_bc = (unsigned char*)realloc(m_bc, m_bcmax << 1);
-      m_bcmax <<= 1;
-    }
-    memcpy(&m_bc[m_bclen], c, sizeof(T));
-    m_bclen += sizeof(T);
-  } else {
-    assertx(pos + sizeof(T) <= m_bclen);
-    for (uint32_t i = 0; i < sizeof(T); ++i) {
-      m_bc[pos + i] = c[i];
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

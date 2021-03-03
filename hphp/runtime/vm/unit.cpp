@@ -146,15 +146,6 @@ Unit::~Unit() {
     data_map::deregister(this);
   }
 
-  if (!RuntimeOption::RepoAuthoritative) {
-    if (debug) {
-      // poison released bytecode
-      memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
-    }
-    free(const_cast<unsigned char*>(m_bc));
-    g_hhbc_size->addValue(-int64_t(m_bclen));
-  }
-
   auto const mi = mergeInfo();
   if (mi) {
     for (auto const func : mi->mutableFuncs()) Func::destroy(func);

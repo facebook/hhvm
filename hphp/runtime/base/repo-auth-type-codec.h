@@ -21,8 +21,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct UnitEmitter;
+struct FuncEmitter;
 struct Unit;
+struct UnitEmitter;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,12 +49,12 @@ RepoAuthType decodeRAT(const UnitEmitter&, const unsigned char*& pc);
 size_t encodedRATSize(const unsigned char* pc);
 
 /*
- * Encode a RepoAuthType into a UnitEmitter's bytecode stream, in the
+ * Encode a RepoAuthType into a FuncEmitter's bytecode stream, in the
  * format used by decodeRAT.
  *
  * This function also merges any litstrs into the unit as appropriate.
  */
-void encodeRAT(UnitEmitter& ue, RepoAuthType rat);
+void encodeRAT(FuncEmitter& fe, RepoAuthType rat);
 
 //////////////////////////////////////////////////////////////////////
 

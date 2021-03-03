@@ -355,15 +355,6 @@ public:
   std::pair<int64_t, TouchClock::time_point> getLastTouch() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Bytecode.                                                          [const]
-
-  /*
-   * Start and size of the bytecode for the Unit.
-   */
-  PC entry() const;
-  Offset bclen() const;
-
-  /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
 
   bool getOffsetRanges(int line, OffsetFuncRangeVec& offsets) const;
@@ -703,13 +694,6 @@ public:
   static size_t liveUnitCount() { return s_liveUnits; }
 
   /////////////////////////////////////////////////////////////////////////////
-  // Offset accessors.                                                 [static]
-
-  static constexpr ptrdiff_t bcOff() {
-    return offsetof(Unit, m_bc);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
 private:
@@ -728,8 +712,6 @@ private:
   // These are organized in reverse order of frequency of use.  Do not re-order
   // without checking perf!
 private:
-  unsigned char const* m_bc{nullptr};
-  Offset m_bclen{0};
   LowStringPtr m_origFilepath{nullptr};
   std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 

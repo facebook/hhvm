@@ -46,7 +46,6 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
     out << ' ' << fe->name->data();
   }
 
-  out << " at " << fe->base;
   out << std::endl;
 
   auto const& params = fe->params;
@@ -113,32 +112,17 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
 }
 
 static void pretty_print(
-  const UnitEmitter* ue,
+  const FuncEmitter* fe,
   std::ostream& out,
   Offset startOffset,
   Offset stopOffset
 ) {
-  std::map<Offset,const FuncEmitter*> funcMap;
-  for (auto& func : ue->fevec()) {
-    funcMap[func->base] = func.get();
-  }
-  for (Id i = 0; i < ue->numPreClasses(); i++) {
-    for (auto fe : ue->pce(i)->methods()) {
-      funcMap[fe->base] = fe;
-    }
-  }
-
-  auto funcIt = funcMap.lower_bound(startOffset);
-
-  const auto* it = &ue->bc()[startOffset];
+  const auto* it = &fe->bc()[startOffset];
   int prevLineNum = -1;
-  while (it < &ue->bc()[stopOffset]) {
-    auto fe = funcIt->second;
-    assertx(funcIt == funcMap.end() || funcIt->first >= fe->offsetOf(it));
-    if (funcIt != funcMap.end() && funcIt->first == fe->offsetOf(it)) {
+  while (it < &fe->bc()[stopOffset]) {
+    if (fe->offsetOf(it) == 0) {
       out.put('\n');
       pretty_print(fe, out);
-      ++funcIt;
       prevLineNum = -1;
     }
 
@@ -149,7 +133,7 @@ static void pretty_print(
     }
 
     out << ' '
-        << std::setw(4) << (it - ue->bc()) << ": "
+        << std::setw(4) << (it - fe->bc()) << ": "
         << instrToString(it, fe)
         << std::endl;
     it += instrLen(it);
@@ -157,7 +141,7 @@ static void pretty_print(
 }
 
 void printInstr(const FuncEmitter* func, PC pc) {
-  std::cout << "  " << std::setw(4) << (pc - func->ue().bc()) << ":" <<
+  std::cout << "  " << std::setw(4) << (pc - func->bc()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
                std::setw(3) << instrLen(pc) <<
@@ -215,7 +199,7 @@ void printGml(const UnitEmitter* unit) {
       const Block* b = j.popFront();
       std::stringstream strbuf;
       pretty_print(
-        unit, strbuf, func->offsetOf(b->start), func->offsetOf(b->end)
+        func.get(), strbuf, func->offsetOf(b->start), func->offsetOf(b->end)
       );
       std::string code = strbuf.str();
       for (int i = 0, n = code.size(); i < n; ++i) {

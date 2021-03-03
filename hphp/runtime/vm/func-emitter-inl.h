@@ -48,6 +48,81 @@ inline void FuncEmitter::setIds(int sn, Id id) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Bytecode
+
+inline const unsigned char* FuncEmitter::bc() const {
+  return m_bc;
+}
+
+inline Offset FuncEmitter::bcPos() const {
+  return m_bclen;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Bytecode emit.
+
+inline void FuncEmitter::emitOp(Op op) {
+  encode_op(op, [&](uint8_t byte) { emitByte(byte); });
+}
+
+inline void FuncEmitter::emitByte(unsigned char n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
+inline void FuncEmitter::emitInt16(uint16_t n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
+inline void FuncEmitter::emitInt32(int n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
+inline void FuncEmitter::emitInt64(int64_t n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
+inline void FuncEmitter::emitDouble(double n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
+template<typename T>
+void FuncEmitter::emitIVA(T n) {
+  if (LIKELY((n & 0x7f) == n)) {
+    emitByte((unsigned char)n);
+  } else {
+    assertx((n & 0x7fffffff) == n);
+    emitInt32((n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f));
+  }
+}
+
+inline void FuncEmitter::emitNamedLocal(NamedLocal loc) {
+  emitIVA(loc.name + 1);
+  emitIVA(loc.id);
+}
+
+template<class T>
+void FuncEmitter::emitImpl(T n, int64_t pos) {
+  auto c = (unsigned char*)&n;
+  if (pos == -1) {
+    // Make sure m_bc is large enough.
+    while (m_bclen + sizeof(T) > m_bcmax) {
+      // If m_bcmax is 0 we haven't allocated a buffer yet so start with a size
+      // of BCMaxInit
+      m_bcmax = m_bcmax == 0 ? BCMaxInit : m_bcmax << 1;
+      m_bc = (unsigned char*)realloc(m_bc, m_bcmax);
+    }
+    memcpy(&m_bc[m_bclen], c, sizeof(T));
+    m_bclen += sizeof(T);
+  } else {
+    assertx(pos + sizeof(T) <= m_bclen);
+    for (uint32_t i = 0; i < sizeof(T); ++i) {
+      m_bc[pos + i] = c[i];
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and parameters.
 
 inline Id FuncEmitter::numLocals() const {
@@ -139,7 +214,7 @@ inline const LineTable& FuncEmitter::lineTable() const {
 // Bytecode.
 
 inline Offset FuncEmitter::offsetOf(const unsigned char* pc) const {
-  return pc - ue().bc();
+  return pc - bc();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

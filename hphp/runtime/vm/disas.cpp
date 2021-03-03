@@ -180,7 +180,7 @@ FuncInfo find_func_info(const Func* func) {
   auto find_jump_targets = [&] {
     auto pc           = func->entry();
     auto const stop   = func->at(func->past());
-    auto const bcBase = func->unit()->entry();
+    auto const bcBase = func->entry();
 
     for (; pc != stop; pc += instrLen(pc)) {
       auto const off = func->offsetOf(pc);

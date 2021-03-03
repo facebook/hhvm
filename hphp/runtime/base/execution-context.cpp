@@ -2147,7 +2147,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;
-  vmpc() = s_debuggerDummy->entry();
+  vmpc() = ar->func()->entry();
   vmFirstAR() = ar;
 }
 

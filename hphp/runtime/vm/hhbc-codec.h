@@ -145,7 +145,7 @@ NamedLocal decode_named_local(PC& pc);
  */
 MemberKey decode_member_key(PC& pc, StringDecoder u);
 
-void encode_member_key(MemberKey mk, UnitEmitter& ue);
+void encode_member_key(MemberKey mk, FuncEmitter& fe);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -177,29 +177,29 @@ void foreachSSwitchString(PC pc, L func) {
 
 //////////////////////////////////////////////////////////////////////
 
-void encodeLocalRange(UnitEmitter&, const LocalRange&);
+void encodeLocalRange(FuncEmitter&, const LocalRange&);
 LocalRange decodeLocalRange(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 
-void encodeIterArgs(UnitEmitter&, const IterArgs&);
+void encodeIterArgs(FuncEmitter&, const IterArgs&);
 IterArgs decodeIterArgs(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 
-void encodeFCallArgsBase(UnitEmitter&, const FCallArgsBase&,
+void encodeFCallArgsBase(FuncEmitter&, const FCallArgsBase&,
                          bool hasInoutArgs, bool hasAsyncEagerOffset,
                          bool hasContext);
-void encodeFCallArgsIO(UnitEmitter&, int numBytes, const uint8_t* inoutArgs);
+void encodeFCallArgsIO(FuncEmitter&, int numBytes, const uint8_t* inoutArgs);
 
 FCallArgs decodeFCallArgs(Op, PC&, StringDecoder);
 
 template<typename T, typename IO, typename CTX>
-void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,
+void encodeFCallArgs(FuncEmitter& fe, const FCallArgsBase& fca,
                      bool hasInoutArgs, IO emitInoutArgs,
                      bool hasAsyncEagerOffset, T emitAsyncEagerOffset,
                      bool hasContext, CTX emitContext) {
-  encodeFCallArgsBase(ue, fca, hasInoutArgs, hasAsyncEagerOffset, hasContext);
+  encodeFCallArgsBase(fe, fca, hasInoutArgs, hasAsyncEagerOffset, hasContext);
   if (hasInoutArgs) emitInoutArgs();
   if (hasAsyncEagerOffset) emitAsyncEagerOffset();
   if (hasContext) emitContext();

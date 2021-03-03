@@ -671,7 +671,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
     FTRACE(4, "      non-reducible EndCatch\n");
     return FNone{};
   }
-  auto pc = inst.marker().fixupSk().unit()->entry() + inst.marker().bcOff();
+  auto pc = inst.marker().fixupSk().func()->entry() + inst.marker().bcOff();
   auto const op = decode_op(pc);
   if (op == OpFCallCtor &&
       decodeFCallArgs(op, pc, nullptr /*StringDecoder*/).lockWhileUnwinding()) {

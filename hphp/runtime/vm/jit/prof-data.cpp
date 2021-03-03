@@ -192,7 +192,7 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
     jit::fast_set<Offset> offsets;
 
     for (auto blocks = linearBlocks(cfg); !blocks.empty(); ) {
-      auto last = blocks.popFront()->last - func->unit()->entry();
+      auto last = blocks.popFront()->last - func->entry();
       offsets.insert(last);
     }
 

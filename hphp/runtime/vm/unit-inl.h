@@ -211,17 +211,6 @@ Unit::getLastTouch() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Bytecode.
-
-inline PC Unit::entry() const {
-  return m_bc;
-}
-
-inline Offset Unit::bclen() const {
-  return m_bclen;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Litstrs and NamedEntitys.
 
 inline size_t Unit::numLitstrs() const {

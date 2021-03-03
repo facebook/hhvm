@@ -131,21 +131,6 @@ inline int numSuccBlocks(const Block* b) {
   if (auto right = d.right()) return right->r; \
   not_reached()
 
-struct SomeUnit {
-  /* implicit */ SomeUnit(const Unit* u) : m_unit(u) {}
-  /* implicit */ SomeUnit(const UnitEmitter* u) : m_unit(u) {}
-
-  SomeUnit& operator=(const Unit* u) { m_unit = u; return *this; }
-  SomeUnit& operator=(const UnitEmitter* u) { m_unit = u; return *this; }
-
-  PC entry() const               { APPLY(m_unit, entry(), bc()); }
-  PC at(Offset o) const          { return entry() + o; }
-  Offset offsetOf(PC addr) const { return static_cast<Offset>(addr - entry()); }
-
-private:
-  Either<const Unit*, const UnitEmitter*> m_unit;
-};
-
 struct SomeFunc {
   /* implicit */ SomeFunc(const Func* f) : m_func(f) {}
   /* implicit */ SomeFunc(const FuncEmitter* f) : m_func(f) {}
@@ -153,14 +138,10 @@ struct SomeFunc {
   SomeFunc& operator=(const Func* f) { m_func = f; return *this; }
   SomeFunc& operator=(const FuncEmitter* f) { m_func = f; return *this; }
 
-  SomeUnit unit() const {
-    return m_func.match(
-      [&] (const Func* f)        -> SomeUnit { return f->unit(); },
-      [&] (const FuncEmitter* f) -> SomeUnit { return &f->ue(); }
-    );
-  }
-  Offset base() const   { APPLY(m_func, base(), base); }
-  Offset past() const   { APPLY(m_func, past(), past); }
+  Offset past() const            { APPLY(m_func, past(), past); }
+  PC entry() const               { APPLY(m_func, entry(), bc()); }
+  PC at(Offset o) const          { return entry() + o; }
+  Offset offsetOf(PC addr) const { return static_cast<Offset>(addr - entry()); }
 
   size_t numParams() const { APPLY(m_func, params().size(), params.size()); }
   const Func::ParamInfo& param(size_t idx) const {
@@ -194,28 +175,26 @@ private:
  public:
   template<class F>
   GraphBuilder(Arena& arena, const F* func)
-    : m_arena(arena), m_func(func),
-      m_unit(m_func.unit()), m_graph(0) {
+    : m_arena(arena), m_func(func), m_graph(0) {
   }
   Graph* build();
-  Block* at(Offset off) const { return at(m_unit.at(off)); }
+  Block* at(Offset off) const { return at(m_func.at(off)); }
  private:
   void createBlocks();
   void createExBlocks();
   void linkBlocks();
   void linkExBlocks();
   Block* createBlock(PC pc);
-  Block* createBlock(Offset off) { return createBlock(m_unit.at(off)); }
+  Block* createBlock(Offset off) { return createBlock(m_func.at(off)); }
   Block* at(PC addr) const;
   Offset offset(PC addr) const {
-    return m_unit.offsetOf(addr);
+    return m_func.offsetOf(addr);
   }
   Block** succs(Block* b);
  private:
   BlockMap m_blocks;
   Arena& m_arena;
   const SomeFunc m_func;
-  const SomeUnit m_unit;
   Graph* m_graph;
 };
 
@@ -291,8 +270,7 @@ struct InstrRange {
 void sortRpo(Graph* g);
 
 inline InstrRange funcInstrs(SomeFunc func) {
-  return InstrRange(func.unit().at(func.base()),
-                    func.unit().at(func.past()));
+  return InstrRange(func.at(0), func.at(func.past()));
 }
 
 inline InstrRange blockInstrs(const Block* b) {

@@ -1462,11 +1462,9 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
     return write_class(ser, cls);
   }
 
-  // Ideally we'd write the func's index in its Unit; but we may not
-  // have that after Unit::initial_merge
-  const uint32_t off = func->base();
-  assertx(!(off & 0x80000000));
-  write_raw(ser, off);
+  const uint32_t sn = func->sn();
+  assertx(!(sn & 0x80000000));
+  write_raw(ser, sn);
   write_unit(ser, func->unit());
 }
 
@@ -1495,7 +1493,7 @@ Func* read_func(ProfDataDeserializer& ser) {
         }
         auto const unit = read_unit(ser);
         for (auto const f : unit->funcs()) {
-          if (f->base() == id) {
+          if (f->sn() == id) {
             Func::bind(f);
             auto const handle = f->funcHandle();
             if (!rds::isPersistentHandle(handle) &&

@@ -126,7 +126,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   }
 
   // The main entry point is also a basic block start.
-  markBlock(fe.base);
+  markBlock(0);
 
   bool traceBc = false;
 
@@ -139,9 +139,9 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *   - Immediatelly following a control flow instruction, other than
    *     a call.
    */
-  auto offset = fe.base;
+  auto offset = 0;
   for (;;) {
-    auto const bc = fe.ue().bc();
+    auto const bc = fe.bc();
     auto const pc = bc + offset;
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past;
@@ -287,7 +287,7 @@ void populate_block(ParseUnitState& puState,
     auto const vecLen = decode_iva(pc);
     for (int32_t i = 0; i < vecLen; ++i) {
       ret.push_back(findBlock(
-        opPC + decode<Offset>(pc) - ue.bc()
+        opPC + decode<Offset>(pc) - fe.bc()
       ));
     }
     return ret;
@@ -301,14 +301,14 @@ void populate_block(ParseUnitState& puState,
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
       ret.emplace_back(ue.lookupLitstr(id),
-                       findBlock(opPC + offset - ue.bc()));
+                       findBlock(opPC + offset - fe.bc()));
     }
 
     // Final case is the default, and must have a litstr id of -1.
     DEBUG_ONLY auto const defId = decode<Id>(pc);
     auto const defOff = decode<Offset>(pc);
     assertx(defId == -1);
-    ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc()));
+    ret.emplace_back(nullptr, findBlock(opPC + defOff - fe.bc()));
     return ret;
   };
 
@@ -346,7 +346,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
 #define IMM_BA(n)      assertx(next == past);     \
                        auto target##n = findBlock(  \
-                         opPC + decode<Offset>(pc) - ue.bc());
+                         opPC + decode<Offset>(pc) - fe.bc());
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
 #define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
@@ -369,7 +369,7 @@ void populate_block(ParseUnitState& puState,
                          }                                                   \
                          auto const aeOffset = fca.asyncEagerOffset;         \
                          auto const aeTarget = aeOffset != kInvalidOffset    \
-                           ? findBlock(opPC + aeOffset - ue.bc())            \
+                           ? findBlock(opPC + aeOffset - fe.bc())            \
                            : NoBlockId;                                      \
                          assertx(aeTarget == NoBlockId || next == past);     \
                          return FCallArgs(fca.flags, fca.numArgs,            \
@@ -425,7 +425,7 @@ void populate_block(ParseUnitState& puState,
       puState.srcLocInfo,
       [&] (const SourceLocTable& tab) {
         SourceLoc sloc;
-        if (SourceLocation::getLoc(tab, opPC - ue.bc(), sloc)) {
+        if (SourceLocation::getLoc(tab, opPC - fe.bc(), sloc)) {
           return php::SrcLoc {
             { static_cast<uint32_t>(sloc.line0),
               static_cast<uint32_t>(sloc.char0) },
@@ -436,7 +436,7 @@ void populate_block(ParseUnitState& puState,
         return php::SrcLoc{};
       },
       [&] (const LineTable& tab) {
-        auto const line = SourceLocation::getLineNumber(tab, opPC - ue.bc());
+        auto const line = SourceLocation::getLineNumber(tab, opPC - fe.bc());
         if (line != -1) {
           return php::SrcLoc {
             { static_cast<uint32_t>(line), 0 },
@@ -455,7 +455,7 @@ void populate_block(ParseUnitState& puState,
 
     if (next == past) {
       if (instrAllowsFallThru(op)) {
-        blk.fallthrough = findBlock(next - ue.bc());
+        blk.fallthrough = findBlock(next - fe.bc());
       }
     }
 
@@ -537,7 +537,7 @@ void link_entry_points(php::Func& func,
       func.dvEntries[i] = dv;
     }
   }
-  func.mainEntry = findBlock(fe.base);
+  func.mainEntry = findBlock(0);
 }
 
 void build_cfg(ParseUnitState& puState,
@@ -555,7 +555,7 @@ void build_cfg(ParseUnitState& puState,
   );
 
   std::map<Offset,std::pair<BlockId, copy_ptr<php::Block>>> blockMap;
-  auto const bc = fe.ue().bc();
+  auto const bc = fe.bc();
 
   auto findBlock = [&] (Offset off, bool catchEntry = false) {
     auto& ent = blockMap[off];

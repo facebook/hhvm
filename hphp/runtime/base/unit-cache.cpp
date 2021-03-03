@@ -1212,7 +1212,13 @@ void logLoad(
     ent.setStr("repo_sn", folly::to<std::string>(u->sn()));
     ent.setStr("repo_id", folly::to<std::string>(u->repoID()));
 
-    ent.setInt("bc_len", u->bclen());
+    int bclen = 0;
+    u->forEachFunc([&](auto const& func) {
+      bclen += func->bclen();
+      return false;
+    });
+
+    ent.setInt("bc_len", bclen);
     ent.setInt("num_litstrs", u->numLitstrs());
     ent.setInt("num_funcs", u->funcs().size());
     ent.setInt("num_classes", u->preclasses().size());

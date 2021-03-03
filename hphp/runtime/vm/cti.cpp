@@ -49,7 +49,7 @@ struct PatchTable {
     m_ctimap[pc - m_unitpc] = cti - m_ctibase;
   }
   void addPatch(PC pc, CodeAddress next_ip) {
-    auto unit_pc = m_func->unit()->entry();
+    auto unit_pc = m_func->entry();
     auto targets = instrJumpTargets(unit_pc, pc - unit_pc);
     assert(targets.size() == 1);
     auto target_pc = unit_pc + targets[0];

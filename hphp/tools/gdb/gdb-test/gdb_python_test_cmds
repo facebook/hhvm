@@ -3,7 +3,8 @@ run
 unit this
 set logging on
 set pagination off
-hhx this->m_bc this->m_bc+this->m_bclen
+set $funcshared = (**((Func**)((MergeInfo*)this->m_mergeInfo._M_b)->m_mergeables)).m_shared.m_px
+hhx $funcshared->m_bc $funcshared->m_bc+$funcshared->m_bclen
 set logging off
 kill
 quit

@@ -123,8 +123,8 @@ struct FuncChecker {
   void copyState(State* to, const State* from);
   void initState(State* s);
   const FlavorDesc* sig(PC pc);
-  Offset offset(PC pc) const { return pc - unit()->bc(); }
-  PC at(Offset off) const { return unit()->bc() + off; }
+  Offset offset(PC pc) const { return pc - m_func->bc(); }
+  PC at(Offset off) const { return m_func->bc() + off; }
   int maxStack() const { return m_func->maxStackCells; }
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
@@ -268,7 +268,7 @@ bool mayTakeExnEdges(Op op) {
 FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
 : m_func(f)
 , m_graph(0)
-, m_instrs(m_arena, f->past - f->base + 1)
+, m_instrs(m_arena, f->past + 1)
 , m_errmode(mode) {
   auto& coeffects = f->staticCoeffects;
   auto const isPureBody =
@@ -341,10 +341,10 @@ bool FuncChecker::checkDef() {
  */
 bool FuncChecker::checkOffsets() {
   bool ok = true;
-  assertx(unit()->bcPos() >= 0);
-  Offset base = m_func->base;
+  assertx(m_func->bcPos() >= 0);
+  Offset base = 0;
   Offset past = m_func->past;
-  checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
+  checkRegion("func", base, past, "unit", 0, m_func->bcPos(), false);
   // Get instruction boundaries and check branches within primary body
   ok &= checkPrimaryBody(base, past);
   // DV entry points must be in the primary function body
@@ -366,7 +366,7 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
   bool ok = true;
   typedef std::list<PC> BranchList;
   BranchList branches;
-  PC bc = unit()->bc();
+  PC bc = m_func->bc();
   // Find instruction boundaries and branch instructions.
   for (InstrRange i(at(base), at(past)); !i.empty();) {
     auto pc = i.popFront();
@@ -376,7 +376,7 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
              opcodeToName(op), offset(pc));
       return false;
     }
-    m_instrs.set(offset(pc) - m_func->base);
+    m_instrs.set(offset(pc));
     if (!instrJumpTargets(bc, offset(pc)).empty()) {
       if (op == OpSwitch && getImm(pc, 0).u_IVA == int(SwitchKind::Bounded)) {
         int64_t switchBase = getImm(pc, 1).u_I64A;
@@ -551,7 +551,7 @@ bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
   // we check branch offsets in checkPrimaryBody(). ignore here.
-  assertx(!instrJumpTargets(unit()->bc(), offset(instr)).empty());
+  assertx(!instrJumpTargets(m_func->bc(), offset(instr)).empty());
   pc += sizeof(Offset);
   return true;
 }
@@ -2046,7 +2046,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
 
   for (int i = 0; i < succs; i++) {
     auto const t = b->succs[i];
-    if (t && offset(t->start) == m_func->base) {
+    if (t && offset(t->start) == 0) {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
         error("%s: Control flow cycles from the entry-block "
@@ -2180,7 +2180,7 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
            name, off, regionName, base, past);
     return false;
   }
-  if (check_instrs && !m_instrs.get(off - m_func->base)) {
+  if (check_instrs && !m_instrs.get(off)) {
     error("label %s %d is not on a valid instruction boundary\n",
            name, off);
     return false;
@@ -2206,8 +2206,8 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
            name, b, p, regionName, base, past);
     return false;
   } else if (check_instrs &&
-             (!m_instrs.get(b - m_func->base) ||
-              (p < past && !m_instrs.get(p - m_func->base)))) {
+             (!m_instrs.get(b) ||
+              (p < past && !m_instrs.get(p)))) {
     error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;

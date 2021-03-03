@@ -701,7 +701,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       return;
     }
 
-    const auto bc = unit()->entry();
+    const auto bc = entry();
     const auto* it = &bc[startOffset];
     int prevLineNum = -1;
     while (it < &bc[stopOffset]) {
@@ -721,7 +721,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 }
 
 void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
-  const auto bc = unit()->entry();
+  const auto bc = entry();
   const auto* it = &bc[offset];
   out << std::setw(4) << (it - bc) << ": "
     << instrToString(it, this)
@@ -732,10 +732,12 @@ void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // SharedData.
 
-Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
+Func::SharedData::SharedData(unsigned char const* bc, Offset bc_len,
+                             PreClass* preClass, Offset past,
                              int sn, int line1, int line2, bool isPhpLeafFn,
                              const StringData* docComment)
-  : m_base(base)
+  : m_bclen(bc_len)
+  , m_bc(bc)
   , m_preClass(preClass)
   , m_line1(line1)
   , m_docComment(docComment)
@@ -761,12 +763,21 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   m_allFlags.m_hasReturnWithMultiUBs = false;
   m_allFlags.m_hasCoeffectRules = false;
 
-  m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
+  m_pastDelta = std::min<uint32_t>(past, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
   m_sn = std::min<uint32_t>(sn, kSmallDeltaLimit);
 }
 
 Func::SharedData::~SharedData() {
+  if (!RuntimeOption::RepoAuthoritative) {
+    if (debug) {
+      // poison released bytecode
+      memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
+    }
+    free(const_cast<unsigned char*>(m_bc));
+    g_hhbc_size->addValue(-int64_t(m_bclen));
+  }
+
   Func::s_extendedLineInfo.erase(this);
   Func::s_lineTables.erase(this);
   free(m_inoutBitPtr);

@@ -38,7 +38,6 @@ struct UnitChecker {
   bool checkSourceLocs();
   bool checkPreClasses();
   bool checkFuncs();
-  bool checkBytecode();
   bool checkMetadata();
   bool checkConstructor(
     const FuncEmitter* structor,
@@ -90,7 +89,6 @@ bool UnitChecker::verify() {
          checkArrays() &&
          //checkSourceLocs() &&
          checkPreClasses() &&
-         checkBytecode() &&
          checkMetadata() &&
          checkFuncs();
 }
@@ -300,68 +298,6 @@ bool UnitChecker::checkPreClasses() {
 //TODO: T19445287 implement this as the fuzzer finds more bugs
 bool UnitChecker::checkMetadata() {
   return true;
-}
-
-/**
- * Check that every byte in the unit's bytecode is inside exactly one
- * function's code region.
- */
-bool UnitChecker::checkBytecode() {
-  bool ok = true;
-  typedef std::map<Offset, const FuncEmitter*> FuncMap; // ordered!
-  FuncMap funcs;
-  auto addFunc = [&] (const FuncEmitter* f) {
-    if (f->past <= f->base) {
-      if (!(f->attrs & AttrAbstract) || f->past < f->base) {
-        error("func size <= 0 [%d:%d] in unit %s\n",
-             f->base, f->past, m_unit->sha1().toString().c_str());
-        ok = false;
-        return;
-      }
-    }
-    if (f->base < 0 || f->past > m_unit->bcPos()) {
-      error("function region [%d:%d] out of unit %s bounds [%d:%d]\n",
-             f->base, f->past, m_unit->sha1().toString().c_str(),
-             0, m_unit->bcPos());
-      ok = false;
-      return;
-    }
-    if (funcs.find(f->base) != funcs.end()) {
-      error("duplicate function-base at %d in unit %s\n",
-             f->base, m_unit->sha1().toString().c_str());
-      ok = false;
-      return;
-    }
-    funcs.insert(FuncMap::value_type(f->base, f));
-  };
-  for (auto& f : m_unit->fevec()) addFunc(f.get());
-  for (Id i = 0; i < m_unit->numPreClasses(); i++) {
-    for (auto f : m_unit->pce(i)->methods()) addFunc(f);
-  }
-  Offset last_past = 0;
-  for (FuncMap::iterator i = funcs.begin(), e = funcs.end(); i != e; ) {
-    auto const f = (*i++).second;
-    if (f->base < last_past) {
-      error("function overlap [%d:%d] in unit %s\n",
-             f->base, last_past, m_unit->sha1().toString().c_str());
-      ok = false;
-    } else if (f->base > last_past) {
-      error("dead bytecode space [%d:%d] in unit %s\n",
-             last_past, f->base, m_unit->sha1().toString().c_str());
-      ok = false;
-    }
-    last_past = f->past;
-    if (i == e && last_past != m_unit->bcPos()) {
-      error("dead bytecode [%d:%d] at end of unit %s\n",
-             last_past, m_unit->bcPos(), m_unit->sha1().toString().c_str());
-      ok = false;
-    }
-  }
-  return ok;
-  // Notes
-  // 1. Bytecode regions for every function must not overlap and must exactly
-  // divide up the bytecode of the whole unit.
-  // 2. Its not an error for an abstract function to have zero size.
 }
 
 bool UnitChecker::checkFuncs() {

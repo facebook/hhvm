@@ -27,8 +27,8 @@ namespace HPHP {
 using Result = BCPattern::Result;
 
 Result BCPattern::matchAnchored(const Func* func) {
-  return matchAnchored(func->unit()->entry() + func->base(),
-                       func->unit()->entry() + func->past());
+  return matchAnchored(func->entry() + func->base(),
+                       func->entry() + func->past());
 }
 
 Result BCPattern::matchAnchored(PC start, PC end) {

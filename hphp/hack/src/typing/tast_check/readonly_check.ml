@@ -205,8 +205,32 @@ let check =
                 ( param.fp_pos,
                   "It is incompatible with this parameter, which is "
                   ^ rty_to_str param_rty );
+              ];
+        (* Check fty const matching for an arg *)
+        match
+          (get_node param.fp_type.et_type, get_node (Tast.get_type arg))
+        with
+        | (Tfun _, Tfun fty)
+        (* Passing a nonconst function to a const parameter *)
+          when get_fp_const_function param
+               && not (Typing_defs.get_ft_is_const fty) ->
+          Errors.readonly_mismatch
+            "Invalid argument"
+            (Tast.get_position arg)
+            ~reason_sub:
+              [
+                ( Tast.get_position arg,
+                  "This function is not marked <<__ConstFun>>" );
               ]
+            ~reason_super:
+              [
+                ( param.fp_pos,
+                  "It is incompatible with this parameter, which is marked <<__ConstFun>>"
+                );
+              ]
+        | _ -> ()
       in
+
       (* Check that readonly arguments match their parameters *)
       let check_args caller_ty args unpacked_arg =
         match get_node caller_ty with

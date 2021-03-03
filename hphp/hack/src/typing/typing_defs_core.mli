@@ -439,6 +439,8 @@ module Flags : sig
 
   val get_ft_readonly_this : 'a fun_type -> bool
 
+  val get_ft_is_const : 'a fun_type -> bool
+
   val from_mutable_flags : Hh_prelude.Int.t -> param_mutability option
 
   val to_mutable_flags : param_mutability option -> Hh_prelude.Int.t

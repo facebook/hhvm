@@ -1,0 +1,12 @@
+File "collection_literal.php", line 26, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_literal.php", line 28, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_literal.php", line 32, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_literal.php", line 34, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_literal.php", line 39, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "collection_literal.php", line 41, characters 3-4:
+This value is readonly, its properties cannot be modified (Typing[4409])

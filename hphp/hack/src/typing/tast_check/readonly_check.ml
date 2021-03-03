@@ -40,6 +40,11 @@ let has_const_attribute user_attributes =
         (snd ua.ua_name)
         Naming_special_names.UserAttributes.uaConstFun)
 
+let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
+
+(* Debugging tool for printing the local environment. Not actually called in code *)
+let pp_lenv lenv = SMap.show pp_rty lenv
+
 let lenv_from_params (params : Tast.fun_param list) user_attributes : rty SMap.t
     =
   let result = SMap.empty in
@@ -83,27 +88,126 @@ let check =
     val mutable ctx : ctx = empty_ctx
 
     method ty_expr (e : Tast.expr) : rty =
-      match e with
-      | (_, ReadonlyExpr _) -> Readonly
-      | (_, This) ->
+      match snd e with
+      | ReadonlyExpr _ -> Readonly
+      | This ->
         (match ctx.this_ty with
         | Some (r, _) -> r
         | None -> Mut)
-      | (_, Lvar (_, lid)) ->
+      | Lvar (_, lid) ->
         let varname = Local_id.to_string lid in
         get_local ctx.lenv varname
       (* If you have a bunch of property accesses in a row, i.e. $x->foo->bar->baz,
         ty_expr will take linear time, and the full check may take O(n^2) time
         if we recurse on expressions in the visitor. We expect this to generally
         be quite small, though. *)
-      | (_, Obj_get (e1, _, _, _)) -> self#ty_expr e1
-      | (_, Await e) -> self#ty_expr e
+      | Obj_get (e1, _, _, _) -> self#ty_expr e1
+      | Await e -> self#ty_expr e
       (* $array[$x] access *)
-      | (_, Array_get (e, Some _)) -> self#ty_expr e
-      | _ -> Mut
+      | Array_get (e, Some _) -> self#ty_expr e
+      (* This is only valid as an lval *)
+      | Array_get (_, None) -> Mut
+      | Class_get _ -> (* TODO: static prop access*) Mut
+      | Smethod_id _
+      | Method_caller _
+      | Call _ ->
+        Mut
+      (* All calls return mut by default, unless they are wrapped in a readonly expression *)
+      | Yield _ ->
+        Mut (* TODO: yield is a statement, really, not an expression. *)
+      | List _ ->
+        Mut (* Only appears as an lvalue; relevant in assign but not here *)
+      | Cast _ -> Mut
+      | Unop _ ->
+        Mut (* Unop only works on value types, so they can be mutable *)
+      (* All binary operators are either assignments or primitive binops, which are all value types *)
+      | Binop _ -> Mut
+      (* I think the right side is always a function call so this could be Mut *)
+      | Pipe (_, _left, right) -> self#ty_expr right
+      | KeyValCollection (_, _, fl) ->
+        if
+          List.exists fl ~f:(fun (_, value) ->
+              match self#ty_expr value with
+              | Readonly -> true
+              | _ -> false)
+        then
+          Readonly
+        else
+          Mut
+      | ValCollection (_, _, el) ->
+        if
+          List.exists el ~f:(fun e ->
+              match self#ty_expr e with
+              | Readonly -> true
+              | _ -> false)
+        then
+          Readonly
+        else
+          Mut
+      | Eif (_, Some e1, e2) ->
+        (* Ternaries are readonly if either side is readonly *)
+        (match (self#ty_expr e1, self#ty_expr e2) with
+        | (Readonly, _)
+        | (_, Readonly) ->
+          Readonly
+        | _ -> Mut)
+      | Eif (_, None, e2) -> self#ty_expr e2
+      | As (expr, _, _) -> self#ty_expr expr
+      | Is _ -> Mut (* Booleans are value types *)
+      | Pair (_, e1, e2) ->
+        (match (self#ty_expr e1, self#ty_expr e2) with
+        | (Readonly, _)
+        | (_, Readonly) ->
+          Readonly
+        | _ -> Mut)
+      | New _ -> Mut (* All constructors are mutable by default *)
+      (* Things that don't appear in function bodies generally *)
+      | Import _
+      | Callconv _ ->
+        Mut
+      | Lplaceholder _ -> Mut
+      (* Cloning something should always result in a mutable version of it *)
+      | Clone _ -> Mut
+      (* These are all value types without restrictions on mutability *)
+      | ExpressionTree _
+      | Xml _
+      | Efun _
+      | Any
+      | Fun_id _
+      | Method_id _
+      | Lfun _
+      | Record _
+      | FunctionPointer _
+      | Null
+      | True
+      | False
+      | Omitted
+      | Id _
+      | Shape _
+      | EnumAtom _
+      | ET_Splice _
+      | Darray _
+      | Varray _
+      | Int _
+      | Dollardollar _
+      | String _
+      | String2 _
+      | Collection (_, _, _)
+      | Float _
+      | PrefixedString _ ->
+        Mut
+      (* Disable formatting here so I can fit all of the above in one line *)
+      | Class_const _ -> Mut
 
     method assign env lval rval =
       match lval with
+      | (_, Array_get (array, _)) ->
+        (* TODO: appending to readonly value types is technically allowed *)
+        begin
+          match self#ty_expr array with
+          | Readonly -> Errors.readonly_modified (Tast.get_position array)
+          | Mut -> ()
+        end
       | (_, Obj_get (obj, get, _, _)) ->
         begin
           match self#ty_expr obj with
@@ -148,8 +252,11 @@ let check =
           | (Some Mut, Mut) -> ()
           | (Some Readonly, Readonly) -> ()
         end
-      (* TODO: awaitables *)
-      (* TODO: vecs, collections, array accesses *)
+      | (_, List el) ->
+        (* List expressions require all of their lvals assigned to the readonlyness of the rval *)
+        List.iter el ~f:(fun list_lval -> self#assign env list_lval rval)
+      | (_, Class_get _) -> () (* TODO: Static property access *)
+      (* TODO: make this exhaustive *)
       | _ -> ()
 
     (* Method call invocation *)

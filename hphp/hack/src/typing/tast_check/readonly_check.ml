@@ -87,7 +87,7 @@ let check =
 
     val mutable ctx : ctx = empty_ctx
 
-    method ty_expr (e : Tast.expr) : rty =
+    method ty_expr env (e : Tast.expr) : rty =
       match snd e with
       | ReadonlyExpr _ -> Readonly
       | This ->
@@ -101,13 +101,21 @@ let check =
         ty_expr will take linear time, and the full check may take O(n^2) time
         if we recurse on expressions in the visitor. We expect this to generally
         be quite small, though. *)
-      | Obj_get (e1, _, _, _) -> self#ty_expr e1
-      | Await e -> self#ty_expr e
+      | Obj_get (e1, _, _, _) -> self#ty_expr env e1
+      | Await e -> self#ty_expr env e
       (* $array[$x] access *)
-      | Array_get (e, Some _) -> self#ty_expr e
+      | Array_get (e, Some _) -> self#ty_expr env e
       (* This is only valid as an lval *)
       | Array_get (_, None) -> Mut
-      | Class_get _ -> (* TODO: static prop access*) Mut
+      | Class_get (class_id, expr, _is_prop_call) ->
+        let class_elt = self#get_static_prop_elt env class_id expr in
+        (match class_elt with
+        | Some elt ->
+          if Typing_defs.get_ce_readonly_prop elt then
+            Readonly
+          else
+            Mut
+        | None -> Mut)
       | Smethod_id _
       | Method_caller _
       | Call _ ->
@@ -123,11 +131,11 @@ let check =
       (* All binary operators are either assignments or primitive binops, which are all value types *)
       | Binop _ -> Mut
       (* I think the right side is always a function call so this could be Mut *)
-      | Pipe (_, _left, right) -> self#ty_expr right
+      | Pipe (_, _left, right) -> self#ty_expr env right
       | KeyValCollection (_, _, fl) ->
         if
           List.exists fl ~f:(fun (_, value) ->
-              match self#ty_expr value with
+              match self#ty_expr env value with
               | Readonly -> true
               | _ -> false)
         then
@@ -137,7 +145,7 @@ let check =
       | ValCollection (_, _, el) ->
         if
           List.exists el ~f:(fun e ->
-              match self#ty_expr e with
+              match self#ty_expr env e with
               | Readonly -> true
               | _ -> false)
         then
@@ -146,16 +154,16 @@ let check =
           Mut
       | Eif (_, Some e1, e2) ->
         (* Ternaries are readonly if either side is readonly *)
-        (match (self#ty_expr e1, self#ty_expr e2) with
+        (match (self#ty_expr env e1, self#ty_expr env e2) with
         | (Readonly, _)
         | (_, Readonly) ->
           Readonly
         | _ -> Mut)
-      | Eif (_, None, e2) -> self#ty_expr e2
-      | As (expr, _, _) -> self#ty_expr expr
+      | Eif (_, None, e2) -> self#ty_expr env e2
+      | As (expr, _, _) -> self#ty_expr env expr
       | Is _ -> Mut (* Booleans are value types *)
       | Pair (_, e1, e2) ->
-        (match (self#ty_expr e1, self#ty_expr e2) with
+        (match (self#ty_expr env e1, self#ty_expr env e2) with
         | (Readonly, _)
         | (_, Readonly) ->
           Readonly
@@ -204,18 +212,34 @@ let check =
       | (_, Array_get (array, _)) ->
         (* TODO: appending to readonly value types is technically allowed *)
         begin
-          match self#ty_expr array with
+          match self#ty_expr env array with
           | Readonly -> Errors.readonly_modified (Tast.get_position array)
           | Mut -> ()
         end
+      | (_, Class_get (id, expr, _)) ->
+        let prop_elt = self#get_static_prop_elt env id expr in
+        (match (prop_elt, self#ty_expr env rval) with
+        | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
+          ->
+          Errors.readonly_mismatch
+            "Invalid property assignment"
+            (Tast.get_position lval)
+            ~reason_sub:
+              [(Tast.get_position rval, "This expression is readonly")]
+            ~reason_super:
+              [
+                ( Lazy.force elt.Typing_defs.ce_pos,
+                  "But it's being assigned to a mutable property" );
+              ]
+        | _ -> ())
       | (_, Obj_get (obj, get, _, _)) ->
         begin
-          match self#ty_expr obj with
+          match self#ty_expr env obj with
           | Readonly -> Errors.readonly_modified (Tast.get_position obj)
           | Mut -> ()
         end;
         let prop_elt = self#get_prop_elt env obj get in
-        (match (prop_elt, self#ty_expr rval) with
+        (match (prop_elt, self#ty_expr env rval) with
         | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
           ->
           Errors.readonly_mismatch
@@ -232,7 +256,7 @@ let check =
       | (_, Lvar (_, lid)) ->
         let var_ro_opt = SMap.find_opt (Local_id.to_string lid) ctx.lenv in
         begin
-          match (var_ro_opt, self#ty_expr rval) with
+          match (var_ro_opt, self#ty_expr env rval) with
           | (Some Readonly, Mut) ->
             Errors.var_readonly_mismatch
               (Tast.get_position lval)
@@ -255,17 +279,16 @@ let check =
       | (_, List el) ->
         (* List expressions require all of their lvals assigned to the readonlyness of the rval *)
         List.iter el ~f:(fun list_lval -> self#assign env list_lval rval)
-      | (_, Class_get _) -> () (* TODO: Static property access *)
       (* TODO: make this exhaustive *)
       | _ -> ()
 
     (* Method call invocation *)
-    method method_call caller =
+    method method_call env caller =
       let open Typing_defs in
       match caller with
       (* Method call checks *)
       | ((_, ty), Obj_get (e1, _, _, (* is_prop_call *) false)) ->
-        let receiver_rty = self#ty_expr e1 in
+        let receiver_rty = self#ty_expr env e1 in
         (match (receiver_rty, get_node ty) with
         | (Readonly, Tfun fty) when not (get_ft_readonly_this fty) ->
           Errors.readonly_method_call (Tast.get_position e1) (get_pos ty)
@@ -278,6 +301,7 @@ let check =
     *)
     method call
         ~is_readonly
+        (env : Tast_env.t)
         (pos : Pos.t)
         (caller_ty : Tast.ty)
         (args : Tast.expr list)
@@ -297,7 +321,7 @@ let check =
       (* Checks a single arg against a parameter *)
       let check_arg param arg =
         let param_rty = param_to_rty param in
-        let arg_rty = self#ty_expr arg in
+        let arg_rty = self#ty_expr env arg in
         if not (subtype_rty arg_rty param_rty) then
           Errors.readonly_mismatch
             "Invalid argument"
@@ -352,25 +376,40 @@ let check =
       check_readonly_call caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
 
-    method get_prop_elt env obj get =
+    method grab_class_decl_from_ty env ty =
       let open Typing_defs in
-      match (get_node (Tast.get_type obj), get) with
-      (* Basic case of a single class and a statically known id:
-        $x->prop (where $x : Foo) *)
-      | (Tclass (id, _exact, _args), (_, Id prop_id)) ->
+      match get_node ty with
+      | Tclass (id, _exact, _args) ->
         let provider_ctx = Tast_env.get_ctx env in
-        (match Decl_provider.get_class provider_ctx (snd id) with
-        | Some class_decl ->
-          let prop = Cls.get_prop class_decl (snd prop_id) in
-          prop
-        (* Class doesn't exist, assume mutable *)
-        | None -> None)
-      (* TODO: Handle more complex generic cases *)
+        Decl_provider.get_class provider_ctx (snd id)
+      (* TODO: Handle more complex types *)
+      | _ -> None
+
+    method get_static_prop_elt env class_id get =
+      let (_, ty) = fst class_id in
+      let class_decl = self#grab_class_decl_from_ty env ty in
+      match (class_decl, get) with
+      | (Some class_decl, CGstring prop_id) ->
+        let prop = Cls.get_sprop class_decl (snd prop_id) in
+        prop
+      (* If we're grabbing a dynamic expression from a class, we won't know its type so give up *)
+      | (Some _, CGexpr _) -> None
+      (* Class doesn't exist, assume mutable *)
+      | _ -> None
+
+    method get_prop_elt env obj get =
+      let ty = Tast.get_type obj in
+      let class_decl = self#grab_class_decl_from_ty env ty in
+      match (class_decl, get) with
+      | (Some class_decl, (_, Id prop_id)) ->
+        let prop = Cls.get_prop class_decl (snd prop_id) in
+        prop
+      (* TODO: Handle more complex  cases *)
       | _ -> None
 
     method obj_get env obj get =
       let prop_elt = self#get_prop_elt env obj get in
-      match (prop_elt, self#ty_expr obj) with
+      match (prop_elt, self#ty_expr env obj) with
       | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
         Errors.explicit_readonly_cast
           "property"
@@ -484,22 +523,24 @@ let check =
       | (_, ReadonlyExpr (_, Call (caller, targs, args, unpacked_arg))) ->
         self#call
           ~is_readonly:true
+          env
           (Tast.get_position caller)
           (Tast.get_type caller)
           args
           unpacked_arg;
-        self#method_call caller;
+        self#method_call env caller;
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Call env caller targs args unpacked_arg
       (* Non readonly calls *)
       | (_, Call (caller, _, args, unpacked_arg)) ->
         self#call
+          env
           ~is_readonly:false
           (Tast.get_position caller)
           (Tast.get_type caller)
           args
           unpacked_arg;
-        self#method_call caller;
+        self#method_call env caller;
         super#on_expr env e
       | (_, ReadonlyExpr (_, Obj_get (obj, get, nullable, is_prop_call))) ->
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
@@ -509,14 +550,15 @@ let check =
         super#on_expr env e
       | (_, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
-        self#call ~is_readonly:false pos constructor_fty args unpacked_arg
+        self#call ~is_readonly:false env pos constructor_fty args unpacked_arg
       | _ -> super#on_expr env e
 
     method! on_stmt_ env s =
       (match s with
       | Return (Some e) ->
         (match ctx.ret_ty with
-        | Some (ret_ty, pos) when not (subtype_rty (self#ty_expr e) ret_ty) ->
+        | Some (ret_ty, pos) when not (subtype_rty (self#ty_expr env e) ret_ty)
+          ->
           Errors.readonly_mismatch
             "Invalid return"
             (Tast.get_position e)

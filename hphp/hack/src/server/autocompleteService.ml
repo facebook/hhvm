@@ -198,8 +198,6 @@ let autocomplete_shape_key env fields id =
 
 let autocomplete_member ~is_static env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
-  (* It's also used for "<nt:fb:text |" XHP attributes, in which case  *)
-  (* class_ is ":nt:fb:text" and its attributes are in tc_props.       *)
   if is_auto_complete (snd id) then (
     (* Detect usage of "parent::|" which can use both static and instance *)
     let match_both_static_and_instance =
@@ -240,6 +238,23 @@ let autocomplete_member ~is_static env class_ cid id =
         (get_class_elt_types env class_ cid (Cls.props class_ |> sort))
         ~f:(add SearchUtils.SI_Property)
     )
+  )
+
+let autocomplete_xhp_attributes env class_ cid id =
+  (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
+  (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
+  if is_auto_complete (snd id) && Cls.is_xhp class_ then (
+    ac_env := Some env;
+    autocomplete_identifier := Some id;
+    argument_global_type := Some Acprop;
+    List.iter
+      (get_class_elt_types env class_ cid (Cls.props class_))
+      ~f:(fun (name, ty) ->
+        add_partial_result
+          name
+          (Phase.decl ty)
+          SearchUtils.SI_Property
+          (Some class_))
   )
 
 let autocomplete_xhp_enum_value
@@ -529,7 +544,10 @@ let visitor =
                         *)
                      autocomplete_xhp_enum_value (snd id) id_id env c (Some cid)
                    | _ -> ());
-                   autocomplete_member ~is_static:false env c (Some cid) id
+                   if Cls.is_xhp c then
+                     autocomplete_xhp_attributes env c (Some cid) id
+                   else
+                     autocomplete_member ~is_static:false env c (Some cid) id
                  | Tast.Xhp_spread _ -> ()));
       super#on_Xml env sid attrs el
 

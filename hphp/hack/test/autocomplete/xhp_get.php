@@ -7,5 +7,6 @@ final class :foo:bar {
 }
 
 function main(): void {
-  <foo:bar AUTO332
+  $x = <foo:bar name=""/>;
+  $x->AUTO332
 }

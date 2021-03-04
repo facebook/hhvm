@@ -1160,7 +1160,7 @@ CompilerResult hackc_compile(
                                                                  
     native_environment const native_env = {
       filename,
-      aliased_namespaces.data(),
+      aliased_namespaces.c_str(),
       s_misc_config.data(),
       RuntimeOption::EvalEmitClassPointers, 
       RuntimeOption::CheckIntOverflow, 

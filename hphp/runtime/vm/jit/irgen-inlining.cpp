@@ -214,7 +214,7 @@ void beginInlining(IRGS& env,
   assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
   assertx((!curFunc(env) ||
-          curFunc(env)->base() + callBcOffset < curFunc(env)->past()) &&
+          callBcOffset < curFunc(env)->bclen()) &&
          "callBcOffset past end of caller");
   assertx(fca.numArgs >= target->numRequiredParams());
   assertx(fca.numArgs <= target->numNonVariadicParams());

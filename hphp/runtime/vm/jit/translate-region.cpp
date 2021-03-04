@@ -174,7 +174,7 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   // are DV initializers, because they can run arbitrary code before they get
   // here (and they do, in some hhas-based builtins, and they may not even get
   // to the Func main entry point).
-  if (sk.offset() == func->base()) {
+  if (sk.offset() == 0) {
     // The assertions inserted here are only valid if the first bytecode
     // instruction does not have unprocessed predecessors.  This invariant is
     // ensured by the emitter using an EntryNop instruction when necessary.
@@ -707,7 +707,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   auto const returnTarget = InlineReturnTarget {
     returnBlock, suspendRetBlock, asyncEagerOffset
   };
-  auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
+  auto callFuncOff = bcOff(irgs);
 
   irgen::beginInlining(irgs, callee, fca, ctx, dynamicCall,
                        psk.srcKey.op(),

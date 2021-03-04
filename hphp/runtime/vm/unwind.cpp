@@ -228,7 +228,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
           isResumed(prevFp));
-  pc = prevFp->func()->at(callOff + prevFp->func()->base());
+  pc = prevFp->func()->at(callOff);
   assertx(prevFp->func()->contains(pc));
   fp = prevFp;
   return phpException;

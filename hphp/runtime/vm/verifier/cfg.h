@@ -138,7 +138,7 @@ struct SomeFunc {
   SomeFunc& operator=(const Func* f) { m_func = f; return *this; }
   SomeFunc& operator=(const FuncEmitter* f) { m_func = f; return *this; }
 
-  Offset past() const            { APPLY(m_func, past(), past); }
+  Offset past() const            { APPLY(m_func, bclen(), bcPos()); }
   PC entry() const               { APPLY(m_func, entry(), bc()); }
   PC at(Offset o) const          { return entry() + o; }
   Offset offsetOf(PC addr) const { return static_cast<Offset>(addr - entry()); }

@@ -380,7 +380,7 @@ void computeFrames(Vunit& unit) {
 
           unit.frames.emplace_back(
             inst.inlinestart_.func,
-            origin->marker().bcOff() - origin->marker().func()->base(),
+            origin->marker().bcOff(),
             frame,
             inst.inlinestart_.cost,
             block.weight

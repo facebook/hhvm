@@ -44,7 +44,6 @@ namespace SourceLocation {
  */
 void generateLineToOffsetRangesMap(
   const SourceLocTable& srcLocTable,
-  Offset baseOff,
   LineToOffsetRangeVecMap& map
 ) {
   // First generate an OffsetRange for each SourceLoc.
@@ -62,6 +61,7 @@ void generateLineToOffsetRangesMap(
 
   using LineRangeOffsetRangePair = std::pair<LineRange, OffsetRange>;
   std::vector<LineRangeOffsetRangePair> lineRangesTable;
+  Offset baseOff = 0;
   for (const auto& sourceLoc: srcLocTable) {
     Offset pastOff = sourceLoc.pastOffset();
     OffsetRange offsetRange(baseOff, pastOff);

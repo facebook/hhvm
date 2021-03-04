@@ -1181,7 +1181,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
                      fe.numLocals() +
                      fe.numIterators() * kNumIterCells;
 
-  fe.finish(fe.bcPos());
+  fe.finish();
 }
 
 void renumber_locals(php::Func& func) {

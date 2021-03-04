@@ -284,36 +284,32 @@ inline PC Func::entry() const {
   return shared()->m_bc;
 }
 
-inline Offset Func::base() const {
-  return 0;
-}
-
 inline Offset Func::bclen() const {
-  return shared()->m_bclen;
+  return shared()->bclen();
 }
 
-inline Offset Func::past() const {
-  auto const sd = shared();
-  auto const delta = sd->m_pastDelta;
-  if (UNLIKELY(delta == kSmallDeltaLimit)) {
-    assertx(extShared());
-    return static_cast<const ExtendedSharedData*>(sd)->m_past;
+inline Offset Func::SharedData::bclen() const {
+  auto const len = this->m_bclenSmall;
+  if (UNLIKELY(len == kSmallDeltaLimit)) {
+    assertx(m_allFlags.m_hasExtendedSharedData);
+    return static_cast<const ExtendedSharedData*>(this)->m_bclen;
   }
-  return base() + delta;
+  return len;
 }
 
 inline bool Func::contains(PC pc) const {
-  return contains(Offset(pc - entry()));
+  return uintptr_t(pc - entry()) < bclen();
 }
 
 inline bool Func::contains(Offset offset) const {
-  return offset >= base() && offset < past();
+  assertx(offset >= 0);
+  return offset < bclen();
 }
 
 inline PC Func::at(Offset off) const {
   // We don't use contains because we want to allow past becase it is often
   // used in loops
-  assertx(off >= base() && off <= past());
+  assertx(off >= 0 && off <= bclen());
   return entry() + off;
 }
 
@@ -705,7 +701,7 @@ inline const Func::EHEntVec& Func::ehtab() const {
 }
 
 inline const EHEnt* Func::findEH(Offset o) const {
-  assertx(o >= base() && o < past());
+  assertx(o >= 0 && o < bclen());
   return findEH(shared()->m_ehtab, o);
 }
 

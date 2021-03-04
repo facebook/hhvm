@@ -148,7 +148,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // The prologue is responsible for unwinding all inputs. We could have
   // optimized away Uninit stores for ActRec and inouts, so skip them as well.
   auto const marker = inst->marker();
-  auto const fixupBcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
+  auto const fixupBcOff = marker.fixupBcOff();
   auto const fixupSpOff =
     marker.spOff() - extra->numInputs() - kNumActRecCells - extra->numOut;
   v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};

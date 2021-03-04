@@ -396,13 +396,6 @@ struct Func final {
   Offset bclen() const;
 
   /*
-   * Get the offsets of the start (base) and end (past) of the function's
-   * bytecode, relative to the start of the unit.
-   */
-  Offset base() const;
-  Offset past() const;
-
-  /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
    * the function's bytecode stream.
    */
@@ -1224,8 +1217,8 @@ private:
    * Properties shared by all clones of a Func.
    */
   struct SharedData : AtomicCountable {
-    SharedData(unsigned char const* bc, Offset bc_len, PreClass* preClass,
-               Offset past, int sn, int line1, int line2, bool isPhpLeafFn,
+    SharedData(unsigned char const* bc, Offset bclen, PreClass* preClass,
+               int sn, int line1, int line2, bool isPhpLeafFn,
                const StringData* docComment);
     ~SharedData();
 
@@ -1234,12 +1227,13 @@ private:
      */
     void atomicRelease();
 
+    Offset bclen() const;
+
     /*
      * Data fields are packed to minimize size.  Try not to add anything new
      * here or reorder anything.
      */
     // (There's a 32-bit integer in the AtomicCountable base class here.)
-    Offset m_bclen{0};
     unsigned char const* m_bc{nullptr};
     PreClass* m_preClass;
     int m_line1;
@@ -1289,9 +1283,8 @@ private:
     RepoAuthType m_repoAwaitedReturnType;
 
     /*
-     * The `past' offset and `line2' are likely to be small, particularly
-     * relative to m_base and m_line1, so we encode each as a 16-bit
-     * difference.
+     * The `line2' are likely to be small, particularly relative to m_line1,
+     * so we encode each as a 16-bit difference.
      *
      * If the delta doesn't fit, we need to have an ExtendedSharedData to hold
      * the real values---in that case, the field here that overflowed is set to
@@ -1299,7 +1292,16 @@ private:
      * be valid.
      */
     uint16_t m_line2Delta;
-    uint16_t m_pastDelta;
+
+    /**
+     * bclen is likely to be small. So we encode each as a 16-bit value
+     *
+     * If the value doesn't fit, we need to have an ExtendedSharedData to hold
+     * the real values---in that case, the field here that overflowed is set to
+     * kSmallDeltaLimit and the corresponding field in ExtendedSharedData will
+     * be valid.
+     */
+    uint16_t m_bclenSmall;
 
     std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
     uint32_t m_cti_size; // size of cti code
@@ -1332,7 +1334,7 @@ private:
     ParamUBMap m_paramUBs;
     UpperBoundVec m_returnUBs;
     CoeffectRules m_coeffectRules;
-    Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
+    Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     int64_t m_dynCallSampleRate;

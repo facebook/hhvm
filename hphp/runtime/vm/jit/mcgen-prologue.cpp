@@ -198,9 +198,9 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   // (The region selectors break a region whenever they hit a SrcKey that has
   // already been optimized.)
   auto const includedBody = prologTransIDs.size() <= 1 &&
-    func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
+    func->bclen() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
-  auto funcBodySk = SrcKey{func, func->base(), ResumeMode::None};
+  auto funcBodySk = SrcKey{func, 0, ResumeMode::None};
   if (!includedBody) {
     profData()->setOptimized(funcBodySk);
   }

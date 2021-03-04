@@ -99,9 +99,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx) {
     // large regions containing the function body (starting at various
     // DV funclets).
     if (prevId != kInvalidTransID) {
-      auto const func = rec->func();
       auto const bcOffset = rec->startBcOff();
-      if (func->base() == bcOffset) {
+      if (0 == bcOffset) {
         FTRACE(2, "selectHotTrace: breaking region because reached the main "
                "function body entry at Translation {} (BC offset {})\n",
                tid, bcOffset);

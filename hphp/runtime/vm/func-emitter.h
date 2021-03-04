@@ -91,7 +91,7 @@ struct FuncEmitter {
    */
   void init(int l1, int l2, Attr attrs_,
             const StringData* docComment_);
-  void finish(Offset past);
+  void finish();
 
   /*
    * Commit this function to a repo.
@@ -337,7 +337,6 @@ public:
   /*
    * Func fields.
    */
-  Offset past;
   int line1;
   int line2;
   LowStringPtr name;

@@ -125,7 +125,7 @@ SourceLocTable FuncEmitter::createSourceLocTable() const {
   for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
     Offset endOff = i < m_sourceLocTab.size() - 1
       ? m_sourceLocTab[i + 1].first
-      : past;
+      : m_bclen;
     locations.push_back(SourceLocEntry(endOff, m_sourceLocTab[i].second));
   }
   return locations;
@@ -195,8 +195,7 @@ void FuncEmitter::init(int l1, int l2, Attr attrs_,
   if (!SystemLib::s_inited) assertx(attrs & AttrBuiltin);
 }
 
-void FuncEmitter::finish(Offset past_) {
-  past = past_;
+void FuncEmitter::finish() {
   sortEHTab();
 }
 
@@ -207,7 +206,7 @@ void FuncEmitter::commit(RepoTxn& txn) {
   int64_t usn = m_ue.m_sn;
 
   if (!m_sourceLocTab.empty()) {
-    m_lineTable = createLineTable(m_sourceLocTab, past);
+    m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   }
 
   frp.insertFunc[repoId]
@@ -218,7 +217,7 @@ void FuncEmitter::commit(RepoTxn& txn) {
       SourceLoc& e = m_sourceLocTab[i].second;
       Offset endOff = i < m_sourceLocTab.size() - 1
                           ? m_sourceLocTab[i + 1].first
-                          : past;
+                          : m_bclen;
 
       frp.insertFuncSourceLoc[repoId]
           .insert(txn, usn, m_sn, endOff, e.line0, e.char0, e.line1, e.char1);
@@ -294,7 +293,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
-    past >= Func::kSmallDeltaLimit ||
+    m_bclen >= Func::kSmallDeltaLimit ||
     m_sn >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
     hasParamsWithMultiUBs ||
@@ -305,10 +304,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   auto const bc = allocateBCRegion(m_bc, m_bclen);
   f->m_shared.reset(
     needsExtendedSharedData
-      ? new Func::ExtendedSharedData(bc, m_bclen, preClass, past, m_sn, line1, line2,
+      ? new Func::ExtendedSharedData(bc, m_bclen, preClass, m_sn, line1, line2,
                                      !containsCalls, docComment)
-      : new Func::SharedData(bc, m_bclen, preClass, past, m_sn,
-                             line1, line2, !containsCalls, docComment)
+      : new Func::SharedData(bc, m_bclen, preClass, m_sn, line1, line2,
+                             !containsCalls, docComment)
   );
 
   f->init(params.size());
@@ -317,9 +316,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     ex->m_allFlags.m_hasExtendedSharedData = true;
     ex->m_arFuncPtr = nullptr;
     ex->m_nativeFuncPtr = nullptr;
+    ex->m_bclen = m_bclen;
     ex->m_sn = m_sn;
     ex->m_line2 = line2;
-    ex->m_past = past;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
@@ -410,7 +409,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
    * info altogether, since it may not be backed by a repo).
    */
   if (m_sourceLocTab.size() != 0) {
-    f->stashLineTable(createLineTable(m_sourceLocTab, past));
+    f->stashLineTable(createLineTable(m_sourceLocTab, m_bclen));
     // If the debugger is enabled, or we plan to dump hhas we will
     // need the extended line table information in the output, and if
     // we're not writing the repo, stashing it here is necessary for
@@ -663,17 +662,14 @@ Attr FuncEmitter::fix_attrs(Attr a) const {
 template<class SerDe>
 void FuncEmitter::serdeMetaData(SerDe& sd) {
   // NOTE: name and a few other fields currently handled outside of this.
-  Offset past_delta;
   Attr a = attrs;
 
   if (!SerDe::deserializing) {
-    past_delta = past;
     a = fix_attrs(attrs);
   }
 
   sd(line1)
     (line2)
-    (past_delta)
     (a)
     (staticCoeffects)
     (hniReturnType)
@@ -712,7 +708,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   if (SerDe::deserializing) {
     repoReturnType.resolveArray(ue());
     repoAwaitedReturnType.resolveArray(ue());
-    past = past_delta;
     attrs = fix_attrs(a);
   }
 }
@@ -885,7 +880,7 @@ void FuncRepoProxy::GetFuncsStmt
       );
 
       fe->setEHTabIsSorted();
-      fe->finish(fe->past);
+      fe->finish();
     }
   } while (!query.done());
   txn.commit();

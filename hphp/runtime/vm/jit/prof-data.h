@@ -477,7 +477,7 @@ struct ProfData {
       return;
     }
 
-    auto const bcSize = func->past() - func->base();
+    auto const bcSize = func->bclen();
     m_profilingBCSize.fetch_add(bcSize, std::memory_order_relaxed);
 
     static auto const bcSizeCounter =

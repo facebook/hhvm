@@ -657,7 +657,7 @@ static std::string toStringElm(TypedValue tv) {
  * funclet for iterId, otherwise false.
  */
 static bool checkIterScope(const Func* f, Offset o, Id iterId) {
-  assertx(o >= f->base() && o < f->past());
+  assertx(o >= 0 && o < f->bclen());
   for (auto const& eh : f->ehtab()) {
     if (eh.m_base <= o && o < eh.m_past &&
         eh.m_iterId == iterId) {
@@ -3642,9 +3642,7 @@ OPTBLD_INLINE void iopUnsetG() {
 
 bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
              void* ctx, TCA retAddr) {
-  TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
-        vmfp()->func()->entry(),
-        int(vmfp()->func()->base()));
+  TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
 
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   assertx(kNumActRecCells == 2);
@@ -5723,7 +5721,7 @@ PcPair lookup_cti(const Func* func, PC pc) {
   if (!cti_entry) {
     cti_entry = compile_cti(const_cast<Func*>(func), unitpc);
   }
-  if (pc == unitpc + func->base()) {
+  if (pc == unitpc) {
     return {cti_code().base() + cti_entry, pc};
   }
   return {lookup_cti(func, cti_entry, unitpc, pc), pc};

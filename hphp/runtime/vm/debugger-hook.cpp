@@ -468,7 +468,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
   auto base = f->isGenerator()
     ? BaseGenerator::userBase(f)
-    : f->base();
+    : 0;
   auto pc = f->at(base);
 
   TRACE(5, "func() break %s : unit %p offset %d ==> pc %p)\n",
@@ -481,7 +481,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
 void phpAddBreakPointFuncExit(const Func* f) {
   // Iterate through the function's opcodes and place breakpoints on each RetC
-  for (PC pc = f->entry(); pc < f->at(f->past());
+  for (PC pc = f->entry(); pc < f->at(f->bclen());
        pc += instrLen(pc)) {
     if (peek_op(pc) != OpRetC && peek_op(pc) != OpRetCSuspended &&
         peek_op(pc) != OpRetM) {
@@ -541,7 +541,7 @@ void phpRemoveBreakPoint(const Func* f, Offset offset) {
 void phpRemoveBreakPointFuncEntry(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function entry
   // filter
-  auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
+  auto base = f->isGenerator() ? BaseGenerator::userBase(f) : 0;
   auto pc = f->at(base);
   RID().m_callBreakPointFilter.removePC(pc);
 }
@@ -550,7 +550,7 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function exit
   // filter
   auto& req_data = RID();
-  for (PC pc = f->at(f->base()); pc < f->at(f->past());
+  for (PC pc = f->entry(); pc < f->at(f->bclen());
        pc += instrLen(pc)) {
     if (peek_op(pc) == OpRetC || peek_op(pc) == OpRetCSuspended ||
         peek_op(pc) == OpRetM) {

@@ -717,8 +717,7 @@ struct AsmState {
                   fe->maxStackCells + maxStackCells);
     fe->maxStackCells += maxStackCells;
 
-
-    fe->finish(fe->bcPos());
+    fe->finish();
 
     fe = 0;
     labelMap.clear();
@@ -2106,7 +2105,7 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
   using Atom = BCPattern::Atom;
   using Captures = BCPattern::CaptureVec;
 
-  auto end = fe->bc() + fe->past;
+  auto end = fe->bc() + fe->bcPos();
   for (uint32_t paramIdx = 0; paramIdx < fe->params.size(); ++paramIdx) {
     auto& pi = fe->params[paramIdx];
     if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;

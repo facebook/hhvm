@@ -207,11 +207,11 @@ Offset compile_cti(Func* func, PC unitpc) {
   }
   // patch jumps, update func with code addresses.
   patches.finish(cti_size);
-  bc_total += func->past() - func->base();
+  bc_total += func->bclen();
   TRACE(1, "cti %s entry %p size %d %lu total %lu %lu\n",
         func->fullName()->size() > 0 ? func->fullName()->data() : "\"\"",
         func->entry(),
-        func->past() - func->base(), cti_size,
+        func->bclen(), cti_size,
         bc_total, a.used());
   TRACE(2, "cti lookups %lu misses %lu\n", cc_lookups, cc_misses);
   return cti_base - cti_code().base();

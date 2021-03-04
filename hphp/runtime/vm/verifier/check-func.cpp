@@ -268,7 +268,7 @@ bool mayTakeExnEdges(Op op) {
 FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
 : m_func(f)
 , m_graph(0)
-, m_instrs(m_arena, f->past + 1)
+, m_instrs(m_arena, f->bcPos() + 1)
 , m_errmode(mode) {
   auto& coeffects = f->staticCoeffects;
   auto const isPureBody =
@@ -343,8 +343,8 @@ bool FuncChecker::checkOffsets() {
   bool ok = true;
   assertx(m_func->bcPos() >= 0);
   Offset base = 0;
-  Offset past = m_func->past;
-  checkRegion("func", base, past, "unit", 0, m_func->bcPos(), false);
+  Offset past = m_func->bcPos();
+  checkRegion("func", base, past, "unit", 0, past, false);
   // Get instruction boundaries and check branches within primary body
   ok &= checkPrimaryBody(base, past);
   // DV entry points must be in the primary function body

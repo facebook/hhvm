@@ -68,7 +68,7 @@ inline bool SrcKey::valid() const {
   auto const funcID = m_s.m_funcID;
   assertx(
     funcID.isInvalid() || funcID.isDummy() ||
-    (m_s.m_offset >= func()->base() && m_s.m_offset < func()->past())
+    (m_s.m_offset >= 0 && m_s.m_offset < func()->bclen())
   );
   return !funcID.isInvalid();
 }

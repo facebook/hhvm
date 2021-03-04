@@ -189,7 +189,7 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      if (translator->sk == SrcKey{func, func->base(), ResumeMode::None} &&
+      if (translator->sk == SrcKey{func, 0, ResumeMode::None} &&
           func->numRequiredParams() == func->numNonVariadicParams()) {
         func->setFuncBody(tca);
       }

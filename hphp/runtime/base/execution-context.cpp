@@ -1784,7 +1784,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
         *prevSp = (TypedValue*)(fp + 1);
       }
     }
-    if (prevPc) *prevPc = prevFp->func()->base() + fp->callOffset();
+    if (prevPc) *prevPc = fp->callOffset();
     if (fromVMEntry) *fromVMEntry = false;
     return prevFp;
   }

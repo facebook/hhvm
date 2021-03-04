@@ -179,7 +179,7 @@ FuncInfo find_func_info(const Func* func) {
 
   auto find_jump_targets = [&] {
     auto pc           = func->entry();
-    auto const stop   = func->at(func->past());
+    auto const stop   = func->at(func->bclen());
     auto const bcBase = func->entry();
 
     for (; pc != stop; pc += instrLen(pc)) {
@@ -455,7 +455,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   auto       ehIter  = begin(finfo.ehStarts);
   auto const ehStop  = end(finfo.ehStarts);
   auto       bcIter  = func->entry();
-  auto const bcStop  = func->at(func->past());
+  auto const bcStop  = func->at(func->bclen());
 
   SourceLoc srcLoc;
 

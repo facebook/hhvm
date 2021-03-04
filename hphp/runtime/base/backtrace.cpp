@@ -133,7 +133,7 @@ BTFrame getARFromWHImpl(
   }
   auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   assertx(fp != nullptr && fp->func() != nullptr);
-  return BTFrame { fp, fp->func()->base() };
+  return BTFrame { fp, 0 };
 }
 
 }
@@ -174,7 +174,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
     ctx.stashedFrm = frm;
 
-    return BTFrame { prevFP, safe_cast<int>(stk->callOff) + ifr.func->base() };
+    return BTFrame { prevFP, safe_cast<int>(stk->callOff) };
   }
 
   // If we don't have an inlined frame, it's always safe to use pcOff() if
@@ -230,7 +230,7 @@ BTFrame getPrevActRec(
       ifr.callOff,
       1 << ActRec::LocalsDecRefd  // don't attempt to read locals
     );
-    prev.pc = fp->callOffset() + ifr.func->base();
+    prev.pc = fp->callOffset();
 
     ctx.prevIFID = ctx.inlineStack.frame;
     ctx.inlineStack.frame = ifr.parent;
@@ -243,7 +243,7 @@ BTFrame getPrevActRec(
     if (prev.pc == kInvalidOffset) {
       assertx(ctx.prevIFID != kInvalidIFrameID);
       auto const ifr = jit::getInlineFrame(ctx.prevIFID);
-      prev.pc = prev.fp->func()->base() + ifr.callOff;
+      prev.pc = ifr.callOff;
     }
     ctx.stashedFrm = BTFrame{};
     ctx.prevIFID = kInvalidIFrameID;

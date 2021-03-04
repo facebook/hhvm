@@ -144,7 +144,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const bc = fe.bc();
     auto const pc = bc + offset;
     auto const nextOff = offset + instrLen(pc);
-    auto const atLast = nextOff == fe.past;
+    auto const atLast = nextOff == fe.bcPos();
     auto const op = peek_op(pc);
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
@@ -187,7 +187,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   }
 
   // Now, each interval in blockStarts delinates a basic block.
-  blockStarts.insert(fe.past);
+  blockStarts.insert(fe.bcPos());
 
   if (traceBc) {
     FTRACE(0, "TraceBytecode (parse): {}::{} in {}\n",

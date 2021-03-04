@@ -816,7 +816,7 @@ void UnitEmitter::serde(SerDe& sd) {
       assertx(fe->sn() == i);
       fe->serde(sd);
       fe->setEHTabIsSorted();
-      fe->finish(fe->past);
+      fe->finish();
     }
   } else {
     auto total = m_fes.size();

@@ -436,7 +436,7 @@ bool Func::isFuncIdValid(FuncId id) {
 // Bytecode.
 
 bool Func::isEntry(Offset offset) const {
-  return offset == base() || isDVEntry(offset);
+  return offset == 0 || isDVEntry(offset);
 }
 
 bool Func::isDVEntry(Offset offset) const {
@@ -449,7 +449,7 @@ bool Func::isDVEntry(Offset offset) const {
 }
 
 int Func::getEntryNumParams(Offset offset) const {
-  if (offset == base()) return numNonVariadicParams();
+  if (offset == 0) return numNonVariadicParams();
   return getDVEntryNumParams(offset);
 }
 
@@ -471,7 +471,7 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
       return pi.funcletOff;
     }
   }
-  return base();
+  return 0;
 }
 
 
@@ -625,7 +625,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << ' ' << m_name->data();
     }
 
-    out << " at " << base();
     out << std::endl;
   }
 
@@ -694,8 +693,8 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   }
 
   if (opts.startOffset != kInvalidOffset) {
-    auto startOffset = std::max(base(), opts.startOffset);
-    auto stopOffset = std::min(past(), opts.stopOffset);
+    auto startOffset = std::max(0, opts.startOffset);
+    auto stopOffset = std::min(bclen(), opts.stopOffset);
 
     if (startOffset >= stopOffset) {
       return;
@@ -732,12 +731,11 @@ void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // SharedData.
 
-Func::SharedData::SharedData(unsigned char const* bc, Offset bc_len,
-                             PreClass* preClass, Offset past,
-                             int sn, int line1, int line2, bool isPhpLeafFn,
+Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
+                             PreClass* preClass, int sn, int line1,
+                             int line2, bool isPhpLeafFn,
                              const StringData* docComment)
-  : m_bclen(bc_len)
-  , m_bc(bc)
+  : m_bc(bc)
   , m_preClass(preClass)
   , m_line1(line1)
   , m_docComment(docComment)
@@ -763,19 +761,20 @@ Func::SharedData::SharedData(unsigned char const* bc, Offset bc_len,
   m_allFlags.m_hasReturnWithMultiUBs = false;
   m_allFlags.m_hasCoeffectRules = false;
 
-  m_pastDelta = std::min<uint32_t>(past, kSmallDeltaLimit);
+  m_bclenSmall = std::min<uint32_t>(bclen, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
   m_sn = std::min<uint32_t>(sn, kSmallDeltaLimit);
 }
 
 Func::SharedData::~SharedData() {
   if (!RuntimeOption::RepoAuthoritative) {
+    auto len = bclen();
     if (debug) {
       // poison released bytecode
-      memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
+      memset(const_cast<unsigned char*>(m_bc), 0xff, len);
     }
     free(const_cast<unsigned char*>(m_bc));
-    g_hhbc_size->addValue(-int64_t(m_bclen));
+    g_hhbc_size->addValue(-int64_t(len));
   }
 
   Func::s_extendedLineInfo.erase(this);
@@ -1031,7 +1030,7 @@ LineToOffsetRangeVecMap Func::getLineToOffsetRangeVecMap() const {
 
   LineToOffsetRangeVecMap map;
   auto const& srcLocTable = getLocTable();
-  SourceLocation::generateLineToOffsetRangesMap(srcLocTable, base(), map);
+  SourceLocation::generateLineToOffsetRangesMap(srcLocTable, map);
 
   ExtendedLineInfoCache::accessor acc;
   if (!s_extendedLineInfo.find(acc, sharedData)) {

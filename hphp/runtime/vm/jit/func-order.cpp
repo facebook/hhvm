@@ -82,7 +82,6 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   FTRACE(1, "createCallGraph\n");
   pd->forEachProfilingFunc([&](auto const& func) {
     always_assert(func);
-    auto const baseOffset = func->base();
     auto const fid = func->getFuncId();
     auto const transIds = pd->funcProfTransIDs(fid);
     uint32_t size = 1; // avoid zero-sized functions
@@ -91,7 +90,7 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::Profile);
       size += trec->asmSize();
-      if (trec->srcKey().offset() == baseOffset) {
+      if (trec->srcKey().offset() == 0) {
         profCount += pd->transCounter(transId);
       }
     }

@@ -156,7 +156,6 @@ LineInfo getLineInfo(const LineTable& table, Offset pc);
 
 void generateLineToOffsetRangesMap(
   const SourceLocTable& srcLocTable,
-  Offset baseOff,
   LineToOffsetRangeVecMap& map
 );
 

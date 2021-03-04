@@ -190,8 +190,7 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
 
   unsafeRegs.stack.nalloc(
     numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
-  unsafeRegs.pc = callerFP->func()->at(
-    callerFP->func()->base() + callFlags.callOffset());
+  unsafeRegs.pc = callerFP->func()->at(callFlags.callOffset());
   unsafeRegs.jitReturnAddr = savedRip;
   tl_regState = VMRegState::CLEAN;
 

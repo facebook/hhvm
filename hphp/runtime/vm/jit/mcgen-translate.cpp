@@ -240,13 +240,13 @@ void createSrcRecs(const Func* func) {
 
   auto create_one = [&] (Offset off) {
     auto const sk = SrcKey { func, off, ResumeMode::None };
-    if (off == func->base() ||
+    if (off == 0 ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, spOff);
     }
   };
 
-  create_one(func->base());
+  create_one(0);
   for (auto const& pi : func->params()) {
     if (pi.hasDefaultValue()) create_one(pi.funcletOff);
   }

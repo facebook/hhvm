@@ -1407,7 +1407,7 @@ void fix_inlined_call(Global& genv, IRInstruction* call, SSATmp* fp) {
   // Adjust the fp and callOffset to reflect the caller frame for this call.
   assertx(call->src(1)->inst()->is(BeginInlining));
   auto const sk = call->marker().fixupSk();
-  call->extra<Call>()->callOffset = sk.offset() - sk.func()->base();
+  call->extra<Call>()->callOffset = sk.offset();
   call->setSrc(1, fp);
 }
 

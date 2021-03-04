@@ -674,7 +674,7 @@ void emitContEnter(IRGS& env) {
   assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
           curClass(env)->classof(Generator::getClass()));
 
-  auto const callBCOffset = bcOff(env) - curFunc(env)->base();
+  auto const callBCOffset = bcOff(env);
   auto const isAsync = curClass(env)->classof(AsyncGenerator::getClass());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);

@@ -106,7 +106,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
     m_offset = m_func->offsetOf(pc);
     auto base = m_func->isGenerator()
       ? BaseGenerator::userBase(m_func)
-      : m_func->base();
+      : 0;
     if (m_offset == base) {
       m_funcEntry = true;
     }

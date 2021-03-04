@@ -163,7 +163,7 @@ Tag Tag::Param(const Func* func, int32_t param) {
   assertx(func->fullName());
   auto const unit = func->unit();
   auto const file = getFilename(func, unit);
-  auto const line = func->getLineNumber(func->base());
+  auto const line = func->getLineNumber(0);
   auto const text = folly::to<std::string>(
       "param ", param, " of ", func->fullName()->data(), " at ", file->data());
   return Tag::Param(makeStaticString(text), line);

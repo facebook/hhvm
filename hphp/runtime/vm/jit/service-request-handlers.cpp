@@ -241,7 +241,7 @@ TCA getFuncBody(const Func* func) {
     tca = tc::ustubs().resumeHelper;
     const_cast<Func*>(func)->setFuncBody(tca);
   } else {
-    SrcKey sk{func, func->base(), ResumeMode::None};
+    SrcKey sk{func, 0, ResumeMode::None};
     auto const trans = getTranslation(sk);
     tca = trans.isRequestPersistentFailure()
       ? tc::ustubs().interpHelperNoTranslate
@@ -317,7 +317,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       assertx(caller == vmfp());
       auto const destFunc = caller->func();
       // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = skipCall(destFunc->at(destFunc->base() + callOff));
+      vmpc() = skipCall(destFunc->at(callOff));
       if (info.req == REQ_POST_INTERP_RET) {
         TypedValue rv;
         rv.m_data = info.args[2].tvData;

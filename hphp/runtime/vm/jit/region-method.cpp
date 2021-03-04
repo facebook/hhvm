@@ -31,8 +31,8 @@ TRACE_SET_MOD(region);
 
 namespace {
 
-bool isFuncEntry(const Func* func, Offset off) {
-  return off == func->base();
+bool isFuncEntry(Offset off) {
+  return off == 0;
 }
 
 int numInstrs(PC start, PC end) {
@@ -64,7 +64,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   using HPHP::Verifier::Block;
 
   auto const func = context.sk.func();
-  if (!isFuncEntry(func, context.sk.offset())) return nullptr;
+  if (!isFuncEntry(context.sk.offset())) return nullptr;
   FTRACE(1, "function entry for {}: using selectMethod\n",
          func->fullName()->data());
 

@@ -231,8 +231,7 @@ inline void Venv::record_inline_stack(TCA addr) {
   auto const func = unit.frames[frame].func;
   auto const in_builtin = func && func->isCPPBuiltin();
   if (origin && !in_builtin) {
-    auto const marker = origin->marker();
-    callOff = marker.bcOff() - marker.func()->base();
+    callOff = origin->marker().bcOff();
   }
   stacks.emplace_back(addr, IStack{frame - 1, pending_frames, callOff});
 }

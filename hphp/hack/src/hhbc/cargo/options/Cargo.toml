@@ -12,7 +12,7 @@ bitflags = "1.2"
 fnv = "1.0"
 itertools = "0.8"
 lazy_static = "1.0"
-lru-cache = "0.1.2"
+lru = "0.6.5"
 options_serde = { path = "../options_serde" }
 serde = { version = "=1.0.118", features = ["derive", "rc"] }
 serde_derive = "1.0"

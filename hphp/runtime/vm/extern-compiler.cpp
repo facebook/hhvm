@@ -1154,14 +1154,14 @@ CompilerResult hackc_compile(
       hhbc_flags |= FOLD_LAZY_CLASS_KEYS;
     }	 
     
-    folly::dynamic aliased_namespaces = ConfigBuilder()
+    std::string aliased_namespaces = ConfigBuilder()
         .addField("hhvm.aliased_namespaces", options.aliasedNamespaces())
         .toString();        
                                                                  
     native_environment const native_env = {
       filename,
       aliased_namespaces.c_str(),
-      s_misc_config.data(),
+      s_misc_config.c_str(),
       RuntimeOption::EvalEmitClassPointers, 
       RuntimeOption::CheckIntOverflow, 
       hhbc_flags,

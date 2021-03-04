@@ -34,6 +34,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "adata_state"
+version = "0.0.0"
+dependencies = [
+ "hhas_adata_rust",
+ "runtime",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -91,7 +99,6 @@ version = "0.0.0"
 dependencies = [
  "ast_scope_rust",
  "env",
- "global_state",
  "hhbc_ast_rust",
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
@@ -278,6 +285,7 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
+ "unique_id_builder",
  "unique_list_rust",
 ]
 
@@ -510,10 +518,10 @@ name = "decl_vars_rust"
 version = "0.0.0"
 dependencies = [
  "ast_body",
- "env",
  "hhas_param_rust",
  "naming_special_names_rust",
  "oxidized",
+ "unique_id_builder",
  "unique_list_rust",
 ]
 
@@ -608,6 +616,7 @@ dependencies = [
 name = "emit_adata_rust"
 version = "0.0.0"
 dependencies = [
+ "adata_state",
  "env",
  "hhas_adata_rust",
  "hhbc_ast_rust",
@@ -652,8 +661,6 @@ dependencies = [
  "emit_type_hint_rust",
  "env",
  "generator_rust",
- "global_state",
- "hhas_attribute_rust",
  "hhas_body_rust",
  "hhas_param_rust",
  "hhas_type",
@@ -662,10 +669,12 @@ dependencies = [
  "hhbc_string_utils_rust",
  "indexmap",
  "instruction_sequence_rust",
+ "iterator",
  "itertools",
  "label_rewriter_rust",
  "label_rust",
  "lazy_static",
+ "local",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -673,6 +682,8 @@ dependencies = [
  "regex",
  "runtime",
  "scope_rust",
+ "statement_state",
+ "unique_id_builder",
 ]
 
 [[package]]
@@ -708,6 +719,7 @@ dependencies = [
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
  "label_rust",
+ "local",
  "naming_special_names_rust",
  "options",
  "oxidized",
@@ -745,7 +757,6 @@ dependencies = [
  "emit_symbol_refs_rust",
  "emit_type_constant_rust",
  "env",
- "global_state",
  "hhas_symbol_refs_rust",
  "hhbc_ast_rust",
  "hhbc_id_rust",
@@ -755,6 +766,7 @@ dependencies = [
  "itertools",
  "label_rust",
  "lazy_static",
+ "local",
  "naming_special_names_rust",
  "options",
  "oxidized",
@@ -808,6 +820,7 @@ dependencies = [
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
  "itertools",
+ "local",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -820,9 +833,9 @@ name = "emit_memoize_helpers_rust"
 version = "0.0.0"
 dependencies = [
  "emit_fatal_rust",
- "env",
  "hhas_param_rust",
  "instruction_sequence_rust",
+ "local",
  "oxidized",
 ]
 
@@ -850,6 +863,7 @@ dependencies = [
  "hhbc_id_rust",
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
+ "local",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -868,7 +882,6 @@ dependencies = [
  "emit_memoize_helpers_rust",
  "emit_native_opcode_rust",
  "env",
- "global_state",
  "hhas_attribute_rust",
  "hhas_coeffects",
  "hhas_method_rust",
@@ -894,6 +907,7 @@ dependencies = [
  "env",
  "hhas_body_rust",
  "instruction_sequence_rust",
+ "local",
  "oxidized",
 ]
 
@@ -912,6 +926,7 @@ dependencies = [
  "hhas_type",
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
+ "local",
  "options",
  "oxidized",
 ]
@@ -991,6 +1006,7 @@ dependencies = [
  "env",
  "hhas_symbol_refs_rust",
  "hhbc_id_rust",
+ "symbol_refs_state",
 ]
 
 [[package]]
@@ -1058,16 +1074,20 @@ dependencies = [
 name = "env"
 version = "0.0.0"
 dependencies = [
+ "adata_state",
  "ast_body",
  "ast_scope_rust",
  "bitflags",
- "indexmap",
+ "global_state",
+ "iterator",
  "itertools",
  "label_rust",
- "naming_special_names_rust",
+ "local",
  "ocamlrep",
  "options",
  "oxidized",
+ "statement_state",
+ "symbol_refs_state",
 ]
 
 [[package]]
@@ -1200,12 +1220,12 @@ dependencies = [
 name = "global_state"
 version = "0.0.0"
 dependencies = [
- "env",
  "hhas_coeffects",
  "lazy_static",
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
+ "unique_id_builder",
 ]
 
 [[package]]
@@ -1538,9 +1558,10 @@ name = "hhbc_ast_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "env",
  "hhbc_id_rust",
+ "iterator",
  "label_rust",
+ "local",
  "runtime",
 ]
 
@@ -1578,9 +1599,11 @@ dependencies = [
  "hhbc_string_utils_rust",
  "indexmap",
  "instruction_sequence_rust",
+ "iterator",
  "itertools",
  "label_rust",
  "lazy_static",
+ "local",
  "naming_special_names_rust",
  "ocaml_helper",
  "options",
@@ -1660,15 +1683,20 @@ dependencies = [
 name = "instruction_sequence_rust"
 version = "0.0.0"
 dependencies = [
- "env",
  "hhbc_ast_rust",
+ "iterator",
  "itertools",
  "label_rust",
+ "local",
  "oxidized",
  "pretty_assertions",
  "runtime",
  "thiserror",
 ]
+
+[[package]]
+name = "iterator"
+version = "0.0.0"
 
 [[package]]
 name = "itertools"
@@ -1754,6 +1782,14 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
+]
+
+[[package]]
+name = "local"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+ "naming_special_names_rust",
 ]
 
 [[package]]
@@ -2615,7 +2651,9 @@ version = "0.0.0"
 dependencies = [
  "env",
  "instruction_sequence_rust",
+ "iterator",
  "label_rust",
+ "local",
 ]
 
 [[package]]
@@ -2715,6 +2753,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "statement_state"
+version = "0.0.0"
+dependencies = [
+ "instruction_sequence_rust",
+ "oxidized",
+]
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2766,6 +2812,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "symbol_refs_state"
+version = "0.0.0"
+dependencies = [
+ "hhas_symbol_refs_rust",
 ]
 
 [[package]]
@@ -2924,6 +2977,10 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
+
+[[package]]
+name = "unique_id_builder"
+version = "0.0.0"
 
 [[package]]
 name = "unique_list_rust"

@@ -17,7 +17,6 @@ emit_pos_rust = { path = "../emit_pos" }
 emit_symbol_refs_rust = { path = "../emit_symbol_refs" }
 emit_type_constant_rust = { path = "../emit_type_constant" }
 env = { path = "../env" }
-global_state = { path = "../global_state" }
 hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
@@ -27,6 +26,7 @@ instruction_sequence_rust = { path = "../instruction_sequence" }
 itertools = "0.8"
 label_rust = { path = "../label" }
 lazy_static = "1.0"
+local = { path = "../local" }
 naming_special_names_rust = { path = "../../../naming" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }

@@ -5,6 +5,7 @@
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
 use std::{collections::HashSet, mem};
+use unique_id_builder::*;
 
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::{
@@ -13,7 +14,7 @@ use ast_scope_rust::{
 use decl_vars_rust as decl_vars;
 use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
-use global_state::{ClosureEnclosingClassInfo, GlobalState, LazyState};
+use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hhas_coeffects::HhasCoeffects;
 use hhbc_id::class;
 use hhbc_id_rust as hhbc_id;
@@ -770,7 +771,7 @@ fn convert_lambda<'a>(
         .closure_namespaces
         .insert(closure_class_name.clone(), st.namespace.clone());
     st.record_function_state(
-        env::get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
+        get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
         function_state,
         coeffects_of_scope,
     );
@@ -1107,7 +1108,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         self.state.reset_function_counts();
         let function_state = convert_function_like_body(self, &mut env, &mut md.body)?;
         self.state.record_function_state(
-            env::get_unique_id_for_method(cls.get_name_str(), &md.name.1),
+            get_unique_id_for_method(cls.get_name_str(), &md.name.1),
             function_state,
             HhasCoeffects::default(),
         );
@@ -1136,7 +1137,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 self.state.reset_function_counts();
                 let function_state = convert_function_like_body(self, &mut env, &mut x.body)?;
                 self.state.record_function_state(
-                    env::get_unique_id_for_function(&x.name.1),
+                    get_unique_id_for_function(&x.name.1),
                     function_state,
                     HhasCoeffects::default(),
                 );
@@ -1764,7 +1765,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<()> 
     }
 
     visitor.state.record_function_state(
-        env::get_unique_id_for_main(),
+        get_unique_id_for_main(),
         visitor.state.current_function_state.clone(),
         HhasCoeffects::default(),
     );
@@ -1779,6 +1780,6 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<()> 
     for class in visitor.state.hoisted_classes.into_iter() {
         defs.push(Def::mk_class(class));
     }
-    *e.emit_state_mut() = visitor.state.global_state;
+    *e.emit_global_state_mut() = visitor.state.global_state;
     Ok(())
 }

@@ -18,9 +18,8 @@ use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos;
 use emit_statement::emit_final_stmts;
 use emit_type_hint_rust as emit_type_hint;
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, Env};
 use generator_rust as generator;
-use global_state::LazyState;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
@@ -40,6 +39,8 @@ use oxidized::{
 };
 use reified_generics_helpers as RGH;
 use runtime::TypedValue;
+use statement_state::StatementState;
+use unique_id_builder::*;
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -303,7 +304,7 @@ fn make_decl_vars(
     body: &AstBody,
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
-    let explicit_use_set = &emitter.emit_state().explicit_use_set;
+    let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
 
     let mut decl_vars =
         decl_vars::from_ast(params, body, explicit_use_set).map_err(unrecoverable)?;
@@ -957,7 +958,7 @@ fn set_emit_statement_state(
 
     emit_statement::set_state(
         emitter,
-        emit_statement::State {
+        StatementState {
             verify_return,
             default_return_value,
             default_dropthrough,
@@ -1078,21 +1079,21 @@ fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
 fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
     use ScopeItem::*;
     let function_state_key = match env.scope.items.as_slice() {
-        [] => env::get_unique_id_for_main(),
+        [] => get_unique_id_for_main(),
         [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
-            env::get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
+            get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
         }
-        [.., Function(fun)] => env::get_unique_id_for_function(fun.get_name_str()),
+        [.., Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
         _ => panic!("unexpected scope shape"),
     };
-    let global_state = emitter.emit_state();
+    let global_state = emitter.emit_global_state();
     match global_state.function_to_labels_map.get(&function_state_key) {
         Some(labels) => {
             env.jump_targets_gen.set_labels_in_function(labels.clone());
         }
         None => {
             env.jump_targets_gen
-                .set_labels_in_function(<env::SMap<bool>>::new());
+                .set_labels_in_function(<SMap<bool>>::new());
         }
     };
     global_state

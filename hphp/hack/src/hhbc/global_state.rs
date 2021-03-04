@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::{emitter::Emitter, SMap, SSet, UniqueIdBuilder};
 use hhas_coeffects::HhasCoeffects;
 use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
+use unique_id_builder::{SMap, SSet, UniqueIdBuilder};
 
 #[derive(Debug, FromOcamlRep, ToOcamlRep, Clone)]
 pub struct ClosureEnclosingClassInfo {
@@ -38,8 +38,8 @@ pub struct GlobalState {
 }
 
 impl GlobalState {
-    fn init() -> Box<dyn std::any::Any> {
-        Box::new(GlobalState::default())
+    pub fn init() -> Self {
+        GlobalState::default()
     }
 
     pub fn get_lambda_coeffects_of_scope(
@@ -62,10 +62,4 @@ impl GlobalState {
     ) -> Option<&ClosureEnclosingClassInfo> {
         self.closure_enclosing_classes.get(class_name)
     }
-}
-
-env::lazy_emit_state!(global_state, GlobalState, GlobalState::init);
-
-pub fn set_state(e: &mut Emitter, global_state: GlobalState) {
-    *e.emit_state_mut() = global_state;
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
-    use env::{emitter::Emitter, iterator, local};
+    use env::emitter::Emitter;
     use instruction_sequence_rust::{instr, InstrSeq, Result};
     use label_rust as label;
 

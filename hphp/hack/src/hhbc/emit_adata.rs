@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use adata_state::AdataState;
 use env::emitter::Emitter;
 use hhas_adata_rust::{
     HhasAdata, ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
@@ -12,26 +13,6 @@ use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{Error, InstrSeq, Result};
 use options::HhvmFlags;
 use runtime::TypedValue as TV;
-
-use std::collections::BTreeMap;
-
-#[derive(Default)]
-pub struct State {
-    pub array_identifier_counter: usize,
-    pub array_identifier_map: BTreeMap<TV, String>,
-    pub adata: Vec<HhasAdata>,
-}
-
-impl State {
-    fn init() -> Box<dyn std::any::Any> {
-        Box::new(State {
-            array_identifier_counter: 0,
-            array_identifier_map: BTreeMap::new(),
-            adata: vec![],
-        })
-    }
-}
-env::lazy_emit_state!(adata_state, State, State::init);
 
 pub fn rewrite_typed_values(emitter: &mut Emitter, instrseq: &mut InstrSeq) -> Result<()> {
     instrseq.map_result_mut(&mut |instr| rewrite_typed_value(emitter, instr))
@@ -85,10 +66,10 @@ pub fn get_array_identifier(e: &mut Emitter, tv: &TV) -> String {
     if e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE) {
         next_adata_id(e, tv)
     } else {
-        match e.emit_state_mut().array_identifier_map.get(tv) {
+        match e.emit_adata_state_mut().array_identifier_map.get(tv) {
             None => {
                 let id = next_adata_id(e, tv);
-                e.emit_state_mut()
+                e.emit_adata_state_mut()
                     .array_identifier_map
                     .insert(tv.clone(), id.clone());
                 id
@@ -99,7 +80,7 @@ pub fn get_array_identifier(e: &mut Emitter, tv: &TV) -> String {
 }
 
 fn next_adata_id(e: &mut Emitter, value: &TV) -> String {
-    let mut state = e.emit_state_mut();
+    let mut state = e.emit_adata_state_mut();
     let id = format!("A_{}", state.array_identifier_counter);
     state.array_identifier_counter += 1;
     state.adata.push(HhasAdata {
@@ -109,8 +90,8 @@ fn next_adata_id(e: &mut Emitter, value: &TV) -> String {
     id
 }
 
-pub fn take(e: &mut Emitter) -> State {
-    let state = e.emit_state_mut();
+pub fn take(e: &mut Emitter) -> AdataState {
+    let state = e.emit_adata_state_mut();
     std::mem::take(state)
 }
 
@@ -121,12 +102,12 @@ mod tests {
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
     fn ref_state_from_emiter(e: &Emitter) {
-        let _: &State = e.emit_state();
+        let _: &AdataState = e.emit_adata_state();
     }
 
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
     fn mut_state_from_emiter(e: &mut Emitter) {
-        let _: &mut State = e.emit_state_mut();
+        let _: &mut AdataState = e.emit_adata_state_mut();
     }
 }

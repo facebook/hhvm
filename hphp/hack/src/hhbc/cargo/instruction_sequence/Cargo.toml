@@ -8,10 +8,11 @@ edition = "2018"
 path = "../../instruction_sequence.rs"
 
 [dependencies]
-env = { path = "../env" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
+iterator = { path = "../iterator" }
 itertools = "0.8"
 label_rust = { path = "../label" }
+local = { path = "../local" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 thiserror = "1.0"

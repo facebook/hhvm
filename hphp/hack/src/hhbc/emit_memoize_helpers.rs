@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use emit_fatal_rust as emit_fatal;
-use env::local;
 use hhas_param_rust::HhasParam;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::{aast::FunParam, pos::Pos};

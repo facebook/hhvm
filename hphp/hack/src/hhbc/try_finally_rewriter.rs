@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::emit_statement::{LazyState, Level};
+use crate::emit_statement::Level;
 use crate::reified_generics_helpers as reified;
 
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
-use env::{emitter::Emitter, iterator, jump_targets as jt, local, Env};
+use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use label::Label;
@@ -104,7 +104,7 @@ pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut 
         None => {
             // no finally blocks, but there might be some iterators that should be
             // released before exit - do it
-            let ctx = e.emit_state();
+            let ctx = e.emit_statement_state();
             let num_out = ctx.num_out;
             let verify_out = ctx.verify_out.clone();
             let verify_return = ctx.verify_return.clone();

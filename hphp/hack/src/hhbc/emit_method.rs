@@ -9,7 +9,6 @@ use emit_fatal_rust::{emit_fatal_runtimeomitframe, raise_fatal_parse};
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use emit_native_opcode_rust as emit_native_opcode;
 use env::emitter::Emitter;
-use global_state::LazyState;
 use hhas_attribute_rust as hhas_attribute;
 use hhas_coeffects::HhasCoeffects;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
@@ -142,7 +141,7 @@ pub fn from_ast<'a>(
     };
     let namespace = RcOc::clone(
         emitter
-            .emit_state()
+            .emit_global_state()
             .closure_namespaces
             .get(&class_name)
             .unwrap_or(&class.namespace),
@@ -150,7 +149,7 @@ pub fn from_ast<'a>(
     let mut coeffects = HhasCoeffects::from_ast(&method.ctxs, &method.params);
     if coeffects.get_static_coeffects().is_empty() && is_closure_body {
         coeffects = emitter
-            .emit_state()
+            .emit_global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1)
             .clone()
     }

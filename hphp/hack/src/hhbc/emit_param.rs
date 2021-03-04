@@ -9,7 +9,7 @@ use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust as emit_pos;
 use emit_type_hint_rust::{hint_to_type_info, Kind};
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, Env};
 use hhas_param_rust::HhasParam;
 use hhas_type::Info;
 use hhbc_string_utils_rust::locals::strip_dollar;

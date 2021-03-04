@@ -15,7 +15,7 @@ use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
 use emit_type_hint_rust as emit_type_hint;
 use emit_xhp_rust as emit_xhp;
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, Env};
 use hhas_attribute_rust as hhas_attribute;
 use hhas_class_rust::{HhasClass, HhasClassFlags, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
@@ -51,15 +51,15 @@ fn add_symbol_refs(
     requirements: &Vec<(class::Type, TraitReqKind)>,
 ) {
     base.iter()
-        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+        .for_each(|x| emit_symbol_refs::add_class(emitter, x.clone()));
     implements
         .iter()
-        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+        .for_each(|x| emit_symbol_refs::add_class(emitter, x.clone()));
     uses.iter()
-        .for_each(|x| emit_symbol_refs::State::add_class(emitter, class::Type::from_ast_name(x)));
+        .for_each(|x| emit_symbol_refs::add_class(emitter, class::Type::from_ast_name(x)));
     requirements
         .iter()
-        .for_each(|(x, _)| emit_symbol_refs::State::add_class(emitter, x.clone()));
+        .for_each(|(x, _)| emit_symbol_refs::add_class(emitter, x.clone()));
 }
 
 fn make_86method<'a>(

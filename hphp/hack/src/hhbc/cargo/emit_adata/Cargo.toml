@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../emit_adata.rs"
 
 [dependencies]
+adata_state = { path = "../adata_state" }
 env = { path = "../env" }
 hhas_adata_rust = { path = "../hhas_adata" }
 hhbc_ast_rust = { path = "../hhbc_ast" }

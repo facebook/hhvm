@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::{iterator::Id as IterId, local};
 use hhbc_ast_rust::*;
+use iterator::Id as IterId;
 use itertools::Either;
 use label_rust as label;
 use label_rust::Label;

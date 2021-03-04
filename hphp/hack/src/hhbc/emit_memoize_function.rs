@@ -8,7 +8,7 @@ use emit_body_rust as emit_body;
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos_then;
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
 use hhas_coeffects::HhasCoeffects;
 use hhas_function_rust::{Flags as HhasFunctionFlags, HhasFunction};

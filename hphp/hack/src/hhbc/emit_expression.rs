@@ -10,7 +10,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::{emit_pos, emit_pos_then};
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_type_constant_rust as emit_type_constant;
-use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
+use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use hhas_symbol_refs_rust::IncludePath;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, r#const, function, method, prop, Id};
@@ -577,7 +577,7 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = r#const::Type::from_ast_name(&s);
             let cid: ConstId = string_utils::strip_global_ns(&s).to_string().into();
-            emit_symbol_refs::State::add_constant(emitter, cid.clone());
+            emit_symbol_refs::add_constant(emitter, cid.clone());
             return Ok(emit_pos_then(p, instr::lit_const(CnsE(cid))));
         }
     };
@@ -684,7 +684,7 @@ fn emit_import(
 ) -> Result {
     use tast::ImportFlavor;
     let inc = parse_include(expr);
-    emit_symbol_refs::State::add_include(e, inc.clone());
+    emit_symbol_refs::add_include(e, inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
@@ -744,14 +744,13 @@ fn emit_clone(e: &mut Emitter, env: &Env, expr: &tast::Expr) -> Result {
 }
 
 fn emit_lambda(e: &mut Emitter, env: &Env, fndef: &tast::Fun_, ids: &[aast_defs::Lid]) -> Result {
-    use global_state::LazyState;
     // Closure conversion puts the class number used for CreateCl in the "name"
     // of the function definition
     let fndef_name = &(fndef.name).1;
     let cls_num = fndef_name
         .parse::<isize>()
         .map_err(|err| Unrecoverable(err.to_string()))?;
-    let explicit_use = e.emit_state().explicit_use_set.contains(fndef_name);
+    let explicit_use = e.emit_global_state().explicit_use_set.contains(fndef_name);
     let is_in_lambda = env.scope.is_in_lambda();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(
@@ -1494,7 +1493,7 @@ fn emit_record(
 ) -> Result {
     let es = mk_afkvalues(es);
     let id = class::Type::from_ast_name_and_mangle(&cid.1);
-    emit_symbol_refs::State::add_class(e, id.clone());
+    emit_symbol_refs::add_class(e, id.clone());
     emit_struct_array(e, env, pos, &es, |_, keys| Ok(instr::new_record(id, keys)))
 }
 
@@ -1981,7 +1980,7 @@ fn emit_call_lhs_and_fcall(
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
                     let cid = class::Type::from_ast_name_and_mangle(&cname);
-                    emit_symbol_refs::State::add_class(e, cid.clone());
+                    emit_symbol_refs::add_class(e, cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
                         InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
@@ -3172,7 +3171,7 @@ fn emit_reified_type_opt(env: &Env, pos: &Pos, name: &str) -> Result<Option<Inst
 fn emit_known_class_id(e: &mut Emitter, id: &ast_defs::Id) -> InstrSeq {
     let cid = class::Type::from_ast_name(&id.1);
     let cid_string = instr::string(cid.to_raw_string());
-    emit_symbol_refs::State::add_class(e, cid);
+    emit_symbol_refs::add_class(e, cid);
     InstrSeq::gather(vec![cid_string, instr::classgetc()])
 }
 
@@ -3268,7 +3267,7 @@ fn emit_new(
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = class::Type::from_ast_name_and_mangle(&cname);
-                emit_symbol_refs::State::add_class(e, id.clone());
+                emit_symbol_refs::add_class(e, id.clone());
                 match has_generics {
                     H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
                     H::HasGenerics => InstrSeq::gather(vec![
@@ -4018,7 +4017,7 @@ fn emit_class_const(
                     emit_pos_then(&pos, instr::string(cname))
                 }
             } else {
-                emit_symbol_refs::State::add_class(e, cid.clone());
+                emit_symbol_refs::add_class(e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =

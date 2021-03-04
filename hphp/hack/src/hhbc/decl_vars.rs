@@ -11,12 +11,13 @@ use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
+use unique_id_builder::SSet;
 
 use std::{collections::HashSet, iter::Iterator};
 use unique_list_rust::UniqueList;
 
 struct DeclvarVisitorContext<'a> {
-    explicit_use_set_opt: Option<&'a env::SSet>,
+    explicit_use_set_opt: Option<&'a SSet>,
 }
 
 struct DeclvarVisitor<'a> {
@@ -26,7 +27,7 @@ struct DeclvarVisitor<'a> {
 }
 
 impl<'a> DeclvarVisitor<'a> {
-    fn new(explicit_use_set_opt: Option<&'a env::SSet>) -> Self {
+    fn new(explicit_use_set_opt: Option<&'a SSet>) -> Self {
         Self {
             locals: UniqueList::new(),
             context: DeclvarVisitorContext {
@@ -220,7 +221,7 @@ fn uls_from_ast<P, F1, F2>(
     params: &[P],
     get_param_name: F1,
     get_param_default_value: F2,
-    explicit_use_set_opt: Option<&env::SSet>,
+    explicit_use_set_opt: Option<&SSet>,
     b: &AstBody,
 ) -> Result<impl Iterator<Item = String>, String>
 where
@@ -244,7 +245,7 @@ where
 pub fn from_ast(
     params: &[HhasParam],
     body: &AstBody,
-    explicit_use_set: &env::SSet,
+    explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
         params,

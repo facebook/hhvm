@@ -14,7 +14,7 @@ use ast_scope_rust as ast_scope;
 use context::Context;
 use core_utils_rust::add_ns;
 use emit_type_hint_rust as emit_type_hint;
-use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
+use env::Env as BodyEnv;
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::HhasAdata;
 use hhas_adata_rust::{
@@ -44,8 +44,10 @@ use hhbc_string_utils_rust::{
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq};
+use iterator::Id as IterId;
 use label_rust::Label;
 use lazy_static::lazy_static;
+use local::Type as Local;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};

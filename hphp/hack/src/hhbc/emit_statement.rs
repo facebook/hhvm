@@ -7,47 +7,22 @@ use crate::try_finally_rewriter as tfr;
 use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, local, Env};
+use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use label_rust::Label;
+use lazy_static::lazy_static;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
 use oxidized::{aast as a, ast as tast, ast_defs, local_id, pos::Pos};
-use scope_rust::scope;
-
-use lazy_static::lazy_static;
 use regex::Regex;
-
-/// Context for code generation. It would be more elegant to pass this
-/// around in an environment parameter.
-pub(in crate) struct State {
-    pub(crate) verify_return: Option<a::Hint>,
-    pub(crate) default_return_value: InstrSeq,
-    pub(crate) default_dropthrough: Option<InstrSeq>,
-    pub(crate) verify_out: InstrSeq,
-    pub(crate) function_pos: Pos,
-    pub(crate) num_out: usize,
-}
-
-impl State {
-    fn init() -> Box<dyn std::any::Any> {
-        Box::new(State {
-            verify_return: None,
-            default_return_value: instr::null(),
-            default_dropthrough: None,
-            verify_out: instr::empty(),
-            num_out: 0,
-            function_pos: Pos::make_none(),
-        })
-    }
-}
-env::lazy_emit_state!(statement_state, State, State::init);
+use scope_rust::scope;
+use statement_state::StatementState;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately
-pub(crate) fn set_state(e: &mut Emitter, state: State) {
-    *e.emit_state_mut() = state;
+pub(crate) fn set_state(e: &mut Emitter, state: StatementState) {
+    *e.emit_statement_state_mut() = state;
 }
 
 pub(crate) type Level = usize;
@@ -1422,11 +1397,11 @@ fn emit_for(
 }
 
 pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
-    match e.emit_state().default_dropthrough.as_ref() {
+    match e.emit_statement_state().default_dropthrough.as_ref() {
         Some(instrs) => Ok(instrs.clone()),
         None => {
             let ret = emit_return(e, env)?;
-            let state = e.emit_state();
+            let state = e.emit_statement_state();
             Ok(emit_pos_then(
                 &(state.function_pos.last_char()),
                 InstrSeq::gather(vec![state.default_return_value.clone(), ret]),

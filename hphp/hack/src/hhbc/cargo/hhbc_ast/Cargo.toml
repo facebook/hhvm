@@ -9,7 +9,8 @@ path = "../../hhbc_ast.rs"
 
 [dependencies]
 bitflags = "1.2"
-env = { path = "../env" }
 hhbc_id_rust = { path = "../hhbc_id" }
+iterator = { path = "../iterator" }
 label_rust = { path = "../label" }
+local = { path = "../local" }
 runtime = { path = "../runtime" }

@@ -15,7 +15,6 @@ emit_fatal_rust = { path = "../emit_fatal" }
 emit_memoize_helpers_rust = { path = "../emit_memoize_helpers" }
 emit_native_opcode_rust = { path = "../emit_native_opcode" }
 env = { path = "../env" }
-global_state = { path = "../global_state" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 hhas_coeffects = { path = "../hhas_coeffects" }
 hhas_method_rust = { path = "../hhas_method" }

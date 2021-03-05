@@ -1018,27 +1018,17 @@ and case_list parent_locals ty env switch_pos cl =
     LEnv.drop_cont env C.Fallthrough
   in
   let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
-    if not @@ List.is_empty block then
-      match rest_of_list with
-      | []
-      | [Default (_, [])] ->
-        ()
-      | _ ->
-        begin
-          match LEnv.get_cont_option env C.Next with
-          | Some _ ->
-            if is_default then
-              Errors.default_fallthrough switch_pos
-            else
-              Errors.case_fallthrough switch_pos case_pos
-          | None -> ()
-        end
-    (* match *)
-    (* match *)
-    else
-      ()
+    if (not (List.is_empty block)) && not (List.is_empty rest_of_list) then
+      match LEnv.get_cont_option env C.Next with
+      | Some _ ->
+        if is_default then
+          Errors.default_fallthrough switch_pos
+        else
+          Errors.case_fallthrough switch_pos case_pos
+      | None -> ()
   in
-  let make_exhaustive_equivalent_case_list env cl =
+  let env =
+    (* below, we try to find out if the switch is exhaustive *)
     let has_default =
       List.exists cl ~f:(function
           | Default _ -> true
@@ -1057,6 +1047,7 @@ and case_list parent_locals ty env switch_pos cl =
           ty
           Errors.unify_error
     in
+    (* leverage that enums are checked for exhaustivity *)
     let is_enum =
       let top_type =
         MakeType.class_type
@@ -1066,14 +1057,12 @@ and case_list parent_locals ty env switch_pos cl =
       in
       Typing_subtype.is_sub_type_for_coercion env ty top_type
     in
-    (* If there is no default case and this is not a switch on enum (since
-     * exhaustiveness is garanteed elsewhere on enums),
-     * then add a default case for control flow correctness
-     *)
+    (* register that the runtime may throw in case we cannot prove
+       that the switch is exhaustive *)
     if has_default || is_enum then
-      (env, cl, false)
+      env
     else
-      (env, cl @ [Default (Pos.none, [])], true)
+      might_throw env
   in
   let rec case_list env = function
     | [] -> (env, [])
@@ -1091,17 +1080,7 @@ and case_list parent_locals ty env switch_pos cl =
       let (env, tcl) = case_list env rl in
       (env, Aast.Case (te, tb) :: tcl)
   in
-  let (env, cl, added_empty_default) =
-    make_exhaustive_equivalent_case_list env cl
-  in
-  let (env, tcl) = case_list env cl in
-  let tcl =
-    if added_empty_default then
-      List.take tcl (List.length tcl - 1)
-    else
-      tcl
-  in
-  (env, tcl)
+  case_list env cl
 
 and catch catchctx env (sid, exn_lvar, b) =
   let env = LEnv.replace_cont env C.Next catchctx in

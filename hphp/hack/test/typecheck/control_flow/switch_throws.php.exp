@@ -1,0 +1,6 @@
+File "switch_throws.php", line 16, characters 19-20:
+Invalid argument (Typing[4110])
+  File "switch_throws.php", line 3, characters 24-30:
+  Expected `nothing`
+  File "switch_throws.php", line 7, characters 10-10:
+  But got `int`

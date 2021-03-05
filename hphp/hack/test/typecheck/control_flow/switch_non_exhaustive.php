@@ -11,5 +11,7 @@ function test(string $x): void {
       $y = new B();
       break;
   }
+  // we expect (exact B) since the switch will
+  // throw when $x !== 'a'
   hh_show($y);
 }

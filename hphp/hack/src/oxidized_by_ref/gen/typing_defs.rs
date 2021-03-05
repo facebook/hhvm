@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<afa81856584169f922d0bd1558b8ed7c>>
+// @generated SignedSource<<1716a9b70bb105457f97dea4e91b0433>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -107,6 +107,8 @@ pub struct ClassConst<'a> {
     pub type_: &'a Ty<'a>,
     /// identifies the class from which this const originates
     pub origin: &'a str,
+    /// references to the constants used in the initializer
+    pub refs: &'a [&'a aast::ClassConstRef<'a>],
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
 

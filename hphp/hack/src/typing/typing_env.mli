@@ -104,6 +104,9 @@ val get_class_or_typedef : env -> class_key -> class_or_typedef_result option
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option
 
+(** Get class constants declaration from the appropriate backend and add dependency. *)
+val consts : env -> class_decl -> (string * class_const) list
+
 (** Get type constant declaration from the appropriate backend and add dependency. *)
 val get_typeconst : env -> class_decl -> string -> typeconst_type option
 

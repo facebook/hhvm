@@ -15,44 +15,95 @@ open Typing_defs
 module Attrs = Naming_attributes
 module FunUtils = Decl_fun_utils
 
-let class_const env c (cc : Nast.class_const) =
+module CCR = struct
+  type t = Aast.class_const_ref
+
+  (* We're deriving the compare function by hand to sync it with the rust code.
+   * In the decl parser I need to sort these class_const_from in the same
+   * way. I used `cargo expand` to see how Cargo generated they Ord/PartialOrd
+   * functions.
+   *)
+  let compare_class_const_from ccf0 ccf1 =
+    match (ccf0, ccf1) with
+    | (Self, Self) -> 0
+    | (From lhs, From rhs) -> String.compare lhs rhs
+    | (Self, From _) -> -1
+    | (From _, Self) -> 1
+
+  let compare (ccf0, s0) (ccf1, s1) =
+    match compare_class_const_from ccf0 ccf1 with
+    | 0 -> String.compare s0 s1
+    | x -> x
+end
+
+module CCRSet = Caml.Set.Make (CCR)
+
+(* gather class constants used in a constant initializer *)
+let gather_constants =
+  object (_ : 'self)
+    inherit [_] Aast.reduce as super
+
+    method zero = CCRSet.empty
+
+    method plus s1 s2 = CCRSet.union s1 s2
+
+    method! on_expr acc expr =
+      let refs = super#on_expr acc expr in
+      let refs =
+        match snd expr with
+        | Class_const (class_id, (_, name)) ->
+          begin
+            match snd class_id with
+            | CI from -> CCRSet.add (From (snd from), name) refs
+            | CIself -> CCRSet.add (Self, name) refs
+            (* not allowed *)
+            | CIexpr _
+            | CIstatic
+            | CIparent ->
+              refs
+          end
+        | _ -> refs
+      in
+      CCRSet.union refs acc
+  end
+
+let class_const env (cc : Nast.class_const) =
+  let gather_constants = gather_constants#on_expr CCRSet.empty in
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
   let pos = Decl_env.make_decl_pos env (fst name) in
-  match c.c_kind with
-  | Ast_defs.Ctrait
-  | Ast_defs.Cnormal
-  | Ast_defs.Cabstract
-  | Ast_defs.Cinterface
-  | Ast_defs.Cenum ->
-    let (ty, abstract) =
-      (* Optional hint h, optional expression e *)
-      match (h, e) with
-      | (Some h, Some _) -> (Decl_hint.hint env h, false)
-      | (Some h, None) -> (Decl_hint.hint env h, true)
-      | (None, Some (e_pos, e_)) ->
-        begin
-          match Decl_utils.infer_const e_ with
-          | Some tprim ->
-            ( mk
-                (Reason.Rwitness (Decl_env.make_decl_pos env e_pos), Tprim tprim),
-              false )
-          | None ->
-            (* Typing will take care of rejecting constants that have neither
-             * an initializer nor a literal initializer *)
-            (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false)
-        end
-      | (None, None) ->
-        (* Typing will take care of rejecting constants that have neither
-         * an initializer nor a literal initializer *)
-        let r = Reason.Rwitness pos in
-        (mk (r, Typing_defs.make_tany ()), true)
-    in
-    Some
-      {
-        scc_abstract = abstract;
-        scc_name = Decl_env.make_decl_posed env name;
-        scc_type = ty;
-      }
+  let (ty, abstract, scc_refs) =
+    (* Optional hint h, optional expression e *)
+    match (h, e) with
+    | (Some h, Some e) -> (Decl_hint.hint env h, false, gather_constants e)
+    | (Some h, None) -> (Decl_hint.hint env h, true, CCRSet.empty)
+    | (None, Some e) ->
+      let (e_pos, e_) = e in
+      let cc_refs = gather_constants e in
+      begin
+        match Decl_utils.infer_const e_ with
+        | Some tprim ->
+          ( mk (Reason.Rwitness (Decl_env.make_decl_pos env e_pos), Tprim tprim),
+            false,
+            cc_refs )
+        | None ->
+          (* Typing will take care of rejecting constants that have neither
+           * an initializer nor a literal initializer *)
+          (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false, cc_refs)
+      end
+    | (None, None) ->
+      (* Typing will take care of rejecting constants that have neither
+       * an initializer nor a literal initializer *)
+      let r = Reason.Rwitness pos in
+      (mk (r, Typing_defs.make_tany ()), true, CCRSet.empty)
+  in
+  let scc_refs = CCRSet.elements scc_refs in
+  Some
+    {
+      scc_abstract = abstract;
+      scc_name = Decl_env.make_decl_posed env name;
+      scc_type = ty;
+      scc_refs;
+    }
 
 let typeconst_abstract_kind env = function
   | Aast.TCAbstract default ->
@@ -285,7 +336,7 @@ let class_ ctx c =
       sc_req_implements;
       sc_implements;
       sc_implements_dynamic = c.c_implements_dynamic;
-      sc_consts = List.filter_map c.c_consts (class_const env c);
+      sc_consts = List.filter_map c.c_consts (class_const env);
       sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
       sc_props = List.map ~f:(prop env) vars;
       sc_sprops = List.map ~f:(static_prop env) static_vars;

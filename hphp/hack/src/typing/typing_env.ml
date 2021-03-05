@@ -769,6 +769,11 @@ let get_const env class_ mid =
   end;
   Cls.get_const class_ mid
 
+let consts env class_ =
+  if not (Pos.is_hhi (Cls.pos class_)) then
+    make_depend_on_class env (Cls.name class_);
+  Cls.consts class_
+
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"
  *)

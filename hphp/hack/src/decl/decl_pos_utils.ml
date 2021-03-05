@@ -198,6 +198,7 @@ struct
       cc_pos = pos_or_decl cc.cc_pos;
       cc_type = ty cc.cc_type;
       cc_origin = cc.cc_origin;
+      cc_refs = cc.cc_refs;
     }
 
   and typeconst_abstract_kind = function
@@ -325,6 +326,7 @@ struct
       scc_abstract = scc.scc_abstract;
       scc_name = positioned_id scc.scc_name;
       scc_type = ty scc.scc_type;
+      scc_refs = scc.scc_refs;
     }
 
   and shallow_typeconst stc =

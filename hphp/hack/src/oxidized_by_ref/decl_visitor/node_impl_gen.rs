@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb3eeb811619fe23d7bc1f73c83d06c4>>
+// @generated SignedSource<<9cabd86e81e100156ccac720588a5379>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -59,6 +59,32 @@ impl<'a> Node<'a> for Capability<'a> {
         match self {
             Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
             Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConstFrom<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_const_from(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConstFrom::Self_ => {}
+            ClassConstFrom::From(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConstRef<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_const_ref(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConstRef(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }
@@ -670,6 +696,7 @@ impl<'a> Node<'a> for ShallowClassConst<'a> {
                 abstract_: ref __binding_0,
                 name: ref __binding_1,
                 type_: ref __binding_2,
+                refs: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
@@ -677,7 +704,10 @@ impl<'a> Node<'a> for ShallowClassConst<'a> {
                 {
                     __binding_1.accept(v)
                 }
-                { __binding_2.accept(v) }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
             }
         }
     }

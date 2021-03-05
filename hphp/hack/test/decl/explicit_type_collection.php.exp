@@ -76,8 +76,8 @@
            scc_name = ([9:16-19], "KEY");
            scc_type =
            (Rhint (root|explicit_type_collection.php line 9, characters 9-14),
-            (Tprim Tstring))
-           }
+            (Tprim Tstring));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -129,7 +129,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   }
 
 let shallow_const_to_class_const child_class mro subst const =
-  let { scc_abstract = cc_abstract; scc_name; scc_type } = const in
+  let { scc_abstract = cc_abstract; scc_name; scc_type; scc_refs } = const in
   let ty =
     let ty = scc_type in
     if String.equal child_class mro.mro_name then
@@ -144,6 +144,7 @@ let shallow_const_to_class_const child_class mro subst const =
       cc_pos = fst scc_name;
       cc_type = ty;
       cc_origin = mro.mro_name;
+      cc_refs = scc_refs;
     } )
 
 (** Each class [C] implicitly defines a class constant named [class], which has
@@ -161,6 +162,7 @@ let classname_const class_id =
       cc_synthesized = true;
       cc_type = classname_ty;
       cc_origin = name;
+      cc_refs = [];
     } )
 
 (** Each concrete type constant [const type <sometype> T] implicitly defines a
@@ -191,6 +193,7 @@ let typeconst_structure mro class_name stc =
       cc_synthesized = true;
       cc_type = ts_ty;
       cc_origin = class_name;
+      cc_refs = [];
     } )
 
 let shallow_typeconst_to_typeconst_type child_class mro subst stc =

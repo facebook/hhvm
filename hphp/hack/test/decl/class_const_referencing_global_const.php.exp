@@ -11,14 +11,14 @@
           scc_name = ([5:15-20], "MAX32");
           scc_type =
           (Rhint (root|class_const_referencing_global_const.php line 5, characters 11-13),
-           (Tprim Tint))
-          };
+           (Tprim Tint));
+          scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([6:15-20], "MAX64");
            scc_type =
            (Rhint (root|class_const_referencing_global_const.php line 6, characters 11-13),
-            (Tprim Tint))
-           }
+            (Tprim Tint));
+           scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -36,14 +36,14 @@
            scc_name = ([11:17-22], "MAX32");
            scc_type =
            (Rhint (root|class_const_referencing_global_const.php line 11, characters 13-15),
-            (Tprim Tint))
-           };
+            (Tprim Tint));
+           scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([12:17-22], "MAX64");
             scc_type =
             (Rhint (root|class_const_referencing_global_const.php line 12, characters 13-15),
-             (Tprim Tint))
-            }
+             (Tprim Tint));
+            scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

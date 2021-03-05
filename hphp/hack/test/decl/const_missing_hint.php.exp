@@ -66,8 +66,8 @@
            scc_name = ([14:3-12], "FromConst");
            scc_type =
            (Rwitness (root|const_missing_hint.php line 14, characters 3-11),
-            Tany)
-           }
+            Tany);
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

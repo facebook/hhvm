@@ -42,6 +42,8 @@ type class_const = {
   cc_type: decl_ty;
   cc_origin: string;
       (** identifies the class from which this const originates *)
+  cc_refs: Aast.class_const_ref list;
+      (** references to the constants used in the initializer *)
 }
 [@@deriving show]
 

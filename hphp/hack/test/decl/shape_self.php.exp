@@ -11,8 +11,8 @@
           scc_name = ([4:16-19], "KEY");
           scc_type =
           (Rhint (root|shape_self.php line 4, characters 9-14),
-           (Tprim Tstring))
-          }
+           (Tprim Tstring));
+          scc_refs = [] }
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;

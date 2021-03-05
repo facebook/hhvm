@@ -261,3 +261,10 @@ let pp_og_null_flavor fmt flavor =
   match flavor with
   | OG_nullthrows -> "OG_nullthrows"
   | OG_nullsafe -> "OG_nullsafe"
+
+type class_const_from =
+  | Self
+  | From of string
+[@@deriving eq, show]
+
+type class_const_ref = class_const_from * string [@@deriving eq, show]

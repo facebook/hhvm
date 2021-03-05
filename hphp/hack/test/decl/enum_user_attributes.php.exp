@@ -18,13 +18,13 @@
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");
           scc_type =
           (Rwitness (root|enum_user_attributes.php line 5, characters 7-9),
-           (Tprim Tstring))
-          };
+           (Tprim Tstring));
+          scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false; scc_name = ([6:3-4], "B");
            scc_type =
            (Rwitness (root|enum_user_attributes.php line 6, characters 7-9),
-            (Tprim Tstring))
-           }
+            (Tprim Tstring));
+           scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

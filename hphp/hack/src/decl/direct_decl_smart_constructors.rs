@@ -20,7 +20,7 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use oxidized_by_ref::{
-    aast,
+    aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
@@ -2189,6 +2189,104 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     }
 }
 
+fn insert_cc_ref<'a>(
+    acc: &mut Vec<'a, &'a aast_defs::ClassConstRef<'a>>,
+    cc_ref: &'a aast_defs::ClassConstRef<'a>,
+) {
+    // Insert sorted
+    match acc.binary_search(&cc_ref) {
+        Ok(_pos) => {} // element already in vector @ `pos`
+        Err(pos) => acc.insert(pos, cc_ref),
+    }
+}
+
+/* gathering all constants that appear in a constant initializer expression */
+/* TODO: hand written reducer, temporary until we get a visitor for by-ref.
+ * Here are the expressions that are not yet supported:
+ Darray(&(_, args))
+ Varray(&(_, args))
+ Shape(& args)
+ ValCollection(& (_, _, args))
+ KeyValCollection(
+ Collection(
+ Clone(&'a Expr<'a, Ex, Fb, En, Hi>),
+ ArrayGet(
+ ObjGet(
+ ClassGet(&(cid, cexpr, _)) => {},
+ Call(
+ Yield(&'a Afield<'a, Ex, Fb, En, Hi>),
+ Eif(
+ Is(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Hint<'a>)),
+ As(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Hint<'a>, bool)),
+ New(
+ Record(
+ Efun(&'a (&'a Fun_<'a, Ex, Fb, En, Hi>, &'a [&'a Lid<'a>])),
+ Lfun(&'a (&'a Fun_<'a, Ex, Fb, En, Hi>, &'a [&'a Lid<'a>])),
+ Xml(
+ Callconv(&'a (oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, Fb, En, Hi>)),
+ Import(&'a (oxidized::aast::ImportFlavor, &'a Expr<'a, Ex, Fb, En, Hi>)),
+ ExpressionTree(&'a ExpressionTree<'a, Ex, Fb, En, Hi>),
+ MethodId(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),
+ MethodCaller(&'a (Sid<'a>, &'a Pstring<'a>)),
+ SmethodId(&'a (&'a ClassId<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),
+ ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
+*/
+fn constants_from_expr<'a>(
+    arena: &'a Bump,
+    acc: &mut Vec<'a, &'a aast_defs::ClassConstRef<'a>>,
+    expr: &'a nast::Expr<'a>,
+) {
+    use aast::Expr_::*;
+    /* Very approximative match, to test the idea first */
+    match expr.1 {
+        PrefixedString(&(_, expr)) => constants_from_expr(arena, acc, expr),
+        String2(args) | List(args) => {
+            for arg in args {
+                constants_from_expr(arena, acc, arg)
+            }
+        }
+        Cast(&(_, expr)) | Unop(&(_, expr)) | Await(expr) | ReadonlyExpr(expr) => {
+            constants_from_expr(arena, acc, expr)
+        }
+
+        Binop(&(_, lhs, rhs)) | Pair(&(_, lhs, rhs)) | Pipe(&(_, lhs, rhs)) => {
+            constants_from_expr(arena, acc, lhs);
+            constants_from_expr(arena, acc, rhs)
+        }
+        ClassConst(&(cid, name)) => match &cid.1 {
+            nast::ClassId_::CI(sid) => {
+                let ccref = arena.alloc(aast_defs::ClassConstRef(
+                    aast_defs::ClassConstFrom::From(sid.1),
+                    name.1,
+                ));
+                insert_cc_ref(acc, ccref)
+            }
+            nast::ClassId_::CIself => {
+                let ccref = arena.alloc(aast_defs::ClassConstRef(
+                    aast_defs::ClassConstFrom::Self_,
+                    name.1,
+                ));
+                insert_cc_ref(acc, ccref)
+            }
+            nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {}
+        },
+        Null | This | True | False | Omitted | Id(_) | Lvar(_) | Dollardollar(_)
+        | FunctionPointer(_) | Int(_) | Float(_) | String(_) | Lplaceholder(_) | FunId(_)
+        | EnumAtom(_) | Any => {}
+
+        _ => {}
+    }
+}
+
+fn gather_constants<'a>(
+    arena: &'a Bump,
+    expr: &'a nast::Expr<'a>,
+) -> &'a [&'a aast_defs::ClassConstRef<'a>] {
+    let mut acc = Vec::new_in(arena);
+    constants_from_expr(arena, &mut acc, expr);
+    acc.into_bump_slice()
+}
+
 impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     for DirectDeclSmartConstructors<'a>
 {
@@ -3268,11 +3366,16 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                                 .or_else(|| self.infer_const(name, initializer))
                                 .unwrap_or_else(|| tany());
                             let modifiers = read_member_modifiers(modifiers.iter());
+                            let refs = match initializer {
+                                Node::Expr(expr) => gather_constants(&self.arena, &expr),
+                                _ => &[],
+                            };
                             Some(Node::Const(self.alloc(
                                 shallow_decl_defs::ShallowClassConst {
                                     abstract_: modifiers.is_abstract,
                                     name: id.into(),
                                     type_: ty,
+                                    refs,
                                 },
                             )))
                         }
@@ -3972,6 +4075,10 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let consts = self.slice(enumerators.iter().filter_map(|node| match node {
             Node::ListItem(&(name, value)) => {
                 let id = name.as_id()?;
+                let refs = match value {
+                    Node::Expr(expr) => gather_constants(&self.arena, &expr),
+                    _ => &[],
+                };
                 Some(
                     self.alloc(shallow_decl_defs::ShallowClassConst {
                         abstract_: false,
@@ -3979,6 +4086,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         type_: self
                             .infer_const(name, value)
                             .unwrap_or_else(|| self.tany_with_pos(id.0)),
+                        refs,
                     }),
                 )
             }
@@ -4180,7 +4288,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         type_: Self::R,
         name: Self::R,
         _equal: Self::R,
-        _initial_value: Self::R,
+        initial_value: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
         let name = match self.expect_name(name) {
@@ -4202,10 +4310,15 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             bumpalo::vec![in self.arena; enum_class_ty, type_].into_bump_slice(),
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
+        let refs = match initial_value {
+            Node::Expr(expr) => gather_constants(&self.arena, &expr),
+            _ => &[],
+        };
         Node::Const(self.alloc(ShallowClassConst {
             abstract_: false,
             name: name.into(),
             type_,
+            refs,
         }))
     }
 

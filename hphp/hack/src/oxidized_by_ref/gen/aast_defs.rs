@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cf6ad708219ac1905b7b07b22ba317b5>>
+// @generated SignedSource<<1d6ccfaa717bd0a9d7b93c95e24aa02c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -333,3 +333,39 @@ pub struct WhereConstraintHint<'a>(
 impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
 
 pub use oxidized::aast_defs::ReifyKind;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ClassConstFrom<'a> {
+    Self_,
+    From(&'a str),
+}
+impl<'a> TrivialDrop for ClassConstFrom<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ClassConstRef<'a>(pub ClassConstFrom<'a>, pub &'a str);
+impl<'a> TrivialDrop for ClassConstRef<'a> {}

@@ -647,6 +647,7 @@ and class_const_fold
       cc_pos = fst scc.scc_name;
       cc_type = scc.scc_type;
       cc_origin = c_name;
+      cc_refs = scc.scc_refs;
     }
   in
   let acc = SMap.add (snd scc.scc_name) cc acc in
@@ -666,6 +667,7 @@ and class_class_decl (class_id : Ast_defs.id) : Typing_defs.class_const =
     cc_synthesized = true;
     cc_type = classname_ty;
     cc_origin = name;
+    cc_refs = [];
   }
 
 and prop_decl
@@ -769,6 +771,7 @@ and typeconst_structure
     cc_synthesized = true;
     cc_type = ts_ty;
     cc_origin = snd c.sc_name;
+    cc_refs = [];
   }
 
 and typeconst_fold

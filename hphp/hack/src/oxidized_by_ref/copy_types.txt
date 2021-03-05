@@ -1,3 +1,4 @@
+aast_defs::ClassConstFrom
 aast_defs::Hint_
 aast_defs::ReifyKind
 aast_defs::Sid

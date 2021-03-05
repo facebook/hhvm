@@ -17,8 +17,8 @@
                 (Rhint (root|classes_const_keyword.php line 5, characters 19-24),
                  (Tprim Tstring))
                 ]
-              )))
-          };
+              )));
+          scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([6:38-50], "CNESTED_DICT");
            scc_type =
@@ -35,8 +35,8 @@
                        ]
                      )))
                  ]
-               )))
-           };
+               )));
+           scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([8:37-55], "CNESTED_DICT_FLOAT");
            scc_type =
@@ -53,8 +53,8 @@
                        ]
                      )))
                  ]
-               )))
-           }
+               )));
+           scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -72,8 +72,8 @@
            scc_name = ([13:22-35], "CABSTRACT_INT");
            scc_type =
            (Rhint (root|classes_const_keyword.php line 13, characters 18-20),
-            (Tprim Tint))
-           }
+            (Tprim Tint));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -94,8 +94,8 @@
             (Tapply (([17:9-12], "\\HH\\vec"),
                [(Rhint (root|classes_const_keyword.php line 17, characters 13-15),
                  (Tprim Tint))]
-               )))
-           };
+               )));
+           scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([18:23-34], "CNESTED_VEC");
             scc_type =
@@ -107,8 +107,8 @@
                        (Tprim Tint))]
                      )))
                   ]
-                )))
-            }
+                )));
+            scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -131,8 +131,8 @@
                 (Tprim Tstring)),
                (Rhint (root|classes_const_keyword.php line 22, characters 24-26),
                 (Tprim Tint))
-               )))
-           };
+               )));
+           scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([23:24-31], "CKEYSET");
             scc_type =
@@ -140,8 +140,8 @@
              (Tapply (([23:9-15], "\\HH\\keyset"),
                 [(Rhint (root|classes_const_keyword.php line 23, characters 16-21),
                   (Tprim Tstring))]
-                )))
-            };
+                )));
+            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([24:27-44], "CCLASSNAME_KEYSET");
             scc_type =
@@ -149,16 +149,16 @@
              (Tapply (([24:9-15], "\\HH\\keyset"),
                 [(Rhint (root|classes_const_keyword.php line 24, characters 16-24),
                   (Tprim Tstring))]
-                )))
-            };
+                )));
+            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([25:24-31], "CVARRAY");
             scc_type =
             (Rhint (root|classes_const_keyword.php line 25, characters 9-22),
              (Tvarray
                 (Rhint (root|classes_const_keyword.php line 25, characters 16-21),
-                 (Tprim Tstring))))
-            }
+                 (Tprim Tstring))));
+            scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -176,26 +176,26 @@
            scc_name = ([29:13-17], "CINT");
            scc_type =
            (Rhint (root|classes_const_keyword.php line 29, characters 9-11),
-            (Tprim Tint))
-           };
+            (Tprim Tint));
+           scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([30:15-21], "CFLOAT");
             scc_type =
             (Rhint (root|classes_const_keyword.php line 30, characters 9-13),
-             (Tprim Tfloat))
-            };
+             (Tprim Tfloat));
+            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([31:16-23], "CSTRING");
             scc_type =
             (Rhint (root|classes_const_keyword.php line 31, characters 9-14),
-             (Tprim Tstring))
-            };
+             (Tprim Tstring));
+            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([32:14-19], "CBOOL");
             scc_type =
             (Rhint (root|classes_const_keyword.php line 32, characters 9-12),
-             (Tprim Tbool))
-            }
+             (Tprim Tbool));
+            scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -226,8 +226,8 @@
                    (Rhint (root|classes_const_keyword.php line 36, characters 34-39),
                     (Tprim Tstring))
                    } }
-               )))
-           }
+               )));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -257,8 +257,8 @@
                            (Rhint (root|classes_const_keyword.php line 41, characters 25-29),
                             (Tprim Tfloat))
                            ]))))
-                 ]))
-           }
+                 ]));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -279,8 +279,8 @@
             (Tapply (([45:9-18], "\\HH\\classname"),
                [(Rhint (root|classes_const_keyword.php line 45, characters 19-29),
                  (Tapply (([45:19-30], "\\TupleConsts"), [])))]
-               )))
-           };
+               )));
+           scc_refs = [((Aast_defs.From "\\TupleConsts"), "class")] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([46:36-47], "CCLASSNAME2");
             scc_type =
@@ -288,8 +288,8 @@
              (Tapply (([46:9-18], "\\HH\\classname"),
                 [(Rhint (root|classes_const_keyword.php line 46, characters 19-33),
                   (Tapply (([46:19-34], "\\ClassnameConsts"), [])))]
-                )))
-            }
+                )));
+            scc_refs = [(Aast_defs.Self, "class")] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

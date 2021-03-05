@@ -31,8 +31,8 @@
                 (Rhint (root|atom.php line 9, characters 3-5),
                  (Tapply (([9:3-6], "\\Box"), [])))
                 ]
-              )))
-          }
+              )));
+          scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -82,8 +82,8 @@
                  (Rhint (root|atom.php line 13, characters 3-5),
                   (Tapply (([13:3-6], "\\Box"), [])))
                  ]
-               )))
-           }
+               )));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -137,8 +137,8 @@
                        (Tprim Tstring))]
                      )))
                  ]
-               )))
-           }
+               )));
+           scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

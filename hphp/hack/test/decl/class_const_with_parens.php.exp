@@ -11,14 +11,14 @@
           scc_name = ([4:13-14], "X");
           scc_type =
           (Rhint (root|class_const_with_parens.php line 4, characters 9-11),
-           (Tprim Tint))
-          };
+           (Tprim Tint));
+          scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([5:13-14], "Y");
            scc_type =
            (Rhint (root|class_const_with_parens.php line 5, characters 9-11),
-            (Tprim Tint))
-           }
+            (Tprim Tint));
+           scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

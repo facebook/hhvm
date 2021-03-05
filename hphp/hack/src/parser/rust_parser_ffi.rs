@@ -7,7 +7,7 @@
 use bumpalo::Bump;
 
 use mode_parser::parse_mode;
-use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep};
+use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep, ToOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml, Pool};
 use operator::{Assoc, Operator};
 use oxidized::file_info::Mode;
@@ -17,11 +17,12 @@ use parser_core_types::{
     syntax_by_ref::positioned_trivia::PositionedTrivia, syntax_error::SyntaxError,
     syntax_tree::SyntaxTree, token_kind::TokenKind,
 };
-use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::{StackLimit, KI, MI};
 
+use to_ocaml_impl::*;
+
 pub fn parse<'a, ParseFn, Node, State>(
-    ocaml_source_text: UnsafeOcamlPtr,
+    ocaml_source_text_ptr: UnsafeOcamlPtr,
     env: FullFidelityParserEnv,
     parse_fn: ParseFn,
 ) -> UnsafeOcamlPtr
@@ -38,10 +39,11 @@ where
         + std::panic::UnwindSafe
         + std::panic::RefUnwindSafe
         + 'static,
-    Node: ToOcaml + 'a,
-    State: ToOcaml + 'a,
+    Node: 'a,
+    for<'r> WithContext<'r, Node>: ToOcamlRep,
+    State: ToOcamlRep + 'a,
 {
-    let ocaml_source_text = ocaml_source_text.as_usize();
+    let ocaml_source_text = ocaml_source_text_ptr.as_usize();
 
     let leak_rust_tree = env.leak_rust_tree;
     let env = ParserEnv::from(env);
@@ -79,10 +81,16 @@ where
             let (root, errors, state) =
                 parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));
             // traversing the parsed syntax tree uses about 1/3 of the stack
-            let context = SerializationContext::new(ocaml_source_text);
-            let ocaml_root = unsafe { root.to_ocaml(&context) };
+
+
+            let context = WithContext {
+                t: &(),
+                source_text: ocaml_source_text_ptr,
+            };
+
+            let ocaml_root = pool.add(&context.with(&root));
             let ocaml_errors = pool.add(&errors);
-            let ocaml_state = unsafe { state.to_ocaml(&context) };
+            let ocaml_state = pool.add(&state);
             let tree = if leak_rust_tree {
                 let (_, mut mode) = parse_mode(&source_text);
                 if mode == Some(Mode::Mpartial) && disable_modes {
@@ -108,12 +116,8 @@ where
             let ocaml_tree = pool.add(&tree);
 
             let mut res = pool.block_with_size(4);
-            pool.set_field(&mut res, 0, unsafe {
-                ocamlrep::OpaqueValue::from_bits(ocaml_state)
-            });
-            pool.set_field(&mut res, 1, unsafe {
-                ocamlrep::OpaqueValue::from_bits(ocaml_root)
-            });
+            pool.set_field(&mut res, 0, ocaml_state);
+            pool.set_field(&mut res, 1, ocaml_root);
             pool.set_field(&mut res, 2, ocaml_errors);
             pool.set_field(&mut res, 3, ocaml_tree);
             // Safety: The UnsafeOcamlPtr must point to the first field in

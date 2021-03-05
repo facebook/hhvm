@@ -7,7 +7,7 @@
 mod decl_mode_smart_constructors_generated;
 
 use bumpalo::Bump;
-use ocaml::core::mlvalues::Value;
+use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use parser_core_types::{
     lexable_token::LexableToken,
     source_text::SourceText,
@@ -18,7 +18,6 @@ use parser_core_types::{
     token_kind::TokenKind,
     trivia_factory::TriviaFactory,
 };
-use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 pub struct State<'src, 'arena, S> {
@@ -252,8 +251,8 @@ where
     }
 }
 
-impl<S> ToOcaml for State<'_, '_, S> {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        self.stack().to_ocaml(context)
+impl<S> ToOcamlRep for State<'_, '_, S> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        self.stack().to_ocamlrep(alloc)
     }
 }

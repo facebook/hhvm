@@ -481,9 +481,8 @@ name = "decl_mode_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "ocaml",
+ "ocamlrep",
  "parser_core_types",
- "rust_to_ocaml",
  "smart_constructors",
  "syntax_smart_constructors",
 ]
@@ -2612,19 +2611,8 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
- "rust_to_ocaml",
  "stack_limit",
-]
-
-[[package]]
-name = "rust_to_ocaml"
-version = "0.0.0"
-dependencies = [
- "ocaml",
- "ocamlpool_rust",
- "ocamlrep_ocamlpool",
- "parser_core_types",
- "smart_constructors",
+ "to_ocaml_impl",
 ]
 
 [[package]]
@@ -2941,6 +2929,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "to_ocaml_impl"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep",
+ "parser_core_types",
+]
+
+[[package]]
 name = "typenum"
 version = "1.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3033,9 +3029,8 @@ name = "verify_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "ocaml",
+ "ocamlrep",
  "parser_core_types",
- "rust_to_ocaml",
  "smart_constructors",
  "syntax_smart_constructors",
 ]

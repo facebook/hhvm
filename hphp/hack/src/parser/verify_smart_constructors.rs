@@ -5,6 +5,7 @@
 
 mod verify_smart_constructors_generated;
 
+use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use parser_core_types::{
     syntax_by_ref::{
         has_arena::HasArena,
@@ -16,8 +17,6 @@ use parser_core_types::{
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 use bumpalo::Bump;
-use ocaml::core::mlvalues::Value;
-use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 // TODO: This parser is only used by the ffp tests, and should be moved out of
 // the parser crate into a separate crate colocated with the tests. This will
@@ -97,8 +96,8 @@ impl<'a> SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'
 {
 }
 
-impl ToOcaml for State<'_> {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        to_list(self.stack(), context)
+impl ToOcamlRep for State<'_> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        self.stack().to_ocamlrep(alloc)
     }
 }

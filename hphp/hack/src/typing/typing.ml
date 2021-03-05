@@ -6135,9 +6135,6 @@ and call
         | param :: paraml -> (false, Some param, paraml)
         | [] -> (true, var_param, paraml)
       in
-      (* TODO: We're using plain String at the moment, until we
-       * introduce actual atom notation (#A instead of "A")
-       *)
       let expand_atom_in_enum env enum_name atom_name =
         let cls = Env.get_class env enum_name in
         match cls with

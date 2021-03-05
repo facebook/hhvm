@@ -100,6 +100,7 @@ let blacklisted_types =
     ("aast_defs", "ByteString");
     ("decl_defs", "Linearization");
     ("decl_defs", "MroElement");
+    ("errors", "FinalizedError");
     ("errors", "Marker");
     ("errors", "MarkedMessage");
     ("errors", "PositionGroup");

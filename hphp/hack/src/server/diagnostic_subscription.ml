@@ -164,8 +164,8 @@ let of_id ~id ~init =
     ~global_errors:init
     ~full_check_done:true
 
-(* Return and record errors as send to subscriber. ds is current diagnostics
- * subscription used to choose which errors from global error list to push. *)
+(** Return and record errors as send to subscriber. [ds] is current diagnostics
+    subscription used to choose which errors from global error list to push. *)
 let pop_errors ds ~global_errors =
   if not ds.has_new_errors then
     (ds, SMap.empty)
@@ -197,7 +197,10 @@ let pop_errors ds ~global_errors =
             when not (List.equal Errors.equal_error old new_) ->
             Some new_
           | (Some _, None) -> Some []
-          | _ -> None)
+          | (Some _, Some _)
+          | (None, None) ->
+            (* error is unchanged, ignore *)
+            None)
     in
     (* Convert to absolute paths *)
     let results =

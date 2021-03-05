@@ -114,7 +114,7 @@ val start_initial_full_check : ServerEnv.env -> ServerEnv.env * int
 
 val prepend_root : string -> string
 
-val errors_to_string : Pos.absolute Errors.error_ list -> string
+val errors_to_string : Errors.finalized_error list -> string
 
 val print_telemetries : ServerEnv.env -> unit
 
@@ -144,7 +144,7 @@ val assert_diagnostics : ('a, 'b) loop_outputs -> string -> unit
 val assert_diagnostics_in : ('a, 'b) loop_outputs -> string -> string -> unit
 
 val get_diagnostics :
-  ('a, 'b) loop_outputs -> Pos.absolute Errors.error_ list SMap.t
+  ('a, 'b) loop_outputs -> Errors.finalized_error list SMap.t
 
 val assert_coverage_levels :
   ('a, Coverage_level_defs.result) loop_outputs -> string list -> unit

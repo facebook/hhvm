@@ -13,9 +13,9 @@ open String_utils
 
 type error_code = int [@@deriving eq]
 
-(** We use `Pos.t message` on the server and convert to `Pos.absolute message`
- * before sending it to the client *)
-type 'a message = 'a * string [@@deriving eq]
+(** We use `Pos.t message` and `Pos_or_decl.t message` on the server
+    and convert to `Pos.absolute message` before sending it to the client *)
+type 'a message = 'a * string [@@deriving eq, ord]
 
 let get_message_pos (msg : 'a message) = fst msg
 
@@ -39,7 +39,7 @@ type format =
   | Highlighted
 
 type typing_error_callback =
-  ?code:int -> Pos.t * string -> (Pos.t * string) list -> unit
+  ?code:int -> Pos.t * string -> (Pos_or_decl.t * string) list -> unit
 
 type name_context =
   | FunctionNamespace
@@ -134,16 +134,23 @@ let get_last error_map =
     | [] -> None
     | e :: _ -> Some e)
 
-type 'a error_ = {
+type ('prim_pos, 'pos) error_ = {
   code: error_code;
-  claim: 'a message;
-  reasons: 'a message list;
+  claim: 'prim_pos message;
+  reasons: 'pos message list;
 }
 [@@deriving eq]
 
-type error = Pos.t error_ [@@deriving eq]
+type finalized_error = (Pos.absolute, Pos.absolute) error_
+
+type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq]
 
 type applied_fixme = Pos.t * int [@@deriving eq]
+
+type t = error files_t * applied_fixme files_t [@@deriving eq]
+
+let claim_as_reason : Pos.t message -> Pos_or_decl.t message =
+ (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
 
 let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 
@@ -166,7 +173,7 @@ let badpos_message_2 =
     "There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. %s"
     Error_message_sentinel.please_file_a_bug_message
 
-let try_with_result f1 f2 =
+let try_with_result f1 (f2 : 'res -> error -> 'res) : 'res =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
   let is_hh_fixme_copy = !is_hh_fixme in
@@ -193,19 +200,18 @@ let try_with_result f1 f2 =
   | None -> result
   | Some { code; claim; reasons } ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
-     * error position*)
-    let l =
-      let (_, msg) = claim in
+     * error position. *)
+    let (claim, reasons) =
+      let (prim_pos, msg) = claim in
       if String.equal msg badpos_message || String.equal msg badpos_message_2
       then
-        if List.is_empty reasons then
-          failwith "in try_with_result"
-        else
-          reasons
+        match reasons with
+        | [] -> failwith "in try_with_result"
+        | (_p, claim) :: reasons -> ((prim_pos, claim), reasons)
       else
-        claim :: reasons
+        (claim, reasons)
     in
-    f2 result { code; claim = List.hd_exn l; reasons = List.tl_exn l }
+    f2 result { code; claim; reasons }
 
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
@@ -311,55 +317,53 @@ let (name_context_to_string : name_context -> string) = function
 
 let get_pos { claim; _ } = fst claim
 
-let sort err =
-  let rec compare (x_code, x_messages) (y_code, y_messages) =
-    match (x_messages, y_messages) with
-    | ([], []) -> 0
-    | (_x_messages, []) -> -1
-    | ([], _y_messages) -> 1
-    | (x_message :: x_messages, y_message :: y_messages) ->
-      (* The primary sort order is by file *)
-      let comparison =
-        Relative_path.compare
-          (fst x_message |> Pos.filename)
-          (fst y_message |> Pos.filename)
-      in
-      (* Then within each file, sort by phase *)
-      let comparison =
-        if comparison = 0 then
-          Int.compare (x_code / 1000) (y_code / 1000)
-        else
-          comparison
-      in
-      (* If the error codes are the same, sort by position *)
-      let comparison =
-        if comparison = 0 then
-          Pos.compare (fst x_message) (fst y_message)
-        else
-          comparison
-      in
-      (* If the error codes are also the same, sort by message text *)
-      let comparison =
-        if comparison = 0 then
-          String.compare (snd x_message) (snd y_message)
-        else
-          comparison
-      in
-      (* Finally, if the message text is also the same, then continue comparing
-      the reason messages (which indicate the reason why Hack believes
-      there is an error reported in the claim message) *)
+let sort : error list -> error list =
+ fun err ->
+  let compare_reasons = List.compare (compare_message Pos_or_decl.compare) in
+  let compare
+      { code = x_code; claim = x_claim; reasons = x_messages }
+      { code = y_code; claim = y_claim; reasons = y_messages } =
+    (* The primary sort order is by file *)
+    let comparison =
+      Relative_path.compare
+        (fst x_claim |> Pos.filename)
+        (fst y_claim |> Pos.filename)
+    in
+    (* Then within each file, sort by phase *)
+    let comparison =
       if comparison = 0 then
-        compare (x_code, x_messages) (y_code, y_messages)
+        Int.compare (x_code / 1000) (y_code / 1000)
       else
         comparison
+    in
+    (* If the error codes are the same, sort by position *)
+    let comparison =
+      if comparison = 0 then
+        Pos.compare (fst x_claim) (fst y_claim)
+      else
+        comparison
+    in
+    (* If the primary positions are also the same, sort by message text *)
+    let comparison =
+      if comparison = 0 then
+        String.compare (snd x_claim) (snd y_claim)
+      else
+        comparison
+    in
+    (* Finally, if the message text is also the same, then continue comparing
+    the reason messages (which indicate the reason why Hack believes
+    there is an error reported in the claim message) *)
+    if comparison = 0 then
+      compare_reasons x_messages y_messages
+    else
+      comparison
   in
   let equal x y = compare x y = 0 in
-  let coalesce { code; claim; reasons } = (code, claim :: reasons) in
-  List.sort ~compare:(fun x y -> compare (coalesce x) (coalesce y)) err
-  |> List.remove_consecutive_duplicates ~equal:(fun x y ->
-         equal (coalesce x) (coalesce y))
+  List.sort ~compare:(fun x y -> compare x y) err
+  |> List.remove_consecutive_duplicates ~equal:(fun x y -> equal x y)
 
-let get_sorted_error_list (err, _) = sort (files_t_to_list err)
+let get_sorted_error_list : t -> error list =
+ (fun (err, _) -> sort (files_t_to_list err))
 
 (* Getters and setter for passed-in map, based on current context *)
 let get_current_file_t file_t_map =
@@ -395,24 +399,26 @@ and make_error code claim reasons : error = { code; claim; reasons }
 (*****************************************************************************)
 (* Accessors. *)
 (*****************************************************************************)
-and get_code ({ code; _ } : 'a error_) = (code : error_code)
+and get_code ({ code; _ } : ('pp, 'p) error_) = (code : error_code)
 
-let get_severity (error : 'a error_) = get_code_severity (get_code error)
+let get_severity (error : ('pp, 'p) error_) = get_code_severity (get_code error)
 
-let to_list ({ claim; reasons; _ } : 'a error_) = claim :: reasons
+let to_list : ('p, 'p) error_ -> 'p message list =
+ (fun { claim; reasons; _ } -> claim :: reasons)
 
-let to_absolute { code; claim; reasons } =
+let get_messages = to_list
+
+let to_absolute : error -> finalized_error =
+ fun { code; claim; reasons } ->
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons = List.map reasons (fun (p, s) -> (Pos.to_absolute p, s)) in
   { code; claim; reasons }
 
 let make_absolute_error code (x : (Pos.absolute * string) list) :
-    Pos.absolute error_ =
+    finalized_error =
   match x with
   | [] -> failwith "an error must have at least one message"
   | claim :: reasons -> { code; claim; reasons }
-
-let get_messages ({ claim; reasons; _ } : 'a error_) = claim :: reasons
 
 let read_lines path =
   try In_channel.read_lines path
@@ -425,7 +431,7 @@ let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
    value for (f x) are consecutive. For any two elements
    x1 and x2 in xs where (f x1) = (f x2), if x1 occurs before x2 in
    xs, then x1 also occurs before x2 in the returned list. *)
-let combining_sort (xs : 'a list) ~(f : 'a -> string) : 'a list =
+let combining_sort (xs : 'a list) ~(f : 'a -> string) : _ list =
   let rec build_map xs grouped keys =
     match xs with
     | x :: xs ->
@@ -486,7 +492,7 @@ let to_absolute_for_test { code; claim; reasons } =
 
 let report_pos_from_reason = ref false
 
-let to_string ({ code; claim; reasons } : Pos.absolute error_) : string =
+let to_string ({ code; claim; reasons } : finalized_error) : string =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
@@ -547,8 +553,6 @@ module Typing = Error_codes.Typing
 (*****************************************************************************)
 (* Types *)
 (*****************************************************************************)
-
-type t = error files_t * applied_fixme files_t [@@deriving eq]
 
 module type Error_category = sig
   type t
@@ -656,7 +660,7 @@ let add_error_with_fixme_error error explanation =
   add_error_impl error;
   add_error_impl { code; claim = (pos, explanation); reasons = [] }
 
-let rec add_applied_fixme code pos =
+let rec add_applied_fixme code (pos : Pos.t) =
   if ServerLoadFlag.get_no_load () then
     let applied_fixmes_list = get_current_list !applied_fixmes in
     set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
@@ -665,13 +669,13 @@ let rec add_applied_fixme code pos =
 
 and add code pos msg = add_list code (pos, msg) []
 
-and fixme_present pos code =
+and fixme_present (pos : Pos.t) code =
   !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
 
 and add_list code (claim : _ message) reasons =
   add_error { code; claim; reasons }
 
-and add_error error =
+and add_error (error : error) =
   let { code; claim; reasons } = error in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
   let error = { code; claim; reasons } in
@@ -1017,7 +1021,8 @@ let highlight_differences base to_highlight =
     |> String.concat
   | List.Or_unequal_lengths.Unequal_lengths -> to_highlight
 
-let error_name_already_bound name name_prev p p_prev =
+let error_name_already_bound name name_prev (p : Pos.t) (p_prev : Pos_or_decl.t)
+    =
   let name = strip_ns name in
   let name_prev = strip_ns name_prev in
   let (claim, reasons) =
@@ -1042,8 +1047,8 @@ let error_name_already_bound name name_prev p p_prev =
   let reasons =
     if Relative_path.(is_hhi (prefix (Pos.filename p))) then
       reasons @ [(p_prev, hhi_msg)]
-    else if Relative_path.(is_hhi (prefix (Pos.filename p_prev))) then
-      reasons @ [(p, hhi_msg)]
+    else if Pos_or_decl.is_hhi p_prev then
+      reasons @ [(Pos_or_decl.of_raw_pos p, hhi_msg)]
     else
       reasons
   in
@@ -1459,7 +1464,9 @@ let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
     ^ ", got "
     ^ Markdown_lite.md_codify actual_ty )
 
-let uninstantiable_class usage_pos decl_pos name reason_msgl =
+let uninstantiable_class :
+    Pos.t -> Pos_or_decl.t -> string -> (Pos.t * string) option -> unit =
+ fun (usage_pos : Pos.t) (decl_pos : Pos_or_decl.t) name reason_msgl ->
   let name = strip_ns name in
   let (claim, reasons) =
     ( (usage_pos, Markdown_lite.md_codify name ^ " is uninstantiable"),
@@ -1467,11 +1474,13 @@ let uninstantiable_class usage_pos decl_pos name reason_msgl =
   in
   let (claim, reasons) =
     match reason_msgl with
-    | (reason_pos, reason_str) :: tail ->
-      let reasons = tail @ (claim :: reasons) in
-      let claim = (reason_pos, reason_str ^ " which must be instantiable") in
+    | Some (prefix_claim_pos, prefix_claim_msg) ->
+      let reasons = claim_as_reason claim :: reasons in
+      let claim =
+        (prefix_claim_pos, prefix_claim_msg ^ " which must be instantiable")
+      in
       (claim, reasons)
-    | [] -> (claim, reasons)
+    | None -> (claim, reasons)
   in
   add_list (Typing.err_code Typing.UninstantiableClass) claim reasons
 
@@ -2059,7 +2068,7 @@ let context_definitions_msg () =
    * - needs to be a thunk because path_of_prefix resolves a reference that is populated at runtime
    *   - points to the hh_server tmp hhi directory
    * - magic numbers are inteded to provide a nicer IDE experience,
-   * - a Pos is constructed in order to make the link to contexts.hhi clickable
+   * - a pos is constructed in order to make the link to contexts.hhi clickable
    *)
   let path =
     Relative_path.(
@@ -2356,7 +2365,8 @@ let method_variance pos =
     pos
     "Covariance or contravariance is not allowed in type parameter of method or function."
 
-let explain_constraint ~use_pos ~definition_pos ~param_name claim reasons =
+let explain_constraint
+    ~(use_pos : Pos.t) ~definition_pos ~param_name claim reasons =
   let inst_msg = "Some type constraint(s) here are violated" in
   (* There may be multiple constraints instantiated at one spot; avoid
    * duplicating the instantiation message *)
@@ -2365,7 +2375,7 @@ let explain_constraint ~use_pos ~definition_pos ~param_name claim reasons =
     if String.equal msg inst_msg && Pos.equal p use_pos then
       reasons
     else
-      claim :: reasons
+      claim_as_reason claim :: reasons
   in
   let name = strip_ns param_name in
   add_list
@@ -2554,20 +2564,6 @@ let unbound_name_typing pos name =
     (Typing.err_code Typing.UnboundNameTyping)
     pos
     ("Unbound name (typing): " ^ Markdown_lite.md_codify (strip_ns name))
-
-let unbound_name_type_constant_access ~access_pos ~name_pos name =
-  add_list
-    (Typing.err_code Typing.UnboundNameTypeConstantAccess)
-    ( access_pos,
-      "Unbound name "
-      ^ Markdown_lite.md_codify (strip_ns name)
-      ^ " in type constant access" )
-    ( []
-    @
-    if Pos.equal name_pos access_pos then
-      []
-    else
-      [(name_pos, "Unbound name is here")] )
 
 let previous_default p =
   add
@@ -2818,7 +2814,7 @@ let array_access code pos1 pos2 ty =
   add_list
     (Typing.err_code code)
     (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty)
-    ( if not (phys_equal pos2 Pos.none) then
+    ( if not (phys_equal pos2 Pos_or_decl.none) then
       [(pos2, "Definition is here")]
     else
       [] )
@@ -2831,7 +2827,7 @@ let keyset_set pos1 pos2 =
   add_list
     (Typing.err_code Typing.KeysetSet)
     (pos1, "Elements in a keyset cannot be assigned, use append instead.")
-    ( if not (phys_equal pos2 Pos.none) then
+    ( if not (phys_equal pos2 Pos_or_decl.none) then
       [(pos2, "Definition is here")]
     else
       [] )
@@ -2840,7 +2836,7 @@ let array_append pos1 pos2 ty =
   add_list
     (Typing.err_code Typing.ArrayAppend)
     (pos1, ty ^ " does not allow array append")
-    ( if not (phys_equal pos2 Pos.none) then
+    ( if not (phys_equal pos2 Pos_or_decl.none) then
       [(pos2, "Definition is here")]
     else
       [] )
@@ -2849,7 +2845,7 @@ let const_mutation pos1 pos2 ty =
   add_list
     (Typing.err_code Typing.ConstMutation)
     (pos1, "You cannot mutate this")
-    ( if not (phys_equal pos2 Pos.none) then
+    ( if not (phys_equal pos2 Pos_or_decl.none) then
       [(pos2, "This is " ^ ty)]
     else
       [] )
@@ -3317,7 +3313,7 @@ let unify_error ?code err =
 
 let unify_error_at : Pos.t -> typing_error_callback =
  fun pos ?code claim reasons ->
-  unify_error ?code (pos, "Typing error") (claim :: reasons)
+  unify_error ?code (pos, "Typing error") (claim_as_reason claim :: reasons)
 
 let maybe_unify_error specific_code ?code errl =
   add_list (Option.value code ~default:(Typing.err_code specific_code)) errl
@@ -3797,7 +3793,7 @@ let wrong_extend_kind
   let msg2 = (parent_pos, "This is " ^ parent_kind_str ^ ".") in
   add_list (Typing.err_code Typing.WrongExtendKind) msg1 [msg2]
 
-let unsatisfied_req parent_pos req_name req_pos =
+let unsatisfied_req (parent_pos : Pos.t) req_name req_pos =
   let s1 = "Failure to satisfy requirement: " ^ strip_ns req_name in
   let s2 = "Required here" in
   if Pos.equal req_pos parent_pos then
@@ -3806,7 +3802,7 @@ let unsatisfied_req parent_pos req_name req_pos =
     add_list
       (Typing.err_code Typing.UnsatisfiedReq)
       (parent_pos, s1)
-      [(req_pos, s2)]
+      [(Pos_or_decl.of_raw_pos req_pos, s2)]
 
 let cyclic_class_def stack pos =
   let stack =
@@ -4013,7 +4009,7 @@ let xhp_required pos why_xhp ty_reason_msg =
   add_list
     (Typing.err_code Typing.XhpRequired)
     (pos, msg)
-    ((pos, why_xhp) :: ty_reason_msg)
+    ((Pos_or_decl.of_raw_pos pos, why_xhp) :: ty_reason_msg)
 
 let illegal_xhp_child pos ty_reason_msg =
   let msg = "XHP children must be compatible with XHPChild" in
@@ -4173,11 +4169,11 @@ let multiple_concrete_defs
       ^ Markdown_lite.md_codify name
       ^ "." )
     [
-      ( child_pos,
+      ( Pos_or_decl.of_raw_pos child_pos,
         Markdown_lite.md_codify child_origin ^ "'s definition is here." );
       ( parent_pos,
         Markdown_lite.md_codify parent_origin ^ "'s definition is here." );
-      ( child_pos,
+      ( Pos_or_decl.of_raw_pos child_pos,
         "Redeclare "
         ^ Markdown_lite.md_codify name
         ^ " in "
@@ -4293,7 +4289,7 @@ let ambiguous_lambda pos uses =
   add_list
     (Typing.err_code Typing.AmbiguousLambda)
     (pos, msg1)
-    ( (pos, msg2)
+    ( (Pos_or_decl.of_raw_pos pos, msg2)
     :: List.map uses (fun (pos, ty) ->
            (pos, "This use has type " ^ Markdown_lite.md_codify ty)) )
 
@@ -4864,7 +4860,10 @@ let unnecessary_attribute pos ~attr ~reason ~suggestion =
   add_list
     (Typing.err_code Typing.UnnecessaryAttribute)
     (pos, sprintf "The attribute `%s` is unnecessary" attr)
-    [(reason_pos, "It is unnecessary because " ^ reason_msg); (pos, suggestion)]
+    [
+      (reason_pos, "It is unnecessary because " ^ reason_msg);
+      (Pos_or_decl.of_raw_pos pos, suggestion);
+    ]
 
 let inherited_class_member_with_different_case
     member_type name name_prev p child_class prev_class prev_class_pos =
@@ -5192,7 +5191,7 @@ let unsafe_cast pos =
 (* Printing *)
 (*****************************************************************************)
 
-let to_json (error : Pos.absolute error_) =
+let to_json (error : finalized_error) =
   let (error_code, msgl) = (get_code error, to_list error) in
   let elts =
     List.map msgl (fun (p, w) ->

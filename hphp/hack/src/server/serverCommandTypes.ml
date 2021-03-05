@@ -15,7 +15,7 @@ module Server_status = struct
   type t = {
     liveness: status_liveness;
     has_unsaved_changes: bool;
-    error_list: Pos.absolute Errors.error_ list;
+    error_list: Errors.finalized_error list;
     dropped_count: int;
     last_recheck_stats: Telemetry.t option;
   }
@@ -246,7 +246,7 @@ type _ t =
       -> Server_status.t t
   | STATUS_SINGLE :
       file_input * int option
-      -> (Pos.absolute Errors.error_ list * int) t
+      -> (Errors.finalized_error list * int) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool
@@ -373,7 +373,7 @@ and streamed =
   | LIST_MODES
 
 type push =
-  | DIAGNOSTIC of int * Pos.absolute Errors.error_ list SMap.t
+  | DIAGNOSTIC of int * Errors.finalized_error list SMap.t
   | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
   | FATAL_EXCEPTION of Marshal_tools.remote_exception_data

@@ -14,6 +14,8 @@ let btw = Pos.btw
 
 let get_raw_pos : t -> Pos.t option = (fun p -> Some p)
 
+let of_raw_pos : Pos.t -> t = (fun p -> p)
+
 let make_decl_pos : Pos.t -> Decl_reference.t -> t =
  (fun p _decl -> (* TODO *) p)
 

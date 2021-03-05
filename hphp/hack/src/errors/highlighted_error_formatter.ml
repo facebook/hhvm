@@ -562,7 +562,7 @@ let mark_messages
       in
       ((next_marker_n, existing_markers), { original_index; marker; message }))
 
-let to_string (error : Pos.absolute Errors.error_) : string =
+let to_string (error : Errors.finalized_error) : string =
   let error_code = Errors.get_code error in
   (* Assign messages markers according to order of original error list
     and then sort these marked messages such that messages in the same

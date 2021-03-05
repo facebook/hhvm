@@ -3874,14 +3874,14 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
   (env, tal, te, classes)
 
 and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
-  let reason_msgl =
+  let reason =
     match cid with
     | CIexpr _ ->
       let ty_str = "This would be " ^ Typing_print.error env c_ty in
-      [(reason_pos, ty_str)]
-    | _ -> []
+      Some (reason_pos, ty_str)
+    | _ -> None
   in
-  Errors.uninstantiable_class c_usage_pos c_tc_pos c_name reason_msgl
+  Errors.uninstantiable_class c_usage_pos c_tc_pos c_name reason
 
 and coerce_to_throwable pos env exn_ty =
   let throwable_ty = MakeType.throwable (Reason.Rthrow pos) in

@@ -6,7 +6,7 @@
     core_kernel
     hh_autoimport
     logging
-    pos
+    pos_or_decl
     ast
     server_load_flag
     utils_exit

@@ -19,6 +19,9 @@ val none : t
     Not valid if from different files or second position precedes first *)
 val btw : t -> t -> t
 
+(** Essentially an upcast. *)
+val of_raw_pos : Pos.t -> t
+
 (** Compress a position to be stored in the decl heap. *)
 val make_decl_pos : Pos.t -> Decl_reference.t -> t
 

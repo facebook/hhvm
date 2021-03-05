@@ -6,5 +6,4 @@
  *
  *)
 
-val to_string :
-  ?claim_color:Tty.raw_color -> Pos.absolute Errors.error_ -> string
+val to_string : ?claim_color:Tty.raw_color -> Errors.finalized_error -> string

@@ -6,4 +6,4 @@
  *
  *)
 
-val to_string : Pos.absolute Errors.error_ -> string
+val to_string : Errors.finalized_error -> string

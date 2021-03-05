@@ -134,7 +134,7 @@ let col_widths (msgs : Pos.absolute Errors.message list) :
 (** Format the list of messages in a given error with context.
     The list may not be ordered, and multiple messages may occur on one line.
  *)
-let format_error (error : Pos.absolute Errors.error_) : string =
+let format_error (error : Errors.finalized_error) : string =
   (* Sort messages such that messages in the same file are together.
     Does not reorder the files or messages within a file. *)
   let msgs =
@@ -193,7 +193,7 @@ let format_error (error : Pos.absolute Errors.error_) : string =
   String.concat ~sep:"\n" (aux sorted_msgs None) ^ "\n"
 
 let to_string
-    ?(claim_color : Tty.raw_color option) (error : Pos.absolute Errors.error_) :
+    ?(claim_color : Tty.raw_color option) (error : Errors.finalized_error) :
     string =
   let error_code = Errors.get_code error in
   let msgl = Errors.to_list error in

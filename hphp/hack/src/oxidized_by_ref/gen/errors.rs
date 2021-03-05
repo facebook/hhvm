@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b052dfe5d3ee516b82bcd836a7973d7>>
+// @generated SignedSource<<5fdd5b9b03c090aff40b0cf2b457064c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -24,8 +24,8 @@ pub use crate::error_codes::Typing;
 
 pub use oxidized::errors::ErrorCode;
 
-/// We use `Pos.t message` on the server and convert to `Pos.absolute message`
-/// before sending it to the client
+/// We use `Pos.t message` and `Pos_or_decl.t message` on the server
+/// and convert to `Pos.absolute message` before sending it to the client
 pub type Message<'a, A> = (A, &'a str);
 
 pub use oxidized::errors::Phase;
@@ -53,14 +53,14 @@ pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct Error_<'a, A> {
+pub struct Error_<'a, PrimPos, Pos> {
     pub code: oxidized::errors::ErrorCode,
-    pub claim: &'a Message<'a, A>,
-    pub reasons: &'a [&'a Message<'a, A>],
+    pub claim: &'a Message<'a, PrimPos>,
+    pub reasons: &'a [&'a Message<'a, Pos>],
 }
-impl<'a, A: TrivialDrop> TrivialDrop for Error_<'a, A> {}
+impl<'a, PrimPos: TrivialDrop, Pos: TrivialDrop> TrivialDrop for Error_<'a, PrimPos, Pos> {}
 
-pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>>;
+pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>>;
 
 #[derive(
     Clone,

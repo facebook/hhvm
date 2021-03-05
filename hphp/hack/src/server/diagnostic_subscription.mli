@@ -28,6 +28,6 @@ val error_sources : t -> Relative_path.Set.t
 
 (* Errors ready for sending to client *)
 val pop_errors :
-  t -> global_errors:Errors.t -> t * Pos.absolute Errors.error_ list SMap.t
+  t -> global_errors:Errors.t -> t * Errors.finalized_error list SMap.t
 
 val get_pushed_error_length : t -> bool * int

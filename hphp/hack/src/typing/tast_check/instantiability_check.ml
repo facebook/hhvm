@@ -58,7 +58,7 @@ let rec check_hint env (pos, hint) =
              && String.( <> ) tc_name SN.Collections.cVec ->
         let tc_pos = Cls.pos cls in
         let tc_name = Cls.name cls in
-        Errors.uninstantiable_class pos tc_pos tc_name []
+        Errors.uninstantiable_class pos tc_pos tc_name None
       | _ -> ()
     end;
     if String.equal class_id SN.Classes.cClassname then

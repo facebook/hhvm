@@ -1052,7 +1052,7 @@ let hack_symbol_definition_to_lsp_identifier_location
     }
 
 let hack_errors_to_lsp_diagnostic
-    (filename : string) (errors : Pos.absolute Errors.error_ list) :
+    (filename : string) (errors : Errors.finalized_error list) :
     PublishDiagnostics.params =
   let open Lsp.Location in
   let location_message (error : Pos.absolute * string) : Lsp.Location.t * string
@@ -1061,7 +1061,7 @@ let hack_errors_to_lsp_diagnostic
     let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
     ({ Location.uri; range }, Markdown_lite.render message)
   in
-  let hack_error_to_lsp_diagnostic (error : Pos.absolute Errors.error_) =
+  let hack_error_to_lsp_diagnostic (error : Errors.finalized_error) =
     let all_messages = Errors.to_list error |> List.map ~f:location_message in
     let (first_message, additional_messages) =
       match all_messages with
@@ -3344,7 +3344,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
 (* our client currently has non-empty diagnostic reports.                     *)
 let do_diagnostics
     (uris_with_diagnostics : UriSet.t)
-    (file_reports : Pos.absolute Errors.error_ list SMap.t) : UriSet.t =
+    (file_reports : Errors.finalized_error list SMap.t) : UriSet.t =
   (* Hack sometimes reports a diagnostic on an empty file when it can't       *)
   (* figure out which file to report. In this case we'll report on the root.  *)
   (* Nuclide and VSCode both display this fine, though they obviously don't   *)

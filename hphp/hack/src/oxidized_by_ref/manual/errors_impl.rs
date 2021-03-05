@@ -7,12 +7,13 @@ use std::cmp::Ordering;
 
 use crate::errors::*;
 use crate::pos::Pos;
+use crate::pos_or_decl::PosOrDecl;
 
-impl<'a> Error_<'a, Pos<'a>> {
+impl<'a> Error_<'a, Pos<'a>, PosOrDecl<'a>> {
     pub fn new(
         code: ErrorCode,
         claim: &'a Message<'a, Pos<'a>>,
-        reasons: &'a [&'a Message<'a, Pos<'a>>],
+        reasons: &'a [&'a Message<'a, PosOrDecl<'a>>],
     ) -> Self {
         Error_ {
             code,
@@ -41,7 +42,7 @@ impl FileOrd for &Pos<'_> {
     }
 }
 
-impl<P: Ord + FileOrd> Ord for Error_<'_, P> {
+impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for Error_<'_, PP, P> {
     // Intended to match the implementation of `compare` in `Errors.sort` in OCaml.
     fn cmp(&self, other: &Self) -> Ordering {
         let Self {
@@ -72,13 +73,13 @@ impl<P: Ord + FileOrd> Ord for Error_<'_, P> {
     }
 }
 
-impl<P: Ord + FileOrd> PartialOrd for Error_<'_, P> {
+impl<PP: Ord + FileOrd, P: Ord + FileOrd> PartialOrd for Error_<'_, PP, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'a> Error_<'a, Pos<'a>> {
+impl<'a> Error_<'a, Pos<'a>, PosOrDecl<'a>> {
     /// Return a struct with a `std::fmt::Display` implementation that displays
     /// the error in the "raw" format expected by our typecheck test cases.
     pub fn display_raw(&'a self) -> DisplayRaw<'a> {
@@ -86,7 +87,7 @@ impl<'a> Error_<'a, Pos<'a>> {
     }
 }
 
-pub struct DisplayRaw<'a>(&'a Error_<'a, Pos<'a>>);
+pub struct DisplayRaw<'a>(&'a Error_<'a, Pos<'a>, PosOrDecl<'a>>);
 
 impl<'a> std::fmt::Display for DisplayRaw<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

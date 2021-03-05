@@ -84,7 +84,7 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-let env_with_self ?pos ?(quiet = false) ?report_cycle env =
+let env_with_self ?pos ?(quiet = false) ?report_cycle ?on_error env =
   let this_ty =
     mk
       ( Reason.none,
@@ -103,9 +103,12 @@ let env_with_self ?pos ?(quiet = false) ?report_cycle env =
     this_ty;
     quiet;
     on_error =
-      (match pos with
-      | None -> Errors.unify_error
-      | Some pos -> Errors.unify_error_at pos);
+      Option.value
+        on_error
+        ~default:
+          (match pos with
+          | None -> Errors.unify_error
+          | Some pos -> Errors.unify_error_at pos);
   }
 
 (*****************************************************************************)
@@ -276,7 +279,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
         root_ty
         id
         ~root_pos
-        ~on_error:ety_env.on_error
         ~allow_abstract_tconst
     in
     (* Elaborate reason with information about expression dependent types and

@@ -43,7 +43,6 @@ type context = {
           subject to the constraint TC as C and we would like to expand TC::T we
           will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
           to C). If it is None the base is exactly the current root. *)
-  on_error: Errors.typing_error_callback;  (** A callback for errors *)
 }
 
 (** The result of an expansion
@@ -106,7 +105,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
               (Cls.pos class_, class_name)
               id_name
               `no_hint
-              ctx.on_error) )
+              ctx.ety_env.on_error) )
   | Some typeconst ->
     let name = tp_name class_name id in
     let type_expansions =
@@ -278,7 +277,7 @@ let rec expand ctx env root : _ * result =
       pos
       ty
       (get_pos root)
-      ctx.on_error
+      ctx.ety_env.on_error
   in
 
   match get_node root with
@@ -378,7 +377,7 @@ let rec expand ctx env root : _ * result =
         env
         n
         ctx.id
-        ~on_error:ctx.on_error
+        ~on_error:ctx.ety_env.on_error
     in
     (env, Exact ty)
   | Tunapplied_alias _ ->
@@ -403,7 +402,6 @@ let expand_with_env
     root
     id
     ~root_pos
-    ~on_error
     ~allow_abstract_tconst =
   let (env, ty) =
     Log.log_type_access ~level:1 root id
@@ -416,7 +414,6 @@ let expand_with_env
         generics_seen = TySet.empty;
         allow_abstract = allow_abstract_tconst;
         abstract_as_tyvar = as_tyvar_with_cnstr;
-        on_error;
         root_pos;
       }
     in
@@ -428,7 +425,7 @@ let expand_with_env
 (* This is called with non-nested type accesses e.g. this::T1::T2 is
  * represented by (this, [T1; T2])
  *)
-let referenced_typeconsts env ety_env (root, ids) ~on_error =
+let referenced_typeconsts env ety_env (root, ids) =
   let (env, root) = Phase.localize ~ety_env env root in
   List.fold
     ids
@@ -459,7 +456,6 @@ let referenced_typeconsts env ety_env (root, ids) ~on_error =
             root
             (pos, tconst)
             ~root_pos:(get_pos root)
-            ~on_error
             ~allow_abstract_tconst:true,
           acc )
       end

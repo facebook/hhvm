@@ -15,7 +15,12 @@ type method_instantiation = {
 }
 
 val env_with_self :
-  ?pos:Pos.t -> ?quiet:bool -> ?report_cycle:Pos.t * string -> env -> expand_env
+  ?pos:Pos.t ->
+  ?quiet:bool ->
+  ?report_cycle:Pos.t * string ->
+  ?on_error:Errors.typing_error_callback ->
+  env ->
+  expand_env
 
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
     into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).

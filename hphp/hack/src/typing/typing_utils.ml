@@ -119,7 +119,6 @@ type expand_typeconst =
   locl_ty ->
   Aast.sid ->
   root_pos:Pos_or_decl.t ->
-  on_error:Errors.typing_error_callback ->
   allow_abstract_tconst:bool ->
   env * locl_ty
 
@@ -219,10 +218,16 @@ let (localize_ref : localize ref) =
 let localize x = !localize_ref x
 
 type env_with_self =
-  ?pos:Pos.t -> ?quiet:bool -> ?report_cycle:Pos.t * string -> env -> expand_env
+  ?pos:Pos.t ->
+  ?quiet:bool ->
+  ?report_cycle:Pos.t * string ->
+  ?on_error:Errors.typing_error_callback ->
+  env ->
+  expand_env
 
 let env_with_self_ref : env_with_self ref =
-  ref (fun ?pos:_ ?quiet:_ ?report_cycle:_ -> not_implemented "env_with_self")
+  ref (fun ?pos:_ ?quiet:_ ?report_cycle:_ ?on_error:_ ->
+      not_implemented "env_with_self")
 
 let env_with_self ?pos ?quiet ?report_cycle x =
   !env_with_self_ref ?pos ?quiet ?report_cycle x

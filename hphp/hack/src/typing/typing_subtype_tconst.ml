@@ -12,7 +12,7 @@ let make_type_const_equal
   let rec make_equal env ty =
     match ty with
     | LoclType ty ->
-      let ety_env = Phase.env_with_self env in
+      let ety_env = Phase.env_with_self ~on_error env in
       let (env, tytconst) =
         Utils.expand_typeconst
           ety_env
@@ -21,7 +21,6 @@ let make_type_const_equal
           ty
           tconstid
           ~root_pos:(get_pos ty)
-          ~on_error
           ~allow_abstract_tconst:true
           ~ignore_errors:as_tyvar_with_cnstr
       in

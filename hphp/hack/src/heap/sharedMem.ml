@@ -73,7 +73,7 @@ type handle = private {
 }
 
 (* Allocated in C only. *)
-type 'a heap_entry = private bytes
+type serialized = private bytes
 
 exception Out_of_shared_memory
 
@@ -239,13 +239,13 @@ external get_worker_id : unit -> int = "hh_get_worker_id" [@@noalloc]
 (*****************************************************************************)
 external mem_raw : string -> bool = "hh_mem"
 
-external get_raw : string -> 'a heap_entry = "hh_get_raw"
+external get_raw : string -> serialized = "hh_get_raw"
 
-external add_raw : string -> 'a heap_entry -> unit = "hh_add_raw"
+external add_raw : string -> serialized -> unit = "hh_add_raw"
 
-external deserialize_raw : 'a heap_entry -> 'a = "hh_deserialize_raw"
+external deserialize_raw : serialized -> 'a = "hh_deserialize_raw"
 
-external serialize_raw : 'a -> 'a heap_entry = "hh_serialize_raw"
+external serialize_raw : 'a -> serialized = "hh_serialize_raw"
 
 (*****************************************************************************)
 (* The shared memory garbage collector. It must be called every time we

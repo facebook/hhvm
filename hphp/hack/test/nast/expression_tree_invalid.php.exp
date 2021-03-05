@@ -1,149 +1,81 @@
 [(Fun
-    { f_span = [3:1-6:2]; f_annotation = (); f_mode = Mstrict;
-      f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
-      f_name = ([3:10-14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [3:1-6:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
+      f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); f_name = ([3:10-14], "\\test"); 
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
+      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([5:3-16],
           (Expr
              ([5:3-15],
               (ExpressionTree
-                 { et_hint = ([5:3-7], (Happly (([5:3-7], "\\Code"), [])));
-                   et_src_expr =
-                   ([5:8-14],
-                    (Binop (QuestionQuestion, ([5:8-9], (Int "1")),
-                       ([5:13-14], (Int "2")))));
+                 { et_hint = ([5:3-7], (Happly (([5:3-7], "\\Code"), []))); 
+                   et_src_expr = ([5:8-14], (Binop (QuestionQuestion, ([5:8-9], (Int "1")), ([5:13-14], (Int "2")))));
                    et_desugared_expr =
                    ([5:8-14],
                     (Call (
                        ([5:8-14],
                         (Lfun (
-                           { f_span = [5:8-14]; f_annotation = ();
-                             f_mode = Mstrict; f_readonly_ret = None;
-                             f_ret = ((), None);
-                             f_name = ([Pos.none], ";anonymous");
-                             f_tparams = []; f_where_constraints = [];
-                             f_variadic = FVnonVariadic; f_params = [];
-                             f_ctxs = None; f_unsafe_ctxs = None;
+                           { f_span = [5:8-14]; f_annotation = (); f_mode = Mstrict; 
+                             f_readonly_ret = None; f_ret = ((), None); 
+                             f_name = ([Pos.none], ";anonymous"); f_tparams = []; 
+                             f_where_constraints = []; f_variadic = FVnonVariadic; 
+                             f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                              f_body =
                              { fb_ast =
                                [([5:8-9],
                                  (Expr
                                     ([5:8-9],
-                                     (Binop ((Eq None),
-                                        ([5:8-9], (Lvar ([5:8-9], $0splice0))),
-                                        ([5:8-9],
-                                         (Call (
-                                            ([5:8-9],
-                                             (Class_const (
-                                                ([5:8-9],
-                                                 (CI ([5:8-9], "\\Code"))),
-                                                ([5:8-9], "intLiteral")))),
-                                            [], [([5:8-9], (Int "1"))], None
-                                            )))
-                                        )))));
+                                     (Binop ((Eq None), ([5:8-9], (Lvar ([5:8-9], $0splice0))),
+                                        ([5:8-9], (Call (([5:8-9], (Class_const (([5:8-9], (CI ([5:8-9], "\\Code"))), ([5:8-9], "intLiteral")))), [], [([5:8-9], (Int "1"))], None))))))));
                                  ([5:13-14],
                                   (Expr
                                      ([5:13-14],
-                                      (Binop ((Eq None),
-                                         ([5:13-14],
-                                          (Lvar ([5:13-14], $0splice1))),
-                                         ([5:13-14],
-                                          (Call (
-                                             ([5:13-14],
-                                              (Class_const (
-                                                 ([5:13-14],
-                                                  (CI ([5:13-14], "\\Code"))),
-                                                 ([5:13-14], "intLiteral")))),
-                                             [], [([5:13-14], (Int "2"))],
-                                             None)))
-                                         )))));
+                                      (Binop ((Eq None), ([5:13-14], (Lvar ([5:13-14], $0splice1))),
+                                         ([5:13-14], (Call (([5:13-14], (Class_const (([5:13-14], (CI ([5:13-14], "\\Code"))), ([5:13-14], "intLiteral")))), [], [([5:13-14], (Int "2"))], None))))))));
                                  ([5:8-14],
                                   (Return
                                      (Some ([5:8-14],
-                                            (Call (
-                                               ([5:8-14],
-                                                (Class_const (
-                                                   ([5:8-14],
-                                                    (CI ([5:8-14], "\\Code"))),
-                                                   ([5:8-14], "makeTree")))),
+                                            (Call (([5:8-14], (Class_const (([5:8-14], (CI ([5:8-14], "\\Code"))), ([5:8-14], "makeTree")))), 
                                                [],
                                                [([5:8-14],
-                                                 (New (
-                                                    ([5:8-14],
-                                                     (CI
-                                                        ([5:8-14],
-                                                         "\\ExprPos"))),
+                                                 (New (([5:8-14], (CI ([5:8-14], "\\ExprPos"))), 
                                                     [],
-                                                    [([Pos.none],
-                                                      (Id
-                                                         ([Pos.none],
-                                                          "\\__FILE__")));
-                                                      ([Pos.none], (Int "5"));
-                                                      ([Pos.none], (Int "7"));
-                                                      ([Pos.none], (Int "5"));
-                                                      ([Pos.none], (Int "13"))
-                                                      ],
+                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                      [Pos.none], (Int "5")); (
+                                                      [Pos.none], (Int "7")); (
+                                                      [Pos.none], (Int "5")); (
+                                                      [Pos.none], (Int "13"))],
                                                     None, [5:8-14])));
                                                  ([Pos.none],
-                                                  (KeyValCollection (Dict,
-                                                     None,
-                                                     [(([Pos.none],
-                                                        (String "$0splice0")),
-                                                       ([Pos.none],
-                                                        (Lvar
-                                                           ([Pos.none],
-                                                            $0splice0))));
-                                                       (([Pos.none],
-                                                         (String "$0splice1")),
-                                                        ([Pos.none],
-                                                         (Lvar
-                                                            ([Pos.none],
-                                                             $0splice1))))
-                                                       ]
+                                                  (KeyValCollection (Dict, None,
+                                                     [(([Pos.none], (String "$0splice0")), ([Pos.none], (Lvar ([Pos.none], $0splice0))));
+                                                       (([Pos.none], (String "$0splice1")), ([Pos.none], (Lvar ([Pos.none], $0splice1))))]
                                                      )));
                                                  ([5:8-14],
                                                   (Lfun (
-                                                     { f_span = [5:8-14];
-                                                       f_annotation = ();
-                                                       f_mode = Mstrict;
-                                                       f_readonly_ret = None;
-                                                       f_ret = ((), None);
-                                                       f_name =
-                                                       ([Pos.none],
-                                                        ";anonymous");
-                                                       f_tparams = [];
-                                                       f_where_constraints =
-                                                       [];
-                                                       f_variadic =
-                                                       FVnonVariadic;
+                                                     { f_span = [5:8-14]; 
+                                                       f_annotation = (); 
+                                                       f_mode = Mstrict; 
+                                                       f_readonly_ret = None; 
+                                                       f_ret = ((), None); 
+                                                       f_name = ([Pos.none], ";anonymous"); 
+                                                       f_tparams = []; 
+                                                       f_where_constraints = []; 
+                                                       f_variadic = FVnonVariadic;
                                                        f_params =
-                                                       [{ param_annotation =
-                                                          [5:3-7];
-                                                          param_type_hint =
-                                                          ((),
-                                                           (Some ([5:3-7],
-                                                                  (Happly (
-                                                                    ([5:3-7],
-                                                                    "\\Code"),
-                                                                    [])))));
-                                                          param_is_variadic =
-                                                          false;
-                                                          param_pos = [5:3-7];
-                                                          param_name = "$v";
-                                                          param_expr = None;
-                                                          param_readonly =
-                                                          None;
-                                                          param_callconv =
-                                                          None;
-                                                          param_user_attributes =
-                                                          [];
-                                                          param_visibility =
-                                                          None }
+                                                       [{ param_annotation = [5:3-7]; 
+                                                          param_type_hint = ((), (Some ([5:3-7], (Happly (([5:3-7], "\\Code"), []))))); 
+                                                          param_is_variadic = false; 
+                                                          param_pos = [5:3-7]; 
+                                                          param_name = "$v"; 
+                                                          param_expr = None; 
+                                                          param_readonly = None; 
+                                                          param_callconv = None; 
+                                                          param_user_attributes = []; 
+                                                          param_visibility = None }
                                                          ];
-                                                       f_ctxs = None;
+                                                       f_ctxs = None; 
                                                        f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
@@ -154,130 +86,79 @@
                                                               (Call (
                                                                  ([5:8-14],
                                                                   (Lfun (
-                                                                    { f_span =
-                                                                    [5:8-14];
-                                                                    f_annotation =
-                                                                    ();
-                                                                    f_mode =
-                                                                    Mstrict;
-                                                                    f_readonly_ret =
-                                                                    None;
-                                                                    f_ret =
-                                                                    (
-                                                                    (), None);
-                                                                    f_name =
-                                                                    (
-                                                                    [Pos.none],
-                                                                    ";anonymous");
-                                                                    f_tparams =
-                                                                    [];
-                                                                    f_where_constraints =
-                                                                    [];
-                                                                    f_variadic =
-                                                                    FVnonVariadic;
-                                                                    f_params =
-                                                                    [];
-                                                                    f_ctxs =
-                                                                    None;
-                                                                    f_unsafe_ctxs =
-                                                                    None;
+                                                                    { f_span = [5:8-14]; 
+                                                                    f_annotation = (); 
+                                                                    f_mode = Mstrict; 
+                                                                    f_readonly_ret = None; 
+                                                                    f_ret = ((), None); 
+                                                                    f_name = ([Pos.none], ";anonymous"); 
+                                                                    f_tparams = []; 
+                                                                    f_where_constraints = []; 
+                                                                    f_variadic = FVnonVariadic; 
+                                                                    f_params = []; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
                                                                     f_body =
                                                                     { fb_ast =
                                                                     [([5:8-14],
                                                                     (Throw
                                                                     ([5:8-14],
-                                                                    (New (
-                                                                    ([5:8-14],
-                                                                    (CI
-                                                                    ([5:8-14],
-                                                                    "\\Exception"))),
-                                                                    [],
-                                                                    [([Pos.none],
-                                                                    (String
-                                                                    "Unsupported syntax: binary operator: QuestionQuestion"))
-                                                                    ], None,
-                                                                    [5:8-14]
-                                                                    )))))];
-                                                                    fb_annotation =
-                                                                    Named };
-                                                                    f_fun_kind =
-                                                                    FSync;
-                                                                    f_user_attributes =
-                                                                    [];
-                                                                    f_file_attributes =
-                                                                    [];
-                                                                    f_external =
-                                                                    false;
+                                                                    (New ((
+                                                                    [5:8-14], (CI ([5:8-14], "\\Exception"))), 
+                                                                    [], 
+                                                                    [([Pos.none], (String "Unsupported syntax: binary operator: QuestionQuestion"))], None, [5:8-14])))))]; 
+                                                                    fb_annotation = Named }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_file_attributes = []; 
+                                                                    f_external = false;
                                                                     f_namespace =
-                                                                    { Namespace_env.ns_ns_uses =
-                                                                    <opaque>;
-                                                                    ns_class_uses =
-                                                                    <opaque>;
-                                                                    ns_record_def_uses =
-                                                                    <opaque>;
-                                                                    ns_fun_uses =
-                                                                    <opaque>;
-                                                                    ns_const_uses =
-                                                                    <opaque>;
-                                                                    ns_name =
-                                                                    None;
-                                                                    ns_auto_ns_map =
-                                                                    [];
-                                                                    ns_is_codegen =
-                                                                    false;
-                                                                    ns_disable_xhp_element_mangling =
-                                                                    false };
-                                                                    f_doc_comment =
-                                                                    None;
-                                                                    f_static =
-                                                                    false },
+                                                                    { Namespace_env.ns_ns_uses = <opaque>; 
+                                                                    ns_class_uses = <opaque>; 
+                                                                    ns_record_def_uses = <opaque>; 
+                                                                    ns_fun_uses = <opaque>; 
+                                                                    ns_const_uses = <opaque>; 
+                                                                    ns_name = None; 
+                                                                    ns_auto_ns_map = []; 
+                                                                    ns_is_codegen = false; 
+                                                                    ns_disable_xhp_element_mangling = false }; 
+                                                                    f_doc_comment = None; 
+                                                                    f_static = false }, 
                                                                     []))),
                                                                  [], 
                                                                  [], None))))))
                                                            ];
-                                                         fb_annotation =
-                                                         Named };
-                                                       f_fun_kind = FSync;
-                                                       f_user_attributes = [];
-                                                       f_file_attributes = [];
+                                                         fb_annotation = Named };
+                                                       f_fun_kind = FSync; 
+                                                       f_user_attributes = []; 
+                                                       f_file_attributes = []; 
                                                        f_external = false;
                                                        f_namespace =
-                                                       { Namespace_env.ns_ns_uses =
-                                                         <opaque>;
-                                                         ns_class_uses =
-                                                         <opaque>;
-                                                         ns_record_def_uses =
-                                                         <opaque>;
-                                                         ns_fun_uses =
-                                                         <opaque>;
-                                                         ns_const_uses =
-                                                         <opaque>;
-                                                         ns_name = None;
-                                                         ns_auto_ns_map = [];
-                                                         ns_is_codegen =
-                                                         false;
-                                                         ns_disable_xhp_element_mangling =
-                                                         false };
-                                                       f_doc_comment = None;
+                                                       { Namespace_env.ns_ns_uses = <opaque>; 
+                                                         ns_class_uses = <opaque>; 
+                                                         ns_record_def_uses = <opaque>; 
+                                                         ns_fun_uses = <opaque>; 
+                                                         ns_const_uses = <opaque>; 
+                                                         ns_name = None; 
+                                                         ns_auto_ns_map = []; 
+                                                         ns_is_codegen = false; 
+                                                         ns_disable_xhp_element_mangling = false };
+                                                       f_doc_comment = None; 
                                                        f_static = false },
                                                      [])));
                                                  ([5:8-14],
                                                   (Efun (
-                                                     { f_span = [5:8-14];
-                                                       f_annotation = ();
-                                                       f_mode = Mstrict;
-                                                       f_readonly_ret = None;
-                                                       f_ret = ((), None);
-                                                       f_name =
-                                                       ([Pos.none],
-                                                        ";anonymous");
-                                                       f_tparams = [];
-                                                       f_where_constraints =
-                                                       [];
-                                                       f_variadic =
-                                                       FVnonVariadic;
-                                                       f_params = [];
-                                                       f_ctxs = None;
+                                                     { f_span = [5:8-14]; 
+                                                       f_annotation = (); 
+                                                       f_mode = Mstrict; 
+                                                       f_readonly_ret = None; 
+                                                       f_ret = ((), None); 
+                                                       f_name = ([Pos.none], ";anonymous"); 
+                                                       f_tparams = []; 
+                                                       f_where_constraints = []; 
+                                                       f_variadic = FVnonVariadic; 
+                                                       f_params = []; 
+                                                       f_ctxs = None; 
                                                        f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
@@ -285,64 +166,39 @@
                                                            (Return
                                                               (Some (
                                                               [5:8-14],
-                                                              (Binop (
-                                                                 QuestionQuestion,
-                                                                 ([5:8-9],
-                                                                  (ET_Splice
-                                                                    ([5:8-9],
-                                                                    (Lvar
-                                                                    ([5:8-9],
-                                                                    $0splice0))))),
-                                                                 ([5:13-14],
-                                                                  (ET_Splice
-                                                                    ([5:13-14],
-                                                                    (Lvar
-                                                                    ([5:13-14],
-                                                                    $0splice1)))))
-                                                                 ))))))
+                                                              (Binop (QuestionQuestion, (
+                                                                 [5:8-9], (ET_Splice ([5:8-9], (Lvar ([5:8-9], $0splice0))))), (
+                                                                 [5:13-14], (ET_Splice ([5:13-14], (Lvar ([5:13-14], $0splice1)))))))))))
                                                            ];
-                                                         fb_annotation =
-                                                         Named };
-                                                       f_fun_kind = FSync;
-                                                       f_user_attributes = [];
-                                                       f_file_attributes = [];
+                                                         fb_annotation = Named };
+                                                       f_fun_kind = FSync; 
+                                                       f_user_attributes = []; 
+                                                       f_file_attributes = []; 
                                                        f_external = false;
                                                        f_namespace =
-                                                       { Namespace_env.ns_ns_uses =
-                                                         <opaque>;
-                                                         ns_class_uses =
-                                                         <opaque>;
-                                                         ns_record_def_uses =
-                                                         <opaque>;
-                                                         ns_fun_uses =
-                                                         <opaque>;
-                                                         ns_const_uses =
-                                                         <opaque>;
-                                                         ns_name = None;
-                                                         ns_auto_ns_map = [];
-                                                         ns_is_codegen =
-                                                         false;
-                                                         ns_disable_xhp_element_mangling =
-                                                         false };
-                                                       f_doc_comment = None;
+                                                       { Namespace_env.ns_ns_uses = <opaque>; 
+                                                         ns_class_uses = <opaque>; 
+                                                         ns_record_def_uses = <opaque>; 
+                                                         ns_fun_uses = <opaque>; 
+                                                         ns_const_uses = <opaque>; 
+                                                         ns_name = None; 
+                                                         ns_auto_ns_map = []; 
+                                                         ns_is_codegen = false; 
+                                                         ns_disable_xhp_element_mangling = false };
+                                                       f_doc_comment = None; 
                                                        f_static = false },
-                                                     [([Pos.none], $0splice0);
-                                                       ([Pos.none], $0splice1)
-                                                       ]
-                                                     )))
+                                                     [([Pos.none], $0splice0); ([Pos.none], $0splice1)])))
                                                  ],
                                                None))))))
                                  ];
                                fb_annotation = Named };
-                             f_fun_kind = FSync; f_user_attributes = [];
+                             f_fun_kind = FSync; f_user_attributes = []; 
                              f_file_attributes = []; f_external = false;
                              f_namespace =
-                             { Namespace_env.ns_ns_uses = <opaque>;
-                               ns_class_uses = <opaque>;
-                               ns_record_def_uses = <opaque>;
-                               ns_fun_uses = <opaque>;
-                               ns_const_uses = <opaque>; ns_name = None;
-                               ns_auto_ns_map = []; ns_is_codegen = false;
+                             { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+                               ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
+                               ns_const_uses = <opaque>; ns_name = None; 
+                               ns_auto_ns_map = []; ns_is_codegen = false; 
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
                            []))),
@@ -350,12 +206,10 @@
                    }))))
           ];
         fb_annotation = Named };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
       f_external = false;
       f_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
-        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false })
-  ]

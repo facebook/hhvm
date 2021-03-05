@@ -6,7 +6,7 @@
  *
  *)
 
-let print_tast ctx =
+let print_tast ctx tast =
   let dummy_filename = Relative_path.default in
   let env = Typing_env.empty ctx dummy_filename ~droot:None in
   let print_pos_and_ty (pos, ty) =
@@ -19,13 +19,6 @@ let print_tast ctx =
     Format.asprintf "(%s)" (Typing_print.full_strip_ns env ty)
     |> Format.pp_print_string fmt
   in
-  fun tast ->
-    Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en pp_hi tast)
-
-let print_tast_for_rust (tast : Tast.program) : unit =
-  (* TODO: do we need real versions of any of those?*)
-  let popt = ParserOptions.default in
-  let tcopt = TypecheckerOptions.default in
-  let deps_mode = Typing_deps_mode.SQLiteMode in
-  let ctx = Provider_context.empty_for_test ~popt ~tcopt ~deps_mode in
-  print_tast ctx tast
+  let formatter = Format.formatter_of_out_channel Stdlib.stdout in
+  Format.pp_set_margin formatter 200;
+  Aast.pp_program pp_ex pp_fb pp_en pp_hi formatter tast

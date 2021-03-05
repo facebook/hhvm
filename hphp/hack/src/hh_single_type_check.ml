@@ -1755,7 +1755,9 @@ let handle_mode
     iter_over_files (fun filename ->
         let nasts = create_nasts ctx files_info in
         let nast = Relative_path.Map.find nasts filename in
-        Printf.printf "%s\n" (Nast.show_program nast))
+        let formatter = Format.formatter_of_out_channel Stdlib.stdout in
+        Format.pp_set_margin formatter 200;
+        Nast.pp_program formatter nast)
   | Dump_tast ->
     let (errors, tasts, _gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents

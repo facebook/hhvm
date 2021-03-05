@@ -1,9 +1,8 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
-      f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
-      f_name = ([3:10-14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_ctxs = None; f_unsafe_ctxs = None;
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
+      f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); f_name = ([3:10-14], "\\test"); 
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
+      f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([4:3-22],
@@ -12,143 +11,72 @@
               (ExpressionTree
                  { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
                    et_src_expr =
-                   ([4:8-20],
-                    (Binop (Plus,
-                       ([4:8-15],
-                        (Binop (Plus,
-                           ([4:8-10], (Unop (Uminus, ([4:9-10], (Int "4"))))),
-                           ([4:13-15], (Int "10"))))),
-                       ([4:18-20], (Lvar ([4:18-20], $x))))));
+                   ([4:8-20], (Binop (Plus, ([4:8-15], (Binop (Plus, ([4:8-10], (Unop (Uminus, ([4:9-10], (Int "4"))))), ([4:13-15], (Int "10"))))), ([4:18-20], (Lvar ([4:18-20], $x))))));
                    et_desugared_expr =
                    ([4:8-20],
                     (Call (
                        ([4:8-20],
                         (Lfun (
-                           { f_span = [4:8-20]; f_annotation = ();
-                             f_mode = Mstrict; f_readonly_ret = None;
-                             f_ret = ((), None);
-                             f_name = ([Pos.none], ";anonymous");
-                             f_tparams = []; f_where_constraints = [];
-                             f_variadic = FVnonVariadic; f_params = [];
-                             f_ctxs = None; f_unsafe_ctxs = None;
+                           { f_span = [4:8-20]; f_annotation = (); f_mode = Mstrict; 
+                             f_readonly_ret = None; f_ret = ((), None); 
+                             f_name = ([Pos.none], ";anonymous"); f_tparams = []; 
+                             f_where_constraints = []; f_variadic = FVnonVariadic; 
+                             f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                              f_body =
                              { fb_ast =
                                [([4:9-10],
                                  (Expr
                                     ([4:9-10],
-                                     (Binop ((Eq None),
-                                        ([4:9-10],
-                                         (Lvar ([4:9-10], $0splice0))),
-                                        ([4:9-10],
-                                         (Call (
-                                            ([4:9-10],
-                                             (Class_const (
-                                                ([4:9-10],
-                                                 (CI ([4:9-10], "\\Code"))),
-                                                ([4:9-10], "intLiteral")))),
-                                            [], [([4:9-10], (Int "4"))], None
-                                            )))
-                                        )))));
+                                     (Binop ((Eq None), ([4:9-10], (Lvar ([4:9-10], $0splice0))),
+                                        ([4:9-10], (Call (([4:9-10], (Class_const (([4:9-10], (CI ([4:9-10], "\\Code"))), ([4:9-10], "intLiteral")))), [], [([4:9-10], (Int "4"))], None))))))));
                                  ([4:13-15],
                                   (Expr
                                      ([4:13-15],
-                                      (Binop ((Eq None),
-                                         ([4:13-15],
-                                          (Lvar ([4:13-15], $0splice1))),
-                                         ([4:13-15],
-                                          (Call (
-                                             ([4:13-15],
-                                              (Class_const (
-                                                 ([4:13-15],
-                                                  (CI ([4:13-15], "\\Code"))),
-                                                 ([4:13-15], "intLiteral")))),
-                                             [], [([4:13-15], (Int "10"))],
-                                             None)))
-                                         )))));
+                                      (Binop ((Eq None), ([4:13-15], (Lvar ([4:13-15], $0splice1))),
+                                         ([4:13-15], (Call (([4:13-15], (Class_const (([4:13-15], (CI ([4:13-15], "\\Code"))), ([4:13-15], "intLiteral")))), [], [([4:13-15], (Int "10"))], None))))))));
                                  ([4:8-20],
                                   (Return
                                      (Some ([4:8-20],
-                                            (Call (
-                                               ([4:8-20],
-                                                (Class_const (
-                                                   ([4:8-20],
-                                                    (CI ([4:8-20], "\\Code"))),
-                                                   ([4:8-20], "makeTree")))),
+                                            (Call (([4:8-20], (Class_const (([4:8-20], (CI ([4:8-20], "\\Code"))), ([4:8-20], "makeTree")))), 
                                                [],
                                                [([4:8-20],
-                                                 (New (
-                                                    ([4:8-20],
-                                                     (CI
-                                                        ([4:8-20],
-                                                         "\\ExprPos"))),
+                                                 (New (([4:8-20], (CI ([4:8-20], "\\ExprPos"))), 
                                                     [],
-                                                    [([Pos.none],
-                                                      (Id
-                                                         ([Pos.none],
-                                                          "\\__FILE__")));
-                                                      ([Pos.none], (Int "4"));
-                                                      ([Pos.none], (Int "7"));
-                                                      ([Pos.none], (Int "4"));
-                                                      ([Pos.none], (Int "19"))
-                                                      ],
+                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                      [Pos.none], (Int "4")); (
+                                                      [Pos.none], (Int "7")); (
+                                                      [Pos.none], (Int "4")); (
+                                                      [Pos.none], (Int "19"))],
                                                     None, [4:8-20])));
                                                  ([Pos.none],
-                                                  (KeyValCollection (Dict,
-                                                     None,
-                                                     [(([Pos.none],
-                                                        (String "$0splice0")),
-                                                       ([Pos.none],
-                                                        (Lvar
-                                                           ([Pos.none],
-                                                            $0splice0))));
-                                                       (([Pos.none],
-                                                         (String "$0splice1")),
-                                                        ([Pos.none],
-                                                         (Lvar
-                                                            ([Pos.none],
-                                                             $0splice1))))
-                                                       ]
+                                                  (KeyValCollection (Dict, None,
+                                                     [(([Pos.none], (String "$0splice0")), ([Pos.none], (Lvar ([Pos.none], $0splice0))));
+                                                       (([Pos.none], (String "$0splice1")), ([Pos.none], (Lvar ([Pos.none], $0splice1))))]
                                                      )));
                                                  ([4:8-20],
                                                   (Lfun (
-                                                     { f_span = [4:8-20];
-                                                       f_annotation = ();
-                                                       f_mode = Mstrict;
-                                                       f_readonly_ret = None;
-                                                       f_ret = ((), None);
-                                                       f_name =
-                                                       ([Pos.none],
-                                                        ";anonymous");
-                                                       f_tparams = [];
-                                                       f_where_constraints =
-                                                       [];
-                                                       f_variadic =
-                                                       FVnonVariadic;
+                                                     { f_span = [4:8-20]; 
+                                                       f_annotation = (); 
+                                                       f_mode = Mstrict; 
+                                                       f_readonly_ret = None; 
+                                                       f_ret = ((), None); 
+                                                       f_name = ([Pos.none], ";anonymous"); 
+                                                       f_tparams = []; 
+                                                       f_where_constraints = []; 
+                                                       f_variadic = FVnonVariadic;
                                                        f_params =
-                                                       [{ param_annotation =
-                                                          [4:3-7];
-                                                          param_type_hint =
-                                                          ((),
-                                                           (Some ([4:3-7],
-                                                                  (Happly (
-                                                                    ([4:3-7],
-                                                                    "\\Code"),
-                                                                    [])))));
-                                                          param_is_variadic =
-                                                          false;
-                                                          param_pos = [4:3-7];
-                                                          param_name = "$v";
-                                                          param_expr = None;
-                                                          param_readonly =
-                                                          None;
-                                                          param_callconv =
-                                                          None;
-                                                          param_user_attributes =
-                                                          [];
-                                                          param_visibility =
-                                                          None }
+                                                       [{ param_annotation = [4:3-7]; 
+                                                          param_type_hint = ((), (Some ([4:3-7], (Happly (([4:3-7], "\\Code"), []))))); 
+                                                          param_is_variadic = false; 
+                                                          param_pos = [4:3-7]; 
+                                                          param_name = "$v"; 
+                                                          param_expr = None; 
+                                                          param_readonly = None; 
+                                                          param_callconv = None; 
+                                                          param_user_attributes = []; 
+                                                          param_visibility = None }
                                                          ];
-                                                       f_ctxs = None;
+                                                       f_ctxs = None; 
                                                        f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
@@ -156,324 +84,132 @@
                                                            (Return
                                                               (Some (
                                                               [4:8-20],
-                                                              (Call (
-                                                                 ([4:8-20],
-                                                                  (Obj_get (
-                                                                    ([4:8-20],
-                                                                    (Lvar
-                                                                    ([4:8-20],
-                                                                    $v))),
-                                                                    ([4:8-20],
-                                                                    (Id
-                                                                    ([4:8-20],
-                                                                    "methCall"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                              (Call ((
+                                                                 [4:8-20], (Obj_get (([4:8-20], (Lvar ([4:8-20], $v))), ([4:8-20], (Id ([4:8-20], "methCall"))), OG_nullthrows, false))), 
                                                                  [],
                                                                  [([4:8-20],
-                                                                   (New (
-                                                                    ([4:8-20],
-                                                                    (CI
-                                                                    ([4:8-20],
-                                                                    "\\ExprPos"))),
+                                                                   (New ((
+                                                                    [4:8-20], (CI ([4:8-20], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "7"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "19"))
-                                                                    ], None,
-                                                                    [4:8-20]
-                                                                    )));
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "7")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "19"))], None, [4:8-20])));
                                                                    ([4:8-15],
                                                                     (
-                                                                    Call (
-                                                                    ([4:8-15],
-                                                                    (Obj_get (
-                                                                    ([4:8-15],
-                                                                    (Lvar
-                                                                    ([4:8-15],
-                                                                    $v))),
-                                                                    ([4:8-15],
-                                                                    (Id
-                                                                    ([4:8-15],
-                                                                    "methCall"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    Call ((
+                                                                    [4:8-15], (Obj_get (([4:8-15], (Lvar ([4:8-15], $v))), ([4:8-15], (Id ([4:8-15], "methCall"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:8-15],
-                                                                    (New (
-                                                                    ([4:8-15],
-                                                                    (CI
-                                                                    ([4:8-15],
-                                                                    "\\ExprPos"))),
+                                                                    (New ((
+                                                                    [4:8-15], (CI ([4:8-15], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "7"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "14"))
-                                                                    ], None,
-                                                                    [4:8-15]
-                                                                    )));
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "7")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "14"))], None, [4:8-15])));
                                                                     ([4:8-10],
-                                                                    (Call (
-                                                                    ([4:8-10],
-                                                                    (Obj_get (
-                                                                    ([4:8-10],
-                                                                    (Lvar
-                                                                    ([4:8-10],
-                                                                    $v))),
-                                                                    ([4:8-10],
-                                                                    (Id
-                                                                    ([4:8-10],
-                                                                    "methCall"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    (Call ((
+                                                                    [4:8-10], (Obj_get (([4:8-10], (Lvar ([4:8-10], $v))), ([4:8-10], (Id ([4:8-10], "methCall"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:8-10],
-                                                                    (New (
-                                                                    ([4:8-10],
-                                                                    (CI
-                                                                    ([4:8-10],
-                                                                    "\\ExprPos"))),
+                                                                    (New ((
+                                                                    [4:8-10], (CI ([4:8-10], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "7"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "9"))
-                                                                    ], None,
-                                                                    [4:8-10]
-                                                                    )));
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "7")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "9"))], None, [4:8-10])));
                                                                     ([4:9-10],
-                                                                    (Call (
-                                                                    ([4:9-10],
-                                                                    (Obj_get (
-                                                                    ([4:9-10],
-                                                                    (Lvar
-                                                                    ([4:9-10],
-                                                                    $v))),
-                                                                    ([4:9-10],
-                                                                    (Id
-                                                                    ([4:9-10],
-                                                                    "splice"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    (Call ((
+                                                                    [4:9-10], (Obj_get (([4:9-10], (Lvar ([4:9-10], $v))), ([4:9-10], (Id ([4:9-10], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:9-10],
-                                                                    (New (
-                                                                    ([4:9-10],
-                                                                    (CI
-                                                                    ([4:9-10],
-                                                                    "\\ExprPos"))),
+                                                                    (New ((
+                                                                    [4:9-10], (CI ([4:9-10], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "8"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "9"))
-                                                                    ], None,
-                                                                    [4:9-10]
-                                                                    )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$0splice0"));
-                                                                    ([4:9-10],
-                                                                    (Lvar
-                                                                    ([4:9-10],
-                                                                    $0splice0)))
-                                                                    ], None)));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "__negate"));
-                                                                    ([Pos.none],
-                                                                    (ValCollection (
-                                                                    Vec,
-                                                                    None, 
-                                                                    [])))],
-                                                                    None)));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "__plus"));
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "8")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "9"))], None, [4:9-10]))); (
+                                                                    [Pos.none], (String "$0splice0")); (
+                                                                    [4:9-10], (Lvar ([4:9-10], $0splice0)))], None))); (
+                                                                    [Pos.none], (String "__negate")); (
+                                                                    [Pos.none], (ValCollection (Vec, None, [])))], None))); (
+                                                                    [Pos.none], (String "__plus"));
                                                                     ([4:13-15],
-                                                                    (ValCollection (
-                                                                    Vec,
-                                                                    None,
+                                                                    (ValCollection (Vec, None,
                                                                     [([4:13-15],
-                                                                    (Call (
-                                                                    ([4:13-15],
-                                                                    (Obj_get (
-                                                                    ([4:13-15],
-                                                                    (Lvar
-                                                                    ([4:13-15],
-                                                                    $v))),
-                                                                    ([4:13-15],
-                                                                    (Id
-                                                                    ([4:13-15],
-                                                                    "splice"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    (Call ((
+                                                                    [4:13-15], (Obj_get (([4:13-15], (Lvar ([4:13-15], $v))), ([4:13-15], (Id ([4:13-15], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:13-15],
-                                                                    (New (
-                                                                    ([4:13-15],
-                                                                    (CI
-                                                                    ([4:13-15],
-                                                                    "\\ExprPos"))),
+                                                                    (New ((
+                                                                    [4:13-15], (CI ([4:13-15], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "12"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "14"))
-                                                                    ], None,
-                                                                    [4:13-15]
-                                                                    )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$0splice1"));
-                                                                    ([4:13-15],
-                                                                    (Lvar
-                                                                    ([4:13-15],
-                                                                    $0splice1)))
-                                                                    ], None)))
-                                                                    ])))],
-                                                                    None)));
-                                                                   ([Pos.none],
-                                                                    (
-                                                                    String
-                                                                    "__plus"));
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "12")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "14"))], None, [4:13-15]))); (
+                                                                    [Pos.none], (String "$0splice1")); (
+                                                                    [4:13-15], (Lvar ([4:13-15], $0splice1)))], None)))])))], None)));
+                                                                   ([Pos.none], (String "__plus"));
                                                                    ([4:18-20],
                                                                     (
-                                                                    ValCollection (
-                                                                    Vec,
-                                                                    None,
+                                                                    ValCollection (Vec, None,
                                                                     [([4:18-20],
                                                                     (Call (
-                                                                    ([4:18-20],
-                                                                    (Obj_get (
-                                                                    ([4:18-20],
-                                                                    (Lvar
-                                                                    ([4:18-20],
-                                                                    $v))),
-                                                                    ([4:18-20],
-                                                                    (Id
-                                                                    ([4:18-20],
-                                                                    "localVar"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    ([4:18-20], (Obj_get (([4:18-20], (Lvar ([4:18-20], $v))), ([4:18-20], (Id ([4:18-20], "localVar"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:18-20],
-                                                                    (New (
-                                                                    ([4:18-20],
-                                                                    (CI
-                                                                    ([4:18-20],
-                                                                    "\\ExprPos"))),
+                                                                    (New ((
+                                                                    [4:18-20], (CI ([4:18-20], "\\ExprPos"))), 
                                                                     [],
-                                                                    [([Pos.none],
-                                                                    (Id
-                                                                    ([Pos.none],
-                                                                    "\\__FILE__")));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "17"));
-                                                                    ([Pos.none],
-                                                                    (Int "4"));
-                                                                    ([Pos.none],
-                                                                    (Int "19"))
-                                                                    ], None,
-                                                                    [4:18-20]
-                                                                    )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$x"))],
-                                                                    None)))]
-                                                                    )))
+                                                                    [([Pos.none], (Id ([Pos.none], "\\__FILE__"))); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "17")); (
+                                                                    [Pos.none], (Int "4")); (
+                                                                    [Pos.none], (Int "19"))], None, [4:18-20]))); (
+                                                                    [Pos.none], (String "$x"))], None)))])))
                                                                    ],
                                                                  None))))))
                                                            ];
-                                                         fb_annotation =
-                                                         Named };
-                                                       f_fun_kind = FSync;
-                                                       f_user_attributes = [];
-                                                       f_file_attributes = [];
+                                                         fb_annotation = Named };
+                                                       f_fun_kind = FSync; 
+                                                       f_user_attributes = []; 
+                                                       f_file_attributes = []; 
                                                        f_external = false;
                                                        f_namespace =
-                                                       { Namespace_env.ns_ns_uses =
-                                                         <opaque>;
-                                                         ns_class_uses =
-                                                         <opaque>;
-                                                         ns_record_def_uses =
-                                                         <opaque>;
-                                                         ns_fun_uses =
-                                                         <opaque>;
-                                                         ns_const_uses =
-                                                         <opaque>;
-                                                         ns_name = None;
-                                                         ns_auto_ns_map = [];
-                                                         ns_is_codegen =
-                                                         false;
-                                                         ns_disable_xhp_element_mangling =
-                                                         false };
-                                                       f_doc_comment = None;
+                                                       { Namespace_env.ns_ns_uses = <opaque>; 
+                                                         ns_class_uses = <opaque>; 
+                                                         ns_record_def_uses = <opaque>; 
+                                                         ns_fun_uses = <opaque>; 
+                                                         ns_const_uses = <opaque>; 
+                                                         ns_name = None; 
+                                                         ns_auto_ns_map = []; 
+                                                         ns_is_codegen = false; 
+                                                         ns_disable_xhp_element_mangling = false };
+                                                       f_doc_comment = None; 
                                                        f_static = false },
-                                                     [([4:13-15], $0splice1);
-                                                       ([4:9-10], $0splice0)]
-                                                     )));
+                                                     [([4:13-15], $0splice1); ([4:9-10], $0splice0)])));
                                                  ([4:8-20],
                                                   (Efun (
-                                                     { f_span = [4:8-20];
-                                                       f_annotation = ();
-                                                       f_mode = Mstrict;
-                                                       f_readonly_ret = None;
-                                                       f_ret = ((), None);
-                                                       f_name =
-                                                       ([Pos.none],
-                                                        ";anonymous");
-                                                       f_tparams = [];
-                                                       f_where_constraints =
-                                                       [];
-                                                       f_variadic =
-                                                       FVnonVariadic;
-                                                       f_params = [];
-                                                       f_ctxs = None;
+                                                     { f_span = [4:8-20]; 
+                                                       f_annotation = (); 
+                                                       f_mode = Mstrict; 
+                                                       f_readonly_ret = None; 
+                                                       f_ret = ((), None); 
+                                                       f_name = ([Pos.none], ";anonymous"); 
+                                                       f_tparams = []; 
+                                                       f_where_constraints = []; 
+                                                       f_variadic = FVnonVariadic; 
+                                                       f_params = []; 
+                                                       f_ctxs = None; 
                                                        f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
@@ -491,92 +227,47 @@
                                                                     ([4:8-10],
                                                                     (Call (
                                                                     ([4:8-10],
-                                                                    (Obj_get (
-                                                                    ([4:9-10],
-                                                                    (ET_Splice
-                                                                    ([4:9-10],
-                                                                    (Lvar
-                                                                    ([4:9-10],
-                                                                    $0splice0))))),
-                                                                    ([4:8-10],
-                                                                    (Id
-                                                                    ([4:8-10],
-                                                                    "__negate"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
+                                                                    (Obj_get ((
+                                                                    [4:9-10], (ET_Splice ([4:9-10], (Lvar ([4:9-10], $0splice0))))), (
+                                                                    [4:8-10], (Id ([4:8-10], "__negate"))), OG_nullthrows, false))), 
                                                                     [], 
-                                                                    [], None
-                                                                    ))),
-                                                                    ([4:8-15],
-                                                                    (Id
-                                                                    ([4:8-15],
-                                                                    "__plus"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
-                                                                    [],
-                                                                    [([4:13-15],
-                                                                    (ET_Splice
-                                                                    ([4:13-15],
-                                                                    (Lvar
-                                                                    ([4:13-15],
-                                                                    $0splice1)))))
-                                                                    ], None))),
-                                                                    ([4:8-20],
-                                                                    (Id
-                                                                    ([4:8-20],
-                                                                    "__plus"))),
-                                                                    OG_nullthrows,
-                                                                    false))),
-                                                                 [],
-                                                                 [([4:18-20],
-                                                                   (Lvar
-                                                                    ([4:18-20],
-                                                                    $x)))
-                                                                   ],
-                                                                 None))))))
+                                                                    [], None))), (
+                                                                    [4:8-15], (Id ([4:8-15], "__plus"))), OG_nullthrows, false))), 
+                                                                    [], 
+                                                                    [([4:13-15], (ET_Splice ([4:13-15], (Lvar ([4:13-15], $0splice1)))))], None))), (
+                                                                    [4:8-20], (Id ([4:8-20], "__plus"))), OG_nullthrows, false))),
+                                                                 [], 
+                                                                 [([4:18-20], (Lvar ([4:18-20], $x)))], None))))))
                                                            ];
-                                                         fb_annotation =
-                                                         Named };
-                                                       f_fun_kind = FSync;
-                                                       f_user_attributes = [];
-                                                       f_file_attributes = [];
+                                                         fb_annotation = Named };
+                                                       f_fun_kind = FSync; 
+                                                       f_user_attributes = []; 
+                                                       f_file_attributes = []; 
                                                        f_external = false;
                                                        f_namespace =
-                                                       { Namespace_env.ns_ns_uses =
-                                                         <opaque>;
-                                                         ns_class_uses =
-                                                         <opaque>;
-                                                         ns_record_def_uses =
-                                                         <opaque>;
-                                                         ns_fun_uses =
-                                                         <opaque>;
-                                                         ns_const_uses =
-                                                         <opaque>;
-                                                         ns_name = None;
-                                                         ns_auto_ns_map = [];
-                                                         ns_is_codegen =
-                                                         false;
-                                                         ns_disable_xhp_element_mangling =
-                                                         false };
-                                                       f_doc_comment = None;
+                                                       { Namespace_env.ns_ns_uses = <opaque>; 
+                                                         ns_class_uses = <opaque>; 
+                                                         ns_record_def_uses = <opaque>; 
+                                                         ns_fun_uses = <opaque>; 
+                                                         ns_const_uses = <opaque>; 
+                                                         ns_name = None; 
+                                                         ns_auto_ns_map = []; 
+                                                         ns_is_codegen = false; 
+                                                         ns_disable_xhp_element_mangling = false };
+                                                       f_doc_comment = None; 
                                                        f_static = false },
-                                                     [([Pos.none], $0splice0);
-                                                       ([Pos.none], $0splice1)
-                                                       ]
-                                                     )))
+                                                     [([Pos.none], $0splice0); ([Pos.none], $0splice1)])))
                                                  ],
                                                None))))))
                                  ];
                                fb_annotation = Named };
-                             f_fun_kind = FSync; f_user_attributes = [];
+                             f_fun_kind = FSync; f_user_attributes = []; 
                              f_file_attributes = []; f_external = false;
                              f_namespace =
-                             { Namespace_env.ns_ns_uses = <opaque>;
-                               ns_class_uses = <opaque>;
-                               ns_record_def_uses = <opaque>;
-                               ns_fun_uses = <opaque>;
-                               ns_const_uses = <opaque>; ns_name = None;
-                               ns_auto_ns_map = []; ns_is_codegen = false;
+                             { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+                               ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
+                               ns_const_uses = <opaque>; ns_name = None; 
+                               ns_auto_ns_map = []; ns_is_codegen = false; 
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
                            []))),
@@ -584,12 +275,10 @@
                    }))))
           ];
         fb_annotation = Named };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = []; 
       f_external = false;
       f_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
-        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false })
-  ]

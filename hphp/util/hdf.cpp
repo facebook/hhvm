@@ -240,7 +240,9 @@ void Hdf::setVisited(bool visited /* = true */) {
 
 const char *Hdf::configGet(const char *defValue /* = NULL */) const {
   HDF *hdf = getRaw();
-  const char *v = hdf_obj_value(hdf);
+  auto err = STATUS_OK;
+  const char *v = hdf_obj_value(hdf, &err);
+  CheckNeoError(err);
   hdf_set_visited(hdf, 1);
   return v ? v : defValue;
 }
@@ -603,7 +605,11 @@ bool Hdf::exists() const {
   if (fullpath.empty()) {
     return true;
   }
-  return hdf_get_obj(m_rawp->m_hdf, fullpath.c_str());
+
+  auto err = STATUS_OK;
+  auto const result = hdf_get_obj(m_rawp->m_hdf, fullpath.c_str(), &err);
+  CheckNeoError(err);
+  return result;
 }
 
 bool Hdf::exists(int name) const {
@@ -618,10 +624,16 @@ bool Hdf::exists(const char *name) const {
     std::string fullpath = getFullPath();
     hdf = m_rawp->m_hdf;
     if (!fullpath.empty()) {
-      hdf = hdf_get_obj(hdf, fullpath.c_str());
+      auto err = STATUS_OK;
+      hdf = hdf_get_obj(hdf, fullpath.c_str(), &err);
+      CheckNeoError(err);
     }
   }
-  return hdf && hdf_get_obj(hdf, name);
+  if (!hdf) return false;
+  auto err = STATUS_OK;
+  if (hdf_get_obj(hdf, name, &err)) return true;
+  CheckNeoError(err);
+  return false;
 }
 
 bool Hdf::exists(const std::string &name) const {
@@ -649,7 +661,10 @@ void Hdf::remove(const std::string &name) const {
 Hdf Hdf::firstChild(bool markVisited /* = true */) const {
   HDF *hdf = getRaw();
   if (markVisited) hdf_set_visited(hdf, 1);
-  Hdf ret(hdf_obj_child(hdf));
+  auto err = STATUS_OK;
+  auto child = hdf_obj_child(hdf, &err);
+  CheckNeoError(err);
+  Hdf ret(child);
   ret.m_path = getFullPath();
   ret.m_name = ret.getName(markVisited);
   return ret;
@@ -699,7 +714,7 @@ HDF *Hdf::getRaw() const {
   if (fullpath.empty()) {
     ret = m_rawp->m_hdf;
   } else {
-    hdf_get_node(m_rawp->m_hdf, (char*)fullpath.c_str(), &ret);
+    CheckNeoError(hdf_get_node(m_rawp->m_hdf, (char*)fullpath.c_str(), &ret));
   }
   m_hdf = ret;
   return ret;

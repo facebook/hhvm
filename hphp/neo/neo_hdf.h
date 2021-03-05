@@ -87,7 +87,7 @@ void hdf_destroy (HDF **hdf);
  * Output: None
  * Returns: the pointer to the named node, or NULL if it doesn't exist
  */
-HDF* hdf_get_obj (HDF *hdf, const char *name);
+HDF* hdf_get_obj (HDF *hdf, const char *name, NEOERR** err);
 
 /*
  * Function: hdf_get_node - Similar to hdf_get_obj except all the nodes
@@ -113,7 +113,7 @@ NEOERR * hdf_get_node (HDF *hdf, const char *name, HDF **ret);
  * Returns: The first child of the named dataset node or NULL if the
  *          node is not found (or it has no children)
  */
-HDF* hdf_get_child (HDF *hdf, const char *name);
+HDF* hdf_get_child (HDF *hdf, const char *name, NEOERR** err);
 
 /*
  * Function: hdf_set_visited - Mark a node visited or not
@@ -136,7 +136,7 @@ int hdf_is_visited (HDF *hdf);
  * Output: None
  * Returns: The pointer to the first child, or NULL if there is none
  */
-HDF* hdf_obj_child (HDF *hdf);
+HDF* hdf_obj_child (HDF *hdf, NEOERR**);
 
 /*
  * Function: hdf_obj_next - Return the next node of a dataset level
@@ -169,7 +169,7 @@ char* hdf_obj_name (HDF *hdf);
  * Output: None
  * Returns: The value of the node, or NULL if it has no value
  */
-char* hdf_obj_value (HDF *hdf);
+char* hdf_obj_value (HDF *hdf, NEOERR**);
 
 /*
  * Function: hdf_set_value - Set the value of a named node

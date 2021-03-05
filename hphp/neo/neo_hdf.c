@@ -230,7 +230,10 @@ void hdf_destroy (HDF **hdf)
   }
 }
 
-static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
+#define WALK_MAX_DEPTH 1000
+
+static int _walk_hdf (HDF *hdf, const char *name, HDF **node,
+                      NEOERR** err, int recursion)
 {
   HDF *parent = NULL;
   HDF *hp = hdf;
@@ -250,7 +253,13 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
 
   if (hdf->link)
   {
-    r = _walk_hdf (hdf->top, hdf->value, &hp);
+    if (recursion >= WALK_MAX_DEPTH) {
+      *err = nerr_raise (NERR_MAX_RECURSION,
+                         "Recursion limit reached in _walk_hdf"
+                        );
+      return -1;
+    }
+    r = _walk_hdf (hdf->top, hdf->value, &hp, err, recursion + 1);
     if (r) return r;
     if (hp)
     {
@@ -302,7 +311,13 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
 
     if (hp->link)
     {
-      r = _walk_hdf (hp->top, hp->value, &hp);
+      if (recursion >= WALK_MAX_DEPTH) {
+        *err = nerr_raise (NERR_MAX_RECURSION,
+                           "Recursion limit reached in _walk_hdf"
+                          );
+        return -1;
+      }
+      r = _walk_hdf (hp->top, hp->value, &hp, err, recursion + 1);
       if (r) {
 	return r;
       }
@@ -320,25 +335,31 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
   }
   if (hp->link)
   {
-    return _walk_hdf (hp->top, hp->value, node);
+    if (recursion >= WALK_MAX_DEPTH) {
+      *err = nerr_raise (NERR_MAX_RECURSION,
+                         "Recursion limit reached in _walk_hdf"
+                        );
+      return -1;
+    }
+    return _walk_hdf (hp->top, hp->value, node, err, recursion + 1);
   }
 
   *node = hp;
   return 0;
 }
 
-HDF* hdf_get_obj (HDF *hdf, const char *name)
+HDF* hdf_get_obj (HDF *hdf, const char *name, NEOERR** err)
 {
   HDF *obj;
 
-  _walk_hdf(hdf, name, &obj);
+  _walk_hdf(hdf, name, &obj, err, 0);
   return obj;
 }
 
-HDF* hdf_get_child (HDF *hdf, const char *name)
+HDF* hdf_get_child (HDF *hdf, const char *name, NEOERR** err)
 {
   HDF *obj;
-  _walk_hdf(hdf, name, &obj);
+  _walk_hdf(hdf, name, &obj, err, 0);
   if (obj != NULL) return obj->child;
   return obj;
 }
@@ -351,13 +372,13 @@ int hdf_is_visited (HDF *hdf) {
   return hdf ? hdf->visited : 0;
 }
 
-HDF* hdf_obj_child (HDF *hdf)
+HDF* hdf_obj_child (HDF *hdf, NEOERR** err)
 {
   HDF *obj;
   if (hdf == NULL) return NULL;
   if (hdf->link)
   {
-    if (_walk_hdf(hdf->top, hdf->value, &obj))
+    if (_walk_hdf(hdf->top, hdf->value, &obj, err, 0))
       return NULL;
     return obj->child;
   }
@@ -376,14 +397,14 @@ char* hdf_obj_name (HDF *hdf)
   return hdf->name;
 }
 
-char* hdf_obj_value (HDF *hdf)
+char* hdf_obj_value (HDF *hdf, NEOERR** err)
 {
   int count = 0;
 
   if (hdf == NULL) return NULL;
   while (hdf->link && count < 100)
   {
-    if (_walk_hdf (hdf->top, hdf->value, &hdf))
+    if (_walk_hdf (hdf->top, hdf->value, &hdf, err, 0))
       return NULL;
     count++;
   }
@@ -710,9 +731,11 @@ NEOERR* hdf_set_value (HDF *hdf, const char *name, const char *value)
 
 NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
 {
-  _walk_hdf(hdf, name, ret);
+  NEOERR* err = STATUS_OK;
+  _walk_hdf(hdf, name, ret, &err, 0);
   if (*ret == NULL)
   {
+    if (err != STATUS_OK) return err;
     return nerr_pass(_set_value (hdf, name, NULL, 0, 1, 0, NULL, ret));
   }
   return STATUS_OK;
@@ -858,8 +881,10 @@ NEOERR* hdf_copy (HDF *dest, const char *name, HDF *src)
   HDF *node;
   HDF_ATTR *attr_copy;
 
-  if (_walk_hdf(dest, name, &node) == -1)
+  err = STATUS_OK;
+  if (_walk_hdf(dest, name, &node, &err, 0) == -1)
   {
+    if (err) return err;
     err = _copy_attr(&attr_copy, src->attr);
     if (err) return nerr_pass(err);
     err = _set_value (dest, name, src->value, 1, 1, src->link, attr_copy,
@@ -1014,8 +1039,10 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
     {
       if (prefix && (dtype == DUMP_TYPE_DOTTED))
       {
-	p = (char *) malloc (strlen(hdf->name) + strlen(prefix) + 2);
-	sprintf (p, "%s.%s", prefix, hdf->name);
+        size_t p_len = strlen(hdf->name) + strlen(prefix) + 2;
+        p = (char *) malloc (p_len);
+        snprintf (p, p_len, "%s.%s", prefix, hdf->name);
+
 	err = hdf_dump_cb (hdf, p, dtype, lvl+1, rock, dump_cbf);
 	free(p);
       }
@@ -1427,9 +1454,15 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       }
       if (splice) {
         name = neos_strip(name);
-        HDF *h = hdf_get_obj(hdf->top, name);
+        HDF *h = hdf_get_obj(hdf->top, name, &err);
+        if (err != STATUS_OK) {
+          return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
+        }
         if (h) {
-          HDF *c = hdf_obj_child(h);
+          HDF *c = hdf_obj_child(h, &err);
+          if (err != STATUS_OK) {
+            return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
+          }
           while (c) {
             err = hdf_copy (hdf, hdf_obj_name(c), c);
             if (err != STATUS_OK) break;
@@ -1458,7 +1491,10 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
 	name = neos_strip(name);
 	s+=2;
 	value = neos_strip(s);
-        HDF *h = hdf_get_obj(hdf->top, value);
+        HDF *h = hdf_get_obj(hdf->top, value, &err);
+        if (err != STATUS_OK) {
+          return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
+        }
         if (!h)
         {
 	  err = nerr_raise(NERR_PARSE,
@@ -1521,7 +1557,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       {
 	*s = '\0';
 	name = neos_strip(name);
-	lower = hdf_get_obj (hdf, name);
+	lower = hdf_get_obj (hdf, name, &err);
 	if (lower == NULL)
 	{
 	  err = _set_value (hdf, name, NULL, 1, 1, 0, attr, &lower);
@@ -1631,12 +1667,16 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len)
 {
   HDF *paths;
   struct stat s;
+  NEOERR* err = STATUS_OK;
 
-  for (paths = hdf_get_child (hdf, "hdf.loadpaths");
-      paths;
-      paths = hdf_obj_next (paths))
+  paths = hdf_get_child (hdf, "hdf.loadpaths", &err);
+  if (err != STATUS_OK) return err;
+
+  for (; paths; paths = hdf_obj_next (paths))
   {
-    snprintf (full, full_len, "%s/%s", hdf_obj_value(paths), path);
+    char* value = hdf_obj_value(paths, &err);
+    if (err != STATUS_OK) return err;
+    snprintf (full, full_len, "%s/%s", value, path);
     errno = 0;
     if (stat (full, &s) == -1)
     {
@@ -1650,6 +1690,8 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len)
   }
 
   strncpy (full, path, full_len);
+  full[full_len > 0 ? full_len-1 : full_len] = '\0';
+
   if (stat (full, &s) == -1)
   {
     if (errno != ENOENT)

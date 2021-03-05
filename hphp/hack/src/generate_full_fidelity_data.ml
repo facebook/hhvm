@@ -1684,67 +1684,6 @@ end
 
 (* GenerateFFRustSyntaxSmartConstructors *)
 
-module GenerateOcamlSyntax = struct
-  let to_constructor_methods x =
-    let sep s = String.concat ~sep:s in
-    let comma_sep = sep ", " in
-    let newline_sep spaces = sep (", \n" ^ spaces) in
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self" i) in
-    let args = comma_sep args in
-    let params f = List.mapi x.fields ~f:(fun i _ -> f (sprintf "arg%d" i)) in
-    let param_values = newline_sep "          " (params (sprintf "%s.value")) in
-    let param_nodes =
-      newline_sep "              " (params (sprintf "%s.syntax"))
-    in
-    sprintf
-      "    fn make_%s(ctx: &C, %s) -> Self {
-      let children = &[
-          %s
-      ];
-      let value = V::from_values(children.iter());
-      let syntax = Self::make(
-          ctx,
-          SyntaxKind::%s,
-          &value,
-          &[
-              %s
-          ],
-      );
-      Self { syntax, value }
-    }\n\n"
-      x.type_name
-      args
-      param_values
-      x.kind_name
-      param_nodes
-
-  let template : string =
-    make_header CStyle ""
-    ^ "
-use crate::{OcamlSyntax, Context};
-use rust_to_ocaml::*;
-
-use parser_core_types::syntax_kind::SyntaxKind;
-use parser_core_types::syntax::{SyntaxType, SyntaxValueType};
-use parser_core_types::positioned_token::PositionedToken;
-
-impl<V, C> SyntaxType<C> for OcamlSyntax<V>
-where
-    C: Context,
-    V: SyntaxValueType<PositionedToken> + ToOcaml,
-{
-CONSTRUCTOR_METHODS}
-  "
-
-  let ocaml_syntax =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:(full_fidelity_path_prefix ^ "ocaml_syntax_generated.rs")
-      ~template
-      ()
-end
-
 module GenerateFFRustDeclModeSmartConstructors = struct
   let to_constructor_methods x =
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
@@ -3269,7 +3208,6 @@ let templates =
     .full_fidelity_smart_constructors_wrappers;
     GenerateFFRustSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
-    GenerateOcamlSyntax.ocaml_syntax;
     GenerateFFRustSyntaxVariantByRef.full_fidelity_syntax;
     GenerateSyntaxTypeImpl.full_fidelity_syntax;
     GenerateSyntaxChildrenIterator.full_fidelity_syntax;

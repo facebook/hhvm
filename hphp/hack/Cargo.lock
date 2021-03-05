@@ -1249,7 +1249,6 @@ version = "3.49.0"
 dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
- "positioned_parser_ffi",
  "verify_parser_ffi",
 ]
 
@@ -2271,17 +2270,6 @@ dependencies = [
  "parser",
  "positioned_smart_constructors",
  "stack_limit",
-]
-
-[[package]]
-name = "positioned_parser_ffi"
-version = "0.0.0"
-dependencies = [
- "ocamlrep",
- "ocamlrep_ocamlpool",
- "oxidized",
- "positioned_parser",
- "rust_parser_ffi",
 ]
 
 [[package]]

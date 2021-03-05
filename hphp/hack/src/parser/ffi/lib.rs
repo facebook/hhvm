@@ -5,5 +5,4 @@
 
 pub use aast_parser_ffi::*;
 pub use positioned_by_ref_parser_ffi::*;
-pub use positioned_parser_ffi::*;
 pub use verify_parser_ffi::*;

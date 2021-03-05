@@ -12,7 +12,7 @@ pub trait Id<'arena>: Sized {
 
     fn to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
         if Self::MANGLE {
-            std::borrow::Cow::from(hhbc_string_utils_rust::unmangle(
+            std::borrow::Cow::from(hhbc_by_ref_hhbc_string_utils::unmangle(
                 self.to_raw_string().into(),
             ))
         } else {
@@ -27,6 +27,9 @@ pub trait Id<'arena>: Sized {
 macro_rules! impl_id {
     ($type: ident, mangle = $mangle:expr, { $($trait_impl: tt)* }) => {
 
+        //Note: $type<'arena> is a newtype over a &'arena str. We
+        //intend that these types borrow strings stored in `InstrSeq`
+        //arenas.
         #[derive(Clone)]
         pub struct $type<'arena>(&'arena str);
 
@@ -86,9 +89,9 @@ pub mod class {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
             (
                 alloc,
-                hhbc_string_utils_rust::strip_global_ns(&hhbc_string_utils_rust::mangle(
-                    s.to_string(),
-                )),
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(
+                    &hhbc_by_ref_hhbc_string_utils::mangle(s.to_string()),
+                ),
             )
                 .into()
         }
@@ -108,7 +111,7 @@ pub mod class {
 pub mod prop {
     impl_id!(Type, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
-            (alloc, hhbc_string_utils_rust::strip_global_ns(s)).into()
+            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
     impl_add_suffix!(Type);
@@ -117,7 +120,7 @@ pub mod prop {
 pub mod method {
     impl_id!(Type, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
-            (alloc, hhbc_string_utils_rust::strip_global_ns(s)).into()
+            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
     impl_add_suffix!(Type);
@@ -126,7 +129,7 @@ pub mod method {
 pub mod function {
     impl_id!(Type, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
-            (alloc, hhbc_string_utils_rust::strip_global_ns(s)).into()
+            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
     impl_add_suffix!(Type);
@@ -136,7 +139,7 @@ pub mod function {
 pub mod r#const {
     impl_id!(Type, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
-            (alloc, hhbc_string_utils_rust::strip_global_ns(s)).into()
+            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
 }
@@ -144,7 +147,7 @@ pub mod r#const {
 pub mod record {
     impl_id!(Type, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
-            (alloc, hhbc_string_utils_rust::strip_global_ns(s)).into()
+            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
 }

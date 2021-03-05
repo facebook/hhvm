@@ -31,7 +31,7 @@ mod float {
 }
 
 type LegacyFlag = bool;
-type ProvTag<'arena> = Option<oxidized_by_ref::ast_defs::Pos<'arena>>;
+type ProvTag = Option<oxidized::ast_defs::Pos>;
 
 /// We introduce a type for Hack/PHP values, mimicking what happens at
 /// runtime. Currently this is used for constant folding. By defining
@@ -53,17 +53,18 @@ pub enum TypedValue<'arena> {
     Null,
     // Classic PHP arrays with explicit (key,value) entries
     HhasAdata(&'arena str),
-    VArray((&'arena [Self], ProvTag<'arena>)),
-    DArray(
+    VArray((&'arena [Self], ProvTag)),
+    DArray((&'arena [(TypedValue<'arena>, TypedValue<'arena>)], ProvTag)),
+    // Hack arrays: vectors, keysets, and dictionaries
+    Vec((&'arena [TypedValue<'arena>], ProvTag, LegacyFlag)),
+    Keyset(&'arena [TypedValue<'arena>]),
+    Dict(
         (
             &'arena [(TypedValue<'arena>, TypedValue<'arena>)],
-            ProvTag<'arena>,
+            ProvTag,
+            LegacyFlag,
         ),
     ),
-    // Hack arrays: vectors, keysets, and dictionaries
-    Vec((&'arena [TypedValue<'arena>], ProvTag<'arena>, LegacyFlag)),
-    Keyset(&'arena [TypedValue<'arena>]),
-    Dict((&'arena [TypedValue<'arena>], ProvTag<'arena>, LegacyFlag)),
 }
 
 mod string_ops {

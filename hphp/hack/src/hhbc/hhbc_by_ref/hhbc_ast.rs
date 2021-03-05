@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_env::local;
+use hhbc_by_ref_local as local;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CheckStarted {
@@ -91,7 +91,7 @@ impl<'arena> FcallArgs<'arena> {
 
 #[derive(Clone, Debug)]
 pub struct IterArgs<'arena> {
-    pub iter_id: hhbc_by_ref_env::iterator::Id,
+    pub iter_id: hhbc_by_ref_iterator::Id,
     pub key_id: Option<local::Type<'arena>>,
     pub val_id: local::Type<'arena>,
 }
@@ -492,7 +492,7 @@ pub enum InstructFinal<'arena> {
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
     IterNext(IterArgs<'arena>, hhbc_by_ref_label::Label<'arena>),
-    IterFree(hhbc_by_ref_env::iterator::Id),
+    IterFree(hhbc_by_ref_iterator::Id),
 }
 
 #[derive(Clone, Debug)]

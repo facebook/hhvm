@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::iterator;
 use hhbc_by_ref_label::Label;
 use oxidized::aast::*;
 
@@ -14,7 +13,7 @@ type LabelSet = std::collections::HashSet<String>;
 pub struct LoopLabels<'arena> {
     label_break: Label<'arena>,
     label_continue: Label<'arena>,
-    iterator: Option<iterator::Id>,
+    iterator: Option<hhbc_by_ref_iterator::Id>,
 }
 
 #[derive(Clone, Debug)]
@@ -32,14 +31,14 @@ pub struct ResolvedTryFinally<'arena> {
     pub target_label: Label<'arena>,
     pub finally_label: Label<'arena>,
     pub adjusted_level: usize,
-    pub iterators_to_release: Vec<iterator::Id>,
+    pub iterators_to_release: Vec<hhbc_by_ref_iterator::Id>,
 }
 
 #[derive(Debug)]
 pub enum ResolvedJumpTarget<'arena> {
     NotFound,
     ResolvedTryFinally(ResolvedTryFinally<'arena>),
-    ResolvedRegular(Label<'arena>, Vec<iterator::Id>),
+    ResolvedRegular(Label<'arena>, Vec<hhbc_by_ref_iterator::Id>),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -52,7 +51,7 @@ impl<'arena> JumpTargets<'arena> {
 
     pub fn get_closest_enclosing_finally_label(
         &self,
-    ) -> Option<(Label<'arena>, Vec<iterator::Id>)> {
+    ) -> Option<(Label<'arena>, Vec<hhbc_by_ref_iterator::Id>)> {
         let mut iters = vec![];
         for r in self.0.iter().rev() {
             match r {
@@ -69,7 +68,7 @@ impl<'arena> JumpTargets<'arena> {
     }
 
     // NOTE(hrust) this corresponds to collect_iterators in OCaml but doesn't allocate/clone
-    pub fn iterators(&self) -> impl Iterator<Item = &iterator::Id> {
+    pub fn iterators(&self) -> impl Iterator<Item = &hhbc_by_ref_iterator::Id> {
         self.0.iter().rev().filter_map(|r| {
             if let Region::Loop(LoopLabels { iterator, .. }, _) = r {
                 iterator.as_ref()
@@ -216,7 +215,7 @@ impl<'arena> Gen<'arena> {
         &mut self,
         label_break: Label<'arena>,
         label_continue: Label<'arena>,
-        iterator: Option<iterator::Id>,
+        iterator: Option<hhbc_by_ref_iterator::Id>,
         block: &[Stmt<Ex, Fb, En, Hi>],
     ) {
         let labels = self.collect_valid_target_labels_for_block(block);
@@ -458,7 +457,10 @@ impl<'arena> Gen<'arena> {
     }
 }
 
-fn add_iterator(it_opt: Option<iterator::Id>, iters: &mut Vec<iterator::Id>) {
+fn add_iterator(
+    it_opt: Option<hhbc_by_ref_iterator::Id>,
+    iters: &mut Vec<hhbc_by_ref_iterator::Id>,
+) {
     if let Some(it) = it_opt {
         iters.push(it);
     }

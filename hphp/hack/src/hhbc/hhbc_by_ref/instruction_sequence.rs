@@ -3,26 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_env::iterator::Id as IterId;
-use hhbc_by_ref_env::local;
 use hhbc_by_ref_hhbc_ast::*;
+use hhbc_by_ref_iterator::Id as IterId;
 use hhbc_by_ref_label::Label;
+use hhbc_by_ref_local as local;
 use hhbc_by_ref_runtime::TypedValue;
-use oxidized_by_ref::ast_defs::Pos;
+use oxidized::ast_defs::Pos;
 use thiserror::Error;
 
-pub type Result<'a, T = InstrSeq<'a>> = std::result::Result<T, Error<'a>>;
+pub type Result<'a, T = InstrSeq<'a>> = std::result::Result<T, Error>;
 
 #[derive(Error, Debug)]
-pub enum Error<'a> {
+pub enum Error {
     #[error("IncludeTimeFatalException: FatalOp={0:?}, {1}")]
-    IncludeTimeFatalException(FatalOp, Pos<'a>, std::string::String),
+    IncludeTimeFatalException(FatalOp, Pos, std::string::String),
 
     #[error("Unrecoverable: {0}")]
     Unrecoverable(std::string::String),
 }
 
-pub fn unrecoverable<'a>(msg: impl std::convert::Into<std::string::String>) -> Error<'a> {
+pub fn unrecoverable(msg: impl std::convert::Into<std::string::String>) -> Error {
     Error::Unrecoverable(msg.into())
 }
 

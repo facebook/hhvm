@@ -4,18 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod emitter; // emitter is public API for mutating state
-pub mod iterator;
 pub mod jump_targets;
-pub mod local;
 
-use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
+use bitflags::bitflags;
 use emitter::Emitter;
 use hhbc_by_ref_ast_body::AstBody;
+use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_label::Label;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as tast, namespace_env::Env as NamespaceEnv};
-
-use bitflags::bitflags;
 
 bitflags! {
     #[derive(Default)]
@@ -27,6 +24,8 @@ bitflags! {
     }
 }
 
+/// `'a` is an AST lifetime, `'arena` the lifetime of the `InstrSeq`
+/// arena.
 #[derive(Clone, Debug)]
 pub struct Env<'a, 'arena> {
     pub arena: &'arena bumpalo::Bump,
@@ -35,7 +34,7 @@ pub struct Env<'a, 'arena> {
     pub scope: Scope<'a>,
     pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
-    pub pipe_var: Option<local::Type<'arena>>,
+    pub pipe_var: Option<hhbc_by_ref_local::Type<'arena>>,
 }
 
 impl<'a, 'arena> Env<'a, 'arena> {
@@ -74,7 +73,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         }
     }
 
-    pub fn with_pipe_var(&mut self, local: local::Type<'arena>) {
+    pub fn with_pipe_var(&mut self, local: hhbc_by_ref_local::Type<'arena>) {
         self.pipe_var = Some(local);
     }
 
@@ -97,7 +96,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         e: &mut Emitter<'arena>,
         label_break: Label<'arena>,
         label_continue: Label<'arena>,
-        iterator: Option<iterator::Id>,
+        iterator: Option<hhbc_by_ref_iterator::Id>,
         b: &[tast::Stmt],
         f: F,
     ) -> R
@@ -197,50 +196,6 @@ impl<'a, 'arena> Env<'a, 'arena> {
         self.jump_targets_gen.revert();
         res
     }
-}
-
-/// Builder for creating unique ids; e.g.
-/// the OCaml function
-///    Emit_env.get_unique_id_for_FOO
-/// can be called in Rust via:
-/// ```
-///    UniqueIdBuilder::new().FOO("some_fun")
-/// ```
-pub struct UniqueIdBuilder {
-    id: String,
-}
-impl UniqueIdBuilder {
-    pub fn new() -> UniqueIdBuilder {
-        UniqueIdBuilder { id: "|".to_owned() }
-    }
-    pub fn main(self) -> String {
-        self.id
-    }
-    pub fn function(mut self, fun_name: &str) -> String {
-        self.id.push_str(fun_name);
-        self.id
-    }
-    pub fn method(self, class_name: &str, meth_name: &str) -> String {
-        let mut ret = class_name.to_owned();
-        ret.push_str(&self.id);
-        ret.push_str(meth_name);
-        ret
-    }
-}
-
-pub type SMap<T> = std::collections::BTreeMap<String, T>;
-pub type SSet = std::collections::BTreeSet<String>;
-
-pub fn get_unique_id_for_main() -> &'static str {
-    "|"
-}
-
-pub fn get_unique_id_for_method(cls_name: &str, md_name: &str) -> String {
-    format!("{}|{}", cls_name, md_name)
-}
-
-pub fn get_unique_id_for_function(fun_name: &str) -> String {
-    format!("|{}", fun_name)
 }
 
 #[cfg(test)]

@@ -3,9 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::iterator::Iter;
-use crate::local as hhbc_by_ref_local;
-use options::Options;
+use hhbc_by_ref_iterator::Iter;
+use hhbc_by_ref_options::Options;
+
+use hhbc_by_ref_adata_state::AdataState;
+use hhbc_by_ref_global_state::GlobalState;
+use hhbc_by_ref_statement_state::StatementState;
+use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
 
 #[derive(Debug, Default)]
 pub struct Emitter<'arena> {
@@ -20,17 +24,11 @@ pub struct Emitter<'arena> {
 
     pub for_debugger_eval: bool,
 
-    // dynamic states are exposed because another crate
-    // needs to inject the lazy set/get into these slots,
-    // accessed via `emit_state()` on Emitter that
-    // auto-implemented via the `lazy_emit_state!` macro
-    // (each crate such as emit_XYZ only access one of these)
-    pub adata_state: DynState,
-    pub expression_state: DynState,
-    pub statement_state: DynState,
-    pub symbol_refs_state: DynState,
+    pub adata_state_: Option<AdataState<'arena>>,
+    pub statement_state_: Option<StatementState<'arena>>,
+    pub symbol_refs_state_: Option<SymbolRefsState>,
     /// State is also frozen and set after closure conversion
-    pub global_state: DynState,
+    pub global_state_: Option<GlobalState>,
 }
 
 impl<'arena> Emitter<'arena> {
@@ -84,75 +82,61 @@ impl<'arena> Emitter<'arena> {
     pub fn systemlib(&self) -> bool {
         self.systemlib
     }
-}
 
-use std::any::Any;
-
-/// Injects stateful type to emitter without adding dependency to another crate
-/// Example:
-/// ```
-/// struct State {}
-/// impl State {
-///     fn init() -> Box<dyn std::any::Any> {
-///         Box::new(State {})
-///     }
-/// }
-/// env::lazy_emit_state!(adata_state, State, State::init);
-/// ```
-/// now the crate can call `emit_state_mut` (or `emit_state`),
-/// which converts to the create-private type `&mut State` (or `State`).
-#[macro_export]
-macro_rules! lazy_emit_state {
-    ($field: ident, $type: ty, $init: expr) => {
-        // Note: if multiple decls or name clashes, do one of:
-        // - add explicit name(s) as macro parameter(s)
-        // - use crate paste/mashup to create unique trait/method names
-        pub trait LazyState<T> {
-            fn emit_state(&self) -> &T;
-            fn emit_state_mut(&mut self) -> &mut T;
-            fn into_emit_state(self) -> T;
-        }
-        impl<'arena> LazyState<$type> for Emitter<'arena> {
-            fn emit_state(&self) -> &$type {
-                self.$field
-                    .as_ref()
-                    .expect(concat!("uninit'd ", module_path!(), " state"))
-                    .downcast_ref::<$type>()
-                    .expect(concat!("expected ", module_path!(), " state"))
-            }
-
-            fn emit_state_mut(&mut self) -> &mut $type {
-                self.$field
-                    .get_or_init($init)
-                    .downcast_mut::<$type>()
-                    .expect(concat!("expected ", module_path!(), " state"))
-            }
-
-            fn into_emit_state(mut self) -> $type {
-                *(self
-                    .$field
-                    .into()
-                    .expect(concat!("uninit'd ", module_path!(), " state")))
-                .downcast::<$type>()
-                .expect(concat!("expected ", module_path!(), " state"))
-            }
-        }
-    };
-}
-
-/// The plumbing to make `lazy_emit_state!` macro work,
-/// which gives user-friendly access to mutable crate-provided type
-#[derive(Debug, Default)]
-pub struct DynState(Option<Box<dyn Any>>);
-impl DynState {
-    pub fn get_or_init(&mut self, init: fn() -> Box<dyn Any>) -> &mut Box<dyn Any> {
-        self.0.get_or_insert_with(init)
+    pub fn emit_adata_state(&self) -> &AdataState<'arena> {
+        self.adata_state_.as_ref().expect("uninit'd adata_state")
     }
-    pub fn as_ref(&self) -> Option<&Box<dyn Any>> {
-        self.0.as_ref()
+    pub fn emit_adata_state_mut(
+        &mut self,
+        alloc: &'arena bumpalo::Bump,
+    ) -> &mut AdataState<'arena> {
+        self.adata_state_
+            .get_or_insert_with(|| AdataState::init(alloc))
+    }
+    pub fn into_adata_emit_state(self) -> AdataState<'arena> {
+        self.adata_state_.expect("uninit'd adata_state")
     }
 
-    pub fn into(self) -> Option<Box<dyn Any>> {
-        self.0
+    pub fn emit_statement_state(&self) -> &StatementState<'arena> {
+        self.statement_state_
+            .as_ref()
+            .expect("uninit'd statement_state")
+    }
+    pub fn emit_statement_state_mut(
+        &mut self,
+        alloc: &'arena bumpalo::Bump,
+    ) -> &mut StatementState<'arena> {
+        self.statement_state_
+            .get_or_insert_with(|| StatementState::init(alloc))
+    }
+    pub fn into_statement_emit_state(self) -> StatementState<'arena> {
+        self.statement_state_.expect("uninit'd statement_state")
+    }
+
+    pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState {
+        self.symbol_refs_state_
+            .as_ref()
+            .expect("uninit'd symbol_refs_state")
+    }
+    pub fn emit_symbol_refs_state_mut(
+        &mut self,
+        alloc: &'arena bumpalo::Bump,
+    ) -> &mut SymbolRefsState {
+        self.symbol_refs_state_
+            .get_or_insert_with(|| SymbolRefsState::init(alloc))
+    }
+    pub fn into_symbol_refs_emit_state(self) -> SymbolRefsState {
+        self.symbol_refs_state_.expect("uninit'd symbol_refs_state")
+    }
+
+    pub fn emit_global_state(&self) -> &GlobalState {
+        self.global_state_.as_ref().expect("uninit'd global_state")
+    }
+    pub fn emit_global_state_mut(&mut self, alloc: &'arena bumpalo::Bump) -> &mut GlobalState {
+        self.global_state_
+            .get_or_insert_with(|| GlobalState::init(alloc))
+    }
+    pub fn into_global_emit_state(self) -> GlobalState {
+        self.global_state_.expect("uninit'd global_state")
     }
 }

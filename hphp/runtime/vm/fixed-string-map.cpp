@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/struct-log-util.h"
 
+#include "hphp/runtime/vm/jit/tc.h"
+
 #include "hphp/util/stack-trace.h"
 
 namespace HPHP {
@@ -29,7 +31,7 @@ namespace FSM {
 const StringData* null_key;
 
 bool is_in_request_context() {
-  return !g_context.isNull();
+  return !g_context.isNull() && !jit::tc::tl_is_jitting;
 }
 
 void log_to_scuba(const StringData* key_in_hashtable,

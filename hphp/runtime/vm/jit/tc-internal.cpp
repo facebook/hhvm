@@ -60,6 +60,8 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
+__thread bool tl_is_jitting = false;
+
 CodeCache* g_code{nullptr};
 SrcDB g_srcDB;
 UniqueStubs g_ustubs;
@@ -587,7 +589,14 @@ void Translator::translate(folly::Optional<CodeCache::View> view) {
     unit.reset();
     vunit.reset();
   };
-  this->gen();
+
+  {
+    tl_is_jitting = true;
+    this->gen();
+    SCOPE_EXIT {
+      tl_is_jitting = false;
+    };
+  }
 
   // Check for translation failure.
   if (!vunit) return;

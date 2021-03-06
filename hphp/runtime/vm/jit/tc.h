@@ -52,6 +52,8 @@ using OptView = folly::Optional<CodeCache::View>;
 
 namespace tc {
 
+extern __thread bool tl_is_jitting;
+
 struct TransRange {
   TcaRange main;
   TcaRange cold;

@@ -48,7 +48,7 @@ struct APCClsMeth {
     assertx(m_handle.kind() == APCKind::ClsMeth);
     auto const c = Class::load(m_clsName);
     if (!c) return Variant{Variant::NullInit{}};
-    auto const m = c->lookupMethod(m_methName, false);
+    auto const m = c->lookupMethod(m_methName);
     return m
       ? Variant{ClsMethDataRef::create(c, m)}
       : Variant{Variant::NullInit{}};

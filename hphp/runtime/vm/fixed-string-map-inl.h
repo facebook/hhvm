@@ -31,21 +31,19 @@ bool is_in_request_context();
 void log_to_scuba(const StringData*, const StringData*);
 
 template<bool CaseSensitive>
-inline bool strEqual(const StringData* sd1, const StringData* sd2, bool raise) {
+inline bool strEqual(const StringData* sd1, const StringData* sd2) {
   if (sd1 == sd2 || sd1->same(sd2)) return true;
-  if (CaseSensitive) return false;
+  if (CaseSensitive || !RO::EvalRaiseOnCaseInsensitiveLookup) return false;
   // If keys are same case insensitively, raise a notice
   if (sd1->isame(sd2)) {
-    if (RO::EvalRaiseOnCaseInsensitiveLookup && raise) {
-      if (is_in_request_context()) {
-        raise_notice("Invalid case sensitive method lookup: "
-                     "Searching for %s using %s",
-                     sd1->data(), sd2->data());
-      } else {
-        log_to_scuba(sd1, sd2);
-      }
+    if (is_in_request_context()) {
+      raise_notice("Invalid case sensitive method lookup: "
+                   "Searching for %s using %s",
+                   sd1->data(), sd2->data());
+    } else {
+      log_to_scuba(sd1, sd2);
     }
-    return raise;
+    return true;
   }
   return false;
 }
@@ -96,7 +94,7 @@ void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
   while (elm->sd) {
     assertx(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
-    if (FSM::strEqual<CaseSensitive>(elm->sd, sd, true)) break;
+    if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) break;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
   }
   elm->sd = sd;
@@ -105,14 +103,13 @@ void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
 
 template<class V, bool CaseSensitive, class E>
 NEVER_INLINE
-V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd,
-                                           bool raise) const {
+V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
   Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
   UNUSED unsigned numProbes = 0;
   for(;;) {
     assertx(numProbes++ < m_mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
-    if (FSM::strEqual<CaseSensitive>(elm->sd, sd, raise)) return &elm->data;
+    if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
   }
 }

@@ -1140,7 +1140,7 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
 bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
                                                         StringArg meth) {
   if (auto const c = Class::load(cls.get())) {
-    if (auto const m = c->lookupMethod(meth.get(), false)) {
+    if (auto const m = c->lookupMethod(meth.get())) {
       return !m->isStatic() && m->isDynamicallyCallable();
     }
   }

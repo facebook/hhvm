@@ -39,7 +39,6 @@ enum class LookupResult {
 enum class MethodLookupErrorOptions {
   None                       = 0,
   RaiseOnNotFound            = (1u << 0),
-  DisallowCaseInsensitive    = (1u << 1),
 };
 
 const Func* lookupMethodCtx(const Class* cls,

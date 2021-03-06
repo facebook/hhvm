@@ -13,44 +13,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #pragma once
 
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/base/type-string.h"
 
-#include "hphp/runtime/vm/hhbc.h"
+namespace HPHP {
 
-namespace HPHP { namespace jit {
+struct StringData;
 
-struct SSATmp;
+enum class ConvNoticeLevel: uint8_t { None, Log, Throw };
 
-namespace irgen {
+const char* convOpToName(ConvNoticeLevel level);
 
-struct IRGS;
+template <typename T> ConvNoticeLevel flagToConvNoticeLevel(T flag) {
+  return static_cast<ConvNoticeLevel>(
+     flag + static_cast<uint8_t>(ConvNoticeLevel::None)
+  );
+}
 
-/*
- * Return true iff we support compiling the given artihmetic operation with the
- * given types.
- */
-bool areBinaryArithTypesSupported(Op op, Type lhs, Type rhs);
+void handleConvNoticeLevel(
+   ConvNoticeLevel Level,
+   const char* const from,
+   const char* const to,
+   const StringData* reason);
 
-/*
- * If val->isA(TBool), return it converted to TInt. Otherwise, return val.
- */
-SSATmp* promoteBool(IRGS& env, SSATmp* val, bool isBitOp);
+extern const StaticString s_ConvNoticeReasonConcat;
+extern const StaticString s_ConvNoticeReasonBitOp;
 
-/*
- * If either lhs or rhs is TDbl, make sure the other one is as well. Return the
- * hhir Opcode corresponding to the given hhbc Op and the final types of lhs
- * and rhs.
- */
-Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& lhs, SSATmp*& rhs);
-
-/*
- * Query whether the given hhbc Op is a bitwise operation, or what the
- * corresponding hhir Opcode is.
- */
-bool isBitOp(Op);
-Opcode bitOp(Op);
-
-}}}
+}

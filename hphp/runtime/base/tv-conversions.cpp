@@ -1461,6 +1461,7 @@ void handleConvNoticeLevel(
 }
 
 const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");
+const StaticString s_ConvNoticeReasonBitOp("bitwise operation");
 
 ///////////////////////////////////////////////////////////////////////////////
 #define X(kind) \

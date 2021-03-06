@@ -70,29 +70,48 @@ inline bool tvToBool(TypedValue cell) {
   not_reached();
 }
 
-inline int64_t tvToInt(TypedValue cell) {
+inline int64_t tvToInt(
+  TypedValue cell, ConvNoticeLevel level, const StringData* notice_reason) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
-    case KindOfNull:          return 0;
-    case KindOfBoolean:       return cell.m_data.num;
+    case KindOfNull:
+      handleConvNoticeLevel(level, "null", "int", notice_reason);
+      return 0;
+    case KindOfBoolean:
+      handleConvNoticeLevel(level, "bool", "int", notice_reason);
+      return cell.m_data.num;
     case KindOfInt64:         return cell.m_data.num;
-    case KindOfDouble:        return double_to_int64(cell.m_data.dbl);
+    case KindOfDouble:
+      handleConvNoticeLevel(level, "double", "int", notice_reason);
+      return double_to_int64(cell.m_data.dbl);
     case KindOfPersistentString:
-    case KindOfString:        return cell.m_data.pstr->toInt64(10);
+    case KindOfString:
+      handleConvNoticeLevel(level, "string", "int", notice_reason);
+      return cell.m_data.pstr->toInt64(10);
     case KindOfPersistentDArray:
     case KindOfDArray:
+    case KindOfPersistentDict:
+    case KindOfDict:
+      handleConvNoticeLevel(level, "darray/dict", "int", notice_reason);
+      return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
+      handleConvNoticeLevel(level, "varray/vec", "int", notice_reason);
+      return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfPersistentKeyset:
-    case KindOfKeyset:        return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfObject:        return cell.m_data.pobj->toInt64();
-    case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
+    case KindOfKeyset:
+      handleConvNoticeLevel(level, "keyset", "int", notice_reason);
+      return cell.m_data.parr->empty() ? 0 : 1;
+    case KindOfObject:
+      handleConvNoticeLevel(level, "object", "int", notice_reason);
+      return cell.m_data.pobj->toInt64();
+    case KindOfResource:
+      handleConvNoticeLevel(level, "resource", "int", notice_reason);
+      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
     case KindOfFunc:

@@ -298,6 +298,9 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RO::EvalNoticeOnCoerceForStrConcat =
       s_globalData.NoticeOnCoerceForStrConcat;
 
+    RO::EvalNoticeOnCoerceForBitOp =
+      s_globalData.NoticeOnCoerceForBitOp;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

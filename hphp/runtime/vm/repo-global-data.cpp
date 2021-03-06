@@ -57,6 +57,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(RaiseClsMethConversionWarning);
   SHOW(StrictArrayFillKeys);
   SHOW(NoticeOnCoerceForStrConcat);
+  SHOW(NoticeOnCoerceForBitOp);
 #undef SHOW
   return out;
 }

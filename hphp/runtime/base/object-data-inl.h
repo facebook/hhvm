@@ -19,6 +19,7 @@
 #endif
 
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/system/systemlib.h"
 
@@ -389,10 +390,14 @@ inline bool ObjectData::toBoolean() const {
   return true;
 }
 
-inline int64_t ObjectData::toInt64() const {
+inline int64_t ObjectData::toInt64(
+    ConvNoticeLevel level, const StringData* notice_reason) const {
+  handleConvNoticeLevel(level, "object", "int", notice_reason);
   if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toInt64Impl();
   }
+  // this was a notice from PHP times. We should consider just deletin this and
+  // let handleConvNoticeLevel do the job.
   raiseObjToIntNotice(classname_cstr());
   return 1;
 }

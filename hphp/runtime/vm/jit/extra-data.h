@@ -2702,6 +2702,8 @@ X(LdRecDescCachedSafe,          RecNameData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
 X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
+X(ConvTVToInt,                  ConvNoticeData);
+X(ConvObjToInt,                 ConvNoticeData);
 
 #undef X
 

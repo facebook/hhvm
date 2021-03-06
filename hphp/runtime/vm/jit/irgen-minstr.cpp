@@ -1728,9 +1728,9 @@ void emitSetRangeM(IRGS& env,
                    uint32_t size,
                    SetRangeOp op,
                    ReadOnlyOp /*rop*/) {
-  auto const count = gen(env, ConvTVToInt, topC(env));
+  auto const count = gen(env, ConvTVToInt, ConvNoticeData{}, topC(env));
   auto const src = topC(env, BCSPRelOffset{1});
-  auto const offset = gen(env, ConvTVToInt, topC(env, BCSPRelOffset{2}));
+  auto const offset = gen(env, ConvTVToInt, ConvNoticeData{}, topC(env, BCSPRelOffset{2}));
   auto const reverse = op == SetRangeOp::Reverse;
 
   gen(
@@ -1786,11 +1786,13 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
     return nullptr;
   }
 
-  lhs = promoteBool(env, lhs);
-  rhs = promoteBool(env, rhs);
+  bool isBitOp_ = isBitOp(bcOp);
 
-  auto const hhirOp = isBitOp(bcOp) ? bitOp(bcOp)
-                                    : promoteBinaryDoubles(env, bcOp, lhs, rhs);
+  lhs = promoteBool(env, lhs, isBitOp_);
+  rhs = promoteBool(env, rhs, isBitOp_);
+
+  auto const hhirOp = isBitOp_ ? bitOp(bcOp)
+                               : promoteBinaryDoubles(env, bcOp, lhs, rhs);
   auto result = gen(env, hhirOp, lhs, rhs);
   assertx(result->isA(TUncounted));
   return result;

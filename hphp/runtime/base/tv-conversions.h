@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
@@ -59,8 +60,6 @@ X(Resource)
 #undef Y
 #undef X
 
-enum class ConvNoticeLevel: uint8_t { None, Log, Throw };
-
 template<typename T>
 enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
 template<typename T>
@@ -91,7 +90,9 @@ ObjectData* tvCastToObjectData(TypedValue tv);
  * Convert a cell to various raw data types, without changing the TypedValue.
  */
 bool tvToBool(TypedValue);
-int64_t tvToInt(TypedValue);
+int64_t tvToInt(TypedValue,
+                const ConvNoticeLevel = ConvNoticeLevel::None,
+                const StringData* = nullptr);
 double tvToDouble(TypedValue);
 
 /*
@@ -108,24 +109,6 @@ TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
 TypedNum stringToNumeric(const StringData*);
 
 TypedValue tvClassToString(TypedValue key);
-
-///////////////////////////////////////////////////////////////////////////////
-
-const char* convOpToName(ConvNoticeLevel level);
-
-template <typename T> ConvNoticeLevel flagToConvNoticeLevel(T flag) {
-  return static_cast<ConvNoticeLevel>(
-     flag + static_cast<uint8_t>(ConvNoticeLevel::None)
-  );
-}
-
-void handleConvNoticeLevel(
-   ConvNoticeLevel Level,
-   const char* const from,
-   const char* const to,
-   const StringData* reason);
-
-extern const StaticString s_ConvNoticeReasonConcat;
 
 }
 

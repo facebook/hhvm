@@ -388,7 +388,6 @@ template<template<class> class BitOp, class StrLenOp>
 TypedValue tvBitOp(StrLenOp strLenOp, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
-
   if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
     return make_tv<KindOfString>(
       stringBitOp(
@@ -400,7 +399,12 @@ TypedValue tvBitOp(StrLenOp strLenOp, TypedValue c1, TypedValue c2) {
     );
   }
 
-  return make_int(BitOp<int64_t>()(tvToInt(c1), tvToInt(c2)));
+  const ConvNoticeLevel notice_level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForBitOp);
+  // pull out of fn invocation to prevent reordering making testing a nightmare
+  auto i1 = tvToInt(c1, notice_level, s_ConvNoticeReasonBitOp.get());
+  auto i2 = tvToInt(c2, notice_level, s_ConvNoticeReasonBitOp.get());
+  return make_int(BitOp<int64_t>()(i1, i2));
 }
 
 template<class Op>
@@ -700,15 +704,20 @@ TypedValue tvBitXor(TypedValue c1, TypedValue c2) {
 }
 
 TypedValue tvShl(TypedValue c1, TypedValue c2) {
-  int64_t lhs = tvToInt(c1);
-  int64_t shift = tvToInt(c2);
+  const ConvNoticeLevel notice_level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForBitOp);
+  int64_t lhs = tvToInt(c1, notice_level, s_ConvNoticeReasonBitOp.get());
+  int64_t shift = tvToInt(c2, notice_level, s_ConvNoticeReasonBitOp.get());
 
   return make_int(shl_ignore_overflow(lhs, shift));
 }
 
 TypedValue tvShr(TypedValue c1, TypedValue c2) {
-  int64_t lhs = tvToInt(c1);
-  int64_t shift = tvToInt(c2);
+  const ConvNoticeLevel notice_level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForBitOp);
+
+  int64_t lhs = tvToInt(c1, notice_level, s_ConvNoticeReasonBitOp.get());
+  int64_t shift = tvToInt(c2, notice_level, s_ConvNoticeReasonBitOp.get());
 
   return make_int(lhs >> (shift & 63));
 }
@@ -775,6 +784,12 @@ void tvBitNot(TypedValue& cell) {
       break;
 
     case KindOfDouble:
+      {
+        const ConvNoticeLevel notice_level =
+          flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForBitOp);
+        handleConvNoticeLevel(
+          notice_level, "double", "int", s_ConvNoticeReasonBitOp.get());
+      }
       cell.m_type     = KindOfInt64;
       cell.m_data.num = ~double_to_int64(cell.m_data.dbl);
       break;

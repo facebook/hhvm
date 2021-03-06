@@ -1509,6 +1509,15 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
       return RuntimeOption::EvalNoticeOnCoerceForStrConcat > 0 &&
         (!lhs.subtypeOf(BArrKey) || !rhs.subtypeOf(BArrKey));
 
+    case SetOpOp::AndEqual:
+    case SetOpOp::OrEqual:
+    case SetOpOp::XorEqual:
+    case SetOpOp::SlEqual:
+    case SetOpOp::SrEqual:
+      if (RuntimeOption::EvalNoticeOnCoerceForBitOp > 0) {
+        return !lhs.subtypeOf(BInt) || !rhs.subtypeOf(BInt);
+      }
+
     case SetOpOp::PlusEqual:
     case SetOpOp::PlusEqualO:
     case SetOpOp::MinusEqual:
@@ -1516,13 +1525,8 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
     case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
-    case SetOpOp::AndEqual:
-    case SetOpOp::OrEqual:
-    case SetOpOp::XorEqual:
     case SetOpOp::MinusEqualO:
     case SetOpOp::MulEqualO:
-    case SetOpOp::SlEqual:
-    case SetOpOp::SrEqual:
       return lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr);
   }
   not_reached();

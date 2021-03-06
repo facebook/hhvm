@@ -2259,26 +2259,41 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
   auto const catchTrace = inst->taken();
+  auto const notice_data = inst->extra<ConvNoticeData>();
 
   if (srcType <= TInt)  return src;
-  if (srcType <= TNull) return cns(env, 0);
-  if (srcType.subtypeOfAny(TVec, TVArr)) {
-    auto const length = gen(env, CountVec, src);
-    return gen(env, Select, length, cns(env, 1), cns(env, 0));
+  if (srcType <= TNull) {
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, "null", "int");
+    return throws ? cns(env, TBottom) : cns(env, 0);
   }
-  if (srcType.subtypeOfAny(TDict, TDArr)) {
-    auto const length = gen(env, CountDict, src);
-    return gen(env, Select, length, cns(env, 1), cns(env, 0));
-  }
-  if (srcType <= TKeyset) {
-    auto const length = gen(env, CountKeyset, src);
-    return gen(env, Select, length, cns(env, 1), cns(env, 0));
-  }
-  if (srcType <= TBool) return gen(env, ConvBoolToInt, src);
-  if (srcType <= TDbl)  return gen(env, ConvDblToInt, src);
-  if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
-  if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
-  if (srcType <= TRes)  return gen(env, ConvResToInt, src);
+
+  auto genWithConvNoticeArray = [&](Opcode op, const char* from) {
+    auto const length = gen(env, op, src);
+    auto tmp = gen(env, Select, length, cns(env, 1), cns(env, 0));
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, from, "int");
+    return throws ? cns(env, TBottom) : tmp;
+  };
+
+  if (srcType.subtypeOfAny(TVec, TVArr))
+    return genWithConvNoticeArray(CountVec, "varray/vec");
+  if (srcType.subtypeOfAny(TDict, TDArr))
+    return genWithConvNoticeArray(CountDict, "darray/dict");
+  if (srcType <= TKeyset) return genWithConvNoticeArray(CountKeyset, "keyset");
+
+  auto genWithConvNoticePrim = [&](Opcode op, const char* from) {
+    auto tmp = gen(env, op, src);
+    auto throws = handleConvNoticeLevel(
+      env, catchTrace, notice_data, from, "int");
+    return throws ? cns(env, TBottom) : tmp;
+  };
+
+  if (srcType <= TBool) return genWithConvNoticePrim(ConvBoolToInt, "bool");
+  if (srcType <= TDbl)  return genWithConvNoticePrim(ConvDblToInt, "double");
+  if (srcType <= TStr)  return genWithConvNoticePrim(ConvStrToInt, "string");
+  if (srcType <= TObj)  return gen(env, ConvObjToInt, *notice_data, catchTrace, src);
+  if (srcType <= TRes)  return genWithConvNoticePrim(ConvResToInt, "resource");
   if (srcType <= TClsMeth)  {
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
       gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToInt.get()));

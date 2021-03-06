@@ -163,6 +163,9 @@ struct Repo::GlobalData {
   /* Whether implicit coercions for concat/interp trigger logs/exceptions */
   int32_t NoticeOnCoerceForStrConcat = 0;
 
+  /* Whether implicit coercions for bit ops trigger logs/exceptions */
+  int32_t NoticeOnCoerceForBitOp = 0;
+
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
    */
@@ -208,6 +211,7 @@ struct Repo::GlobalData {
       (RaiseClsMethConversionWarning)
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
+      (NoticeOnCoerceForBitOp)
       ;
   }
 };

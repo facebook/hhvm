@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/weakref-data.h"
 
@@ -353,7 +354,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * (e.g. SimpleXMLElement -> bool)
    */
   bool toBoolean() const;
-  int64_t toInt64() const;
+  int64_t toInt64(
+    ConvNoticeLevel level = ConvNoticeLevel::None,
+    const StringData* notice_reason = nullptr) const;
   double toDouble() const;
 
   template <IntishCast IC = IntishCast::None>
@@ -662,4 +665,3 @@ typename std::enable_if<
 #undef incl_HPHP_OBJECT_DATA_INL_H_
 
 ///////////////////////////////////////////////////////////////////////////////
-

@@ -62,6 +62,13 @@ Type bitwise_impl(Type t1, Type t2, Fun op) {
 
 template<class Fun>
 Type shift_impl(Type t1, Type t2, Fun op) {
+  if (RuntimeOption::EvalNoticeOnCoerceForBitOp > 0 &&
+      (!t1.subtypeOf(BInt) || !t2.subtypeOf(BInt))) {
+    // because typeToInt is triggered outside of eval_const, we need to do the
+    // check for bailing manually
+    return TInt;
+  }
+
   t1 = typeToInt(t1);
   t2 = typeToInt(t2);
 

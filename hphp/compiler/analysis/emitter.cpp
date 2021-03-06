@@ -180,6 +180,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.NoticeOnCoerceForStrConcat =
     RuntimeOption::EvalNoticeOnCoerceForStrConcat;
+  gd.NoticeOnCoerceForBitOp =
+    RuntimeOption::EvalNoticeOnCoerceForBitOp;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

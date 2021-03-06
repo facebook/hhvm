@@ -277,6 +277,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                "NoticeOnCoerceForStrConcat",
                RuntimeOption::EvalNoticeOnCoerceForStrConcat);
 
+  Config::Bind(RuntimeOption::EvalNoticeOnCoerceForBitOp, ini, config,
+               "NoticeOnCoerceForBitOp",
+               RuntimeOption::EvalNoticeOnCoerceForBitOp);
+
   // arrprov is only for dvarrays. It should be off if HADVAs is on.
   if (RO::EvalHackArrDVArrs) {
     RO::EvalArrayProvenance = false;

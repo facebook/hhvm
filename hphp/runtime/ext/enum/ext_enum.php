@@ -51,7 +51,7 @@ abstract class BuiltinEnum<+T> {
     if (null === $new_value) {
       $cls = static::class;
       throw new \UnexpectedValueException(
-        "{$value} is not a valid value for {$cls}",
+        (string)$value." is not a valid value for {$cls}",
       );
     }
     return $new_value;

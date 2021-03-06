@@ -94,26 +94,44 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
   not_reached();
 }
 
-folly::Optional<RuntimeCoeffects>
-CoeffectRule::emit(const Func* f, uint32_t numArgsInclUnpack) const {
+namespace {
+
+RuntimeCoeffects emitCCParam(const Func* f,
+                             uint32_t numArgsInclUnpack,
+                             uint32_t paramIdx,
+                             const StringData* name) {
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::full();
+  auto const index =
+    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
+  auto const tv = vmStack().indC(index);
+  if (tvIsNull(tv)) return RuntimeCoeffects::full();
+  if (!tvIsObject(tv)) {
+    raise_error(folly::sformat("Coeffect rule requires parameter at "
+                               "position {} to be an object or null",
+                               paramIdx));
+  }
+  auto const cls = tv->m_data.pobj->getVMClass();
+  return cls->clsCtxCnsGet(name);
+}
+
+RuntimeCoeffects emitCCThis() {
+  // TODO(oulgen): implement this
+  return RuntimeCoeffects::full();
+}
+RuntimeCoeffects emitFunParam() {
+  // TODO(oulgen): implement this
+  return RuntimeCoeffects::full();
+}
+
+} // namespace
+
+RuntimeCoeffects CoeffectRule::emit(const Func* f,
+                                    uint32_t numArgsInclUnpack) const {
   switch (m_type) {
-    case Type::CCParam: {
-      if (m_index >= numArgsInclUnpack) return folly::none;
-      auto const index =
-        numArgsInclUnpack - 1 - m_index + (f->hasReifiedGenerics() ? 1 : 0);
-      auto const tv = vmStack().indC(index);
-      if (tvIsNull(tv)) return folly::none;
-      if (!tvIsObject(tv)) {
-        raise_error(folly::sformat("Coeffect rule requires parameter at "
-                                   "position {} to be an object or null",
-                                   m_index));
-      }
-      auto const cls = tv->m_data.pobj->getVMClass();
-      return cls->clsCtxCnsGet(m_name);
-    }
-    case Type::FunParam:
-    case Type::CCThis:
-      return folly::none;
+    case Type::CCParam:  return emitCCParam(f, numArgsInclUnpack,
+                                            m_index, m_name);
+    case Type::CCThis:   return emitCCThis();
+    case Type::FunParam: return emitFunParam();
     case Type::Invalid:
       always_assert(false);
   }

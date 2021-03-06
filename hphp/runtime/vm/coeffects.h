@@ -128,7 +128,7 @@ struct CoeffectRule final {
     , m_name(ctx_name)
   { assertx(ctx_name); }
 
-  folly::Optional<RuntimeCoeffects> emit(const Func*, uint32_t) const;
+  RuntimeCoeffects emit(const Func*, uint32_t) const;
   jit::SSATmp* emitJit(jit::irgen::IRGS&, const Func*, uint32_t) const;
 
   folly::Optional<std::string> toString(const Func*) const;

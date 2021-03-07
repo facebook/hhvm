@@ -38,8 +38,7 @@ bool is_volatile_local(const php::Func* func, LocalId lid) {
   auto const& l = func->locals[lid];
   if (!l.name) return false;
 
-  return (RuntimeOption::EnableArgsInBacktraces &&
-          l.name->same(s_reified_generics_var.get())) ||
+  return l.name->same(s_reified_generics_var.get()) ||
          l.name->same(s_86metadata.get());
 }
 

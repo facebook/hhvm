@@ -437,6 +437,7 @@ module NamingHash = struct
     Int64.of_int upper_31_bits_set_to_1
 
   let make_lower_bound (hash : Dep.t) : t =
+    let hash = hash land 0b01111111_11111111_11111111_11111111 in
     let hash = hash lsl 31 |> Int64.of_int in
     Int64.bit_and hash naming_table_hash_lower_bound_mask
 
@@ -445,6 +446,7 @@ module NamingHash = struct
     Int64.of_int lower_31_bits_set_to_1
 
   let make_upper_bound (hash : Dep.t) : t =
+    let hash = hash land 0b01111111_11111111_11111111_11111111 in
     let upper_31_bits = hash lsl 31 |> Int64.of_int in
     Int64.bit_or upper_31_bits naming_table_hash_upper_bound_mask
 

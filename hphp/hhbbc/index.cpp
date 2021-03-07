@@ -234,23 +234,23 @@ struct MethTabEntry {
 }
 
 struct res::Func::MethTabEntryPair :
-      ISStringToOneT<MethTabEntry>::value_type {};
+      SStringToOneT<MethTabEntry>::value_type {};
 
 namespace {
 
 using MethTabEntryPair = res::Func::MethTabEntryPair;
 
 inline MethTabEntryPair* mteFromElm(
-  ISStringToOneT<MethTabEntry>::value_type& elm) {
+  SStringToOneT<MethTabEntry>::value_type& elm) {
   return static_cast<MethTabEntryPair*>(&elm);
 }
 
 inline const MethTabEntryPair* mteFromElm(
-  const ISStringToOneT<MethTabEntry>::value_type& elm) {
+  const SStringToOneT<MethTabEntry>::value_type& elm) {
   return static_cast<const MethTabEntryPair*>(&elm);
 }
 
-inline MethTabEntryPair* mteFromIt(ISStringToOneT<MethTabEntry>::iterator it) {
+inline MethTabEntryPair* mteFromIt(SStringToOneT<MethTabEntry>::iterator it) {
   return static_cast<MethTabEntryPair*>(&*it);
 }
 
@@ -1143,8 +1143,8 @@ struct Index::IndexData {
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
   ISStringToOneT<const php::Class*>      classes;
-  ISStringToMany<const php::Func>        methods;
-  ISStringToOneT<uint64_t>               method_inout_params_by_name;
+  SStringToMany<const php::Func>         methods;
+  SStringToOneT<uint64_t>                method_inout_params_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
@@ -1550,7 +1550,7 @@ bool build_class_constants(BuildClsInfo& info,
              ConstModifiers::show(existing->kind));
       return false;
     }
-    
+
     // Ignore abstract constants
     if (c.isAbstract) continue;
 

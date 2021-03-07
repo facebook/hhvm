@@ -862,8 +862,8 @@ Block* create_catch_block(
   auto const marker = env.irb->curMarker();
   auto const newMarker = [&] {
     if (offsetToAdjustSPForCall == 0) return marker;
-    auto const newSP = marker.spOff() - offsetToAdjustSPForCall;
-    return marker.adjustSP(newSP);
+    auto const newSPOff = marker.spOff() - offsetToAdjustSPForCall;
+    return marker.adjustSPOff(newSPOff);
   }();
   env.irb->setCurMarker(newMarker);
   gen(env, EndCatch, data, fp(env), sp(env));

@@ -1508,7 +1508,7 @@ void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
   }();
 
   inst.marker() = inst.marker().adjustFP(fp)
-                               .adjustSP(inst.marker().spOff() + spAdj)
+                               .adjustSPOff(inst.marker().spOff() + spAdj)
                                .adjustFixupSK(callSK);
 }
 

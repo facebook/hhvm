@@ -111,9 +111,9 @@ struct BCMarker {
     return m_fixupSk.offset();
   }
 
-  // Return a copy of this marker with an updated sp, fp, or sk.
-  BCMarker adjustSP(FPInvOffset sp) const {
-    return BCMarker { m_sk, sp, m_stublogue, m_profTransIDs, m_fp };
+  // Return a copy of this marker with an updated spOff, fp, or fixupSK.
+  BCMarker adjustSPOff(FPInvOffset spOff) const {
+    return BCMarker { m_sk, spOff, m_stublogue, m_profTransIDs, m_fp };
   }
   BCMarker adjustFP(SSATmp* fp) const {
     return BCMarker { m_sk, m_spOff, m_stublogue, m_profTransIDs, fp };

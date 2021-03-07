@@ -192,7 +192,7 @@ let get_state_path ~(env : env) : Path.t =
 let make_incremental_state ~(env : env) : Incremental.state =
   let state_path = get_state_path env in
   Hh_logger.log "State path: %s" (Path.to_string state_path);
-  Incremental.make_reference_implementation deps_mode state_path
+  Incremental.make_reference_implementation state_path
 
 let advance_cursor
     ~(env : env)
@@ -678,7 +678,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
       ~new_naming_table
       ~file_deltas
       ~path
-    |> Debug_fanout.result_to_json ~deps_mode
+    |> Debug_fanout.result_to_json ~deps_mode:cursor#get_deps_mode
   in
   let json =
     Hh_json.JSON_Object

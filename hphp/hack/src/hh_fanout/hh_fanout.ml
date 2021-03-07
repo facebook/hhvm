@@ -194,6 +194,39 @@ let make_incremental_state ~(env : env) : Incremental.state =
   Hh_logger.log "State path: %s" (Path.to_string state_path);
   Incremental.make_reference_implementation state_path
 
+let resolve_cursor_reference
+    ~(env : env)
+    ~(incremental_state : Incremental.state)
+    ~(previous_cursor_reference : cursor_reference) :
+    Incremental.cursor * Relative_path.Set.t =
+  match previous_cursor_reference with
+  | Cursor_reference_from_saved_state saved_state_result ->
+    let client_id =
+      incremental_state#make_client_id
+        {
+          Incremental.client_id = env.client_id;
+          ignore_hh_version = env.ignore_hh_version;
+          dep_table_saved_state_path = saved_state_result.dep_table_path;
+          dep_table_errors_saved_state_path = saved_state_result.errors_path;
+          naming_table_saved_state_path =
+            Naming_sqlite.Db_path
+              (Path.to_string saved_state_result.naming_table_path);
+          deps_mode = saved_state_result.deps_mode;
+        }
+    in
+    let cursor =
+      incremental_state#make_default_cursor client_id |> Result.ok_or_failwith
+    in
+    (cursor, saved_state_result.saved_state_changed_files)
+  | Cursor_reference_id cursor_id ->
+    let cursor =
+      incremental_state#look_up_cursor
+        ~client_id:(Some (Incremental.Client_id env.client_id))
+        ~cursor_id
+      |> Result.ok_or_failwith
+    in
+    (cursor, Relative_path.Set.empty)
+
 let advance_cursor
     ~(env : env)
     ~(setup_result : setup_result)
@@ -201,33 +234,7 @@ let advance_cursor
     ~(previous_cursor_reference : cursor_reference)
     ~(input_files : Relative_path.Set.t) : Incremental.cursor =
   let (cursor, cursor_changed_files) =
-    match previous_cursor_reference with
-    | Cursor_reference_from_saved_state saved_state_result ->
-      let client_id =
-        incremental_state#make_client_id
-          {
-            Incremental.client_id = env.client_id;
-            ignore_hh_version = env.ignore_hh_version;
-            dep_table_saved_state_path = saved_state_result.dep_table_path;
-            dep_table_errors_saved_state_path = saved_state_result.errors_path;
-            naming_table_saved_state_path =
-              Naming_sqlite.Db_path
-                (Path.to_string saved_state_result.naming_table_path);
-            deps_mode = saved_state_result.deps_mode;
-          }
-      in
-      let cursor =
-        incremental_state#make_default_cursor client_id |> Result.ok_or_failwith
-      in
-      (cursor, saved_state_result.saved_state_changed_files)
-    | Cursor_reference_id cursor_id ->
-      let cursor =
-        incremental_state#look_up_cursor
-          ~client_id:(Some (Incremental.Client_id env.client_id))
-          ~cursor_id
-        |> Result.ok_or_failwith
-      in
-      (cursor, Relative_path.Set.empty)
+    resolve_cursor_reference ~env ~incremental_state ~previous_cursor_reference
   in
   let cursor_changed_files =
     cursor_changed_files

@@ -21,6 +21,7 @@ type client_config = {
   dep_table_saved_state_path: Path.t;
   dep_table_errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;
+  deps_mode: Typing_deps_mode.t;
 }
 
 type typecheck_result = {
@@ -202,6 +203,8 @@ class cursor ~deps_mode ~client_id ~cursor_state =
           helper previous
       in
       helper cursor_state
+
+    method get_deps_mode : Typing_deps_mode.t = self#get_client_config.deps_mode
 
     method private load_dep_table : unit =
       let { dep_table_saved_state_path; ignore_hh_version; _ } =

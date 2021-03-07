@@ -213,6 +213,7 @@ let advance_cursor
             naming_table_saved_state_path =
               Naming_sqlite.Db_path
                 (Path.to_string saved_state_result.naming_table_path);
+            deps_mode = saved_state_result.deps_mode;
           }
       in
       let cursor =

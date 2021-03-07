@@ -35,7 +35,6 @@ type saved_state_result = {
   dep_table_path: Path.t;
   errors_path: Path.t;
   saved_state_changed_files: Relative_path.Set.t;
-  deps_mode: Typing_deps_mode.t;
   setup_result: setup_result;
 }
 
@@ -171,7 +170,6 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       dep_table_path;
       errors_path;
       saved_state_changed_files = changed_files;
-      deps_mode;
       setup_result;
     }
 
@@ -215,7 +213,8 @@ let resolve_cursor_reference
           naming_table_saved_state_path =
             Naming_sqlite.Db_path
               (Path.to_string saved_state_result.naming_table_path);
-          deps_mode = saved_state_result.deps_mode;
+          deps_mode =
+            Provider_context.get_deps_mode saved_state_result.setup_result.ctx;
         }
     in
     let cursor =
@@ -783,7 +782,8 @@ let mode_query
   let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
   let json =
     Query_fanout.go
-      ~deps_mode:saved_state_result.deps_mode
+      ~deps_mode:
+        (Provider_context.get_deps_mode saved_state_result.setup_result.ctx)
       ~dep_hash
       ~include_extends
     |> Query_fanout.result_to_json
@@ -819,9 +819,11 @@ let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
     unit Lwt.t =
   let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
+  let deps_mode =
+    Provider_context.get_deps_mode saved_state_result.setup_result.ctx
+  in
   let json =
-    Query_path.go ~deps_mode:saved_state_result.deps_mode ~source ~dest
-    |> Query_path.result_to_json
+    Query_path.go ~deps_mode ~source ~dest |> Query_path.result_to_json
   in
   let json = Hh_json.JSON_Object [("result", json)] in
   Hh_json.json_to_multiline_output Out_channel.stdout json;

@@ -36,13 +36,15 @@ type saved_state_result = {
   errors_path: Path.t;
   saved_state_changed_files: Relative_path.Set.t;
   deps_mode: Typing_deps_mode.t;
+  setup_result: setup_result;
 }
 
 type cursor_reference =
   | Cursor_reference_from_saved_state of saved_state_result
   | Cursor_reference_id of string
 
-let set_up_global_environment (env : env) : setup_result =
+let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
+    setup_result =
   let server_args =
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string env.root)
   in
@@ -71,8 +73,7 @@ let set_up_global_environment (env : env) : setup_result =
   in
   { workers; ctx }
 
-let load_saved_state ~(env : env) ~(setup_result : setup_result) :
-    saved_state_result Lwt.t =
+let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   let%lwt (naming_table_path, naming_table_changed_files) =
     match env.naming_table_path with
     | Some naming_table_path -> Lwt.return (naming_table_path, [])
@@ -141,6 +142,8 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
         FindUtils.file_filter (Relative_path.to_absolute path))
   in
 
+  let setup_result = set_up_global_environment env ~deps_mode in
+
   let naming_table =
     Naming_table.load_from_sqlite
       setup_result.ctx
@@ -169,6 +172,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       errors_path;
       saved_state_changed_files = changed_files;
       deps_mode;
+      setup_result;
     }
 
 let get_state_path ~(env : env) : Path.t =
@@ -248,23 +252,41 @@ let mode_calculate
     ~(env : env) ~(input_files : Path.Set.t) ~(cursor_id : string option) :
     unit Lwt.t =
   let telemetry = Telemetry.create () in
-  let setup_result = set_up_global_environment env in
-  let%lwt previous_cursor_reference =
+  let incremental_state = make_incremental_state ~env in
+  let%lwt (previous_cursor, previous_changed_files, setup_result) =
     match cursor_id with
     | None ->
-      let%lwt saved_state_result = load_saved_state ~env ~setup_result in
-      Lwt.return (Cursor_reference_from_saved_state saved_state_result)
-    | Some cursor_id -> Lwt.return (Cursor_reference_id cursor_id)
+      let%lwt saved_state_result = load_saved_state ~env in
+      let previous_cursor_reference =
+        Cursor_reference_from_saved_state saved_state_result
+      in
+      let (previous_cursor, previous_changed_files) =
+        resolve_cursor_reference
+          ~env
+          ~incremental_state
+          ~previous_cursor_reference
+      in
+      Lwt.return
+        ( previous_cursor,
+          previous_changed_files,
+          saved_state_result.setup_result )
+    | Some cursor_id ->
+      let previous_cursor_reference = Cursor_reference_id cursor_id in
+      let (previous_cursor, previous_changed_files) =
+        resolve_cursor_reference
+          ~env
+          ~incremental_state
+          ~previous_cursor_reference
+      in
+      let deps_mode = previous_cursor#get_deps_mode in
+      let setup_result = set_up_global_environment env ~deps_mode in
+      Lwt.return (previous_cursor, previous_changed_files, setup_result)
   in
 
   let input_files =
     Path.Set.fold input_files ~init:Relative_path.Set.empty ~f:(fun path acc ->
         let path = Relative_path.create_detect_prefix (Path.to_string path) in
         Relative_path.Set.add acc path)
-  in
-  let incremental_state = make_incremental_state ~env in
-  let (previous_cursor, previous_changed_files) =
-    resolve_cursor_reference ~env ~incremental_state ~previous_cursor_reference
   in
   let cursor =
     advance_cursor
@@ -338,7 +360,6 @@ let mode_calculate
 let mode_calculate_errors
     ~(env : env) ~(cursor_id : string option) ~(pretty_print : bool) :
     unit Lwt.t =
-  let { ctx; workers } = set_up_global_environment env in
   let incremental_state = make_incremental_state ~env in
   let cursor =
     match cursor_id with
@@ -352,6 +373,9 @@ let mode_calculate_errors
     match cursor with
     | Error message -> failwith ("Cursor not found: " ^ message)
     | Ok cursor -> cursor
+  in
+  let { ctx; workers } =
+    set_up_global_environment env ~deps_mode:cursor#get_deps_mode
   in
 
   let (errors, cursor) = cursor#calculate_errors ctx workers in
@@ -645,10 +669,7 @@ If not provided, uses the cursor corresponding to the saved-state.
 
 let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     unit Lwt.t =
-  let ({ ctx; workers } as setup_result) = set_up_global_environment env in
-  let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
-    load_saved_state ~env ~setup_result
-  in
+  let%lwt saved_state_result = load_saved_state ~env in
   let previous_cursor_reference =
     match cursor_id with
     | Some _ ->
@@ -668,23 +689,23 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let cursor =
     advance_cursor
       ~env
-      ~setup_result
+      ~setup_result:saved_state_result.setup_result
       ~previous_cursor
       ~previous_changed_files
       ~input_files
   in
   let file_deltas = cursor#get_file_deltas in
   let new_naming_table =
-    Naming_table.update_from_deltas old_naming_table file_deltas
+    Naming_table.update_from_deltas saved_state_result.naming_table file_deltas
   in
 
   let cursor_id = incremental_state#add_cursor cursor in
 
   let json =
     Debug_fanout.go
-      ~ctx
-      ~workers
-      ~old_naming_table
+      ~ctx:saved_state_result.setup_result.ctx
+      ~workers:saved_state_result.setup_result.workers
+      ~old_naming_table:saved_state_result.naming_table
       ~new_naming_table
       ~file_deltas
       ~path
@@ -759,10 +780,7 @@ let status_subcommand =
 let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :
     unit Lwt.t =
-  let setup_result = set_up_global_environment env in
-  let%lwt (saved_state_result : saved_state_result) =
-    load_saved_state ~env ~setup_result
-  in
+  let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
   let json =
     Query_fanout.go
       ~deps_mode:saved_state_result.deps_mode
@@ -800,10 +818,7 @@ let query_subcommand =
 let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
     unit Lwt.t =
-  let setup_result = set_up_global_environment env in
-  let%lwt (saved_state_result : saved_state_result) =
-    load_saved_state ~env ~setup_result
-  in
+  let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
   let json =
     Query_path.go ~deps_mode:saved_state_result.deps_mode ~source ~dest
     |> Query_path.result_to_json

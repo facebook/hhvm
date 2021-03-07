@@ -35,6 +35,7 @@ type saved_state_result = {
   dep_table_path: Path.t;
   errors_path: Path.t;
   saved_state_changed_files: Relative_path.Set.t;
+  deps_mode: Typing_deps_mode.t;
 }
 
 type previous_cursor =
@@ -167,6 +168,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       dep_table_path;
       errors_path;
       saved_state_changed_files = changed_files;
+      deps_mode;
     }
 
 let get_state_path ~(env : env) : Path.t =
@@ -747,11 +749,14 @@ let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :
     unit Lwt.t =
   let setup_result = set_up_global_environment env in
-  let%lwt (_saved_state_result : saved_state_result) =
+  let%lwt (saved_state_result : saved_state_result) =
     load_saved_state ~env ~setup_result
   in
   let json =
-    Query_fanout.go ~deps_mode ~dep_hash ~include_extends
+    Query_fanout.go
+      ~deps_mode:saved_state_result.deps_mode
+      ~dep_hash
+      ~include_extends
     |> Query_fanout.result_to_json
   in
   let json = Hh_json.JSON_Object [("result", json)] in
@@ -785,11 +790,12 @@ let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
     unit Lwt.t =
   let setup_result = set_up_global_environment env in
-  let%lwt (_saved_state_result : saved_state_result) =
+  let%lwt (saved_state_result : saved_state_result) =
     load_saved_state ~env ~setup_result
   in
   let json =
-    Query_path.go ~deps_mode ~source ~dest |> Query_path.result_to_json
+    Query_path.go ~deps_mode:saved_state_result.deps_mode ~source ~dest
+    |> Query_path.result_to_json
   in
   let json = Hh_json.JSON_Object [("result", json)] in
   Hh_json.json_to_multiline_output Out_channel.stdout json;

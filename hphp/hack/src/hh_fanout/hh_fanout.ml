@@ -8,14 +8,12 @@
 
 open Hh_prelude
 
-(* TODO(hverr): Support 64-bit deps mode *)
-let deps_mode = Typing_deps_mode.SQLiteMode
-
 type env = {
   from: string;
   client_id: string;
   root: Path.t;
   ignore_hh_version: bool;
+  is_64bit: bool;
   detail_level: Calculate_fanout.Detail_level.t;
   naming_table_path: Path.t option;
   dep_table_path: Path.t option;
@@ -109,14 +107,13 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       Lwt.return (dep_table_path, errors_path, [])
     | None ->
       let%lwt dep_table_saved_state =
-        (* TODO(hverr): Support 64-bit *)
         State_loader_lwt.load
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
               { root = env.root; sockname = env.watchman_sockname }
           ~ignore_hh_version:env.ignore_hh_version
           ~saved_state_type:
-            (Saved_state_loader.Naming_and_dep_table { is_64bit = false })
+            (Saved_state_loader.Naming_and_dep_table { is_64bit = env.is_64bit })
       in
       (match dep_table_saved_state with
       | Error load_error ->
@@ -141,6 +138,12 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         FindUtils.file_filter (Relative_path.to_absolute path))
   in
 
+  let deps_mode =
+    if env.is_64bit then
+      Typing_deps_mode.CustomMode (Some (Path.to_string dep_table_path))
+    else
+      Typing_deps_mode.SQLiteMode
+  in
   let setup_result = set_up_global_environment env ~deps_mode in
 
   let naming_table =
@@ -441,6 +444,7 @@ let env
     root
     detail_level
     ignore_hh_version
+    is_64bit
     naming_table_path
     dep_table_path
     watchman_sockname
@@ -489,6 +493,7 @@ let env
     client_id;
     root;
     ignore_hh_version;
+    is_64bit;
     detail_level;
     naming_table_path;
     dep_table_path;
@@ -538,6 +543,10 @@ If not provided, defaults to the value for 'from'.
     in
     value & flag & info ["ignore-hh-version"] ~doc
   in
+  let is_64bit =
+    let doc = "Use 64bit depgraph." in
+    value & flag & info ["64bit"] ~doc
+  in
   let naming_table_path =
     let doc = "The path to the naming table SQLite saved-state." in
     let docv = "PATH" in
@@ -585,6 +594,7 @@ If not provided, will use the default path for the repository.
     $ root
     $ detail_level
     $ ignore_hh_version
+    $ is_64bit
     $ naming_table_path
     $ dep_table_path
     $ watchman_sockname

@@ -207,15 +207,22 @@ class cursor ~client_id ~cursor_state =
     method get_deps_mode : Typing_deps_mode.t = self#get_client_config.deps_mode
 
     method private load_dep_table : unit =
-      let { dep_table_saved_state_path; ignore_hh_version; _ } =
-        self#get_client_config
-      in
-      let () =
-        SharedMem.load_dep_table_sqlite
-          (Path.to_string dep_table_saved_state_path)
-          ignore_hh_version
-      in
-
+      begin
+        match self#get_deps_mode with
+        | Typing_deps_mode.CustomMode _
+        | Typing_deps_mode.SaveCustomMode _ ->
+          ()
+        | Typing_deps_mode.SQLiteMode ->
+          let { dep_table_saved_state_path; ignore_hh_version; _ } =
+            self#get_client_config
+          in
+          let () =
+            SharedMem.load_dep_table_sqlite
+              (Path.to_string dep_table_saved_state_path)
+              ignore_hh_version
+          in
+          ()
+      end;
       let rec helper cursor_state =
         match cursor_state with
         | Saved_state _ -> ()

@@ -32,19 +32,21 @@ let make_hhi_dir () =
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root
 
 let init_state
-    ~(root : Path.t) ~(popt : ParserOptions.t) ~(tcopt : TypecheckerOptions.t) :
+    ~(root : Path.t)
+    ~(popt : ParserOptions.t)
+    ~(tcopt : TypecheckerOptions.t)
+    ~(deps_mode : Typing_deps_mode.t) :
     Provider_context.t * Batch_global_state.batch_state =
   Relative_path.(set_path_prefix Root root);
   make_tmp_dir ();
   make_hhi_dir ();
   Typing_global_inference.set_path ();
   let ctx =
-    (* TODO(hverr): Support 64-bit *)
     Provider_context.empty_for_tool
       ~popt
       ~tcopt
       ~backend:Provider_backend.Shared_memory
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode
   in
   let batch_state = Batch_global_state.save ~trace:true in
   (ctx, batch_state)
@@ -54,11 +56,12 @@ let init
     ~(shmem_config : SharedMem.config)
     ~(popt : ParserOptions.t)
     ~(tcopt : TypecheckerOptions.t)
+    ~(deps_mode : Typing_deps_mode.t)
     (t : float) : Provider_context.t * MultiWorker.worker list * float =
   let nbr_procs = Sys_utils.nbr_procs in
   let heap_handle = SharedMem.init ~num_workers:nbr_procs shmem_config in
   let gc_control = Core_kernel.Gc.get () in
-  let (ctx, state) = init_state ~root ~popt ~tcopt in
+  let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =
     MultiWorker.make
       ~call_wrapper:{ WorkerController.wrap = catch_and_classify_exceptions }
@@ -79,3 +82,4 @@ let init_with_defaults =
     ~shmem_config:SharedMem.default_config
     ~popt:ParserOptions.default
     ~tcopt:TypecheckerOptions.default
+    ~deps_mode:Typing_deps_mode.SQLiteMode

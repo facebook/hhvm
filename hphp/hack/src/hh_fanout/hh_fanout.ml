@@ -75,6 +75,7 @@ let set_up_global_environment (env : env) : setup_result =
       ~shmem_config:(ServerConfig.sharedmem_config server_config)
       ~popt:server_env.ServerEnv.popt
       ~tcopt:server_env.ServerEnv.tcopt
+      ~deps_mode
       (Unix.gettimeofday ())
   in
   { workers; ctx }

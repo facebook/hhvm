@@ -11,6 +11,7 @@ val init :
   shmem_config:SharedMem.config ->
   popt:ParserOptions.t ->
   tcopt:TypecheckerOptions.t ->
+  deps_mode:Typing_deps_mode.t ->
   float ->
   Provider_context.t * MultiWorker.worker list * float
 

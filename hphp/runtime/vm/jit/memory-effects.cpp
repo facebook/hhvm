@@ -222,8 +222,7 @@ AliasClass all_pointees(const IRInstruction& inst) {
 
 // Return an AliasClass representing a range of the eval stack that contains
 // everything below a logical depth.
-template<typename Off>
-AliasClass stack_below(SSATmp* base, Off offset) {
+AliasClass stack_below(SSATmp* base, IRSPRelOffset offset) {
   return AStack { base, offset, std::numeric_limits<int32_t>::max() };
 }
 
@@ -362,10 +361,22 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const new_kills = [&] {
     if (inst.marker().fp() == nullptr) return AEmpty;
 
-    auto const killed_stack = stack_below(
-      inst.marker().fp(),
-      -inst.marker().spOff() - 1
-    );
+    auto const offset = [&]() -> IRSPRelOffset {
+      auto const fp = canonical(inst.marker().fp());
+      if (fp->inst()->is(BeginInlining)) {
+        assertx(inst.marker().resumeMode() == ResumeMode::None);
+        auto const fpOffset = fp->inst()->extra<BeginInlining>()->spOffset;
+        auto const numStackElemsFromFP = inst.marker().spOff() - FPInvOffset{0};
+        return fpOffset - numStackElemsFromFP;
+      }
+
+      assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
+      auto const sp = inst.marker().sp();
+      auto const irSPOff = sp->inst()->extra<DefStackData>()->irSPOff;
+      return inst.marker().spOff().to<IRSPRelOffset>(irSPOff);
+    }();
+
+    auto const killed_stack = stack_below(inst.marker().sp(), offset - 1);
     auto const kills_union = x.kills.precise_union(killed_stack);
     return kills_union ? *kills_union : killed_stack;
   }();
@@ -657,11 +668,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InterpOne:
     return interp_one_effects(inst);
-  case InterpOneCF:
+  case InterpOneCF: {
+    auto const extra = inst.extra<InterpOneData>();
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), -inst.marker().spOff() - 1) | AMIStateAny
+      stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny
     };
+  }
 
   case NativeImpl:
     return UnknownEffects {};

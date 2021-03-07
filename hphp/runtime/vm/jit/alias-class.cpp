@@ -179,28 +179,6 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
 }
 }
 
-AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
-  : offset(o)
-  , size(s)
-{
-  always_assert(fp->isA(TFramePtr));
-
-  fp = canonical(fp);
-  auto beginInlining = fp->inst();
-  if (!beginInlining->is(BeginInlining)) return;
-  auto const sp = beginInlining->src(0)->inst();
-  assertx(sp->is(DefFrameRelSP, DefRegSP));
-
-  // FP-relative offset of the inlined frame.
-  auto const innerFPRel =
-    beginInlining->extra<BeginInlining>()->spOffset.to<FPRelOffset>(
-      sp->extra<DefStackData>()->irSPOff);
-
-  // Offset from the outermost FP is simply the sum of (inner frame relative to
-  // outer) and (offset relative to inner frame).
-  offset += innerFPRel.offset;
-}
-
 AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
   : offset()
   , size(s)

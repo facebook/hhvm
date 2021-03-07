@@ -48,19 +48,21 @@ struct BCMarker {
       FPInvOffset{0},
       false,
       TransIDSet{},
+      nullptr,
       nullptr
     };
   }
 
   BCMarker() = default;
 
-  BCMarker(SrcKey sk, FPInvOffset sp, bool stublogue, const TransIDSet& tids,
-           SSATmp* fp)
+  BCMarker(SrcKey sk, FPInvOffset spOff, bool stublogue, const TransIDSet& tids,
+           SSATmp* fp, SSATmp* sp)
     : m_sk(sk)
-    , m_spOff(sp)
+    , m_spOff(spOff)
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
+    , m_sp{sp}
     , m_fixupSk(sk)
   {
     assertx(valid());
@@ -71,7 +73,8 @@ struct BCMarker {
            b.m_spOff == m_spOff &&
            b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
-           b.m_fp == m_fp;
+           b.m_fp == m_fp &&
+           b.m_sp == m_sp;
   }
   bool operator!=(const BCMarker& b) const { return !operator==(b); }
 
@@ -87,6 +90,7 @@ struct BCMarker {
   FPInvOffset spOff()     const { assertx(valid()); return m_spOff;         }
   bool        stublogue() const { assertx(valid()); return m_stublogue;     }
   SSATmp*     fp()        const { assertx(valid()); return m_fp;            }
+  SSATmp*     sp()        const { assertx(valid()); return m_sp;            }
   SrcKey      fixupSk()   const { assertx(valid()); return m_fixupSk;       }
 
   const TransIDSet& profTransIDs() const {
@@ -113,10 +117,10 @@ struct BCMarker {
 
   // Return a copy of this marker with an updated spOff, fp, or fixupSK.
   BCMarker adjustSPOff(FPInvOffset spOff) const {
-    return BCMarker { m_sk, spOff, m_stublogue, m_profTransIDs, m_fp };
+    return BCMarker { m_sk, spOff, m_stublogue, m_profTransIDs, m_fp, m_sp };
   }
   BCMarker adjustFP(SSATmp* fp) const {
-    return BCMarker { m_sk, m_spOff, m_stublogue, m_profTransIDs, fp };
+    return BCMarker { m_sk, m_spOff, m_stublogue, m_profTransIDs, fp, m_sp };
   }
   BCMarker adjustFixupSK(SrcKey sk) const {
     auto ret = *this;
@@ -131,6 +135,7 @@ struct BCMarker {
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
     m_fp = nullptr;
+    m_sp = nullptr;
     m_fixupSk = SrcKey();
   }
 
@@ -140,6 +145,7 @@ private:
   bool        m_stublogue;
   TransIDSet  m_profTransIDs;
   SSATmp*     m_fp{nullptr};
+  SSATmp*     m_sp{nullptr};
 
   // Normally the fixup SrcKey is the same as the SrcKey for the marker,
   // however, when inlining has dropped an inner frame the fixup SrcKey will

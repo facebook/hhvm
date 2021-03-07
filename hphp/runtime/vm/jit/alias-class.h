@@ -239,7 +239,6 @@ struct AStack {
   // We can create an AStack from either a stack pointer or a frame pointer.
   // These constructors canonicalize the offset to be relative to the outermost
   // frame pointer.
-  explicit AStack(SSATmp* fp, FPRelOffset offset, int32_t size);
   explicit AStack(SSATmp* sp, IRSPRelOffset offset, int32_t size);
   explicit AStack(FPRelOffset o, int32_t s) : offset(o), size(s) {}
 

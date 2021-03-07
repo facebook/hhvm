@@ -121,13 +121,20 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<EnterTCUnwind>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 1).reg();
+  auto const exn = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
-  auto const exn = srcLoc(env, inst, 0).reg();
+
+  auto const syncSP = v.makeReg();
+  v << lea{sp[cellsToBytes(extra->offset.offset)], syncSP};
+  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(), rvmtl(), fp, syncSP);
+
   v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
 
   auto const target = [&] {
-    auto const extra = inst->extra<EnterTCUnwindData>();
     if (extra->teardown) return tc::ustubs().endCatchHelper;
     if (inst->func()->hasThisInBody()) {
       return tc::ustubs().endCatchTeardownThisHelper;

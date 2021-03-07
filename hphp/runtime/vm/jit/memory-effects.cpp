@@ -583,8 +583,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case EnterTCUnwind: {
     auto const stack_kills = stack_below(
-      inst.marker().fp(),
-      -inst.marker().spOff() - 1
+      inst.src(0),
+      inst.extra<EnterTCUnwind>()->offset - 1
     );
     return ExitEffects {
       AUnknown,

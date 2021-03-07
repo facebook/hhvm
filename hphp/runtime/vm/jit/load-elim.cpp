@@ -719,7 +719,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
 Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
   if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
   assertx(inst.op() == EnterTCUnwind);
-  auto const data = inst.extra<EnterTCUnwindData>();
+  auto const data = inst.extra<EnterTCUnwind>();
   if (!data->teardown || inst.func()->isCPPBuiltin()) {
     FTRACE(4, "      non-reducible EnterTCUnwind\n");
     return FNone{};
@@ -737,7 +737,7 @@ Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
       env,
       locals,
       i,
-      AliasClass { ALocal { inst.marker().fp(), i }});
+      AliasClass { ALocal { inst.src(1), i }});
   }
 
   if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {
@@ -1111,6 +1111,8 @@ void optimize_enter_tc_unwind(
   FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
 
   auto const block = inst.block();
+  auto const extra = inst.extra<EnterTCUnwind>();
+  assertx(extra->teardown);
 
   for (auto local : locals) {
     int locId = local.first;
@@ -1124,8 +1126,9 @@ void optimize_enter_tc_unwind(
       env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
     block->insert(block->iteratorTo(&inst), decref);
   }
-  auto const data = EnterTCUnwindData { false };
-  env.unit.replace(&inst, EnterTCUnwind, data, inst.src(0));
+  auto const etcData = EnterTCUnwindData { extra->offset, false };
+  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0), inst.src(1),
+                   inst.src(2));
   env.stackTeardownsOptimized++;
 }
 

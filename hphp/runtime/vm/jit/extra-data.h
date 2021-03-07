@@ -2338,20 +2338,28 @@ struct EndCatchData : IRSPRelOffsetData {
 };
 
 struct EnterTCUnwindData : IRExtraData {
-  explicit EnterTCUnwindData(bool teardown) : teardown{teardown} {}
+  explicit EnterTCUnwindData(IRSPRelOffset offset, bool teardown)
+    : offset{offset}, teardown{teardown} {}
 
   std::string show() const {
-    return folly::to<std::string>(teardown ? "" : "no-", "teardown");
+    return folly::to<std::string>(
+      "IRSPOff ", offset.offset, ",",
+      teardown ? "" : "no-", "teardown"
+    );
   }
 
   size_t stableHash() const {
-    return std::hash<bool>()(teardown);
+    return folly::hash::hash_combine(
+      std::hash<int32_t>()(offset.offset),
+      std::hash<bool>()(teardown)
+    );
   }
 
   bool equals(const EnterTCUnwindData& o) const {
-    return teardown == o.teardown;
+    return offset == o.offset && teardown == o.teardown;
   }
 
+  IRSPRelOffset offset;
   bool teardown;
 };
 

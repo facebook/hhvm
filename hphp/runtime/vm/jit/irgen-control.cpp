@@ -338,10 +338,9 @@ void emitThrow(IRGS& env) {
     // There are no more catch blocks in this function, we are at the top
     // level throw
     auto const exn = popC(env);
-    auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
-    gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);
-    gen(env, EnterTCUnwind, EnterTCUnwindData { true }, exn);
+    auto const etcData = EnterTCUnwindData { spOffBCFromIRSP(env), true };
+    gen(env, EnterTCUnwind, etcData, sp(env), fp(env), exn);
   };
 
   if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) return handleThrow();

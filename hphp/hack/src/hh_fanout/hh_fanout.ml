@@ -52,29 +52,19 @@ let set_up_global_environment (env : env) : setup_result =
     ServerEnvBuild.make_genv server_args server_config server_local_config []
     (* no workers *)
   in
-  let init_id = Random_id.short_string () in
-  let server_env =
-    ServerEnvBuild.make_env ~init_id ~deps_mode genv.ServerEnv.config
-  in
+
+  let popt = ServerConfig.parser_options genv.ServerEnv.config in
+  let tcopt = ServerConfig.typechecker_options genv.ServerEnv.config in
   (* We need shallow class declarations so that we can invalidate individual
   members in a class hierarchy. *)
-  let server_env =
-    {
-      server_env with
-      ServerEnv.tcopt =
-        {
-          server_env.ServerEnv.tcopt with
-          GlobalOptions.tco_shallow_class_decl = true;
-        };
-    }
-  in
+  let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
 
   let (ctx, workers, _time_taken) =
     Batch_init.init
       ~root:env.root
       ~shmem_config:(ServerConfig.sharedmem_config server_config)
-      ~popt:server_env.ServerEnv.popt
-      ~tcopt:server_env.ServerEnv.tcopt
+      ~popt
+      ~tcopt
       ~deps_mode
       (Unix.gettimeofday ())
   in

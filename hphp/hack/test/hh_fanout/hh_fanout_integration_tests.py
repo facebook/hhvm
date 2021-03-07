@@ -293,24 +293,6 @@ Total files to typecheck: 2\
             status = run_hh_fanout_status(env=env, cursor=cursor)
             self.assertEqual(status, "Total files to typecheck: 0")
 
-            # Changing an upstream file should also include its downstream
-            # dependent in its fanout size, according to status. Note that the
-            # downstream file itself isn't included in the status printout,
-            # since it hasn't changed.
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[file("foo.php")],
-                args=[],
-                cursor=cursor,
-            )
-            cursor = cast(str, result["cursor"])
-            status = run_hh_fanout_status(env=env, cursor=cursor)
-            self.assertEqual(
-                status,
-                """\
-foo.php
-  M \\foo (2 files)
-Total files to typecheck: 2\
-""",
-            )
+            # It'd be interesting to do another fanout calculation here.
+            # However, the hh_fanout tool doesn't support iterated fanout
+            # calculations, i.e. calculating fanouts after a typecheck.

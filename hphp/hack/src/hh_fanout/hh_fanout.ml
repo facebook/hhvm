@@ -38,9 +38,9 @@ type saved_state_result = {
   deps_mode: Typing_deps_mode.t;
 }
 
-type previous_cursor =
-  | Previous_cursor_from_saved_state of saved_state_result
-  | Previous_cursor_id of string
+type cursor_reference =
+  | Cursor_reference_from_saved_state of saved_state_result
+  | Cursor_reference_id of string
 
 let set_up_global_environment (env : env) : setup_result =
   let server_args =
@@ -198,11 +198,11 @@ let advance_cursor
     ~(env : env)
     ~(setup_result : setup_result)
     ~(incremental_state : Incremental.state)
-    ~(previous_cursor : previous_cursor)
+    ~(previous_cursor_reference : cursor_reference)
     ~(input_files : Relative_path.Set.t) : Incremental.cursor =
   let (cursor, cursor_changed_files) =
-    match previous_cursor with
-    | Previous_cursor_from_saved_state saved_state_result ->
+    match previous_cursor_reference with
+    | Cursor_reference_from_saved_state saved_state_result ->
       let client_id =
         incremental_state#make_client_id
           {
@@ -220,7 +220,7 @@ let advance_cursor
         incremental_state#make_default_cursor client_id |> Result.ok_or_failwith
       in
       (cursor, saved_state_result.saved_state_changed_files)
-    | Previous_cursor_id cursor_id ->
+    | Cursor_reference_id cursor_id ->
       let cursor =
         incremental_state#look_up_cursor
           ~client_id:(Some (Incremental.Client_id env.client_id))
@@ -245,12 +245,12 @@ let mode_calculate
     unit Lwt.t =
   let telemetry = Telemetry.create () in
   let setup_result = set_up_global_environment env in
-  let%lwt previous_cursor =
+  let%lwt previous_cursor_reference =
     match cursor_id with
     | None ->
       let%lwt saved_state_result = load_saved_state ~env ~setup_result in
-      Lwt.return (Previous_cursor_from_saved_state saved_state_result)
-    | Some cursor_id -> Lwt.return (Previous_cursor_id cursor_id)
+      Lwt.return (Cursor_reference_from_saved_state saved_state_result)
+    | Some cursor_id -> Lwt.return (Cursor_reference_id cursor_id)
   in
 
   let input_files =
@@ -264,7 +264,7 @@ let mode_calculate
       ~env
       ~setup_result
       ~incremental_state
-      ~previous_cursor
+      ~previous_cursor_reference
       ~input_files
   in
 
@@ -642,14 +642,14 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
     load_saved_state ~env ~setup_result
   in
-  let previous_cursor =
+  let previous_cursor_reference =
     match cursor_id with
     | Some _ ->
       Hh_logger.warn
         ( "A cursor ID was passed to `debug`, "
         ^^ "but loading from a previous cursor is not yet implemented." );
-      Previous_cursor_from_saved_state saved_state_result
-    | None -> Previous_cursor_from_saved_state saved_state_result
+      Cursor_reference_from_saved_state saved_state_result
+    | None -> Cursor_reference_from_saved_state saved_state_result
   in
 
   let path = Relative_path.create_detect_prefix (Path.to_string path) in
@@ -660,7 +660,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
       ~env
       ~setup_result
       ~incremental_state
-      ~previous_cursor
+      ~previous_cursor_reference
       ~input_files
   in
   let file_deltas = cursor#get_file_deltas in

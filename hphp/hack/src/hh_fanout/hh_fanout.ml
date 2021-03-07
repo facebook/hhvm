@@ -230,18 +230,15 @@ let resolve_cursor_reference
 let advance_cursor
     ~(env : env)
     ~(setup_result : setup_result)
-    ~(incremental_state : Incremental.state)
-    ~(previous_cursor_reference : cursor_reference)
+    ~(previous_cursor : Incremental.cursor)
+    ~(previous_changed_files : Relative_path.Set.t)
     ~(input_files : Relative_path.Set.t) : Incremental.cursor =
-  let (cursor, cursor_changed_files) =
-    resolve_cursor_reference ~env ~incremental_state ~previous_cursor_reference
-  in
   let cursor_changed_files =
-    cursor_changed_files
+    previous_changed_files
     |> Relative_path.Set.union env.changed_files
     |> Relative_path.Set.union input_files
   in
-  cursor#advance
+  previous_cursor#advance
     ~detail_level:env.detail_level
     setup_result.ctx
     setup_result.workers
@@ -266,12 +263,15 @@ let mode_calculate
         Relative_path.Set.add acc path)
   in
   let incremental_state = make_incremental_state ~env in
+  let (previous_cursor, previous_changed_files) =
+    resolve_cursor_reference ~env ~incremental_state ~previous_cursor_reference
+  in
   let cursor =
     advance_cursor
       ~env
       ~setup_result
-      ~incremental_state
-      ~previous_cursor_reference
+      ~previous_cursor
+      ~previous_changed_files
       ~input_files
   in
 
@@ -662,12 +662,15 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let path = Relative_path.create_detect_prefix (Path.to_string path) in
   let input_files = Relative_path.Set.singleton path in
   let incremental_state = make_incremental_state ~env in
+  let (previous_cursor, previous_changed_files) =
+    resolve_cursor_reference ~env ~incremental_state ~previous_cursor_reference
+  in
   let cursor =
     advance_cursor
       ~env
       ~setup_result
-      ~incremental_state
-      ~previous_cursor_reference
+      ~previous_cursor
+      ~previous_changed_files
       ~input_files
   in
   let file_deltas = cursor#get_file_deltas in

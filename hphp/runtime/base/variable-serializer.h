@@ -135,14 +135,6 @@ struct VariableSerializer {
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
                          MarkedVArray, MarkedDArray };
 
-  // One entry for each vec or dict in the value being serialized (in a
-  // pre-order walk). If the bool is true, and mode is PHPOutput, the vec or
-  // dict will be output like a varray or darray.
-  using DVOverrides = std::vector<bool>;
-  void setDVOverrides(const DVOverrides* overrides) {
-    m_dvOverrides = overrides;
-  }
-
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
     assertx(getType() == Type::Internal);
@@ -331,8 +323,6 @@ private:
    * an adata for a unit in the repo--it is needed to correctly
    * compress the provenance tag */
   const StringData* m_unitFilename{nullptr};
-  const DVOverrides* m_dvOverrides{nullptr};
-  size_t m_dvOverridesIndex{0};
 };
 
 inline String internal_serialize(const Variant& v) {

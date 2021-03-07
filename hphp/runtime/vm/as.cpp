@@ -767,14 +767,8 @@ struct AsmState {
    */
   std::unordered_map<std::string, std::vector<char>> adataDecls;
 
-  // Map of adata identifiers to their associated static arrays and potential DV
-  // overrides.
-  std::map<
-    std::string,
-    std::pair<ArrayData*,VariableSerializer::DVOverrides>
-  > adataMap;
-  // Map of array immediates to their adata identifiers.
-  std::map<Offset, std::string> adataUses;
+  // Map of adata identifiers to their associated static arrays.
+  std::map<std::string, ArrayData*> adataMap;
 
   // In whole program mode it isn't possible to lookup a litstr in the global
   // table while emitting, so keep a lookaside of litstrs seen by the assembler.
@@ -939,8 +933,7 @@ std::vector<std::string> read_strvector(AsmState& as) {
   return ret;
 }
 
-Variant parse_php_serialized(folly::StringPiece,
-                             VariableSerializer::DVOverrides*);
+Variant parse_php_serialized(folly::StringPiece);
 
 std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
   as.in.skipSpaceTab();
@@ -954,23 +947,19 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
 
   auto adata = [&]() -> ArrayData* {
     auto const it = as.adataMap.find(name);
-    if (it != as.adataMap.end()) return it->second.first;
+    if (it != as.adataMap.end()) return it->second;
     auto const decl = as.adataDecls.find(name);
     if (decl == as.adataDecls.end()) return nullptr;
     auto& buf = decl->second;
     return suppressOOM([&] {
-      VariableSerializer::DVOverrides overrides;
-      auto var = parse_php_serialized(
-        buf,
-        RuntimeOption::EvalHackArrDVArrs ? &overrides : nullptr
-      );
+      auto var = parse_php_serialized(buf);
       if (!var.isArray()) {
         as.error(".adata only supports serialized arrays");
       }
 
       auto data = var.detach().m_data.parr;
       ArrayData::GetScalarArray(&data);
-      as.adataMap[name] = std::make_pair(data, std::move(overrides));
+      as.adataMap[name] = data;
       as.adataDecls.erase(decl);
       return data;
     });
@@ -1547,13 +1536,9 @@ std::map<std::string,ParserFunc> opcode_parsers;
     immFCA = fcab;                                                      \
   } while (0)
 
-// Record the offset of the immediate so that we can correlate it with its
-// associated adata later.
 #define IMM_AA do {                             \
   auto const p = read_litarray(as);             \
-  auto const pos = as.fe->bcPos();              \
   as.fe->emitInt32(as.ue->mergeArray(p.first)); \
-  as.adataUses[pos] = std::move(p.second);      \
 } while (0)
 
 #define IMM_BLA do {                                    \
@@ -1827,17 +1812,13 @@ Variant checkSize(Variant val) {
  * Returns a Variant representing the serialized data.  It's up to the
  * caller to make sure it is a legal literal.
  */
-Variant parse_php_serialized(
-  folly::StringPiece str,
-  VariableSerializer::DVOverrides* overrides = nullptr
-) {
+Variant parse_php_serialized(folly::StringPiece str) {
   VariableUnserializer vu(
     str.data(),
     str.size(),
     VariableUnserializer::Type::Internal,
     true
   );
-  if (overrides) vu.setDVOverrides(overrides);
   try {
     return checkSize(vu.unserialize());
   } catch (const FatalErrorException&) {
@@ -1851,12 +1832,9 @@ Variant parse_php_serialized(
   }
 }
 
-Variant parse_php_serialized(
-  AsmState& as,
-  VariableSerializer::DVOverrides* overrides = nullptr
-) {
+Variant parse_php_serialized(AsmState& as) {
   auto str = parse_long_string(as);
-  return parse_php_serialized(str.slice(), overrides);
+  return parse_php_serialized(str.slice());
 }
 
 /*
@@ -2163,19 +2141,10 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     assertx(capture);
 
     TypedValue dv = make_tv<KindOfUninit>();
-    const VariableSerializer::DVOverrides* overrides = nullptr;
-    SCOPE_EXIT { overrides = nullptr; };
     auto decode_array = [&] {
-      auto const captureCopy = capture;
       if (auto arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
         dv.m_type = arr->toPersistentDataType();
         dv.m_data.parr = const_cast<ArrayData*>(arr);
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          auto const litOffset = captureCopy - fe->bc();
-          auto const it = as.adataUses.find(litOffset);
-          assertx(it != as.adataUses.end());
-          overrides = &as.adataMap[it->second].second;
-        }
       }
     };
 
@@ -2206,9 +2175,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     // default value, matching the behavior of hphpc.
     if (dv.m_type != KindOfUninit) {
       VariableSerializer vs(VariableSerializer::Type::PHPOutput);
-      if (RuntimeOption::EvalHackArrDVArrs && overrides) {
-        vs.setDVOverrides(overrides);
-      }
       auto str = vs.serialize(tvAsCVarRef(&dv), true);
       pi.defaultValue = dv;
       pi.phpCode = makeStaticString(str.get());

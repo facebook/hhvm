@@ -1327,8 +1327,6 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
 }
 
 Array VariableUnserializer::unserializeDict() {
-  if (m_dvOverrides) m_dvOverrides->push_back(false);
-
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1365,8 +1363,6 @@ Array VariableUnserializer::unserializeDict() {
 }
 
 Array VariableUnserializer::unserializeVec() {
-  if (m_dvOverrides) m_dvOverrides->push_back(false);
-
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1402,8 +1398,6 @@ Array VariableUnserializer::unserializeVec() {
 }
 
 Array VariableUnserializer::unserializeVArray() {
-  if (m_dvOverrides) m_dvOverrides->push_back(true);
-
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1473,8 +1467,6 @@ Array VariableUnserializer::unserializeVArray() {
 }
 
 Array VariableUnserializer::unserializeDArray() {
-  if (m_dvOverrides) m_dvOverrides->push_back(true);
-
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');

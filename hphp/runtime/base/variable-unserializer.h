@@ -79,10 +79,6 @@ struct VariableUnserializer {
    */
   void set(const char* buf, const char* end);
 
-  void setDVOverrides(VariableSerializer::DVOverrides* overrides) {
-    m_dvOverrides = overrides;
-  }
-
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
     assertx(m_type == Type::Internal);
@@ -176,7 +172,6 @@ private:
    * an adata from the repo--it is needed to *re*construct the
    * correct provenance tag */
   const StringData* m_unitFilename{nullptr};
-  VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
   void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);

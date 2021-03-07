@@ -899,24 +899,10 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
-        if (m_type == Type::PHPOutput && m_dvOverrides) {
-          m_buf->append(
-            (*m_dvOverrides)[m_dvOverridesIndex] ? "darray [\n" : "dict [\n"
-          );
-          m_dvOverridesIndex++;
-        } else {
-          m_buf->append("dict [\n");
-        }
+        m_buf->append("dict [\n");
         break;
       case ArrayKind::Vec:
-        if (m_type == Type::PHPOutput && m_dvOverrides) {
-          m_buf->append(
-            (*m_dvOverrides)[m_dvOverridesIndex] ? "varray [\n" : "vec [\n"
-          );
-          m_dvOverridesIndex++;
-        } else {
-          m_buf->append("vec [\n");
-        }
+        m_buf->append("vec [\n");
         break;
       case ArrayKind::Keyset:
         m_buf->append("keyset [\n");

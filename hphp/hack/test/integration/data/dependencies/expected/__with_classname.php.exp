@@ -1,5 +1,7 @@
 <?hh
+
 class SimpleClass {}
+
 function with_classname(): string {
   return SimpleClass::class;
 }

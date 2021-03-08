@@ -1,11 +1,13 @@
 //// toplevel.php
 <?hh
+
 function with_mapped_namespace(): void {
   PHP\ini_set('foo', 'bar');
 }
 
 //// builtins.php
 <?hh // partial
+
 namespace HH {
   namespace Lib {
     namespace PHP {

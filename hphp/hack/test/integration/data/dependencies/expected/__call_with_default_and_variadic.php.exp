@@ -1,5 +1,6 @@
 //// toplevel.php
 <?hh
+
 function with_default_and_variadic(
   mixed $x,
   ?string $y = \extract_standalone_make_default(),
@@ -7,6 +8,7 @@ function with_default_and_variadic(
 ): void {
   throw new \Exception();
 }
+
 function call_with_default_and_variadic(string $s): void {
   with_default_and_variadic(42);
   with_default_and_variadic(42, 'meaning of life');

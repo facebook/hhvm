@@ -1,11 +1,14 @@
 <?hh
+
 abstract class AbstractBase {
   abstract protected function must_implement(): void;
 }
+
 class ImplementingBase extends \AbstractBase {
   public function inherited(): void {
     throw new \Exception();
   }
+
   protected function must_implement(): void {
     $this->inherited();
   }

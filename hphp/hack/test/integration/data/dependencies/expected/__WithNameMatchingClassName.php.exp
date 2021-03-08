@@ -1,5 +1,7 @@
 <?hh
+
 function WithNameMatchingClassName(): WithNameMatchingClassName {
   return new WithNameMatchingClassName();
 }
+
 class WithNameMatchingClassName {}

@@ -1,5 +1,6 @@
 //// partial.php
 <?hh // partial
+
 function with_default_and_anonymous_variadic(
   float $x,
   ?string $y = \extract_standalone_make_default(),
@@ -7,6 +8,7 @@ function with_default_and_anonymous_variadic(
 ): void {
   throw new \Exception();
 }
+
 function call_with_default_and_anonymous_variadic(string $s): void {
   with_default_and_anonymous_variadic(3.14);
   with_default_and_anonymous_variadic(3.14, 'pi');

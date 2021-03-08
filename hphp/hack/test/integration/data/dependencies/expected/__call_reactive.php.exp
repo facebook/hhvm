@@ -1,8 +1,10 @@
 //// toplevel.php
 <?hh
+
 function reactive(mixed $x = \extract_standalone_make_default()): void {
   throw new \Exception();
 }
+
 function call_reactive(): void {
   reactive();
 }

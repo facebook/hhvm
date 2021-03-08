@@ -1,16 +1,22 @@
 <?hh
+
 namespace Test1 {
   class A {}
+
   function f(int $x): \Test1\A {
     throw new \Exception();
   }
+
   namespace NestedTest {
     class A extends \Test1\NestedTest\UltraNested\B {}
+
     function g(int $x): \Test1\NestedTest\A {
       throw new \Exception();
     }
+
     namespace UltraNested {
       class B {}
+
       function noop(): void {
         throw new \Exception();
       }

@@ -1,13 +1,18 @@
 //// constants.php
 <?hh
+
 abstract class WithAbstractConst {
   const type NESTED = \WithConst;
 }
+
 class WithConst {
   const type TYPECONST as num = int;
+
   const type WITH_THIS = this::WITH_CONSTRAINT;
+
   const type WITH_CONSTRAINT = \A0;
 }
+
 function with_type_constants(
   WithAbstractConst::NESTED::WITH_THIS $arg,
 ): WithConst::TYPECONST {
@@ -16,4 +21,5 @@ function with_type_constants(
 
 //// toplevel.php
 <?hh
+
 class A0 {}

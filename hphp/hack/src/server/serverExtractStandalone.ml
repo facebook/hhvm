@@ -157,6 +157,12 @@ module Fmt = struct
       pp_open_hbox ppf ();
       pp_v ppf v;
       pp_close_box ppf ())
+
+  let vbox ?(indent = 0) pp_v ppf v =
+    Format.(
+      pp_open_vbox ppf indent;
+      pp_v ppf v;
+      pp_close_box ppf ())
 end
 
 (* -- Decl_provider helpers ------------------------------------------------- *)
@@ -2321,25 +2327,19 @@ end = struct
         | Ctrait -> Fmt.string ppf "trait"
         | Cenum -> Fmt.string ppf "enum")
 
-    let pp_class_extends ppf = function
-      | [] -> Fmt.nop ppf ()
+    let pp_class_ancestors class_or_intf ppf = function
+      | [] ->
+        (* because we are prefixing the list with a constant string, we
+           match on the empty list here and noop to avoid priting "extends "
+           ("implements ") with no class (interface) *)
+        ()
       | hints ->
-        Fmt.(
-          prefix (const string "extends ")
-          @@ list ~sep:comma
-          @@ pp_hint ~is_ctx:false)
-          ppf
-          hints
-
-    let pp_class_implements ppf = function
-      | [] -> Fmt.nop ppf ()
-      | hints ->
-        Fmt.(
-          prefix (const string "implements ")
-          @@ list ~sep:comma
-          @@ pp_hint ~is_ctx:false)
-          ppf
-          hints
+        let pfx =
+          match class_or_intf with
+          | `Class -> Fmt.(const string "extends ")
+          | `Interface -> Fmt.(const string "implements ")
+        in
+        Fmt.(prefix pfx @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
 
     let pp
         ppf
@@ -2357,9 +2357,9 @@ end = struct
           (strip_ns name)
           pp_tparams
           tparams
-          pp_class_extends
+          (pp_class_ancestors `Class)
           extends
-          pp_class_implements
+          (pp_class_ancestors `Interface)
           implements)
   end
 
@@ -2393,25 +2393,36 @@ end = struct
         elements = List.sort ~compare:Class_elt.compare class_elts;
       }
 
-    let pp_use ppf = Fmt.pf ppf "use %a;" @@ pp_hint ~is_ctx:false
+    let pp_use_extend ppf = function
+      | ([], [], []) ->
+        (* In the presence of any traits or trait/interface requirements
+           we add a cut after them to match the Hack style given in the docs
+           (line breaks are not added by HackFmt). We need to check that
+           we have no traits or requirements here else we end up with
+           an unnecessary line break in this case *)
+        ()
+      | (uses, req_extends, req_implements) ->
+        let pp_elem pfx ppf hint =
+          Fmt.(prefix pfx @@ suffix semicolon @@ pp_hint ~is_ctx:false) ppf hint
+        in
+        Fmt.(
+          suffix cut
+          @@ pair ~sep:nop (list @@ pp_elem @@ const string "use ")
+          @@ pair
+               ~sep:nop
+               (list @@ pp_elem @@ const string "require extends ")
+               (list @@ pp_elem @@ const string "require implements "))
+          ppf
+          (uses, (req_extends, req_implements))
 
-    let pp_req_extends ppf =
-      Fmt.pf ppf "require extends %a;" @@ pp_hint ~is_ctx:false
-
-    let pp_req_implements ppf =
-      Fmt.pf ppf "require implements %a;" @@ pp_hint ~is_ctx:false
+    let pp_elts ppf = function
+      | [] -> ()
+      | elts -> Fmt.(list ~sep:cut @@ prefix cut Class_elt.pp) ppf elts
 
     let pp ppf { uses; req_extends; req_implements; elements } =
-      Fmt.(
-        pair
-          ~sep:sp
-          (pair ~sep:sp (list ~sep:sp pp_use) (list ~sep:sp pp_req_extends))
-          (pair
-             ~sep:sp
-             (list ~sep:sp pp_req_implements)
-             (list ~sep:sp Class_elt.pp)))
+      Fmt.(pair ~sep:nop pp_use_extend pp_elts)
         ppf
-        ((uses, req_extends), (req_implements, elements))
+        ((uses, req_extends, req_implements), elements)
   end
 
   type t =
@@ -2440,7 +2451,7 @@ end = struct
 
   let pp ppf = function
     | ClsGroup { decl; body; _ } ->
-      Fmt.(pair ~sep:sp Class_decl.pp @@ braces Class_body.pp) ppf (decl, body)
+      Fmt.(pair Class_decl.pp @@ braces @@ vbox Class_body.pp) ppf (decl, body)
     | Single single -> Single.pp ppf single
 
   (* -- Classify and group extracted dependencies --------------------------- *)
@@ -2592,13 +2603,28 @@ end = struct
     children: (string * t) list;
   }
 
-  let pp_namespace ppf nm = Fmt.pf ppf {|namespace %s|} nm
-
-  let rec pp ppf { deps; children; _ } =
-    Fmt.(pair ~sep:sp (list Grouped.pp) (list pp_children)) ppf (deps, children)
+  let rec pp_ ppf { deps; children; _ } =
+    (* We guard against empty list of depedencies or nested namespaces here
+       since we should add a cut between them only when both are non-empty
+    *)
+    match (deps, children) with
+    | (_, []) -> Fmt.(list ~sep:cut @@ suffix cut Grouped.pp) ppf deps
+    | ([], _) -> Fmt.(list ~sep:cut pp_children) ppf children
+    | _ ->
+      Fmt.(
+        pair
+          ~sep:cut
+          (list ~sep:cut @@ suffix cut Grouped.pp)
+          (list ~sep:cut pp_children))
+        ppf
+        (deps, children)
 
   and pp_children ppf (nm, t) =
-    Fmt.(pair ~sep:sp pp_namespace @@ braces pp) ppf (nm, t)
+    Fmt.(pair (prefix (const string "namespace ") string) (braces pp_))
+      ppf
+      (nm, t)
+
+  let pp ppf t = Fmt.(vbox @@ prefix cut pp_) ppf t
 
   let namespace_of dep =
     Grouped.name dep
@@ -2777,7 +2803,6 @@ end = struct
 
   let generate ctx target (dep_default, dep_any, deps) =
     let target_path = Target.relative_path ctx target in
-
     let files =
       List.sort ~compare:File.compare
       @@ List.map ~f:File.(of_deps ctx (target_path, target))
@@ -2845,8 +2870,7 @@ end = struct
 
   let pp ppf { dep_default; dep_any; files } =
     if dep_default || dep_any then
-      Fmt.(
-        pair ~sep:cut (list ~sep:sp @@ File.pp ~is_multifile:true) pp_helpers)
+      Fmt.(pair ~sep:cut (list @@ File.pp ~is_multifile:true) pp_helpers)
         ppf
         (files, (dep_default, dep_any))
     else
@@ -2856,7 +2880,7 @@ end = struct
         | _ -> false
       in
 
-      Fmt.(list ~sep:sp @@ File.pp ~is_multifile) ppf files
+      Fmt.(list @@ File.pp ~is_multifile) ppf files
 
   let to_string = Fmt.to_to_string pp
 end

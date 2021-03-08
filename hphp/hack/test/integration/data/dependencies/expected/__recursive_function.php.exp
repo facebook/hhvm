@@ -1,4 +1,5 @@
 <?hh
+
 function recursive_function(int $n): int {
   if ($n <= 0) {
     return 0;

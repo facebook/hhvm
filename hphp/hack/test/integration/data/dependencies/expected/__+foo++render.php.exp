@@ -1,4 +1,5 @@
 <?hh
+
 class :xhp implements \XHPChild {
   public function __construct(
     darray<string, mixed> $attr,
@@ -9,10 +10,14 @@ class :xhp implements \XHPChild {
     throw new \Exception();
   }
 }
+
 class :foo extends :xhp {
   attribute string quux = "";
+
   attribute num baz @lateinit;
+
   attribute int bar @required;
+
   public function render(): :xhp {
     return
       <xhp>

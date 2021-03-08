@@ -1,13 +1,17 @@
 //// constants.php
 <?hh
+
 enum SomeEnum: int {
   FIRST = 0;
   SECOND = 0;
 }
+
 class WithStaticProperty {
   public static \HH\Vector<\A> $vector = Vector {};
+
   public static \HH\Map<\SomeEnum, string> $map = Map {};
 }
+
 function with_static_property(): void {
   $a = WithStaticProperty::$map;
   $b = WithStaticProperty::$vector;
@@ -15,6 +19,9 @@ function with_static_property(): void {
 
 //// toplevel.php
 <?hh
+
 interface I1 {}
+
 class A0 {}
+
 class A extends \A0 implements \I1 {}

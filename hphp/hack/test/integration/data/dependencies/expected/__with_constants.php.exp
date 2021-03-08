@@ -1,32 +1,51 @@
 <?hh
+
 type TypedefForString = string;
+
 enum SomeEnum: int {
   FIRST = 0;
   SECOND = 0;
 }
+
 enum SecondEnum: string {
   FIRST = "";
   SECOND = "";
 }
+
 class WithConst {
   const CWITHOUT_HINT = "";
+
   const \SomeEnum CENUM = \SomeEnum::FIRST;
+
   const string CSTRING = "";
+
   const float CFLOAT = 0.0;
 }
+
 const shape('x' => int, 'y' => \SecondEnum) SHAPE1 =
   shape('x' => 0, 'y' => \SecondEnum::FIRST);
+
 const shape(\WithConst::CSTRING => int) SHAPE2 =
   shape(\WithConst::CSTRING => 0);
+
 const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('a' => 0, 'b' => "");
+
 const (int, ?(string, float)) OPTION = tuple(0, null);
+
 const darray<string, int> ARR = darray[];
+
 const darray<string, int> AGE_RANGE = darray[];
+
 const varray<string> MAP_INDEX = varray[];
+
 const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
+
 const \HH\keyset<string> KEYSET = keyset[];
+
 const \TypedefForString TYPEDEF = "";
+
 const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
+
 function with_constants(): void {
   $_ = WithConst::CFLOAT;
   $_ = WithConst::CENUM;

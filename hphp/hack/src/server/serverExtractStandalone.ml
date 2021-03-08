@@ -865,8 +865,13 @@ end = struct
     requirements *)
   let get_implementation_dependencies ctx env cls =
     let f = add_impls ~ctx ~env ~cls in
-    let init = List.fold ~init:[] ~f @@ Class.all_ancestor_names cls in
-    List.fold ~f ~init @@ Class.all_ancestor_req_names cls
+    let init =
+      Option.value_map ~default:[] ~f:(fun ss ->
+          List.map ~f:(fun nm -> Typing_deps.Dep.Class nm) @@ SSet.elements ss)
+      @@ Class.sealed_whitelist cls
+    in
+    let ancs = List.fold ~init ~f @@ Class.all_ancestor_names cls in
+    List.fold ~f ~init:ancs @@ Class.all_ancestor_req_names cls
 
   (** Add implementation depedencies of all class dependencies until we reach
     a fixed point *)

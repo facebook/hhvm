@@ -2295,14 +2295,14 @@ struct AssertReason : IRExtraData {
 
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
 
-struct EndCatchData : IRSPRelOffsetData {
+struct EndCatchData : IRExtraData {
   enum class CatchMode { UnwindOnly, CallCatch, SideExit, LocalsDecRefd };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
 
   explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
                         FrameMode stublogue, Teardown teardown)
-    : IRSPRelOffsetData{offset}
+    : offset{offset}
     , mode{mode}
     , stublogue{stublogue}
     , teardown{teardown}
@@ -2310,7 +2310,7 @@ struct EndCatchData : IRSPRelOffsetData {
 
   std::string show() const {
     return folly::to<std::string>(
-      IRSPRelOffsetData::show(), ",",
+      "IRSPOff ", offset.offset, ",",
       mode == CatchMode::UnwindOnly ? "UnwindOnly" :
         mode == CatchMode::CallCatch ? "CallCatch" :
           mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
@@ -2322,6 +2322,7 @@ struct EndCatchData : IRSPRelOffsetData {
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
+      std::hash<int32_t>()(offset.offset),
       std::hash<CatchMode>()(mode),
       std::hash<FrameMode>()(stublogue),
       std::hash<Teardown>()(teardown)
@@ -2329,9 +2330,11 @@ struct EndCatchData : IRSPRelOffsetData {
   }
 
   bool equals(const EndCatchData& o) const {
-    return mode == o.mode && stublogue == o.stublogue && teardown == o.teardown;
+    return offset == o.offset && mode == o.mode && stublogue == o.stublogue &&
+           teardown == o.teardown;
   }
 
+  IRSPRelOffset offset;
   CatchMode mode;
   FrameMode stublogue;
   Teardown teardown;

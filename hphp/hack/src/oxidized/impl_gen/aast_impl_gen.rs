@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e75b5a3e48918426cf3ef4545680d164>>
+// @generated SignedSource<<15e749b7ce7e591198da94cd26045ff6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2708,8 +2708,8 @@ impl<Ex, Fb, En, Hi> Afield<Ex, Fb, En, Hi> {
     }
 }
 impl<Ex, Fb, En, Hi> XhpAttribute<Ex, Fb, En, Hi> {
-    pub fn mk_xhp_simple(p0: Pstring, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        XhpAttribute::XhpSimple(p0, p1)
+    pub fn mk_xhp_simple(p0: XhpSimple<Ex, Fb, En, Hi>) -> Self {
+        XhpAttribute::XhpSimple(p0)
     }
     pub fn mk_xhp_spread(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         XhpAttribute::XhpSpread(p0)
@@ -2726,9 +2726,9 @@ impl<Ex, Fb, En, Hi> XhpAttribute<Ex, Fb, En, Hi> {
             _ => false,
         }
     }
-    pub fn as_xhp_simple(&self) -> Option<(&Pstring, &Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_xhp_simple(&self) -> Option<&XhpSimple<Ex, Fb, En, Hi>> {
         match self {
-            XhpAttribute::XhpSimple(p0, p1) => Some((p0, p1)),
+            XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2738,9 +2738,9 @@ impl<Ex, Fb, En, Hi> XhpAttribute<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_xhp_simple_mut(&mut self) -> Option<(&mut Pstring, &mut Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_xhp_simple_mut(&mut self) -> Option<&mut XhpSimple<Ex, Fb, En, Hi>> {
         match self {
-            XhpAttribute::XhpSimple(p0, p1) => Some((p0, p1)),
+            XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2750,9 +2750,9 @@ impl<Ex, Fb, En, Hi> XhpAttribute<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_xhp_simple_into(self) -> Option<(Pstring, Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_xhp_simple_into(self) -> Option<XhpSimple<Ex, Fb, En, Hi>> {
         match self {
-            XhpAttribute::XhpSimple(p0, p1) => Some((p0, p1)),
+            XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }

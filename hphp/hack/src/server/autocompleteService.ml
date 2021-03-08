@@ -537,7 +537,7 @@ let visitor =
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function
-                 | Tast.Xhp_simple (id, value) ->
+                 | Tast.Xhp_simple { Aast.xs_name = id; xs_expr = value; _ } ->
                    (match value with
                    | (_, Tast.Id id_id) ->
                      (* This handles the situation

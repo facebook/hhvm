@@ -47,8 +47,9 @@ fn rewrite_xml_(
             .into_iter()
             .fold((0, vec![]), |(mut spread_id, mut attrs), attr| {
                 match attr {
-                    XhpAttribute::XhpSimple((pos, name), v) => {
-                        attrs.push((SF::SFlitStr((pos, name.into())), v));
+                    XhpAttribute::XhpSimple(xhp_simple) => {
+                        let (pos, name) = xhp_simple.name;
+                        attrs.push((SF::SFlitStr((pos, name.into())), xhp_simple.expr));
                     }
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((

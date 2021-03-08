@@ -2971,47 +2971,11 @@ and expr_
         not typecheck. *)
         []
     in
-    let (env, typed_attrs, attr_types) =
-      xhp_attribute_exprs env class_info attrl
-    in
+    let (env, typed_attrs) = xhp_attribute_exprs env class_info attrl sid obj in
     let txml = Aast.Xml (sid, typed_attrs, tchildren) in
     (match class_info with
     | None -> make_result env p txml (mk (Reason.Runknown_class p, Tobject))
-    | Some class_info ->
-      let env =
-        List.fold_left
-          attr_types
-          ~f:
-            begin
-              fun env attr ->
-              let (namepstr, valpty) = attr in
-              let (valp, valty) = valpty in
-              let (env, (declty, _tal)) =
-                TOG.obj_get
-                  ~obj_pos:(fst sid)
-                  ~is_method:false
-                  ~inst_meth:false
-                  ~nullsafe:None
-                  ~coerce_from_ty:None
-                  ~explicit_targs:[]
-                  ~class_id:cid
-                  ~member_id:namepstr
-                  ~on_error:Errors.unify_error
-                  env
-                  obj
-              in
-              let ureason = Reason.URxhp (Cls.name class_info, snd namepstr) in
-              Typing_coercion.coerce_type
-                valp
-                ureason
-                env
-                valty
-                (MakeType.unenforced declty)
-                Errors.xhp_attribute_does_not_match_hint
-            end
-          ~init:env
-      in
-      make_result env p txml obj)
+    | Some _ -> make_result env p txml obj)
   | Callconv (kind, e) ->
     let (env, te, ty) = expr env e in
     make_result env p (Aast.Callconv (kind, te)) ty
@@ -3092,16 +3056,45 @@ and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
       cid
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
-  (*****************************************************************************)
-  (* XHP attribute/body helpers. *)
-  (*****************************************************************************)
+
+(*****************************************************************************)
+(* XHP attribute/body helpers. *)
+(*****************************************************************************)
+and xhp_attribute_decl_ty env sid obj attr =
+  let (namepstr, valpty) = attr in
+  let (valp, valty) = valpty in
+  let (env, (declty, _tal)) =
+    TOG.obj_get
+      ~obj_pos:(fst sid)
+      ~is_method:false
+      ~inst_meth:false
+      ~nullsafe:None
+      ~coerce_from_ty:None
+      ~explicit_targs:[]
+      ~class_id:(CI sid)
+      ~member_id:namepstr
+      ~on_error:Errors.unify_error
+      env
+      obj
+  in
+  let ureason = Reason.URxhp (snd sid, snd namepstr) in
+  let env =
+    Typing_coercion.coerce_type
+      valp
+      ureason
+      env
+      valty
+      (MakeType.unenforced declty)
+      Errors.xhp_attribute_does_not_match_hint
+  in
+  (env, declty)
 
 (**
  * Process a spread operator by computing the intersection of XHP attributes
  * between the spread expression and the XHP constructor onto which we're
  * spreading.
  *)
-and xhp_spread_attribute env c_onto valexpr =
+and xhp_spread_attribute env c_onto valexpr sid obj =
   let (p, _) = valexpr in
   let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
   (* Build the typed attribute node *)
@@ -3111,39 +3104,52 @@ and xhp_spread_attribute env c_onto valexpr =
     | None -> (env, [])
     | Some class_info -> Typing_xhp.get_spread_attributes env p class_info valty
   in
-  (env, typed_attr, attr_ptys)
+
+  let env =
+    List.fold_left
+      attr_ptys
+      ~f:(fun env attr ->
+        let (env, _) = xhp_attribute_decl_ty env sid obj attr in
+        env)
+      ~init:env
+  in
+  (env, typed_attr)
 
 (**
  * Simple XHP attributes (attr={expr} form) are simply interpreted as a member
- * variable prefixed with a colon, the types of which will be validated later
+ * variable prefixed with a colon.
  *)
-and xhp_simple_attribute env id valexpr =
+and xhp_simple_attribute env id valexpr sid obj =
   let (p, _) = valexpr in
   let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
   (* This converts the attribute name to a member name. *)
   let name = ":" ^ snd id in
   let attr_pty = ((fst id, name), (p, valty)) in
-  let typed_attr = Aast.Xhp_simple (id, te) in
-  (env, typed_attr, [attr_pty])
+  let (env, decl_ty) = xhp_attribute_decl_ty env sid obj attr_pty in
+  let typed_attr =
+    Aast.Xhp_simple { xs_name = id; xs_type = decl_ty; xs_expr = te }
+  in
+  (env, typed_attr)
 
 (**
  * Typecheck the attribute expressions - this just checks that the expressions are
  * valid, not that they match the declared type for the attribute and,
  * in case of spreads, makes sure they are XHP.
  *)
-and xhp_attribute_exprs env cid attrl =
-  let handle_attr (env, typed_attrl, attr_ptyl) attr =
-    let (env, typed_attr, attr_ptys) =
+and xhp_attribute_exprs env cls_decl attrl sid obj =
+  let handle_attr (env, typed_attrl) attr =
+    let (env, typed_attr) =
       match attr with
-      | Xhp_simple (id, valexpr) -> xhp_simple_attribute env id valexpr
-      | Xhp_spread valexpr -> xhp_spread_attribute env cid valexpr
+      | Xhp_simple { xs_name = id; xs_expr = valexpr; _ } ->
+        xhp_simple_attribute env id valexpr sid obj
+      | Xhp_spread valexpr -> xhp_spread_attribute env cls_decl valexpr sid obj
     in
-    (env, typed_attr :: typed_attrl, attr_ptys @ attr_ptyl)
+    (env, typed_attr :: typed_attrl)
   in
-  let (env, typed_attrl, attr_ptyl) =
-    List.fold_left ~f:handle_attr ~init:(env, [], []) attrl
+  let (env, typed_attrl) =
+    List.fold_left ~f:handle_attr ~init:(env, []) attrl
   in
-  (env, List.rev typed_attrl, List.rev attr_ptyl)
+  (env, List.rev typed_attrl)
 
 (*****************************************************************************)
 (* Anonymous functions & lambdas. *)

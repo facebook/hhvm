@@ -74,6 +74,13 @@ let base_visitor line char =
       else
         None
 
+    method! on_xhp_simple env attribute =
+      let (pos, _) = attribute.Aast.xs_name in
+      if Pos.inside pos line char then
+        Some (pos, env, attribute.Aast.xs_type)
+      else
+        super#on_xhp_simple env attribute
+
     method! on_class_id env cid =
       match cid with
       (* Don't use the resolved class type (the expr_annotation on the class_id

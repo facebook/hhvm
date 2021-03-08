@@ -39,7 +39,7 @@ let process_attribute (pos, name) class_name method_ =
 let process_xml_attrs class_name attrs =
   List.fold attrs ~init:Result_set.empty ~f:(fun acc attr ->
       match attr with
-      | Aast.Xhp_simple ((pos, name), _) ->
+      | Aast.Xhp_simple { Aast.xs_name = (pos, name); _ } ->
         Result_set.add
           {
             name;

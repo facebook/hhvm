@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<30b64dc237cd3a552557ebe2a16bd1b7>>
+// @generated SignedSource<<f6b592e0fda1eca57936644c661c3633>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -916,8 +916,28 @@ pub enum Afield<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
+pub struct XhpSimple<Ex, Fb, En, Hi> {
+    pub name: Pstring,
+    pub type_: Hi,
+    pub expr: Expr<Ex, Fb, En, Hi>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub enum XhpAttribute<Ex, Fb, En, Hi> {
-    XhpSimple(Pstring, Expr<Ex, Fb, En, Hi>),
+    XhpSimple(XhpSimple<Ex, Fb, En, Hi>),
     XhpSpread(Expr<Ex, Fb, En, Hi>),
 }
 

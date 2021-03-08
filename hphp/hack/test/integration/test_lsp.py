@@ -556,6 +556,16 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": InsertTextFormat.PlainText.value,
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
+                        {
+                            "label": "xhp:generic",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": "xhp:generic",
+                            "insertText": "xhp:generic",
+                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "data": {"fullname": ":xhp:generic"},
+                        },
                     ],
                 },
                 powered_by="serverless_ide",
@@ -844,6 +854,16 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": ":xhp:enum-attribute",
                             "insertTextFormat": InsertTextFormat.PlainText.value,
                             "data": {"fullname": ":xhp:enum-attribute"},
+                        },
+                        {
+                            "label": ":xhp:generic",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": ":xhp:generic",
+                            "insertText": ":xhp:generic",
+                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "data": {"fullname": ":xhp:generic"},
                         },
                     ],
                 },
@@ -2006,6 +2026,16 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": InsertTextFormat.PlainText.value,
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
+                        {
+                            "label": "xhp:generic",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": "xhp:generic",
+                            "insertText": "xhp:generic",
+                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "data": {"fullname": ":xhp:generic"},
+                        },
                     ],
                 },
                 powered_by="serverless_ide",
@@ -2294,6 +2324,16 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": ":xhp:enum-attribute",
                             "insertTextFormat": InsertTextFormat.PlainText.value,
                             "data": {"fullname": ":xhp:enum-attribute"},
+                        },
+                        {
+                            "label": ":xhp:generic",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": ":xhp:generic",
+                            "insertText": ":xhp:generic",
+                            "insertTextFormat": InsertTextFormat.PlainText.value,
+                            "data": {"fullname": ":xhp:generic"},
                         },
                     ],
                 },
@@ -3899,19 +3939,88 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="hover over an attribute in an xhp literal",
+                comment="hover over an primitive attribute in an xhp literal",
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 62, "character": 25},
                 },
                 result={
-                    "contents": [
-                        {"language": "hack", "value": "public :xhp:enum-attribute name"}
-                    ],
+                    "contents": [{"language": "hack", "value": "public ?string name"}],
                     "range": {
                         "start": {"line": 62, "character": 22},
                         "end": {"line": 62, "character": 26},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="hover over a nonprimitive attribute in an xhp literal",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 62, "character": 36},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "public ?MyEnum enum-attribute"}
+                    ],
+                    "range": {
+                        "start": {"line": 62, "character": 33},
+                        "end": {"line": 62, "character": 47},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="hover over a generic attribute in an xhp literal",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 63, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "public ?ID<EntSomething> id"}
+                    ],
+                    "range": {
+                        "start": {"line": 63, "character": 15},
+                        "end": {"line": 63, "character": 17},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="Add '<xhp:enum-attribute name' to test hover for incomplete xhp attribute",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 69, "character": 0},
+                                "end": {"line": 69, "character": 0},
+                            },
+                            "text": "<xhp:enum-attribute name",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover over an attribute in an xhp literal without a value",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 69, "character": 22},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "public ?string name"}],
+                    "range": {
+                        "start": {"line": 69, "character": 20},
+                        "end": {"line": 69, "character": 24},
                     },
                 },
                 powered_by="serverless_ide",

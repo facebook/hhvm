@@ -2310,7 +2310,8 @@ and attrl env l = List.map ~f:(attr env) l
 
 and attr env at =
   match at with
-  | Aast.Xhp_simple (x, e) -> N.Xhp_simple (x, expr env e)
+  | Aast.Xhp_simple { Aast.xs_name; xs_type; xs_expr = e } ->
+    N.Xhp_simple { Aast.xs_name; xs_type; xs_expr = expr env e }
   | Aast.Xhp_spread e -> N.Xhp_spread (expr env e)
 
 and string2 env idl = List.map idl (expr env)

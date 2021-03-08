@@ -646,8 +646,14 @@ and ('ex, 'fb, 'en, 'hi) afield =
   | AFvalue of ('ex, 'fb, 'en, 'hi) expr
   | AFkvalue of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
 
+and ('ex, 'fb, 'en, 'hi) xhp_simple = {
+  xs_name: pstring;
+  xs_type: 'hi;
+  xs_expr: ('ex, 'fb, 'en, 'hi) expr;
+}
+
 and ('ex, 'fb, 'en, 'hi) xhp_attribute =
-  | Xhp_simple of pstring * ('ex, 'fb, 'en, 'hi) expr
+  | Xhp_simple of ('ex, 'fb, 'en, 'hi) xhp_simple
   | Xhp_spread of ('ex, 'fb, 'en, 'hi) expr
 
 and is_variadic = bool

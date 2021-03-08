@@ -49,7 +49,7 @@ let rec collect_attrs_from_ty env set ty =
 let collect_attrs env attrs =
   let collect_attr set attr =
     match attr with
-    | Xhp_simple ((_, n), _) -> SSet.add (":" ^ n) set
+    | Xhp_simple { xs_name = (_, n); _ } -> SSet.add (":" ^ n) set
     | Xhp_spread ((_, ty), _) -> collect_attrs_from_ty env set ty
   in
   List.fold attrs ~init:SSet.empty ~f:collect_attr

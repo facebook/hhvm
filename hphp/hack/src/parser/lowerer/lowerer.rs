@@ -2316,7 +2316,12 @@ where
                 } else {
                     Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
                 };
-                Ok(ast::XhpAttribute::XhpSimple(name, expr))
+                let xhp_simple = ast::XhpSimple {
+                    name,
+                    type_: (),
+                    expr,
+                };
+                Ok(ast::XhpAttribute::XhpSimple(xhp_simple))
             }
             XHPSpreadAttribute(c) => {
                 let expr = Self::p_xhp_embedded(Self::unesc_xhp, &c.expression, env)?;

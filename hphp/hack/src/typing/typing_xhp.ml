@@ -164,7 +164,7 @@ let is_xhp_child env pos ty =
 let rewrite_xml_into_new pos sid attributes children =
   let cid = CI sid in
   let mk_attribute ix = function
-    | Xhp_simple ((attr_pos, attr_key), exp) ->
+    | Xhp_simple { xs_name = (attr_pos, attr_key); xs_expr = exp; _ } ->
       let attr_aux = attr_pos in
       let key = (attr_aux, String attr_key) in
       (key, exp)

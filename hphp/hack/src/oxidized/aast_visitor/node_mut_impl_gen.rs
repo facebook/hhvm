@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2db43a48b63dd8bf4a7486af29114e92>>
+// @generated SignedSource<<2f7b2605669bcd10833557be7d603143>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2171,9 +2171,8 @@ impl<P: Params> NodeMut<P> for XhpAttribute<P::Ex, P::Fb, P::En, P::Hi> {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            XhpAttribute::XhpSimple(a0, a1) => {
+            XhpAttribute::XhpSimple(a0) => {
                 a0.accept(c, v)?;
-                a1.accept(c, v)?;
                 Ok(())
             }
             XhpAttribute::XhpSpread(a0) => {
@@ -2236,5 +2235,24 @@ impl<P: Params> NodeMut<P> for XhpChildOp {
             XhpChildOp::ChildPlus => Ok(()),
             XhpChildOp::ChildQuestion => Ok(()),
         }
+    }
+}
+impl<P: Params> NodeMut<P> for XhpSimple<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_xhp_simple(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        v.visit_hi(c, &mut self.type_)?;
+        self.expr.accept(c, v)?;
+        Ok(())
     }
 }

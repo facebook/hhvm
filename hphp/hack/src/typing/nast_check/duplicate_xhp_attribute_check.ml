@@ -26,9 +26,10 @@ let error_if_repeated_attribute
     (attribs : ('ex, 'fb, 'en, 'hi) xhp_attribute list) =
   let rec loop attribs (seen : SSet.t) =
     match attribs with
-    | Xhp_simple ((pos, name), _) :: _ when SSet.mem name seen ->
+    | Xhp_simple { xs_name = (pos, name); _ } :: _ when SSet.mem name seen ->
       Errors.xhp_parsing_error (pos, Printf.sprintf "Cannot redeclare %s" name)
-    | Xhp_simple ((_, name), _) :: attribs -> loop attribs (SSet.add name seen)
+    | Xhp_simple { xs_name = (_, name); _ } :: attribs ->
+      loop attribs (SSet.add name seen)
     | Xhp_spread _ :: attribs -> loop attribs seen
     | [] -> ()
   in

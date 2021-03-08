@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<63fcd0a8b3defaca3a987ac182e8ee06>>
+// @generated SignedSource<<011a9592b594d9866a427776f2b581fa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -989,6 +989,29 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 
 #[derive(
     Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct XhpSimple<'a, Ex, Fb, En, Hi> {
+    pub name: &'a Pstring<'a>,
+    pub type_: Hi,
+    pub expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for XhpSimple<'a, Ex, Fb, En, Hi>
+{
+}
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Eq,
@@ -1002,7 +1025,7 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
     ToOcamlRep
 )]
 pub enum XhpAttribute<'a, Ex, Fb, En, Hi> {
-    XhpSimple(&'a (&'a Pstring<'a>, &'a Expr<'a, Ex, Fb, En, Hi>)),
+    XhpSimple(&'a XhpSimple<'a, Ex, Fb, En, Hi>),
     XhpSpread(&'a Expr<'a, Ex, Fb, En, Hi>),
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop

@@ -198,17 +198,18 @@ let vc_kind_to_name kind =
 
 (* XHP attribute helpers *)
 let map_xhp_attr (f : pstring -> pstring) (g : expr -> expr) = function
-  | Xhp_simple (id, e) -> Xhp_simple (f id, g e)
+  | Xhp_simple { xs_name = id; xs_type; xs_expr = e } ->
+    Xhp_simple { xs_name = f id; xs_type; xs_expr = g e }
   | Xhp_spread e -> Xhp_spread (g e)
 
 let get_xhp_attr_expr = function
-  | Xhp_simple (_, e)
+  | Xhp_simple { xs_expr = e; _ }
   | Xhp_spread e ->
     e
 
 let get_simple_xhp_attrs =
   List.filter_map ~f:(function
-      | Xhp_simple (id, e) -> Some (id, e)
+      | Xhp_simple { xs_name = id; xs_expr = e; _ } -> Some (id, e)
       | Xhp_spread _ -> None)
 
 (* Given a Nast.program, give me the list of entities it defines *)
@@ -1051,7 +1052,7 @@ module Visitor_DEPRECATED = struct
         let acc =
           List.fold_left attrl ~init:acc ~f:(fun acc attr ->
               match attr with
-              | Xhp_simple (_, e)
+              | Xhp_simple { xs_expr = e; _ }
               | Xhp_spread e ->
                 this#on_expr acc e)
         in

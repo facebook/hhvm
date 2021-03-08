@@ -27,3 +27,20 @@ final class :xhp:enum-attribute implements XHPChild {
     public int $line,
   ) {}
 }
+
+newtype ID<T> = int;
+
+class EntSomething {
+  public static function getId(): ID<EntSomething> { return 0; }
+}
+
+final class :xhp:generic<T> implements XHPChild {
+  attribute ID<T> id;
+
+    public function __construct(
+    public darray<string,mixed> $attributes,
+    public varray<mixed> $children,
+    public string $filename,
+    public int $line,
+  ) {}
+}

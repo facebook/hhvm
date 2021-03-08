@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<859090b2a21232738d30f6c3f19bb635>>
+// @generated SignedSource<<7a1e46c3e2c674f7e371cbefd77d48ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use crate::{
-    aast_defs::*, ast_defs::*, decl_defs::*, direct_decl_parser::*, shallow_decl_defs::*,
-    t_shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
+    aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
+    typing_defs::*, typing_defs_core::*, typing_reason::*,
 };
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;

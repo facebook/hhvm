@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9bf61bb8fba6930ee5d17bfc5f9aa41e>>
+// @generated SignedSource<<b139acef71c6a04b9939b28678afcc4b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,8 +13,8 @@
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::{
-    aast_defs::*, ast_defs::*, decl_defs::*, direct_decl_parser::*, shallow_decl_defs::*,
-    t_shape_map::*, typing_defs::*, typing_defs_core::*, typing_reason::*,
+    aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
+    typing_defs::*, typing_defs_core::*, typing_reason::*,
 };
 impl<'a> Node<'a> for ArgPosition {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {

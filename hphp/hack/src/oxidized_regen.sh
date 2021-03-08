@@ -140,7 +140,6 @@ summary "Write oxidized_by_ref/decl_visitor/"
   by-ref-decl-visitor                                                         \
   --input "hphp/hack/src/oxidized_by_ref/gen/aast_defs.rs"                    \
   --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs"                     \
-  --input "hphp/hack/src/oxidized_by_ref/gen/decl_defs.rs"                    \
   --input "hphp/hack/src/oxidized_by_ref/gen/shallow_decl_defs.rs"            \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs"             \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs"                  \

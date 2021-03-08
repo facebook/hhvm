@@ -700,12 +700,16 @@ end = struct
     match Dep.get_class_name obj with
     | Some cls_name ->
       do_add_dep ctx env (Typing_deps.Dep.Class cls_name);
+      Option.iter ~f:(add_class_attr_deps ctx env)
+      @@ Nast_helper.get_class ctx cls_name;
       (match Decl_provider.get_class ctx cls_name with
       | None ->
         let Typing_defs.{ td_type; td_constraint; _ } =
           value_or_not_found description
           @@ Decl_provider.get_typedef ctx cls_name
         in
+        Option.iter ~f:(add_tydef_attr_deps ctx env)
+        @@ Nast_helper.get_typedef ctx cls_name;
         add_dep ctx ~this:None env td_type;
         Option.iter td_constraint ~f:(add_dep ctx ~this:None env)
       | Some cls ->
@@ -717,19 +721,24 @@ end = struct
               value_or_not_found description @@ Class.get_prop cls name
             in
             add_dep @@ Lazy.force ce_type;
-
+            Option.iter ~f:(add_classvar_attr_deps ctx env)
+            @@ Nast_helper.get_prop ctx cls_name name;
             (* We need to initialize properties in the constructor, add a dependency on it *)
             do_add_dep ctx env (Cstr cls_name)
           | SProp (_, name) ->
             let Typing_defs.{ ce_type; _ } =
               value_or_not_found description @@ Class.get_sprop cls name
             in
-            add_dep @@ Lazy.force ce_type
+            add_dep @@ Lazy.force ce_type;
+            Option.iter ~f:(add_classvar_attr_deps ctx env)
+            @@ Nast_helper.get_prop ctx cls_name name
           | Method (_, name) ->
             let Typing_defs.{ ce_type; _ } =
               value_or_not_found description @@ Class.get_method cls name
             in
             add_dep @@ Lazy.force ce_type;
+            Option.iter ~f:(add_method_attr_deps ctx env)
+            @@ Nast_helper.get_method ctx cls_name name;
             Class.all_ancestor_names cls
             |> List.iter ~f:(fun ancestor_name ->
                    match Decl_provider.get_class ctx ancestor_name with
@@ -740,6 +749,8 @@ end = struct
             (match Class.get_smethod cls name with
             | Some Typing_defs.{ ce_type; _ } ->
               add_dep @@ Lazy.force ce_type;
+              Option.iter ~f:(add_method_attr_deps ctx env)
+              @@ Nast_helper.get_method ctx cls_name name;
               Class.all_ancestor_names cls
               |> List.iter ~f:(fun ancestor_name ->
                      match Decl_provider.get_class ctx ancestor_name with
@@ -757,6 +768,9 @@ end = struct
             | Some Typing_defs.{ ttc_type; ttc_as_constraint; ttc_origin; _ } ->
               if not (String.equal cls_name ttc_origin) then
                 do_add_dep ctx env (Const (ttc_origin, name));
+
+              Option.iter ~f:(add_tyconst_attr_deps ctx env)
+              @@ Nast_helper.get_typeconst ctx ttc_origin name;
               Option.iter ttc_type ~f:add_dep;
               Option.iter ttc_as_constraint ~f:add_dep
             | None ->
@@ -767,7 +781,9 @@ end = struct
           | Cstr _ ->
             (match Class.construct cls with
             | (Some Typing_defs.{ ce_type; _ }, _) ->
-              add_dep @@ Lazy.force ce_type
+              add_dep @@ Lazy.force ce_type;
+              Option.iter ~f:(add_method_attr_deps ctx env)
+              @@ Nast_helper.get_method ctx cls_name "__construct"
             | _ -> ())
           | Class _ ->
             List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
@@ -795,7 +811,9 @@ end = struct
           let Typing_defs.{ fe_type; _ } =
             value_or_not_found description @@ Decl_provider.get_fun ctx f
           in
-          add_dep ctx ~this:None env @@ fe_type
+          add_dep ctx ~this:None env @@ fe_type;
+          Option.iter ~f:(add_fun_attr_deps ctx env)
+          @@ Nast_helper.get_fun ctx f
         | GConst c
         | GConstName c ->
           let const =
@@ -803,6 +821,58 @@ end = struct
           in
           add_dep ctx ~this:None env const.Typing_defs.cd_type
         | _ -> raise UnexpectedDependency))
+
+  and add_user_attr_deps ctx env user_attrs =
+    List.iter user_attrs ~f:(fun Aast.{ ua_name = (_, cls); _ } ->
+        if not @@ String.is_prefix ~prefix:"__" cls then (
+          do_add_dep ctx env @@ Typing_deps.Dep.Class cls;
+          do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
+        ))
+
+  and add_class_attr_deps
+      ctx env Aast.{ c_user_attributes = attrs; c_tparams = tparams; _ } =
+    add_user_attr_deps ctx env attrs;
+    List.iter tparams ~f:(add_tparam_attr_deps ctx env)
+
+  and add_classvar_attr_deps ctx env Aast.{ cv_user_attributes = attrs; _ } =
+    add_user_attr_deps ctx env attrs
+
+  and add_tyconst_attr_deps ctx env Aast.{ c_tconst_user_attributes = attrs; _ }
+      =
+    add_user_attr_deps ctx env attrs
+
+  and add_arg_attr_deps ctx env (attrs, params, tparams) =
+    add_user_attr_deps ctx env attrs;
+    List.iter params ~f:(add_fun_param_attr_deps ctx env);
+    List.iter tparams ~f:(add_tparam_attr_deps ctx env)
+
+  and add_fun_attr_deps
+      ctx
+      env
+      Aast.
+        { f_user_attributes = attrs; f_params = params; f_tparams = tparams; _ }
+      =
+    add_arg_attr_deps ctx env (attrs, params, tparams)
+
+  and add_method_attr_deps
+      ctx
+      env
+      Aast.
+        { m_user_attributes = attrs; m_tparams = tparams; m_params = params; _ }
+      =
+    add_arg_attr_deps ctx env (attrs, params, tparams)
+
+  and add_fun_param_attr_deps ctx env Aast.{ param_user_attributes = attrs; _ }
+      =
+    add_user_attr_deps ctx env attrs
+
+  and add_tydef_attr_deps ctx env Aast.{ t_user_attributes = attrs; _ } =
+    add_user_attr_deps ctx env attrs
+
+  and add_tparam_attr_deps
+      ctx env Aast.{ tp_user_attributes = attrs; tp_parameters = tparams; _ } =
+    add_user_attr_deps ctx env attrs;
+    List.iter tparams ~f:(add_tparam_attr_deps ctx env)
 
   let add_impls ~ctx ~env ~cls acc ancestor_name =
     let open Typing_deps.Dep in
@@ -1098,6 +1168,11 @@ end = struct
     Format.asprintf "%a" (pp []) hint
 
   (* -- Shared pretty printers ---------------------------------------------- *)
+  let pp_visibility ppf = function
+    | Ast_defs.Private -> Fmt.string ppf "private"
+    | Ast_defs.Public -> Fmt.string ppf "public"
+    | Ast_defs.Protected -> Fmt.string ppf "protected"
+
   let pp_paramkind ppf =
     Ast_defs.(
       function
@@ -1737,14 +1812,17 @@ end = struct
           param_expr;
           param_callconv;
           param_user_attributes;
+          param_visibility;
           _;
         } =
     Format.(
       fprintf
         ppf
-        {|%a %a %a%a%a|}
+        {|%a %a %a %a%a%a|}
         pp_user_attrs
         param_user_attributes
+        Fmt.(option pp_visibility)
+        param_visibility
         Fmt.(option pp_paramkind)
         param_callconv
         (pp_type_hint ~is_ret_type:false)
@@ -1769,11 +1847,6 @@ end = struct
         @@ pair ~sep:comma (list ~sep:comma pp_fun_param) pp_variadic_fun_param)
         ppf
         tup
-
-  let pp_visibility ppf = function
-    | Ast_defs.Private -> Fmt.string ppf "private"
-    | Ast_defs.Public -> Fmt.string ppf "public"
-    | Ast_defs.Protected -> Fmt.string ppf "protected"
 
   (* -- Single element depdencies ------------------------------------------- *)
 
@@ -1803,6 +1876,7 @@ end = struct
           base: Aast.hint;
           constr: Aast.hint option;
           consts: (string * string) list;
+          user_attrs: Nast.user_attribute list;
         }
       | SGConst of {
           name: string;
@@ -1820,7 +1894,9 @@ end = struct
           Pos.line @@ Target.pos ctx target,
           Target.source_text ctx target )
 
-    let mk_enum ctx Aast.{ c_name = (pos, name); c_enum; c_consts; _ } =
+    let mk_enum
+        ctx
+        Aast.{ c_name = (pos, name); c_enum; c_consts; c_user_attributes; _ } =
       let Aast.{ e_base; e_constraint; _ } =
         value_or_not_found Format.(sprintf "expected an enum class: %s" name)
         @@ c_enum
@@ -1837,6 +1913,7 @@ end = struct
           consts;
           base = e_base;
           constr = e_constraint;
+          user_attrs = c_user_attributes;
         }
 
     let mk_gconst ctx Aast.{ cst_name = (pos, name); cst_type; _ } =
@@ -1911,13 +1988,19 @@ end = struct
     let pp_fixme ppf code = Fmt.pf ppf "/* HH_FIXME[%d] */@." code
 
     let pp_tydef
-        ppf (nm, fixmes, Aast.{ t_tparams; t_constraint; t_vis; t_kind; _ }) =
+        ppf
+        ( nm,
+          fixmes,
+          Aast.{ t_tparams; t_constraint; t_vis; t_kind; t_user_attributes; _ }
+        ) =
       Fmt.(
         pf
           ppf
-          {|%a%a %s%a%a = %a;|}
+          {|%a%a%a %s%a%a = %a;|}
           (list ~sep:cut pp_fixme)
           fixmes
+          pp_user_attrs
+          t_user_attributes
           pp_typedef_visiblity
           t_vis
           (strip_ns nm)
@@ -1941,11 +2024,13 @@ end = struct
 
     (* -- Enums ------------------------------------------------------------- *)
 
-    let pp_enum ppf (name, base, constr, consts) =
+    let pp_enum ppf (name, base, constr, consts, user_attrs) =
       Fmt.(
         pf
           ppf
-          {|enum %s: %a%a {%a}|}
+          {|%a enum %s: %a%a {%a}|}
+          pp_user_attrs
+          user_attrs
           (strip_ns name)
           (pp_hint ~is_ctx:false)
           base
@@ -1955,8 +2040,8 @@ end = struct
           consts)
 
     let pp ppf = function
-      | SEnum { name; base; constr; consts; _ } ->
-        pp_enum ppf (name, base, constr, consts)
+      | SEnum { name; base; constr; consts; user_attrs; _ } ->
+        pp_enum ppf (name, base, constr, consts, user_attrs)
       | STydef (nm, _, fixmes, ast) -> pp_tydef ppf (nm, fixmes, ast)
       | SGConst { name; type_; init_val; _ } ->
         pp_gconst ppf (name, type_, init_val)
@@ -2003,6 +2088,7 @@ end = struct
           is_ctx: bool;
           type_: Aast.hint option;
           constraint_: Aast.hint option;
+          user_attrs: Nast.user_attribute list;
         }
       | EltProp of {
           name: string;
@@ -2064,6 +2150,7 @@ end = struct
             c_tconst_type;
             c_tconst_as_constraint;
             c_tconst_is_ctx;
+            c_tconst_user_attributes;
             _;
           } =
       let is_abstract =
@@ -2080,6 +2167,7 @@ end = struct
           type_ = c_tconst_type;
           constraint_ = c_tconst_as_constraint;
           is_ctx = c_tconst_is_ctx;
+          user_attrs = c_tconst_user_attributes;
         }
 
     let mk_method from_interface (Aast.{ m_name = (pos, _); _ } as method_) =
@@ -2220,11 +2308,14 @@ end = struct
           init_val)
 
     (* -- Type constants ---------------------------------------------------- *)
-    let pp_tyconst ppf (name, is_abstract, is_ctx, type_, constraint_) =
+    let pp_tyconst
+        ppf (name, is_abstract, is_ctx, type_, constraint_, user_attrs) =
       Fmt.(
         pf
           ppf
-          {|%a const %a %s%a%a;|}
+          {|%a %a const %a %s%a%a;|}
+          pp_user_attrs
+          user_attrs
           (cond ~pp_t:(const string "abstract") ~pp_f:nop)
           is_abstract
           (cond ~pp_t:(const string "ctx") ~pp_f:(const string "type"))
@@ -2255,8 +2346,11 @@ end = struct
       | EltMethod (from_interface, _, method_) ->
         pp_method ppf (from_interface, method_)
       | EltTargetMethod (_, src) -> Fmt.string ppf @@ SourceText.text src
-      | EltTypeConst { name; is_abstract; is_ctx; type_; constraint_; _ } ->
-        pp_tyconst ppf (name, is_abstract, is_ctx, type_, constraint_)
+      | EltTypeConst
+          { name; is_abstract; is_ctx; type_; constraint_; user_attrs; _ } ->
+        pp_tyconst
+          ppf
+          (name, is_abstract, is_ctx, type_, constraint_, user_attrs)
       | EltConst { name; is_abstract; type_; init_val; _ } ->
         pp_const ppf (name, is_abstract, type_, init_val)
       | EltXHPAttr { name; user_attrs; type_; init_val; xhp_attr_info; _ } ->

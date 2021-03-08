@@ -203,3 +203,82 @@ function my_keys<Tk as arraykey, Tv>(
 function with_expr_in_user_attrs(): void {
   $_ = my_keys(vec[]);
 }
+
+<<MyUserAttr('blah')>>
+type TransparentWithUserAttr = int;
+
+<<MyUserAttr('blah')>>
+newtype OpaqueWithUserAttr = int;
+
+<<MyUserAttr('blah')>>
+enum EnumWithUserAttr: int as int {
+  Blah = 0;
+}
+
+function enum_with_user_attr(EnumWithUserAttr $x): void {}
+
+function transparent_with_user_attr(TransparentWithUserAttr $x): void {}
+
+function opaque_with_user_attr(OpaqueWithUserAttr $x): void {}
+
+<<MyUserAttr('blah')>>
+class WithUserAttr {
+  public function foo(): void {}
+}
+
+class WithMethodWithUserAttr {
+  <<MyUserAttr('blah')>>
+  public function foo(): void {}
+}
+
+class WithTypeConstantWithUserAttr {
+  <<MyUserAttr('blah')>>
+  const type T = int;
+  public function foo(): self::T {
+    return 1;
+  }
+}
+
+class WithStaticPropWithUserAttr {
+  <<MyUserAttr('blah')>> public static int $i = 0;
+  public function foo(): int {
+    return self::$i;
+  }
+}
+
+class WithPropWithUserAttr {
+  <<MyUserAttr('blah')>> public int $i = 0;
+  public function foo(): int {
+    return $this->i;
+  }
+}
+
+class WithConstrPropWithUserAttr {
+  public function __construct(<<MyUserAttr('blah')>> private int $i){}
+}
+
+function with_constr_prop_with_user_attr():void {
+  $_ = new WithConstrPropWithUserAttr(2);
+}
+
+<<MyUserAttr('blah')>>
+function with_user_attr(): void {}
+
+function with_param_with_user_attr(<<MyUserAttr('blah')>> int $s): void {}
+
+function with_tparam_with_user_attr<<<MyUserAttr('blah')>> T>(T $x): void {}
+
+final class MyUserAttr
+  implements
+    HH\ClassAttribute,
+    HH\MethodAttribute,
+    HH\TypeAliasAttribute,
+    HH\EnumAttribute,
+    HH\FunctionAttribute,
+    HH\InstancePropertyAttribute,
+    HH\StaticPropertyAttribute,
+    HH\ParameterAttribute,
+    HH\TypeParameterAttribute,
+    HH\TypeConstantAttribute {
+  public function __construct(string $first, string ...$remainder)[] {}
+}

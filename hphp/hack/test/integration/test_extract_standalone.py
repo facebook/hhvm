@@ -206,6 +206,18 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_optional_argument_dependent_context",
             "\\with_expr_in_user_attrs",
             "\\with_arg_with_sealed_whitelist",
+            "\\with_user_attr",
+            "\\with_param_with_user_attr",
+            "\\with_tparam_with_user_attr",
+            "\\WithPropWithUserAttr::foo",
+            "\\WithStaticPropWithUserAttr::foo",
+            "\\WithTypeConstantWithUserAttr::foo",
+            "\\WithMethodWithUserAttr::foo",
+            "\\WithUserAttr::foo",
+            "\\enum_with_user_attr",
+            "\\opaque_with_user_attr",
+            "\\transparent_with_user_attr",
+            "\\with_constr_prop_with_user_attr",
         ]
 
         for function_name in function_names:

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48d26677b4f0c2d6327a4ac922e04969>>
+// @generated SignedSource<<d798ea4e38d493e5cbc742af546e0ebd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -480,6 +480,20 @@ pub enum ReifyKind {
 }
 impl TrivialDrop for ReifyKind {}
 
+/// Origin of Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
+///
+/// class_const_from encodes the origin (class vs self).
 #[derive(
     Clone,
     Debug,
@@ -499,6 +513,18 @@ pub enum ClassConstFrom {
     From(String),
 }
 
+/// Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
 #[derive(
     Clone,
     Debug,

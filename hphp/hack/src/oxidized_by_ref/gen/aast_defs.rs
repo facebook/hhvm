@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1d6ccfaa717bd0a9d7b93c95e24aa02c>>
+// @generated SignedSource<<770871abb21282cf6f2e3247b8863d2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -334,6 +334,20 @@ impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
 
 pub use oxidized::aast_defs::ReifyKind;
 
+/// Origin of Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
+///
+/// class_const_from encodes the origin (class vs self).
 #[derive(
     Clone,
     Copy,
@@ -354,6 +368,18 @@ pub enum ClassConstFrom<'a> {
 }
 impl<'a> TrivialDrop for ClassConstFrom<'a> {}
 
+/// Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
 #[derive(
     Clone,
     Debug,

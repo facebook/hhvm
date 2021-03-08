@@ -6142,7 +6142,10 @@ and call
             (env, Some (te, lty))
           | None ->
             Errors.atom_unknown pos atom_name enum_name;
-            (env, None))
+            let r = Reason.Rwitness pos in
+            let ty = Typing_utils.terr env r in
+            let te = ((pos, ty), EnumAtom atom_name) in
+            (env, Some (te, ty)))
         | None -> (env, None)
       in
       let check_arg env ((pos, arg) as e) opt_param ~is_variadic =

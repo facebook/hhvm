@@ -244,7 +244,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   // Handle stacks specially to be less pessimistic.  We can always use the
   // expand map to find stack locations that may alias our class.
   auto const stk = acls.stack();
-  if (stk && stk->size > 1) {
+  if (stk && stk->size() > 1) {
     auto const it = stk_expand_map.find(*stk);
     ret |= it != end(stk_expand_map) ? it->second : all_stack;
   } else {
@@ -293,8 +293,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   // We want to handle stacks partially specially, because they can be expanded
   // in some situations even if they don't have an ALocMeta.
   if (auto const stk = acls.stack()) {
-    auto const it = stk->size > 1 ? stk_expand_map.find(*stk)
-                                  : end(stk_expand_map);
+    auto const it = stk->size() > 1 ? stk_expand_map.find(*stk)
+                                    : end(stk_expand_map);
     if (it != end(stk_expand_map)) {
       ret |= it->second;
     } else {
@@ -425,15 +425,15 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * re-entry) unioned with a single stack slot).
      */
     if (auto const stk = acls.stack()) {
-      if (stk->size > 1) {
+      if (stk->size() > 1) {
         ret.stk_expand_map[AliasClass { *stk }];
       }
-      if (stk->size > kMaxExpandedSize) return;
+      if (stk->size() > kMaxExpandedSize) return;
 
       auto complete = true;
       auto range = ALocBits{};
-      for (auto stkidx = int32_t{0}; stkidx < stk->size; ++stkidx) {
-        AliasClass single = AStack { stk->offset - stkidx, 1 };
+      for (auto stkidx = stk->low; stkidx < stk->high; ++stkidx) {
+        AliasClass single = AStack::at(stkidx);
         if (auto const index = add_class(ret, single)) {
           range.set(*index);
         } else {
@@ -441,7 +441,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
         }
       }
 
-      if (stk->size > 1 && complete) {
+      if (stk->size() > 1 && complete) {
         FTRACE(2, "    range {}:  {}\n", show(acls), show(range));
         ret.stack_ranges[acls] = range;
       }

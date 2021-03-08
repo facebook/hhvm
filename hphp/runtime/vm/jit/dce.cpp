@@ -830,14 +830,15 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
 //////////////////////////////////////////////////////////////////////
 
 void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
-                       FPRelOffset stackTop, const UseCounts& uses) {
+                       const UseCounts& uses) {
   using Bits = std::bitset<64>;
 
+  auto const stackTop = (AStack {
+    block->back().src(1), block->back().extra<EndCatch>()->offset, 0
+  }).offset();
   auto const stackSize = (stackTop.offset < -64) ? 64 : -stackTop.offset;
   if (stackSize == 0) return;
-  auto const stackBase = stackTop + stackSize;
-  // subtract 1 because we want the cells at offsets -1, -2, ... -stackSize
-  auto const stackRange = AStack { stackBase - 1, stackSize };
+  auto const stackRange = AStack::range(stackTop, stackTop + stackSize);
 
   Bits usedLocations = {};
   // stores that are only read by the EndCatch
@@ -851,15 +852,15 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       if (!cls.maybe(stackRange)) return {};
       auto const stk = cls.stack();
       if (!stk) return { 0, stackSize };
-      if (stk->offset < stackTop) {
-        auto const delta = stackTop.offset - stk->offset.offset;
-        if (delta >= stk->size) return {};
-        return { 0, stk->size - delta };
+      if (stk->offset() < stackTop) {
+        auto const delta = stackTop.offset - stk->offset().offset;
+        if (delta >= stk->size()) return {};
+        return { 0, stk->size() - delta };
       }
-      auto const base = stk->offset.offset - stackTop.offset;
+      auto const base = stk->offset().offset - stackTop.offset;
       if (base >= stackSize) return {};
-      auto const end = base + stk->size < stackSize ?
-        base + stk->size : stackSize;
+      auto const end = base + stk->size() < stackSize ?
+        base + stk->size() : stackSize;
       return { base, end };
     };
 
@@ -969,10 +970,7 @@ void optimizeCatchBlocks(const BlockList& blocks,
         block->back().extra<EndCatch>()->mode !=
           EndCatchData::CatchMode::SideExit &&
         block->front().is(BeginCatch)) {
-      auto const astk = AStack {
-        block->back().src(1), block->back().extra<EndCatch>()->offset, 0
-      };
-      processCatchBlock(unit, state, block, astk.offset, uses);
+      processCatchBlock(unit, state, block, uses);
     }
   }
 }

@@ -240,10 +240,28 @@ struct AStack {
   // These constructors canonicalize the offset to be relative to the outermost
   // frame pointer.
   explicit AStack(SSATmp* sp, IRSPRelOffset offset, int32_t size);
-  explicit AStack(FPRelOffset o, int32_t s) : offset(o), size(s) {}
 
-  FPRelOffset offset;
-  int32_t size;
+  // Return AStack representing a single stack cell at `offset`.
+  static AStack at(FPRelOffset offset) {
+    return AStack{offset, offset + 1};
+  }
+
+  // Return AStack representing a range of stack cells between low (inclusive)
+  // and high (exclusive) offsets.
+  static AStack range(FPRelOffset low, FPRelOffset high) {
+    return AStack{low, high};
+  }
+
+  FPRelOffset offset() const { return high - 1; }
+  uint32_t size() const {
+    return safe_cast<uint32_t>(int64_t{high.offset} - int64_t{low.offset});
+  }
+
+  FPRelOffset low;
+  FPRelOffset high;
+
+private:
+  explicit AStack(FPRelOffset l, FPRelOffset h) : low(l), high(h) {}
 };
 
 /*

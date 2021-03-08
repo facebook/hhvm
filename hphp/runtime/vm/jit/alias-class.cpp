@@ -35,16 +35,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Helper for returning the lowest index of an AStack range, non inclusive.
-// I.e. a AStack class affects stack slots in [sp+offset,lowest_offset).
-int32_t lowest_offset(AStack stk) {
-  auto const off    = int64_t{stk.offset.offset};
-  auto const sz     = int64_t{stk.size};
-  auto const low    = off - sz;
-  auto const i32min = int64_t{std::numeric_limits<int32_t>::min()};
-  return safe_cast<int32_t>(std::max(low, i32min));
-}
-
 std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   using A = AliasClass;
 
@@ -179,16 +169,21 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
 }
 }
 
-AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
-  : offset()
-  , size(s)
-{
+AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s) {
   always_assert(sp->isA(TStkPtr));
 
   auto const defSP = sp->inst();
   always_assert_flog(defSP->is(DefFrameRelSP, DefRegSP),
                      "unexpected StkPtr: {}\n", sp->toString());
-  offset = spRel.to<FPRelOffset>(defSP->extra<DefStackData>()->irSPOff);
+  high = spRel.to<FPRelOffset>(defSP->extra<DefStackData>()->irSPOff) + 1;
+  if (s == std::numeric_limits<int32_t>::max()) {
+    low = FPRelOffset{std::numeric_limits<int32_t>::min()};
+  } else {
+    low = FPRelOffset{safe_cast<int32_t>(std::max<int64_t>(
+      int64_t{high.offset} - int64_t{s},
+      int64_t{std::numeric_limits<int32_t>::min()}
+    ))};
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -216,8 +211,8 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_elemS.key->hash());
   case STag::Stack:
     return folly::hash::hash_combine(hash,
-                                     acls.m_stack.offset.offset,
-                                     acls.m_stack.size);
+                                     acls.m_stack.low.offset,
+                                     acls.m_stack.high.offset);
   case STag::FrameAll:
     return folly::hash::hash_combine(hash, acls.m_frameAll.base.offset);
 
@@ -341,7 +336,7 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:           break;
   case STag::ElemI:          break;
   case STag::Stack:
-    assertx(m_stack.size > 0);          // use AEmpty if you want that
+    assertx(m_stack.size() > 0);          // use AEmpty if you want that
     break;
   case STag::ElemS:
     assertx(m_elemS.key->isStatic());
@@ -369,8 +364,8 @@ bool AliasClass::equivData(AliasClass o) const {
                               m_elemI.idx == o.m_elemI.idx;
   case STag::ElemS:    return m_elemS.arr == o.m_elemS.arr &&
                               m_elemS.key == o.m_elemS.key;
-  case STag::Stack:    return m_stack.offset == o.m_stack.offset &&
-                              m_stack.size == o.m_stack.size;
+  case STag::Stack:    return m_stack.low == o.m_stack.low &&
+                              m_stack.high == o.m_stack.high;
   case STag::Rds:      return m_rds.handle == o.m_rds.handle;
   }
   not_reached();
@@ -404,9 +399,9 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto const stkB = b.m_stack;
 
       // Make a stack range big enough to contain both of them.
-      auto const highest = std::max(stkA.offset, stkB.offset);
-      auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
-      auto const newStack = AStack { highest, highest.offset - lowest };
+      auto const highest = std::max(stkA.high, stkB.high);
+      auto const lowest = std::min(stkA.low, stkB.low);
+      auto const newStack = AStack::range(lowest, highest);
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stagBits = BStack;
@@ -553,8 +548,7 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Local:
     return framelike_subclass(m_local, o.m_local);
   case STag::Stack:
-    return m_stack.offset <= o.m_stack.offset &&
-           lowest_offset(m_stack) >= lowest_offset(o.m_stack);
+    return m_stack.high <= o.m_stack.high && m_stack.low >= o.m_stack.low;
   case STag::FrameAll: return m_frameAll.base == o.m_frameAll.base;
   }
   not_reached();
@@ -706,12 +700,9 @@ bool AliasClass::maybeData(AliasClass o) const {
     {
       // True if there's a non-empty intersection of the two stack slot
       // intervals.
-      auto const lowest_upper = std::min(m_stack.offset, o.m_stack.offset);
-      auto const highest_lower = std::max(
-        lowest_offset(m_stack),
-        lowest_offset(o.m_stack)
-      );
-      return lowest_upper.offset > highest_lower;
+      auto const lowest_upper = std::min(m_stack.high, o.m_stack.high);
+      auto const highest_lower = std::max(m_stack.low, o.m_stack.low);
+      return lowest_upper > highest_lower;
     }
 
   case STag::Rds:
@@ -767,7 +758,7 @@ bool AliasClass::isSingleLocation() const {
     return iter->ids.hasSingleValue();
   }
   if (auto const stk = is_stack()) {
-    return stk->size == 1;
+    return stk->size() == 1;
   }
   // All other specializations currently have exactly one location.
   return true;
@@ -837,10 +828,10 @@ std::string show(AliasClass acls) {
     break;
   case A::STag::Stack:
     folly::format(&ret, "St {}{}",
-      acls.m_stack.offset.offset,
-      acls.m_stack.size == std::numeric_limits<int32_t>::max()
+      acls.m_stack.low.offset == std::numeric_limits<int32_t>::min()
         ? "<"
-        : folly::sformat(";{}", acls.m_stack.size)
+        : folly::sformat("{}:", acls.m_stack.low.offset),
+      acls.m_stack.high.offset
     );
     break;
   case A::STag::Rds:

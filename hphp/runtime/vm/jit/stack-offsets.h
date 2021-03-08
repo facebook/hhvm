@@ -258,6 +258,14 @@ struct FPRelOffset {
   FPRelOffset& operator-=(int32_t d) { offset -= d; return *this; }
 
   /*
+   * Increment.
+   */
+  FPRelOffset& operator++() {
+    offset++;
+    return *this;
+  }
+
+  /*
    * Invert to an FPInvOffset.
    */
   FPInvOffset operator-() const;

@@ -88,7 +88,7 @@
     CGetL $data
     BaseH
     .srcloc 7:40,7:44;
-    SetM 0 PT:"data" Any
+    SetM 0 PT:"data" Mutable
     .srcloc 7:40,7:44;
     PopC
     .srcloc 7:49,7:49;
@@ -161,7 +161,7 @@
     CheckThis
     .srcloc 22:39,22:49;
     BaseH
-    QueryM 0 CGet PT:"data" Any
+    QueryM 0 CGet PT:"data" Mutable
     .srcloc 22:32,22:50;
     VerifyRetTypeC
     RetC
@@ -219,7 +219,7 @@
     VerifyParamTypeTS $enum
     .srcloc 34:12,34:22;
     BaseL $enum Warn
-    QueryM 0 CGet PT:"data" Any
+    QueryM 0 CGet PT:"data" Mutable
     .srcloc 34:5,34:23;
     VerifyRetTypeC
     RetC
@@ -256,7 +256,7 @@
     Array @A_3
     CombineAndResolveTypeStruct 1
     BaseC 0 None
-    QueryM 1 CGetQuiet ET:"classname" Any
+    QueryM 1 CGetQuiet ET:"classname" Mutable
     Dup
     IsTypeC Null
     JmpNZ L0

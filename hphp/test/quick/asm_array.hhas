@@ -15,7 +15,7 @@
     String "arr"
     String "ClassWithArray"
     ClassGetC
-    CGetS Any
+    CGetS Mutable
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
@@ -28,8 +28,8 @@
     Int 2
     CGetL $x
     ClassGetC
-    BaseSC 2 0 Warn Any
-    QueryM 3 CGet EC:1 Any
+    BaseSC 2 0 Warn Mutable
+    QueryM 3 CGet EC:1 Mutable
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
 
@@ -48,7 +48,7 @@
   PopC
 
   BaseL $arr Warn
-  QueryM 0 CGet ET:"foo" Any
+  QueryM 0 CGet ET:"foo" Mutable
   String "\n"
   Concat
   Print
@@ -56,11 +56,11 @@
 
   String "one"
   BaseL $arr Define
-  SetM 0 EI:1 Any
+  SetM 0 EI:1 Mutable
   PopC
 
   BaseL $arr Warn
-  QueryM 0 CGet EI:1 Any
+  QueryM 0 CGet EI:1 Mutable
   String "\n"
   Concat
   Print
@@ -70,12 +70,12 @@
   SetL $key
   PopC
   BaseL $arr Unset
-  UnsetM 0 EL:$key Any
+  UnsetM 0 EL:$key Mutable
 
   # Test that it's unset
   CGetL $arr
   BaseC 0 Warn
-  QueryM 1 Isset EL:$key Any
+  QueryM 1 Isset EL:$key Mutable
   JmpZ unset_label
 
   String "This should be impossible...\n"

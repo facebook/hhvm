@@ -8,14 +8,14 @@
   .method [protected public] <"" N  > get() {
     CheckThis
     BaseH
-    QueryM 0 CGet PT:"attre" Any
+    QueryM 0 CGet PT:"attre" Mutable
     RetC
   }
   .method <"" N  > set($x) {
     CheckThis
     CGetL $x
     BaseH
-    SetM 0 PT:"attre" Any
+    SetM 0 PT:"attre" Mutable
     PopC
     Null
     RetC
@@ -23,7 +23,7 @@
   .method [public] <"" N  > __construct($attre) {
     CGetL $attre
     BaseH
-    SetM 0 PT:"attre" Any
+    SetM 0 PT:"attre" Mutable
     PopC
     Null
     RetC

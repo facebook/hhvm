@@ -59,9 +59,9 @@ enum MemberCode : uint8_t {
 constexpr size_t NumMemberCodes = MW + 1;
 
 #define READONLY_OPS    \
+  OP(Mutable)           \
   OP(Any)               \
-  OP(ReadOnly)          \
-  OP(Mutable)                  
+  OP(ReadOnly)         
 
 enum class ReadOnlyOp : uint8_t {
 #define OP(name) name,
@@ -95,29 +95,29 @@ constexpr bool mcodeIsElem(MemberCode mcode) {
 struct MemberKey {
   MemberKey()
     : mcode{MW}
-    , rop{ReadOnlyOp::Any}
+    , rop{ReadOnlyOp::Mutable}
     , int64{0}
   {}
 
-  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop = ReadOnlyOp::Mutable)
     : mcode{mcode}
     , rop{rop}
     , local{loc}
   {}
 
-  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop = ReadOnlyOp::Mutable)
     : mcode{mcode}
     , rop{rop}
     , iva{iva}
   {}
 
-  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop = ReadOnlyOp::Mutable)
     : mcode{mcode}
     , rop{rop}
     , int64{int64}
   {}
 
-  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop = ReadOnlyOp::Any)
+  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop = ReadOnlyOp::Mutable)
     : mcode{mcode}
     , rop{rop}
     , litstr{litstr}

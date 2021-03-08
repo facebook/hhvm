@@ -44,22 +44,6 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
-static BytecodeArena& bytecode_arena() {
-  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
-  return arena;
-}
-
-/*
- * Export for the admin server.
- */
-size_t hhbc_arena_capacity() {
-  if (!RuntimeOption::RepoAuthoritative) return 0;
-  return bytecode_arena().capacity();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // FuncEmitter.
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
@@ -84,6 +68,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
+  , m_loadedFromRepo(false)
 {}
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
@@ -109,6 +94,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_ehTabSorted(false)
+  , m_loadedFromRepo(false)
 {}
 
 FuncEmitter::~FuncEmitter() {
@@ -227,16 +213,6 @@ void FuncEmitter::commit(RepoTxn& txn) {
 
 const StaticString s_DynamicallyCallable("__DynamicallyCallable");
 
-static const unsigned char*
-allocateBCRegion(const unsigned char* bc, size_t bclen) {
-  g_hhbc_size->addValue(bclen);
-  auto mem = static_cast<unsigned char*>(
-    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
-                                     : malloc(bclen));
-  std::copy(bc, bc + bclen, mem);
-  return mem;
-}
-
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool saveLineTable) const {
   bool isGenerated = isdigit(name->data()[0]);
 
@@ -301,7 +277,17 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     dynCallSampleRate ||
     !coeffectRules.empty();
 
-  auto const bc = allocateBCRegion(m_bc, m_bclen);
+  const unsigned char* bc = nullptr;
+  // If we created the FuncEmitter by loading from the repo we don't need the bytecode.
+  // Instead we will load it lazily when needed
+  // If the function is a builtin function hhbbc may use the bytecode for constant folding.
+  // The way hhbbc does it is to read in all Funcs into memory. Close the current repo and
+  // then open the new repo for writing. It then want to constant fold some builtins which
+  // require the bytecode from the closed repo. So instead we just keep the bytecode alive
+  // for those Funcs.
+  if (!m_loadedFromRepo || (attrs & AttrBuiltin)) {
+    bc = m_bc;
+  }
   f->m_shared.reset(
     needsExtendedSharedData
       ? new Func::ExtendedSharedData(bc, m_bclen, preClass, m_sn, line1, line2,
@@ -671,6 +657,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   sd(line1)
     (line2)
     (a)
+    (m_bclen)
     (staticCoeffects)
     (hniReturnType)
     (repoReturnType)
@@ -737,14 +724,10 @@ void FuncEmitter::serde(SerDe& sd) {
 
   // Bytecode
   if constexpr (SerDe::deserializing) {
-    size_t size;
-    sd(size);
-    FTRACE_MOD(Trace::tmp0, 1, "Size: %d %d", size, sd.remaining());
-    assertx(sd.remaining() >= size);
-    setBc(sd.data(), size);
-    sd.advance(size);
+    assertx(sd.remaining() >= m_bclen);
+    setBc(sd.data(), m_bclen);
+    sd.advance(m_bclen);
   } else {
-    sd(m_bclen);
     sd.writeRaw((const char*)m_bc, m_bclen);
   }
 }
@@ -761,7 +744,8 @@ FuncRepoProxy::FuncRepoProxy(Repo& repo)
       getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)},
       getFuncLineTable{GetFuncLineTableStmt(repo, 0), GetFuncLineTableStmt(repo, 1)},
       insertFuncSourceLoc{InsertFuncSourceLocStmt(repo, 0), InsertFuncSourceLocStmt(repo, 1)},
-      getSourceLocTab{GetSourceLocTabStmt(repo, 0), GetSourceLocTabStmt(repo, 1)}
+      getSourceLocTab{GetSourceLocTabStmt(repo, 0), GetSourceLocTabStmt(repo, 1)},
+      getBytecode{GetBytecodeStmt(repo, 0), GetBytecodeStmt(repo, 1)}
 {}
 
 FuncRepoProxy::~FuncRepoProxy() {
@@ -859,6 +843,7 @@ void FuncRepoProxy::GetFuncsStmt
       }
       assertx(fe->sn() == funcSn);
       fe->setBc(static_cast<const unsigned char*>(bc), bclen);
+      fe->m_loadedFromRepo = true;
       fe->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited) {
         assertx(fe->attrs & AttrBuiltin);
@@ -967,6 +952,50 @@ FuncRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn, int64_t funcSn,
       SourceLocEntry entry(pastOffset, sLoc);
       sourceLocTab.push_back(entry);
     } while (!query.done());
+    txn.commit();
+  } catch (RepoExc& re) {
+    return RepoStatus::error;
+  }
+  return RepoStatus::success;
+}
+
+RepoStatus
+FuncRepoProxy::GetBytecodeStmt::get(Func* func, PC& pc) {
+  try {
+    auto txn = RepoTxn{m_repo.begin()};
+    if (!prepared()) {
+      auto selectQuery = folly::sformat(
+        "SELECT bc "
+        "FROM {} "
+        "WHERE unitSn == @unitSn AND funcSn = @funcSn",
+        m_repo.table(m_repoId, "Func"));
+      txn.prepare(*this, selectQuery);
+    }
+    RepoTxnQuery query(txn, *this);
+    query.bindInt64("@unitSn", func->unit()->sn());
+    query.bindInt64("@funcSn", func->sn());
+
+    query.step();
+    if (query.row()) {
+      const void* bc; size_t bclen; /**/ query.getBlob(0, bc, bclen);
+
+      always_assert(bclen == func->bclen());
+
+      // Recheck that no one else have loaded the bytecode because there is a risk
+      // that we leak memory we want that risk to be as little as possible
+      pc = func->shared()->m_bc.load(std::memory_order_acquire);
+      if (pc == nullptr) {
+        pc = allocateBCRegion(static_cast<const unsigned char*>(bc), bclen);
+        const unsigned char* expected = nullptr;
+        if (!func->shared()->m_bc.compare_exchange_strong(expected, pc)) {
+          // If someone set it before us free the one we created
+          // In repoauth mode we will not be able to free but the chance of a race
+          // is very tiny so we are ok with it leaking.
+          freeBCRegion(static_cast<const unsigned char*>(pc), bclen);
+          pc = expected;
+        }
+      }
+    }
     txn.commit();
   } catch (RepoExc& re) {
     return RepoStatus::error;

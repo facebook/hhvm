@@ -118,6 +118,7 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
  */
 struct Func final {
   friend struct FuncEmitter;
+  friend struct FuncRepoProxy;
 
 #ifndef USE_LOWPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
@@ -394,6 +395,8 @@ struct Func final {
    */
   PC entry() const;
   Offset bclen() const;
+
+  PC loadBytecode();
 
   /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
@@ -1234,7 +1237,7 @@ private:
      * here or reorder anything.
      */
     // (There's a 32-bit integer in the AtomicCountable base class here.)
-    unsigned char const* m_bc{nullptr};
+    std::atomic<unsigned char const*> m_bc{nullptr};
     PreClass* m_preClass;
     int m_line1;
     LowStringPtr m_docComment;
@@ -1741,6 +1744,20 @@ inline tracing::Props traceProps(const Func* f) {
  * Throw an exception that func cannot be converted to type.
  */
 [[noreturn]] void invalidFuncConversion(const char* type);
+
+///////////////////////////////////////////////////////////////////////////////
+// Bytecode
+
+/*
+ * Report capacity of RepoAuthoritative mode bytecode arena.
+ *
+ * Returns 0 if !RuntimeOption::RepoAuthoritative.
+ */
+size_t hhbc_arena_capacity();
+
+const unsigned char*
+allocateBCRegion(const unsigned char* bc, size_t bclen);
+void freeBCRegion(const unsigned char* bc, size_t bclen);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -435,6 +435,15 @@ bool Func::isFuncIdValid(FuncId id) {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 
+PC Func::loadBytecode() {
+  auto& frp = Repo::get().frp();
+  PC pc = nullptr;
+  auto DEBUG_ONLY res = frp.getBytecode[m_unit->repoID()].get(this, pc);
+  assertx(res == RepoStatus::success);
+  assertx(pc != nullptr && shared()->m_bc.load(std::memory_order_relaxed) != nullptr);
+  return pc;
+}
+
 bool Func::isEntry(Offset offset) const {
   return offset == 0 || isDVEntry(offset);
 }
@@ -735,7 +744,7 @@ Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
                              PreClass* preClass, int sn, int line1,
                              int line2, bool isPhpLeafFn,
                              const StringData* docComment)
-  : m_bc(bc)
+  : m_bc((bc != nullptr) ? allocateBCRegion(bc, bclen) : nullptr)
   , m_preClass(preClass)
   , m_line1(line1)
   , m_docComment(docComment)
@@ -768,13 +777,7 @@ Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
 
 Func::SharedData::~SharedData() {
   if (!RuntimeOption::RepoAuthoritative) {
-    auto len = bclen();
-    if (debug) {
-      // poison released bytecode
-      memset(const_cast<unsigned char*>(m_bc), 0xff, len);
-    }
-    free(const_cast<unsigned char*>(m_bc));
-    g_hhbc_size->addValue(-int64_t(len));
+    freeBCRegion(m_bc, bclen());
   }
 
   Func::s_extendedLineInfo.erase(this);
@@ -1172,6 +1175,42 @@ bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
     }
   }
   return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Bytecode
+
+using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
+static BytecodeArena& bytecode_arena() {
+  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
+  return arena;
+}
+
+/*
+ * Export for the admin server.
+ */
+size_t hhbc_arena_capacity() {
+  if (!RuntimeOption::RepoAuthoritative) return 0;
+  return bytecode_arena().capacity();
+}
+
+const unsigned char*
+allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  g_hhbc_size->addValue(bclen);
+  auto mem = static_cast<unsigned char*>(
+    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
+                                     : malloc(bclen));
+  std::copy(bc, bc + bclen, mem);
+  return mem;
+}
+
+void freeBCRegion(const unsigned char* bc, size_t bclen) {
+  if (debug) {
+    // poison released bytecode
+    memset(const_cast<unsigned char*>(bc), 0xff, bclen);
+  }
+  free(const_cast<unsigned char*>(bc));
+  g_hhbc_size->addValue(-int64_t(bclen));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

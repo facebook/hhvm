@@ -45,6 +45,8 @@ namespace Native {
 struct NativeFunctionInfo;
 }
 
+void freeBCRegion(const unsigned char* bc, size_t bclen);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -391,7 +393,8 @@ private:
   int m_numUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
-  bool m_ehTabSorted;
+  bool m_ehTabSorted : 1;
+  bool m_loadedFromRepo: 1;
 
   /*
    * Source location tables.
@@ -449,11 +452,17 @@ struct FuncRepoProxy : public RepoProxy {
     RepoStatus get(int64_t unitSn, int64_t funcSn, SourceLocTable& sourceLocTab);
   };
 
+  struct GetBytecodeStmt : public RepoProxy::Stmt {
+    GetBytecodeStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    RepoStatus get(Func* func, PC& pc);
+  };
+
   InsertFuncStmt insertFunc[RepoIdCount];
   GetFuncsStmt getFuncs[RepoIdCount];
   GetFuncLineTableStmt getFuncLineTable[RepoIdCount];
   InsertFuncSourceLocStmt insertFuncSourceLoc[RepoIdCount];
   GetSourceLocTabStmt getSourceLocTab[RepoIdCount];
+  GetBytecodeStmt getBytecode[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

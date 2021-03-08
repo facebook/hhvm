@@ -1,10 +1,14 @@
-break HPHP::Unit::getCachedEntryPoint
+break hphp_process_init
 run
-unit this
+clear hphp_process_init
+break update_constants_and_options
+continue
+clear update_constants_and_options
+break allocateBCRegion
+continue
 set logging on
 set pagination off
-set $funcshared = (**((Func**)((MergeInfo*)this->m_mergeInfo._M_b)->m_mergeables)).m_shared.m_px
-hhx $funcshared->m_bc $funcshared->m_bc+$funcshared->m_bclenSmall
+hhx bc bc+bclen
 set logging off
 kill
 quit

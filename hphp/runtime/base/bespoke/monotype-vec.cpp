@@ -745,7 +745,6 @@ ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
   auto const newSize = mad->size() - 1;
   value = Variant::attach(mad->typedValueUnchecked(newSize));
   mad->m_size = newSize;
-
   return mad;
 }
 

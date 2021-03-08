@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/bespoke/struct-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -545,27 +546,46 @@ const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-ArrayData* maybeMonoifyForTesting(ArrayData* ad, LoggingProfile* profile) {
-  assertx(profile->data);
-  auto& profileMonotype = profile->data->staticMonotypeArray;
-  auto const mad = profileMonotype.load(std::memory_order_relaxed);
-  if (mad) return mad;
 
-  auto const result = maybeMonoify(ad);
+template<typename Bespokify>
+ArrayData* maybeBespokifyForTesting(ArrayData* ad,
+                                    LoggingProfile* profile,
+                                    std::atomic<ArrayData*>& cache,
+                                    Bespokify bespokify) {
+  if (!profile->data) return ad;
+  auto const bad = cache.load(std::memory_order_relaxed);
+  if (bad) return bad;
+
+  auto const result = bespokify(ad, profile);
   if (!result) return ad;
   ad->decRefAndRelease();
 
-  // We should cache a staticMonotypeArray iff this profile is for a static
+  // We should cache a static bespoke array iff this profile is for a static
   // array constructor or static prop - i.e. iff staticLoggingArray is set.
   if (!profile->data->staticLoggingArray) return result;
 
   ArrayData* current = nullptr;
-  if (profileMonotype.compare_exchange_strong(current, result)) {
-    return result;
-  }
+  if (cache.compare_exchange_strong(current, result)) return result;
   RO::EvalLowStaticArrays ? low_free(result) : uncounted_free(result);
   return current;
 }
+
+KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
+  std::unordered_set<const StringData*> keys;
+  for (auto const& p : keyOrderMap) {
+    if (!p.first.valid()) continue;
+    keys.insert(p.first.begin(), p.first.end());
+  }
+
+  KeyOrder::KeyOrderData sorted;
+  for (auto const key : keys) {
+    sorted.push_back(key);
+  }
+  std::sort(sorted.begin(), sorted.end(),
+            [](auto a, auto b) { return a->compare(b) < 0; });
+  return KeyOrder::Make(sorted);
+}
+
 }
 
 void logBespokeDispatch(const BespokeArray* bad, const char* fn) {
@@ -600,13 +620,37 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
     : MonotypeVec::MakeFromVanilla(ad, dt);
 }
 
+BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile) {
+  if (!ad->isVanilla() || ad->isKeysetType()) return nullptr;
+
+  assertx(profile->data);
+  auto const& koMap = profile->data->keyOrders;
+  if (koMap.empty()) return nullptr;
+
+  auto const ko = collectKeyOrder(koMap);
+  auto const create = !s_hierarchyFinal.load(std::memory_order_acquire);
+  auto const layout = StructLayout::getLayout(ko, create);
+  return layout ?  StructArray::MakeFromVanilla(ad, layout) : nullptr;
+}
+
 ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   if (!jit::mcgen::retranslateAllEnabled()) {
     return bespoke::maybeMakeLoggingArray(ad, profile);
   }
-  auto const mod = requestCount() % 3;
+  auto const mod = requestCount() % 4;
   if (mod == 1) return bespoke::maybeMakeLoggingArray(ad, profile);
-  if (mod == 2) return bespoke::maybeMonoifyForTesting(ad, profile);
+  if (mod == 2) {
+    return bespoke::maybeBespokifyForTesting(
+      ad, profile, profile->data->staticMonotypeArray,
+      [](auto ad, auto /*profile*/) { return maybeMonoify(ad); }
+    );
+  }
+  if (mod == 3) {
+    return bespoke::maybeBespokifyForTesting(
+      ad, profile, profile->data->staticStructArray,
+      [](auto ad, auto profile) { return maybeStructify(ad, profile); }
+    );
+  }
   return ad;
 }
 

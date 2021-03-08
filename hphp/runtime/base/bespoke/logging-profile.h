@@ -148,6 +148,9 @@ struct CopyAtomic {
   std::atomic<T> value;
 };
 
+using KeyOrderMap =
+  std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
+
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {
@@ -162,8 +165,6 @@ struct LoggingProfile {
                                               integralHashCompare<uint16_t>>;
   using EntryTypesMap = folly::F14FastMap<EntryTypesMapKey, CopyAtomic<size_t>,
                                           EntryTypesMapHasher>;
-  using KeyOrderMap =
-    std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
 
   // The content of the logging profile that can be freed after layout selection.
   struct LoggingProfileData {
@@ -172,6 +173,7 @@ struct LoggingProfile {
     std::atomic<uint64_t> loggingArraysEmitted = 0;
     LoggingArray* staticLoggingArray = nullptr;
     std::atomic<ArrayData*> staticMonotypeArray{nullptr};
+    std::atomic<ArrayData*> staticStructArray{nullptr};
     ArrayData* staticSampledArray = nullptr;
     EventMap events;
     EntryTypesMap entryTypes;
@@ -224,8 +226,6 @@ using SinkProfileKey = std::pair<TransID, SrcKey>;
 // We'll store a SinkProfile for each place where an array is used.
 struct SinkProfile {
   using SourceMap = folly::F14FastMap<LoggingProfile*, CopyAtomic<size_t>>;
-  using KeyOrderMap =
-    std::unordered_map<KeyOrder, CopyAtomic<size_t>, KeyOrderHash>;
 
   static constexpr size_t kNumArrTypes = ArrayData::kNumKinds / 2;
   static constexpr size_t kNumKeyTypes = int(KeyTypes::Any) + 1;

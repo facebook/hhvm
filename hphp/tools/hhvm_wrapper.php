@@ -29,7 +29,7 @@ function my_option_map(): OptionInfoMap {
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '',  'Disable PGO' },
-'bespoke'         => Pair { '',  'Emit bespoke logging arrays' },
+'bespoke:'        => Pair { '',  'Bespoke array mode' },
 'hadva'           => Pair { '',  'Enable HAM and automarking' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
@@ -148,6 +148,16 @@ function determine_flags(OptionMap $opts): string {
         '';
   }
 
+  if ($opts->containsKey('bespoke')) {
+    $mode = (int)$opts['bespoke'];
+    $flags .=
+        '-v Eval.BespokeArrayLikeMode='.$mode.' '.
+        '-v Eval.ArrayProvenance=0 '.
+        '-v Eval.ExportLoggingArrayDataPath="/tmp/logging-array-export" '.
+        '-v Eval.EmitLoggingArraySampleRate=17 '.
+        '';
+  }
+
   if ($opts->containsKey('region-mode')) {
     if ($opts['region-mode'] == 'method') {
       $flags .=
@@ -177,11 +187,7 @@ function determine_flags(OptionMap $opts): string {
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
-    'bespoke'         => '-v Eval.BespokeArrayLikeMode=2 '.
-                         '-v Eval.ArrayProvenance=0 '.
-                         '-v Eval.ExportLoggingArrayDataPath="/tmp/logging-array-export" '.
-                         '-v Eval.EmitLoggingArraySampleRate=17 ',
-     'hadva'          => '-v Eval.HackArrDVArrs=true '.
+    'hadva'           => '-v Eval.HackArrDVArrs=true '.
                          '-v Eval.HackArrDVArrMark=true ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',

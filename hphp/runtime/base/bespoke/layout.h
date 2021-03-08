@@ -61,13 +61,18 @@ constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b1011;
 constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b0111;
 constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b0110;
 constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b0010;
-constexpr uint8_t kMaxLayoutByte = kLoggingLayoutByte;
+constexpr uint8_t kStructLayoutByte                = 0b1111;
+constexpr uint8_t kMaxLayoutByte = kStructLayoutByte;
 
 // Log that we're calling the given function for the given array.
 void logBespokeDispatch(const BespokeArray* bad, const char* fn);
 
 // Return a monotype copy of a vanilla array, or nullptr if it's not monotype.
 BespokeArray* maybeMonoify(ArrayData*);
+
+// Return a struct copy of a vanilla array, or nullptr if
+// it cannot be constructed.
+BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
 
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(size_t, HeapSize, const T* ad) \

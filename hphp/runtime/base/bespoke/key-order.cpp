@@ -27,19 +27,22 @@ namespace {
 
 const StaticString s_extraKey("...");
 
-struct KeyOrderDataHash {
+struct KeyCollectionHash {
   size_t operator()(const KeyOrder::KeyOrderData& ko) const {
     size_t seed = 0;
-    for (auto s : ko) folly::hash::hash_combine(seed, s->hash());
+    for (auto const key : ko) {
+      folly::hash::hash_combine(seed, key->hash());
+    }
     return seed;
   }
 };
 
 using KeyOrderSet =
-  std::unordered_set<KeyOrder::KeyOrderData, KeyOrderDataHash>;
+  std::unordered_set<KeyOrder::KeyOrderData, KeyCollectionHash>;
 
 KeyOrderSet s_keyOrderSet;
 folly::SharedMutex s_keyOrderLock;
+
 }
 
 KeyOrder KeyOrder::insert(const StringData* k) const {
@@ -54,7 +57,7 @@ KeyOrder KeyOrder::insert(const StringData* k) const {
 }
 
 KeyOrder KeyOrder::remove(const StringData* k) const {
-  if (!m_keys || isTooLong()) return *this;
+  if (!valid()) return *this;
   KeyOrderData newOrder{*m_keys};
   newOrder.erase(std::remove_if(newOrder.begin(), newOrder.end(),
                                 [&](LowStringPtr key) { return k->same(key); }),
@@ -63,7 +66,7 @@ KeyOrder KeyOrder::remove(const StringData* k) const {
 }
 
 KeyOrder KeyOrder::pop() const {
-  if (!m_keys || m_keys->empty() || isTooLong()) return *this;
+  if (empty() || !valid()) return *this;
   KeyOrderData newOrder{*m_keys};
   newOrder.pop_back();
   return Make(newOrder);
@@ -119,6 +122,7 @@ KeyOrder KeyOrder::ForArray(const ArrayData* ad) {
       ko.push_back(val(k).pstr);
       return false;
     } else {
+      hasStaticStrKeysOnly = false;
       return true;
     }
   });
@@ -133,4 +137,23 @@ bool KeyOrder::isTooLong() const {
   assertx(m_keys);
   return m_keys->size() > kMaxLen;
 }
+
+bool KeyOrder::empty() const {
+  return m_keys && m_keys->empty();
+}
+
+bool KeyOrder::valid() const {
+  return m_keys && !isTooLong();
+}
+
+KeyOrder::const_iterator KeyOrder::begin() const {
+  assertx(m_keys);
+  return m_keys->begin();
+}
+
+KeyOrder::const_iterator KeyOrder::end() const {
+  assertx(m_keys);
+  return m_keys->end();
+}
+
 }}

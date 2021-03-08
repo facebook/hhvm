@@ -28,4 +28,4 @@ val get_typarams :
   Typing_deps.Dep.dependent Typing_deps.Dep.variant * 'a ->
   variance SMap.t ->
   Typing_defs.decl_ty ->
-  Typing_reason.t list SMap.t * Typing_reason.t list SMap.t
+  Typing_reason.decl_t list SMap.t * Typing_reason.decl_t list SMap.t

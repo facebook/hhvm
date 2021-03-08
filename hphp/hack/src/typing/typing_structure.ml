@@ -19,7 +19,10 @@ module SN = Naming_special_names
 module Subst = Decl_subst
 module TUtils = Typing_utils
 
-let make_ts env ty =
+let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
+    =
+ fun env ty ->
+  let r = get_reason ty in
   match Env.get_typedef env SN.FB.cTypeStructure with
   | Some { td_tparams; _ } ->
     (* Typedef parameters can not have constraints *)
@@ -28,12 +31,12 @@ let make_ts env ty =
         ~f:
           begin
             fun { tp_name = (p, x); _ } ->
-            mk (Reason.Rwitness p, Tgeneric (x, []))
+            mk (Reason.Rwitness_from_decl p, Tgeneric (x, []))
           end
         td_tparams
     in
     let ts =
-      mk (get_reason ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params))
+      mk (Reason.Rnone, Tapply ((Pos.none, SN.FB.cTypeStructure), params))
     in
     let ety_env =
       {
@@ -41,10 +44,12 @@ let make_ts env ty =
         substs = Subst.make_locl td_tparams [ty];
       }
     in
-    Phase.localize ~ety_env env ts
+    let (env, ty) = Phase.localize ~ety_env env ts in
+    let ty = with_reason ty r in
+    (env, ty)
   | _ ->
     (* Should not hit this because TypeStructure should always be defined *)
-    (env, MakeType.dynamic (get_reason ty))
+    (env, MakeType.dynamic r)
 
 let rec transform_shapemap ?(nullable = false) env pos ty shape =
   let (env, ty) =

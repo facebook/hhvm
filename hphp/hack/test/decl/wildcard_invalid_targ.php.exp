@@ -21,12 +21,8 @@
         sc_name = ([6:7-8], "\\D"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|wildcard_invalid_targ.php line 6, characters 17-20),
-          (Tapply (([6:17-18], "\\C"),
-             [(Rhint (root|wildcard_invalid_targ.php line 6, characters 19-19),
-               Terr)]
-             )))
-          ];
+        [(Rhint ([6:17-21]),
+          (Tapply (([6:17-18], "\\C"), [(Rhint ([6:19-20]), Terr)])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -40,14 +36,10 @@
         sc_name = ([7:7-8], "\\E"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|wildcard_invalid_targ.php line 7, characters 17-23),
+        [(Rhint ([7:17-24]),
           (Tapply (([7:17-18], "\\C"),
-             [(Rhint (root|wildcard_invalid_targ.php line 7, characters 19-22),
-               (Tapply (([7:19-20], "\\C"),
-                  [(Rhint (root|wildcard_invalid_targ.php line 7, characters 21-21),
-                    Terr)]
-                  )))
-               ]
+             [(Rhint ([7:19-23]),
+               (Tapply (([7:19-20], "\\C"), [(Rhint ([7:21-22]), Terr)])))]
              )))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
@@ -60,7 +52,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|wildcard_invalid_targ.php line 9, characters 10-13),
+        (Rwitness_from_decl ([9:10-14]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -69,13 +61,11 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|wildcard_invalid_targ.php line 9, characters 15-21),
+                   (Rhint ([9:15-22]),
                     (Tapply (([9:15-16], "\\C"),
-                       [(Rhint (root|wildcard_invalid_targ.php line 9, characters 17-20),
+                       [(Rhint ([9:17-21]),
                          (Tapply (([9:17-18], "\\C"),
-                            [(Rhint (root|wildcard_invalid_targ.php line 9, characters 19-19),
-                              Terr)]
-                            )))
+                            [(Rhint ([9:19-20]), Terr)])))
                          ]
                        )))
                    };
@@ -90,11 +80,8 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|wildcard_invalid_targ.php line 9, characters 28-31),
-                 (Tapply (([9:28-29], "\\C"),
-                    [(Rhint (root|wildcard_invalid_targ.php line 9, characters 30-30),
-                      Terr)]
-                    )))
+                (Rhint ([9:28-32]),
+                 (Tapply (([9:28-29], "\\C"), [(Rhint ([9:30-31]), Terr)])))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

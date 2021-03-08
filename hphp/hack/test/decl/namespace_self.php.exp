@@ -9,30 +9,25 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false;
           scc_name = ([6:16-19], "KEY");
-          scc_type =
-          (Rhint (root|namespace_self.php line 6, characters 9-14),
-           (Tprim Tstring));
-          scc_refs = [] }
+          scc_type = (Rhint ([6:9-15]), (Tprim Tstring)); scc_refs = [] }
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
           stc_as_constraint = None; stc_name = ([8:14-18], "TInt");
-          stc_type =
-          (Some (Rhint (root|namespace_self.php line 8, characters 21-23),
-                 (Tprim Tint)));
+          stc_type = (Some (Rhint ([8:21-24]), (Tprim Tint)));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
          { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
            stc_as_constraint = None; stc_name = ([9:14-20], "TShape");
            stc_type =
-           (Some (Rhint (root|namespace_self.php line 9, characters 23-61),
+           (Some (Rhint ([9:23-11:4]),
                   (Tshape (Typing_defs_core.Closed_shape,
                      { (Typing_defs_core.TSFclass_const (
                           ([10:5-9], "\\NS1\\NS2\\C"), ([10:11-14], "KEY"))) ->
                        { sft_optional = false;
                          sft_ty =
-                         (Rhint (root|namespace_self.php line 10, characters 18-27),
+                         (Rhint ([10:18-28]),
                           (Taccess
-                             ((Rhint (root|namespace_self.php line 10, characters 18-27),
+                             ((Rhint ([10:18-28]),
                                (Tapply (([5:7-8], "\\NS1\\NS2\\C"), []))),
                               [([10:24-28], "TInt")])))
                          } }
@@ -44,7 +39,7 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([13:19-20], "f");
           sm_type =
-          (Rwitness (root|namespace_self.php line 13, characters 19-19),
+          (Rwitness_from_decl ([13:19-20]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = [];
@@ -53,9 +48,9 @@
                    fp_type =
                    { et_enforced = false;
                      et_type =
-                     (Rhint (root|namespace_self.php line 13, characters 21-30),
+                     (Rhint ([13:21-31]),
                       (Taccess
-                         ((Rhint (root|namespace_self.php line 13, characters 21-30),
+                         ((Rhint ([13:21-31]),
                            (Tapply (([5:7-8], "\\NS1\\NS2\\C"), []))),
                           [([13:27-31], "TInt")])))
                      };
@@ -70,10 +65,7 @@
                 { capability = (CapDefaults [13:19-20]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|namespace_self.php line 13, characters 37-40),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([13:37-41]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false

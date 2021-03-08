@@ -11,17 +11,14 @@
        sc_static_methods =
        [{ Shallow_decl_defs.sm_name = ([5:26-27], "f");
           sm_type =
-          (Rwitness (root|memoize_lsb.php line 5, characters 26-26),
+          (Rwitness_from_decl ([5:26-27]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:26-27]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|memoize_lsb.php line 5, characters 31-33),
-                   (Tprim Tint))
-                  };
+                  et_type = (Rhint ([5:31-34]), (Tprim Tint)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false

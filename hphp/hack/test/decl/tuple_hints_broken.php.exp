@@ -3,10 +3,8 @@
      { Typing_defs.td_pos = [3:6-7]; td_vis = Transparent; td_tparams = [];
        td_constraint = None;
        td_type =
-       (Rhint (root|tuple_hints_broken.php line 3, characters 10-19),
-        (Tapply (([3:10-15], "\\tuple"),
-           [(Rhint (root|tuple_hints_broken.php line 3, characters 16-18),
-             (Tprim Tint))]
+       (Rhint ([3:10-20]),
+        (Tapply (([3:10-15], "\\tuple"), [(Rhint ([3:16-19]), (Tprim Tint))]
            )))
        }))
   ]

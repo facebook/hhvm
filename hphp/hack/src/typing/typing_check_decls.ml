@@ -100,7 +100,7 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
   in
   let tyl =
     List.map unchecked_tparams (fun t ->
-        mk (Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()))
+        mk (Reason.Rwitness_from_decl (fst t.tp_name), Typing_defs.make_tany ()))
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in

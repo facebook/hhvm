@@ -8,9 +8,7 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-          stc_as_constraint =
-          (Some (Rhint (root|enforceable_type_const.php line 4, characters 46-53),
-                 (Tprim Tarraykey)));
+          stc_as_constraint = (Some (Rhint ([4:46-54]), (Tprim Tarraykey)));
           stc_name = ([4:41-42], "T"); stc_type = None;
           stc_enforceable = ([4:5-18], true); stc_reifiable = None }
          ];

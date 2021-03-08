@@ -5,15 +5,12 @@
        sc_name = ([8:12-14], "\\EE"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
-       [(Rhint (root|atom.php line 8, characters 12-13),
+       [(Rhint ([8:12-14]),
          (Tapply (([8:12-14], "\\HH\\BuiltinEnumClass"),
-            [(Rhint (root|atom.php line 8, characters 12-13),
+            [(Rhint ([8:12-14]),
               (Tapply (([8:12-14], "\\HH\\MemberOf"),
-                 [(Rhint (root|atom.php line 8, characters 12-13),
-                   (Tapply (([8:12-14], "\\EE"), [])));
-                   (Rhint (root|atom.php line 8, characters 17-17),
-                    (Tapply (([8:17-18], "\\I"), [])))
-                   ]
+                 [(Rhint ([8:12-14]), (Tapply (([8:12-14], "\\EE"), [])));
+                   (Rhint ([8:17-18]), (Tapply (([8:17-18], "\\I"), [])))]
                  )))
               ]
             )))
@@ -24,13 +21,10 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([9:7-8], "A");
           scc_type =
-          (Rhint (root|atom.php line 9, characters 7-7),
+          (Rhint ([9:7-8]),
            (Tapply (([9:7-8], "\\HH\\MemberOf"),
-              [(Rhint (root|atom.php line 9, characters 7-7),
-                (Tapply (([9:7-8], "\\EE"), [])));
-                (Rhint (root|atom.php line 9, characters 3-5),
-                 (Tapply (([9:3-6], "\\Box"), [])))
-                ]
+              [(Rhint ([9:7-8]), (Tapply (([9:7-8], "\\EE"), [])));
+                (Rhint ([9:3-6]), (Tapply (([9:3-6], "\\Box"), [])))]
               )));
           scc_refs = [] }
          ];
@@ -42,8 +36,7 @@
          ];
        sc_enum_type =
        (Some { Typing_defs.te_base =
-               (Rhint (root|atom.php line 8, characters 17-17),
-                (Tapply (([8:17-18], "\\I"), [])));
+               (Rhint ([8:17-18]), (Tapply (([8:17-18], "\\I"), [])));
                te_constraint = None; te_includes = []; te_enum_class = true })
        }));
   ("\\FF",
@@ -53,21 +46,16 @@
         sc_name = ([12:12-14], "\\FF"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|atom.php line 12, characters 12-13),
+        [(Rhint ([12:12-14]),
           (Tapply (([12:12-14], "\\HH\\BuiltinEnumClass"),
-             [(Rhint (root|atom.php line 12, characters 12-13),
+             [(Rhint ([12:12-14]),
                (Tapply (([12:12-14], "\\HH\\MemberOf"),
-                  [(Rhint (root|atom.php line 12, characters 12-13),
-                    (Tapply (([12:12-14], "\\FF"), [])));
-                    (Rhint (root|atom.php line 12, characters 17-17),
-                     (Tapply (([12:17-18], "\\I"), [])))
-                    ]
+                  [(Rhint ([12:12-14]), (Tapply (([12:12-14], "\\FF"), [])));
+                    (Rhint ([12:17-18]), (Tapply (([12:17-18], "\\I"), [])))]
                   )))
                ]
              )));
-          (Rhint (root|atom.php line 12, characters 27-28),
-           (Tapply (([12:27-29], "\\EE"), [])))
-          ];
+          (Rhint ([12:27-29]), (Tapply (([12:27-29], "\\EE"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false;
@@ -75,13 +63,10 @@
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([13:7-8], "C");
            scc_type =
-           (Rhint (root|atom.php line 13, characters 7-7),
+           (Rhint ([13:7-8]),
             (Tapply (([13:7-8], "\\HH\\MemberOf"),
-               [(Rhint (root|atom.php line 13, characters 7-7),
-                 (Tapply (([13:7-8], "\\FF"), [])));
-                 (Rhint (root|atom.php line 13, characters 3-5),
-                  (Tapply (([13:3-6], "\\Box"), [])))
-                 ]
+               [(Rhint ([13:7-8]), (Tapply (([13:7-8], "\\FF"), [])));
+                 (Rhint ([13:3-6]), (Tapply (([13:3-6], "\\Box"), [])))]
                )));
            scc_refs = [] }
           ];
@@ -93,12 +78,10 @@
           ];
         sc_enum_type =
         (Some { Typing_defs.te_base =
-                (Rhint (root|atom.php line 12, characters 17-17),
-                 (Tapply (([12:17-18], "\\I"), [])));
+                (Rhint ([12:17-18]), (Tapply (([12:17-18], "\\I"), [])));
                 te_constraint = None;
                 te_includes =
-                [(Rhint (root|atom.php line 12, characters 27-28),
-                  (Tapply (([12:27-29], "\\EE"), [])))];
+                [(Rhint ([12:27-29]), (Tapply (([12:27-29], "\\EE"), [])))];
                 te_enum_class = true })
         }));
   ("\\Foo",
@@ -108,14 +91,12 @@
         sc_name = ([16:12-15], "\\Foo"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|atom.php line 16, characters 12-14),
+        [(Rhint ([16:12-15]),
           (Tapply (([16:12-15], "\\HH\\BuiltinEnumClass"),
-             [(Rhint (root|atom.php line 16, characters 12-14),
+             [(Rhint ([16:12-15]),
                (Tapply (([16:12-15], "\\HH\\MemberOf"),
-                  [(Rhint (root|atom.php line 16, characters 12-14),
-                    (Tapply (([16:12-15], "\\Foo"), [])));
-                    (Rhint (root|atom.php line 16, characters 17-21), Tmixed)
-                    ]
+                  [(Rhint ([16:12-15]), (Tapply (([16:12-15], "\\Foo"), [])));
+                    (Rhint ([16:17-22]), Tmixed)]
                   )))
                ]
              )))
@@ -127,15 +108,12 @@
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([17:16-19], "Str");
            scc_type =
-           (Rhint (root|atom.php line 17, characters 16-18),
+           (Rhint ([17:16-19]),
             (Tapply (([17:16-19], "\\HH\\MemberOf"),
-               [(Rhint (root|atom.php line 17, characters 16-18),
-                 (Tapply (([17:16-19], "\\Foo"), [])));
-                 (Rhint (root|atom.php line 17, characters 4-14),
+               [(Rhint ([17:16-19]), (Tapply (([17:16-19], "\\Foo"), [])));
+                 (Rhint ([17:4-15]),
                   (Tapply (([17:4-7], "\\Box"),
-                     [(Rhint (root|atom.php line 17, characters 8-13),
-                       (Tprim Tstring))]
-                     )))
+                     [(Rhint ([17:8-14]), (Tprim Tstring))])))
                  ]
                )));
            scc_refs = [] }
@@ -147,8 +125,7 @@
            ua_classname_params = [] }
           ];
         sc_enum_type =
-        (Some { Typing_defs.te_base =
-                (Rhint (root|atom.php line 16, characters 17-21), Tmixed);
+        (Some { Typing_defs.te_base = (Rhint ([16:17-22]), Tmixed);
                 te_constraint = None; te_includes = []; te_enum_class = true
                 })
         }));
@@ -156,7 +133,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|atom.php line 20, characters 10-11),
+        (Rwitness_from_decl ([20:10-12]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -165,11 +142,11 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|atom.php line 20, characters 24-43),
+                   (Rhint ([20:24-44]),
                     (Tapply (([20:24-35], "\\HH\\MemberOf"),
-                       [(Rhint (root|atom.php line 20, characters 36-37),
+                       [(Rhint ([20:36-38]),
                          (Tapply (([20:36-38], "\\EE"), [])));
-                         (Rhint (root|atom.php line 20, characters 40-42),
+                         (Rhint ([20:40-43]),
                           (Tapply (([20:40-43], "\\Box"), [])))
                          ]
                        )))
@@ -184,10 +161,7 @@
               ft_implicit_params = { capability = (CapDefaults [20:10-12]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|atom.php line 20, characters 51-53),
-                 (Tprim Tint))
-                };
+                et_type = (Rhint ([20:51-54]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

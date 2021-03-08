@@ -40,7 +40,7 @@ let validator =
         super#on_typeconst acc is_concrete typeconst
       | _ ->
         let (pos, tconst) = typeconst.ttc_name in
-        let r = Reason.Rwitness pos in
+        let r = Reason.Rwitness_from_decl pos in
         this#invalid acc r
         @@ "the abstract type constant "
         ^ tconst

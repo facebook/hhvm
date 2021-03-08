@@ -30,9 +30,9 @@ let fun_env ?origin ctx f =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness p, Tgeneric (s, [])))
+        mk (Reason.Rwitness_from_decl p, Tgeneric (s, [])))
   in
-  mk (Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams))
+  mk (Reason.Rwitness_from_decl (fst c.c_name), Tapply (c.c_name, tparams))
 
 let class_env ?origin ctx c =
   let file = Pos.filename (fst c.c_name) in
@@ -46,7 +46,9 @@ let class_env ?origin ctx c =
   let (env, self_ty) =
     match c.c_kind with
     | Ast_defs.Cenum ->
-      (env, MakeType.class_type (get_reason self) (snd c.c_name) [])
+      ( env,
+        MakeType.class_type (Reason.Rwitness (fst c.c_name)) (snd c.c_name) []
+      )
     | Ast_defs.Cinterface
     | Ast_defs.Cabstract
     | Ast_defs.Ctrait

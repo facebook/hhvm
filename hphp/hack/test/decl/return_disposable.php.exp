@@ -6,25 +6,21 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
        sc_implements =
-       [(Rhint (root|return_disposable.php line 3, characters 28-38),
-         (Tapply (([3:28-39], "\\IDisposable"), [])))];
+       [(Rhint ([3:28-39]), (Tapply (([3:28-39], "\\IDisposable"), [])))];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "__dispose");
           sm_type =
-          (Rwitness (root|return_disposable.php line 4, characters 19-27),
+          (Rwitness_from_decl ([4:19-28]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:19-28]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|return_disposable.php line 4, characters 32-35),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([4:32-36]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -37,7 +33,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|return_disposable.php line 8, characters 16-18),
+        (Rwitness_from_decl ([8:16-19]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -45,10 +41,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|return_disposable.php line 8, characters 23-36),
+                (Rhint ([8:23-37]),
                  (Tapply (([8:23-32], "\\HH\\Awaitable"),
-                    [(Rhint (root|return_disposable.php line 8, characters 33-35),
-                      (Tapply (([8:33-36], "\\Bar"), [])))]
+                    [(Rhint ([8:33-36]), (Tapply (([8:33-36], "\\Bar"), [])))
+                      ]
                     )))
                 };
               ft_flags =

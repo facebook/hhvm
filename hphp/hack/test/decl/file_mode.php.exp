@@ -13,17 +13,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|file_mode.php line 5, characters 10-28),
+        (Rwitness_from_decl ([5:10-29]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:10-29]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|file_mode.php line 5, characters 33-36),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([5:33-37]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -32,17 +29,13 @@
   ("\\MyPartialType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [7:6-19]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|file_mode.php line 7, characters 22-27), (Tprim Tstring))
+        td_constraint = None; td_type = (Rhint ([7:22-28]), (Tprim Tstring))
         }));
   ("\\MY_PARTIAL_CONST",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [9:1-10:53];
         cd_type =
-        (Rhint (root|file_mode.php line 9, characters 7-19),
-         (Tapply (([9:7-20], "\\MyPartialType"), [])))
-        }))
+        (Rhint ([9:7-20]), (Tapply (([9:7-20], "\\MyPartialType"), []))) }))
   ]
 
 They matched!

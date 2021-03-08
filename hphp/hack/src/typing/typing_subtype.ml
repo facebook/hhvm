@@ -163,10 +163,10 @@ module ConditionTypes = struct
             let params =
               List.map tparams ~f:(fun { tp_name = (p, x); _ } ->
                   (* TODO(T69551141) handle type arguments *)
-                  MakeType.generic (Reason.Rwitness p) x)
+                  MakeType.generic (Reason.Rwitness_from_decl p) x)
             in
             let subst = Decl_instantiate.make_subst tparams [] in
-            let ty = MakeType.apply (Reason.Rwitness p) sid params in
+            let ty = MakeType.apply (Reason.Rwitness_from_decl p) sid params in
             Decl_instantiate.instantiate subst ty
       in
       let ety_env = Phase.env_with_self env in
@@ -174,7 +174,7 @@ module ConditionTypes = struct
       t
     in
     match deref ty with
-    | (r, Toption ty) -> mk (r, Toption (do_localize ty))
+    | (r, Toption ty) -> mk (Reason.localize r, Toption (do_localize ty))
     | _ -> do_localize ty
 end
 

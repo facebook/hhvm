@@ -11,96 +11,9 @@ open Hh_prelude
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
-(** The reason why something is expected to have a certain type *)
-type t =
-  | Rnone
-  | Rwitness of Pos.t
-  | Ridx of Pos.t * t
-      (** Used as an index into a vector-like
-          array or string. Position of indexing,
-          reason for the indexed type *)
-  | Ridx_vector of Pos.t  (** Used as an index, in the Vector case *)
-  | Rforeach of Pos.t  (** Because it is iterated in a foreach loop *)
-  | Rasyncforeach of Pos.t  (** Because it is iterated "await as" in foreach *)
-  | Rarith of Pos.t
-  | Rarith_ret of Pos.t
-  | Rarith_ret_float of Pos.t * t * arg_position
-      (** pos, arg float typing reason, arg position *)
-  | Rarith_ret_num of Pos.t * t * arg_position
-      (** pos, arg num typing reason, arg position *)
-  | Rarith_ret_int of Pos.t
-  | Rarith_dynamic of Pos.t
-  | Rbitwise_dynamic of Pos.t
-  | Rincdec_dynamic of Pos.t
-  | Rcomp of Pos.t
-  | Rconcat_ret of Pos.t
-  | Rlogic_ret of Pos.t
-  | Rbitwise of Pos.t
-  | Rbitwise_ret of Pos.t
-  | Rno_return of Pos.t
-  | Rno_return_async of Pos.t
-  | Rret_fun_kind of Pos.t * Ast_defs.fun_kind
-  | Rhint of Pos.t
-  | Rthrow of Pos.t
-  | Rplaceholder of Pos.t
-  | Rret_div of Pos.t
-  | Ryield_gen of Pos.t
-  | Ryield_asyncgen of Pos.t
-  | Ryield_asyncnull of Pos.t
-  | Ryield_send of Pos.t
-  | Rlost_info of string * t * blame
-  | Rformat of Pos.t * string * t
-  | Rclass_class of Pos.t * string
-  | Runknown_class of Pos.t
-  | Rvar_param of Pos.t
-  | Runpack_param of Pos.t * Pos.t * int
-      (** splat pos, fun def pos, number of args before splat *)
-  | Rinout_param of Pos.t
-  | Rinstantiate of t * string * t
-  | Rarray_filter of Pos.t * t
-  | Rtypeconst of t * (Pos.t * string) * string * t
-  | Rtype_access of t * (t * string) list
-  | Rexpr_dep_type of t * Pos.t * expr_dep_type_reason
-  | Rnullsafe_op of Pos.t  (** ?-> operator is used *)
-  | Rtconst_no_cstr of Aast.sid
-  | Rpredicated of Pos.t * string
-  | Ris of Pos.t
-  | Ras of Pos.t
-  | Rvarray_or_darray_key of Pos.t
-  | Rvec_or_dict_key of Pos.t
-  | Rusing of Pos.t
-  | Rdynamic_prop of Pos.t
-  | Rdynamic_call of Pos.t
-  | Rdynamic_construct of Pos.t
-  | Ridx_dict of Pos.t
-  | Rset_element of Pos.t
-  | Rmissing_required_field of Pos.t * string
-  | Rmissing_optional_field of Pos.t * string
-  | Runset_field of Pos.t * string
-  | Rcontravariant_generic of t * string
-  | Rinvariant_generic of t * string
-  | Rregex of Pos.t
-  | Rimplicit_upper_bound of Pos.t * string
-  | Rtype_variable of Pos.t
-  | Rtype_variable_generics of Pos.t * string * string
-  | Rsolve_fail of Pos.t
-  | Rcstr_on_generics of Pos.t * Aast.sid
-  | Rlambda_param of Pos.t * t
-  | Rshape of Pos.t * string
-  | Renforceable of Pos.t
-  | Rdestructure of Pos.t
-  | Rkey_value_collection_key of Pos.t
-  | Rglobal_class_prop of Pos.t
-  | Rglobal_fun_param of Pos.t
-  | Rglobal_fun_ret of Pos.t
-  | Rsplice of Pos.t
-  | Ret_boolean of Pos.t
-  | Rdefault_capability of Pos.t
-  | Rarray_unification of Pos.t
-  | Rconcat_operand of Pos.t
-  | Rinterp_operand of Pos.t
+type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, ord, show]
 
-and arg_position =
+type arg_position =
   | Aonly
   | Afirst
   | Asecond
@@ -121,6 +34,140 @@ and blame_source =
 
 and blame = Blame of Pos.t * blame_source [@@deriving eq]
 
+(* create private types to represent the different type phases *)
+type decl_phase = private DeclPhase [@@deriving eq, show]
+
+type locl_phase = private LoclPhase [@@deriving eq, show]
+
+(** The reason why something is expected to have a certain type *)
+type _ t_ =
+  | Rnone : 'phase t_
+  | Rwitness : Pos.t -> locl_phase t_
+  | Rwitness_from_decl : Pos_or_decl.t -> 'phase t_
+  | Ridx : Pos.t * locl_phase t_ -> locl_phase t_
+      (** Used as an index into a vector-like
+          array or string. Position of indexing,
+          reason for the indexed type *)
+  | Ridx_vector : Pos.t -> locl_phase t_
+      (** Used as an index, in the Vector case *)
+  | Rforeach : Pos.t -> locl_phase t_
+      (** Because it is iterated in a foreach loop *)
+  | Rasyncforeach : Pos.t -> locl_phase t_
+      (** Because it is iterated "await as" in foreach *)
+  | Rarith : Pos.t -> locl_phase t_
+  | Rarith_ret : Pos.t -> locl_phase t_
+  | Rarith_ret_float : Pos.t * locl_phase t_ * arg_position -> locl_phase t_
+      (** pos, arg float typing reason, arg position *)
+  | Rarith_ret_num : Pos.t * locl_phase t_ * arg_position -> locl_phase t_
+      (** pos, arg num typing reason, arg position *)
+  | Rarith_ret_int : Pos.t -> locl_phase t_
+  | Rarith_dynamic : Pos.t -> locl_phase t_
+  | Rbitwise_dynamic : Pos.t -> locl_phase t_
+  | Rincdec_dynamic : Pos.t -> locl_phase t_
+  | Rcomp : Pos.t -> locl_phase t_
+  | Rconcat_ret : Pos.t -> locl_phase t_
+  | Rlogic_ret : Pos.t -> locl_phase t_
+  | Rbitwise : Pos.t -> locl_phase t_
+  | Rbitwise_ret : Pos.t -> locl_phase t_
+  | Rno_return : Pos.t -> locl_phase t_
+  | Rno_return_async : Pos.t -> locl_phase t_
+  | Rret_fun_kind : Pos.t * Ast_defs.fun_kind -> locl_phase t_
+  | Rret_fun_kind_from_decl : Pos_or_decl.t * Ast_defs.fun_kind -> 'phase t_
+  | Rhint : Pos_or_decl.t -> 'phase t_
+  | Rthrow : Pos.t -> locl_phase t_
+  | Rplaceholder : Pos.t -> locl_phase t_
+  | Rret_div : Pos.t -> locl_phase t_
+  | Ryield_gen : Pos.t -> locl_phase t_
+  | Ryield_asyncgen : Pos.t -> locl_phase t_
+  | Ryield_asyncnull : Pos.t -> locl_phase t_
+  | Ryield_send : Pos.t -> locl_phase t_
+  | Rlost_info : string * locl_phase t_ * blame -> locl_phase t_
+  | Rformat : Pos.t * string * locl_phase t_ -> locl_phase t_
+  | Rclass_class : Pos_or_decl.t * string -> 'phase t_
+  | Runknown_class : Pos.t -> locl_phase t_
+  | Rvar_param : Pos.t -> locl_phase t_
+  | Rvar_param_from_decl : Pos_or_decl.t -> 'phase t_
+  | Runpack_param : Pos.t * Pos.t * int -> locl_phase t_
+      (** splat pos, fun def pos, number of args before splat *)
+  | Rinout_param : Pos.t -> locl_phase t_
+  | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
+  | Rarray_filter : Pos.t * locl_phase t_ -> locl_phase t_
+  | Rtypeconst :
+      locl_phase t_ * (Pos.t * string) * string * locl_phase t_
+      -> locl_phase t_
+  | Rtype_access :
+      locl_phase t_ * (locl_phase t_ * string) list
+      -> locl_phase t_
+  | Rexpr_dep_type :
+      'phase t_ * Pos_or_decl.t * expr_dep_type_reason
+      -> 'phase t_
+  | Rnullsafe_op : Pos.t -> locl_phase t_  (** ?-> operator is used *)
+  | Rtconst_no_cstr : pos_id -> 'phase t_
+  | Rpredicated : Pos.t * string -> locl_phase t_
+  | Ris : Pos.t -> locl_phase t_
+  | Ras : Pos.t -> locl_phase t_
+  | Rvarray_or_darray_key : Pos_or_decl.t -> 'phase t_
+  | Rvec_or_dict_key : Pos_or_decl.t -> 'phase t_
+  | Rusing : Pos.t -> locl_phase t_
+  | Rdynamic_prop : Pos.t -> locl_phase t_
+  | Rdynamic_call : Pos.t -> locl_phase t_
+  | Rdynamic_construct : Pos.t -> locl_phase t_
+  | Ridx_dict : Pos.t -> locl_phase t_
+  | Rset_element : Pos.t -> locl_phase t_
+  | Rmissing_optional_field : Pos_or_decl.t * string -> 'phase t_
+  | Runset_field : Pos.t * string -> locl_phase t_
+  | Rcontravariant_generic : locl_phase t_ * string -> locl_phase t_
+  | Rinvariant_generic : locl_phase t_ * string -> locl_phase t_
+  | Rregex : Pos.t -> locl_phase t_
+  | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
+  | Rtype_variable : Pos.t -> locl_phase t_
+  | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rsolve_fail : Pos_or_decl.t -> 'phase t_
+  | Rcstr_on_generics : Pos.t * Aast.sid -> locl_phase t_
+  | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
+  | Rshape : Pos.t * string -> locl_phase t_
+  | Renforceable : Pos_or_decl.t -> 'phase t_
+  | Rdestructure : Pos.t -> locl_phase t_
+  | Rkey_value_collection_key : Pos.t -> locl_phase t_
+  | Rglobal_class_prop : Pos_or_decl.t -> 'phase t_
+  | Rglobal_fun_param : Pos_or_decl.t -> 'phase t_
+  | Rglobal_fun_ret : Pos_or_decl.t -> 'phase t_
+  | Rsplice : Pos.t -> locl_phase t_
+  | Ret_boolean : Pos.t -> locl_phase t_
+  | Rdefault_capability : Pos_or_decl.t -> 'phase t_
+  | Rarray_unification : Pos.t -> locl_phase t_
+  | Rconcat_operand : Pos.t -> locl_phase t_
+  | Rinterp_operand : Pos.t -> locl_phase t_
+
+type t = locl_phase t_
+
+type decl_t = decl_phase t_
+
+let is_none = function
+  | Rnone -> true
+  | _ -> false
+
+let rec localize : decl_phase t_ -> locl_phase t_ = function
+  | Rnone -> Rnone
+  | Rwitness_from_decl p -> Rwitness_from_decl p
+  | Rret_fun_kind_from_decl (p, r) -> Rret_fun_kind_from_decl (p, r)
+  | Rclass_class (p, r) -> Rclass_class (p, r)
+  | Rvar_param_from_decl p -> Rvar_param_from_decl p
+  | Rglobal_fun_param p -> Rglobal_fun_param p
+  | Renforceable p -> Renforceable p
+  | Rimplicit_upper_bound (p, q) -> Rimplicit_upper_bound (p, q)
+  | Rsolve_fail p -> Rsolve_fail p
+  | Rmissing_optional_field (p, q) -> Rmissing_optional_field (p, q)
+  | Rglobal_class_prop p -> Rglobal_class_prop p
+  | Rhint p -> Rhint p
+  | Rvarray_or_darray_key p -> Rvarray_or_darray_key p
+  | Rvec_or_dict_key p -> Rvec_or_dict_key p
+  | Rglobal_fun_ret p -> Rglobal_fun_ret p
+  | Rinstantiate (r1, s, r2) -> Rinstantiate (localize r1, s, localize r2)
+  | Rexpr_dep_type (r, s, t) -> Rexpr_dep_type (localize r, s, t)
+  | Rtconst_no_cstr id -> Rtconst_no_cstr id
+  | Rdefault_capability p -> Rdefault_capability p
+
 let arg_pos_str ap =
   match ap with
   | Aonly -> "only"
@@ -130,18 +177,19 @@ let arg_pos_str ap =
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
  * multiple locations meant that it needed to more than convert to a string *)
-let rec to_string prefix r =
+let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
+ fun prefix r ->
   let p = to_pos r in
   match r with
   | Rnone -> [(p, prefix)]
   | Rwitness _ -> [(p, prefix)]
+  | Rwitness_from_decl p -> [(p, prefix)]
   | Ridx (_, r2) ->
     [(p, prefix)]
     @ [
-        ( ( if equal r2 Rnone then
-            p
-          else
-            to_pos r2 ),
+        ( (match r2 with
+          | Rnone -> p
+          | _ -> to_pos r2),
           "This can only be indexed with integers" );
       ]
   | Ridx_vector _ ->
@@ -247,7 +295,18 @@ let rec to_string prefix r =
         | Ast_defs.FAsync -> prefix ^ " (result of an `async` function)"
         | Ast_defs.FSync -> prefix );
     ]
-  | Rhint _ -> [(p, prefix)]
+  | Rret_fun_kind_from_decl (p, kind) ->
+    [
+      ( p,
+        match kind with
+        | Ast_defs.FAsyncGenerator ->
+          prefix ^ " (result of `async function` containing a `yield`)"
+        | Ast_defs.FGenerator ->
+          prefix ^ " (result of function containing a `yield`)"
+        | Ast_defs.FAsync -> prefix ^ " (result of an `async` function)"
+        | Ast_defs.FSync -> prefix );
+    ]
+  | Rhint p -> [(p, prefix)]
   | Rthrow _ -> [(p, prefix ^ " because it is used as an exception")]
   | Rplaceholder _ ->
     [(p, prefix ^ " (`$_` is a placeholder variable not meant to be used)")]
@@ -271,6 +330,7 @@ let rec to_string prefix r =
       );
     ]
   | Rvar_param _ -> [(p, prefix ^ " (variadic argument)")]
+  | Rvar_param_from_decl p -> [(p, prefix ^ " (variadic argument)")]
   | Runpack_param _ -> [(p, prefix ^ " (it is unpacked with `...`)")]
   | Rinout_param _ -> [(p, prefix ^ " (`inout` parameter)")]
   | Rnullsafe_op _ -> [(p, prefix ^ " (use of `?->` operator)")]
@@ -285,7 +345,7 @@ let rec to_string prefix r =
     in
     to_string prefix r1
     @ [
-        ( p2,
+        ( p2 |> Pos_or_decl.of_raw_pos,
           "All the local information about "
           ^ Markdown_lite.md_codify s
           ^ " has been invalidated "
@@ -316,9 +376,9 @@ let rec to_string prefix r =
     @ to_string
         ("  via this generic " ^ Markdown_lite.md_codify generic_name)
         r_inst
-  | Rtype_variable p ->
+  | Rtype_variable _ ->
     [(p, prefix ^ " because a type could not be determined here")]
-  | Rtype_variable_generics (p, tp_name, s) ->
+  | Rtype_variable_generics (_, tp_name, s) ->
     [
       ( p,
         prefix
@@ -329,7 +389,7 @@ let rec to_string prefix r =
         ^ " could not be determined. Please add explicit type parameters to the invocation of "
         ^ Markdown_lite.md_codify s );
     ]
-  | Rsolve_fail p ->
+  | Rsolve_fail _ ->
     [(p, prefix ^ " because a type could not be determined here")]
   | Rarray_filter (_, r) ->
     to_string prefix r
@@ -347,7 +407,7 @@ let rec to_string prefix r =
         prefix ^ "\n  "
     in
     [
-      ( pos,
+      ( Pos_or_decl.of_raw_pos pos,
         sprintf
           "%sby accessing the type constant %s"
           prefix
@@ -357,7 +417,8 @@ let rec to_string prefix r =
   | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
     to_string prefix r_orig
     @ [
-        (pos, sprintf "  resulting from accessing the type constant '%s'" tconst);
+        ( Pos_or_decl.of_raw_pos pos,
+          sprintf "  resulting from accessing the type constant '%s'" tconst );
       ]
     @ to_string ("  on " ^ ty_str) r_root
   | Rtype_access (Rtypeconst (Rnone, _, _, _), (r, _) :: l) ->
@@ -381,10 +442,10 @@ let rec to_string prefix r =
     to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]
   | Rtconst_no_cstr (_, n) ->
     [(p, prefix ^ " because the type constant " ^ n ^ " has no constraints")]
-  | Rpredicated (p, f) ->
+  | Rpredicated (_, f) ->
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
-  | Ris p -> [(p, prefix ^ " from this `is` expression test")]
-  | Ras p -> [(p, prefix ^ " from this \"as\" assertion")]
+  | Ris _ -> [(p, prefix ^ " from this `is` expression test")]
+  | Ras _ -> [(p, prefix ^ " from this \"as\" assertion")]
   | Rvarray_or_darray_key _ ->
     [
       ( p,
@@ -393,12 +454,12 @@ let rec to_string prefix r =
     ]
   | Rvec_or_dict_key _ ->
     [(p, "This is vec_or_dict, which requires keys that have type arraykey")]
-  | Rusing p -> [(p, prefix ^ " because it was assigned in a `using` clause")]
-  | Rdynamic_prop p ->
+  | Rusing _ -> [(p, prefix ^ " because it was assigned in a `using` clause")]
+  | Rdynamic_prop _ ->
     [(p, prefix ^ ", the result of accessing a property of a `dynamic` type")]
-  | Rdynamic_call p ->
+  | Rdynamic_call _ ->
     [(p, prefix ^ ", the result of calling a `dynamic` type as a function")]
-  | Rdynamic_construct p ->
+  | Rdynamic_construct _ ->
     [
       ( p,
         prefix ^ ", the result of constructing an object with a `dynamic` type"
@@ -418,16 +479,7 @@ let rec to_string prefix r =
         ^ " because only array keys can be used as elements of `keyset` or `Set`"
       );
     ]
-  | Rmissing_required_field (p, name) ->
-    [
-      ( p,
-        prefix
-        ^ " because the field "
-        ^ Markdown_lite.md_codify name
-        ^ " is not defined in this shape type, "
-        ^ "and this shape type does not allow unknown fields" );
-    ]
-  | Rmissing_optional_field (p, name) ->
+  | Rmissing_optional_field (_, name) ->
     [
       ( p,
         prefix
@@ -435,7 +487,7 @@ let rec to_string prefix r =
         ^ Markdown_lite.md_codify name
         ^ " may be set to any type in this shape" );
     ]
-  | Runset_field (p, name) ->
+  | Runset_field (_, name) ->
     [
       ( p,
         prefix
@@ -472,7 +524,7 @@ let rec to_string prefix r =
   (* If type originated with an unannotated lambda parameter with type variable type,
    * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
   | Rlambda_param
-      ( p,
+      ( _,
         ( Rsolve_fail _ | Rtype_variable_generics _ | Rtype_variable _
         | Rinstantiate _ ) ) ->
     [
@@ -482,7 +534,7 @@ let rec to_string prefix r =
         ^ "Please add a type hint to the parameter" );
     ]
   | Rlambda_param (_, r_orig) -> to_string prefix r_orig
-  | Rshape (p, fun_name) ->
+  | Rshape (_, fun_name) ->
     [
       ( p,
         prefix
@@ -490,8 +542,8 @@ let rec to_string prefix r =
         ^ Markdown_lite.md_codify fun_name
         ^ " expects a shape" );
     ]
-  | Renforceable p -> [(p, prefix ^ " because it is an unenforceable type")]
-  | Rdestructure p ->
+  | Renforceable _ -> [(p, prefix ^ " because it is an unenforceable type")]
+  | Rdestructure _ ->
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
   | Rkey_value_collection_key _ ->
     [
@@ -500,114 +552,120 @@ let rec to_string prefix r =
   | Rglobal_class_prop p -> [(p, prefix)]
   | Rglobal_fun_param p -> [(p, prefix)]
   | Rglobal_fun_ret p -> [(p, prefix)]
-  | Rsplice p ->
+  | Rsplice _ ->
     [
       (p, prefix ^ " because this is being spliced into another Expression Tree");
     ]
-  | Ret_boolean p ->
+  | Ret_boolean _ ->
     [
       ( p,
         prefix
         ^ " because Expression Trees do not allow coercion of truthy values" );
     ]
-  | Rdefault_capability p ->
+  | Rdefault_capability _ ->
     [(p, prefix ^ " because the function did not have an explicit context")]
-  | Rarray_unification p ->
+  | Rarray_unification _ ->
     [(p, prefix ^ " because legacy arrays have been unified with Hack arrays")]
-  | Rconcat_operand p -> [(p, "Expected `string` or `int`")]
-  | Rinterp_operand p -> [(p, "Expected `string` or `int`")]
+  | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
+  | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
 
-and to_pos r =
+and to_pos : type ph. ph t_ -> Pos_or_decl.t =
+ fun r ->
   if !Errors.report_pos_from_reason then
-    Pos.set_from_reason (to_raw_pos r)
+    Pos_or_decl.set_from_reason (to_raw_pos r)
   else
     to_raw_pos r
 
-and to_raw_pos r =
+and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
+ fun r ->
   match r with
-  | Rnone -> Pos.none
-  | Rwitness p -> p
-  | Ridx (p, _) -> p
-  | Ridx_vector p -> p
-  | Rforeach p -> p
-  | Rasyncforeach p -> p
-  | Rarith p -> p
-  | Rarith_ret p -> p
-  | Rarith_dynamic p -> p
-  | Rcomp p -> p
-  | Rconcat_ret p -> p
-  | Rlogic_ret p -> p
-  | Rbitwise p -> p
-  | Rbitwise_ret p -> p
-  | Rno_return p -> p
-  | Rno_return_async p -> p
-  | Rret_fun_kind (p, _) -> p
-  | Rhint p -> p
-  | Rthrow p -> p
-  | Rplaceholder p -> p
-  | Rret_div p -> p
-  | Ryield_gen p -> p
-  | Ryield_asyncgen p -> p
-  | Ryield_asyncnull p -> p
-  | Ryield_send p -> p
-  | Rlost_info (_, r, _) -> to_raw_pos r
-  | Rformat (p, _, _) -> p
-  | Rclass_class (p, _) -> p
-  | Runknown_class p -> p
-  | Rvar_param p -> p
-  | Runpack_param (p, _, _) -> p
-  | Rinout_param p -> p
-  | Rinstantiate (_, _, r) -> to_raw_pos r
-  | Rtypeconst (Rnone, (p, _), _, _)
-  | Rarray_filter (p, _) ->
+  | Rnone -> Pos_or_decl.none
+  | Rret_fun_kind_from_decl (p, _)
+  | Rhint p
+  | Rwitness_from_decl p
+  | Rclass_class (p, _)
+  | Rvar_param_from_decl p
+  | Rglobal_fun_param p
+  | Rglobal_fun_ret p
+  | Renforceable p
+  | Rimplicit_upper_bound (p, _)
+  | Rsolve_fail p
+  | Rmissing_optional_field (p, _)
+  | Rvarray_or_darray_key p
+  | Rvec_or_dict_key p
+  | Rdefault_capability p
+  | Rglobal_class_prop p ->
     p
-  | Rtypeconst (r, _, _, _)
-  | Rtype_access (r, _) ->
+  | Rwitness p
+  | Ridx (p, _)
+  | Ridx_vector p
+  | Rforeach p
+  | Rasyncforeach p
+  | Rarith p
+  | Rarith_ret p
+  | Rarith_dynamic p
+  | Rcomp p
+  | Rconcat_ret p
+  | Rlogic_ret p
+  | Rbitwise p
+  | Rbitwise_ret p
+  | Rno_return p
+  | Rno_return_async p
+  | Rret_fun_kind (p, _)
+  | Rthrow p
+  | Rplaceholder p
+  | Rret_div p
+  | Ryield_gen p
+  | Ryield_asyncgen p
+  | Ryield_asyncnull p
+  | Ryield_send p
+  | Rformat (p, _, _)
+  | Runknown_class p
+  | Rvar_param p
+  | Runpack_param (p, _, _)
+  | Rinout_param p
+  | Rtypeconst (Rnone, (p, _), _, _)
+  | Rarray_filter (p, _)
+  | Rnullsafe_op p
+  | Rtconst_no_cstr (p, _)
+  | Rpredicated (p, _)
+  | Ris p
+  | Ras p
+  | Rusing p
+  | Rdynamic_prop p
+  | Rdynamic_call p
+  | Rdynamic_construct p
+  | Ridx_dict p
+  | Rset_element p
+  | Runset_field (p, _)
+  | Rregex p
+  | Rarith_ret_float (p, _, _)
+  | Rarith_ret_num (p, _, _)
+  | Rarith_ret_int p
+  | Rbitwise_dynamic p
+  | Rincdec_dynamic p
+  | Rtype_variable p
+  | Rtype_variable_generics (p, _, _)
+  | Rcstr_on_generics (p, _)
+  | Rlambda_param (p, _)
+  | Rshape (p, _)
+  | Rdestructure p
+  | Rkey_value_collection_key p
+  | Rsplice p
+  | Ret_boolean p
+  | Rarray_unification p
+  | Rconcat_operand p
+  | Rinterp_operand p ->
+    Pos_or_decl.of_raw_pos p
+  | Rinvariant_generic (r, _)
+  | Rcontravariant_generic (r, _)
+  | Rtype_access (r, _)
+  | Rlost_info (_, r, _)
+  | Rtypeconst (r, _, _, _) ->
     to_raw_pos r
-  | Rexpr_dep_type (r, _, _) -> to_raw_pos r
-  | Rnullsafe_op p -> p
-  | Rtconst_no_cstr (p, _) -> p
-  | Rpredicated (p, _) -> p
-  | Ris p -> p
-  | Ras p -> p
-  | Rvarray_or_darray_key p -> p
-  | Rvec_or_dict_key p -> p
-  | Rusing p -> p
-  | Rdynamic_prop p -> p
-  | Rdynamic_call p -> p
-  | Rdynamic_construct p -> p
-  | Ridx_dict p -> p
-  | Rset_element p -> p
-  | Rmissing_required_field (p, _) -> p
-  | Rmissing_optional_field (p, _) -> p
-  | Runset_field (p, _) -> p
-  | Rcontravariant_generic (r, _) -> to_raw_pos r
-  | Rinvariant_generic (r, _) -> to_raw_pos r
-  | Rregex p -> p
-  | Rimplicit_upper_bound (p, _) -> p
-  | Rarith_ret_float (p, _, _) -> p
-  | Rarith_ret_num (p, _, _) -> p
-  | Rarith_ret_int p -> p
-  | Rbitwise_dynamic p -> p
-  | Rincdec_dynamic p -> p
-  | Rtype_variable p -> p
-  | Rtype_variable_generics (p, _, _) -> p
-  | Rsolve_fail p -> p
-  | Rcstr_on_generics (p, _) -> p
-  | Rlambda_param (p, _) -> p
-  | Rshape (p, _) -> p
-  | Renforceable p -> p
-  | Rdestructure p -> p
-  | Rkey_value_collection_key p -> p
-  | Rglobal_class_prop p -> p
-  | Rglobal_fun_param p -> p
-  | Rglobal_fun_ret p -> p
-  | Rsplice p -> p
-  | Ret_boolean p -> p
-  | Rdefault_capability p -> p
-  | Rarray_unification p -> p
-  | Rconcat_operand p -> p
-  | Rinterp_operand p -> p
+  | Rinstantiate (_, _, r)
+  | Rexpr_dep_type (r, _, _) ->
+    to_raw_pos r
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -648,10 +706,10 @@ and expr_dep_type_reason_string = function
     ^ Markdown_lite.md_codify s
     ^ " is a type projected from this expression"
 
-let to_constructor_string r =
-  match r with
+let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
   | Rwitness _ -> "Rwitness"
+  | Rwitness_from_decl _ -> "Rwitness_from_decl"
   | Ridx _ -> "Ridx"
   | Ridx_vector _ -> "Ridx_vector"
   | Rforeach _ -> "Rforeach"
@@ -666,6 +724,7 @@ let to_constructor_string r =
   | Rno_return _ -> "Rno_return"
   | Rno_return_async _ -> "Rno_return_async"
   | Rret_fun_kind _ -> "Rret_fun_kind"
+  | Rret_fun_kind_from_decl _ -> "Rret_fun_kind_from_decl"
   | Rhint _ -> "Rhint"
   | Rthrow _ -> "Rthrow"
   | Rplaceholder _ -> "Rplaceholder"
@@ -679,6 +738,7 @@ let to_constructor_string r =
   | Rclass_class _ -> "Rclass_class"
   | Runknown_class _ -> "Runknown_class"
   | Rvar_param _ -> "Rvar_param"
+  | Rvar_param_from_decl _ -> "Rvar_param_from_decl"
   | Runpack_param _ -> "Runpack_param"
   | Rinout_param _ -> "Rinout_param"
   | Rinstantiate _ -> "Rinstantiate"
@@ -699,7 +759,6 @@ let to_constructor_string r =
   | Rdynamic_construct _ -> "Rdynamic_construct"
   | Ridx_dict _ -> "Ridx_dict"
   | Rset_element _ -> "Rset_element"
-  | Rmissing_required_field _ -> "Rmissing_required_field"
   | Rmissing_optional_field _ -> "Rmissing_optional_field"
   | Runset_field _ -> "Runset_field"
   | Rcontravariant_generic _ -> "Rcontravariant_generic"
@@ -734,13 +793,7 @@ let to_constructor_string r =
 let pp fmt r =
   let pos = to_raw_pos r in
   Format.pp_print_string fmt
-  @@ Printf.sprintf
-       "%s (%s)"
-       (to_constructor_string r)
-       (Printf.sprintf
-          "%s %s"
-          (Relative_path.S.to_string (Pos.filename pos))
-          (Pos.string_no_file pos))
+  @@ Printf.sprintf "%s (%s)" (to_constructor_string r) (Pos_or_decl.show pos)
 
 type ureason =
   | URnone
@@ -838,8 +891,9 @@ let string_of_ureason = function
   | URstr_interp ->
     "Only string and int values can be used in string interpolation"
 
-let compare r1 r2 =
-  let get_pri = function
+let compare : type phase. phase t_ -> phase t_ -> int =
+ fun r1 r2 ->
+  let get_pri : type ph. ph t_ -> int = function
     | Rnone -> 0
     | Rforeach _ -> 1
     | Rwitness _ -> 3
@@ -850,7 +904,7 @@ let compare r1 r2 =
   if Int.( <> ) d 0 then
     d
   else
-    Pos.compare (to_raw_pos r1) (to_raw_pos r2)
+    Pos_or_decl.compare (to_raw_pos r1) (to_raw_pos r2)
 
 let none = Rnone
 
@@ -858,10 +912,11 @@ let none = Rnone
 (* When the subtyping fails because of a constraint. *)
 (*****************************************************************************)
 
-let explain_generic_constraint p_inst reason name error =
+let explain_generic_constraint p_inst reason name error messages =
   let pos = to_pos reason in
   Errors.explain_constraint
     ~use_pos:p_inst
     ~definition_pos:pos
     ~param_name:name
     error
+    messages

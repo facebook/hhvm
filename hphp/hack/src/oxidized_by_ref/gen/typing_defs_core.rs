@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<30b35198b2ff91df27f01498536e02bd>>
+// @generated SignedSource<<e53493548931c09d4ad5004d60327bbc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -21,25 +21,7 @@ use crate::*;
 pub use crate::t_shape_map;
 pub use crate::typing_reason as reason;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PosId<'a>(
-    pub &'a pos_or_decl::PosOrDecl<'a>,
-    pub &'a ast_defs::Id_<'a>,
-);
-impl<'a> TrivialDrop for PosId<'a> {}
+pub use reason::PosId;
 
 #[derive(
     Clone,
@@ -406,7 +388,7 @@ pub struct WhereConstraint<'a>(
 impl<'a> TrivialDrop for WhereConstraint<'a> {}
 
 #[derive(Clone, Debug, FromOcamlRepIn, Hash, NoPosHash, Serialize, ToOcamlRep)]
-pub struct Ty<'a>(pub &'a reason::Reason<'a>, pub Ty_<'a>);
+pub struct Ty<'a>(pub &'a reason::T_<'a>, pub Ty_<'a>);
 impl<'a> TrivialDrop for Ty<'a> {}
 
 /// A shape may specify whether or not fields are required. For example, consider

@@ -16,11 +16,9 @@
         sc_name = ([6:6-7], "\\E"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|classname.php line 6, characters 6-6),
+        [(Rhint ([6:6-7]),
           (Tapply (([6:6-7], "\\HH\\BuiltinEnum"),
-             [(Rhint (root|classname.php line 6, characters 6-6),
-               (Tapply (([6:6-7], "\\E"), [])))]
-             )))
+             [(Rhint ([6:6-7]), (Tapply (([6:6-7], "\\E"), [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
@@ -28,17 +26,14 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([7:3-6], "FOO");
-           scc_type =
-           (Rwitness (root|classname.php line 7, characters 3-5), Tany);
+           scc_type = (Rwitness_from_decl ([7:3-6]), Tany);
            scc_refs = [((Aast_defs.From "\\Foo"), "class")] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = [];
         sc_enum_type =
-        (Some { Typing_defs.te_base =
-                (Rhint (root|classname.php line 6, characters 9-14),
-                 (Tprim Tstring));
+        (Some { Typing_defs.te_base = (Rhint ([6:9-15]), (Tprim Tstring));
                 te_constraint = None; te_includes = []; te_enum_class = false
                 })
         }))

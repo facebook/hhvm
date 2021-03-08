@@ -11,7 +11,7 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-20], "f");
           sm_type =
-          (Rwitness (root|generic_method_tparam_scope.php line 4, characters 19-19),
+          (Rwitness_from_decl ([4:19-20]),
            (Tfun
               { ft_arity = (Fstandard ());
                 ft_tparams =
@@ -25,10 +25,7 @@
                 [{ fp_pos = [4:28-30]; fp_name = (Some "$a");
                    fp_type =
                    { et_enforced = false;
-                     et_type =
-                     (Rhint (root|generic_method_tparam_scope.php line 4, characters 25-26),
-                      (Tgeneric ("Ta", [])))
-                     };
+                     et_type = (Rhint ([4:25-27]), (Tgeneric ("Ta", []))) };
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -39,10 +36,7 @@
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|generic_method_tparam_scope.php line 4, characters 33-34),
-                   (Tgeneric ("Ta", [])))
-                  };
+                  et_type = (Rhint ([4:33-35]), (Tgeneric ("Ta", []))) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -51,7 +45,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([8:19-20], "g");
            sm_type =
-           (Rwitness (root|generic_method_tparam_scope.php line 8, characters 19-19),
+           (Rwitness_from_decl ([8:19-20]),
             (Tfun
                { ft_arity = (Fstandard ());
                  ft_tparams =
@@ -65,10 +59,7 @@
                  [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
                     fp_type =
                     { et_enforced = false;
-                      et_type =
-                      (Rhint (root|generic_method_tparam_scope.php line 8, characters 25-26),
-                       (Tgeneric ("Tb", [])))
-                      };
+                      et_type = (Rhint ([8:25-27]), (Tgeneric ("Tb", []))) };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -80,10 +71,7 @@
                  { capability = (CapDefaults [8:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|generic_method_tparam_scope.php line 8, characters 33-34),
-                    (Tgeneric ("Tb", [])))
-                   };
+                   et_type = (Rhint ([8:33-35]), (Tgeneric ("Tb", []))) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

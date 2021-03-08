@@ -27,8 +27,7 @@
         sc_name = ([15:9-10], "\\D"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|use_type.php line 15, characters 19-19),
-          (Tapply (([15:19-20], "\\NS\\C"), [])))];
+        [(Rhint ([15:19-20]), (Tapply (([15:19-20], "\\NS\\C"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -39,7 +38,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|use_type.php line 17, characters 12-12),
+        (Rwitness_from_decl ([17:12-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -48,8 +47,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|use_type.php line 17, characters 14-16),
-                    (Tapply (([17:14-17], "\\C\\X"), [])))
+                   (Rhint ([17:14-17]), (Tapply (([17:14-17], "\\C\\X"), [])))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -61,10 +59,7 @@
               ft_implicit_params = { capability = (CapDefaults [17:12-13]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|use_type.php line 17, characters 23-26),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([17:23-27]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

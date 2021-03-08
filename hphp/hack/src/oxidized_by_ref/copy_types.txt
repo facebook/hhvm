@@ -164,6 +164,10 @@ typing_mutability_env::MutType
 typing_reason::ArgPosition
 typing_reason::Blame
 typing_reason::BlameSource
+typing_reason::DeclPhase
 typing_reason::ExprDepTypeReason
+typing_reason::LoclPhase
+typing_reason::PosId
 typing_reason::Reason
+typing_reason::T_
 typing_reason::Ureason

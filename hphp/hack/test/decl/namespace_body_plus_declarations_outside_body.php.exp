@@ -2,17 +2,14 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|namespace_body_plus_declarations_outside_body.php line 4, characters 12-12),
+       (Rwitness_from_decl ([4:12-13]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:12-13]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rhint (root|namespace_body_plus_declarations_outside_body.php line 4, characters 17-20),
-                (Tprim Tvoid))
-               };
+               et_type = (Rhint ([4:17-21]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -22,17 +19,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|namespace_body_plus_declarations_outside_body.php line 9, characters 10-10),
+        (Rwitness_from_decl ([9:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [9:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|namespace_body_plus_declarations_outside_body.php line 9, characters 15-18),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([9:15-19]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

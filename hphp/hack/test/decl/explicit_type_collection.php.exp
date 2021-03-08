@@ -6,24 +6,22 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
        sc_implements =
-       [(Rhint (root|explicit_type_collection.php line 3, characters 20-36),
+       [(Rhint ([3:20-37]),
          (Tapply (([3:20-37], "\\HH\\ClassAttribute"), [])))];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:49-51], "i"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint (root|explicit_type_collection.php line 4, characters 38-47),
+          (Some (Rhint ([4:38-48]),
                  (Tapply (([4:38-41], "\\HH\\vec"),
-                    [(Rhint (root|explicit_type_collection.php line 4, characters 42-46),
-                      Tmixed)]
-                    ))));
+                    [(Rhint ([4:42-47]), Tmixed)]))));
           sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_sprops = [];
        sc_constructor =
        (Some { Shallow_decl_defs.sm_name = ([4:19-30], "__construct");
                sm_type =
-               (Rwitness (root|explicit_type_collection.php line 4, characters 19-29),
+               (Rwitness_from_decl ([4:19-30]),
                 (Tfun
                    { ft_arity = (Fstandard ()); ft_tparams = [];
                      ft_where_constraints = [];
@@ -32,11 +30,9 @@
                         fp_type =
                         { et_enforced = false;
                           et_type =
-                          (Rhint (root|explicit_type_collection.php line 4, characters 38-47),
+                          (Rhint ([4:38-48]),
                            (Tapply (([4:38-41], "\\HH\\vec"),
-                              [(Rhint (root|explicit_type_collection.php line 4, characters 42-46),
-                                Tmixed)]
-                              )))
+                              [(Rhint ([4:42-47]), Tmixed)])))
                           };
                         fp_flags =
                         (make_fp_flags ~accept_disposable:false
@@ -51,9 +47,7 @@
                      ft_ret =
                      { et_enforced = false;
                        et_type =
-                       (Rwitness (root|explicit_type_collection.php line 4, characters 19-29),
-                        (Tprim Tvoid))
-                       };
+                       (Rwitness_from_decl ([4:19-30]), (Tprim Tvoid)) };
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
                        ~returns_readonly:false ~readonly_this:false
@@ -74,10 +68,7 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([9:16-19], "KEY");
-           scc_type =
-           (Rhint (root|explicit_type_collection.php line 9, characters 9-14),
-            (Tprim Tstring));
-           scc_refs = [] }
+           scc_type = (Rhint ([9:9-15]), (Tprim Tstring)); scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

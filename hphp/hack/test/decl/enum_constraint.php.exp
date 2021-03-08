@@ -5,11 +5,9 @@
        sc_name = ([3:6-7], "\\A"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
-       [(Rhint (root|enum_constraint.php line 3, characters 6-6),
+       [(Rhint ([3:6-7]),
          (Tapply (([3:6-7], "\\HH\\BuiltinEnum"),
-            [(Rhint (root|enum_constraint.php line 3, characters 6-6),
-              (Tapply (([3:6-7], "\\A"), [])))]
-            )))
+            [(Rhint ([3:6-7]), (Tapply (([3:6-7], "\\A"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -17,12 +15,8 @@
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base =
-               (Rhint (root|enum_constraint.php line 3, characters 10-15),
-                (Tprim Tstring));
-               te_constraint =
-               (Some (Rhint (root|enum_constraint.php line 3, characters 20-25),
-                      (Tprim Tstring)));
+       (Some { Typing_defs.te_base = (Rhint ([3:10-16]), (Tprim Tstring));
+               te_constraint = (Some (Rhint ([3:20-26]), (Tprim Tstring)));
                te_includes = []; te_enum_class = false })
        }));
   ("\\B",
@@ -32,11 +26,9 @@
         sc_name = ([5:6-7], "\\B"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|enum_constraint.php line 5, characters 6-6),
+        [(Rhint ([5:6-7]),
           (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),
-             [(Rhint (root|enum_constraint.php line 5, characters 6-6),
-               (Tapply (([5:6-7], "\\B"), [])))]
-             )))
+             [(Rhint ([5:6-7]), (Tapply (([5:6-7], "\\B"), [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
@@ -44,13 +36,11 @@
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type =
-        (Some { Typing_defs.te_base =
-                (Rhint (root|enum_constraint.php line 5, characters 10-12),
-                 (Tprim Tint));
+        (Some { Typing_defs.te_base = (Rhint ([5:10-13]), (Tprim Tint));
                 te_constraint =
-                (Some (Rhint (root|enum_constraint.php line 5, characters 17-23),
+                (Some (Rhint ([5:17-24]),
                        (Tapply (([5:17-21], "\\IdOf"),
-                          [(Rhint (root|enum_constraint.php line 5, characters 22-22),
+                          [(Rhint ([5:22-23]),
                             (Tapply (([5:22-23], "\\X"), [])))]
                           ))));
                 te_includes = []; te_enum_class = false })

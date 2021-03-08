@@ -55,7 +55,7 @@ let validator =
       | _ when Option.is_some typeconst.ttc_reifiable || is_concrete ->
         super#on_typeconst acc is_concrete typeconst
       | _ ->
-        let r = Reason.Rwitness (fst typeconst.ttc_name) in
+        let r = Reason.Rwitness_from_decl (fst typeconst.ttc_name) in
         let kind =
           "an abstract type constant without the __Reifiable attribute"
         in

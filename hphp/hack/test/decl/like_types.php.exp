@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|like_types.php line 4, characters 10-19),
+       (Rwitness_from_decl ([4:10-20]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = [];
@@ -10,10 +10,7 @@
              [{ fp_pos = [4:25-27]; fp_name = (Some "$i");
                 fp_type =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|like_types.php line 4, characters 21-23),
-                   (Tprim Tint))
-                  };
+                  et_type = (Rhint ([4:21-24]), (Tprim Tint)) };
                 fp_flags =
                 (make_fp_flags ~accept_disposable:false ~has_default:false
                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -24,10 +21,7 @@
              ft_implicit_params = { capability = (CapDefaults [4:10-20]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rhint (root|like_types.php line 4, characters 30-33),
-                (Tprim Tvoid))
-               };
+               et_type = (Rhint ([4:30-34]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -37,7 +31,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|like_types.php line 6, characters 10-10),
+        (Rwitness_from_decl ([6:10-11]),
          (Tfun
             { ft_arity = (Fstandard ());
               ft_tparams =
@@ -45,10 +39,8 @@
                  tp_name = ([6:12-13], "T"); tp_tparams = [];
                  tp_constraints =
                  [(Constraint_as,
-                   (Rhint (root|like_types.php line 6, characters 17-20),
-                    (Tlike
-                       (Rhint (root|like_types.php line 6, characters 18-20),
-                        (Tprim Tint)))))
+                   (Rhint ([6:17-21]),
+                    (Tlike (Rhint ([6:18-21]), (Tprim Tint)))))
                    ];
                  tp_reified = Erased; tp_user_attributes = [] }
                 ];
@@ -57,10 +49,7 @@
               [{ fp_pos = [6:25-27]; fp_name = (Some "$t");
                  fp_type =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|like_types.php line 6, characters 23-23),
-                    (Tgeneric ("T", [])))
-                   };
+                   et_type = (Rhint ([6:23-24]), (Tgeneric ("T", []))) };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -71,10 +60,7 @@
               ft_implicit_params = { capability = (CapDefaults [6:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|like_types.php line 6, characters 30-33),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([6:30-34]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -91,10 +77,8 @@
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
            stc_as_constraint =
-           (Some (Rhint (root|like_types.php line 11, characters 28-31),
-                  (Tlike
-                     (Rhint (root|like_types.php line 11, characters 29-31),
-                      (Tprim Tint)))));
+           (Some (Rhint ([11:28-32]),
+                  (Tlike (Rhint ([11:29-32]), (Tprim Tint)))));
            stc_name = ([11:23-24], "T"); stc_type = None;
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
@@ -103,7 +87,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([13:19-20], "f");
            sm_type =
-           (Rwitness (root|like_types.php line 13, characters 19-19),
+           (Rwitness_from_decl ([13:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = [];
@@ -112,11 +96,9 @@
                     fp_type =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|like_types.php line 13, characters 21-27),
+                      (Rhint ([13:21-28]),
                        (Taccess
-                          ((Rhint (root|like_types.php line 13, characters 21-27),
-                            Tthis),
-                           [([13:27-28], "T")])))
+                          ((Rhint ([13:21-28]), Tthis), [([13:27-28], "T")])))
                       };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -129,10 +111,7 @@
                  { capability = (CapDefaults [13:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|like_types.php line 13, characters 34-37),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([13:34-38]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

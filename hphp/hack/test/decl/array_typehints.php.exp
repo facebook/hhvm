@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|array_typehints.php line 3, characters 10-11),
+       (Rwitness_from_decl ([3:10-12]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
@@ -10,13 +10,9 @@
              ft_ret =
              { et_enforced = false;
                et_type =
-               (Rhint (root|array_typehints.php line 3, characters 16-34),
-                (Tdarray (
-                   (Rhint (root|array_typehints.php line 3, characters 23-25),
-                    (Tprim Tint)),
-                   (Rhint (root|array_typehints.php line 3, characters 28-33),
-                    (Tprim Tstring))
-                   )))
+               (Rhint ([3:16-35]),
+                (Tdarray ((Rhint ([3:23-26]), (Tprim Tint)),
+                   (Rhint ([3:28-34]), (Tprim Tstring)))))
                };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
@@ -27,7 +23,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 7, characters 10-11),
+        (Rwitness_from_decl ([7:10-12]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -35,11 +31,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 7, characters 16-21),
-                 (Tvarray
-                    (Rhint (root|array_typehints.php line 7, characters 16-21),
-                     Tany)))
-                };
+                (Rhint ([7:16-22]), (Tvarray (Rhint ([7:16-22]), Tany))) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -49,7 +41,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 11, characters 10-11),
+        (Rwitness_from_decl ([11:10-12]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -57,10 +49,8 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 11, characters 16-26),
-                 (Tvarray
-                    (Rhint (root|array_typehints.php line 11, characters 23-25),
-                     (Tprim Tint))))
+                (Rhint ([11:16-27]),
+                 (Tvarray (Rhint ([11:23-26]), (Tprim Tint))))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -71,7 +61,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 15, characters 10-11),
+        (Rwitness_from_decl ([15:10-12]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -79,13 +69,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 15, characters 16-21),
-                 (Tdarray (
-                    (Rhint (root|array_typehints.php line 15, characters 16-21),
-                     Tany),
-                    (Rhint (root|array_typehints.php line 15, characters 16-21),
-                     Tany)
-                    )))
+                (Rhint ([15:16-22]),
+                 (Tdarray ((Rhint ([15:16-22]), Tany),
+                    (Rhint ([15:16-22]), Tany))))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -96,7 +82,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 19, characters 10-11),
+        (Rwitness_from_decl ([19:10-12]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -104,13 +90,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 19, characters 16-34),
-                 (Tdarray (
-                    (Rhint (root|array_typehints.php line 19, characters 23-25),
-                     (Tprim Tint)),
-                    (Rhint (root|array_typehints.php line 19, characters 28-33),
-                     (Tprim Tstring))
-                    )))
+                (Rhint ([19:16-35]),
+                 (Tdarray ((Rhint ([19:23-26]), (Tprim Tint)),
+                    (Rhint ([19:28-34]), (Tprim Tstring)))))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -121,7 +103,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 23, characters 10-12),
+        (Rwitness_from_decl ([23:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -129,12 +111,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 23, characters 17-32),
+                (Rhint ([23:17-33]),
                  (Tvarray_or_darray
-                    (Rvarray_or_darray_key (root|array_typehints.php line 23, characters 17-32),
-                     (Tprim Tarraykey)),
-                    (Rhint (root|array_typehints.php line 23, characters 17-32),
-                     Tany)))
+                    (Rvarray_or_darray_key ([23:17-33]), (Tprim Tarraykey)),
+                    (Rhint ([23:17-33]), Tany)))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -145,7 +125,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 27, characters 10-12),
+        (Rwitness_from_decl ([27:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -153,12 +133,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 27, characters 17-37),
+                (Rhint ([27:17-38]),
                  (Tvarray_or_darray
-                    (Rvarray_or_darray_key (root|array_typehints.php line 27, characters 17-37),
-                     (Tprim Tarraykey)),
-                    (Rhint (root|array_typehints.php line 27, characters 34-36),
-                     (Tprim Tint))))
+                    (Rvarray_or_darray_key ([27:17-38]), (Tprim Tarraykey)),
+                    (Rhint ([27:34-37]), (Tprim Tint))))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -169,7 +147,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 31, characters 10-12),
+        (Rwitness_from_decl ([31:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -177,12 +155,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|array_typehints.php line 31, characters 17-45),
-                 (Tvarray_or_darray
-                    (Rhint (root|array_typehints.php line 31, characters 34-36),
-                     (Tprim Tint)),
-                    (Rhint (root|array_typehints.php line 31, characters 39-44),
-                     (Tprim Tstring))))
+                (Rhint ([31:17-46]),
+                 (Tvarray_or_darray (Rhint ([31:34-37]), (Tprim Tint)),
+                    (Rhint ([31:39-45]), (Tprim Tstring))))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -193,17 +168,13 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|array_typehints.php line 35, characters 10-12),
+        (Rwitness_from_decl ([35:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [35:10-13]) };
               ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|array_typehints.php line 35, characters 17-51),
-                 Tany)
-                };
+              { et_enforced = false; et_type = (Rhint ([35:17-52]), Tany) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

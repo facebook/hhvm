@@ -1059,24 +1059,24 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                 }
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::witness(expr.0)),
+                    self.alloc(Reason::witness_from_decl(expr.0)),
                     expr_to_ty(self.arena, expr)?,
                 )))
             }
             Node::IntLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness(pos)),
+                self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tint)),
             ))),
             Node::FloatingLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness(pos)),
+                self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tfloat)),
             ))),
             Node::StringLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness(pos)),
+                self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tstring)),
             ))),
             Node::BooleanLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness(pos)),
+                self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
             ))),
             Node::Token(t) if t.kind() == TokenKind::Varray => {
@@ -1285,7 +1285,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::witness(pos)),
+                    self.alloc(Reason::witness_from_decl(pos)),
                     Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
                 )))
             }
@@ -1307,21 +1307,21 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let pos = type_.get_pos().unwrap_or_else(|| Pos::none());
         match kind {
             FunKind::FAsyncGenerator => self.alloc(Ty(
-                self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
+                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
                 Ty_::Tapply(self.alloc((
                     PosId(pos, naming_special_names::classes::ASYNC_GENERATOR),
                     self.alloc([type_, type_, type_]),
                 ))),
             )),
             FunKind::FGenerator => self.alloc(Ty(
-                self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
+                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
                 Ty_::Tapply(self.alloc((
                     PosId(pos, naming_special_names::classes::GENERATOR),
                     self.alloc([type_, type_, type_]),
                 ))),
             )),
             FunKind::FAsync => self.alloc(Ty(
-                self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
+                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
                 Ty_::Tapply(self.alloc((
                     PosId(pos, naming_special_names::classes::AWAITABLE),
                     self.alloc([type_]),
@@ -1372,7 +1372,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Construct => {
                 let pos = self.token_pos(t);
                 self.alloc(Ty(
-                    self.alloc(Reason::witness(pos)),
+                    self.alloc(Reason::witness_from_decl(pos)),
                     Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
                 ))
             }
@@ -1458,7 +1458,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             ifc_decl,
         });
 
-        let ty = self.alloc(Ty(self.alloc(Reason::witness(id.0)), Ty_::Tfun(ft)));
+        let ty = self.alloc(Ty(
+            self.alloc(Reason::witness_from_decl(id.0)),
+            Ty_::Tfun(ft),
+        ));
         Some((id.into(), ty, properties))
     }
 
@@ -1550,9 +1553,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             let type_ = if variadic {
                                 self.alloc(Ty(
                                     self.alloc(if name.is_some() {
-                                        Reason::RvarParam(pos)
+                                        Reason::RvarParamFromDecl(pos)
                                     } else {
-                                        Reason::witness(pos)
+                                        Reason::witness_from_decl(pos)
                                     }),
                                     type_.1,
                                 ))
@@ -1687,7 +1690,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     fn tany_with_pos(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
-        self.alloc(Ty(self.alloc(Reason::witness(pos)), TANY_))
+        self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), TANY_))
     }
 
     /// The type used when a `vec_or_dict` typehint is missing its key type argument.

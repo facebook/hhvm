@@ -9,15 +9,11 @@
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
           stc_as_constraint = None; stc_name = ([5:14-15], "T");
-          stc_type =
-          (Some (Rhint (root|classes_typeconst.php line 5, characters 18-20),
-                 (Tprim Tint)));
+          stc_type = (Some (Rhint ([5:18-21]), (Tprim Tint)));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
          { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
            stc_as_constraint = None; stc_name = ([15:14-16], "T2");
-           stc_type =
-           (Some (Rhint (root|classes_typeconst.php line 15, characters 19-24),
-                  (Tprim Tstring)));
+           stc_type = (Some (Rhint ([15:19-25]), (Tprim Tstring)));
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -25,7 +21,7 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([7:19-20], "f");
           sm_type =
-          (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
+          (Rwitness_from_decl ([7:19-20]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
@@ -33,11 +29,8 @@
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|classes_typeconst.php line 7, characters 24-30),
-                   (Taccess
-                      ((Rhint (root|classes_typeconst.php line 7, characters 24-30),
-                        Tthis),
-                       [([7:30-31], "T")])))
+                  (Rhint ([7:24-31]),
+                   (Taccess ((Rhint ([7:24-31]), Tthis), [([7:30-31], "T")])))
                   };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
@@ -47,7 +40,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([11:19-20], "g");
            sm_type =
-           (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
+           (Rwitness_from_decl ([11:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -56,11 +49,9 @@
                  ft_ret =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|classes_typeconst.php line 11, characters 24-31),
+                   (Rhint ([11:24-32]),
                     (Taccess
-                       ((Rhint (root|classes_typeconst.php line 11, characters 24-31),
-                         Tthis),
-                        [([11:30-32], "T2")])))
+                       ((Rhint ([11:24-32]), Tthis), [([11:30-32], "T2")])))
                    };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
@@ -81,8 +72,7 @@
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
            stc_as_constraint =
-           (Some (Rhint (root|classes_typeconst.php line 19, characters 37-37),
-                  (Tapply (([19:37-38], "\\C"), []))));
+           (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
            stc_name = ([19:23-33], "TConstType"); stc_type = None;
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
@@ -91,7 +81,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([20:28-39], "instantiate");
            sm_type =
-           (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
+           (Rwitness_from_decl ([20:28-39]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = [];
@@ -100,12 +90,11 @@
                     fp_type =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|classes_typeconst.php line 20, characters 40-58),
+                      (Rhint ([20:40-59]),
                        (Taccess
-                          ((Rhint (root|classes_typeconst.php line 20, characters 40-58),
+                          ((Rhint ([20:40-59]),
                             (Taccess
-                               ((Rhint (root|classes_typeconst.php line 20, characters 40-58),
-                                 Tthis),
+                               ((Rhint ([20:40-59]), Tthis),
                                 [([20:46-56], "TConstType")]))),
                            [([20:58-59], "T")])))
                       };
@@ -121,10 +110,9 @@
                  ft_ret =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|classes_typeconst.php line 20, characters 71-86),
+                   (Rhint ([20:71-87]),
                     (Taccess
-                       ((Rhint (root|classes_typeconst.php line 20, characters 71-86),
-                         Tthis),
+                       ((Rhint ([20:71-87]), Tthis),
                         [([20:77-87], "TConstType")])))
                    };
                  ft_flags =

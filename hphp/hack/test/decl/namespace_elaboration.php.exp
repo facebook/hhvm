@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|namespace_elaboration.php line 31, characters 10-11),
+       (Rwitness_from_decl ([31:10-12]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = [];
@@ -11,7 +11,7 @@
                 fp_type =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|namespace_elaboration.php line 31, characters 13-18),
+                  (Rhint ([31:13-19]),
                    (Tapply (([31:13-19], "\\MyNamespace\\MyType"), [])))
                   };
                 fp_flags =
@@ -25,7 +25,7 @@
              ft_ret =
              { et_enforced = false;
                et_type =
-               (Rhint (root|namespace_elaboration.php line 31, characters 25-31),
+               (Rhint ([31:25-32]),
                 (Tapply (([31:25-32], "\\MyNamespace\\MyType"), [])))
                };
              ft_flags =
@@ -37,7 +37,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|namespace_elaboration.php line 35, characters 10-17),
+        (Rwitness_from_decl ([35:10-18]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -46,7 +46,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|namespace_elaboration.php line 35, characters 19-29),
+                   (Rhint ([35:19-30]),
                     (Tapply (([35:19-30], "\\MyNamespace\\MyOtherType"), [])))
                    };
                  fp_flags =
@@ -60,7 +60,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|namespace_elaboration.php line 35, characters 36-47),
+                (Rhint ([35:36-48]),
                  (Tapply (([35:36-48], "\\MyNamespace\\MyOtherType"), [])))
                 };
               ft_flags =
@@ -72,7 +72,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|namespace_elaboration.php line 39, characters 10-18),
+        (Rwitness_from_decl ([39:10-19]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -81,7 +81,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|namespace_elaboration.php line 39, characters 20-31),
+                   (Rhint ([39:20-32]),
                     (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"), 
                        [])))
                    };
@@ -96,7 +96,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|namespace_elaboration.php line 39, characters 38-50),
+                (Rhint ([39:38-51]),
                  (Tapply (([39:38-51], "\\MyNamespace\\MyBracedType"), [])))
                 };
               ft_flags =

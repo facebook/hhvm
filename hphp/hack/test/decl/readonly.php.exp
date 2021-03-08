@@ -13,7 +13,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|readonly.php line 6, characters 16-31),
+        (Rwitness_from_decl ([6:16-32]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -21,10 +21,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|readonly.php line 6, characters 46-59),
+                (Rhint ([6:46-60]),
                  (Tapply (([6:46-55], "\\HH\\Awaitable"),
-                    [(Rhint (root|readonly.php line 6, characters 56-58),
-                      (Tapply (([6:56-59], "\\Foo"), [])))]
+                    [(Rhint ([6:56-59]), (Tapply (([6:56-59], "\\Foo"), [])))
+                      ]
                     )))
                 };
               ft_flags =
@@ -36,7 +36,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|readonly.php line 10, characters 16-29),
+        (Rwitness_from_decl ([10:16-30]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -44,9 +44,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|readonly.php line 10, characters 34-47),
+                (Rhint ([10:34-48]),
                  (Tapply (([10:34-43], "\\HH\\Awaitable"),
-                    [(Rhint (root|readonly.php line 10, characters 44-46),
+                    [(Rhint ([10:44-47]),
                       (Tapply (([10:44-47], "\\Foo"), [])))]
                     )))
                 };
@@ -67,21 +67,19 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([15:23-25], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint (root|readonly.php line 15, characters 19-21),
-                  (Tapply (([15:19-22], "\\Foo"), []))));
+           (Some (Rhint ([15:19-22]), (Tapply (([15:19-22], "\\Foo"), []))));
            sp_visibility = Public; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([18:25-27], "y");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint (root|readonly.php line 18, characters 21-23),
-                   (Tapply (([18:21-24], "\\Foo"), []))));
+            (Some (Rhint ([18:21-24]), (Tapply (([18:21-24], "\\Foo"), []))));
             sp_visibility = Public; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([17:19-30], "__construct");
                 sm_type =
-                (Rwitness (root|readonly.php line 17, characters 19-29),
+                (Rwitness_from_decl ([17:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
@@ -90,7 +88,7 @@
                          fp_type =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|readonly.php line 18, characters 21-23),
+                           (Rhint ([18:21-24]),
                             (Tapply (([18:21-24], "\\Foo"), [])))
                            };
                          fp_flags =
@@ -106,9 +104,7 @@
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|readonly.php line 17, characters 19-29),
-                         (Tprim Tvoid))
-                        };
+                        (Rwitness_from_decl ([17:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false
@@ -120,7 +116,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([22:28-34], "getFoo");
            sm_type =
-           (Rwitness (root|readonly.php line 22, characters 28-33),
+           (Rwitness_from_decl ([22:28-34]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -128,10 +124,7 @@
                  { capability = (CapDefaults [22:28-34]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|readonly.php line 22, characters 39-42),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([22:39-43]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:true

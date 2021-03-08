@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ast_defs::Id;
 use crate::pos::Pos;
 use crate::typing_reason::*;
 
@@ -22,15 +21,20 @@ impl<'a> Reason<'a> {
         Reason::Rwitness(pos)
     }
 
+    pub fn witness_from_decl(pos: &'a Pos<'a>) -> Self {
+        Reason::RwitnessFromDecl(pos)
+    }
+
     pub fn instantiate(args: &'a (Reason<'a>, &'a str, Reason<'a>)) -> Self {
         Reason::Rinstantiate(args)
     }
 
     pub fn pos(&self) -> Option<&'a Pos<'a>> {
-        use Reason::*;
+        use T_::*;
         match self {
             Rnone => None,
             Rwitness(p)
+            | RwitnessFromDecl(p)
             | Ridx((p, _))
             | RidxVector(p)
             | Rforeach(p)
@@ -46,6 +50,7 @@ impl<'a> Reason<'a> {
             | RnoReturn(p)
             | RnoReturnAsync(p)
             | RretFunKind((p, _))
+            | RretFunKindFromDecl((p, _))
             | Rhint(p)
             | Rthrow(p)
             | Rplaceholder(p)
@@ -58,12 +63,13 @@ impl<'a> Reason<'a> {
             | RclassClass((p, _))
             | RunknownClass(p)
             | RvarParam(p)
+            | RvarParamFromDecl(p)
             | RunpackParam((p, _, _))
             | RinoutParam(p)
             | Rtypeconst((Rnone, (p, _), _, _))
             | RarrayFilter((p, _))
             | RnullsafeOp(p)
-            | RtconstNoCstr(Id(p, _))
+            | RtconstNoCstr(PosId(p, _))
             | Rpredicated((p, _))
             | Ris(p)
             | Ras(p)
@@ -75,7 +81,6 @@ impl<'a> Reason<'a> {
             | RdynamicConstruct(p)
             | RidxDict(p)
             | RsetElement(p)
-            | RmissingRequiredField((p, _))
             | RmissingOptionalField((p, _))
             | RunsetField((p, _))
             | Rregex(p)

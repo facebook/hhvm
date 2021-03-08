@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|missing_function_typehints.php line 3, characters 10-10),
+       (Rwitness_from_decl ([3:10-11]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = [];
@@ -10,10 +10,7 @@
              [{ fp_pos = [3:12-14]; fp_name = (Some "$x");
                 fp_type =
                 { et_enforced = false;
-                  et_type =
-                  (Rwitness (root|missing_function_typehints.php line 3, characters 12-13),
-                   Tany)
-                  };
+                  et_type = (Rwitness_from_decl ([3:12-14]), Tany) };
                 fp_flags =
                 (make_fp_flags ~accept_disposable:false ~has_default:false
                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -24,10 +21,7 @@
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rwitness (root|missing_function_typehints.php line 3, characters 10-10),
-                Tany)
-               };
+               et_type = (Rwitness_from_decl ([3:10-11]), Tany) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);

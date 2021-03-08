@@ -14,7 +14,7 @@ module Reason = Typing_reason
 
 type validity =
   | Valid
-  | Invalid : (Reason.t * string) list -> validity
+  | Invalid : (Reason.decl_t * string) list -> validity
 
 (* In hint positions, reified types are not resolved *)
 type reification =

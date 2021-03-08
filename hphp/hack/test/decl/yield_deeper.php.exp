@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|yield_deeper.php line 3, characters 10-10),
+       (Rwitness_from_decl ([3:10-11]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
@@ -10,15 +10,11 @@
              ft_ret =
              { et_enforced = false;
                et_type =
-               (Rhint (root|yield_deeper.php line 3, characters 15-42),
+               (Rhint ([3:15-43]),
                 (Tapply (([3:15-24], "\\Generator"),
-                   [(Rhint (root|yield_deeper.php line 3, characters 25-28),
-                     (Tprim Tbool));
-                     (Rhint (root|yield_deeper.php line 3, characters 31-36),
-                      (Tprim Tstring));
-                     (Rhint (root|yield_deeper.php line 3, characters 39-41),
-                      (Tprim Tint))
-                     ]
+                   [(Rhint ([3:25-29]), (Tprim Tbool));
+                     (Rhint ([3:31-37]), (Tprim Tstring));
+                     (Rhint ([3:39-42]), (Tprim Tint))]
                    )))
                };
              ft_flags =
@@ -30,17 +26,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|yield_deeper.php line 7, characters 10-10),
+        (Rwitness_from_decl ([7:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|yield_deeper.php line 7, characters 15-18),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([7:15-19]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -50,17 +43,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|yield_deeper.php line 13, characters 10-10),
+        (Rwitness_from_decl ([13:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [13:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|yield_deeper.php line 13, characters 15-18),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([13:15-19]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -70,7 +60,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|yield_deeper.php line 19, characters 16-16),
+        (Rwitness_from_decl ([19:16-17]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -78,11 +68,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|yield_deeper.php line 19, characters 21-35),
+                (Rhint ([19:21-36]),
                  (Tapply (([19:21-30], "\\HH\\Awaitable"),
-                    [(Rhint (root|yield_deeper.php line 19, characters 31-34),
-                      (Tprim Tvoid))]
-                    )))
+                    [(Rhint ([19:31-35]), (Tprim Tvoid))])))
                 };
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
@@ -93,7 +81,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|yield_deeper.php line 26, characters 16-16),
+        (Rwitness_from_decl ([26:16-17]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -101,13 +89,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|yield_deeper.php line 26, characters 21-51),
+                (Rhint ([26:21-52]),
                  (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),
-                    [(Rhint (root|yield_deeper.php line 26, characters 40-45),
-                      (Tprim Tstring));
-                      (Rhint (root|yield_deeper.php line 26, characters 48-50),
-                       (Tprim Tint))
-                      ]
+                    [(Rhint ([26:40-46]), (Tprim Tstring));
+                      (Rhint ([26:48-51]), (Tprim Tint))]
                     )))
                 };
               ft_flags =

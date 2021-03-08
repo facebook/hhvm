@@ -13,56 +13,61 @@ module Reason = Typing_reason
 
 class type ['a] decl_type_visitor_type =
   object
-    method on_tany : 'a -> Reason.t -> 'a
+    method on_tany : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_terr : 'a -> Reason.t -> 'a
+    method on_terr : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tmixed : 'a -> Reason.t -> 'a
+    method on_tmixed : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tnonnull : 'a -> Reason.t -> 'a
+    method on_tnonnull : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tdynamic : 'a -> Reason.t -> 'a
+    method on_tdynamic : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tthis : 'a -> Reason.t -> 'a
+    method on_tthis : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tvarray_or_darray : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
+    method on_tvarray_or_darray :
+      'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
 
-    method on_tvec_or_dict : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
+    method on_tvec_or_dict :
+      'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
 
-    method on_tvarray : 'a -> Reason.t -> decl_ty -> 'a
+    method on_tvarray : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
 
-    method on_tdarray : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
+    method on_tdarray : 'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
 
-    method on_tgeneric : 'a -> Reason.t -> string -> decl_ty list -> 'a
+    method on_tgeneric :
+      'a -> decl_phase Reason.t_ -> string -> decl_ty list -> 'a
 
-    method on_toption : 'a -> Reason.t -> decl_ty -> 'a
+    method on_toption : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
 
-    method on_tlike : 'a -> Reason.t -> decl_ty -> 'a
+    method on_tlike : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
 
-    method on_tprim : 'a -> Reason.t -> Aast.tprim -> 'a
+    method on_tprim : 'a -> decl_phase Reason.t_ -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
+    method on_tvar : 'a -> decl_phase Reason.t_ -> Ident.t -> 'a
 
     method on_type : 'a -> decl_ty -> 'a
 
-    method on_tfun : 'a -> Reason.t -> decl_fun_type -> 'a
+    method on_tfun : 'a -> decl_phase Reason.t_ -> decl_fun_type -> 'a
 
-    method on_tapply : 'a -> Reason.t -> pos_id -> decl_ty list -> 'a
+    method on_tapply :
+      'a -> decl_phase Reason.t_ -> pos_id -> decl_ty list -> 'a
 
-    method on_ttuple : 'a -> Reason.t -> decl_ty list -> 'a
+    method on_ttuple : 'a -> decl_phase Reason.t_ -> decl_ty list -> 'a
 
-    method on_tunion : 'a -> Reason.t -> decl_ty list -> 'a
+    method on_tunion : 'a -> decl_phase Reason.t_ -> decl_ty list -> 'a
 
-    method on_tintersection : 'a -> Reason.t -> decl_ty list -> 'a
+    method on_tintersection : 'a -> decl_phase Reason.t_ -> decl_ty list -> 'a
 
     method on_tshape :
       'a ->
-      Reason.t ->
+      decl_phase Reason.t_ ->
       shape_kind ->
       decl_phase shape_field_type TShapeMap.t ->
       'a
 
-    method on_taccess : 'a -> Reason.t -> decl_phase taccess_type -> 'a
+    method on_taccess :
+      'a -> decl_phase Reason.t_ -> decl_phase taccess_type -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =

@@ -82,18 +82,22 @@ let class_const env (cc : Nast.class_const) =
       begin
         match Decl_utils.infer_const e_ with
         | Some tprim ->
-          ( mk (Reason.Rwitness (Decl_env.make_decl_pos env e_pos), Tprim tprim),
+          ( mk
+              ( Reason.Rwitness_from_decl (Decl_env.make_decl_pos env e_pos),
+                Tprim tprim ),
             false,
             cc_refs )
         | None ->
           (* Typing will take care of rejecting constants that have neither
            * an initializer nor a literal initializer *)
-          (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false, cc_refs)
+          ( mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()),
+            false,
+            cc_refs )
       end
     | (None, None) ->
       (* Typing will take care of rejecting constants that have neither
        * an initializer nor a literal initializer *)
-      let r = Reason.Rwitness pos in
+      let r = Reason.Rwitness_from_decl pos in
       (mk (r, Typing_defs.make_tany ()), true, CCRSet.empty)
   in
   let scc_refs = CCRSet.elements scc_refs in
@@ -126,7 +130,7 @@ let typeconst env c tc =
     let enforceable =
       match Attrs.find SN.UserAttributes.uaEnforceable attributes with
       | Some { ua_name = (pos, _); _ } -> (Decl_env.make_decl_pos env pos, true)
-      | None -> (Pos.none, false)
+      | None -> (Pos_or_decl.none, false)
     in
     let reifiable =
       match Attrs.find SN.UserAttributes.uaReifiable attributes with
@@ -282,7 +286,7 @@ let method_ env m =
   in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
-    sm_type = mk (Reason.Rwitness pos, Tfun ft);
+    sm_type = mk (Reason.Rwitness_from_decl pos, Tfun ft);
     sm_visibility = m.m_visibility;
     sm_deprecated;
     sm_flags =

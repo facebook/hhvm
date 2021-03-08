@@ -43,7 +43,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([7:19-22], "foo");
            sm_type =
-           (Rwitness (root|function_where_constraints.php line 7, characters 19-21),
+           (Rwitness_from_decl ([7:19-22]),
             (Tfun
                { ft_arity = (Fstandard ());
                  ft_tparams =
@@ -51,30 +51,22 @@
                     tp_name = ([7:23-25], "Tf"); tp_tparams = [];
                     tp_constraints =
                     [(Constraint_as,
-                      (Rhint (root|function_where_constraints.php line 7, characters 29-29),
-                       (Tapply (([7:29-30], "\\A"), []))))
+                      (Rhint ([7:29-30]), (Tapply (([7:29-30], "\\A"), []))))
                       ];
                     tp_reified = Erased; tp_user_attributes = [] }
                    ];
                  ft_where_constraints =
-                 [((Rhint (root|function_where_constraints.php line 7, characters 46-47),
-                    (Tgeneric ("Tb", []))),
-                   Constraint_as,
-                   (Rhint (root|function_where_constraints.php line 7, characters 52-58),
+                 [((Rhint ([7:46-48]), (Tgeneric ("Tb", []))), Constraint_as,
+                   (Rhint ([7:52-59]),
                     (Tapply (([7:52-55], "\\Cov"),
-                       [(Rhint (root|function_where_constraints.php line 7, characters 56-57),
-                         (Tgeneric ("Tf", [])))]
-                       ))))
+                       [(Rhint ([7:56-58]), (Tgeneric ("Tf", [])))]))))
                    ];
                  ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [7:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|function_where_constraints.php line 7, characters 35-38),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([7:35-39]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -96,13 +88,11 @@
           ];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|function_where_constraints.php line 10, characters 27-39),
+        [(Rhint ([10:27-40]),
           (Tapply (([10:27-31], "\\Base"),
-             [(Rhint (root|function_where_constraints.php line 10, characters 32-38),
+             [(Rhint ([10:32-39]),
                (Tapply (([10:32-35], "\\Cov"),
-                  [(Rhint (root|function_where_constraints.php line 10, characters 36-37),
-                    (Tgeneric ("Td", [])))]
-                  )))
+                  [(Rhint ([10:36-38]), (Tgeneric ("Td", [])))])))
                ]
              )))
           ];
@@ -114,7 +104,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([11:19-22], "foo");
            sm_type =
-           (Rwitness (root|function_where_constraints.php line 11, characters 19-21),
+           (Rwitness_from_decl ([11:19-22]),
             (Tfun
                { ft_arity = (Fstandard ());
                  ft_tparams =
@@ -122,27 +112,20 @@
                     tp_name = ([11:23-25], "Tf"); tp_tparams = [];
                     tp_constraints =
                     [(Constraint_as,
-                      (Rhint (root|function_where_constraints.php line 11, characters 29-29),
-                       (Tapply (([11:29-30], "\\A"), []))))
+                      (Rhint ([11:29-30]), (Tapply (([11:29-30], "\\A"), []))))
                       ];
                     tp_reified = Erased; tp_user_attributes = [] }
                    ];
                  ft_where_constraints =
-                 [((Rhint (root|function_where_constraints.php line 11, characters 46-47),
-                    (Tgeneric ("Td", []))),
+                 [((Rhint ([11:46-48]), (Tgeneric ("Td", []))),
                    Constraint_as,
-                   (Rhint (root|function_where_constraints.php line 11, characters 52-52),
-                    (Tapply (([11:52-53], "\\A"), []))))
-                   ];
+                   (Rhint ([11:52-53]), (Tapply (([11:52-53], "\\A"), []))))];
                  ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|function_where_constraints.php line 11, characters 35-38),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([11:35-39]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

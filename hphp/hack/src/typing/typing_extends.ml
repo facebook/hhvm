@@ -341,8 +341,8 @@ let check_override
       in
       check_ambiguous_inheritance
         check
-        (r_parent, ft_parent)
-        (r_child, ft_child)
+        (Typing_reason.localize r_parent, ft_parent)
+        (Typing_reason.localize r_child, ft_child)
         pos
         class_
         class_elt.ce_origin
@@ -593,7 +593,7 @@ let make_all_members ~child_class ~parent_class =
  * determine whether a child class needs to call parent::__construct *)
 let default_constructor_ce class_ =
   let (pos, name) = (Cls.pos class_, Cls.name class_) in
-  let r = Reason.Rwitness pos in
+  let r = Reason.Rwitness_from_decl pos in
   (* reason doesn't get used in, e.g. arity checks *)
   let ft =
     {

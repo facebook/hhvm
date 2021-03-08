@@ -11,7 +11,7 @@ open Hh_prelude
 module Reason = Typing_reason
 module SN = Naming_special_names
 
-type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, ord, show]
+type pos_id = Reason.pos_id [@@deriving eq, ord, show]
 
 type ce_visibility =
   | Vpublic
@@ -41,9 +41,9 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase [@@deriving eq, show]
+type decl_phase = Reason.decl_phase [@@deriving eq, show]
 
-type locl_phase = private LoclPhase [@@deriving eq, show]
+type locl_phase = Reason.locl_phase [@@deriving eq, show]
 
 type val_kind =
   | Lval
@@ -208,7 +208,7 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
-type 'phase ty = Reason.t * 'phase ty_
+type 'phase ty = 'phase Reason.t_ * 'phase ty_
 
 and decl_ty = decl_phase ty
 
@@ -1105,9 +1105,10 @@ let get_reason (r, _) = r
 
 let get_node (_, n) = n
 
-let map_reason (r, ty) ~(f : Reason.t -> Reason.t) = (f r, ty)
+let map_reason (r, ty) ~(f : _ Reason.t_ -> _ Reason.t_) = (f r, ty)
 
-let map_ty (r, ty) ~(f : _ ty_ -> _ ty_) = (r, f ty)
+let map_ty : type ph. ph ty -> f:(ph ty_ -> ph ty_) -> ph ty =
+ (fun (r, ty) ~(f : _ ty_ -> _ ty_) -> (r, f ty))
 
 let with_reason ty r = map_reason ty ~f:(fun _r -> r)
 
@@ -1117,6 +1118,6 @@ let mk_constraint_type p = p
 
 let deref_constraint_type p = p
 
-let get_reason_i = function
+let get_reason_i : internal_type -> Reason.t = function
   | LoclType lty -> get_reason lty
   | ConstraintType (r, _) -> r

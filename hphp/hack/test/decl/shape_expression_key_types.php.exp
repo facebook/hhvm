@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,29 +1,26 @@
+@@ -1,24 +1,20 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -12,20 +12,15 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([4:16-19], "KEY");
-           scc_type =
-           (Rhint (root|shape_expression_key_types.php line 4, characters 9-14),
-            (Tprim Tstring));
-           scc_refs = [] };
+           scc_type = (Rhint ([4:9-15]), (Tprim Tstring)); scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([6:15-16], "X");
-            scc_type =
-            (Rhint (root|shape_expression_key_types.php line 6, characters 9-13),
-             Tmixed);
+-           scc_type = (Rhint ([6:9-14]), Tmixed);
 -           scc_refs =
 -           [((Aast_defs.From "\\C"), "KEY");
 -             ((Aast_defs.From "\\C"), "class")]
 -           }
-+           scc_refs = [] }
++           scc_type = (Rhint ([6:9-14]), Tmixed); scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

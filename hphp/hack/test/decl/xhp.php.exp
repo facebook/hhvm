@@ -46,7 +46,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|xhp.php line 7, characters 10-32),
+        (Rwitness_from_decl ([7:10-33]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -55,9 +55,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|xhp.php line 7, characters 34-36),
-                    (Tapply (([7:34-37], "\\xhp"), [])))
-                   };
+                   (Rhint ([7:34-37]), (Tapply (([7:34-37], "\\xhp"), []))) };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -68,9 +66,7 @@
               ft_implicit_params = { capability = (CapDefaults [7:10-33]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|xhp.php line 7, characters 43-46), (Tprim Tvoid))
-                };
+                et_type = (Rhint ([7:43-47]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

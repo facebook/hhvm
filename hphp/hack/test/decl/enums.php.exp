@@ -5,11 +5,9 @@
        sc_name = ([3:6-9], "\\Foo"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
-       [(Rhint (root|enums.php line 3, characters 6-8),
+       [(Rhint ([3:6-9]),
          (Tapply (([3:6-9], "\\HH\\BuiltinEnum"),
-            [(Rhint (root|enums.php line 3, characters 6-8),
-              (Tapply (([3:6-9], "\\Foo"), [])))]
-            )))
+            [(Rhint ([3:6-9]), (Tapply (([3:6-9], "\\Foo"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -17,34 +15,27 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false;
           scc_name = ([4:3-6], "FOO");
-          scc_type =
-          (Rwitness (root|enums.php line 4, characters 9-9), (Tprim Tint));
+          scc_type = (Rwitness_from_decl ([4:9-10]), (Tprim Tint));
           scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([5:3-6], "BAR");
-           scc_type =
-           (Rwitness (root|enums.php line 5, characters 9-10), (Tprim Tint));
+           scc_type = (Rwitness_from_decl ([5:9-11]), (Tprim Tint));
            scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([6:3-6], "BAZ");
-           scc_type =
-           (Rwitness (root|enums.php line 6, characters 3-5), Tany);
+           scc_type = (Rwitness_from_decl ([6:3-6]), Tany);
            scc_refs = [((Aast_defs.From "\\Foo"), "FOO")] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([7:3-6], "QUX");
-           scc_type =
-           (Rwitness (root|enums.php line 7, characters 3-5), Tany);
+           scc_type = (Rwitness_from_decl ([7:3-6]), Tany);
            scc_refs = [((Aast_defs.From "\\Foo"), "BAR")] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base =
-               (Rhint (root|enums.php line 3, characters 11-13), (Tprim Tint));
-               te_constraint =
-               (Some (Rhint (root|enums.php line 3, characters 18-20),
-                      (Tprim Tint)));
+       (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
+               te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
                te_includes = []; te_enum_class = false })
        }))
   ]

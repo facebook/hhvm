@@ -79,7 +79,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
   let fe_type =
     mk
-      ( Reason.Rwitness (fst f.f_name),
+      ( Reason.Rwitness_from_decl (fst f.f_name),
         Tfun
           {
             ft_arity = arity;
@@ -216,12 +216,14 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
     | None ->
       (match Decl_utils.infer_const value with
       | Some tprim ->
-        mk (Reason.Rwitness (Decl_env.make_decl_pos env value_pos), Tprim tprim)
+        mk
+          ( Reason.Rwitness_from_decl (Decl_env.make_decl_pos env value_pos),
+            Tprim tprim )
       (* A NAST check will take care of rejecting constants that have neither
        * an initializer nor a literal initializer *)
       | None ->
         mk
-          ( Reason.Rwitness (Decl_env.make_decl_pos env name_pos),
+          ( Reason.Rwitness_from_decl (Decl_env.make_decl_pos env name_pos),
             Typing_defs.make_tany () ))
   in
   { cd_pos = Decl_env.make_decl_pos env cst_span; cd_type }

@@ -1,35 +1,21 @@
 [("\\Ta",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_pos = [4:8-10]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
-       td_type =
-       (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 4, characters 13-15),
-        (Tprim Tint))
-       }));
+       td_constraint = None; td_type = (Rhint ([4:13-16]), (Tprim Tint)) }));
   ("\\Te",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [5:8-10]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 5, characters 13-18),
-         (Tprim Tstring))
+        td_constraint = None; td_type = (Rhint ([5:13-19]), (Tprim Tstring))
         }));
   ("\\NS\\Ta",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [9:8-10]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 9, characters 13-15),
-         (Tprim Tint))
-        }));
+        td_constraint = None; td_type = (Rhint ([9:13-16]), (Tprim Tint)) }));
   ("\\NS\\Te",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [10:8-10]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 10, characters 13-18),
-         (Tprim Tstring))
-        }));
+        td_type = (Rhint ([10:13-19]), (Tprim Tstring)) }));
   ("\\NS\\I",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -39,22 +25,16 @@
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([13:5-7], "Ta"); tp_tparams = [];
            tp_constraints =
-           [(Constraint_as,
-             (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 13, characters 11-18),
-              (Tprim Tarraykey)))
-             ];
+           [(Constraint_as, (Rhint ([13:11-19]), (Tprim Tarraykey)))];
            tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
             tp_name = ([14:5-7], "Tb"); tp_tparams = [];
             tp_constraints =
             [(Constraint_as,
-              (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 11-21),
+              (Rhint ([14:11-22]),
                (Tapply (([14:11-14], "\\HH\\Map"),
-                  [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 15-16),
-                    (Tgeneric ("Ta", [])));
-                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 19-20),
-                     (Tgeneric ("Te", [])))
-                    ]
+                  [(Rhint ([14:15-17]), (Tgeneric ("Ta", [])));
+                    (Rhint ([14:19-21]), (Tgeneric ("Te", [])))]
                   ))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
@@ -62,12 +42,10 @@
             tp_name = ([15:5-7], "Tc"); tp_tparams = [];
             tp_constraints =
             [(Constraint_as,
-              (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 11-23),
+              (Rhint ([15:11-24]),
                (Tapply (([15:11-14], "\\HH\\Map"),
-                  [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 15-17),
-                    (Tapply (([15:15-18], "\\Ta"), [])));
-                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 20-22),
-                     (Tapply (([15:20-23], "\\Te"), [])))
+                  [(Rhint ([15:15-18]), (Tapply (([15:15-18], "\\Ta"), [])));
+                    (Rhint ([15:20-23]), (Tapply (([15:20-23], "\\Te"), [])))
                     ]
                   ))))
               ];
@@ -76,11 +54,11 @@
             tp_name = ([16:5-7], "Td"); tp_tparams = [];
             tp_constraints =
             [(Constraint_as,
-              (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 11-29),
+              (Rhint ([16:11-30]),
                (Tapply (([16:11-14], "\\HH\\Map"),
-                  [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 15-20),
+                  [(Rhint ([16:15-21]),
                     (Tapply (([16:15-21], "\\NS\\Ta"), [])));
-                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 23-28),
+                    (Rhint ([16:23-29]),
                      (Tapply (([16:23-29], "\\NS\\Te"), [])))
                     ]
                   ))))

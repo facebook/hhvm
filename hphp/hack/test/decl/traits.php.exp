@@ -11,17 +11,14 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "doNothing");
           sm_type =
-          (Rwitness (root|traits.php line 4, characters 19-27),
+          (Rwitness_from_decl ([4:19-28]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:19-28]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|traits.php line 4, characters 32-35),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([4:32-36]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -37,8 +34,7 @@
         sc_name = ([7:7-16], "\\TMyTrait2"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = [];
         sc_uses =
-        [(Rhint (root|traits.php line 8, characters 7-14),
-          (Tapply (([8:7-15], "\\TMyTrait"), [])))];
+        [(Rhint ([8:7-15]), (Tapply (([8:7-15], "\\TMyTrait"), [])))];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -46,7 +42,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([10:19-32], "doMoreNothing");
            sm_type =
-           (Rwitness (root|traits.php line 10, characters 19-31),
+           (Rwitness_from_decl ([10:19-32]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -54,10 +50,7 @@
                  { capability = (CapDefaults [10:19-32]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|traits.php line 10, characters 36-39),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([10:36-40]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -79,7 +72,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([14:19-35], "doYetMoreNothing");
            sm_type =
-           (Rwitness (root|traits.php line 14, characters 19-34),
+           (Rwitness_from_decl ([14:19-35]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -87,10 +80,7 @@
                  { capability = (CapDefaults [14:19-35]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|traits.php line 14, characters 39-42),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([14:39-43]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -106,11 +96,8 @@
         sc_name = ([17:7-24], "\\MyTraitUsingClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = [];
         sc_uses =
-        [(Rhint (root|traits.php line 18, characters 7-15),
-          (Tapply (([18:7-16], "\\TMyTrait2"), [])));
-          (Rhint (root|traits.php line 19, characters 7-15),
-           (Tapply (([19:7-16], "\\TMyTrait3"), [])))
-          ];
+        [(Rhint ([18:7-16]), (Tapply (([18:7-16], "\\TMyTrait2"), [])));
+          (Rhint ([19:7-16]), (Tapply (([19:7-16], "\\TMyTrait3"), [])))];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

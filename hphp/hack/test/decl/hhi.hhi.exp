@@ -1,19 +1,16 @@
 [("\\X",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_pos = [3:6-7]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
-       td_type =
-       (Rhint (root|hhi.hhi line 3, characters 10-12), (Tprim Tint)) }));
+       td_constraint = None; td_type = (Rhint ([3:10-13]), (Tprim Tint)) }));
   ("\\Y",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [5:1-17];
-        cd_type = (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint))
-        }));
+        cd_type = (Rhint ([5:7-10]), (Tprim Tint)) }));
   ("\\f",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|hhi.hhi line 7, characters 10-10),
+        (Rwitness_from_decl ([7:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -21,10 +18,7 @@
               [{ fp_pos = [7:19-21]; fp_name = (Some "$s");
                  fp_type =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|hhi.hhi line 7, characters 12-17),
-                    (Tprim Tstring))
-                   };
+                   et_type = (Rhint ([7:12-18]), (Tprim Tstring)) };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -35,9 +29,7 @@
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|hhi.hhi line 7, characters 24-26), (Tprim Tint))
-                };
+                et_type = (Rhint ([7:24-27]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -56,7 +48,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([10:19-20], "g");
            sm_type =
-           (Rwitness (root|hhi.hhi line 10, characters 19-19),
+           (Rwitness_from_decl ([10:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = [];
@@ -65,8 +57,7 @@
                     fp_type =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|hhi.hhi line 10, characters 21-21),
-                       (Tapply (([10:21-22], "\\X"), [])))
+                      (Rhint ([10:21-22]), (Tapply (([10:21-22], "\\X"), [])))
                       };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -79,10 +70,7 @@
                  { capability = (CapDefaults [10:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|hhi.hhi line 10, characters 28-30),
-                    (Tprim Tint))
-                   };
+                   et_type = (Rhint ([10:28-31]), (Tprim Tint)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

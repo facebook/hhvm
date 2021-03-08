@@ -9,57 +9,76 @@
 
 class type ['a] decl_type_visitor_type =
   object
-    method on_tany : 'a -> Typing_reason.t -> 'a
+    method on_tany : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_terr : 'a -> Typing_reason.t -> 'a
+    method on_terr : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_tmixed : 'a -> Typing_reason.t -> 'a
+    method on_tmixed : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_tnonnull : 'a -> Typing_reason.t -> 'a
+    method on_tnonnull : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_tdynamic : 'a -> Typing_reason.t -> 'a
+    method on_tdynamic : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_tthis : 'a -> Typing_reason.t -> 'a
+    method on_tthis : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tvarray_or_darray :
-      'a -> Typing_reason.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_ty ->
+      'a
 
     method on_tvec_or_dict :
-      'a -> Typing_reason.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_ty ->
+      'a
 
-    method on_tvarray : 'a -> Typing_reason.t -> Typing_defs.decl_ty -> 'a
+    method on_tvarray : 'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
 
     method on_tdarray :
-      'a -> Typing_reason.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_ty ->
+      'a
 
     method on_tgeneric :
-      'a -> Typing_reason.t -> string -> Typing_defs.decl_ty list -> 'a
+      'a -> Typing_reason.decl_t -> string -> Typing_defs.decl_ty list -> 'a
 
-    method on_toption : 'a -> Typing_reason.t -> Typing_defs.decl_ty -> 'a
+    method on_toption : 'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
 
-    method on_tlike : 'a -> Typing_reason.t -> Typing_defs.decl_ty -> 'a
+    method on_tlike : 'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
 
-    method on_tprim : 'a -> Typing_reason.t -> Aast.tprim -> 'a
+    method on_tprim : 'a -> Typing_reason.decl_t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Typing_reason.t -> Ident.t -> 'a
+    method on_tvar : 'a -> Typing_reason.decl_t -> Ident.t -> 'a
 
     method on_type : 'a -> Typing_defs.decl_ty -> 'a
 
-    method on_tfun : 'a -> Typing_reason.t -> Typing_defs.decl_fun_type -> 'a
+    method on_tfun :
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_fun_type -> 'a
 
     method on_tapply :
-      'a -> Typing_reason.t -> Ast_defs.id -> Typing_defs.decl_ty list -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Ast_defs.id ->
+      Typing_defs.decl_ty list ->
+      'a
 
-    method on_ttuple : 'a -> Typing_reason.t -> Typing_defs.decl_ty list -> 'a
+    method on_ttuple :
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
 
-    method on_tunion : 'a -> Typing_reason.t -> Typing_defs.decl_ty list -> 'a
+    method on_tunion :
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
 
     method on_tintersection :
-      'a -> Typing_reason.t -> Typing_defs.decl_ty list -> 'a
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
 
     method on_tshape :
       'a ->
-      Typing_reason.t ->
+      Typing_reason.decl_t ->
       Typing_defs.shape_kind ->
       Typing_defs.decl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
@@ -67,7 +86,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_taccess :
       'a ->
-      Typing_reason.t ->
+      Typing_reason.decl_t ->
       Typing_defs.decl_phase Typing_defs.taccess_type ->
       'a
   end

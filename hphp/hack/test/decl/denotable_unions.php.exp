@@ -24,7 +24,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|denotable_unions.php line 9, characters 10-10),
+        (Rwitness_from_decl ([9:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -33,11 +33,10 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|denotable_unions.php line 9, characters 12-17),
+                   (Rhint ([9:12-18]),
                     (Tintersection
-                       [(Rhint (root|denotable_unions.php line 9, characters 13-13),
-                         (Tapply (([9:13-14], "\\I"), [])));
-                         (Rhint (root|denotable_unions.php line 9, characters 16-16),
+                       [(Rhint ([9:13-14]), (Tapply (([9:13-14], "\\I"), [])));
+                         (Rhint ([9:16-17]),
                           (Tapply (([9:16-17], "\\J"), [])))
                          ]))
                    };
@@ -51,10 +50,7 @@
               ft_implicit_params = { capability = (CapDefaults [9:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|denotable_unions.php line 9, characters 25-28),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([9:25-29]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -64,7 +60,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|denotable_unions.php line 10, characters 10-10),
+        (Rwitness_from_decl ([10:10-11]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -73,11 +69,11 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|denotable_unions.php line 10, characters 12-17),
+                   (Rhint ([10:12-18]),
                     (Tunion
-                       [(Rhint (root|denotable_unions.php line 10, characters 13-13),
+                       [(Rhint ([10:13-14]),
                          (Tapply (([10:13-14], "\\I"), [])));
-                         (Rhint (root|denotable_unions.php line 10, characters 16-16),
+                         (Rhint ([10:16-17]),
                           (Tapply (([10:16-17], "\\J"), [])))
                          ]))
                    };
@@ -91,10 +87,7 @@
               ft_implicit_params = { capability = (CapDefaults [10:10-11]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|denotable_unions.php line 10, characters 25-28),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([10:25-29]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

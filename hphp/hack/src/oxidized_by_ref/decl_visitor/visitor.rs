@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<206ce340fc1736dfd727a231510b9909>>
+// @generated SignedSource<<859090b2a21232738d30f6c3f19bb635>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -97,9 +97,6 @@ pub trait Visitor<'a> {
     fn visit_possibly_enforced_ty(&mut self, p: &'a PossiblyEnforcedTy<'a>) {
         p.recurse(self.object())
     }
-    fn visit_reason(&mut self, p: &'a Reason<'a>) {
-        p.recurse(self.object())
-    }
     fn visit_record_def_type(&mut self, p: &'a RecordDefType<'a>) {
         p.recurse(self.object())
     }
@@ -131,6 +128,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_tshape_field(&mut self, p: &'a TShapeField<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_t_(&mut self, p: &'a T_<'a>) {
         p.recurse(self.object())
     }
     fn visit_taccess_type(&mut self, p: &'a TaccessType<'a>) {

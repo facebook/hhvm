@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|ret_from_kind.php line 3, characters 16-28),
+       (Rwitness_from_decl ([3:16-29]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
@@ -10,11 +10,9 @@
              ft_ret =
              { et_enforced = false;
                et_type =
-               (Rret_fun_kind (root|ret_from_kind.php line 3, characters 16-28),
+               (Rret_fun_kind_from_decl ([3:16-29]),
                 (Tapply (([3:16-29], "\\HH\\Awaitable"),
-                   [(Rwitness (root|ret_from_kind.php line 3, characters 16-28),
-                     Tany)]
-                   )))
+                   [(Rwitness_from_decl ([3:16-29]), Tany)])))
                };
              ft_flags =
              (make_ft_flags FAsync ~return_disposable:false
@@ -25,7 +23,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+        (Rwitness_from_decl ([5:10-27]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -33,15 +31,11 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rret_fun_kind (root|ret_from_kind.php line 5, characters 10-26),
+                (Rret_fun_kind_from_decl ([5:10-27]),
                  (Tapply (([5:10-27], "\\Generator"),
-                    [(Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                      Tany);
-                      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                       Tany);
-                      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                       Tany)
-                      ]
+                    [(Rwitness_from_decl ([5:10-27]), Tany);
+                      (Rwitness_from_decl ([5:10-27]), Tany);
+                      (Rwitness_from_decl ([5:10-27]), Tany)]
                     )))
                 };
               ft_flags =
@@ -53,7 +47,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+        (Rwitness_from_decl ([9:16-39]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -61,15 +55,11 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rret_fun_kind (root|ret_from_kind.php line 9, characters 16-38),
+                (Rret_fun_kind_from_decl ([9:16-39]),
                  (Tapply (([9:16-39], "\\HH\\AsyncGenerator"),
-                    [(Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                      Tany);
-                      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                       Tany);
-                      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                       Tany)
-                      ]
+                    [(Rwitness_from_decl ([9:16-39]), Tany);
+                      (Rwitness_from_decl ([9:16-39]), Tany);
+                      (Rwitness_from_decl ([9:16-39]), Tany)]
                     )))
                 };
               ft_flags =

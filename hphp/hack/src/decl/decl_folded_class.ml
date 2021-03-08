@@ -679,7 +679,7 @@ and prop_decl
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> mk (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
+    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -715,7 +715,7 @@ and static_prop_decl
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> mk (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
+    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -755,7 +755,7 @@ and typeconst_structure
     (c : Shallow_decl_defs.shallow_class)
     (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
   let pos = fst stc.stc_name in
-  let r = Reason.Rwitness pos in
+  let r = Reason.Rwitness_from_decl pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
   let ts_ty =
     mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))

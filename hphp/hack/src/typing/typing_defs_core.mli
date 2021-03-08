@@ -10,7 +10,7 @@
 module Reason = Typing_reason
 module SN = Naming_special_names
 
-type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, ord, show]
+type pos_id = Reason.pos_id [@@deriving eq, ord, show]
 
 type ce_visibility =
   | Vpublic
@@ -39,9 +39,9 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase [@@deriving eq, show]
+type decl_phase = Typing_reason.decl_phase [@@deriving eq, show]
 
-type locl_phase = private LoclPhase [@@deriving eq, show]
+type locl_phase = Typing_reason.locl_phase [@@deriving eq, show]
 
 type val_kind =
   | Lval
@@ -588,21 +588,22 @@ type internal_type =
 (* Abstraction *)
 val compare_decl_ty : decl_ty -> decl_ty -> int
 
-val mk : Reason.t * 'phase ty_ -> 'phase ty
+val mk : 'phase Reason.t_ * 'phase ty_ -> 'phase ty
 
-val deref : 'phase ty -> Reason.t * 'phase ty_
+val deref : 'phase ty -> 'phase Reason.t_ * 'phase ty_
 
-val get_reason : 'phase ty -> Reason.t
+val get_reason : 'phase ty -> 'phase Reason.t_
 
 val get_node : 'phase ty -> 'phase ty_
 
-val with_reason : 'phase ty -> Reason.t -> 'phase ty
+val with_reason : 'phase ty -> 'phase Reason.t_ -> 'phase ty
 
 val get_pos : 'phase ty -> Pos_or_decl.t
 
-val map_reason : 'phase ty -> f:(Reason.t -> Reason.t) -> 'phase ty
+val map_reason :
+  'phase ty -> f:('phase Reason.t_ -> 'phase Reason.t_) -> 'phase ty
 
-val map_ty : 'ph1 ty -> f:('ph1 ty_ -> 'ph2 ty_) -> 'ph2 ty
+val map_ty : 'ph ty -> f:('ph ty_ -> 'ph ty_) -> 'ph ty
 
 val mk_constraint_type : Reason.t * constraint_type_ -> constraint_type
 

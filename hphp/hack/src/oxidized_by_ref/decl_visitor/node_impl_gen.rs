@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cabd86e81e100156ccac720588a5379>>
+// @generated SignedSource<<9bf61bb8fba6930ee5d17bfc5f9aa41e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -438,95 +438,6 @@ impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Reason<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_reason(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Reason::Rnone => {}
-            Reason::Rwitness(ref __binding_0) => __binding_0.accept(v),
-            Reason::Ridx(ref __binding_0) => __binding_0.accept(v),
-            Reason::RidxVector(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rforeach(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rasyncforeach(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rarith(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarithRet(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarithRetFloat(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarithRetNum(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarithRetInt(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarithDynamic(ref __binding_0) => __binding_0.accept(v),
-            Reason::RbitwiseDynamic(ref __binding_0) => __binding_0.accept(v),
-            Reason::RincdecDynamic(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rcomp(ref __binding_0) => __binding_0.accept(v),
-            Reason::RconcatRet(ref __binding_0) => __binding_0.accept(v),
-            Reason::RlogicRet(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rbitwise(ref __binding_0) => __binding_0.accept(v),
-            Reason::RbitwiseRet(ref __binding_0) => __binding_0.accept(v),
-            Reason::RnoReturn(ref __binding_0) => __binding_0.accept(v),
-            Reason::RnoReturnAsync(ref __binding_0) => __binding_0.accept(v),
-            Reason::RretFunKind(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rhint(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rthrow(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rplaceholder(ref __binding_0) => __binding_0.accept(v),
-            Reason::RretDiv(ref __binding_0) => __binding_0.accept(v),
-            Reason::RyieldGen(ref __binding_0) => __binding_0.accept(v),
-            Reason::RyieldAsyncgen(ref __binding_0) => __binding_0.accept(v),
-            Reason::RyieldAsyncnull(ref __binding_0) => __binding_0.accept(v),
-            Reason::RyieldSend(ref __binding_0) => __binding_0.accept(v),
-            Reason::RlostInfo(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rformat(ref __binding_0) => __binding_0.accept(v),
-            Reason::RclassClass(ref __binding_0) => __binding_0.accept(v),
-            Reason::RunknownClass(ref __binding_0) => __binding_0.accept(v),
-            Reason::RvarParam(ref __binding_0) => __binding_0.accept(v),
-            Reason::RunpackParam(ref __binding_0) => __binding_0.accept(v),
-            Reason::RinoutParam(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rinstantiate(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarrayFilter(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rtypeconst(ref __binding_0) => __binding_0.accept(v),
-            Reason::RtypeAccess(ref __binding_0) => __binding_0.accept(v),
-            Reason::RexprDepType(ref __binding_0) => __binding_0.accept(v),
-            Reason::RnullsafeOp(ref __binding_0) => __binding_0.accept(v),
-            Reason::RtconstNoCstr(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rpredicated(ref __binding_0) => __binding_0.accept(v),
-            Reason::Ris(ref __binding_0) => __binding_0.accept(v),
-            Reason::Ras(ref __binding_0) => __binding_0.accept(v),
-            Reason::RvarrayOrDarrayKey(ref __binding_0) => __binding_0.accept(v),
-            Reason::RvecOrDictKey(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rusing(ref __binding_0) => __binding_0.accept(v),
-            Reason::RdynamicProp(ref __binding_0) => __binding_0.accept(v),
-            Reason::RdynamicCall(ref __binding_0) => __binding_0.accept(v),
-            Reason::RdynamicConstruct(ref __binding_0) => __binding_0.accept(v),
-            Reason::RidxDict(ref __binding_0) => __binding_0.accept(v),
-            Reason::RsetElement(ref __binding_0) => __binding_0.accept(v),
-            Reason::RmissingRequiredField(ref __binding_0) => __binding_0.accept(v),
-            Reason::RmissingOptionalField(ref __binding_0) => __binding_0.accept(v),
-            Reason::RunsetField(ref __binding_0) => __binding_0.accept(v),
-            Reason::RcontravariantGeneric(ref __binding_0) => __binding_0.accept(v),
-            Reason::RinvariantGeneric(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rregex(ref __binding_0) => __binding_0.accept(v),
-            Reason::RimplicitUpperBound(ref __binding_0) => __binding_0.accept(v),
-            Reason::RtypeVariable(ref __binding_0) => __binding_0.accept(v),
-            Reason::RtypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
-            Reason::RsolveFail(ref __binding_0) => __binding_0.accept(v),
-            Reason::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
-            Reason::RlambdaParam(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rshape(ref __binding_0) => __binding_0.accept(v),
-            Reason::Renforceable(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rdestructure(ref __binding_0) => __binding_0.accept(v),
-            Reason::RkeyValueCollectionKey(ref __binding_0) => __binding_0.accept(v),
-            Reason::RglobalClassProp(ref __binding_0) => __binding_0.accept(v),
-            Reason::RglobalFunParam(ref __binding_0) => __binding_0.accept(v),
-            Reason::RglobalFunRet(ref __binding_0) => __binding_0.accept(v),
-            Reason::Rsplice(ref __binding_0) => __binding_0.accept(v),
-            Reason::RetBoolean(ref __binding_0) => __binding_0.accept(v),
-            Reason::RdefaultCapability(ref __binding_0) => __binding_0.accept(v),
-            Reason::RarrayUnification(ref __binding_0) => __binding_0.accept(v),
-            Reason::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
-            Reason::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
 impl<'a> Node<'a> for RecordDefType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_record_def_type(self)
@@ -842,6 +753,97 @@ impl<'a> Node<'a> for TShapeField<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             TShapeField(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for T_<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_t_(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            T_::Rnone => {}
+            T_::Rwitness(ref __binding_0) => __binding_0.accept(v),
+            T_::RwitnessFromDecl(ref __binding_0) => __binding_0.accept(v),
+            T_::Ridx(ref __binding_0) => __binding_0.accept(v),
+            T_::RidxVector(ref __binding_0) => __binding_0.accept(v),
+            T_::Rforeach(ref __binding_0) => __binding_0.accept(v),
+            T_::Rasyncforeach(ref __binding_0) => __binding_0.accept(v),
+            T_::Rarith(ref __binding_0) => __binding_0.accept(v),
+            T_::RarithRet(ref __binding_0) => __binding_0.accept(v),
+            T_::RarithRetFloat(ref __binding_0) => __binding_0.accept(v),
+            T_::RarithRetNum(ref __binding_0) => __binding_0.accept(v),
+            T_::RarithRetInt(ref __binding_0) => __binding_0.accept(v),
+            T_::RarithDynamic(ref __binding_0) => __binding_0.accept(v),
+            T_::RbitwiseDynamic(ref __binding_0) => __binding_0.accept(v),
+            T_::RincdecDynamic(ref __binding_0) => __binding_0.accept(v),
+            T_::Rcomp(ref __binding_0) => __binding_0.accept(v),
+            T_::RconcatRet(ref __binding_0) => __binding_0.accept(v),
+            T_::RlogicRet(ref __binding_0) => __binding_0.accept(v),
+            T_::Rbitwise(ref __binding_0) => __binding_0.accept(v),
+            T_::RbitwiseRet(ref __binding_0) => __binding_0.accept(v),
+            T_::RnoReturn(ref __binding_0) => __binding_0.accept(v),
+            T_::RnoReturnAsync(ref __binding_0) => __binding_0.accept(v),
+            T_::RretFunKind(ref __binding_0) => __binding_0.accept(v),
+            T_::RretFunKindFromDecl(ref __binding_0) => __binding_0.accept(v),
+            T_::Rhint(ref __binding_0) => __binding_0.accept(v),
+            T_::Rthrow(ref __binding_0) => __binding_0.accept(v),
+            T_::Rplaceholder(ref __binding_0) => __binding_0.accept(v),
+            T_::RretDiv(ref __binding_0) => __binding_0.accept(v),
+            T_::RyieldGen(ref __binding_0) => __binding_0.accept(v),
+            T_::RyieldAsyncgen(ref __binding_0) => __binding_0.accept(v),
+            T_::RyieldAsyncnull(ref __binding_0) => __binding_0.accept(v),
+            T_::RyieldSend(ref __binding_0) => __binding_0.accept(v),
+            T_::RlostInfo(ref __binding_0) => __binding_0.accept(v),
+            T_::Rformat(ref __binding_0) => __binding_0.accept(v),
+            T_::RclassClass(ref __binding_0) => __binding_0.accept(v),
+            T_::RunknownClass(ref __binding_0) => __binding_0.accept(v),
+            T_::RvarParam(ref __binding_0) => __binding_0.accept(v),
+            T_::RvarParamFromDecl(ref __binding_0) => __binding_0.accept(v),
+            T_::RunpackParam(ref __binding_0) => __binding_0.accept(v),
+            T_::RinoutParam(ref __binding_0) => __binding_0.accept(v),
+            T_::Rinstantiate(ref __binding_0) => __binding_0.accept(v),
+            T_::RarrayFilter(ref __binding_0) => __binding_0.accept(v),
+            T_::Rtypeconst(ref __binding_0) => __binding_0.accept(v),
+            T_::RtypeAccess(ref __binding_0) => __binding_0.accept(v),
+            T_::RexprDepType(ref __binding_0) => __binding_0.accept(v),
+            T_::RnullsafeOp(ref __binding_0) => __binding_0.accept(v),
+            T_::RtconstNoCstr(ref __binding_0) => __binding_0.accept(v),
+            T_::Rpredicated(ref __binding_0) => __binding_0.accept(v),
+            T_::Ris(ref __binding_0) => __binding_0.accept(v),
+            T_::Ras(ref __binding_0) => __binding_0.accept(v),
+            T_::RvarrayOrDarrayKey(ref __binding_0) => __binding_0.accept(v),
+            T_::RvecOrDictKey(ref __binding_0) => __binding_0.accept(v),
+            T_::Rusing(ref __binding_0) => __binding_0.accept(v),
+            T_::RdynamicProp(ref __binding_0) => __binding_0.accept(v),
+            T_::RdynamicCall(ref __binding_0) => __binding_0.accept(v),
+            T_::RdynamicConstruct(ref __binding_0) => __binding_0.accept(v),
+            T_::RidxDict(ref __binding_0) => __binding_0.accept(v),
+            T_::RsetElement(ref __binding_0) => __binding_0.accept(v),
+            T_::RmissingOptionalField(ref __binding_0) => __binding_0.accept(v),
+            T_::RunsetField(ref __binding_0) => __binding_0.accept(v),
+            T_::RcontravariantGeneric(ref __binding_0) => __binding_0.accept(v),
+            T_::RinvariantGeneric(ref __binding_0) => __binding_0.accept(v),
+            T_::Rregex(ref __binding_0) => __binding_0.accept(v),
+            T_::RimplicitUpperBound(ref __binding_0) => __binding_0.accept(v),
+            T_::RtypeVariable(ref __binding_0) => __binding_0.accept(v),
+            T_::RtypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
+            T_::RsolveFail(ref __binding_0) => __binding_0.accept(v),
+            T_::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
+            T_::RlambdaParam(ref __binding_0) => __binding_0.accept(v),
+            T_::Rshape(ref __binding_0) => __binding_0.accept(v),
+            T_::Renforceable(ref __binding_0) => __binding_0.accept(v),
+            T_::Rdestructure(ref __binding_0) => __binding_0.accept(v),
+            T_::RkeyValueCollectionKey(ref __binding_0) => __binding_0.accept(v),
+            T_::RglobalClassProp(ref __binding_0) => __binding_0.accept(v),
+            T_::RglobalFunParam(ref __binding_0) => __binding_0.accept(v),
+            T_::RglobalFunRet(ref __binding_0) => __binding_0.accept(v),
+            T_::Rsplice(ref __binding_0) => __binding_0.accept(v),
+            T_::RetBoolean(ref __binding_0) => __binding_0.accept(v),
+            T_::RdefaultCapability(ref __binding_0) => __binding_0.accept(v),
+            T_::RarrayUnification(ref __binding_0) => __binding_0.accept(v),
+            T_::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
+            T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

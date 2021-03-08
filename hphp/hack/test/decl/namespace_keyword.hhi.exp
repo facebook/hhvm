@@ -10,11 +10,9 @@
          ];
        sc_where_constraints = [];
        sc_extends =
-       [(Rhint (root|namespace_keyword.hhi line 5, characters 36-54),
+       [(Rhint ([5:36-55]),
          (Tapply (([5:36-51], "\\HH\\Traversable"),
-            [(Rhint (root|namespace_keyword.hhi line 5, characters 52-53),
-              (Tgeneric ("Tv", [])))]
-            )))
+            [(Rhint ([5:52-54]), (Tgeneric ("Tv", [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -34,11 +32,9 @@
           ];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|namespace_keyword.hhi line 7, characters 33-57),
+        [(Rhint ([7:33-58]),
           (Tapply (([7:33-54], "\\HH\\Rx\\Traversable"),
-             [(Rhint (root|namespace_keyword.hhi line 7, characters 55-56),
-               (Tgeneric ("Tv", [])))]
-             )))
+             [(Rhint ([7:55-57]), (Tgeneric ("Tv", [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];

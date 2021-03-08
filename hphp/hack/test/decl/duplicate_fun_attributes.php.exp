@@ -2,17 +2,14 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = (Some "The function f is deprecated: a");
        fe_type =
-       (Rwitness (root|duplicate_fun_attributes.php line 4, characters 10-10),
+       (Rwitness_from_decl ([4:10-11]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rwitness (root|duplicate_fun_attributes.php line 4, characters 10-10),
-                Tany)
-               };
+               et_type = (Rwitness_from_decl ([4:10-11]), Tany) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);

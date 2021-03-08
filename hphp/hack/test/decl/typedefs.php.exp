@@ -1,20 +1,16 @@
 [("\\MyNamespace\\MyString",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_pos = [7:8-16]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
-       td_type =
-       (Rhint (root|typedefs.php line 7, characters 19-24), (Tprim Tstring))
-       }));
+       td_constraint = None; td_type = (Rhint ([7:19-25]), (Tprim Tstring)) }));
   ("\\MyArray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [10:6-13]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 10, characters 16-31),
+        (Rhint ([10:16-32]),
          (Tvarray_or_darray
-            (Rvarray_or_darray_key (root|typedefs.php line 10, characters 16-31),
-             (Tprim Tarraykey)),
-            (Rhint (root|typedefs.php line 10, characters 16-31), Tany)))
+            (Rvarray_or_darray_key ([10:16-32]), (Tprim Tarraykey)),
+            (Rhint ([10:16-32]), Tany)))
         }));
   ("\\MyArray1",
    (Shallow_decl_defs.Typedef
@@ -26,10 +22,8 @@
           ];
         td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 11, characters 20-28),
-         (Tvarray
-            (Rhint (root|typedefs.php line 11, characters 27-27),
-             (Tgeneric ("T", [])))))
+        (Rhint ([11:20-29]),
+         (Tvarray (Rhint ([11:27-28]), (Tgeneric ("T", [])))))
         }));
   ("\\MyArray2",
    (Shallow_decl_defs.Typedef
@@ -46,13 +40,9 @@
           ];
         td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 12, characters 25-38),
-         (Tdarray (
-            (Rhint (root|typedefs.php line 12, characters 32-33),
-             (Tgeneric ("TK", []))),
-            (Rhint (root|typedefs.php line 12, characters 36-37),
-             (Tgeneric ("TV", [])))
-            )))
+        (Rhint ([12:25-39]),
+         (Tdarray ((Rhint ([12:32-34]), (Tgeneric ("TK", []))),
+            (Rhint ([12:36-38]), (Tgeneric ("TV", []))))))
         }));
   ("\\MyDarray",
    (Shallow_decl_defs.Typedef
@@ -69,13 +59,9 @@
           ];
         td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 13, characters 25-38),
-         (Tdarray (
-            (Rhint (root|typedefs.php line 13, characters 32-33),
-             (Tgeneric ("TK", []))),
-            (Rhint (root|typedefs.php line 13, characters 36-37),
-             (Tgeneric ("TV", [])))
-            )))
+        (Rhint ([13:25-39]),
+         (Tdarray ((Rhint ([13:32-34]), (Tgeneric ("TK", []))),
+            (Rhint ([13:36-38]), (Tgeneric ("TV", []))))))
         }));
   ("\\MyVarray",
    (Shallow_decl_defs.Typedef
@@ -87,10 +73,8 @@
           ];
         td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 14, characters 20-28),
-         (Tvarray
-            (Rhint (root|typedefs.php line 14, characters 27-27),
-             (Tgeneric ("T", [])))))
+        (Rhint ([14:20-29]),
+         (Tvarray (Rhint ([14:27-28]), (Tgeneric ("T", [])))))
         }));
   ("\\MyVarrayOrDarray",
    (Shallow_decl_defs.Typedef
@@ -107,100 +91,77 @@
           ];
         td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 15, characters 33-56),
-         (Tvarray_or_darray
-            (Rhint (root|typedefs.php line 15, characters 50-51),
-             (Tgeneric ("TK", []))),
-            (Rhint (root|typedefs.php line 15, characters 54-55),
-             (Tgeneric ("TV", [])))))
+        (Rhint ([15:33-57]),
+         (Tvarray_or_darray (Rhint ([15:50-52]), (Tgeneric ("TK", []))),
+            (Rhint ([15:54-56]), (Tgeneric ("TV", [])))))
         }));
   ("\\MyString",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [16:6-14]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 16, characters 17-22), (Tprim Tstring))
-        }));
+        td_type = (Rhint ([16:17-23]), (Tprim Tstring)) }));
   ("\\MyInt",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [17:6-11]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 17, characters 14-16), (Tprim Tint)) }));
+        td_type = (Rhint ([17:14-17]), (Tprim Tint)) }));
   ("\\MyFloat",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [18:6-13]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 18, characters 16-20), (Tprim Tfloat))
-        }));
+        td_type = (Rhint ([18:16-21]), (Tprim Tfloat)) }));
   ("\\MyNum",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [19:6-11]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 19, characters 14-16), (Tprim Tnum)) }));
+        td_type = (Rhint ([19:14-17]), (Tprim Tnum)) }));
   ("\\MyBool",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [20:6-12]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 20, characters 15-18), (Tprim Tbool))
-        }));
+        td_type = (Rhint ([20:15-19]), (Tprim Tbool)) }));
   ("\\MyMixed",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [21:6-13]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 21, characters 16-20), Tmixed) }));
+        td_type = (Rhint ([21:16-21]), Tmixed) }));
   ("\\MyNothing",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [22:6-15]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 22, characters 18-24), (Tunion [])) }));
+        td_type = (Rhint ([22:18-25]), (Tunion [])) }));
   ("\\MyNonnull",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [23:6-15]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 23, characters 18-24), Tnonnull) }));
+        td_type = (Rhint ([23:18-25]), Tnonnull) }));
   ("\\MyDynamic",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [24:6-15]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 24, characters 18-24), Tdynamic) }));
+        td_type = (Rhint ([24:18-25]), Tdynamic) }));
   ("\\MyArrayKey",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [25:6-16]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 25, characters 19-26),
-         (Tprim Tarraykey))
-        }));
+        td_type = (Rhint ([25:19-27]), (Tprim Tarraykey)) }));
   ("\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [27:6-22]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
         td_type =
-        (Rhint (root|typedefs.php line 27, characters 25-45),
+        (Rhint ([27:25-46]),
          (Tapply (([27:25-46], "\\MyNamespace\\MyString"), [])))
         }));
   ("\\MyNewtype",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [29:9-18]; td_vis = Opaque; td_tparams = [];
-        td_constraint =
-        (Some (Rhint (root|typedefs.php line 29, characters 22-24),
-               (Tprim Tnum)));
-        td_type =
-        (Rhint (root|typedefs.php line 29, characters 28-30), (Tprim Tint)) }));
+        td_constraint = (Some (Rhint ([29:22-25]), (Tprim Tnum)));
+        td_type = (Rhint ([29:28-31]), (Tprim Tint)) }));
   ("\\MyNewtypeWithoutConstraint",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [30:9-35]; td_vis = Opaque; td_tparams = [];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|typedefs.php line 30, characters 38-40), (Tprim Tint)) }))
+        td_constraint = None; td_type = (Rhint ([30:38-41]), (Tprim Tint)) }))
   ]
 
 They matched!

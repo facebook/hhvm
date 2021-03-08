@@ -11,17 +11,14 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([5:19-22], "foo");
           sm_type =
-          (Rwitness (root|deprecated.php line 5, characters 19-21),
+          (Rwitness_from_decl ([5:19-22]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|deprecated.php line 5, characters 26-29),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([5:26-30]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -33,7 +30,7 @@
           sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
-           (Rwitness (root|deprecated.php line 8, characters 19-21),
+           (Rwitness_from_decl ([8:19-22]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -41,10 +38,7 @@
                  { capability = (CapDefaults [8:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|deprecated.php line 8, characters 26-29),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([8:26-30]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -53,7 +47,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
-           (Rwitness (root|deprecated.php line 11, characters 19-21),
+           (Rwitness_from_decl ([11:19-22]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -61,10 +55,7 @@
                  { capability = (CapDefaults [11:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|deprecated.php line 11, characters 26-29),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([11:26-30]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -73,7 +64,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
-           (Rwitness (root|deprecated.php line 14, characters 19-22),
+           (Rwitness_from_decl ([14:19-23]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -81,10 +72,7 @@
                  { capability = (CapDefaults [14:19-23]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|deprecated.php line 14, characters 27-30),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([14:27-31]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -101,17 +89,14 @@
       { Typing_defs.fe_deprecated =
         (Some "The function foo is deprecated: use bar() instead");
         fe_type =
-        (Rwitness (root|deprecated.php line 18, characters 10-12),
+        (Rwitness_from_decl ([18:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:10-13]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|deprecated.php line 18, characters 17-20),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([18:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -121,17 +106,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|deprecated.php line 21, characters 10-12),
+        (Rwitness_from_decl ([21:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [21:10-13]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|deprecated.php line 21, characters 17-20),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([21:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -141,17 +123,14 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|deprecated.php line 24, characters 10-12),
+        (Rwitness_from_decl ([24:10-13]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [24:10-13]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|deprecated.php line 24, characters 17-20),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([24:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -162,17 +141,14 @@
       { Typing_defs.fe_deprecated =
         (Some "The function foo2 is deprecated: use bar2() instead");
         fe_type =
-        (Rwitness (root|deprecated.php line 27, characters 10-13),
+        (Rwitness_from_decl ([27:10-14]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [27:10-14]) };
               ft_ret =
               { et_enforced = false;
-                et_type =
-                (Rhint (root|deprecated.php line 27, characters 18-21),
-                 (Tprim Tvoid))
-                };
+                et_type = (Rhint ([27:18-22]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

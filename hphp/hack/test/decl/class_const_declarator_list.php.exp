@@ -9,16 +9,10 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false;
           scc_name = ([5:5-8], "FOO");
-          scc_type =
-          (Rhint (root|class_const_declarator_list.php line 4, characters 9-11),
-           (Tprim Tint));
-          scc_refs = [] };
+          scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([6:5-8], "BAR");
-           scc_type =
-           (Rhint (root|class_const_declarator_list.php line 4, characters 9-11),
-            (Tprim Tint));
-           scc_refs = [] }
+           scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -7,10 +7,7 @@
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_constraint = None;
-       td_type =
-       (Rhint (root|xhp_self.php line 3, characters 26-26),
-        (Tgeneric ("T", [])))
-       }));
+       td_type = (Rhint ([3:26-27]), (Tgeneric ("T", []))) }));
   ("\\:Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -23,14 +20,11 @@
         [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
            stc_as_constraint = None; stc_name = ([6:14-20], "TProps");
            stc_type =
-           (Some (Rhint (root|xhp_self.php line 6, characters 23-39),
+           (Some (Rhint ([6:23-40]),
                   (Tshape (Typing_defs_core.Closed_shape,
                      { (Typing_defs_core.TSFlit_str ([6:29-32], "x")) ->
                        { sft_optional = false;
-                         sft_ty =
-                         (Rhint (root|xhp_self.php line 6, characters 36-38),
-                          (Tprim Tint))
-                         } }
+                         sft_ty = (Rhint ([6:36-39]), (Tprim Tint)) } }
                      ))));
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
@@ -40,11 +34,11 @@
            (Some { Typing_defs_core.xa_tag = (Some Typing_defs_core.Required);
                    xa_has_default = false });
            sp_type =
-           (Some (Rhint (root|xhp_self.php line 8, characters 13-39),
+           (Some (Rhint ([8:13-40]),
                   (Tapply (([8:13-26], "\\REACT_XHP_FIX"),
-                     [(Rhint (root|xhp_self.php line 8, characters 27-38),
+                     [(Rhint ([8:27-39]),
                        (Taccess
-                          ((Rhint (root|xhp_self.php line 8, characters 27-38),
+                          ((Rhint ([8:27-39]),
                             (Tapply (([5:13-17], "\\:Foo"), []))),
                            [([8:33-39], "TProps")])))
                        ]
@@ -55,7 +49,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([10:22-30], "getProps");
            sm_type =
-           (Rwitness (root|xhp_self.php line 10, characters 22-29),
+           (Rwitness_from_decl ([10:22-30]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -64,9 +58,9 @@
                  ft_ret =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|xhp_self.php line 10, characters 34-45),
+                   (Rhint ([10:34-46]),
                     (Taccess
-                       ((Rhint (root|xhp_self.php line 10, characters 34-45),
+                       ((Rhint ([10:34-46]),
                          (Tapply (([5:13-17], "\\:Foo"), []))),
                         [([10:40-46], "TProps")])))
                    };

@@ -136,13 +136,14 @@ let rec localize ~ety_env env (dty : decl_ty) =
     else
       localize ~ety_env env ty
   in
-  match deref dty with
-  | (r, Terr) -> (env, TUtils.terr env r)
-  | (r, Tany _) -> (env, mk (r, TUtils.tany env))
-  | (r, Tvar _var) -> Env.new_global_tyvar env r
-  | (r, ((Tnonnull | Tprim _ | Tdynamic) as x)) -> (env, mk (r, x))
-  | (r, Tmixed) -> (env, MakeType.mixed r)
-  | (r, Tthis) ->
+  let r = get_reason dty |> Typing_reason.localize in
+  match get_node dty with
+  | Terr -> (env, TUtils.terr env r)
+  | Tany _ -> (env, mk (r, TUtils.tany env))
+  | Tvar _var -> Env.new_global_tyvar env r
+  | (Tnonnull | Tprim _ | Tdynamic) as x -> (env, mk (r, x))
+  | Tmixed -> (env, MakeType.mixed r)
+  | Tthis ->
     let ty =
       map_reason ety_env.this_ty ~f:(function
           | Reason.Rnone -> r
@@ -151,26 +152,26 @@ let rec localize ~ety_env env (dty : decl_ty) =
           | reason -> Reason.Rinstantiate (reason, SN.Typehints.this, r))
     in
     (env, ty)
-  | (r, Tdarray (tk, tv)) ->
+  | Tdarray (tk, tv) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     let ty = Tdarray (tk, tv) in
     (env, mk (r, ty))
-  | (r, Tvarray tv) ->
+  | Tvarray tv ->
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:0 in
     let ty = Tvarray tv in
     (env, mk (r, ty))
-  | (r, Tvarray_or_darray (tk, tv)) ->
+  | Tvarray_or_darray (tk, tv) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     (* Explicit decl Tvarray_or_darray should not exist when unification is true *)
     (env, MakeType.varray_or_darray ~unification:false r tk tv)
-  | (r, Tvec_or_dict (tk, tv)) ->
+  | Tvec_or_dict (tk, tv) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     let ty = Tvec_or_dict (tk, tv) in
     (env, mk (r, ty))
-  | (r, Tgeneric (x, targs)) ->
+  | Tgeneric (x, targs) ->
     let localize_tgeneric ?replace_with name r =
       match (targs, replace_with, Env.get_pos_and_kind_of_generic env name) with
       | (_, _, Some (_def_pos, kind)) ->
@@ -219,22 +220,22 @@ let rec localize ~ety_env env (dty : decl_ty) =
         end
       | None -> localize_tgeneric x r
     end
-  | (r, Toption ty) ->
+  | Toption ty ->
     let (env, ty) = localize ~ety_env env ty in
     TUtils.union env (MakeType.null r) ty
-  | (r, Tlike ty) ->
+  | Tlike ty ->
     let (env, ty) = localize ~ety_env env ty in
     let (env, lty) = TUtils.union env (MakeType.dynamic r) ty in
     (env, lty)
-  | (r, Tfun ft) ->
+  | Tfun ft ->
     let pos = Reason.to_pos r in
     let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
     (env, mk (r, Tfun ft))
-  | (r, Tapply ((_, x), [arg]))
+  | Tapply ((_, x), [arg])
     when String.equal x Naming_special_names.FB.cIncorrectType
          && Env.is_typedef env x ->
-    localize ~ety_env env (mk (r, Tlike arg))
-  | (r, Tapply (((_p, cid) as cls), argl)) ->
+    localize ~ety_env env (mk (get_reason dty, Tlike arg))
+  | Tapply (((_p, cid) as cls), argl) ->
     begin
       match Env.get_class_or_typedef env cid with
       | Some (Env.ClassResult class_info) ->
@@ -249,16 +250,16 @@ let rec localize ~ety_env env (dty : decl_ty) =
           (Some typedef_info)
       | None -> localize_class_instantiation ~ety_env env r cls argl None
     end
-  | (r, Ttuple tyl) ->
+  | Ttuple tyl ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, mk (r, Ttuple tyl))
-  | (r, Tunion tyl) ->
+  | Tunion tyl ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, mk (r, Tunion tyl))
-  | (r, Tintersection tyl) ->
+  | Tintersection tyl ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, mk (r, Tintersection tyl))
-  | (r, Taccess (root_ty, id)) ->
+  | Taccess (root_ty, id) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
     to allow accessing abstract type constants here. *)
     let rec allow_abstract_tconst ty =
@@ -301,7 +302,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     let ty = map_reason ty ~f:elaborate_reason in
     (env, ty)
-  | (r, Tshape (shape_kind, tym)) ->
+  | Tshape (shape_kind, tym) ->
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, mk (r, Tshape (shape_kind, tym)))
 
@@ -328,6 +329,7 @@ and localize_tparam_by_kind
     (env, ety_env) ty (nkind : KindDefs.Simple.named_kind) =
   match deref ty with
   | (r, Tapply ((_, x), _argl)) when String.equal x SN.Typehints.wildcard ->
+    let r = Typing_reason.localize r in
     let (name, kind) = nkind in
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
     let pos = get_reason ty |> Reason.to_pos in
@@ -468,6 +470,7 @@ and localize_with_kind
     | Aast_defs.Opaque -> true
   in
   let (r, dty_) = deref dty in
+  let r = Typing_reason.localize r in
   let arity = KindDefs.Simple.get_arity expected_kind in
   if Int.( = ) arity 0 then
     (* Not higher-kinded *)

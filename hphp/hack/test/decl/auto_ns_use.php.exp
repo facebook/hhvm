@@ -3,18 +3,17 @@
      { Typing_defs.td_pos = [5:10-19]; td_vis = Transparent; td_tparams = [];
        td_constraint = None;
        td_type =
-       (Rhint (root|auto_ns_use.php line 5, characters 22-42),
+       (Rhint ([5:22-43]),
         (Tapply (([5:22-26], "\\HH\\dict"),
-           [(Rhint (root|auto_ns_use.php line 5, characters 27-34),
-             (Tprim Tarraykey));
-             (Rhint (root|auto_ns_use.php line 5, characters 37-41), Tmixed)]
+           [(Rhint ([5:27-35]), (Tprim Tarraykey));
+             (Rhint ([5:37-42]), Tmixed)]
            )))
        }));
   ("\\make_dict",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|auto_ns_use.php line 8, characters 12-20),
+        (Rwitness_from_decl ([8:12-21]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -22,7 +21,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|auto_ns_use.php line 8, characters 25-38),
+                (Rhint ([8:25-39]),
                  (Tapply (([8:25-39], "\\HH\\Lib\\Dict\\MixedDict"), [])))
                 };
               ft_flags =
@@ -34,7 +33,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|auto_ns_use.php line 12, characters 12-20),
+        (Rwitness_from_decl ([12:12-21]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -43,7 +42,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|auto_ns_use.php line 12, characters 22-35),
+                   (Rhint ([12:22-36]),
                     (Tapply (([12:22-36], "\\HH\\Lib\\Dict\\MixedDict"), [])))
                    };
                  fp_flags =
@@ -55,10 +54,7 @@
                 { fp_pos = [12:50-52]; fp_name = (Some "$k");
                   fp_type =
                   { et_enforced = false;
-                    et_type =
-                    (Rhint (root|auto_ns_use.php line 12, characters 41-48),
-                     (Tprim Tarraykey))
-                    };
+                    et_type = (Rhint ([12:41-49]), (Tprim Tarraykey)) };
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -68,11 +64,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:12-21]) };
               ft_ret =
-              { et_enforced = false;
-                et_type =
-                (Rhint (root|auto_ns_use.php line 12, characters 55-59),
-                 Tmixed)
-                };
+              { et_enforced = false; et_type = (Rhint ([12:55-60]), Tmixed) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -83,7 +75,7 @@
       { Typing_defs.td_pos = [16:8-14]; td_vis = Transparent;
         td_tparams = []; td_constraint = None;
         td_type =
-        (Rhint (root|auto_ns_use.php line 16, characters 17-30),
+        (Rhint ([16:17-31]),
          (Tapply (([16:17-31], "\\HH\\Lib\\Dict\\MixedDict"), [])))
         }))
   ]

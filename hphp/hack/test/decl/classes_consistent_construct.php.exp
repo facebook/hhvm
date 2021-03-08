@@ -20,8 +20,7 @@
         sc_name = ([6:7-9], "\\C2"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|classes_consistent_construct.php line 6, characters 18-19),
-          (Tapply (([6:18-20], "\\C1"), [])))];
+        [(Rhint ([6:18-20]), (Tapply (([6:18-20], "\\C1"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -29,7 +28,7 @@
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([8:19-30], "__construct");
                 sm_type =
-                (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
+                (Rwitness_from_decl ([8:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
@@ -38,7 +37,7 @@
                          fp_type =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|classes_consistent_construct.php line 8, characters 31-31),
+                           (Rhint ([8:31-32]),
                             (Tapply (([8:31-32], "\\A"), [])))
                            };
                          fp_flags =
@@ -54,9 +53,7 @@
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
-                         (Tprim Tvoid))
-                        };
+                        (Rwitness_from_decl ([8:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false

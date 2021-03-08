@@ -2,17 +2,14 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|async_and_generator_functions.php line 3, characters 10-22),
+       (Rwitness_from_decl ([3:10-23]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-23]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rhint (root|async_and_generator_functions.php line 3, characters 27-30),
-                (Tprim Tvoid))
-               };
+               et_type = (Rhint ([3:27-31]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -22,7 +19,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|async_and_generator_functions.php line 5, characters 16-29),
+        (Rwitness_from_decl ([5:16-30]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -30,11 +27,9 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|async_and_generator_functions.php line 5, characters 34-50),
+                (Rhint ([5:34-51]),
                  (Tapply (([5:34-43], "\\HH\\Awaitable"),
-                    [(Rhint (root|async_and_generator_functions.php line 5, characters 44-49),
-                      (Tprim Tstring))]
-                    )))
+                    [(Rhint ([5:44-50]), (Tprim Tstring))])))
                 };
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
@@ -45,7 +40,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|async_and_generator_functions.php line 10, characters 10-27),
+        (Rwitness_from_decl ([10:10-28]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -53,15 +48,11 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|async_and_generator_functions.php line 10, characters 32-59),
+                (Rhint ([10:32-60]),
                  (Tapply (([10:32-41], "\\Generator"),
-                    [(Rhint (root|async_and_generator_functions.php line 10, characters 42-47),
-                      (Tprim Tstring));
-                      (Rhint (root|async_and_generator_functions.php line 10, characters 50-52),
-                       (Tprim Tint));
-                      (Rhint (root|async_and_generator_functions.php line 10, characters 55-58),
-                       (Tprim Tvoid))
-                      ]
+                    [(Rhint ([10:42-48]), (Tprim Tstring));
+                      (Rhint ([10:50-53]), (Tprim Tint));
+                      (Rhint ([10:55-59]), (Tprim Tvoid))]
                     )))
                 };
               ft_flags =
@@ -73,7 +64,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|async_and_generator_functions.php line 14, characters 10-40),
+        (Rwitness_from_decl ([14:10-41]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -81,15 +72,11 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|async_and_generator_functions.php line 14, characters 45-72),
+                (Rhint ([14:45-73]),
                  (Tapply (([14:45-54], "\\Generator"),
-                    [(Rhint (root|async_and_generator_functions.php line 14, characters 55-57),
-                      (Tprim Tint));
-                      (Rhint (root|async_and_generator_functions.php line 14, characters 60-65),
-                       (Tprim Tstring));
-                      (Rhint (root|async_and_generator_functions.php line 14, characters 68-71),
-                       (Tprim Tvoid))
-                      ]
+                    [(Rhint ([14:55-58]), (Tprim Tint));
+                      (Rhint ([14:60-66]), (Tprim Tstring));
+                      (Rhint ([14:68-72]), (Tprim Tvoid))]
                     )))
                 };
               ft_flags =
@@ -101,7 +88,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|async_and_generator_functions.php line 18, characters 16-30),
+        (Rwitness_from_decl ([18:16-31]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
@@ -109,15 +96,11 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|async_and_generator_functions.php line 18, characters 35-67),
+                (Rhint ([18:35-68]),
                  (Tapply (([18:35-49], "\\HH\\AsyncGenerator"),
-                    [(Rhint (root|async_and_generator_functions.php line 18, characters 50-52),
-                      (Tprim Tint));
-                      (Rhint (root|async_and_generator_functions.php line 18, characters 55-60),
-                       (Tprim Tstring));
-                      (Rhint (root|async_and_generator_functions.php line 18, characters 63-66),
-                       (Tprim Tvoid))
-                      ]
+                    [(Rhint ([18:50-53]), (Tprim Tint));
+                      (Rhint ([18:55-61]), (Tprim Tstring));
+                      (Rhint ([18:63-67]), (Tprim Tvoid))]
                     )))
                 };
               ft_flags =

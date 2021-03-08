@@ -1021,7 +1021,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
   let global_reason =
     match (gl1, gl2) with
     | (Some r1, Some r2) ->
-      if Reason.(equal r1 none) then
+      if Reason.is_none r1 then
         Some r2
       else
         Some r1

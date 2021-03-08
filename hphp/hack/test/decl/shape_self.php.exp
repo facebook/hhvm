@@ -9,24 +9,18 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = false;
           scc_name = ([4:16-19], "KEY");
-          scc_type =
-          (Rhint (root|shape_self.php line 4, characters 9-14),
-           (Tprim Tstring));
-          scc_refs = [] }
+          scc_type = (Rhint ([4:9-15]), (Tprim Tstring)); scc_refs = [] }
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
           stc_as_constraint = None; stc_name = ([6:14-24], "TClassType");
           stc_type =
-          (Some (Rhint (root|shape_self.php line 6, characters 27-58),
+          (Some (Rhint ([6:27-8:4]),
                  (Tshape (Typing_defs_core.Closed_shape,
                     { (Typing_defs_core.TSFclass_const (
                          ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
                       { sft_optional = false;
-                        sft_ty =
-                        (Rhint (root|shape_self.php line 7, characters 18-20),
-                         (Tprim Tint))
-                        } }
+                        sft_ty = (Rhint ([7:18-21]), (Tprim Tint)) } }
                     ))));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];

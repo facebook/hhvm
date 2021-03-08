@@ -1783,9 +1783,11 @@ and expr_
       let params =
         List.map (Cls.tparams class_) (fun { tp_name = (p, n); _ } ->
             (* TODO(T69551141) handle type arguments for Tgeneric *)
-            MakeType.generic (Reason.Rwitness p) n)
+            MakeType.generic (Reason.Rwitness_from_decl p) n)
       in
-      let obj_type = MakeType.apply (Reason.Rwitness p) pos_cname params in
+      let obj_type =
+        MakeType.apply (Reason.Rwitness_from_decl p) pos_cname params
+      in
       let ety_env =
         {
           (Phase.env_with_self env) with
@@ -1942,8 +1944,9 @@ and expr_
             on_error = Errors.unify_error_at p;
           }
         in
-        (match deref ty with
-        | (r, Tfun ft) ->
+        let r = get_reason ty |> Typing_reason.localize in
+        (match get_node ty with
+        | Tfun ft ->
           let ft =
             Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
           in
@@ -1985,7 +1988,7 @@ and expr_
           | Vprotected _ ->
             Errors.protected_class_meth ~def_pos ~use_pos;
             expr_error env r outer)
-        | (r, _) ->
+        | _ ->
           Errors.internal_error p "We have a method which isn't callable";
           expr_error env r outer)))
   | Lplaceholder p ->
@@ -2284,13 +2287,15 @@ and expr_
               begin
                 fun { tp_name = (p, x); _ } ->
                 (* TODO(T69551141) handle type arguments for Tgeneric *)
-                MakeType.generic (Reason.Rwitness p) x
+                MakeType.generic (Reason.Rwitness_from_decl p) x
               end
             tparaml
         in
-        let tdef = mk (Reason.Rwitness p, Tapply (sid, params)) in
+        let tdef = mk (Reason.Rwitness_from_decl p, Tapply (sid, params)) in
         let typename =
-          mk (Reason.Rwitness p, Tapply ((p, SN.Classes.cTypename), [tdef]))
+          mk
+            ( Reason.Rwitness_from_decl p,
+              Tapply ((p, SN.Classes.cTypename), [tdef]) )
         in
         let (env, tparams) =
           List.map_env env tparaml (fun env tp ->
@@ -5127,7 +5132,7 @@ and fun_type_of_id env x tal el =
             env
             ft)
       in
-      let fty = mk (get_reason fe_type, Tfun ft) in
+      let fty = mk (get_reason fe_type |> Typing_reason.localize, Tfun ft) in
       TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
       (env, fty, tal)
     | _ -> failwith "Expected function type")
@@ -5426,7 +5431,10 @@ and class_get_
                     env
                     ft)
               in
-              (env, mk (r, Tfun ft), false, explicit_targs)
+              ( env,
+                mk (Typing_reason.localize r, Tfun ft),
+                false,
+                explicit_targs )
             (* unused *)
             | _ ->
               let { et_type; et_enforced } =
@@ -5818,8 +5826,9 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
     (* Obtain the type of the constructor *)
     let (env, m) =
-      match deref m with
-      | (r, Tfun ft) ->
+      let r = get_reason m |> Typing_reason.localize in
+      match get_node m with
+      | Tfun ft ->
         let ft =
           Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
         in
@@ -5853,7 +5862,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
               ft)
         in
         (env, mk (r, Tfun ft))
-      | (r, _) ->
+      | _ ->
         Errors.internal_error p "Expected function type for constructor";
         let ty = TUtils.terr env r in
         (env, ty)

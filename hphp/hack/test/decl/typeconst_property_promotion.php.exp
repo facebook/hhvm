@@ -9,26 +9,21 @@
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
           stc_as_constraint = None; stc_name = ([4:14-15], "T");
-          stc_type =
-          (Some (Rhint (root|typeconst_property_promotion.php line 4, characters 18-20),
-                 (Tprim Tint)));
+          stc_type = (Some (Rhint ([4:18-21]), (Tprim Tint)));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([6:21-23], "a"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint (root|typeconst_property_promotion.php line 6, characters 13-19),
-                 (Taccess
-                    ((Rhint (root|typeconst_property_promotion.php line 6, characters 13-19),
-                      Tthis),
-                     [([6:19-20], "T")]))));
+          (Some (Rhint ([6:13-20]),
+                 (Taccess ((Rhint ([6:13-20]), Tthis), [([6:19-20], "T")]))));
           sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_sprops = [];
        sc_constructor =
        (Some { Shallow_decl_defs.sm_name = ([5:19-30], "__construct");
                sm_type =
-               (Rwitness (root|typeconst_property_promotion.php line 5, characters 19-29),
+               (Rwitness_from_decl ([5:19-30]),
                 (Tfun
                    { ft_arity = (Fstandard ()); ft_tparams = [];
                      ft_where_constraints = [];
@@ -37,11 +32,9 @@
                         fp_type =
                         { et_enforced = false;
                           et_type =
-                          (Rhint (root|typeconst_property_promotion.php line 6, characters 13-19),
+                          (Rhint ([6:13-20]),
                            (Taccess
-                              ((Rhint (root|typeconst_property_promotion.php line 6, characters 13-19),
-                                Tthis),
-                               [([6:19-20], "T")])))
+                              ((Rhint ([6:13-20]), Tthis), [([6:19-20], "T")])))
                           };
                         fp_flags =
                         (make_fp_flags ~accept_disposable:false
@@ -56,9 +49,7 @@
                      ft_ret =
                      { et_enforced = false;
                        et_type =
-                       (Rwitness (root|typeconst_property_promotion.php line 5, characters 19-29),
-                        (Tprim Tvoid))
-                       };
+                       (Rwitness_from_decl ([5:19-30]), (Tprim Tvoid)) };
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
                        ~returns_readonly:false ~readonly_this:false

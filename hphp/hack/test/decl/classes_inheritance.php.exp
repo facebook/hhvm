@@ -11,17 +11,14 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-20], "a");
           sm_type =
-          (Rwitness (root|classes_inheritance.php line 4, characters 19-19),
+          (Rwitness_from_decl ([4:19-20]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|classes_inheritance.php line 4, characters 24-27),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([4:24-28]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -30,7 +27,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([5:19-20], "b");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 5, characters 19-19),
+           (Rwitness_from_decl ([5:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -38,10 +35,7 @@
                  { capability = (CapDefaults [5:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 5, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([5:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -56,9 +50,7 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([8:7-8], "\\B"); sc_tparams = [];
         sc_where_constraints = [];
-        sc_extends =
-        [(Rhint (root|classes_inheritance.php line 8, characters 17-17),
-          (Tapply (([8:17-18], "\\A"), [])))];
+        sc_extends = [(Rhint ([8:17-18]), (Tapply (([8:17-18], "\\A"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -67,7 +59,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([9:19-20], "b");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 9, characters 19-19),
+           (Rwitness_from_decl ([9:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -75,10 +67,7 @@
                  { capability = (CapDefaults [9:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 9, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([9:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -87,7 +76,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
           { Shallow_decl_defs.sm_name = ([10:19-20], "c");
             sm_type =
-            (Rwitness (root|classes_inheritance.php line 10, characters 19-19),
+            (Rwitness_from_decl ([10:19-20]),
              (Tfun
                 { ft_arity = (Fstandard ()); ft_tparams = [];
                   ft_where_constraints = []; ft_params = [];
@@ -95,10 +84,7 @@
                   { capability = (CapDefaults [10:19-20]) };
                   ft_ret =
                   { et_enforced = false;
-                    et_type =
-                    (Rhint (root|classes_inheritance.php line 10, characters 24-27),
-                     (Tprim Tvoid))
-                    };
+                    et_type = (Rhint ([10:24-28]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~readonly_this:false
@@ -121,7 +107,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([14:19-20], "c");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 14, characters 19-19),
+           (Rwitness_from_decl ([14:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -129,10 +115,7 @@
                  { capability = (CapDefaults [14:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 14, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([14:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -149,8 +132,7 @@
         sc_name = ([17:11-12], "\\D"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|classes_inheritance.php line 17, characters 21-21),
-          (Tapply (([17:21-22], "\\C"), [])))];
+        [(Rhint ([17:21-22]), (Tapply (([17:21-22], "\\C"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -159,7 +141,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([18:19-20], "d");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 18, characters 19-19),
+           (Rwitness_from_decl ([18:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -167,10 +149,7 @@
                  { capability = (CapDefaults [18:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 18, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([18:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -188,15 +167,14 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements =
-        [(Rhint (root|classes_inheritance.php line 21, characters 20-20),
-          (Tapply (([21:20-21], "\\C"), [])))];
+        [(Rhint ([21:20-21]), (Tapply (([21:20-21], "\\C"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([22:19-20], "c");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 22, characters 19-19),
+           (Rwitness_from_decl ([22:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -204,10 +182,7 @@
                  { capability = (CapDefaults [22:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 22, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([22:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -223,20 +198,18 @@
         sc_name = ([25:7-8], "\\F"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|classes_inheritance.php line 25, characters 17-17),
-          (Tapply (([25:17-18], "\\E"), [])))];
+        [(Rhint ([25:17-18]), (Tapply (([25:17-18], "\\E"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = [];
         sc_implements =
-        [(Rhint (root|classes_inheritance.php line 25, characters 30-30),
-          (Tapply (([25:30-31], "\\D"), [])))];
+        [(Rhint ([25:30-31]), (Tapply (([25:30-31], "\\D"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([26:19-20], "d");
            sm_type =
-           (Rwitness (root|classes_inheritance.php line 26, characters 19-19),
+           (Rwitness_from_decl ([26:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -244,10 +217,7 @@
                  { capability = (CapDefaults [26:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_inheritance.php line 26, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([26:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

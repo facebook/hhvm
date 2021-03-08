@@ -172,11 +172,11 @@ let autocomplete_shape_key env fields id =
       let (code, kind, ty) =
         match name with
         | Typing_defs.TSFlit_int (pos, str) ->
-          let reason = Typing_reason.Rwitness pos in
+          let reason = Typing_reason.Rwitness_from_decl pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
           (str, SI_Literal, Typing_defs.mk (reason, ty))
         | Typing_defs.TSFlit_str (pos, str) ->
-          let reason = Typing_reason.Rwitness pos in
+          let reason = Typing_reason.Rwitness_from_decl pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote =
             if have_prefix then
@@ -188,7 +188,8 @@ let autocomplete_shape_key env fields id =
         | Typing_defs.TSFclass_const ((pos, cid), (_, mid)) ->
           ( Printf.sprintf "%s::%s" cid mid,
             SI_ClassConstant,
-            Typing_defs.mk (Reason.Rwitness pos, Typing_defs.make_tany ()) )
+            Typing_defs.mk
+              (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) )
       in
       if (not have_prefix) || string_starts_with code prefix then
         add_partial_result code (Phase.decl ty) kind None

@@ -1,8 +1,7 @@
 [("\\X",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [3:1-21];
-       cd_type =
-       (Rwitness (root|const_tany.php line 3, characters 7-7), Tany) }))
+       cd_type = (Rwitness_from_decl ([3:7-8]), Tany) }))
   ]
 
 They matched!

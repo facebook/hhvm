@@ -11,17 +11,14 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "openDoors");
           sm_type =
-          (Rwitness (root|classes_require.php line 4, characters 19-27),
+          (Rwitness_from_decl ([4:19-28]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:19-28]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|classes_require.php line 4, characters 32-35),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([4:32-36]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -30,7 +27,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
            sm_type =
-           (Rwitness (root|classes_require.php line 5, characters 19-28),
+           (Rwitness_from_decl ([5:19-29]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -38,10 +35,7 @@
                  { capability = (CapDefaults [5:19-29]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_require.php line 5, characters 33-36),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([5:33-37]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -63,7 +57,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([9:19-22], "fly");
            sm_type =
-           (Rwitness (root|classes_require.php line 9, characters 19-21),
+           (Rwitness_from_decl ([9:19-22]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -71,10 +65,7 @@
                  { capability = (CapDefaults [9:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_require.php line 9, characters 26-29),
-                    (Tprim Tbool))
-                   };
+                   et_type = (Rhint ([9:26-30]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -92,18 +83,16 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = [];
         sc_req_extends =
-        [(Rhint (root|classes_require.php line 13, characters 19-25),
-          (Tapply (([13:19-26], "\\Machine"), [])))];
+        [(Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), [])))];
         sc_req_implements =
-        [(Rhint (root|classes_require.php line 14, characters 22-27),
-          (Tapply (([14:22-28], "\\Fliers"), [])))];
+        [(Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), [])))];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([16:19-26], "takeOff");
            sm_type =
-           (Rwitness (root|classes_require.php line 16, characters 19-25),
+           (Rwitness_from_decl ([16:19-26]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -111,10 +100,7 @@
                  { capability = (CapDefaults [16:19-26]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_require.php line 16, characters 30-33),
-                    (Tprim Tbool))
-                   };
+                   et_type = (Rhint ([16:30-34]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -130,22 +116,19 @@
         sc_name = ([23:7-13], "\\AirBus"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
-        [(Rhint (root|classes_require.php line 23, characters 22-28),
-          (Tapply (([23:22-29], "\\Machine"), [])))];
+        [(Rhint ([23:22-29]), (Tapply (([23:22-29], "\\Machine"), [])))];
         sc_uses =
-        [(Rhint (root|classes_require.php line 24, characters 7-11),
-          (Tapply (([24:7-12], "\\Plane"), [])))];
+        [(Rhint ([24:7-12]), (Tapply (([24:7-12], "\\Plane"), [])))];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements =
-        [(Rhint (root|classes_require.php line 23, characters 41-46),
-          (Tapply (([23:41-47], "\\Fliers"), [])))];
+        [(Rhint ([23:41-47]), (Tapply (([23:41-47], "\\Fliers"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([26:19-22], "fly");
            sm_type =
-           (Rwitness (root|classes_require.php line 26, characters 19-21),
+           (Rwitness_from_decl ([26:19-22]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -153,10 +136,7 @@
                  { capability = (CapDefaults [26:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes_require.php line 26, characters 26-29),
-                    (Tprim Tbool))
-                   };
+                   et_type = (Rhint ([26:26-30]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

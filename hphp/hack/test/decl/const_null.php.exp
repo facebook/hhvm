@@ -1,10 +1,7 @@
 [("\\MUST_PREPARE",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [3:1-27];
-       cd_type =
-       (Rwitness (root|const_null.php line 3, characters 22-25),
-        (Tprim Tnull))
-       }))
+       cd_type = (Rwitness_from_decl ([3:22-26]), (Tprim Tnull)) }))
   ]
 
 They matched!

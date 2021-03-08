@@ -417,7 +417,7 @@ let rec always_solve_tyvar_down ~freshen env r var on_error =
     env
   else
     let r =
-      if Reason.(equal r Rnone) then
+      if Reason.is_none r then
         Reason.Rwitness (Env.get_tyvar_pos env var)
       else
         r
@@ -451,7 +451,7 @@ let solve_tyvar_wrt_variance env r var on_error =
     env
   else
     let r =
-      if Reason.equal r Reason.Rnone then
+      if Reason.is_none r then
         Reason.Rwitness (Env.get_tyvar_pos env var)
       else
         r

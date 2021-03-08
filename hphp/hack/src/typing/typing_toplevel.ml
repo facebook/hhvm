@@ -1151,9 +1151,9 @@ let class_constr_def env cls constructor =
 let class_implements_type env implements c1 ctype2 =
   let params =
     List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness p, Tgeneric (s, [])))
+        mk (Reason.Rwitness_from_decl p, Tgeneric (s, [])))
   in
-  let r = Reason.Rwitness (fst c1.c_name) in
+  let r = Reason.Rwitness_from_decl (fst c1.c_name) in
   let ctype1 = mk (r, Tapply (c1.c_name, params)) in
   Typing_extends.check_implements env implements ctype2 ctype1
 

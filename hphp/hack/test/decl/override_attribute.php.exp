@@ -11,17 +11,14 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-20], "f");
           sm_type =
-          (Rwitness (root|override_attribute.php line 4, characters 19-19),
+          (Rwitness_from_decl ([4:19-20]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|override_attribute.php line 4, characters 24-27),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([4:24-28]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -36,9 +33,7 @@
         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
         sc_name = ([7:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = [];
-        sc_extends =
-        [(Rhint (root|override_attribute.php line 7, characters 17-17),
-          (Tapply (([7:17-18], "\\B"), [])))];
+        sc_extends = [(Rhint ([7:17-18]), (Tapply (([7:17-18], "\\B"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
@@ -47,7 +42,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([9:19-20], "f");
            sm_type =
-           (Rwitness (root|override_attribute.php line 9, characters 19-19),
+           (Rwitness_from_decl ([9:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -55,10 +50,7 @@
                  { capability = (CapDefaults [9:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|override_attribute.php line 9, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([9:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

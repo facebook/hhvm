@@ -16,7 +16,7 @@ val has_constfun_attribute : Nast.user_attribute list -> bool
 val hint_to_type_opt :
   is_lambda:bool ->
   Decl_env.env ->
-  Typing_reason.t ->
+  Typing_reason.decl_t ->
   Nast.xhp_attr_hint option ->
   Typing_defs.decl_ty option
 

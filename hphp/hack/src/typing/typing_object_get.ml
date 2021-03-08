@@ -409,7 +409,7 @@ let rec obj_get_concrete_ty
                       env
                       ft)
                 in
-                let ft_ty = mk (r, Tfun ft) in
+                let ft_ty = mk (Typing_reason.localize r, Tfun ft) in
                 (env, ft_ty, explicit_targs, false)
               | _ ->
                 let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in

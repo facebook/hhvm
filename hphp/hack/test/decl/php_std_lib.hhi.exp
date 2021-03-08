@@ -2,17 +2,14 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
        fe_type =
-       (Rwitness (root|php_std_lib.hhi line 4, characters 10-10),
+       (Rwitness_from_decl ([4:10-11]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
              ft_ret =
              { et_enforced = false;
-               et_type =
-               (Rhint (root|php_std_lib.hhi line 4, characters 15-18),
-                (Tprim Tvoid))
-               };
+               et_type = (Rhint ([4:15-19]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~readonly_this:false ~is_const:false);
@@ -30,27 +27,23 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:16-18], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint (root|php_std_lib.hhi line 9, characters 11-14),
-                  (Toption
-                     (Rhint (root|php_std_lib.hhi line 9, characters 12-14),
-                      (Tprim Tint)))));
+           (Some (Rhint ([9:11-15]),
+                  (Toption (Rhint ([9:12-15]), (Tprim Tint)))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_sprops =
         [{ Shallow_decl_defs.sp_name = ([12:23-25], "$y");
            sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint (root|php_std_lib.hhi line 12, characters 18-21),
-                  (Toption
-                     (Rhint (root|php_std_lib.hhi line 12, characters 19-21),
-                      (Tprim Tint)))));
+           (Some (Rhint ([12:18-22]),
+                  (Toption (Rhint ([12:19-22]), (Tprim Tint)))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_constructor = None;
         sc_static_methods =
         [{ Shallow_decl_defs.sm_name = ([18:26-27], "g");
            sm_type =
-           (Rwitness (root|php_std_lib.hhi line 18, characters 26-26),
+           (Rwitness_from_decl ([18:26-27]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -58,10 +51,7 @@
                  { capability = (CapDefaults [18:26-27]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|php_std_lib.hhi line 18, characters 31-34),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([18:31-35]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -73,7 +63,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:19-20], "f");
            sm_type =
-           (Rwitness (root|php_std_lib.hhi line 15, characters 19-19),
+           (Rwitness_from_decl ([15:19-20]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -81,10 +71,7 @@
                  { capability = (CapDefaults [15:19-20]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|php_std_lib.hhi line 15, characters 24-27),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([15:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

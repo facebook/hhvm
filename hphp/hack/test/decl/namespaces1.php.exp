@@ -1,11 +1,7 @@
 [("\\MyAnonymousNamespaceType",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_pos = [4:8-32]; td_vis = Transparent; td_tparams = [];
-       td_constraint = None;
-       td_type =
-       (Rhint (root|namespaces1.php line 4, characters 35-40),
-        (Tprim Tstring))
-       }));
+       td_constraint = None; td_type = (Rhint ([4:35-41]), (Tprim Tstring)) }));
   ("\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -20,10 +16,7 @@
   ("\\MyNamespace\\MyNamespaceType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_pos = [9:8-23]; td_vis = Transparent; td_tparams = [];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|namespaces1.php line 9, characters 26-31),
-         (Tprim Tstring))
+        td_constraint = None; td_type = (Rhint ([9:26-32]), (Tprim Tstring))
         }));
   ("\\MyNamespace\\MyClass",
    (Shallow_decl_defs.Class

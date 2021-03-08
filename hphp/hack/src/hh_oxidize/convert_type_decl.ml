@@ -106,6 +106,8 @@ let blacklisted_types =
     ("errors", "PositionGroup");
     ("typing_defs", "ExpandEnv");
     ("typing_defs", "PhaseTy");
+    ("typing_reason", "DeclPhase");
+    ("typing_reason", "LoclPhase");
   ]
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
@@ -429,6 +431,9 @@ let type_declaration name td =
     | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
       when curr_module_name () = "typing_defs_core"
            || curr_module_name () = "typing_defs" ->
+      []
+    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "t_")
+      when curr_module_name () = "typing_reason" ->
       []
     | (tparams, _) -> tparams
   in

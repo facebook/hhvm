@@ -10,34 +10,26 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:17-34], "instanceProperty");
           sp_xhp_attr = None;
-          sp_type =
-          (Some (Rhint (root|classes.php line 5, characters 10-15),
-                 (Tprim Tstring)));
+          sp_type = (Some (Rhint ([5:10-16]), (Tprim Tstring)));
           sp_visibility = Public; sp_flags = needs_init };
          { Shallow_decl_defs.sp_name = ([6:17-35], "protectedProperty");
            sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint (root|classes.php line 6, characters 13-15),
-                  (Tprim Tint)));
+           sp_type = (Some (Rhint ([6:13-16]), (Tprim Tint)));
            sp_visibility = Protected; sp_flags = needs_init };
          { Shallow_decl_defs.sp_name = ([7:34-36], "p"); sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint (root|classes.php line 7, characters 25-32),
-                  (Tprim Tarraykey)));
+           sp_type = (Some (Rhint ([7:25-33]), (Tprim Tarraykey)));
            sp_visibility = Public; sp_flags = lateinit | needs_init }
          ];
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([4:25-40], "$staticProperty");
           sp_xhp_attr = None;
-          sp_type =
-          (Some (Rhint (root|classes.php line 4, characters 18-23),
-                 (Tprim Tstring)));
+          sp_type = (Some (Rhint ([4:18-24]), (Tprim Tstring)));
           sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_constructor =
        (Some { Shallow_decl_defs.sm_name = ([9:19-30], "__construct");
                sm_type =
-               (Rwitness (root|classes.php line 9, characters 19-29),
+               (Rwitness_from_decl ([9:19-30]),
                 (Tfun
                    { ft_arity = (Fstandard ()); ft_tparams = [];
                      ft_where_constraints = []; ft_params = [];
@@ -46,9 +38,7 @@
                      ft_ret =
                      { et_enforced = false;
                        et_type =
-                       (Rwitness (root|classes.php line 9, characters 19-29),
-                        (Tprim Tvoid))
-                       };
+                       (Rwitness_from_decl ([9:19-30]), (Tprim Tvoid)) };
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
                        ~returns_readonly:false ~readonly_this:false
@@ -60,7 +50,7 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([11:20-33], "privateMethod");
           sm_type =
-          (Rwitness (root|classes.php line 11, characters 20-32),
+          (Rwitness_from_decl ([11:20-33]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
@@ -68,10 +58,7 @@
                 { capability = (CapDefaults [11:20-33]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|classes.php line 11, characters 37-40),
-                   (Tprim Tvoid))
-                  };
+                  et_type = (Rhint ([11:37-41]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -80,7 +67,7 @@
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
            sm_type =
-           (Rwitness (root|classes.php line 12, characters 19-30),
+           (Rwitness_from_decl ([12:19-31]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -88,10 +75,7 @@
                  { capability = (CapDefaults [12:19-31]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes.php line 12, characters 35-38),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([12:35-39]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -100,7 +84,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
            sm_type =
-           (Rwitness (root|classes.php line 13, characters 22-36),
+           (Rwitness_from_decl ([13:22-37]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -108,10 +92,7 @@
                  { capability = (CapDefaults [13:22-37]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|classes.php line 13, characters 41-44),
-                    (Tprim Tvoid))
-                   };
+                   et_type = (Rhint ([13:41-45]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false
@@ -121,7 +102,7 @@
            sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([14:25-40], "async_generator");
            sm_type =
-           (Rwitness (root|classes.php line 14, characters 25-39),
+           (Rwitness_from_decl ([14:25-40]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = [];
@@ -129,10 +110,7 @@
                  [{ fp_pos = [15:12-17]; fp_name = (Some "$arg1");
                     fp_type =
                     { et_enforced = false;
-                      et_type =
-                      (Rhint (root|classes.php line 15, characters 5-10),
-                       (Tprim Tstring))
-                      };
+                      et_type = (Rhint ([15:5-11]), (Tprim Tstring)) };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -142,10 +120,7 @@
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
                      { et_enforced = false;
-                       et_type =
-                       (Rhint (root|classes.php line 16, characters 5-7),
-                        (Tprim Tint))
-                       };
+                       et_type = (Rhint ([16:5-8]), (Tprim Tint)) };
                      fp_flags =
                      (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -158,15 +133,11 @@
                  ft_ret =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|classes.php line 17, characters 6-41),
+                   (Rhint ([17:6-42]),
                     (Tapply (([17:6-23], "\\HH\\AsyncGenerator"),
-                       [(Rhint (root|classes.php line 17, characters 24-26),
-                         (Tprim Tint));
-                         (Rhint (root|classes.php line 17, characters 29-34),
-                          (Tprim Tstring));
-                         (Rhint (root|classes.php line 17, characters 37-40),
-                          (Tprim Tvoid))
-                         ]
+                       [(Rhint ([17:24-27]), (Tprim Tint));
+                         (Rhint ([17:29-35]), (Tprim Tstring));
+                         (Rhint ([17:37-41]), (Tprim Tvoid))]
                        )))
                    };
                  ft_flags =
@@ -222,34 +193,26 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint (root|classes.php line 29, characters 13-18),
-                  (Tprim Tstring)));
+           sp_type = (Some (Rhint ([29:13-19]), (Tprim Tstring)));
            sp_visibility = Private; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([30:22-32], "protected");
             sp_xhp_attr = None;
-            sp_type =
-            (Some (Rhint (root|classes.php line 30, characters 15-20),
-                   (Tprim Tstring)));
+            sp_type = (Some (Rhint ([30:15-21]), (Tprim Tstring)));
             sp_visibility = Protected; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([31:19-26], "public");
             sp_xhp_attr = None;
-            sp_type =
-            (Some (Rhint (root|classes.php line 31, characters 12-17),
-                   (Tprim Tstring)));
+            sp_type = (Some (Rhint ([31:12-18]), (Tprim Tstring)));
             sp_visibility = Public; sp_flags = needs_init };
           { Shallow_decl_defs.sp_name = ([32:19-30], "hasDefault");
             sp_xhp_attr = None;
-            sp_type =
-            (Some (Rhint (root|classes.php line 32, characters 12-17),
-                   (Tprim Tstring)));
+            sp_type = (Some (Rhint ([32:12-18]), (Tprim Tstring)));
             sp_visibility = Public; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([28:19-30], "__construct");
                 sm_type =
-                (Rwitness (root|classes.php line 28, characters 19-29),
+                (Rwitness_from_decl ([28:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
@@ -257,10 +220,7 @@
                       [{ fp_pos = [29:20-28]; fp_name = (Some "$private");
                          fp_type =
                          { et_enforced = false;
-                           et_type =
-                           (Rhint (root|classes.php line 29, characters 13-18),
-                            (Tprim Tstring))
-                           };
+                           et_type = (Rhint ([29:13-19]), (Tprim Tstring)) };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -271,10 +231,7 @@
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
                           { et_enforced = false;
-                            et_type =
-                            (Rhint (root|classes.php line 30, characters 15-20),
-                             (Tprim Tstring))
-                            };
+                            et_type = (Rhint ([30:15-21]), (Tprim Tstring)) };
                           fp_flags =
                           (make_fp_flags ~accept_disposable:false
                             ~has_default:false
@@ -286,10 +243,7 @@
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
                           { et_enforced = false;
-                            et_type =
-                            (Rhint (root|classes.php line 31, characters 12-17),
-                             (Tprim Tstring))
-                            };
+                            et_type = (Rhint ([31:12-18]), (Tprim Tstring)) };
                           fp_flags =
                           (make_fp_flags ~accept_disposable:false
                             ~has_default:false
@@ -302,10 +256,7 @@
                           fp_name = (Some "$hasDefault");
                           fp_type =
                           { et_enforced = false;
-                            et_type =
-                            (Rhint (root|classes.php line 32, characters 12-17),
-                             (Tprim Tstring))
-                            };
+                            et_type = (Rhint ([32:12-18]), (Tprim Tstring)) };
                           fp_flags =
                           (make_fp_flags ~accept_disposable:false
                             ~has_default:true ~mode:Typing_defs_core.FPnormal
@@ -319,9 +270,7 @@
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|classes.php line 28, characters 19-29),
-                         (Tprim Tvoid))
-                        };
+                        (Rwitness_from_decl ([28:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false

@@ -46,7 +46,7 @@ module Capabilities = struct
   include SN.Capabilities
 
   let mk special_name env =
-    let r = Reason.none in
+    let r = Reason.Rnone in
     Typing_make_type.apply r (Reason.to_pos r, special_name) []
     |> Typing_phase.localize_with_self env
 end

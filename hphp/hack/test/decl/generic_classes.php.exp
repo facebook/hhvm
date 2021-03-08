@@ -15,16 +15,14 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:13-18], "data");
           sp_xhp_attr = None;
-          sp_type =
-          (Some (Rhint (root|generic_classes.php line 4, characters 11-11),
-                 (Tgeneric ("T", []))));
+          sp_type = (Some (Rhint ([4:11-12]), (Tgeneric ("T", []))));
           sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_sprops = [];
        sc_constructor =
        (Some { Shallow_decl_defs.sm_name = ([6:19-30], "__construct");
                sm_type =
-               (Rwitness (root|generic_classes.php line 6, characters 19-29),
+               (Rwitness_from_decl ([6:19-30]),
                 (Tfun
                    { ft_arity = (Fstandard ()); ft_tparams = [];
                      ft_where_constraints = [];
@@ -32,9 +30,7 @@
                      [{ fp_pos = [6:33-38]; fp_name = (Some "$data");
                         fp_type =
                         { et_enforced = false;
-                          et_type =
-                          (Rhint (root|generic_classes.php line 6, characters 31-31),
-                           (Tgeneric ("T", [])))
+                          et_type = (Rhint ([6:31-32]), (Tgeneric ("T", [])))
                           };
                         fp_flags =
                         (make_fp_flags ~accept_disposable:false
@@ -49,9 +45,7 @@
                      ft_ret =
                      { et_enforced = false;
                        et_type =
-                       (Rwitness (root|generic_classes.php line 6, characters 19-29),
-                        (Tprim Tvoid))
-                       };
+                       (Rwitness_from_decl ([6:19-30]), (Tprim Tvoid)) };
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
                        ~returns_readonly:false ~readonly_this:false
@@ -63,7 +57,7 @@
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([10:19-22], "get");
           sm_type =
-          (Rwitness (root|generic_classes.php line 10, characters 19-21),
+          (Rwitness_from_decl ([10:19-22]),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
@@ -71,10 +65,7 @@
                 { capability = (CapDefaults [10:19-22]) };
                 ft_ret =
                 { et_enforced = false;
-                  et_type =
-                  (Rhint (root|generic_classes.php line 10, characters 26-26),
-                   (Tgeneric ("T", [])))
-                  };
+                  et_type = (Rhint ([10:26-27]), (Tgeneric ("T", []))) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~readonly_this:false
@@ -100,16 +91,14 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([16:13-18], "data");
            sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint (root|generic_classes.php line 16, characters 11-11),
-                  (Tgeneric ("T", []))));
+           sp_type = (Some (Rhint ([16:11-12]), (Tgeneric ("T", []))));
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([18:19-30], "__construct");
                 sm_type =
-                (Rwitness (root|generic_classes.php line 18, characters 19-29),
+                (Rwitness_from_decl ([18:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
@@ -118,9 +107,7 @@
                          fp_type =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|generic_classes.php line 18, characters 31-31),
-                            (Tgeneric ("T", [])))
-                           };
+                           (Rhint ([18:31-32]), (Tgeneric ("T", []))) };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -134,9 +121,7 @@
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|generic_classes.php line 18, characters 19-29),
-                         (Tprim Tvoid))
-                        };
+                        (Rwitness_from_decl ([18:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false
@@ -163,16 +148,14 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([24:13-18], "data");
            sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint (root|generic_classes.php line 24, characters 11-11),
-                  (Tgeneric ("T", []))));
+           sp_type = (Some (Rhint ([24:11-12]), (Tgeneric ("T", []))));
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([26:19-30], "__construct");
                 sm_type =
-                (Rwitness (root|generic_classes.php line 26, characters 19-29),
+                (Rwitness_from_decl ([26:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
@@ -181,9 +164,7 @@
                          fp_type =
                          { et_enforced = false;
                            et_type =
-                           (Rhint (root|generic_classes.php line 26, characters 31-31),
-                            (Tgeneric ("T", [])))
-                           };
+                           (Rhint ([26:31-32]), (Tgeneric ("T", []))) };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -197,9 +178,7 @@
                       ft_ret =
                       { et_enforced = false;
                         et_type =
-                        (Rwitness (root|generic_classes.php line 26, characters 19-29),
-                         (Tprim Tvoid))
-                        };
+                        (Rwitness_from_decl ([26:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~readonly_this:false
@@ -211,7 +190,7 @@
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([30:19-22], "get");
            sm_type =
-           (Rwitness (root|generic_classes.php line 30, characters 19-21),
+           (Rwitness_from_decl ([30:19-22]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
@@ -219,10 +198,7 @@
                  { capability = (CapDefaults [30:19-22]) };
                  ft_ret =
                  { et_enforced = false;
-                   et_type =
-                   (Rhint (root|generic_classes.php line 30, characters 26-26),
-                    (Tgeneric ("T", [])))
-                   };
+                   et_type = (Rhint ([30:26-27]), (Tgeneric ("T", []))) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~readonly_this:false

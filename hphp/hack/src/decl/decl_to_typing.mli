@@ -45,7 +45,7 @@ val shallow_const_to_class_const :
   Shallow_decl_defs.shallow_class_const ->
   string * Typing_defs.class_const
 
-val classname_const : Aast.sid -> string * Typing_defs.class_const
+val classname_const : Typing_defs.pos_id -> string * Typing_defs.class_const
 
 val typeconst_structure :
   Decl_defs.mro_element ->

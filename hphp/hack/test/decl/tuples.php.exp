@@ -3,18 +3,16 @@
      { Typing_defs.td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
        td_constraint = None;
        td_type =
-       (Rhint (root|tuples.php line 3, characters 19-32),
+       (Rhint ([3:19-33]),
         (Ttuple
-           [(Rhint (root|tuples.php line 3, characters 20-24), (Tprim Tfloat));
-             (Rhint (root|tuples.php line 3, characters 27-31),
-              (Tprim Tfloat))
-             ]))
+           [(Rhint ([3:20-25]), (Tprim Tfloat));
+             (Rhint ([3:27-32]), (Tprim Tfloat))]))
        }));
   ("\\takes_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|tuples.php line 5, characters 10-20),
+        (Rwitness_from_decl ([5:10-21]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -23,13 +21,10 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|tuples.php line 5, characters 22-35),
+                   (Rhint ([5:22-36]),
                     (Ttuple
-                       [(Rhint (root|tuples.php line 5, characters 23-27),
-                         (Tprim Tfloat));
-                         (Rhint (root|tuples.php line 5, characters 30-34),
-                          (Tprim Tfloat))
-                         ]))
+                       [(Rhint ([5:23-28]), (Tprim Tfloat));
+                         (Rhint ([5:30-35]), (Tprim Tfloat))]))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -42,7 +37,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|tuples.php line 5, characters 45-54),
+                (Rhint ([5:45-55]),
                  (Tapply (([5:45-55], "\\Coordinate"), [])))
                 };
               ft_flags =
@@ -54,7 +49,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|tuples.php line 9, characters 10-22),
+        (Rwitness_from_decl ([9:10-23]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
@@ -63,7 +58,7 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|tuples.php line 9, characters 24-33),
+                   (Rhint ([9:24-34]),
                     (Tapply (([9:24-34], "\\Coordinate"), [])))
                    };
                  fp_flags =
@@ -77,13 +72,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|tuples.php line 9, characters 43-56),
+                (Rhint ([9:43-57]),
                  (Ttuple
-                    [(Rhint (root|tuples.php line 9, characters 44-48),
-                      (Tprim Tfloat));
-                      (Rhint (root|tuples.php line 9, characters 51-55),
-                       (Tprim Tfloat))
-                      ]))
+                    [(Rhint ([9:44-49]), (Tprim Tfloat));
+                      (Rhint ([9:51-56]), (Tprim Tfloat))]))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -94,7 +86,7 @@
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
         fe_type =
-        (Rwitness (root|tuples.php line 13, characters 10-22),
+        (Rwitness_from_decl ([13:10-23]),
          (Tfun
             { ft_arity = (Fstandard ());
               ft_tparams =
@@ -109,13 +101,10 @@
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|tuples.php line 13, characters 27-32),
+                   (Rhint ([13:27-33]),
                     (Ttuple
-                       [(Rhint (root|tuples.php line 13, characters 28-28),
-                         (Tgeneric ("T", [])));
-                         (Rhint (root|tuples.php line 13, characters 31-31),
-                          (Tgeneric ("T", [])))
-                         ]))
+                       [(Rhint ([13:28-29]), (Tgeneric ("T", [])));
+                         (Rhint ([13:31-32]), (Tgeneric ("T", [])))]))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -128,13 +117,10 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|tuples.php line 13, characters 42-47),
+                (Rhint ([13:42-48]),
                  (Ttuple
-                    [(Rhint (root|tuples.php line 13, characters 43-43),
-                      (Tgeneric ("T", [])));
-                      (Rhint (root|tuples.php line 13, characters 46-46),
-                       (Tgeneric ("T", [])))
-                      ]))
+                    [(Rhint ([13:43-44]), (Tgeneric ("T", [])));
+                      (Rhint ([13:46-47]), (Tgeneric ("T", [])))]))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

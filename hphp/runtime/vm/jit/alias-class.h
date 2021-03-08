@@ -252,7 +252,6 @@ struct AStack {
     return AStack{low, high};
   }
 
-  FPRelOffset offset() const { return high - 1; }
   uint32_t size() const {
     return safe_cast<uint32_t>(int64_t{high.offset} - int64_t{low.offset});
   }

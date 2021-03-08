@@ -17,7 +17,7 @@ $output = __SystemLib\hphp_test_tmppath('DOMNode_C14NFile_basic.tmp');
 $doc = new DOMDocument();
 $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);
-var_dump($node->C14NFile($output));
+var_dump($node->C14Nfile($output));
 $content = file_get_contents($output);
 var_dump($content);
 

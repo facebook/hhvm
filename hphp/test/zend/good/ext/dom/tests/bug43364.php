@@ -26,7 +26,7 @@ $xml = <<<DOC
 DOC;
 
 $doc = new DomDocument();
-$doc->loadXml($xml);
+$doc->loadXML($xml);
 $doc->xinclude();
 
 $count = loopElements(varray[$doc->documentElement]);

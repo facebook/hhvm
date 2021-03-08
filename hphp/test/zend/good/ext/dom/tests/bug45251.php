@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $doc = new DOMDocument;
-$doc->loadXml(<<<EOF
+$doc->loadXML(<<<EOF
 <?xml version="1.0" encoding="utf-8" ?>
 <aaa>
   <bbb foo="bar"/>

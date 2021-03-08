@@ -12,6 +12,6 @@ EOD;
 $d->loadHTML($str);
 $e = $d->getElementsByTagName("p");
 $e = $e->item(0);
-echo $d->saveXml($e),"\n";
-echo $d->saveHtml($e),"\n";
+echo $d->saveXML($e),"\n";
+echo $d->saveHTML($e),"\n";
 }

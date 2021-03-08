@@ -6,7 +6,7 @@ function main_entry(): void {
   require_once("dom_test.inc");
 
   $dom = new DOMDocument;
-  $dom->loadXML($xmlstr);
+  $dom->loadXML(getXmlStr());
   if(!$dom) {
     echo "Error while parsing the document\n";
     exit;
@@ -18,14 +18,14 @@ function main_entry(): void {
   echo get_class($element), "\n";
 
   echo "\nElement should have attributes:\n";
-  var_dump($element->hasAttributes()); 
+  var_dump($element->hasAttributes());
 
-  $nodelist=$dom->getElementsByTagName('tbody') ; 
+  $nodelist=$dom->getElementsByTagName('tbody') ;
   $element = $nodelist->item(0);
 
   echo "\nVerify that we have a DOMElement object:\n";
   echo get_class($element), "\n";
 
-  echo "\nElement should have no attributes:\n"; 
+  echo "\nElement should have no attributes:\n";
   var_dump($element->hasAttributes());
 }

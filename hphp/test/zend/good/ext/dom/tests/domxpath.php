@@ -1,5 +1,4 @@
 <?hh
-require_once("dom_test.inc");
 
 function MyAverage($nodelist) {
     $count = 0;
@@ -15,6 +14,7 @@ function MyAverage($nodelist) {
     }
 }
 <<__EntryPoint>> function main(): void {
+require_once("dom_test.inc");
 $dom = new DOMDocument;
 $dom->loadXML(b'<root xmlns="urn::default"><child>myval</child></root>');
 

@@ -4,7 +4,7 @@ function main_entry(): void {
   require_once("dom_test.inc");
 
   $dom = new DOMDocument;
-  $dom->loadXML($xmlstr);
+  $dom->loadXML(getXmlStr());
   if(!$dom) {
     echo "Error while parsing the document\n";
     exit;

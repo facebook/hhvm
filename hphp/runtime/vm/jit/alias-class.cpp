@@ -170,16 +170,11 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
 }
 
 AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s) {
-  always_assert(sp->isA(TStkPtr));
-
-  auto const defSP = sp->inst();
-  always_assert_flog(defSP->is(DefFrameRelSP, DefRegSP),
-                     "unexpected StkPtr: {}\n", sp->toString());
-  high = spRel.to<FPRelOffset>(defSP->extra<DefStackData>()->irSPOff) + 1;
+  high = spRel + 1;
   if (s == std::numeric_limits<int32_t>::max()) {
-    low = FPRelOffset{std::numeric_limits<int32_t>::min()};
+    low = IRSPRelOffset{std::numeric_limits<int32_t>::min()};
   } else {
-    low = FPRelOffset{safe_cast<int32_t>(std::max<int64_t>(
+    low = IRSPRelOffset{safe_cast<int32_t>(std::max<int64_t>(
       int64_t{high.offset} - int64_t{s},
       int64_t{std::numeric_limits<int32_t>::min()}
     ))};

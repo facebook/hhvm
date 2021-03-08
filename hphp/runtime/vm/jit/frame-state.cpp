@@ -615,7 +615,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     }
     if (auto const bstack = base.stack()) {
       assertx(bstack->size() == 1);
-      auto const l = stk(bstack->low.to<IRSPRelOffset>(irSPOff()));
+      auto const l = stk(bstack->low);
       apply_one(l, Ptr::Stk);
     }
 
@@ -642,9 +642,10 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   if (base.maybe(AStackAny)) {
     for (auto i = 0; i < cur().stack.size(); ++i) {
       // The FPInvOffset of the stack slot is just its 1-indexed slot.
-      auto const fpRel = -FPInvOffset{i + 1};
-      if (base.maybe(AStack::at(fpRel))) {
-        apply(stk(fpRel.to<IRSPRelOffset>(irSPOff())));
+      auto const fpRel = FPInvOffset{i + 1};
+      auto const spRel = fpRel.to<IRSPRelOffset>(irSPOff());
+      if (base.maybe(AStack::at(spRel))) {
+        apply(stk(spRel));
       }
     }
   }
@@ -702,16 +703,17 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
 
     if (base.maybe(AStackAny) && stores.maybe(AStackAny)) {
       for (auto i = 0; i < cur().stack.size(); ++i) {
-        auto const fpRel = -FPInvOffset{i + 1};
-        auto const astk = AStack::at(fpRel);
+        auto const fpRel = FPInvOffset{i + 1};
+        auto const spRel = fpRel.to<IRSPRelOffset>(irSPOff());
+        auto const astk = AStack::at(spRel);
 
         if (base.maybe(astk) && stores.maybe(astk)) {
           if (!updated) {
-            cur().mbase = stack(-fpRel);
+            cur().mbase = stack(fpRel);
             cur().mbase.maybeChanged = true;
             updated = true;
           } else {
-            merge_into(cur().mbase, stack(-fpRel));
+            merge_into(cur().mbase, stack(fpRel));
           }
         }
       }

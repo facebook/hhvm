@@ -242,13 +242,13 @@ struct AStack {
   explicit AStack(SSATmp* sp, IRSPRelOffset offset, int32_t size);
 
   // Return AStack representing a single stack cell at `offset`.
-  static AStack at(FPRelOffset offset) {
+  static AStack at(IRSPRelOffset offset) {
     return AStack{offset, offset + 1};
   }
 
   // Return AStack representing a range of stack cells between low (inclusive)
   // and high (exclusive) offsets.
-  static AStack range(FPRelOffset low, FPRelOffset high) {
+  static AStack range(IRSPRelOffset low, IRSPRelOffset high) {
     return AStack{low, high};
   }
 
@@ -256,11 +256,11 @@ struct AStack {
     return safe_cast<uint32_t>(int64_t{high.offset} - int64_t{low.offset});
   }
 
-  FPRelOffset low;
-  FPRelOffset high;
+  IRSPRelOffset low;
+  IRSPRelOffset high;
 
 private:
-  explicit AStack(FPRelOffset l, FPRelOffset h) : low(l), high(h) {}
+  explicit AStack(IRSPRelOffset l, IRSPRelOffset h) : low(l), high(h) {}
 };
 
 /*

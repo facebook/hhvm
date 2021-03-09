@@ -1,0 +1,1 @@
+Fatal error: This method cannot be memoized because it has a polymorphic context in %s on line 4

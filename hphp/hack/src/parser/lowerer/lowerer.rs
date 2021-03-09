@@ -3181,18 +3181,28 @@ where
         }
     }
 
+    fn strip_ns(name: &str) -> &str {
+        match name.chars().next() {
+            Some('\\') => &name[1..],
+            _ => name,
+        }
+    }
+
     fn has_polymorphic_context(contexts: &Option<ast::Contexts>) -> bool {
-        use ast::Hint_::{Haccess, HfunContext, Hvar};
+        use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
         if let Some(ast::Contexts(_, ref context_hints)) = contexts {
             return context_hints.iter().any(|c| match *c.1 {
                 HfunContext(_) => true,
-                Haccess(ref root, _) => {
-                    if let Hvar(_) = *root.1 {
+                Haccess(ref root, _) => match &*root.1 {
+                    Happly(oxidized::ast::Id(_, id), _)
+                        if Self::strip_ns(id.as_str())
+                            == naming_special_names_rust::typehints::THIS =>
+                    {
                         true
-                    } else {
-                        false
                     }
-                }
+                    Hvar(_) => true,
+                    _ => false,
+                },
                 _ => false,
             });
         } else {

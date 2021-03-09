@@ -1,0 +1,15 @@
+in f
+
+Warning: Call to A::f() requires [rx] coeffects but pure() provided [] in %s on line 14
+in f
+
+Warning: Call to A::f() requires [defaults] coeffects but pure() provided [] in %s on line 14
+in f
+in f
+in f
+
+Warning: Call to A::f() requires [defaults] coeffects but rx() provided [rx] in %s on line 15
+in f
+in f
+in f
+in f

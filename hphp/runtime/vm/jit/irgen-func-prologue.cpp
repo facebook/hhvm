@@ -255,7 +255,8 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
-                              SSATmp* callFlags, uint32_t argc) {
+                              SSATmp* callFlags, uint32_t argc,
+                              SSATmp* prologueCtx) {
   assertx(callee);
   assertx(callFlags);
 
@@ -264,7 +265,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     auto result = cns(env, callee->staticCoeffects().toRequired().value());
     if (!callee->hasCoeffectRules()) return result;
     for (auto const& rule : callee->getCoeffectRules()) {
-      if (auto const coeffect = rule.emitJit(env, callee, argc)) {
+      if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx)) {
         result = gen(env, AndInt, result, coeffect);
       }
     }
@@ -353,14 +354,14 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
 }
 
 void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
-                      SSATmp* callFlags) {
+                      SSATmp* callFlags, SSATmp* prologueCtx) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
-  emitCalleeCoeffectChecks(env, callee, callFlags, argc);
+  emitCalleeCoeffectChecks(env, callee, callFlags, argc, prologueCtx);
   emitCalleeImplicitContextChecks(env, callee);
 
   // Emit early stack overflow check if necessary.
@@ -562,7 +563,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
     : cns(env, nullptr);
 
   emitPrologueEntry(env, callee, argc, transID);
-  emitCalleeChecks(env, callee, argc, callFlags);
+  emitCalleeChecks(env, callee, argc, callFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
   emitInitFuncLocals(env, callee, prologueCtx);

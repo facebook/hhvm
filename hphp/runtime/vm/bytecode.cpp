@@ -3653,7 +3653,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   calleeGenericsChecks(func, callFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
-  calleeCoeffectChecks(func, callFlags, numArgsInclUnpack);
+  calleeCoeffectChecks(func, callFlags, numArgsInclUnpack, ctx);
   calleeImplicitContextChecks(func);
   initFuncInputs(func, numArgsInclUnpack);
 

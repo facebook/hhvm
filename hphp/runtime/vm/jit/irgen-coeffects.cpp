@@ -69,9 +69,13 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   );
 }
 
-SSATmp* emitCCThis() {
-  // TODO(oulgen): Implement this
-  return nullptr;
+SSATmp* emitCCThis(IRGS& env, const Func* f, const StringData* name,
+                   SSATmp* prologueCtx) {
+  assertx(!f->isClosureBody());
+  assertx(f->isMethod());
+  auto const cls =
+    f->isStatic() ? prologueCtx : gen(env, LdObjClass, prologueCtx);
+  return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
 SSATmp* emitFunParam() {
@@ -85,12 +89,13 @@ SSATmp* emitFunParam() {
 
 jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
                                    const Func* f,
-                                   uint32_t numArgsInclUnpack) const {
+                                   uint32_t numArgsInclUnpack,
+                                   jit::SSATmp* prologueCtx) const {
   using namespace jit::irgen;
   switch (m_type) {
     case Type::CCParam:  return emitCCParam(env, f, numArgsInclUnpack,
                                             m_index, m_name);
-    case Type::CCThis:   return emitCCThis();
+    case Type::CCThis:   return emitCCThis(env, f, m_name, prologueCtx);
     case Type::FunParam: return emitFunParam();
     case Type::Invalid:
       always_assert(false);

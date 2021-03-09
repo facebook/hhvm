@@ -114,10 +114,16 @@ RuntimeCoeffects emitCCParam(const Func* f,
   return cls->clsCtxCnsGet(name);
 }
 
-RuntimeCoeffects emitCCThis() {
-  // TODO(oulgen): implement this
-  return RuntimeCoeffects::full();
+RuntimeCoeffects emitCCThis(const Func* f, const StringData* name,
+                            void* prologueCtx) {
+  assertx(!f->isClosureBody());
+  assertx(f->isMethod());
+  auto const cls = f->isStatic()
+    ? reinterpret_cast<Class*>(prologueCtx)
+    : reinterpret_cast<ObjectData*>(prologueCtx)->getVMClass();
+  return cls->clsCtxCnsGet(name);
 }
+
 RuntimeCoeffects emitFunParam() {
   // TODO(oulgen): implement this
   return RuntimeCoeffects::full();
@@ -126,11 +132,12 @@ RuntimeCoeffects emitFunParam() {
 } // namespace
 
 RuntimeCoeffects CoeffectRule::emit(const Func* f,
-                                    uint32_t numArgsInclUnpack) const {
+                                    uint32_t numArgsInclUnpack,
+                                    void* prologueCtx) const {
   switch (m_type) {
     case Type::CCParam:  return emitCCParam(f, numArgsInclUnpack,
                                             m_index, m_name);
-    case Type::CCThis:   return emitCCThis();
+    case Type::CCThis:   return emitCCThis(f, m_name, prologueCtx);
     case Type::FunParam: return emitFunParam();
     case Type::Invalid:
       always_assert(false);

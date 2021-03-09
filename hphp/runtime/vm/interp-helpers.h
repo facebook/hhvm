@@ -150,14 +150,15 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
  */
 inline bool calleeCoeffectChecks(const Func* callee,
                                  const CallFlags flags,
-                                 uint32_t numArgsInclUnpack) {
+                                 uint32_t numArgsInclUnpack,
+                                 void* prologueCtx) {
   if (!CoeffectsConfig::enabled()) return true;
   auto const providedCoeffects = flags.coeffects();
   auto const requiredCoeffects = [&] {
     auto required = callee->staticCoeffects().toRequired();
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
-      required &= rule.emit(callee, numArgsInclUnpack);
+      required &= rule.emit(callee, numArgsInclUnpack, prologueCtx);
     }
     return required;
   }();

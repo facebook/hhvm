@@ -50,13 +50,14 @@ let server_finale_file (pid : int) : string =
   Filename.concat GlobalConfig.tmp_dir (spf "%d.fin" pid)
 
 (* Return all the files that we need to typecheck *)
-let make_next ~(indexer : unit -> string list) ~(extra_roots : Path.t list) :
-    Relative_path.t list Bucket.next =
+let make_next
+    ?(hhi_filter = FindUtils.is_hack)
+    ~(indexer : unit -> string list)
+    ~(extra_roots : Path.t list) : Relative_path.t list Bucket.next =
   let next_files_root =
     compose (List.map ~f:Relative_path.(create Root)) indexer
   in
   let hhi_root = Hhi.get_hhi_root () in
-  let hhi_filter = FindUtils.is_hack in
   let next_files_hhi =
     compose
       (List.map ~f:Relative_path.(create Hhi))

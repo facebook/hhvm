@@ -21,12 +21,13 @@ let no_incremental_check (options : ServerArgs.options) : bool =
   let full_init = Option.is_none (SharedMem.loaded_dep_table_filename ()) in
   in_check_mode && full_init
 
-let indexing (genv : ServerEnv.genv) : Relative_path.t list Bucket.next * float
-    =
+let indexing ?hhi_filter (genv : ServerEnv.genv) :
+    Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress_to_monitor "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
     ServerFiles.make_next
+      ?hhi_filter
       ~indexer:(genv.indexer FindUtils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)
   in

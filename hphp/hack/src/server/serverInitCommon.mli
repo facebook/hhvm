@@ -9,7 +9,10 @@
 
 val hh_log_heap : unit -> unit
 
-val indexing : ServerEnv.genv -> Relative_path.t list Bucket.next * float
+val indexing :
+  ?hhi_filter:(string -> bool) ->
+  ServerEnv.genv ->
+  Relative_path.t list Bucket.next * float
 
 val parsing :
   lazy_parse:bool ->

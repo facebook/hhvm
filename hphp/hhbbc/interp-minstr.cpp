@@ -1946,21 +1946,32 @@ Effects miFinalIncDecNewElem(ISS& env, int32_t nDiscard) {
 // appropriate interp-state actions. Returns true if the instruction
 // is totally effect-free.
 bool handleEffects(ISS& env, Effects effects, Promotion keyPromotion) {
-  switch (effects) {
-    case Effects::None:
-      if (keyPromotion == Promotion::YesMightThrow) return false;
-      effect_free(env);
-      return true;
-    case Effects::SideEffect:
-      if (keyPromotion != Promotion::YesMightThrow) nothrow(env);
-      return false;
-    case Effects::Throws:
-      return false;
-    case Effects::AlwaysThrows:
-      unreachable(env);
-      return false;
+  auto const effectFree = [&]{
+    switch (effects) {
+      case Effects::None:
+        if (keyPromotion == Promotion::YesMightThrow) return false;
+        effect_free(env);
+        return true;
+      case Effects::SideEffect:
+        if (keyPromotion != Promotion::YesMightThrow) nothrow(env);
+        return false;
+      case Effects::Throws:
+        return false;
+      case Effects::AlwaysThrows:
+        unreachable(env);
+        return false;
+    }
+    always_assert(false);
+  }();
+
+  if (env.flags.wasPEI && env.blk.throwExit != NoBlockId) {
+    // Minstr opcodes may throw after side-effects.
+    assertx(!effectFree);
+    auto const state = with_throwable_only(env.index, env.state);
+    env.propagate(env.blk.throwExit, &state);
   }
-  always_assert(false);
+
+  return effectFree;
 }
 
 }

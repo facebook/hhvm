@@ -498,6 +498,8 @@ type t = {
   recheck_capture: RecheckCapture.t;
   (* The version of the Remote Execution CLI tool to use *)
   recli_version: string;
+  (* The unique identifier of a particular remote typechecking run *)
+  remote_nonce: Int64.t;
   (* Remote type check settings that can be changed, e.g., by GK *)
   remote_type_check: RemoteTypeCheck.t;
   (* If set, uses the key to fetch type checking jobs *)
@@ -606,6 +608,7 @@ let default =
     prefetch_deferred_files = false;
     recheck_capture = RecheckCapture.default;
     recli_version = "STABLE";
+    remote_nonce = Int64.zero;
     remote_type_check = RemoteTypeCheck.default;
     remote_worker_key = None;
     remote_check_id = None;
@@ -1059,6 +1062,11 @@ let load_ fn ~silent ~current_version overrides =
   let recheck_capture =
     RecheckCapture.load ~current_version ~default:default.recheck_capture config
   in
+  let remote_nonce =
+    match string_opt "remote_nonce" config with
+    | Some n -> Int64.of_string n
+    | None -> Int64.zero
+  in
   let remote_type_check =
     RemoteTypeCheck.load
       ~current_version
@@ -1251,6 +1259,7 @@ let load_ fn ~silent ~current_version overrides =
     prefetch_deferred_files;
     recheck_capture;
     recli_version;
+    remote_nonce;
     remote_type_check;
     remote_worker_key;
     remote_check_id;

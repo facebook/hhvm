@@ -187,6 +187,7 @@ type delegate_env = {
   mergebase: Hg.hg_rev option;
   num_workers: int;
   recheck_id: string;
+  nonce: Int64.t;
   root: string;
   tcopt: TypecheckerOptions.t;
   hash_mode: Typing_deps_mode.hash_mode;

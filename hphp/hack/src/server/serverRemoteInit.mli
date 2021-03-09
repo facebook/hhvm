@@ -11,6 +11,7 @@ val init :
   Provider_context.t ->
   MultiWorker.worker list option ->
   worker_key:string ->
+  nonce:Int64.t ->
   check_id:string ->
   recli_version:string ->
   transport_channel:string option ->

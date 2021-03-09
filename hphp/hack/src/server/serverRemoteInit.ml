@@ -10,6 +10,7 @@ let init
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(worker_key : string)
+    ~(nonce : Int64.t)
     ~(check_id : string)
     ~(recli_version : string)
     ~(transport_channel : string option)
@@ -50,6 +51,7 @@ let init
       ~init_id
       ~init_start_t
       ~key:worker_key
+      ~nonce
       ~transport_channel
       ~root
       artifact_store_config

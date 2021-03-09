@@ -1133,16 +1133,17 @@ let serve genv env in_fds =
  * 7. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : ServerInit.init_approach * string =
+  let nonce = genv.local_config.ServerLocalConfig.remote_nonce in
   match
     ( genv.local_config.ServerLocalConfig.remote_worker_key,
       genv.local_config.ServerLocalConfig.remote_check_id )
   with
   | (Some worker_key, Some check_id) ->
-    let remote_init = ServerInit.{ worker_key; check_id } in
+    let remote_init = ServerInit.{ worker_key; nonce; check_id } in
     (ServerInit.Remote_init remote_init, "Server_args_remote_worker")
   | (Some worker_key, None) ->
     let check_id = Random_id.short_string () in
-    let remote_init = ServerInit.{ worker_key; check_id } in
+    let remote_init = ServerInit.{ worker_key; nonce; check_id } in
     (ServerInit.Remote_init remote_init, "Server_args_remote_worker")
   | (None, Some check_id) ->
     failwith

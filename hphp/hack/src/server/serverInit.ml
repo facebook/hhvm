@@ -115,7 +115,7 @@ let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   | (true, true, true) -> Init
   | _ -> Off
 
-let remote_init genv env root worker_key check_id _profiling =
+let remote_init genv env root worker_key nonce check_id _profiling =
   if not (ServerArgs.check_mode genv.options) then
     failwith "Remote init is only supported in check (run once) mode";
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
@@ -130,6 +130,7 @@ let remote_init genv env root worker_key check_id _profiling =
     ctx
     genv.workers
     ~worker_key
+    ~nonce
     ~check_id
     ~recli_version
     ~transport_channel
@@ -237,8 +238,8 @@ let init
   in
   let (init_method, init_method_name) =
     match (lazy_lev, init_approach) with
-    | (_, Remote_init { worker_key; check_id }) ->
-      (remote_init genv env root worker_key check_id, "remote_init")
+    | (_, Remote_init { worker_key; nonce; check_id }) ->
+      (remote_init genv env root worker_key nonce check_id, "remote_init")
     | (Init, Full_init) -> (lazy_full_init genv env, "lazy_full_init")
     | (Init, Parse_only_init) ->
       (lazy_parse_only_init genv env, "lazy_parse_only_init")

@@ -29,6 +29,7 @@ type load_state_approach =
 
 type remote_init = {
   worker_key: string;
+  nonce: Int64.t;
   check_id: string;
 }
 

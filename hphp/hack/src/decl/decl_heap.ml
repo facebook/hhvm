@@ -68,9 +68,25 @@ end
 
 module Funs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun) (Capacity)
-module Classes =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
-    (Capacity)
+
+module Classes = struct
+  include SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+            (Capacity)
+
+  let add class_name decl =
+    if Provider_backend.(get () = Analysis) then
+      let stack = Printexc.get_callstack 10 in
+      let () =
+        Format.eprintf
+          "Decl_heap: adding %s\n%s\n%!"
+          class_name
+          (Printexc.raw_backtrace_to_string stack)
+      in
+      failwith "bad decl"
+    else
+      add class_name decl
+end
+
 module RecordDefs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
     (Capacity)
@@ -150,13 +166,3 @@ module StaticMethods =
 module Constructors =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
     (Capacity)
-
-type class_members = {
-  m_properties: Property.t SMap.t;
-  m_static_properties: StaticProperty.t SMap.t;
-  m_methods: Method.t SMap.t;
-  m_static_methods: StaticMethod.t SMap.t;
-  m_constructor: Constructor.t option;
-}
-
-type class_entries = Class.t * class_members option

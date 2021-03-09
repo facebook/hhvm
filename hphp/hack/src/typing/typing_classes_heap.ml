@@ -87,9 +87,11 @@ let make_lazy_class_type ctx class_name =
     in
     Some (Lazy (sc, remainder))
 
+let make_eager_class_decl decl = Eager (Decl_class.to_class_type (decl, None))
+
 let make_eager_class_type ctx class_name declare_folded_class_in_file =
-  match Decl_heap.Classes.get class_name with
-  | Some decl -> Some (Eager (Decl_class.to_class_type (decl, None)))
+  match Decl_store.((get ()).get_class class_name) with
+  | Some decl -> Some (make_eager_class_decl decl)
   | None ->
     begin
       match Naming_provider.get_class_path ctx class_name with

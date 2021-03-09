@@ -43,7 +43,7 @@ let rec name_and_declare_types_program
       | FileAttributes _ -> acc
       | Fun f ->
         let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
-        with_sh (fun _ -> Decl_heap.Funs.add name decl);
+        with_sh (fun _ -> Decl_store.((get ()).add_fun name decl));
         (name, Shallow_decl_defs.Fun decl) :: acc
       | Class c ->
         with_sh (fun sh -> class_decl_if_missing ~sh ctx c);
@@ -52,23 +52,25 @@ let rec name_and_declare_types_program
         :: acc
       | RecordDef rd ->
         let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
-        with_sh (fun _ -> Decl_heap.RecordDefs.add name decl);
+        with_sh (fun _ -> Decl_store.((get ()).add_recorddef name decl));
         (name, Shallow_decl_defs.Record decl) :: acc
       | Typedef typedef ->
         let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
-        with_sh (fun _ -> Decl_heap.Typedefs.add name decl);
+        with_sh (fun _ -> Decl_store.((get ()).add_typedef name decl));
         (name, Shallow_decl_defs.Typedef decl) :: acc
       | Stmt _ -> acc
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
-        with_sh (fun _ -> Decl_heap.GConsts.add name decl);
+        with_sh (fun _ -> Decl_store.((get ()).add_gconst name decl));
         (name, Shallow_decl_defs.Const decl) :: acc)
 
 let nast_to_decls
     (acc : Direct_decl_parser.decls)
     (ctx : Provider_context.t)
     (prog : Nast.program) : Direct_decl_parser.decls =
-  name_and_declare_types_program acc None ctx prog
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> []
+  | _ -> name_and_declare_types_program acc None ctx prog
 
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :

@@ -50,13 +50,13 @@ let add_extends_dependency env x =
       Typing_deps.add_idep deps_mode root dep);
   ()
 
-type class_cache = Decl_heap.class_entries SMap.t
+type class_cache = Decl_store.class_entries SMap.t
 
 let get_class_add_dep env ?(cache : class_cache option) x =
   let res =
     match Option.(cache >>= SMap.find_opt x >>| fst) with
     | Some c -> Some c
-    | None -> Decl_heap.Classes.get x
+    | None -> Decl_store.((get ()).get_class x)
   in
   Option.iter res (fun cd ->
       if not (is_hhi cd) then add_extends_dependency env x);

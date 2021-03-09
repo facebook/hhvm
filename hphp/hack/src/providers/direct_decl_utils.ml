@@ -12,13 +12,14 @@ let cache_decls ctx decls =
   let open Shallow_decl_defs in
   let open Typing_defs in
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     List.iter decls ~f:(function
         | (name, Class decl) -> Shallow_classes_heap.Classes.add name decl
-        | (name, Fun decl) -> Decl_heap.Funs.add name decl
-        | (name, Record decl) -> Decl_heap.RecordDefs.add name decl
-        | (name, Typedef decl) -> Decl_heap.Typedefs.add name decl
-        | (name, Const decl) -> Decl_heap.GConsts.add name decl)
+        | (name, Fun decl) -> Decl_store.((get ()).add_fun name decl)
+        | (name, Record decl) -> Decl_store.((get ()).add_recorddef name decl)
+        | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
+        | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl))
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
     List.iter decls ~f:(function
         | (name, Class decl) ->

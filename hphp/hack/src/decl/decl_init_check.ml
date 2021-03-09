@@ -85,7 +85,7 @@ let init_not_required_props c props =
       end
     ~init:props
 
-type class_cache = Decl_heap.class_entries SMap.t
+type class_cache = Decl_store.class_entries SMap.t
 
 let parent_props ?(class_cache : class_cache option) decl_env c props =
   List.fold_left

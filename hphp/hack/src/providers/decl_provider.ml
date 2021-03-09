@@ -123,13 +123,16 @@ module Cache =
 
 let declare_folded_class_in_file
     (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
-    Decl_defs.decl_class_type * Decl_heap.class_members option =
-  match
-    Errors.run_in_decl_mode file (fun () ->
-        Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
-  with
-  | None -> err_not_found file name
-  | Some (_name, decl_and_members) -> decl_and_members
+    Decl_defs.decl_class_type * Decl_store.class_members option =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | _ ->
+    (match
+       Errors.run_in_decl_mode file (fun () ->
+           Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
+     with
+    | None -> err_not_found file name
+    | Some (_name, decl_and_members) -> decl_and_members)
 
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -154,6 +157,22 @@ let get_class
     derivation of the decl_class_type that lives in shmem.
   DECL BACKEND - the class_t is cached in the worker-local 'Cache' heap *)
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis ->
+    begin
+      match Cache.get class_name with
+      | Some t -> Some (counter, t)
+      | None ->
+        begin
+          match
+            Decl_store.((get ()).get_class class_name)
+            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl
+          with
+          | None -> None
+          | Some v ->
+            Cache.add class_name v;
+            Some (counter, v)
+        end
+    end
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
@@ -206,8 +225,9 @@ let get_fun
   Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
   | Provider_backend.Shared_memory ->
-    (match Decl_heap.Funs.get fun_name with
+    (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_fun_path ctx fun_name with
@@ -225,7 +245,7 @@ let get_fun
             Errors.run_in_decl_mode filename (fun () ->
                 declare_fun_in_file ctx filename fun_name)
           in
-          Decl_heap.Funs.add fun_name ft;
+          Decl_store.((get ()).add_fun fun_name ft);
           Some ft
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
@@ -270,8 +290,9 @@ let get_typedef
   Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
-    (match Decl_heap.Typedefs.get typedef_name with
+    (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_typedef_path ctx typedef_name with
@@ -289,7 +310,7 @@ let get_typedef
             Errors.run_in_decl_mode filename (fun () ->
                 declare_typedef_in_file ctx filename typedef_name)
           in
-          Decl_heap.Typedefs.add typedef_name tdecl;
+          Decl_store.((get ()).add_typedef typedef_name tdecl);
           record_typedef typedef_name;
           Some tdecl
       | None -> None))
@@ -335,8 +356,9 @@ let get_record_def
   Decl_counters.count_decl Decl_counters.Record_def ?tracing_info record_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_recorddef record_name)
   | Provider_backend.Shared_memory ->
-    (match Decl_heap.RecordDefs.get record_name with
+    (match Decl_store.((get ()).get_recorddef record_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_record_def_path ctx record_name with
@@ -354,7 +376,7 @@ let get_record_def
             Errors.run_in_decl_mode filename (fun () ->
                 declare_record_def_in_file ctx filename record_name)
           in
-          Decl_heap.RecordDefs.add record_name record_decl;
+          Decl_store.((get ()).add_recorddef record_name record_decl);
           record_record_def record_name;
           Some record_decl
       | None -> None))
@@ -401,8 +423,9 @@ let get_gconst
   Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
   | Provider_backend.Shared_memory ->
-    (match Decl_heap.GConsts.get gconst_name with
+    (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_const_path ctx gconst_name with
@@ -420,7 +443,7 @@ let get_gconst
             Errors.run_in_decl_mode filename (fun () ->
                 declare_const_in_file ctx filename gconst_name)
           in
-          Decl_heap.GConsts.add gconst_name gconst;
+          Decl_store.((get ()).add_gconst gconst_name gconst);
           record_const gconst_name;
           Some gconst
       | None -> None))
@@ -454,6 +477,7 @@ let prepare_for_typecheck
     (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
     unit =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis
   | Provider_backend.Shared_memory
   | Provider_backend.Local_memory _ ->
     ()
@@ -466,28 +490,8 @@ let prepare_for_typecheck
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.parse_and_cache_decls_in decl path content
 
-let local_changes_push_sharedmem_stack () : unit =
-  Decl_heap.Funs.LocalChanges.push_stack ();
-  Decl_heap.RecordDefs.LocalChanges.push_stack ();
-  Decl_heap.Constructors.LocalChanges.push_stack ();
-  Decl_heap.Props.LocalChanges.push_stack ();
-  Decl_heap.StaticProps.LocalChanges.push_stack ();
-  Decl_heap.Methods.LocalChanges.push_stack ();
-  Decl_heap.StaticMethods.LocalChanges.push_stack ();
-  Decl_heap.Classes.LocalChanges.push_stack ();
-  Decl_heap.Typedefs.LocalChanges.push_stack ();
-  Decl_heap.GConsts.LocalChanges.push_stack ();
-  ()
+let local_changes_push_sharedmem_stack () =
+  Decl_store.((get ()).push_local_changes ())
 
-let local_changes_pop_sharedmem_stack () : unit =
-  Decl_heap.Funs.LocalChanges.pop_stack ();
-  Decl_heap.RecordDefs.LocalChanges.pop_stack ();
-  Decl_heap.Constructors.LocalChanges.pop_stack ();
-  Decl_heap.Props.LocalChanges.pop_stack ();
-  Decl_heap.StaticProps.LocalChanges.pop_stack ();
-  Decl_heap.Methods.LocalChanges.pop_stack ();
-  Decl_heap.StaticMethods.LocalChanges.pop_stack ();
-  Decl_heap.Classes.LocalChanges.pop_stack ();
-  Decl_heap.Typedefs.LocalChanges.pop_stack ();
-  Decl_heap.GConsts.LocalChanges.pop_stack ();
-  ()
+let local_changes_pop_sharedmem_stack () =
+  Decl_store.((get ()).pop_local_changes ())

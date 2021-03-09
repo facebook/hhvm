@@ -120,6 +120,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis
       | Provider_backend.Shared_memory ->
         Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
         >>| attach_name_type FileInfo.Const
@@ -150,6 +151,7 @@ let add_const
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   if !writes_enabled then
     match backend with
+    | Provider_backend.Analysis -> failwith "invalid"
     | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -161,6 +163,7 @@ let add_const
 
 let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Naming_heap.Consts.remove_batch
       (Db_path_provider.get_naming_db_path backend)
@@ -236,6 +239,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis
       | Provider_backend.Shared_memory ->
         Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
         >>| attach_name_type FileInfo.Fun
@@ -285,6 +289,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
   | Some (path, _pos) -> compute_symbol_canon_name path
   | None ->
     (match Provider_context.get_backend ctx with
+    | Provider_backend.Analysis
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
         given symbol has been deleted in a context entry. We're relying on
@@ -317,6 +322,7 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
   if !writes_enabled then
     match backend with
+    | Provider_backend.Analysis -> failwith "invalid"
     | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -337,6 +343,7 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
 
 let remove_fun_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
+  | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
     Naming_heap.Funs.remove_batch
       (Db_path_provider.get_naming_db_path backend)
@@ -366,6 +373,7 @@ let add_type
     (kind : Naming_types.kind_of_type) : unit =
   if !writes_enabled then
     match backend with
+    | Provider_backend.Analysis -> failwith "invalid"
     | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -386,6 +394,7 @@ let add_type
 
 let remove_type_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Naming_heap.Types.remove_batch
       (Db_path_provider.get_naming_db_path backend)
@@ -425,6 +434,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     ~is_symbol:(String.equal name)
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis
       | Provider_backend.Shared_memory ->
         Naming_heap.Types.get_pos (db_path_of_ctx ctx) name
         >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
@@ -506,6 +516,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     compute_symbol_canon_name path (name_type_to_kind name_type)
   | None ->
     (match Provider_context.get_backend ctx with
+    | Provider_backend.Analysis
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
     given symbol has been deleted in a context entry. We're relying on
@@ -683,6 +694,7 @@ let update
   in
   match backend with
   | Provider_backend.Decl_service _ -> not_implemented backend
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     (* Remove old entries *)
     Option.iter old_file_info ~f:(fun old_file_info ->

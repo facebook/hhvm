@@ -14,5 +14,5 @@ exception Decl_heap_elems_bug
     The parameters might not contain all the member entries,
     in which case those are fetched from the member heaps. *)
 val to_class_type :
-  Decl_defs.decl_class_type * Decl_heap.class_members option ->
+  Decl_defs.decl_class_type * Decl_store.class_members option ->
   Typing_defs.class_type

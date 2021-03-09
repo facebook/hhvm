@@ -18,4 +18,11 @@ val class_decl_if_missing :
   sh:SharedMem.uses ->
   Provider_context.t ->
   string ->
-  (string * Decl_heap.class_entries) option
+  (string * Decl_store.class_entries) option
+
+val class_decl :
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  Shallow_decl_defs.shallow_class ->
+  parents:Decl_store.class_entries SMap.t ->
+  Decl_defs.decl_class_type * Decl_store.class_members

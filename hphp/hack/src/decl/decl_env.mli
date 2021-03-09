@@ -18,7 +18,7 @@ val add_wclass : env -> string -> unit
 
 val add_extends_dependency : env -> string -> unit
 
-type class_cache = Decl_heap.class_entries SMap.t
+type class_cache = Decl_store.class_entries SMap.t
 
 (** Add a dependency to the class then get class decl.
     First look up in cache and if not found lookup in heap. *)

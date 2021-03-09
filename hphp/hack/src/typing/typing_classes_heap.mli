@@ -13,13 +13,15 @@ open Typing_defs
 
 type class_t
 
+val make_eager_class_decl : Decl_defs.decl_class_type -> class_t
+
 val get :
   Provider_context.t ->
   string ->
   (Provider_context.t ->
   Relative_path.t ->
   string ->
-  Decl_defs.decl_class_type * Decl_heap.class_members option) ->
+  Decl_defs.decl_class_type * Decl_store.class_members option) ->
   class_t option
 
 module Api : sig

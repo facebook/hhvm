@@ -77,7 +77,9 @@ let add
     (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
     : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Cache.add key value
+  | Provider_backend.Analysis
+  | Provider_backend.Shared_memory ->
+    Cache.add key value
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->
     let key = key_to_local_key key in
     Provider_backend.Linearization_cache.add linearization_cache ~key ~value
@@ -89,7 +91,9 @@ let add
 let get (ctx : Provider_context.t) (key : key) :
     Decl_defs.mro_element list option =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Cache.get key
+  | Provider_backend.Analysis
+  | Provider_backend.Shared_memory ->
+    Cache.get key
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->
     let key = key_to_local_key key in
     Provider_backend.Linearization_cache.find_or_add

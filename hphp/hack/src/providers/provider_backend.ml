@@ -196,14 +196,18 @@ type t =
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }
+  | Analysis
 
 let t_to_string (t : t) : string =
   match t with
   | Shared_memory -> "Shared_memory"
   | Local_memory _ -> "Local_memory"
   | Decl_service _ -> "Decl_service"
+  | Analysis -> "Analysis"
 
 let backend_ref = ref Shared_memory
+
+let set_analysis_backend () : unit = backend_ref := Analysis
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 

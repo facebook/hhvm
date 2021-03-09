@@ -43,6 +43,7 @@ so keeping it around would just be a waste of memory. *)
 let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
   let (_, name) = class_.Aast.c_name in
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl ctx class_ in
     if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
@@ -55,6 +56,7 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
 
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt
@@ -103,6 +105,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
 let get_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.get_batch names
   | Provider_backend.Local_memory _ ->
@@ -113,6 +116,7 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
 let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.get_old_batch names
   | Provider_backend.Local_memory _ ->
@@ -122,6 +126,7 @@ let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
 
 let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.oldify_batch names
   | Provider_backend.Local_memory _ ->
@@ -131,6 +136,7 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.remove_old_batch names
   | Provider_backend.Local_memory _ ->
@@ -140,6 +146,7 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.remove_batch names
   | Provider_backend.Local_memory _ ->

@@ -50,10 +50,10 @@
     decl_env
     decl_fun_utils
     decl_folded_class
-    decl_heap
     decl_hint
     decl_nast
     decl_pos_utils
+    decl_store
     full_fidelity
     naming
     naming_heap
@@ -71,7 +71,6 @@
   (libraries
     decl_env
     decl_fun_utils
-    decl_heap
     decl_hint
     decl_init_check
     decl_pos_utils
@@ -97,9 +96,9 @@
     decl_enum
     decl_env
     decl_fun_utils
-    decl_heap
     decl_init_check
     decl_pos_utils
+    decl_store
     decl_to_typing
     naming
     procs_procs
@@ -133,8 +132,8 @@
   (modules decl_class)
   (libraries
     decl_defs
-    decl_heap
     decl_instantiate
+    decl_store
     decl_subst
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
@@ -192,7 +191,7 @@
   (modules decl_env)
   (libraries
     decl_defs
-    decl_heap
+    decl_store
     provider_context
     typing_defs
     typing_deps)
@@ -204,7 +203,7 @@
   (libraries
     decl
     decl_defs
-    decl_heap
+    decl_store
     naming
     naming_heap
     utils_core)
@@ -226,6 +225,17 @@
   (libraries
     decl_defs
     heap_shared_mem
+    provider_backend
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_store)
+  (modules decl_store)
+  (libraries
+    decl_defs
+    decl_heap
+    provider_backend
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 

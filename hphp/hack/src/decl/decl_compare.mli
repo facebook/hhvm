@@ -10,18 +10,18 @@
 open Typing_deps
 open Decl_heap
 
-val class_big_diff : Classes.t -> Classes.t -> bool
+val class_big_diff : Class.t -> Class.t -> bool
 
 module ClassDiff : sig
   val compare :
-    Typing_deps_mode.t -> string -> Classes.t -> Classes.t -> DepSet.t * bool
+    Typing_deps_mode.t -> string -> Class.t -> Class.t -> DepSet.t * bool
 end
 
 module ClassEltDiff : sig
   val compare :
     Typing_deps_mode.t ->
-    Classes.t ->
-    Classes.t ->
+    Class.t ->
+    Class.t ->
     DepSet.t * [> `Changed | `Unchanged ]
 end
 
@@ -30,8 +30,8 @@ val get_extend_deps : Typing_deps_mode.t -> DepSet.elt -> DepSet.t -> DepSet.t
 val get_classes_deps :
   ctx:Provider_context.t ->
   conservative_redecl:bool ->
-  Classes.t option SMap.t ->
-  Classes.t option SMap.t ->
+  Class.t option SMap.t ->
+  Class.t option SMap.t ->
   SSet.t ->
   DepSet.t * DepSet.t * DepSet.t
 

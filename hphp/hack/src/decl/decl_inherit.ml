@@ -27,13 +27,13 @@ module Inst = Decl_instantiate
 
 type inherited = {
   ih_substs: subst_context SMap.t;
-  ih_cstr: (element * Decl_heap.Constructor.t option) option * consistent_kind;
+  ih_cstr: (element * fun_elt option) option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
-  ih_props: (element * Decl_heap.Property.t option) SMap.t;
-  ih_sprops: (element * Decl_heap.StaticProperty.t option) SMap.t;
-  ih_methods: (element * Decl_heap.Method.t option) SMap.t;
-  ih_smethods: (element * Decl_heap.StaticMethod.t option) SMap.t;
+  ih_props: (element * decl_ty option) SMap.t;
+  ih_sprops: (element * decl_ty option) SMap.t;
+  ih_methods: (element * fun_elt option) SMap.t;
+  ih_smethods: (element * fun_elt option) SMap.t;
 }
 
 let empty =
@@ -335,7 +335,7 @@ let inherit_hack_class
     parent_name
     parent
     argl
-    (parent_members : Decl_heap.class_members option) : inherited =
+    (parent_members : Decl_store.class_members option) : inherited =
   let subst = make_substitution parent argl in
   let parent =
     match parent.dc_kind with
@@ -367,7 +367,7 @@ let inherit_hack_class
       ih_cstr =
         ( Option.map cstr ~f:(fun cstr ->
               let constructor_heap_value =
-                parent_members >>= fun m -> m.Decl_heap.m_constructor
+                parent_members >>= fun m -> m.Decl_store.m_constructor
               in
               (cstr, constructor_heap_value)),
           constructor_consistency );
@@ -376,19 +376,19 @@ let inherit_hack_class
       ih_props =
         pair_with_heap_entries
           parent.dc_props
-          (parent_members >>| fun m -> m.Decl_heap.m_properties);
+          (parent_members >>| fun m -> m.Decl_store.m_properties);
       ih_sprops =
         pair_with_heap_entries
           parent.dc_sprops
-          (parent_members >>| fun m -> m.Decl_heap.m_static_properties);
+          (parent_members >>| fun m -> m.Decl_store.m_static_properties);
       ih_methods =
         pair_with_heap_entries
           parent.dc_methods
-          (parent_members >>| fun m -> m.Decl_heap.m_methods);
+          (parent_members >>| fun m -> m.Decl_store.m_methods);
       ih_smethods =
         pair_with_heap_entries
           parent.dc_smethods
-          (parent_members >>| fun m -> m.Decl_heap.m_static_methods);
+          (parent_members >>| fun m -> m.Decl_store.m_static_methods);
     }
   in
   result
@@ -426,7 +426,7 @@ let inherit_hack_xhp_attrs_only class_type members =
       ih_props =
         pair_with_heap_entries
           props
-          (members >>| fun m -> m.Decl_heap.m_properties);
+          (members >>| fun m -> m.Decl_store.m_properties);
     }
   in
   result
@@ -437,15 +437,15 @@ let inherit_hack_xhp_attrs_only class_type members =
     and optionally all the entries from the property and method heaps.
     [classes] acts as a cache for entries we already have at hand.
     Also add dependency to that class. *)
-let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
-    Decl_heap.class_entries option =
+let heap_entries env class_name (classes : Decl_store.class_entries SMap.t) :
+    Decl_store.class_entries option =
   match SMap.find_opt class_name classes with
   | Some (class_, _) as heap_entries ->
     if not (Pos_or_decl.is_hhi class_.dc_pos) then
       Decl_env.add_extends_dependency env class_name;
     heap_entries
   | None ->
-    (match Decl_heap.Classes.get class_name with
+    (match Decl_store.((get ()).get_class class_name) with
     | None ->
       Decl_env.add_extends_dependency env class_name;
       None
@@ -454,7 +454,7 @@ let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
         Decl_env.add_extends_dependency env class_name;
       Some (class_, None))
 
-let from_class env c (parents : Decl_heap.class_entries SMap.t) parent_ty :
+let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
     inherited =
   let (_, (_, parent_name), parent_class_params) =
     Decl_utils.unwrap_class_type parent_ty
@@ -473,7 +473,7 @@ let from_class env c (parents : Decl_heap.class_entries SMap.t) parent_ty :
       parent_class_params
       parent_members
 
-let from_class_constants_only env (parents : Decl_heap.class_entries SMap.t) ty
+let from_class_constants_only env (parents : Decl_store.class_entries SMap.t) ty
     =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
   match heap_entries env class_name parents with
@@ -484,7 +484,7 @@ let from_class_constants_only env (parents : Decl_heap.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_class_constants_only class_ class_params parent_members
 
-let from_class_xhp_attrs_only env (parents : Decl_heap.class_entries SMap.t) ty
+let from_class_xhp_attrs_only env (parents : Decl_store.class_entries SMap.t) ty
     =
   let (_, (_pos, class_name), _class_params) =
     Decl_utils.unwrap_class_type ty
@@ -497,7 +497,7 @@ let from_class_xhp_attrs_only env (parents : Decl_heap.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_xhp_attrs_only class_ parent_members
 
-let from_parent env c (parents : Decl_heap.class_entries SMap.t) =
+let from_parent env c (parents : Decl_store.class_entries SMap.t) =
   let extends =
     (* In an abstract class or a trait, we assume the interfaces
      * will be implemented in the future, so we take them as
@@ -531,12 +531,12 @@ let from_trait env c parents (acc, methods, smethods) uses =
   let smethods = SMap.fold extend_methods ih_smethods smethods in
   (add_inherited inherited acc, methods, smethods)
 
-let from_xhp_attr_use env (parents : Decl_heap.class_entries SMap.t) acc uses =
+let from_xhp_attr_use env (parents : Decl_store.class_entries SMap.t) acc uses =
   let inherited = from_class_xhp_attrs_only env parents uses in
   add_inherited inherited acc
 
 let from_interface_constants
-    env (parents : Decl_heap.class_entries SMap.t) acc impls =
+    env (parents : Decl_store.class_entries SMap.t) acc impls =
   let inherited = from_class_constants_only env parents impls in
   add_inherited inherited acc
 
@@ -544,7 +544,7 @@ let from_interface_constants
 (* The API to the outside *)
 (*****************************************************************************)
 
-let make env c ~cache:(parents : Decl_heap.class_entries SMap.t) =
+let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
   (* members inherited from parent class ... *)
   let (acc : inherited) = from_parent env c parents in
   let acc =

@@ -168,8 +168,11 @@ type t =
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }  (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
+  | Analysis
 
 val t_to_string : t -> string
+
+val set_analysis_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
 

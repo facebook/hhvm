@@ -1302,9 +1302,9 @@ let class_def_ env c tc =
     let method_pos ~is_static class_id meth_id =
       let get_meth =
         if is_static then
-          Decl_heap.StaticMethods.get
+          Decl_store.((get ()).get_static_method)
         else
-          Decl_heap.Methods.get
+          Decl_store.((get ()).get_method)
       in
       match get_meth (class_id, meth_id) with
       | Some { fe_pos; _ } -> fe_pos

@@ -169,7 +169,7 @@ let add_grand_parents_or_traits
 let get_class_parent_or_trait
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    (parent_cache : Decl_heap.class_entries SMap.t)
+    (parent_cache : Decl_store.class_entries SMap.t)
     ((parents, is_complete, pass) :
       SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
     (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * bool * 'a =
@@ -248,22 +248,22 @@ let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
     (class_env : class_env)
     (shallow_class : Shallow_decl_defs.shallow_class) :
-    string * Decl_heap.class_entries =
+    string * Decl_store.class_entries =
   let (_, name) = shallow_class.sc_name in
   let class_env = { class_env with stack = SSet.add name class_env.stack } in
   let (errors, (tc, member_heaps_values)) =
     Errors.do_ (fun () ->
         let parents = class_parents_decl ~sh class_env shallow_class in
-        class_decl ~sh class_env.ctx shallow_class parents)
+        class_decl ~sh class_env.ctx shallow_class ~parents)
   in
   let class_ = { tc with dc_decl_errors = Some errors } in
-  Decl_heap.Classes.add name class_;
+  Decl_store.((get ()).add_class name class_);
   (name, (class_, Some member_heaps_values))
 
 and class_parents_decl
     ~(sh : SharedMem.uses)
     (class_env : class_env)
-    (c : Shallow_decl_defs.shallow_class) : Decl_heap.class_entries SMap.t =
+    (c : Shallow_decl_defs.shallow_class) : Decl_store.class_entries SMap.t =
   let class_type_decl acc class_ty =
     match get_node class_ty with
     | Tapply ((pos, class_name), _) ->
@@ -302,8 +302,8 @@ and is_disposable_type
 
 and class_decl_if_missing
     ~(sh : SharedMem.uses) (class_env : class_env) (class_name : string) :
-    (string * Decl_heap.class_entries) option =
-  match Decl_heap.Classes.get class_name with
+    (string * Decl_store.class_entries) option =
+  match Decl_store.((get ()).get_class class_name) with
   | Some decl -> Some (class_name, (decl, None))
   | None ->
     (match Shallow_classes_provider.get class_env.ctx class_name with
@@ -355,8 +355,8 @@ and class_decl
     ~(sh : SharedMem.uses)
     (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
-    (parents : Decl_heap.class_entries SMap.t) :
-    Decl_defs.decl_class_type * Decl_heap.class_members =
+    ~(parents : Decl_store.class_entries SMap.t) :
+    Decl_defs.decl_class_type * Decl_store.class_members =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let (_p, cls_name) = c.sc_name in
@@ -518,7 +518,7 @@ and class_decl
   in
   let member_heaps_values =
     {
-      Decl_heap.m_static_properties = SMap.filter_map snd static_props;
+      Decl_store.m_static_properties = SMap.filter_map snd static_props;
       m_properties = SMap.filter_map snd props;
       m_static_methods = SMap.filter_map snd static_methods;
       m_methods = SMap.filter_map snd methods;
@@ -570,10 +570,10 @@ and trait_exists
 and constructor_decl
     ~(sh : SharedMem.uses)
     ((parent_cstr, pconsist) :
-      (Decl_defs.element * Decl_heap.Constructor.t option) option
+      (Decl_defs.element * Typing_defs.fun_elt option) option
       * Typing_defs.consistent_kind)
     (class_ : Shallow_decl_defs.shallow_class) :
-    (Decl_defs.element * Decl_heap.Constructor.t option) option
+    (Decl_defs.element * Typing_defs.fun_elt option) option
     * Typing_defs.consistent_kind =
   let SharedMem.Uses = sh in
   (* constructors in children of class_ must be consistent? *)
@@ -600,7 +600,7 @@ and build_constructor
     ~(write_shmem : bool)
     (class_ : Shallow_decl_defs.shallow_class)
     (method_ : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Decl_heap.Constructor.t option) option =
+    (Decl_defs.element * Typing_defs.fun_elt option) option =
   let (_, class_name) = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
   let pos = fst method_.sm_name in
@@ -631,7 +631,7 @@ and build_constructor
       fe_php_std_lib = false;
     }
   in
-  if write_shmem then Decl_heap.Constructors.add class_name fe;
+  (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
   Some (cstr, Some fe)
 
 and class_const_fold
@@ -673,9 +673,9 @@ and class_class_decl (class_id : Ast_defs.id) : Typing_defs.class_const =
 and prop_decl
     ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Decl_heap.Property.t option) SMap.t)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Decl_heap.Property.t option) SMap.t =
+    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
@@ -702,16 +702,17 @@ and prop_decl
       elt_deprecated = None;
     }
   in
-  if write_shmem then Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
+  ( if write_shmem then
+    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty) );
   let acc = SMap.add sp_name (elt, Some ty) acc in
   acc
 
 and static_prop_decl
     ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Decl_heap.StaticProperty.t option) SMap.t)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Decl_heap.StaticProperty.t option) SMap.t =
+    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
@@ -738,7 +739,8 @@ and static_prop_decl
       elt_deprecated = None;
     }
   in
-  if write_shmem then Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
+  ( if write_shmem then
+    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty) );
   let acc = SMap.add sp_name (elt, Some ty) acc in
   acc
 
@@ -828,9 +830,9 @@ and method_decl_acc
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
     ((acc, condition_types) :
-      (Decl_defs.element * Decl_heap.Method.t option) SMap.t * SSet.t)
+      (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t)
     (m : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Decl_heap.Method.t option) SMap.t * SSet.t =
+    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t =
   (* If method doesn't override anything but has the <<__Override>> attribute, then
    * set the override flag in ce_flags and let typing emit an appropriate error *)
   let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
@@ -869,18 +871,18 @@ and method_decl_acc
       fe_php_std_lib = false;
     }
   in
-  if write_shmem then
+  ( if write_shmem then
     if is_static then
-      Decl_heap.StaticMethods.add (elt.elt_origin, id) fe
+      Decl_store.((get ()).add_static_method (elt.elt_origin, id) fe)
     else
-      Decl_heap.Methods.add (elt.elt_origin, id) fe;
+      Decl_store.((get ()).add_method (elt.elt_origin, id) fe) );
   let acc = SMap.add id (elt, Some fe) acc in
   (acc, condition_types)
 
 let class_decl_if_missing
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (class_name : string) :
-    (string * Decl_heap.class_entries) option =
-  match Decl_heap.Classes.get class_name with
+    (string * Decl_store.class_entries) option =
+  match Decl_store.((get ()).get_class class_name) with
   | Some class_ -> Some (class_name, (class_, None))
   | None ->
     (* Class elements are in memory if and only if the class itself is there.

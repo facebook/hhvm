@@ -776,9 +776,7 @@ Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
 }
 
 Func::SharedData::~SharedData() {
-  if (!RuntimeOption::RepoAuthoritative) {
-    freeBCRegion(m_bc, bclen());
-  }
+  freeBCRegion(m_bc, bclen());
 
   Func::s_extendedLineInfo.erase(this);
   Func::s_lineTables.erase(this);
@@ -1205,6 +1203,9 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 }
 
 void freeBCRegion(const unsigned char* bc, size_t bclen) {
+  // Can't free bytecode arena memory.
+  if (RuntimeOption::RepoAuthoritative) return;
+
   if (debug) {
     // poison released bytecode
     memset(const_cast<unsigned char*>(bc), 0xff, bclen);

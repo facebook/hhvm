@@ -31,9 +31,9 @@ else ()
   SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
     ZSTD_DOWNLOAD_ARGS
     SOURCE_URL
-    "https://github.com/facebook/zstd/releases/download/v1.4.5/zstd-1.4.5.tar.gz"
+    "https://github.com/facebook/zstd/releases/download/v1.4.9/zstd-1.4.9.tar.gz"
     SOURCE_HASH
-    "SHA512=417b813ade6c8436690bd9d6da34a9f87f50e7378752b72e63066befbee496392a4b72896fa56688d814f461871ab31d3c6637497ff2ed7a282d58513631a38b"
+    "SHA512=10d325c844be43f801c798158c6f1d1ab57401abf1e783e04f6b9e4ac0ba53cf487204fa3244370b1ade239d5f3a784bf1829e206c4ba61fdd9c2f4e9502b238"
   )
   ExternalProject_Add(
     bundled_zstd

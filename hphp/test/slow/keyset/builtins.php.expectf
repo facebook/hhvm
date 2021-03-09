@@ -808,12 +808,10 @@ array_reverse: darray(4) {
   [3]=>
   int(5)
 }
-array_slice: 
-Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/builtins.php on line 70
-darray(2) {
-  [0]=>
+array_slice: darray(2) {
+  ["8"]=>
   string(1) "8"
-  [1]=>
+  ["10"]=>
   string(2) "10"
 }
 array_key_exists: varray(2) {

@@ -1027,23 +1027,10 @@ TypedValue HHVM_FUNCTION(array_slice,
 
   // Otherwise VArrayInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
-  auto logged_intish_cast = false;
-  auto is_php_array = isArrayType(cell_input.m_type);
   Array ret = Array::attach(MixedArray::MakeReserveDArray(len));
   auto nextKI = 0; // for appends
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
-    Variant key(iter.first());
-    if (!is_php_array && key.isString()) {
-      int64_t n;
-      if (key.asCStrRef().get()->isStrictlyInteger(n)) {
-        if (!logged_intish_cast &&
-            RO::EvalHackArrCompatArraySliceIntishCastNotices) {
-          logged_intish_cast = true;
-          raise_hackarr_compat_notice("triggered IntishCast for array_slice");
-        }
-        key = n;
-      }
-    }
+    auto const key = iter.first();
     if (!preserve_keys && key.isInteger()) {
       ret.set(nextKI++, iter.secondValPlus());
     } else {

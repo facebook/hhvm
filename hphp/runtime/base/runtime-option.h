@@ -137,23 +137,23 @@ struct RepoOptions {
     // bigger problems.
     return m_sha1 == o.m_sha1;
   }
-  
+
   // Getters for the parser options we pass to HackC for extracting facts
   bool allowNewAttributeSyntax() const noexcept {
     return AllowNewAttributeSyntax;
   }
   bool enableXHPClassModifier() const noexcept {
-    return EnableXHPClassModifier; 
+    return EnableXHPClassModifier;
   }
   bool disableXHPElementMangling() const noexcept {
-    return DisableXHPElementMangling; 
+    return DisableXHPElementMangling;
   }
 
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
 
   static const RepoOptions& forFile(const char* path);
-  
+
 private:
   RepoOptions() = default;
   explicit RepoOptions(const char* str, const char* file);
@@ -161,7 +161,7 @@ private:
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
   void calcCacheKey();
-  
+
   #define N(t, n, ...) t n;
   #define P(t, n, ...) t n;
   #define H(t, n, ...) t n;
@@ -1140,9 +1140,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatFBSerializeHackArraysNotices, false)             \
   /* Raise notices on intish-cast (which may use an is_array check) */  \
   F(bool, HackArrCompatIntishCastNotices, false)                        \
-  /* Raise notices on a special, Hack-array only intish-cast in the     \
-   * array_slice builtin which we need to eliminate immediately. */     \
-  F(bool, HackArrCompatArraySliceIntishCastNotices, true)               \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
   F(bool, HackArrCompatIsVecDictNotices, false)                         \
   F(bool, HackArrCompatSerializeNotices, false)                         \

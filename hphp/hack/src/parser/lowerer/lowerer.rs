@@ -3188,23 +3188,29 @@ where
         }
     }
 
-    fn has_polymorphic_context(contexts: &Option<ast::Contexts>) -> bool {
+    fn has_polymorphic_context_single(hint: &ast::Hint) -> bool {
         use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
-        if let Some(ast::Contexts(_, ref context_hints)) = contexts {
-            return context_hints.iter().any(|c| match *c.1 {
-                HfunContext(_) => true,
-                Haccess(ref root, _) => match &*root.1 {
-                    Happly(oxidized::ast::Id(_, id), _)
-                        if Self::strip_ns(id.as_str())
-                            == naming_special_names_rust::typehints::THIS =>
-                    {
-                        true
-                    }
-                    Hvar(_) => true,
-                    _ => false,
-                },
+        match *hint.1 {
+            HfunContext(_) => true,
+            Haccess(ref root, _) => match &*root.1 {
+                Happly(oxidized::ast::Id(_, id), _)
+                    if Self::strip_ns(id.as_str())
+                        == naming_special_names_rust::typehints::THIS =>
+                {
+                    true
+                }
+                Hvar(_) => true,
                 _ => false,
-            });
+            },
+            _ => false,
+        }
+    }
+
+    fn has_polymorphic_context(contexts: &Option<ast::Contexts>) -> bool {
+        if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+            return context_hints
+                .iter()
+                .any(|c| Self::has_polymorphic_context_single(c));
         } else {
             false
         }
@@ -4238,6 +4244,13 @@ where
                     let ast::Hint(_, ref h) = hint;
                     if let Hintersection(hl) = &**h {
                         for h in hl {
+                            if Self::has_polymorphic_context_single(h) {
+                                Self::raise_parsing_error(
+                                    &c.constraint,
+                                    env,
+                                    "Polymorphic contexts on ctx constants are not allowed",
+                                );
+                            }
                             let ast::Hint(_, ref h) = h;
                             if let Happly(oxidized::ast::Id(_, id), _) = &**h {
                                 if id.as_str().ends_with("_local") {

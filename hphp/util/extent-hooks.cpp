@@ -77,8 +77,8 @@ extent_hooks_t MultiRangeExtentAllocator::s_hooks {
 
 void MultiRangeExtentAllocator::appendMapper(RangeMapper* m) {
   for (auto& p : m_mappers) {
-    if (p == nullptr) {
-      p = m;
+    RangeMapper* expected = nullptr;
+    if (p.compare_exchange_strong(expected, m, std::memory_order_acq_rel)) {
       return;
     }
   }
@@ -87,7 +87,8 @@ void MultiRangeExtentAllocator::appendMapper(RangeMapper* m) {
 
 size_t MultiRangeExtentAllocator::maxCapacity() const {
   size_t result = 0;
-  for (auto& p : m_mappers) {
+  for (auto& mapper : m_mappers) {
+    auto p = mapper.load(std::memory_order_acquire);
     if (p == nullptr) {
       break;
     }
@@ -110,7 +111,8 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
   assertx(alignment <= (2u << 20));
 
   auto extAlloc = GetByArenaId<MultiRangeExtentAllocator>(arena_ind);
-  for (auto rangeMapper : extAlloc->m_mappers) {
+  for (auto& mapper : extAlloc->m_mappers) {
+    auto rangeMapper = mapper.load(std::memory_order_acquire);
     if (!rangeMapper) return nullptr;
     // RangeMapper::addMappingImpl() holds the lock on RangeState when adding
     // new mappings, so no additional locking is needed here.

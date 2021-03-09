@@ -26,7 +26,9 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/bump-mapper.h"
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
@@ -341,6 +343,22 @@ void CodeCache::freeProf() {
       }
     }
     mprotect(m_prof.base(), m_prof.size(), PROT_NONE);
+#if USE_JEMALLOC_EXTENT_HOOKS
+    // Reuse the memory region as an emergency buffer for low memory.
+    if (use_lowptr && RO::EvalRecycleAProf &&
+        is_low_mem(m_prof.base()) && low_arena) {
+      auto const base = reinterpret_cast<uintptr_t>(m_prof.base());
+      assertx((base & ~(s_pageSize - 1)) == 0);
+      assertx((m_prof.size() & ~(s_pageSize - 1)) == 0);
+      using namespace alloc;
+      auto prof_range = new RangeState(base, base + m_prof.size(), Reserved{});
+      auto mapper =
+        new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM); }, *prof_range);
+      reinterpret_cast<LowArena*>(&g_lowerArena)->appendMapper(mapper);
+      reinterpret_cast<LowArena*>(&g_lowArena)->appendMapper(mapper);
+      reinterpret_cast<LowArena*>(&g_lowColdArena)->appendMapper(mapper);
+    }
+#endif
   }
 
   m_profFreed = true;

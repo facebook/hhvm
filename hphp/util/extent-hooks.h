@@ -113,7 +113,7 @@ struct MultiRangeExtentAllocator {
 
  private:
   static constexpr std::size_t kMaxMapperCount = 7u;
-  std::array<RangeMapper*, kMaxMapperCount> m_mappers;
+  std::array<std::atomic<RangeMapper*>, kMaxMapperCount> m_mappers{};
   std::atomic_size_t m_allocatedSize;
 };
 

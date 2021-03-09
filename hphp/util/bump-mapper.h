@@ -19,6 +19,7 @@
 #include "hphp/util/address-range.h"
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/alloc.h"
+#include <functional>
 #include <utility>
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -158,6 +159,25 @@ struct BumpFileMapper : public RangeMapper {
 #define TMPDIRMAXLEN 80
 #endif
   char m_dirName[TMPDIRMAXLEN]{};
+};
+
+
+// A mapper that is used when other mappers all fail. To avoid crashing, this
+// could allocate from some emergency buffer, and initiate a graceful shutdown.
+// The range passed in should be pre-mapped.
+struct BumpEmergencyMapper : public RangeMapper {
+ public:
+  using ExitFun = std::function<void()>;
+  template<typename... Args>
+  explicit BumpEmergencyMapper(ExitFun&& exitFn, Args&&... args)
+    : RangeMapper(std::forward<Args>(args)...)
+    , m_exit(exitFn) {}
+ protected:
+  Direction direction() const override { return Direction::LowToHigh; }
+  bool addMappingImpl() override;
+ protected:
+  // The exit function to call when we start using the emergency mapping.
+  ExitFun m_exit;
 };
 
 }}

@@ -1015,6 +1015,7 @@ struct RuntimeOption {
   F(bool, JsonParserUseLocalArena,     true)                            \
   F(bool, XmlParserUseLocalArena,      true)                            \
   F(bool, LowStaticArrays,             true)                            \
+  F(bool, RecycleAProf,                true)                            \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \

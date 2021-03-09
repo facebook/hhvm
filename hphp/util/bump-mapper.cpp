@@ -200,6 +200,20 @@ bool BumpFileMapper::addMappingImpl() {
   return true;
 }
 
+bool BumpEmergencyMapper::addMappingImpl() {
+  // The emergency buffer should have already been mapped.
+  auto low = m_state.low();
+  auto const high = m_state.high();
+  if (m_state.low_map.compare_exchange_strong(low, high,
+                                              std::memory_order_acq_rel)) {
+    mprotect(reinterpret_cast<void*>(low), high - low,
+             PROT_READ | PROT_WRITE);
+    if (m_exit) m_exit();
+    return true;
+  }
+  return false;
+}
+
 template bool BumpNormalMapper<Direction::LowToHigh>::addMappingImpl();
 template bool BumpNormalMapper<Direction::HighToLow>::addMappingImpl();
 

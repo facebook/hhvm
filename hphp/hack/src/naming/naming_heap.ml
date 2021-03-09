@@ -87,6 +87,8 @@ module type ReverseNamingTable = sig
   val remove_batch : Naming_sqlite.db_path option -> SSet.t -> unit
 
   val heap_string_of_key : string -> string
+
+  module Position : Value.Type with type t = pos
 end
 
 (* The Types module records both class names and typedefs since they live in the
@@ -95,25 +97,27 @@ end
 module Types = struct
   type pos = FileInfo.pos * Naming_types.kind_of_type
 
+  module CanonName = struct
+    type t = string
+
+    let prefix = Prefix.make ()
+
+    let description = "Naming_TypeCanon"
+  end
+
+  module Position = struct
+    type t = pos
+
+    let prefix = Prefix.make ()
+
+    let description = "Naming_TypePos"
+  end
+
   module TypeCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = string
-
-        let prefix = Prefix.make ()
-
-        let description = "Naming_TypeCanon"
-      end)
+    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
 
   module TypePosHeap =
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = pos
-
-        let prefix = Prefix.make ()
-
-        let description = "Naming_TypePos"
-      end)
+    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
       (struct
         let capacity = 1000
       end)
@@ -258,25 +262,27 @@ end
 module Funs = struct
   type pos = FileInfo.pos
 
+  module CanonName = struct
+    type t = string
+
+    let prefix = Prefix.make ()
+
+    let description = "Naming_FunCanon"
+  end
+
   module FunCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = string
+    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
 
-        let prefix = Prefix.make ()
+  module Position = struct
+    type t = pos
 
-        let description = "Naming_FunCanon"
-      end)
+    let prefix = Prefix.make ()
+
+    let description = "Naming_FunPos"
+  end
 
   module FunPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = pos
-
-        let prefix = Prefix.make ()
-
-        let description = "Naming_FunPos"
-      end)
+    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
 
   module BlockedEntries =
     SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
@@ -362,15 +368,16 @@ end
 module Consts = struct
   type pos = FileInfo.pos
 
+  module Position = struct
+    type t = pos
+
+    let prefix = Prefix.make ()
+
+    let description = "Naming_ConstPos"
+  end
+
   module ConstPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = pos
-
-        let prefix = Prefix.make ()
-
-        let description = "Naming_ConstPos"
-      end)
+    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
 
   module BlockedEntries =
     SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)

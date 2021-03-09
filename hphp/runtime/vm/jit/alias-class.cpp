@@ -169,18 +169,6 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
 }
 }
 
-AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s) {
-  high = spRel + 1;
-  if (s == std::numeric_limits<int32_t>::max()) {
-    low = IRSPRelOffset{std::numeric_limits<int32_t>::min()};
-  } else {
-    low = IRSPRelOffset{safe_cast<int32_t>(std::max<int64_t>(
-      int64_t{high.offset} - int64_t{s},
-      int64_t{std::numeric_limits<int32_t>::min()}
-    ))};
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 size_t AliasClass::Hash::operator()(AliasClass acls) const {

@@ -586,7 +586,7 @@ void visit(Local& env, IRInstruction& inst) {
         load(env, ALocal { inst.src(0), inst.extra<AssertLoc>()->locId });
         return;
       case AssertStk:
-        load(env, AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 });
+        load(env, AStack::at(inst.extra<AssertStk>()->offset));
         return;
       default:
         return;

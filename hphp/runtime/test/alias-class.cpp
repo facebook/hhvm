@@ -54,11 +54,6 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
   auto const mainFP = unit.gen(DefFP, bcctx)->dst();
-  auto const SP = unit.gen(
-    DefFrameRelSP, bcctx,
-    DefStackData { FPInvOffset { 10 }, FPInvOffset { 10 } },
-    mainFP
-  )->dst();
 
   return {
     // Frame locals.
@@ -67,12 +62,12 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
     ALocal { mainFP, 6 },
 
     // Some stack locations.
-    AStack { SP, IRSPRelOffset { -1 }, 1 },
-    AStack { SP, IRSPRelOffset { -2 }, 3 },
-    AStack { SP, IRSPRelOffset { -12 }, std::numeric_limits<int32_t>::max() },
-    AStack { SP, IRSPRelOffset { -12 }, 4 },
-    AStack { SP, IRSPRelOffset { -11 }, 3 },
-    AStack { SP, IRSPRelOffset { -52 }, 10 },
+    AStack::at(IRSPRelOffset { -1 }),
+    AStack::range(IRSPRelOffset { -4 }, IRSPRelOffset { -1 }),
+    AStack::below(IRSPRelOffset { -11 }),
+    AStack::range(IRSPRelOffset { -15 }, IRSPRelOffset { -11 }),
+    AStack::range(IRSPRelOffset { -13 }, IRSPRelOffset { -10 }),
+    AStack::range(IRSPRelOffset { -61 }, IRSPRelOffset { -51 }),
 
     // ActRec locations
     AFContext { mainFP },
@@ -224,17 +219,10 @@ TEST(AliasClass, Basic) {
 
 TEST(AliasClass, StackBasics) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto const FP = unit.gen(DefFP, bcctx)->dst();
-  auto const SP = unit.gen(
-    DefFrameRelSP, bcctx,
-    DefStackData { FPInvOffset { 5 }, FPInvOffset { 5 } },
-    FP
-  )->dst();
 
   // Some basic canonicalization and maybe.
   {
-    AliasClass const stk = AStack { SP, IRSPRelOffset { 0 }, 1 };
+    AliasClass const stk = AStack::at(IRSPRelOffset { 0 });
 
     EXPECT_TRUE(stk <= AStackAny);
     EXPECT_TRUE(stk != AStackAny);
@@ -246,16 +234,18 @@ TEST(AliasClass, StackBasics) {
 
   // Stack ranges, with subtype and maybe.
   {
-    AliasClass const stk1 = AStack { SP, IRSPRelOffset { -10 }, 1 };
-    AliasClass const stk2 = AStack { SP, IRSPRelOffset { -10 }, 2 };
+    AliasClass const stk1 = AStack::at(IRSPRelOffset { -10 });
+    AliasClass const stk2 = AStack::range(IRSPRelOffset { -11 },
+                                          IRSPRelOffset { -9 });
     EXPECT_TRUE(stk1 <= stk2);
     EXPECT_TRUE(stk1.maybe(stk2));
 
-    AliasClass const stk3 = AStack { SP, IRSPRelOffset { -10 }, 5 };
+    AliasClass const stk3 = AStack::range(IRSPRelOffset { -14 },
+                                          IRSPRelOffset { -9 });
     EXPECT_TRUE(stk1 <= stk3);
     EXPECT_TRUE(stk1.maybe(stk3));
-    AliasClass const stk4 = AStack { SP, IRSPRelOffset { -15 }, 1 };
-    AliasClass const stk5 = AStack { SP, IRSPRelOffset { -14 }, 1 };
+    AliasClass const stk4 = AStack::at(IRSPRelOffset { -15 });
+    AliasClass const stk5 = AStack::at(IRSPRelOffset { -14 });
     // stk4's slot is immediately below stk3's range, but stk5 is the last slot
     // of its range.
     EXPECT_FALSE(stk3.maybe(stk4));
@@ -269,17 +259,12 @@ TEST(AliasClass, StackBasics) {
 
 TEST(AliasClass, SpecializedUnions) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto const FP = unit.gen(DefFP, bcctx)->dst();
-  auto const SP = unit.gen(
-    DefFrameRelSP, bcctx,
-    DefStackData { FPInvOffset { 5 }, FPInvOffset { 5 } },
-    FP
-  )->dst();
 
-  AliasClass const stk = AStack { SP, IRSPRelOffset { -10 }, 3 };
-  AliasClass const unrelated_stk = AStack { SP, IRSPRelOffset { -14 }, 1 };
-  AliasClass const related_stk = AStack { SP, IRSPRelOffset { -11 }, 2 };
+  AliasClass const stk = AStack::range(IRSPRelOffset { -12 },
+                                       IRSPRelOffset { -9 });
+  AliasClass const unrelated_stk = AStack::at(IRSPRelOffset { -14 });
+  AliasClass const related_stk = AStack::range(IRSPRelOffset { -12 },
+                                               IRSPRelOffset { -10 });
 
   auto const stk_and_frame = stk | ALocalAny;
   EXPECT_TRUE(!stk_and_frame.is_stack());
@@ -349,21 +334,17 @@ TEST(AliasClass, SpecializedUnions) {
 
 TEST(AliasClass, StackUnions) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto const FP = unit.gen(DefFP, bcctx)->dst();
-  auto const SP = unit.gen(
-    DefFrameRelSP, bcctx,
-    DefStackData { FPInvOffset { 1 }, FPInvOffset { 1 } },
-    FP
-  )->dst();
 
   {
-    AliasClass const stk1  = AStack { SP, IRSPRelOffset { -3 }, 1 };
-    AliasClass const stk2  = AStack { SP, IRSPRelOffset { -4 }, 1 };
-    AliasClass const stk3  = AStack { SP, IRSPRelOffset { -5 }, 1 };
-    AliasClass const stk12 = AStack { SP, IRSPRelOffset { -3 }, 2 };
-    AliasClass const stk23 = AStack { SP, IRSPRelOffset { -4 }, 2 };
-    AliasClass const stk13 = AStack { SP, IRSPRelOffset { -3 }, 3 };
+    AliasClass const stk1  = AStack::at(IRSPRelOffset { -3 });
+    AliasClass const stk2  = AStack::at(IRSPRelOffset { -4 });
+    AliasClass const stk3  = AStack::at(IRSPRelOffset { -5 });
+    AliasClass const stk12 = AStack::range(IRSPRelOffset { -4 },
+                                           IRSPRelOffset { -2 });
+    AliasClass const stk23 = AStack::range(IRSPRelOffset { -5 },
+                                           IRSPRelOffset { -3 });
+    AliasClass const stk13 = AStack::range(IRSPRelOffset { -5 },
+                                           IRSPRelOffset { -2 });
     EXPECT_EQ(stk1 | stk2, stk12);
     EXPECT_EQ(stk2 | stk3, stk23);
     EXPECT_EQ(stk1 | stk3, stk13);
@@ -371,29 +352,32 @@ TEST(AliasClass, StackUnions) {
 
   // Same as above but with some other bits.
   {
-    AliasClass const stk1  = AHeapAny | AStack { SP, IRSPRelOffset { -3 }, 1 };
-    AliasClass const stk2  = AHeapAny | AStack { SP, IRSPRelOffset { -4 }, 1 };
-    AliasClass const stk3  = AHeapAny | AStack { SP, IRSPRelOffset { -5 }, 1 };
-    AliasClass const stk12 = AHeapAny | AStack { SP, IRSPRelOffset { -3 }, 2 };
-    AliasClass const stk23 = AHeapAny | AStack { SP, IRSPRelOffset { -4 }, 2 };
-    AliasClass const stk13 = AHeapAny | AStack { SP, IRSPRelOffset { -3 }, 3 };
+    AliasClass const stk1  = AHeapAny | AStack::at(IRSPRelOffset { -3 });
+    AliasClass const stk2  = AHeapAny | AStack::at(IRSPRelOffset { -4 });
+    AliasClass const stk3  = AHeapAny | AStack::at(IRSPRelOffset { -5 });
+    AliasClass const stk12 = AHeapAny | AStack::range(IRSPRelOffset { -4 },
+                                                      IRSPRelOffset { -2 });
+    AliasClass const stk23 = AHeapAny | AStack::range(IRSPRelOffset { -5 },
+                                                      IRSPRelOffset { -3 });
+    AliasClass const stk13 = AHeapAny | AStack::range(IRSPRelOffset { -5 },
+                                                      IRSPRelOffset { -2 });
     EXPECT_EQ(stk1 | stk2, stk12);
     EXPECT_EQ(stk2 | stk3, stk23);
     EXPECT_EQ(stk1 | stk3, stk13);
   }
 
   {
-    AliasClass const stk1 = AStack { SP, IRSPRelOffset { 0 }, 1 };
-    AliasClass const stk2 = AStack { SP, IRSPRelOffset { -2 }, 1 };
-    AliasClass const true_union = AStack { SP, IRSPRelOffset { 0 }, 3 };
+    AliasClass const stk1 = AStack::at(IRSPRelOffset { 0 });
+    AliasClass const stk2 = AStack::at(IRSPRelOffset { -2 });
+    AliasClass const true_union = AStack::range(IRSPRelOffset { -2 },
+                                                IRSPRelOffset { 1 });
     EXPECT_NE(stk1 | stk2, AStackAny);
     EXPECT_EQ(stk1 | stk2, true_union);
   }
 
   {
-    auto const imax = std::numeric_limits<int32_t>::max();
-    AliasClass const deep_stk1 = AStack { SP, IRSPRelOffset { -10 }, imax };
-    AliasClass const deep_stk2 = AStack { SP, IRSPRelOffset { -14 }, imax };
+    AliasClass const deep_stk1 = AStack::below(IRSPRelOffset { -9 });
+    AliasClass const deep_stk2 = AStack::below(IRSPRelOffset { -13 });
     EXPECT_EQ(deep_stk1 | deep_stk2, deep_stk1);
   }
 }

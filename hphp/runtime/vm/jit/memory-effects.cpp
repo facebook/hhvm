@@ -102,7 +102,7 @@ AliasClass pointee(
     if (type <= TMemToStkCell) {
       if (sinst->is(LdStkAddr)) {
         return AliasClass {
-          AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 }
+          AStack::at(sinst->extra<LdStkAddr>()->offset)
         };
       }
       return AStackAny;
@@ -223,20 +223,14 @@ AliasClass all_pointees(const IRInstruction& inst) {
 // Return an AliasClass representing a range of the eval stack that contains
 // everything below a logical depth.
 AliasClass stack_below(SSATmp* base, IRSPRelOffset offset) {
-  return AStack { base, offset, std::numeric_limits<int32_t>::max() };
+  return AStack::below(offset + 1);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 // Return an AliasClass representing an entire ActRec at base + offset.
 AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
-  return AStack {
-    base,
-    // The offset is the bottom of where the ActRec is stored, but AliasClass
-    // needs an offset to the highest cell.
-    offset + int32_t{kNumActRecCells} - 1,
-    int32_t{kNumActRecCells}
-  };
+  return AStack::range(offset, offset + int32_t{kNumActRecCells});
 }
 
 /*
@@ -760,20 +754,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // Input arguments.
-        extra->numInputs() == 0 ? AEmpty : AStack {
-          inst.src(0),
-          extra->spOffset + extra->numInputs() - 1,
-          static_cast<int32_t>(extra->numInputs())
-        },
+        extra->numInputs() == 0 ? AEmpty : AStack::range(
+          extra->spOffset,
+          extra->spOffset + extra->numInputs()
+        ),
         // ActRec.
         actrec(inst.src(0), extra->spOffset + extra->numInputs()),
         // Inout outputs.
-        extra->numOut == 0 ? AEmpty : AStack {
-          inst.src(0),
+        extra->numOut == 0 ? AEmpty : AStack::range(
+          extra->spOffset + extra->numInputs() + kNumActRecCells,
           extra->spOffset + extra->numInputs() + kNumActRecCells +
-            extra->numOut - 1,
-          static_cast<int32_t>(extra->numOut)
-        },
+            extra->numOut
+        ),
         // Locals. We intentionally leave off a dependency on AFBasePtr to allow
         // store-elim to elide the new frame.
         backtrace_locals(inst) | ar
@@ -1101,11 +1093,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitVecElemLoop:
     {
       auto const extra = inst.extra<InitVecElemLoop>();
-      auto const stack_in = AStack {
-        inst.src(1),
-        extra->offset + static_cast<int32_t>(extra->size) - 1,
-        static_cast<int32_t>(extra->size)
-      };
+      auto const stack_in = AStack::range(
+        extra->offset,
+        extra->offset + static_cast<int32_t>(extra->size)
+      );
       return may_load_store_move(stack_in, AElemIAny, stack_in);
     }
 
@@ -1120,11 +1111,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // NewKeysetArray is reading elements from the stack, but writes to a
       // completely new array, so we can treat the store set as empty.
       auto const extra = inst.extra<NewKeysetArray>();
-      auto const stack_in = AStack {
-        inst.src(0),
-        extra->offset + static_cast<int32_t>(extra->size) - 1,
-        static_cast<int32_t>(extra->size)
-      };
+      auto const stack_in = AStack::range(
+        extra->offset,
+        extra->offset + static_cast<int32_t>(extra->size)
+      );
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
@@ -1134,22 +1124,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // NewStruct{Dict,DArray} is reading elements from the stack, but writes
       // to a completely new array, so we can treat the store set as empty.
       auto const extra = inst.extra<NewStructData>();
-      auto const stack_in = AStack {
-        inst.src(0),
-        extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
-        static_cast<int32_t>(extra->numKeys)
-      };
+      auto const stack_in = AStack::range(
+        extra->offset,
+        extra->offset + static_cast<int32_t>(extra->numKeys)
+      );
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
   case NewRecord:
     {
       auto const extra = inst.extra<NewStructData>();
-      auto const stack_in = AStack {
-        inst.src(1),
-        extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
-        static_cast<int32_t>(extra->numKeys)
-      };
+      auto const stack_in = AStack::range(
+        extra->offset,
+        extra->offset + static_cast<int32_t>(extra->numKeys)
+      );
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
   case MemoGetStaticValue:
@@ -1440,13 +1428,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Instructions that explicitly manipulate the stack.
 
   case LdStk:
-    return PureLoad {
-      AStack { inst.src(0), inst.extra<LdStk>()->offset, 1 }
-    };
+    return PureLoad { AStack::at(inst.extra<LdStk>()->offset) };
 
   case StStk:
     return PureStore {
-      AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
+      AStack::at(inst.extra<StStk>()->offset),
       inst.src(1),
       nullptr
     };
@@ -1462,7 +1448,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CheckStk:
     return may_load_store(
-      AStack { inst.src(0), inst.extra<CheckStk>()->offset, 1 },
+      AStack::at(inst.extra<CheckStk>()->offset),
       AEmpty
     );
 
@@ -1475,11 +1461,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case ResolveTypeStruct: {
     auto const extra = inst.extra<ResolveTypeStructData>();
-    auto const stack_in = AStack {
-      inst.src(0),
-      extra->offset + static_cast<int32_t>(extra->size) - 1,
-      static_cast<int32_t>(extra->size)
-    };
+    auto const stack_in = AStack::range(
+      extra->offset,
+      extra->offset + static_cast<int32_t>(extra->size)
+    );
     return may_load_store(AliasClass(stack_in)|AHeapAny, AHeapAny);
   }
 
@@ -1994,7 +1979,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgTrashStk:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      AStack { inst.src(0), inst.extra<DbgTrashStk>()->offset, 1 }
+      AStack::at(inst.extra<DbgTrashStk>()->offset)
     };
   case DbgTrashFrame:
     return GeneralEffects {

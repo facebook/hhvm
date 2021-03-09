@@ -198,27 +198,25 @@ struct AElemI { SSATmp* arr; int64_t idx; };
 struct AElemS { SSATmp* arr; const StringData* key; };
 
 /*
- * A range of the stack, starting at `offset' from the outermost frame pointer,
- * and extending `size' slots deeper into the stack (toward lower memory
- * addresses).  As an example, `acls = AStack { fp, FPRelOffset{-1}, 3 }`
+ * A range of the stack located between the `low' and `high' offsets from
+ * the IRSP. The `low' offset may be set to INT32_MIN to refer to the class
+ * of all stack locations below the `high' depth. The stack pointer is the same
+ * for all stack ranges in the IR unit, and thus is not stored here.
+ *
+ * As an example, `acls = AStack::range(IRSPRelOffset{-3}, IRSPRelOffset{-1})'
  * represents the following:
  *
  *         ___________________
- *        | (i am an actrec)  |
- *  high  |___________________| ___...fp points here        __
- *    ^   |   local 0         |                               \
- *    |   |___________________| ___...start counting here: 1  |
- *    |   |   local 1         |                               | acls
- *    |   |___________________| ___...2                       |
- *    |   |   local 2         |                               |
- *   low  |___________________| ___...3; we're done         __/
- *        |   local 3         |
+ *  high  |   irspoff  0      |
+ *    ^   |___________________| ___...sp points here
+ *    |   |   irspoff -1      |
+ *    |   |___________________| ___...acls.high             __
+ *    |   |   ifspoff -2      |                               \
+ *    |   |___________________|                                | acls
+ *    |   |   irspoff -3      |                                |
+ *    |   |___________________| ___...acls.low              __/
+ *   low  |   irspoff -4      |
  *        |___________________|
- *
- * The frame pointer is the same for all stack ranges in the IR unit, and thus
- * is not stored here.  The reason ranges extend downward is that it is common
- * to need to refer to the class of all stack locations below some depth (this
- * can be done by putting INT32_MAX in the size).
  *
  * Some notes on how the evaluation stack is treated for alias analysis:
  *
@@ -236,11 +234,6 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *     HHBC-level semantics.)
  */
 struct AStack {
-  // We can create an AStack from either a stack pointer or a frame pointer.
-  // These constructors canonicalize the offset to be relative to the outermost
-  // frame pointer.
-  explicit AStack(SSATmp* sp, IRSPRelOffset offset, int32_t size);
-
   // Return AStack representing a single stack cell at `offset`.
   static AStack at(IRSPRelOffset offset) {
     return AStack{offset, offset + 1};
@@ -249,6 +242,13 @@ struct AStack {
   // Return AStack representing a range of stack cells between low (inclusive)
   // and high (exclusive) offsets.
   static AStack range(IRSPRelOffset low, IRSPRelOffset high) {
+    return AStack{low, high};
+  }
+
+  // Return AStack representing all stack cells below the high offset (not
+  // including the cell at the high offset, as that one is above).
+  static AStack below(IRSPRelOffset high) {
+    auto constexpr low = IRSPRelOffset{std::numeric_limits<int32_t>::min()};
     return AStack{low, high};
   }
 

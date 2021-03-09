@@ -837,11 +837,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
   auto constexpr numTrackedSlots = 64;
   auto constexpr wholeRange = std::make_pair(0, numTrackedSlots);
   auto const stackTop = block->back().extra<EndCatch>()->offset;
-  auto const stackRange = AStack {
-    block->back().src(1),
-    stackTop + numTrackedSlots - 1,
-    numTrackedSlots
-  };
+  auto const stackRange = AStack::range(stackTop, stackTop + numTrackedSlots);
 
   std::bitset<numTrackedSlots> usedLocations = {};
   // stores that are only read by the EndCatch

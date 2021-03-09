@@ -602,7 +602,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
       };
     case AssertStk:
       return AliasClass {
-        AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 }
+        AStack::at(inst.extra<AssertStk>()->offset)
       };
     default: break;
     }
@@ -698,7 +698,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
     // Iterate from higher addresses to lower so that tracing prints them in
     // the memory layout order
     for (int32_t i = numStackElems - 1; i >= 0; --i) {
-      auto const astk_ = AStack { inst.src(1), data->offset + i, 1 };
+      auto const astk_ = AStack::at(data->offset + i);
       check_decref_eligible(
         env,
         elems,

@@ -14,9 +14,9 @@ namespace apache { namespace thrift {
 
 struct RpcMetadata_constants {
 
-  static constexpr int64_t const kRocketProtocolKey_ = 4036991616LL;
+  static constexpr ::std::int64_t const kRocketProtocolKey_ = 4036991616LL;
 
-  static constexpr int64_t kRocketProtocolKey() {
+  static constexpr ::std::int64_t kRocketProtocolKey() {
     return kRocketProtocolKey_;
   }
 

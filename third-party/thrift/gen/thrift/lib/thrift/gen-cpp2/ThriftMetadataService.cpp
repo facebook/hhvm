@@ -15,25 +15,28 @@ std::unique_ptr<apache::thrift::AsyncProcessor> ThriftMetadataServiceSvIf::getPr
 }
 
 
-void ThriftMetadataServiceSvIf::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {
+void ThriftMetadataServiceSvIf::getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getThriftServiceMetadata");
 }
 
-folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::semifuture_getThriftServiceMetadata() {
-  return apache::thrift::detail::si::semifuture_returning_uptr([&]( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) { getThriftServiceMetadata(_return); });
+folly::SemiFuture<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::semifuture_getThriftServiceMetadata() {
+  return apache::thrift::detail::si::semifuture_returning_uptr([&](::apache::thrift::metadata::ThriftServiceMetadataResponse& _return) { getThriftServiceMetadata(_return); });
 }
 
-folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::future_getThriftServiceMetadata() {
-  return apache::thrift::detail::si::future(semifuture_getThriftServiceMetadata(), getThreadManager());
+folly::Future<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> ThriftMetadataServiceSvIf::future_getThriftServiceMetadata() {
+  using Source = apache::thrift::concurrency::ThreadManager::Source;
+  auto scope = getRequestContext()->getRequestExecutionScope();
+  auto ka = getThreadManager()->getKeepAlive(std::move(scope), Source::INTERNAL);
+  return apache::thrift::detail::si::future(semifuture_getThriftServiceMetadata(), std::move(ka));
 }
 
-void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) {
+void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) {
   apache::thrift::detail::si::async_tm(this, std::move(callback), [&] {
     return future_getThriftServiceMetadata();
   });
 }
 
-void ThriftMetadataServiceSvNull::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {}
+void ThriftMetadataServiceSvNull::getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {}
 
 
 
@@ -45,7 +48,7 @@ void ThriftMetadataServiceAsyncProcessor::getServiceMetadata(apache::thrift::met
   ::apache::thrift::detail::md::ServiceMetadata<ThriftMetadataServiceSvIf>::gen(*response.metadata_ref(), *response.context_ref());
 }
 
-void ThriftMetadataServiceAsyncProcessor::processSerializedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void ThriftMetadataServiceAsyncProcessor::processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
 }
 

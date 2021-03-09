@@ -12,6 +12,6 @@
 
 namespace apache { namespace thrift {
 
-constexpr int64_t const RpcMetadata_constants::kRocketProtocolKey_;
+constexpr ::std::int64_t const RpcMetadata_constants::kRocketProtocolKey_;
 
 }} // apache::thrift

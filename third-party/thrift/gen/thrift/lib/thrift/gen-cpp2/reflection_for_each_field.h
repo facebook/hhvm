@@ -17,14 +17,11 @@ template <>
 struct ForEachField<::apache::thrift::reflection::StructField> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::reflection::StructField>;
-
-    f(get_metadata(0), static_cast<T&&>(t).isRequired_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).type_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).name_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).annotations_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).order_ref()...);
+    f(0, static_cast<T&&>(t).isRequired_ref()...);
+    f(1, static_cast<T&&>(t).type_ref()...);
+    f(2, static_cast<T&&>(t).name_ref()...);
+    f(3, static_cast<T&&>(t).annotations_ref()...);
+    f(4, static_cast<T&&>(t).order_ref()...);
   }
 };
 
@@ -32,14 +29,11 @@ template <>
 struct ForEachField<::apache::thrift::reflection::DataType> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::reflection::DataType>;
-
-    f(get_metadata(0), static_cast<T&&>(t).name_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).fields_ref()...);
-    f(get_metadata(2), static_cast<T&&>(t).mapKeyType_ref()...);
-    f(get_metadata(3), static_cast<T&&>(t).valueType_ref()...);
-    f(get_metadata(4), static_cast<T&&>(t).enumValues_ref()...);
+    f(0, static_cast<T&&>(t).name_ref()...);
+    f(1, static_cast<T&&>(t).fields_ref()...);
+    f(2, static_cast<T&&>(t).mapKeyType_ref()...);
+    f(3, static_cast<T&&>(t).valueType_ref()...);
+    f(4, static_cast<T&&>(t).enumValues_ref()...);
   }
 };
 
@@ -47,11 +41,8 @@ template <>
 struct ForEachField<::apache::thrift::reflection::Schema> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    FOLLY_MAYBE_UNUSED constexpr auto get_metadata =
-        get_field_metadata<::apache::thrift::reflection::Schema>;
-
-    f(get_metadata(0), static_cast<T&&>(t).dataTypes_ref()...);
-    f(get_metadata(1), static_cast<T&&>(t).names_ref()...);
+    f(0, static_cast<T&&>(t).dataTypes_ref()...);
+    f(1, static_cast<T&&>(t).names_ref()...);
   }
 };
 } // namespace detail

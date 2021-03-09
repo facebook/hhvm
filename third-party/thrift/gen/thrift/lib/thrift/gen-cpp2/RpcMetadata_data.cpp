@@ -12,158 +12,545 @@
 namespace apache {
 namespace thrift {
 
+const std::array<::apache::thrift::ProtocolId, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::values = {{
+  type::BINARY,
+  type::COMPACT,
+}};
+const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::names = {{
+  "BINARY",
+  "COMPACT",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::ProtocolId>::size;
-constexpr const std::array<::apache::thrift::ProtocolId, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::values;
-constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::names;
+const std::array<::apache::thrift::RpcKind, 7> TEnumDataStorage<::apache::thrift::RpcKind>::values = {{
+  type::SINGLE_REQUEST_SINGLE_RESPONSE,
+  type::SINGLE_REQUEST_NO_RESPONSE,
+  type::STREAMING_REQUEST_SINGLE_RESPONSE,
+  type::STREAMING_REQUEST_NO_RESPONSE,
+  type::SINGLE_REQUEST_STREAMING_RESPONSE,
+  type::STREAMING_REQUEST_STREAMING_RESPONSE,
+  type::SINK,
+}};
+const std::array<folly::StringPiece, 7> TEnumDataStorage<::apache::thrift::RpcKind>::names = {{
+  "SINGLE_REQUEST_SINGLE_RESPONSE",
+  "SINGLE_REQUEST_NO_RESPONSE",
+  "STREAMING_REQUEST_SINGLE_RESPONSE",
+  "STREAMING_REQUEST_NO_RESPONSE",
+  "SINGLE_REQUEST_STREAMING_RESPONSE",
+  "STREAMING_REQUEST_STREAMING_RESPONSE",
+  "SINK",
+}};
 
+const std::array<::apache::thrift::RpcPriority, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::values = {{
+  type::HIGH_IMPORTANT,
+  type::HIGH,
+  type::IMPORTANT,
+  type::NORMAL,
+  type::BEST_EFFORT,
+  type::N_PRIORITIES,
+}};
+const std::array<folly::StringPiece, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::names = {{
+  "HIGH_IMPORTANT",
+  "HIGH",
+  "IMPORTANT",
+  "NORMAL",
+  "BEST_EFFORT",
+  "N_PRIORITIES",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::RpcKind>::size;
-constexpr const std::array<::apache::thrift::RpcKind, 7> TEnumDataStorage<::apache::thrift::RpcKind>::values;
-constexpr const std::array<folly::StringPiece, 7> TEnumDataStorage<::apache::thrift::RpcKind>::names;
+const std::array<::apache::thrift::CompressionAlgorithm, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::values = {{
+  type::NONE,
+  type::ZLIB,
+  type::ZSTD,
+}};
+const std::array<folly::StringPiece, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::names = {{
+  "NONE",
+  "ZLIB",
+  "ZSTD",
+}};
 
+const std::array<::apache::thrift::ResponseRpcErrorCategory, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::values = {{
+  type::INTERNAL_ERROR,
+  type::INVALID_REQUEST,
+  type::LOADSHEDDING,
+  type::SHUTDOWN,
+}};
+const std::array<folly::StringPiece, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::names = {{
+  "INTERNAL_ERROR",
+  "INVALID_REQUEST",
+  "LOADSHEDDING",
+  "SHUTDOWN",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::RpcPriority>::size;
-constexpr const std::array<::apache::thrift::RpcPriority, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::values;
-constexpr const std::array<folly::StringPiece, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::names;
+const std::array<::apache::thrift::ResponseRpcErrorCode, 16> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::values = {{
+  type::UNKNOWN,
+  type::OVERLOAD,
+  type::TASK_EXPIRED,
+  type::QUEUE_OVERLOADED,
+  type::SHUTDOWN,
+  type::INJECTED_FAILURE,
+  type::REQUEST_PARSING_FAILURE,
+  type::QUEUE_TIMEOUT,
+  type::RESPONSE_TOO_BIG,
+  type::WRONG_RPC_KIND,
+  type::UNKNOWN_METHOD,
+  type::CHECKSUM_MISMATCH,
+  type::INTERRUPTION,
+  type::APP_OVERLOAD,
+  type::UNKNOWN_INTERACTION_ID,
+  type::INTERACTION_CONSTRUCTOR_ERROR,
+}};
+const std::array<folly::StringPiece, 16> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::names = {{
+  "UNKNOWN",
+  "OVERLOAD",
+  "TASK_EXPIRED",
+  "QUEUE_OVERLOADED",
+  "SHUTDOWN",
+  "INJECTED_FAILURE",
+  "REQUEST_PARSING_FAILURE",
+  "QUEUE_TIMEOUT",
+  "RESPONSE_TOO_BIG",
+  "WRONG_RPC_KIND",
+  "UNKNOWN_METHOD",
+  "CHECKSUM_MISMATCH",
+  "INTERRUPTION",
+  "APP_OVERLOAD",
+  "UNKNOWN_INTERACTION_ID",
+  "INTERACTION_CONSTRUCTOR_ERROR",
+}};
 
+const std::array<::apache::thrift::InterfaceKind, 4> TEnumDataStorage<::apache::thrift::InterfaceKind>::values = {{
+  type::USER,
+  type::DEBUGGING,
+  type::MONITORING,
+  type::PROFILING,
+}};
+const std::array<folly::StringPiece, 4> TEnumDataStorage<::apache::thrift::InterfaceKind>::names = {{
+  "USER",
+  "DEBUGGING",
+  "MONITORING",
+  "PROFILING",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::size;
-constexpr const std::array<::apache::thrift::CompressionAlgorithm, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::values;
-constexpr const std::array<folly::StringPiece, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::names;
+const std::array<::apache::thrift::CodecConfig::Type, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::values = {{
+  type::zlibConfig,
+  type::zstdConfig,
+}};
+const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::names = {{
+  "zlibConfig",
+  "zstdConfig",
+}};
 
+const std::array<::apache::thrift::PayloadExceptionMetadata::Type, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::values = {{
+  type::declaredException,
+  type::proxyException,
+  type::proxiedException,
+  type::appClientException,
+  type::appServerException,
+}};
+const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::names = {{
+  "declaredException",
+  "proxyException",
+  "proxiedException",
+  "appClientException",
+  "appServerException",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::size;
-constexpr const std::array<::apache::thrift::RequestRpcMetadataFlags, 2> TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::values;
-constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::names;
+const std::array<::apache::thrift::PayloadMetadata::Type, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::values = {{
+  type::responseMetadata,
+  type::exceptionMetadata,
+}};
+const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::names = {{
+  "responseMetadata",
+  "exceptionMetadata",
+}};
 
+const std::array<::apache::thrift::ServerPushMetadata::Type, 1> TEnumDataStorage<::apache::thrift::ServerPushMetadata::Type>::values = {{
+  type::setupResponse,
+}};
+const std::array<folly::StringPiece, 1> TEnumDataStorage<::apache::thrift::ServerPushMetadata::Type>::names = {{
+  "setupResponse",
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::size;
-constexpr const std::array<::apache::thrift::ResponseRpcErrorCategory, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::values;
-constexpr const std::array<folly::StringPiece, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::names;
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_types = {{
+}};
 
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_types = {{
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::size;
-constexpr const std::array<::apache::thrift::ResponseRpcErrorCode, 16> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::values;
-constexpr const std::array<folly::StringPiece, 16> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::names;
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::CodecConfig>::fields_names = {{
+  "zlibConfig",
+  "zstdConfig",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::CodecConfig>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::CodecConfig>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
 
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_names = {{
+  "codecConfig",
+  "compressionSizeLimit",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_I64,
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::InterfaceKind>::size;
-constexpr const std::array<::apache::thrift::InterfaceKind, 2> TEnumDataStorage<::apache::thrift::InterfaceKind>::values;
-constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::InterfaceKind>::names;
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_names = {{
+  "compressionAlgos",
+  "useStopTLS",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_types = {{
+  TType::T_I64,
+  TType::T_BOOL,
+}};
 
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_names = {{
+  "interactionId",
+  "interactionName",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_types = {{
+  TType::T_I64,
+  TType::T_STRING,
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::CodecConfig::Type>::size;
-constexpr const std::array<::apache::thrift::CodecConfig::Type, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::values;
-constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::names;
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_names = {{
+  "interactionId",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_types = {{
+  TType::T_I64,
+}};
 
+const std::array<folly::StringPiece, 16> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_names = {{
+  "protocol",
+  "name",
+  "kind",
+  "seqId",
+  "clientTimeoutMs",
+  "queueTimeoutMs",
+  "priority",
+  "otherMetadata",
+  "crc32c",
+  "loadMetric",
+  "compression",
+  "compressionConfig",
+  "interactionId",
+  "interactionCreate",
+  "clientId",
+  "serviceTraceMeta",
+}};
+const std::array<int16_t, 16> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  11,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+}};
+const std::array<protocol::TType, 16> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_MAP,
+  TType::T_I32,
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_I64,
+  TType::T_STRUCT,
+  TType::T_STRING,
+  TType::T_STRING,
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::size;
-constexpr const std::array<::apache::thrift::PayloadExceptionMetadata::Type, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::values;
-constexpr const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::names;
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_types = {{
+}};
 
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_types = {{
+}};
 
-constexpr const std::size_t TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::size;
-constexpr const std::array<::apache::thrift::PayloadMetadata::Type, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::values;
-constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::names;
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_types = {{
+}};
 
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_types = {{
+}};
 
-constexpr const std::size_t TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZlibCompressionCodecConfig>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_size> TStructDataStorage<::apache::thrift::ZstdCompressionCodecConfig>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::CodecConfig>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::CodecConfig>::fields_size> TStructDataStorage<::apache::thrift::CodecConfig>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::CodecConfig>::fields_size> TStructDataStorage<::apache::thrift::CodecConfig>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::CodecConfig>::fields_size> TStructDataStorage<::apache::thrift::CodecConfig>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::CompressionConfig>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::CompressionConfig>::fields_size> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::CompressionConfig>::fields_size> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::CompressionConfig>::fields_size> TStructDataStorage<::apache::thrift::CompressionConfig>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_size> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_size> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_size> TStructDataStorage<::apache::thrift::NegotiationParameters>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::InteractionCreate>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::InteractionCreate>::fields_size> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::InteractionCreate>::fields_size> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::InteractionCreate>::fields_size> TStructDataStorage<::apache::thrift::InteractionCreate>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_size> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_size> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_size> TStructDataStorage<::apache::thrift::InteractionTerminate>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestRpcMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadResponseMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadDeclaredExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxyExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadProxiedExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_size> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_size> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_size> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_types;
-constexpr const std::size_t TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_size;
-constexpr const std::array<folly::StringPiece, TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_names;
-constexpr const std::array<int16_t, TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_ids;
-constexpr const std::array<apache::thrift::protocol::TType, TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_size> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_types;
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadAppClientExceptionMetadata>::fields_types = {{
+}};
+
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::PayloadAppServerExceptionMetadata>::fields_types = {{
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_names = {{
+  "declaredException",
+  "proxyException",
+  "proxiedException",
+  "appClientException",
+  "appServerException",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::PayloadExceptionMetadata>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_names = {{
+  "name_utf8",
+  "what_utf8",
+  "metadata",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::PayloadExceptionMetadataBase>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_names = {{
+  "responseMetadata",
+  "exceptionMetadata",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::PayloadMetadata>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::ProxiedPayloadMetadata>::fields_types = {{
+}};
+
+const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_names = {{
+  "protocol",
+  "seqId",
+  "otherMetadata",
+  "load",
+  "crc32c",
+  "compression",
+  "payloadMetadata",
+  "proxiedPayloadMetadata",
+}};
+const std::array<int16_t, 8> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+}};
+const std::array<protocol::TType, 8> TStructDataStorage<::apache::thrift::ResponseRpcMetadata>::fields_types = {{
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_MAP,
+  TType::T_I64,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_names = {{
+  "name_utf8",
+  "what_utf8",
+  "category",
+  "code",
+  "load",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::ResponseRpcError>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I64,
+}};
+
+const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_names = {{
+  "compression",
+  "otherMetadata",
+}};
+const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_ids = {{
+  1,
+  2,
+}};
+const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::StreamPayloadMetadata>::fields_types = {{
+  TType::T_I32,
+  TType::T_MAP,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::ClientMetadata>::fields_names = {{
+  "agent",
+  "hostname",
+  "otherMetadata",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::ClientMetadata>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::ClientMetadata>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_MAP,
+}};
+
+const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_names = {{
+  "opaque",
+  "interfaceKind",
+  "minVersion",
+  "maxVersion",
+  "dscpToReflect",
+  "markToReflect",
+  "clientMetadata",
+}};
+const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  9,
+}};
+const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::RequestSetupMetadata>::fields_types = {{
+  TType::T_MAP,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_I32,
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::SetupResponse>::fields_names = {{
+  "version",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::SetupResponse>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::SetupResponse>::fields_types = {{
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::ServerPushMetadata>::fields_names = {{
+  "setupResponse",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::ServerPushMetadata>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::ServerPushMetadata>::fields_types = {{
+  TType::T_STRUCT,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_names = {{
+  "otherMetadata",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::HeadersPayloadContent>::fields_types = {{
+  TType::T_MAP,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_names = {{
+  "compression",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::HeadersPayloadMetadata>::fields_types = {{
+  TType::T_I32,
+}};
 
 } // namespace thrift
 } // namespace apache

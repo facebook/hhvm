@@ -26,6 +26,26 @@ class EnumMetadata<::apache::thrift::metadata::ThriftPrimitiveType> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::apache::thrift::metadata::ThriftStructType> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::metadata::ThriftConstStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::metadata::ThriftConstValue> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::metadata::ThriftConstValuePair> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::apache::thrift::metadata::ThriftListType> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -42,11 +62,6 @@ class StructMetadata<::apache::thrift::metadata::ThriftMapType> {
 };
 template <>
 class StructMetadata<::apache::thrift::metadata::ThriftEnumType> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::apache::thrift::metadata::ThriftStructType> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

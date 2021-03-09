@@ -12,6 +12,6 @@
 
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
-constexpr int32_t const frozen_constants::kCurrentFrozenFileVersion_;
+constexpr ::std::int32_t const frozen_constants::kCurrentFrozenFileVersion_;
 
 }}}} // apache::thrift::frozen::schema

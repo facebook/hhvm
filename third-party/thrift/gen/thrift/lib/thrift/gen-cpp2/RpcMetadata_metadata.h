@@ -40,12 +40,6 @@ class EnumMetadata<::apache::thrift::CompressionAlgorithm>
   using EmptyMetadata::gen;
 };
 template <>
-class EnumMetadata<::apache::thrift::RequestRpcMetadataFlags>
-    : private EmptyMetadata {
- public:
-  using EmptyMetadata::gen;
-};
-template <>
 class EnumMetadata<::apache::thrift::ResponseRpcErrorCategory>
     : private EmptyMetadata {
  public:
@@ -190,7 +184,25 @@ class StructMetadata<::apache::thrift::StreamPayloadMetadata>
   using EmptyMetadata::gen;
 };
 template <>
+class StructMetadata<::apache::thrift::ClientMetadata>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
 class StructMetadata<::apache::thrift::RequestSetupMetadata>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::SetupResponse>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ServerPushMetadata>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;

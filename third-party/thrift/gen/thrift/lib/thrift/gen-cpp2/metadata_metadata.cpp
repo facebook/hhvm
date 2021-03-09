@@ -32,6 +32,110 @@ void EnumMetadata<::apache::thrift::metadata::ThriftPrimitiveType>::gen(ThriftMe
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::metadata::ThriftStructType>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("metadata.ThriftStructType", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& metadata_ThriftStructType = res.first->second;
+  metadata_ThriftStructType.name_ref() = "metadata.ThriftStructType";
+  metadata_ThriftStructType.is_union_ref() = false;
+  static const EncodedThriftField
+  metadata_ThriftStructType_fields[] = {
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+  };
+  for (const auto& f : metadata_ThriftStructType_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
+    metadata_ThriftStructType.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::metadata::ThriftConstStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("metadata.ThriftConstStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& metadata_ThriftConstStruct = res.first->second;
+  metadata_ThriftConstStruct.name_ref() = "metadata.ThriftConstStruct";
+  metadata_ThriftConstStruct.is_union_ref() = false;
+  static const EncodedThriftField
+  metadata_ThriftConstStruct_fields[] = {
+    std::make_tuple(1, "type", false, std::make_unique<Typedef>("metadata.ThriftStructType", std::make_unique<Struct< ::apache::thrift::metadata::ThriftStructType>>("metadata.ThriftStructType")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "fields", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Union< ::apache::thrift::metadata::ThriftConstValue>>("metadata.ThriftConstValue")), std::vector<ThriftConstStruct>{}),
+  };
+  for (const auto& f : metadata_ThriftConstStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
+    metadata_ThriftConstStruct.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::metadata::ThriftConstValue>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("metadata.ThriftConstValue", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& metadata_ThriftConstValue = res.first->second;
+  metadata_ThriftConstValue.name_ref() = "metadata.ThriftConstValue";
+  metadata_ThriftConstValue.is_union_ref() = true;
+  static const EncodedThriftField
+  metadata_ThriftConstValue_fields[] = {
+    std::make_tuple(1, "cv_bool", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "cv_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "cv_double", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "cv_string", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "cv_map", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstValuePair>>("metadata.ThriftConstValuePair")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "cv_list", false, std::make_unique<List>(std::make_unique<Typedef>("metadata.ThriftConstValue", std::make_unique<Union< ::apache::thrift::metadata::ThriftConstValue>>("metadata.ThriftConstValue"))), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(7, "cv_struct", false, std::make_unique<Typedef>("metadata.ThriftConstStruct", std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
+  };
+  for (const auto& f : metadata_ThriftConstValue_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
+    metadata_ThriftConstValue.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::metadata::ThriftConstValuePair>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("metadata.ThriftConstValuePair", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& metadata_ThriftConstValuePair = res.first->second;
+  metadata_ThriftConstValuePair.name_ref() = "metadata.ThriftConstValuePair";
+  metadata_ThriftConstValuePair.is_union_ref() = false;
+  static const EncodedThriftField
+  metadata_ThriftConstValuePair_fields[] = {
+    std::make_tuple(1, "key", false, std::make_unique<Typedef>("metadata.ThriftConstValue", std::make_unique<Union< ::apache::thrift::metadata::ThriftConstValue>>("metadata.ThriftConstValue")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "value", false, std::make_unique<Typedef>("metadata.ThriftConstValue", std::make_unique<Union< ::apache::thrift::metadata::ThriftConstValue>>("metadata.ThriftConstValue")), std::vector<ThriftConstStruct>{}),
+  };
+  for (const auto& f : metadata_ThriftConstValuePair_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
+    metadata_ThriftConstValuePair.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::metadata::ThriftListType>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs_ref()->emplace("metadata.ThriftListType", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -40,9 +144,9 @@ StructMetadata<::apache::thrift::metadata::ThriftListType>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftListType = res.first->second;
   metadata_ThriftListType.name_ref() = "metadata.ThriftListType";
   metadata_ThriftListType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftListType_fields[] = {
-    std::make_tuple(1, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftListType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -50,6 +154,7 @@ StructMetadata<::apache::thrift::metadata::ThriftListType>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftListType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -63,9 +168,9 @@ StructMetadata<::apache::thrift::metadata::ThriftSetType>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftSetType = res.first->second;
   metadata_ThriftSetType.name_ref() = "metadata.ThriftSetType";
   metadata_ThriftSetType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftSetType_fields[] = {
-    std::make_tuple(1, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftSetType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -73,6 +178,7 @@ StructMetadata<::apache::thrift::metadata::ThriftSetType>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftSetType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -86,10 +192,10 @@ StructMetadata<::apache::thrift::metadata::ThriftMapType>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftMapType = res.first->second;
   metadata_ThriftMapType.name_ref() = "metadata.ThriftMapType";
   metadata_ThriftMapType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftMapType_fields[] = {
-    std::make_tuple(1, "keyType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
-    std::make_tuple(2, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "keyType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "valueType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftMapType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -97,6 +203,7 @@ StructMetadata<::apache::thrift::metadata::ThriftMapType>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftMapType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -110,9 +217,9 @@ StructMetadata<::apache::thrift::metadata::ThriftEnumType>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftEnumType = res.first->second;
   metadata_ThriftEnumType.name_ref() = "metadata.ThriftEnumType";
   metadata_ThriftEnumType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftEnumType_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftEnumType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -120,30 +227,8 @@ StructMetadata<::apache::thrift::metadata::ThriftEnumType>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftEnumType.fields_ref()->push_back(std::move(field));
-  }
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::apache::thrift::metadata::ThriftStructType>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs_ref()->emplace("metadata.ThriftStructType", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& metadata_ThriftStructType = res.first->second;
-  metadata_ThriftStructType.name_ref() = "metadata.ThriftStructType";
-  metadata_ThriftStructType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
-  metadata_ThriftStructType_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-  };
-  for (const auto& f : metadata_ThriftStructType_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id_ref() = std::get<0>(f);
-    field.name_ref() = std::get<1>(f);
-    field.is_optional_ref() = std::get<2>(f);
-    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
-    metadata_ThriftStructType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
 }
@@ -156,9 +241,9 @@ StructMetadata<::apache::thrift::metadata::ThriftUnionType>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftUnionType = res.first->second;
   metadata_ThriftUnionType.name_ref() = "metadata.ThriftUnionType";
   metadata_ThriftUnionType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftUnionType_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftUnionType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -166,6 +251,7 @@ StructMetadata<::apache::thrift::metadata::ThriftUnionType>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftUnionType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -179,10 +265,10 @@ StructMetadata<::apache::thrift::metadata::ThriftTypedefType>::gen(ThriftMetadat
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftTypedefType = res.first->second;
   metadata_ThriftTypedefType.name_ref() = "metadata.ThriftTypedefType";
   metadata_ThriftTypedefType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftTypedefType_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "underlyingType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "underlyingType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftTypedefType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -190,6 +276,7 @@ StructMetadata<::apache::thrift::metadata::ThriftTypedefType>::gen(ThriftMetadat
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftTypedefType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -203,10 +290,10 @@ StructMetadata<::apache::thrift::metadata::ThriftStreamType>::gen(ThriftMetadata
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftStreamType = res.first->second;
   metadata_ThriftStreamType.name_ref() = "metadata.ThriftStreamType";
   metadata_ThriftStreamType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftStreamType_fields[] = {
-    std::make_tuple(1, "elemType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
-    std::make_tuple(2, "initialResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "elemType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "initialResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftStreamType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -214,6 +301,7 @@ StructMetadata<::apache::thrift::metadata::ThriftStreamType>::gen(ThriftMetadata
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftStreamType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -227,11 +315,11 @@ StructMetadata<::apache::thrift::metadata::ThriftSinkType>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftSinkType = res.first->second;
   metadata_ThriftSinkType.name_ref() = "metadata.ThriftSinkType";
   metadata_ThriftSinkType.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftSinkType_fields[] = {
-    std::make_tuple(1, "elemType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
-    std::make_tuple(2, "finalResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
-    std::make_tuple(3, "initialResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"))),
+    std::make_tuple(1, "elemType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "finalResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "initialResponseType", true, std::make_unique<Typedef>("metadata.ThriftType", std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftSinkType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -239,6 +327,7 @@ StructMetadata<::apache::thrift::metadata::ThriftSinkType>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftSinkType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -252,18 +341,18 @@ StructMetadata<::apache::thrift::metadata::ThriftType>::gen(ThriftMetadata& meta
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftType = res.first->second;
   metadata_ThriftType.name_ref() = "metadata.ThriftType";
   metadata_ThriftType.is_union_ref() = true;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftType_fields[] = {
-    std::make_tuple(1, "t_primitive", false, std::make_unique<Enum< ::apache::thrift::metadata::ThriftPrimitiveType>>("metadata.ThriftPrimitiveType")),
-    std::make_tuple(2, "t_list", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftListType>>("metadata.ThriftListType")),
-    std::make_tuple(3, "t_set", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftSetType>>("metadata.ThriftSetType")),
-    std::make_tuple(4, "t_map", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftMapType>>("metadata.ThriftMapType")),
-    std::make_tuple(5, "t_enum", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftEnumType>>("metadata.ThriftEnumType")),
-    std::make_tuple(6, "t_struct", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftStructType>>("metadata.ThriftStructType")),
-    std::make_tuple(7, "t_union", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftUnionType>>("metadata.ThriftUnionType")),
-    std::make_tuple(8, "t_typedef", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftTypedefType>>("metadata.ThriftTypedefType")),
-    std::make_tuple(9, "t_stream", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftStreamType>>("metadata.ThriftStreamType")),
-    std::make_tuple(10, "t_sink", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftSinkType>>("metadata.ThriftSinkType")),
+    std::make_tuple(1, "t_primitive", false, std::make_unique<Enum< ::apache::thrift::metadata::ThriftPrimitiveType>>("metadata.ThriftPrimitiveType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "t_list", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftListType>>("metadata.ThriftListType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "t_set", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftSetType>>("metadata.ThriftSetType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "t_map", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftMapType>>("metadata.ThriftMapType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "t_enum", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftEnumType>>("metadata.ThriftEnumType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "t_struct", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftStructType>>("metadata.ThriftStructType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(7, "t_union", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftUnionType>>("metadata.ThriftUnionType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(8, "t_typedef", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftTypedefType>>("metadata.ThriftTypedefType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(9, "t_stream", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftStreamType>>("metadata.ThriftStreamType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(10, "t_sink", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftSinkType>>("metadata.ThriftSinkType"), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftType_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -271,6 +360,7 @@ StructMetadata<::apache::thrift::metadata::ThriftType>::gen(ThriftMetadata& meta
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftType.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -284,10 +374,11 @@ StructMetadata<::apache::thrift::metadata::ThriftEnum>::gen(ThriftMetadata& meta
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftEnum = res.first->second;
   metadata_ThriftEnum.name_ref() = "metadata.ThriftEnum";
   metadata_ThriftEnum.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftEnum_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "elements", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "elements", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftEnum_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -295,6 +386,7 @@ StructMetadata<::apache::thrift::metadata::ThriftEnum>::gen(ThriftMetadata& meta
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftEnum.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -308,12 +400,13 @@ StructMetadata<::apache::thrift::metadata::ThriftField>::gen(ThriftMetadata& met
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftField = res.first->second;
   metadata_ThriftField.name_ref() = "metadata.ThriftField";
   metadata_ThriftField.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftField_fields[] = {
-    std::make_tuple(1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
-    std::make_tuple(2, "type", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")),
-    std::make_tuple(3, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(4, "is_optional", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)),
+    std::make_tuple(1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "type", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "is_optional", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftField_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -321,6 +414,7 @@ StructMetadata<::apache::thrift::metadata::ThriftField>::gen(ThriftMetadata& met
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftField.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -334,11 +428,12 @@ StructMetadata<::apache::thrift::metadata::ThriftStruct>::gen(ThriftMetadata& me
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftStruct = res.first->second;
   metadata_ThriftStruct.name_ref() = "metadata.ThriftStruct";
   metadata_ThriftStruct.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftStruct_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "fields", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
-    std::make_tuple(3, "is_union", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "fields", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "is_union", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -346,6 +441,7 @@ StructMetadata<::apache::thrift::metadata::ThriftStruct>::gen(ThriftMetadata& me
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftStruct.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -359,10 +455,11 @@ StructMetadata<::apache::thrift::metadata::ThriftException>::gen(ThriftMetadata&
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftException = res.first->second;
   metadata_ThriftException.name_ref() = "metadata.ThriftException";
   metadata_ThriftException.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftException_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "fields", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "fields", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftException_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -370,6 +467,7 @@ StructMetadata<::apache::thrift::metadata::ThriftException>::gen(ThriftMetadata&
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftException.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -383,13 +481,14 @@ StructMetadata<::apache::thrift::metadata::ThriftFunction>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftFunction = res.first->second;
   metadata_ThriftFunction.name_ref() = "metadata.ThriftFunction";
   metadata_ThriftFunction.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftFunction_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "return_type", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")),
-    std::make_tuple(3, "arguments", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
-    std::make_tuple(4, "exceptions", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
-    std::make_tuple(5, "is_oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "return_type", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "arguments", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "exceptions", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "is_oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftFunction_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -397,6 +496,7 @@ StructMetadata<::apache::thrift::metadata::ThriftFunction>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftFunction.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -410,11 +510,12 @@ StructMetadata<::apache::thrift::metadata::ThriftService>::gen(ThriftMetadata& m
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftService = res.first->second;
   metadata_ThriftService.name_ref() = "metadata.ThriftService";
   metadata_ThriftService.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftService_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "functions", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftFunction>>("metadata.ThriftFunction"))),
-    std::make_tuple(3, "parent", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "functions", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftFunction>>("metadata.ThriftFunction")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(3, "parent", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "structured_annotations", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftConstStruct>>("metadata.ThriftConstStruct")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftService_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -422,6 +523,7 @@ StructMetadata<::apache::thrift::metadata::ThriftService>::gen(ThriftMetadata& m
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftService.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -435,9 +537,9 @@ StructMetadata<::apache::thrift::metadata::ThriftModuleContext>::gen(ThriftMetad
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftModuleContext = res.first->second;
   metadata_ThriftModuleContext.name_ref() = "metadata.ThriftModuleContext";
   metadata_ThriftModuleContext.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftModuleContext_fields[] = {
-    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
+    std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftModuleContext_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -445,6 +547,7 @@ StructMetadata<::apache::thrift::metadata::ThriftModuleContext>::gen(ThriftMetad
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftModuleContext.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -458,10 +561,10 @@ StructMetadata<::apache::thrift::metadata::ThriftServiceContext>::gen(ThriftMeta
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftServiceContext = res.first->second;
   metadata_ThriftServiceContext.name_ref() = "metadata.ThriftServiceContext";
   metadata_ThriftServiceContext.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftServiceContext_fields[] = {
-    std::make_tuple(1, "service_info", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftService>>("metadata.ThriftService")),
-    std::make_tuple(2, "module", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftModuleContext>>("metadata.ThriftModuleContext")),
+    std::make_tuple(1, "service_info", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftService>>("metadata.ThriftService"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "module", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftModuleContext>>("metadata.ThriftModuleContext"), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftServiceContext_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -469,6 +572,7 @@ StructMetadata<::apache::thrift::metadata::ThriftServiceContext>::gen(ThriftMeta
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftServiceContext.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -482,12 +586,12 @@ StructMetadata<::apache::thrift::metadata::ThriftMetadata>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftMetadata = res.first->second;
   metadata_ThriftMetadata.name_ref() = "metadata.ThriftMetadata";
   metadata_ThriftMetadata.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftMetadata_fields[] = {
-    std::make_tuple(2, "enums", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftEnum>>("metadata.ThriftEnum"))),
-    std::make_tuple(4, "structs", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftStruct>>("metadata.ThriftStruct"))),
-    std::make_tuple(5, "exceptions", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftException>>("metadata.ThriftException"))),
-    std::make_tuple(6, "services", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftService>>("metadata.ThriftService"))),
+    std::make_tuple(2, "enums", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftEnum>>("metadata.ThriftEnum")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(4, "structs", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftStruct>>("metadata.ThriftStruct")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(5, "exceptions", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftException>>("metadata.ThriftException")), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(6, "services", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct< ::apache::thrift::metadata::ThriftService>>("metadata.ThriftService")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftMetadata_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -495,6 +599,7 @@ StructMetadata<::apache::thrift::metadata::ThriftMetadata>::gen(ThriftMetadata& 
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftMetadata.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;
@@ -508,10 +613,10 @@ StructMetadata<::apache::thrift::metadata::ThriftServiceMetadataResponse>::gen(T
   ::apache::thrift::metadata::ThriftStruct& metadata_ThriftServiceMetadataResponse = res.first->second;
   metadata_ThriftServiceMetadataResponse.name_ref() = "metadata.ThriftServiceMetadataResponse";
   metadata_ThriftServiceMetadataResponse.is_union_ref() = false;
-  static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
+  static const EncodedThriftField
   metadata_ThriftServiceMetadataResponse_fields[] = {
-    std::make_tuple(1, "context", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftServiceContext>>("metadata.ThriftServiceContext")),
-    std::make_tuple(2, "metadata", false, std::make_unique<Typedef>("metadata.ThriftMetadata", std::make_unique<Struct< ::apache::thrift::metadata::ThriftMetadata>>("metadata.ThriftMetadata"))),
+    std::make_tuple(1, "context", false, std::make_unique<Struct< ::apache::thrift::metadata::ThriftServiceContext>>("metadata.ThriftServiceContext"), std::vector<ThriftConstStruct>{}),
+    std::make_tuple(2, "metadata", false, std::make_unique<Typedef>("metadata.ThriftMetadata", std::make_unique<Struct< ::apache::thrift::metadata::ThriftMetadata>>("metadata.ThriftMetadata")), std::vector<ThriftConstStruct>{}),
   };
   for (const auto& f : metadata_ThriftServiceMetadataResponse_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -519,6 +624,7 @@ StructMetadata<::apache::thrift::metadata::ThriftServiceMetadataResponse>::gen(T
     field.name_ref() = std::get<1>(f);
     field.is_optional_ref() = std::get<2>(f);
     std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = std::get<4>(f);
     metadata_ThriftServiceMetadataResponse.fields_ref()->push_back(std::move(field));
   }
   return res.first->second;

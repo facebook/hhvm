@@ -27,9 +27,9 @@ namespace apache { namespace thrift { namespace metadata {
 class ThriftMetadataServiceSvAsyncIf {
  public:
   virtual ~ThriftMetadataServiceSvAsyncIf() {}
-  virtual void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) = 0;
-  virtual folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() = 0;
-  virtual folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() = 0;
+  virtual void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) = 0;
+  virtual folly::Future<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() = 0;
+  virtual folly::SemiFuture<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() = 0;
 };
 
 class ThriftMetadataServiceAsyncProcessor;
@@ -40,15 +40,15 @@ class ThriftMetadataServiceSvIf : public ThriftMetadataServiceSvAsyncIf, public 
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
 
 
-  virtual void getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/);
-  folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() override;
-  folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() override;
-  void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) override;
+  virtual void getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/);
+  folly::Future<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() override;
+  folly::SemiFuture<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() override;
+  void async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) override;
 };
 
 class ThriftMetadataServiceSvNull : public ThriftMetadataServiceSvIf {
  public:
-  void getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) override;
+  void getThriftServiceMetadata(::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) override;
 };
 
 class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor {
@@ -59,7 +59,7 @@ class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAs
  protected:
   ThriftMetadataServiceSvIf* iface_;
  public:
-  void processSerializedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+  void processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
  protected:
   std::shared_ptr<folly::RequestContext> getBaseContextForRequest() override;
  public:
@@ -72,11 +72,11 @@ class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAs
   static const ThriftMetadataServiceAsyncProcessor::ProcessMap compactProcessMap_;
  private:
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void process_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void process_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_getThriftServiceMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx,  ::apache::thrift::metadata::ThriftServiceMetadataResponse const& _return);
+  static folly::IOBufQueue return_getThriftServiceMetadata(int32_t protoSeqId, apache::thrift::ContextStack* ctx, ::apache::thrift::metadata::ThriftServiceMetadataResponse const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:

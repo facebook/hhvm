@@ -14,9 +14,9 @@ namespace apache { namespace thrift { namespace frozen { namespace schema {
 
 struct frozen_constants {
 
-  static constexpr int32_t const kCurrentFrozenFileVersion_ = 1;
+  static constexpr ::std::int32_t const kCurrentFrozenFileVersion_ = 1;
 
-  static constexpr int32_t kCurrentFrozenFileVersion() {
+  static constexpr ::std::int32_t kCurrentFrozenFileVersion() {
     return kCurrentFrozenFileVersion_;
   }
 

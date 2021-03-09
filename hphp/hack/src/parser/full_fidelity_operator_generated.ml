@@ -56,7 +56,6 @@ module type Sig = sig
     | GreaterThanOperator
     | StrictNotEqualOperator
     | StrictEqualOperator
-    | PhpNotEqualOperator
     | NotEqualOperator
     | EqualOperator
     | AndOperator
@@ -132,7 +131,6 @@ module Impl : Sig = struct
     | GreaterThanOperator
     | StrictNotEqualOperator
     | StrictEqualOperator
-    | PhpNotEqualOperator
     | NotEqualOperator
     | EqualOperator
     | AndOperator

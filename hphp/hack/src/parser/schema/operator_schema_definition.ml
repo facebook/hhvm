@@ -56,7 +56,6 @@ let operators =
     make_operator "GreaterThan" ~is_comparison:true;
     make_operator "StrictNotEqual" ~is_comparison:true;
     make_operator "StrictEqual" ~is_comparison:true;
-    make_operator "PhpNotEqual" ~is_comparison:true;
     make_operator "NotEqual" ~is_comparison:true;
     make_operator "Equal" ~is_comparison:true;
     make_operator "And";

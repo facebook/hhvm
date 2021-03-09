@@ -58,11 +58,7 @@ impl Operator {
             OrOperator => 12,
             ExclusiveOrOperator => 13,
             AndOperator => 14,
-            EqualOperator
-            | StrictEqualOperator
-            | PhpNotEqualOperator
-            | NotEqualOperator
-            | StrictNotEqualOperator => 15,
+            EqualOperator | StrictEqualOperator | NotEqualOperator | StrictNotEqualOperator => 15,
             SpaceshipOperator
             | LessThanOperator
             | LessThanOrEqualOperator
@@ -102,7 +98,7 @@ impl Operator {
     // must be updated.
     pub fn associativity(&self, _: &ParserEnv) -> Assoc {
         match self {
-            | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
+            | EqualOperator | StrictEqualOperator | NotEqualOperator
             | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
             | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
             | NewOperator | CloneOperator | SpaceshipOperator => Assoc::NotAssociative,
@@ -353,7 +349,6 @@ impl Operator {
             EqualOperator
             | StrictEqualOperator
             | NotEqualOperator
-            | PhpNotEqualOperator
             | StrictNotEqualOperator
             | LessThanOperator
             | LessThanOrEqualOperator

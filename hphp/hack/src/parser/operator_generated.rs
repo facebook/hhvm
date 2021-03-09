@@ -59,7 +59,6 @@ pub enum Operator {
     GreaterThanOperator,
     StrictNotEqualOperator,
     StrictEqualOperator,
-    PhpNotEqualOperator,
     NotEqualOperator,
     EqualOperator,
     AndOperator,

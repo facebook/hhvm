@@ -189,7 +189,7 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name flytrap)
+  (name flytrap_stubs)
   (wrapped false)
   (modules flytrap)
   (preprocess

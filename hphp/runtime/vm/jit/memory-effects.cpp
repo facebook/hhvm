@@ -222,8 +222,8 @@ AliasClass all_pointees(const IRInstruction& inst) {
 
 // Return an AliasClass representing a range of the eval stack that contains
 // everything below a logical depth.
-AliasClass stack_below(SSATmp* base, IRSPRelOffset offset) {
-  return AStack::below(offset + 1);
+AliasClass stack_below(IRSPRelOffset offset) {
+  return AStack::below(offset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
       return inst.marker().spOff().to<IRSPRelOffset>(irSPOff);
     }();
 
-    auto const killed_stack = stack_below(inst.marker().sp(), offset - 1);
+    auto const killed_stack = stack_below(offset);
     auto const kills_union = x.kills.precise_union(killed_stack);
     return kills_union ? *kills_union : killed_stack;
   }();
@@ -488,30 +488,28 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmp:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff - 1)
+      stack_below(inst.extra<ReqBindJmp>()->irSPOff)
     };
   case ReqRetranslate:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqRetranslate>()->offset - 1)
+      stack_below(inst.extra<ReqRetranslate>()->offset)
     };
   case ReqRetranslateOpt:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqRetranslateOpt>()->offset - 1)
+      stack_below(inst.extra<ReqRetranslateOpt>()->offset)
     };
   case JmpSwitchDest:
     return ExitEffects {
       AUnknown,
-      *stack_below(inst.src(1),
-                   inst.extra<JmpSwitchDest>()->spOffBCFromIRSP - 1).
+      *stack_below(inst.extra<JmpSwitchDest>()->spOffBCFromIRSP).
         precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
     return ExitEffects {
       AUnknown,
-      *stack_below(inst.src(1),
-                   inst.extra<JmpSSwitchDest>()->offset - 1).
+      *stack_below(inst.extra<JmpSSwitchDest>()->offset).
         precise_union(AMIStateAny)
     };
 
@@ -576,10 +574,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store_kill(AUnknown, AUnknown, AMIStateAny);
 
   case EndCatch: {
-    auto const stack_kills = stack_below(
-      inst.src(1),
-      inst.extra<EndCatch>()->offset - 1
-    );
+    auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);
     return ExitEffects {
       AUnknown,
       stack_kills | AMIStateTempBase | AMIStateBase
@@ -587,10 +582,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case EnterTCUnwind: {
-    auto const stack_kills = stack_below(
-      inst.src(0),
-      inst.extra<EnterTCUnwind>()->offset - 1
-    );
+    auto const stack_kills = stack_below(inst.extra<EnterTCUnwind>()->offset);
     return ExitEffects {
       AUnknown,
       stack_kills | AMIStateTempBase | AMIStateBase
@@ -607,7 +599,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * SP relative offset of the firstin the inlined call.
      */
     auto inlineStackOff =
-      inst.extra<BeginInlining>()->spOffset + kNumActRecCells - 1;
+      inst.extra<BeginInlining>()->spOffset + kNumActRecCells;
     return may_load_store_kill(
       AEmpty,
       AEmpty,
@@ -617,7 +609,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * locals of the callee-- those slots are inacessible in the inlined
        * call as frame and stack locations may not alias.
        */
-      stack_below(inst.src(0), inlineStackOff)
+      stack_below(inlineStackOff)
     );
   }
 
@@ -666,7 +658,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const extra = inst.extra<InterpOneData>();
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny
+      stack_below(extra->spOffset) | AMIStateAny
     };
   }
 
@@ -729,7 +721,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<ContEnter>();
       return CallEffects {
         // Kills. Everything on the stack.
-        stack_below(inst.src(0), extra->spOffset) | AMIStateAny,
+        stack_below(extra->spOffset) | AMIStateAny,
         // No inputs. The value being sent is passed explicitly.
         AEmpty,
         // ActRec. It is on the heap and we already implicitly assume that
@@ -752,7 +744,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<Call>();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
+        stack_below(extra->spOffset) | AMIStateAny,
         // Input arguments.
         extra->numInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
@@ -797,7 +789,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_kill(
         stk | AHeapAny | foldable,
         out_stk | AHeapAny | foldable,
-        stack_below(inst.src(1), extra->spOffset - 1) | AMIStateAny
+        stack_below(extra->spOffset) | AMIStateAny
       );
     }
 

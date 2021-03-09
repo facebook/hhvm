@@ -4794,6 +4794,28 @@ where
         }
     }
 
+    fn check_context_has_this(contexts: &Option<ast::Contexts>, env: &mut Env<'a, TF>) {
+        use ast::Hint_::{Haccess, Happly};
+        if let Some(ast::Contexts(pos, ref context_hints)) = contexts {
+            context_hints.iter().for_each(|c| match *c.1 {
+                Haccess(ref root, _) => match &*root.1 {
+                    Happly(oxidized::ast::Id(_, id), _)
+                        if Self::strip_ns(id.as_str())
+                            == naming_special_names_rust::typehints::THIS =>
+                    {
+                        Self::raise_parsing_error_pos(
+                            pos,
+                            env,
+                            "this:: context is not allowed on top level functions",
+                        )
+                    }
+                    _ => {}
+                },
+                _ => {}
+            });
+        }
+    }
+
     fn p_def(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<ast::Def>> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.children {
@@ -4818,6 +4840,7 @@ where
                     "function",
                     env,
                 );
+                Self::check_context_has_this(&hdr.contexts, env);
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {

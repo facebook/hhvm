@@ -4233,6 +4233,24 @@ where
                         "Constraints on ctx constants are not allowed",
                     );
                 }
+                if let Some(ref hint) = context {
+                    use ast::Hint_::{Happly, Hintersection};
+                    let ast::Hint(_, ref h) = hint;
+                    if let Hintersection(hl) = &**h {
+                        for h in hl {
+                            let ast::Hint(_, ref h) = h;
+                            if let Happly(oxidized::ast::Id(_, id), _) = &**h {
+                                if id.as_str().ends_with("_local") {
+                                    Self::raise_parsing_error(
+                                        &c.ctx_list,
+                                        env,
+                                        "Local contexts on ctx constants are not allowed",
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
                 let span = Self::p_pos(node, env);
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
                 let has_abstract = kinds.has(modifier::ABSTRACT);

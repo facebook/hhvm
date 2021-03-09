@@ -1,7 +1,7 @@
 <?hh
 
 class WithContextConstant {
-  const ctx C = [\HH\Contexts\policied_local];
+  const ctx C = [\HH\Contexts\policied_shallow];
 
   public function has_io()[self::C]: void {
     echo "I have IO!";

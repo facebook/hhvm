@@ -172,7 +172,7 @@ class Contextual {
 }
 
 class WithContextConstant {
-  const ctx C = [policied_local];
+  const ctx C = [policied_shallow];
   public function has_io()[self::C]: void {
     echo "I have IO!";
   }

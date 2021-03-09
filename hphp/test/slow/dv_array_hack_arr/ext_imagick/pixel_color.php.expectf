@@ -1,11 +1,11 @@
-Array
+Dict
 (
     [hue] => 0.167
     [saturation] => 1
     [luminosity] => 0.500
 )
 
-Array
+Dict
 (
     [r] => 1
     [g] => 1
@@ -13,14 +13,14 @@ Array
     [a] => 1
 )
 
-Array
+Dict
 (
     [hue] => 0.167
     [saturation] => 1
     [luminosity] => 0.500
 )
 
-Array
+Dict
 (
     [r] => 255
     [g] => 255
@@ -28,14 +28,14 @@ Array
     [a] => 1
 )
 
-Array
+Dict
 (
     [hue] => 0.300
     [saturation] => 0.400
     [luminosity] => 0.500
 )
 
-Array
+Dict
 (
     [r] => 97
     [g] => 179
@@ -43,14 +43,14 @@ Array
     [a] => 1
 )
 
-Array
+Dict
 (
     [hue] => 0.300
     [saturation] => 0.400
     [luminosity] => 0.500
 )
 
-Array
+Dict
 (
     [r] => 0.380
     [g] => 0.700
@@ -67,14 +67,14 @@ Array
 0.169
 1
 0
-Array
+Dict
 (
     [hue] => 0.921
     [saturation] => 0.868
     [luminosity] => 0.555
 )
 
-Array
+Dict
 (
     [r] => 240
     [g] => 43

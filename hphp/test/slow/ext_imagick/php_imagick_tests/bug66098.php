@@ -1,9 +1,11 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-error_reporting(0);
+  error_reporting(0);
 
-$img = new Imagick();
-echo $img->foobar;
-
-echo "OK";
+  $img = new Imagick();
+  try {
+    echo $img->foobar;
+  } catch (UndefinedPropertyException $e) {
+    echo "OK";
+  }
 }

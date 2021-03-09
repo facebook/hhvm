@@ -59,7 +59,7 @@
               ft_params =
               [{ fp_pos = [9:23-25]; fp_name = (Some "$c");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([9:15-22]),
                     (Tapply (([9:15-16], "\\C"),
@@ -78,7 +78,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-14]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([9:28-32]),
                  (Tapply (([9:28-29], "\\C"), [(Rhint ([9:30-31]), Terr)])))

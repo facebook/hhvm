@@ -20,7 +20,7 @@
                      ft_implicit_params =
                      { capability = (CapDefaults [4:19-30]) };
                      ft_ret =
-                     { et_enforced = false;
+                     { et_enforced = Typing_defs_core.Unenforced;
                        et_type =
                        (Rwitness_from_decl ([4:19-30]), (Tprim Tvoid)) };
                      ft_flags =

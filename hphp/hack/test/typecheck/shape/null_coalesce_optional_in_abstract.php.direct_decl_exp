@@ -31,7 +31,7 @@
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params = { capability = (CapDefaults [7:35-41]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([7:45-55]),
                     (Taccess
@@ -79,7 +79,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [15:26-32]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type =
                     (Rhint ([15:36-46]),
                      (Taccess
@@ -129,7 +129,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [22:26-31]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([22:35-39]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false

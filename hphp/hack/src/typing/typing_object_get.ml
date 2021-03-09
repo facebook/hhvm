@@ -322,7 +322,10 @@ let rec obj_get_concrete_ty
                 ft_implicit_params =
                   { capability = CapTy (MakeType.intersection Reason.Rnone []) };
                 ft_ret =
-                  { et_type = MakeType.void Reason.Rnone; et_enforced = false };
+                  {
+                    et_type = MakeType.void Reason.Rnone;
+                    et_enforced = Unenforced;
+                  };
                 ft_flags = 0;
                 ft_ifc_decl = default_ifc_fun_decl;
               }
@@ -410,7 +413,7 @@ let rec obj_get_concrete_ty
                       ft)
                 in
                 let ft_ty = mk (Typing_reason.localize r, Tfun ft) in
-                (env, ft_ty, explicit_targs, false)
+                (env, ft_ty, explicit_targs, Unenforced)
               | _ ->
                 let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in
                 let { et_type; et_enforced } =

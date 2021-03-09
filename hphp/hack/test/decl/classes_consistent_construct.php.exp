@@ -35,7 +35,7 @@
                       ft_params =
                       [{ fp_pos = [8:33-35]; fp_name = (Some "$a");
                          fp_type =
-                         { et_enforced = false;
+                         { et_enforced = Typing_defs_core.Unenforced;
                            et_type =
                            (Rhint ([8:31-32]),
                             (Tapply (([8:31-32], "\\A"), [])))
@@ -51,7 +51,7 @@
                       ft_implicit_params =
                       { capability = (CapDefaults [8:19-30]) };
                       ft_ret =
-                      { et_enforced = false;
+                      { et_enforced = Typing_defs_core.Unenforced;
                         et_type =
                         (Rwitness_from_decl ([8:19-30]), (Tprim Tvoid)) };
                       ft_flags =

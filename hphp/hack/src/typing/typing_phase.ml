@@ -808,7 +808,10 @@ and localize_ft
       (* HHVM does not enforce types on vararg parameters yet *)
       ( env,
         Fvariadic
-          { param with fp_type = { et_type = var_ty; et_enforced = false } } )
+          {
+            param with
+            fp_type = { et_type = var_ty; et_enforced = Unenforced };
+          } )
     | Fstandard as x -> (env, x)
   in
   let (env, params) =

@@ -199,8 +199,7 @@ let rec union env ty1 ty2 =
   else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, ty1)
   else
-    let r = union_reason r1 r2 in
-    union_ env ty1 ty2 r
+    union_ env ty1 ty2 (union_reason r1 r2)
 
 and union_ env ty1 ty2 r = union_lists env [ty1] [ty2] r
 

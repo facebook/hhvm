@@ -38,8 +38,8 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     t_shape_map::TShapeField,
     typing_defs::{
-        self, Capability::*, ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam,
-        FunParams, FunType, IfcFunDecl, ParamMode, PosByteString, PosId, PosString,
+        self, Capability::*, ConstDecl, Enforcement, EnumType, FunArity, FunElt, FunImplicitParams,
+        FunParam, FunParams, FunType, IfcFunDecl, ParamMode, PosByteString, PosId, PosString,
         PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
         TshapeFieldName, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
@@ -1451,7 +1451,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             params,
             implicit_params,
             ret: self.alloc(PossiblyEnforcedTy {
-                enforced: false,
+                enforced: Enforcement::Unenforced,
                 type_,
             }),
             flags,
@@ -1566,7 +1566,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 pos,
                                 name,
                                 type_: self.alloc(PossiblyEnforcedTy {
-                                    enforced: false,
+                                    enforced: Enforcement::Unenforced,
                                     type_,
                                 }),
                                 flags,
@@ -4698,7 +4698,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 pos: self.get_pos(fp.hint),
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
-                    enforced: false,
+                    enforced: Enforcement::Unenforced,
                     type_: self.node_to_ty(fp.hint).unwrap_or_else(|| tany()),
                 }),
                 flags,
@@ -4739,7 +4739,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                 params,
                 implicit_params,
                 ret: self.alloc(PossiblyEnforcedTy {
-                    enforced: false,
+                    enforced: Enforcement::Unenforced,
                     type_: ret,
                 }),
                 flags,

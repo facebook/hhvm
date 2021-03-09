@@ -138,6 +138,7 @@ type _ t_ =
   | Rarray_unification : Pos.t -> locl_phase t_
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
+  | Rdynamic_coercion of locl_phase t_
 
 type t = locl_phase t_
 
@@ -167,6 +168,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rexpr_dep_type (r, s, t) -> Rexpr_dep_type (localize r, s, t)
   | Rtconst_no_cstr id -> Rtconst_no_cstr id
   | Rdefault_capability p -> Rdefault_capability p
+  | Rdynamic_coercion r -> Rdynamic_coercion r
 
 let arg_pos_str ap =
   match ap with
@@ -568,6 +570,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     [(p, prefix ^ " because legacy arrays have been unified with Hack arrays")]
   | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
   | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
+  | Rdynamic_coercion r -> to_string prefix r
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -666,6 +669,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rinstantiate (_, _, r)
   | Rexpr_dep_type (r, _, _) ->
     to_raw_pos r
+  | Rdynamic_coercion r -> to_raw_pos r
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -789,6 +793,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rarray_unification _ -> "Rarray_unification"
   | Rconcat_operand _ -> "Rconcat_operand"
   | Rinterp_operand _ -> "Rinterp_operand"
+  | Rdynamic_coercion _ -> "Rdynamic_coercion"
 
 let pp fmt r =
   let pos = to_raw_pos r in

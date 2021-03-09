@@ -27,7 +27,7 @@
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [7:19-20]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type =
                   (Rhint ([7:24-31]),
                    (Taccess ((Rhint ([7:24-31]), Tthis), [([7:30-31], "T")])))
@@ -47,7 +47,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-20]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([11:24-32]),
                     (Taccess
@@ -88,7 +88,7 @@
                  ft_params =
                  [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
                     fp_type =
-                    { et_enforced = false;
+                    { et_enforced = Typing_defs_core.Unenforced;
                       et_type =
                       (Rhint ([20:40-59]),
                        (Taccess
@@ -108,7 +108,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [20:28-39]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([20:71-87]),
                     (Taccess

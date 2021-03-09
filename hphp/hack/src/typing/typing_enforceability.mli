@@ -6,7 +6,11 @@
  *
  *)
 
-val is_enforceable : Typing_env_types.env -> Typing_defs.decl_ty -> bool
+val is_enforceable :
+  ?include_dynamic:bool -> Typing_env_types.env -> Typing_defs.decl_ty -> bool
+
+val get_enforcement :
+  Typing_env_types.env -> Typing_defs.decl_ty -> Typing_defs_core.enforcement
 
 val make_locl_like_type :
   Typing_env_types.env ->

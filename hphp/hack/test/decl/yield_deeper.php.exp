@@ -8,7 +8,7 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type =
                (Rhint ([3:15-43]),
                 (Tapply (([3:15-24], "\\Generator"),
@@ -32,7 +32,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([7:15-19]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -49,7 +49,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [13:10-11]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([13:15-19]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -66,7 +66,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [19:16-17]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([19:21-36]),
                  (Tapply (([19:21-30], "\\HH\\Awaitable"),
@@ -87,7 +87,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [26:16-17]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([26:21-52]),
                  (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),

@@ -87,7 +87,7 @@
                     ft_params =
                     [{ fp_pos = [14:21-23]; fp_name = None;
                        fp_type =
-                       { et_enforced = false;
+                       { et_enforced = Typing_defs_core.Unenforced;
                          et_type =
                          (Rhint ([14:21-23]), (Tgeneric ("Ta", []))) };
                        fp_flags =
@@ -101,7 +101,7 @@
                     ft_implicit_params =
                     { capability = (CapDefaults [14:11-29]) };
                     ft_ret =
-                    { et_enforced = false;
+                    { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([14:26-28]), (Tgeneric ("Tb", []))) };
                     ft_flags =
                     (make_ft_flags FSync ~return_disposable:false

@@ -32,7 +32,7 @@
                 ft_params =
                 [{ fp_pos = [4:28-30]; fp_name = (Some "$a");
                    fp_type =
-                   { et_enforced = false;
+                   { et_enforced = Typing_defs_core.Unenforced;
                      et_type = (Rhint ([4:25-27]), (Tgeneric ("Ta", []))) };
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -42,7 +42,7 @@
                     };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type =
-                    { et_enforced = false;
+                    { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([4:32-34]), (Tgeneric ("Tc", []))) };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -53,7 +53,7 @@
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type =
                   (Rhint ([4:40-48]),
                    (Ttuple
@@ -81,7 +81,7 @@
                  ft_params =
                  [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
                     fp_type =
-                    { et_enforced = false;
+                    { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([8:25-27]), (Tgeneric ("Tb", []))) };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -91,7 +91,7 @@
                      };
                    { fp_pos = [8:35-37]; fp_name = (Some "$d");
                      fp_type =
-                     { et_enforced = false;
+                     { et_enforced = Typing_defs_core.Unenforced;
                        et_type = (Rhint ([8:32-34]), (Tgeneric ("Td", []))) };
                      fp_flags =
                      (make_fp_flags ~accept_disposable:false
@@ -103,7 +103,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [8:19-20]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([8:40-48]),
                     (Ttuple

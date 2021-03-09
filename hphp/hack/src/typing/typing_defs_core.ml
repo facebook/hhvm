@@ -208,6 +208,12 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
+type enforcement =
+  | Unenforced
+  | Enforced
+  | PartiallyEnforced
+[@@deriving eq, show, ord]
+
 type 'phase ty = 'phase Reason.t_ * 'phase ty_
 
 and decl_ty = decl_phase ty
@@ -401,7 +407,7 @@ and 'ty fun_arity =
           min ; variadic param type *)
 
 and 'ty possibly_enforced_ty = {
-  et_enforced: bool;
+  et_enforced: enforcement;
       (** True if consumer of this type enforces it at runtime *)
   et_type: 'ty;
 }
@@ -719,7 +725,7 @@ module Pp = struct
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "et_enforced";
-    Format.fprintf fmt "%B" x.et_enforced;
+    Format.fprintf fmt "%a" pp_enforcement x.et_enforced;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 

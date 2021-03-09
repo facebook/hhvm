@@ -222,7 +222,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             Reason.URparam
             env
             shape_ty
-            { et_type = nullable_super_shape; et_enforced = false }
+            { et_type = nullable_super_shape; et_enforced = Unenforced }
             Errors.unify_error
         in
         TUtils.union env res (MakeType.null fun_pos)
@@ -233,7 +233,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             Reason.URparam
             env
             shape_ty
-            { et_type = nullable_super_shape; et_enforced = false }
+            { et_type = nullable_super_shape; et_enforced = Unenforced }
             Errors.unify_error
         in
         let env =
@@ -270,7 +270,7 @@ let at env ~expr_pos ~shape_pos shape_ty field =
           Reason.URparam
           env
           shape_ty
-          { et_type = fake_super_shape_ty; et_enforced = false }
+          { et_type = fake_super_shape_ty; et_enforced = Unenforced }
           Errors.unify_error
       in
       (env, res)

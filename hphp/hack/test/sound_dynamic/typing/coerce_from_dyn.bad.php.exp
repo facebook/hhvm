@@ -56,5 +56,5 @@ File "coerce_from_dyn.bad.php", line 46, characters 12-13:
 Invalid argument (Typing[4110])
   File "coerce_from_dyn.bad.php", line 38, characters 19-24:
   Expected `string`
-  File "coerce_from_dyn.bad.php", line 40, characters 21-27:
-  But got `dynamic`
+  File "coerce_from_dyn.bad.php", line 44, characters 10-10:
+  But got `int`

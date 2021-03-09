@@ -224,4 +224,4 @@ and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.
    * We refine this during localization
    *)
-  { et_enforced = false; et_type = hint env h }
+  { et_enforced = Unenforced; et_type = hint env h }

@@ -34,7 +34,7 @@
              ft_params =
              [{ fp_pos = [4:26-28]; fp_name = (Some "$f");
                 fp_type =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type =
                   (Rhint ([4:3-25]),
                    (Tfun
@@ -46,7 +46,7 @@
                                   (Tgeneric ("Tctx$f", []))))
                           };
                         ft_ret =
-                        { et_enforced = false;
+                        { et_enforced = Typing_defs_core.Unenforced;
                           et_type = (Rhint ([4:20-24]), (Tprim Tvoid)) };
                         ft_flags =
                         (make_ft_flags FSync ~return_disposable:false
@@ -62,7 +62,7 @@
                  };
                { fp_pos = [5:12-14]; fp_name = (Some "$v");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([5:12-14]), (Tgeneric ("T$v", []))) };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -79,7 +79,7 @@
                             (Rhint ([6:11-16]), (Tgeneric ("T$v@C", [])))])))
                };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type = (Rhint ([6:19-23]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
@@ -119,7 +119,7 @@
               ft_params =
               [{ fp_pos = [10:21-23]; fp_name = (Some "$v");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([10:21-23]), (Tgeneric ("T$v", []))) };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -132,7 +132,7 @@
               { capability =
                 (CapTy (Rhint ([10:25-30]), (Tgeneric ("T$v@C", [])))) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([10:33-36]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
@@ -176,7 +176,7 @@
               ft_params =
               [{ fp_pos = [15:27-29]; fp_name = (Some "$f");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([15:3-26]),
                     (Toption
@@ -190,7 +190,7 @@
                                        (Tgeneric ("Tctx$f", []))))
                                };
                              ft_ret =
-                             { et_enforced = false;
+                             { et_enforced = Typing_defs_core.Unenforced;
                                et_type = (Rhint ([15:21-25]), (Tprim Tvoid))
                                };
                              ft_flags =
@@ -207,7 +207,7 @@
                   };
                 { fp_pos = [16:13-15]; fp_name = (Some "$v");
                   fp_type =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type =
                     (Rhint ([16:3-12]),
                      (Toption (Rhint ([16:13-15]), (Tgeneric ("T$v", [])))))
@@ -227,7 +227,7 @@
                              (Rhint ([17:11-16]), (Tgeneric ("T$v@C", [])))])))
                 };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([17:19-23]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

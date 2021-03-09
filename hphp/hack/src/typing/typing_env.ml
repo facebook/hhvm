@@ -574,7 +574,10 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
           {
             (* Actually should get set straight away anyway *)
             return_type =
-              { et_type = mk (Reason.Rnone, Tunion []); et_enforced = false };
+              {
+                et_type = mk (Reason.Rnone, Tunion []);
+                et_enforced = Unenforced;
+              };
             return_disposable = false;
             return_explicit = false;
             return_dynamically_callable = false;

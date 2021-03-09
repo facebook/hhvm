@@ -8,7 +8,7 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-12]) };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type =
                (Rhint ([3:16-35]),
                 (Tdarray ((Rhint ([3:23-26]), (Tprim Tint)),
@@ -29,7 +29,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-12]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([7:16-22]), (Tvarray (Rhint ([7:16-22]), Tany))) };
               ft_flags =
@@ -47,7 +47,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [11:10-12]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([11:16-27]),
                  (Tvarray (Rhint ([11:23-26]), (Tprim Tint))))
@@ -67,7 +67,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [15:10-12]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([15:16-22]),
                  (Tdarray ((Rhint ([15:16-22]), Tany),
@@ -88,7 +88,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [19:10-12]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([19:16-35]),
                  (Tdarray ((Rhint ([19:23-26]), (Tprim Tint)),
@@ -109,7 +109,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [23:10-13]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([23:17-33]),
                  (Tvarray_or_darray
@@ -131,7 +131,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [27:10-13]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([27:17-38]),
                  (Tvarray_or_darray
@@ -153,7 +153,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [31:10-13]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([31:17-46]),
                  (Tvarray_or_darray (Rhint ([31:34-37]), (Tprim Tint)),
@@ -174,7 +174,8 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [35:10-13]) };
               ft_ret =
-              { et_enforced = false; et_type = (Rhint ([35:17-52]), Tany) };
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([35:17-52]), Tany) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7dd68eef8bd6b0ddf8ad81254972c2ee>>
+// @generated SignedSource<<e1b568cdddc78f572e9ae0d23d86d62f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -240,6 +240,7 @@ pub enum T_<'a> {
     RarrayUnification(&'a pos::Pos<'a>),
     RconcatOperand(&'a pos::Pos<'a>),
     RinterpOperand(&'a pos::Pos<'a>),
+    RdynamicCoercion(&'a T_<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 

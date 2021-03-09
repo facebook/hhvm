@@ -19,7 +19,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [8:12-21]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([8:25-39]),
                  (Tapply (([8:25-39], "\\HH\\Lib\\Dict\\MixedDict"), [])))
@@ -40,7 +40,7 @@
               ft_params =
               [{ fp_pos = [12:37-39]; fp_name = (Some "$d");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([12:22-36]),
                     (Tapply (([12:22-36], "\\HH\\Lib\\Dict\\MixedDict"), [])))
@@ -53,7 +53,7 @@
                   };
                 { fp_pos = [12:50-52]; fp_name = (Some "$k");
                   fp_type =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([12:41-49]), (Tprim Tarraykey)) };
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -64,7 +64,8 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:12-21]) };
               ft_ret =
-              { et_enforced = false; et_type = (Rhint ([12:55-60]), Tmixed) };
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([12:55-60]), Tmixed) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~readonly_this:false ~is_const:false);

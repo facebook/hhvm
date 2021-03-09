@@ -177,6 +177,17 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
+type enforcement =
+  (* The consumer doesn't enforce the type at runtime *)
+  | Unenforced
+  (* The consumer enforces the type at runtime *)
+  | Enforced
+  (* The consumer enforces part of the type at runtime, e.g.,
+   * in C<int> it enforces that the value is a C, but does not enforce the
+   * type argument. *)
+  | PartiallyEnforced
+[@@deriving eq, show, ord]
+
 (* = Reason.t * 'phase ty_ *)
 type 'phase ty
 
@@ -365,8 +376,7 @@ and 'ty fun_arity =
   | Fvariadic of 'ty fun_param
 
 and 'ty possibly_enforced_ty = {
-  (* True if consumer of this type enforces it at runtime *)
-  et_enforced: bool;
+  et_enforced: enforcement;
   et_type: 'ty;
 }
 

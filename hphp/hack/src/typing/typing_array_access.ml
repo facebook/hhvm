@@ -141,7 +141,7 @@ let check_arraykey_index error env pos container_ty index_ty =
       reason
       env
       index_ty
-      { et_type = ty_arraykey; et_enforced = true }
+      { et_type = ty_arraykey; et_enforced = Enforced }
       (fun ?code:_ _ _ ->
         error pos (info_of_type container_ty) (info_of_type index_ty))
   else
@@ -230,7 +230,7 @@ let rec array_get
           Typing_coercion.try_coerce
             env
             ty_have
-            { et_type = ty_expect; et_enforced = true }
+            { et_type = ty_expect; et_enforced = Enforced }
         with
         | Some env -> env
         | None ->
@@ -646,7 +646,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           Typing_coercion.try_coerce
             env
             ty_have
-            { et_type = ty_expect; et_enforced = true }
+            { et_type = ty_expect; et_enforced = Enforced }
         with
         | Some e -> e
         | None ->

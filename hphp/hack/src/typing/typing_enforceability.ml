@@ -18,8 +18,11 @@ let wrap_like ty =
   let r = Typing_reason.Renforceable (get_pos ty) in
   MakeType.like r ty
 
-let is_enforceable (env : env) (ty : decl_ty) =
-  let rec is_enforceable env visited ty =
+let is_enforceable ?(include_dynamic = true) (env : env) (ty : decl_ty) =
+  let enable_sound_dynamic =
+    TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+  in
+  let rec is_enforceable include_dynamic env visited ty =
     match get_node ty with
     | Tthis -> false
     | Tapply ((_, name), _)
@@ -37,7 +40,7 @@ let is_enforceable (env : env) (ty : decl_ty) =
               { td_vis = Aast.Transparent; td_tparams; td_type; _ }) ->
           (* So that the check does not collide with reified generics *)
           let env = Env.add_generic_parameters env td_tparams in
-          is_enforceable env (SSet.add name visited) td_type
+          is_enforceable include_dynamic env (SSet.add name visited) td_type
         | Some (Env.ClassResult tc) ->
           begin
             match tyl with
@@ -54,14 +57,15 @@ let is_enforceable (env : env) (ty : decl_ty) =
                         match get_node targ with
                         | Tdynamic
                         (* We accept the inner type being dynamic regardless of reification *)
-                        | Tlike _ ->
+                        | Tlike _
+                          when not enable_sound_dynamic ->
                           acc
                         | _ ->
                           (match tparam.tp_reified with
                           | Aast.Erased -> false
                           | Aast.SoftReified -> false
                           | Aast.Reified ->
-                            is_enforceable env visited targ && acc))
+                            is_enforceable true env visited targ && acc))
                   with
                   | Ok new_acc -> new_acc
                   | Unequal_lengths -> true
@@ -95,7 +99,7 @@ let is_enforceable (env : env) (ty : decl_ty) =
     | Tany _ -> true
     | Terr -> true
     | Tnonnull -> true
-    | Tdynamic -> true
+    | Tdynamic -> (not enable_sound_dynamic) || include_dynamic
     | Tfun _ -> false
     | Ttuple _ -> false
     | Tunion [] -> true
@@ -110,10 +114,16 @@ let is_enforceable (env : env) (ty : decl_ty) =
     | Tvec_or_dict (_, ty)
     | Tvarray_or_darray (_, ty) ->
       is_any ty
-    | Toption ty -> is_enforceable env visited ty
+    | Toption ty -> is_enforceable include_dynamic env visited ty
     (* TODO(T36532263) make sure that this is what we want *)
   in
-  is_enforceable env SSet.empty ty
+  is_enforceable include_dynamic env SSet.empty ty
+
+let get_enforcement (env : env) (ty : decl_ty) =
+  if is_enforceable ~include_dynamic:false env ty then
+    Enforced
+  else
+    Unenforced
 
 let make_locl_like_type env ty =
   if env.Typing_env_types.pessimize then
@@ -123,7 +133,7 @@ let make_locl_like_type env ty =
     (env, ty)
 
 let is_enforced env ~explicitly_untrusted ty =
-  let enforceable = is_enforceable env ty in
+  let enforceable = is_enforceable ~include_dynamic:false env ty in
   let is_hhi =
     get_pos ty
     |> Pos.filename
@@ -133,8 +143,15 @@ let is_enforced env ~explicitly_untrusted ty =
   enforceable && (not is_hhi) && not explicitly_untrusted
 
 let pessimize_type env { et_type; et_enforced } =
+  let is_fully_enforced e =
+    match e with
+    | Enforced -> true
+    | Unenforced
+    | PartiallyEnforced ->
+      false
+  in
   let et_type =
-    if et_enforced || not env.pessimize then
+    if is_fully_enforced et_enforced || not env.pessimize then
       et_type
     else
       match get_node et_type with
@@ -144,7 +161,12 @@ let pessimize_type env { et_type; et_enforced } =
   { et_type; et_enforced }
 
 let compute_enforced_ty env ?(explicitly_untrusted = false) (ty : decl_ty) =
-  let et_enforced = is_enforced env ~explicitly_untrusted ty in
+  let et_enforced =
+    if is_enforced env ~explicitly_untrusted ty then
+      Enforced
+    else
+      Unenforced
+  in
   { et_type = ty; et_enforced }
 
 let compute_enforced_and_pessimize_ty

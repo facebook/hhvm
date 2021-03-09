@@ -151,9 +151,9 @@ let intersection r tyl =
   | [ty] -> ty
   | _ -> mk (r, Tintersection tyl)
 
-let unenforced ty = { et_type = ty; et_enforced = false }
+let unenforced ty = { et_type = ty; et_enforced = Unenforced }
 
-let enforced ty = { et_type = ty; et_enforced = true }
+let enforced ty = { et_type = ty; et_enforced = Enforced }
 
 let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType

@@ -290,10 +290,10 @@ let decl_type_as_value env ty = Atom (Typing_print.debug_decl env ty)
 
 let possibly_enforced_type_as_value env et =
   Atom
-    ( ( if et.et_enforced then
-        "enforced "
-      else
-        "" )
+    ( (match et.et_enforced with
+      | Enforced -> "enforced "
+      | PartiallyEnforced -> "partially enforced"
+      | Unenforced -> "")
     ^ Typing_print.debug env et.et_type )
 
 let return_info_as_value env return_info =

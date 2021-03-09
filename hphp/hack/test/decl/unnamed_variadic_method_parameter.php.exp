@@ -17,7 +17,7 @@
                 (Fvariadic (
                    { fp_pos = [4:31-34]; fp_name = None;
                      fp_type =
-                     { et_enforced = false;
+                     { et_enforced = Typing_defs_core.Unenforced;
                        et_type = (Rwitness_from_decl ([4:31-34]), Tany) };
                      fp_flags =
                      (make_fp_flags ~accept_disposable:false
@@ -30,7 +30,7 @@
                 ft_params =
                 [{ fp_pos = [4:25-29]; fp_name = (Some "$foo");
                    fp_type =
-                   { et_enforced = false;
+                   { et_enforced = Typing_defs_core.Unenforced;
                      et_type = (Rhint ([4:21-24]), (Tprim Tint)) };
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -41,7 +41,7 @@
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type = (Rhint ([4:37-41]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false

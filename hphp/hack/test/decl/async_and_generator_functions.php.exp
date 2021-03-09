@@ -8,7 +8,7 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-23]) };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type = (Rhint ([3:27-31]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
@@ -25,7 +25,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:16-30]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([5:34-51]),
                  (Tapply (([5:34-43], "\\HH\\Awaitable"),
@@ -46,7 +46,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [10:10-28]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([10:32-60]),
                  (Tapply (([10:32-41], "\\Generator"),
@@ -70,7 +70,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [14:10-41]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([14:45-73]),
                  (Tapply (([14:45-54], "\\Generator"),
@@ -94,7 +94,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:16-31]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([18:35-68]),
                  (Tapply (([18:35-49], "\\HH\\AsyncGenerator"),

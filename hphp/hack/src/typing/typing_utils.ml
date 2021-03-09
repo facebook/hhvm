@@ -565,7 +565,7 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
   {
     fp_pos = pos;
     fp_name = None;
-    fp_type = { et_type = ty; et_enforced = false };
+    fp_type = { et_type = ty; et_enforced = Unenforced };
     fp_flags =
       make_fp_flags
         ~mode:FPnormal

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b139acef71c6a04b9939b28678afcc4b>>
+// @generated SignedSource<<d89da6eecb4756b94a5fef4f310bfb43>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -164,6 +164,18 @@ impl<'a> Node<'a> for DependentType {
         match self {
             DependentType::DTthis => {}
             DependentType::DTexpr(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for Enforcement {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_enforcement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Enforcement::Unenforced => {}
+            Enforcement::Enforced => {}
+            Enforcement::PartiallyEnforced => {}
         }
     }
 }
@@ -844,6 +856,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RarrayUnification(ref __binding_0) => __binding_0.accept(v),
             T_::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
+            T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -29,7 +29,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [7:19-20]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([7:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
@@ -46,7 +46,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [10:19-20]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([10:24-28]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -64,7 +64,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [13:19-27]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([13:31-35]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -82,7 +82,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [16:19-29]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([16:33-37]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -100,7 +100,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [19:19-28]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([19:32-36]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -118,7 +118,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [22:19-27]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([22:31-35]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -136,7 +136,7 @@
                   ft_params =
                   [{ fp_pos = [25:22-24]; fp_name = (Some "$x");
                      fp_type =
-                     { et_enforced = false;
+                     { et_enforced = Typing_defs_core.Unenforced;
                        et_type =
                        (Rhint ([25:20-21]),
                         (Tapply (([25:20-21], "\\C"), [])))
@@ -149,7 +149,7 @@
                       };
                     { fp_pos = [26:38-40]; fp_name = (Some "$f");
                       fp_type =
-                      { et_enforced = false;
+                      { et_enforced = Typing_defs_core.Unenforced;
                         et_type =
                         (Rhint ([26:19-37]),
                          (Tfun
@@ -158,7 +158,7 @@
                               ft_implicit_params =
                               { capability = (CapDefaults [26:19-37]) };
                               ft_ret =
-                              { et_enforced = false;
+                              { et_enforced = Typing_defs_core.Unenforced;
                                 et_type = (Rhint ([26:32-36]), (Tprim Tvoid))
                                 };
                               ft_flags =
@@ -177,7 +177,7 @@
                   ft_implicit_params =
                   { capability = (CapDefaults [24:19-28]) };
                   ft_ret =
-                  { et_enforced = false;
+                  { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([27:6-10]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
@@ -198,7 +198,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [31:10-20]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([31:24-28]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

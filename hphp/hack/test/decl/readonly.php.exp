@@ -19,7 +19,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [6:16-32]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([6:46-60]),
                  (Tapply (([6:46-55], "\\HH\\Awaitable"),
@@ -42,7 +42,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [10:16-30]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([10:34-48]),
                  (Tapply (([10:34-43], "\\HH\\Awaitable"),
@@ -86,7 +86,7 @@
                       ft_params =
                       [{ fp_pos = [18:25-27]; fp_name = (Some "$y");
                          fp_type =
-                         { et_enforced = false;
+                         { et_enforced = Typing_defs_core.Unenforced;
                            et_type =
                            (Rhint ([18:21-24]),
                             (Tapply (([18:21-24], "\\Foo"), [])))
@@ -102,7 +102,7 @@
                       ft_implicit_params =
                       { capability = (CapDefaults [17:19-30]) };
                       ft_ret =
-                      { et_enforced = false;
+                      { et_enforced = Typing_defs_core.Unenforced;
                         et_type =
                         (Rwitness_from_decl ([17:19-30]), (Tprim Tvoid)) };
                       ft_flags =
@@ -123,7 +123,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [22:28-34]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([22:39-43]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false

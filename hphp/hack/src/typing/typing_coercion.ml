@@ -68,13 +68,46 @@ module MakeType = Typing_make_type
 (* does coercion, including subtyping *)
 let coerce_type_impl
     env ty_have ty_expect (on_error : Errors.typing_error_callback) =
+  let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    if
-      ty_expect.et_enforced
-      && Typing_utils.is_sub_type_for_coercion env ty_have ty_expect.et_type
-    then
-      env
-    else
+    match ty_expect.et_enforced with
+    | Enforced ->
+      (* If the type is enforced, then we also allow dynamic.
+         For example, if a function takes an int, then it's ok to pass it
+         an int or something of type dynamic.
+       *)
+      let (env, tunion) =
+        Typing_union.union env ty_expect.et_type (MakeType.dynamic Reason.Rnone)
+      in
+      let tunion =
+        with_reason
+          tunion
+          (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
+      in
+
+      (* It's critical that we don't allow the sub-type check here to coerce to dynamic.
+         If we did, then the following would type check:
+         function f(string $s) : void {} ... f(1)
+         We would check that int is a sub-type of string | dynamic, and it would
+         be if we allow int <: dynamic in the check.
+
+         We could imagine that we need the coercion to dynamic in order for
+         ty_have to be a sub-type of ty_expect without the extra union with dynamic.
+         This would lead to needing to do two different sub-type checks. However, this
+         turns out to be unnecessary because of the restricted form that enforced types
+         can have. An enforced type must be an atomic type, mixed, nothing,
+         dynamic, an optional enforced type, or a class type where all generics
+         are reified and applied to enforced types.
+
+         Thus the only way for dynamic to appear is if the type is
+         dynamic, ?dynamic, or C<dynamic, ...>, where C's type parameters are reified.
+         Critically, reified parameters are invariant, and so we don't have C<int> <: C<dynamic> even
+         with coercion to dynamic enabled.
+         The computation of the enforcement takes case that a top-level dynamic or ?dynamic are not considered Enforced.
+         *)
+      Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
+    | Unenforced
+    | PartiallyEnforced ->
       Typing_utils.sub_type
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
@@ -89,15 +122,15 @@ let coerce_type_impl
     let (env, ety_have) = Typing_env.expand_type env ty_have in
     match (get_node ety_have, get_node ety_expect) with
     | (_, Tdynamic) -> env
-    | (Tdynamic, _) when ty_expect.et_enforced -> env
-    | _ when ty_expect.et_enforced ->
+    | (Tdynamic, _) when is_expected_enforced -> env
+    | _ when is_expected_enforced ->
       Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have
         ty_expect.et_type
         on_error
     | _
-      when ( ((not ty_expect.et_enforced) && env.Typing_env_types.pessimize)
+      when ( ((not is_expected_enforced) && env.Typing_env_types.pessimize)
            || Typing_utils.is_dynamic env ety_expect )
            && complex_coercion ->
       Typing_utils.sub_type_with_dynamic_as_bottom

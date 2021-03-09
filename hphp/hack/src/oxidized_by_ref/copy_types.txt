@@ -117,6 +117,7 @@ typing_defs_core::ConstraintType
 typing_defs_core::ConstraintType_
 typing_defs_core::DependentType
 typing_defs_core::DestructureKind
+typing_defs_core::Enforcement
 typing_defs_core::Exact
 typing_defs_core::FunArity
 typing_defs_core::FunTparamsKind

@@ -46,7 +46,7 @@
                 ft_params =
                 [{ fp_pos = [13:32-34]; fp_name = (Some "$x");
                    fp_type =
-                   { et_enforced = false;
+                   { et_enforced = Typing_defs_core.Unenforced;
                      et_type =
                      (Rhint ([13:21-31]),
                       (Taccess
@@ -64,7 +64,7 @@
                 ft_implicit_params =
                 { capability = (CapDefaults [13:19-20]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type = (Rhint ([13:37-41]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false

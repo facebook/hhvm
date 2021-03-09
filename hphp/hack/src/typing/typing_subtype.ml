@@ -123,6 +123,25 @@ let make_subtype_env
     on_error;
   }
 
+(* In typing_coercion.ml we sometimes check t1 <: t2 by adding dynamic
+   to check t1 < t|dynamic. In that case, we use the Rdynamic_coercion
+   reason so that we can detect it here and not print the dynamic if there
+   is a type error. *)
+let detect_attempting_dynamic_coercion_reason r ty =
+  match r with
+  | Reason.Rdynamic_coercion r ->
+    (match ty with
+    | LoclType lty ->
+      (match get_node lty with
+      | Tunion [t1; t2] ->
+        (match (get_node t1, get_node t2) with
+        | (Tdynamic, _) -> (r, LoclType t2)
+        | (_, Tdynamic) -> (r, LoclType t1)
+        | _ -> (r, ty))
+      | _ -> (r, ty))
+    | _ -> (r, ty))
+  | _ -> (r, ty)
+
 module ConditionTypes = struct
   let try_get_class_for_condition_type (env : env) (ty : decl_ty) =
     match TUtils.try_unwrap_class_type ty with
@@ -578,6 +597,9 @@ and simplify_subtype_i
   let fail_with_suffix suffix =
     let r_super = reason ety_super in
     let r_sub = reason ety_sub in
+    let (r_super, ety_super) =
+      detect_attempting_dynamic_coercion_reason r_super ety_super
+    in
     let ty_super_descr = describe_ty_super env ety_super in
     let ty_sub_descr =
       Markdown_lite.md_codify
@@ -2811,7 +2833,12 @@ and sub_type_inner
   log_subtype_i
     ~level:1
     ~this_ty
-    ~function_name:"sub_type_inner"
+    ~function_name:
+      ( "sub_type_inner"
+      ^
+      match subtype_env.coerce with
+      | Some TL.CoerceToDynamic -> " (including <: dynamic)"
+      | _ -> "" )
     env
     ty_sub
     ty_super;

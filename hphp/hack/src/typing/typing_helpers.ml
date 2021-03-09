@@ -61,7 +61,7 @@ module ExpectedTy : sig
 
   val make : Pos.t -> Typing_reason.ureason -> locl_ty -> t
 
-  (* We will allow coercion to this expected type, if et_enforced=true *)
+  (* We will allow coercion to this expected type, if et_enforced=Enforced *)
   val make_and_allow_coercion :
     Pos.t -> Typing_reason.ureason -> locl_possibly_enforced_ty -> t
 

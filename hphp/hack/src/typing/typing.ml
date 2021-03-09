@@ -268,8 +268,8 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
       in
       let enforced =
         match decl_hint with
-        | None -> false
-        | Some ty -> Typing_enforceability.is_enforceable env ty
+        | None -> Unenforced
+        | Some ty -> Typing_enforceability.get_enforcement env ty
       in
       let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
       let expected =
@@ -2856,7 +2856,7 @@ and expr_
                 TUtils.is_any env declared_ft_param.fp_type.et_type
               in
               if is_undeclared then
-                let enforced_ty = { et_enforced = false; et_type } in
+                let enforced_ty = { et_enforced = Unenforced; et_type } in
                 { declared_ft_param with fp_type = enforced_ty }
               else
                 declared_ft_param
@@ -3608,9 +3608,12 @@ and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option) =
             [
               Log_head
                 ( Printf.sprintf
-                    "Typing.check_expected_ty %s enforced=%b"
+                    "Typing.check_expected_ty %s enforced=%s"
                     message
-                    ty.et_enforced,
+                    (match ty.et_enforced with
+                    | Unenforced -> "unenforced"
+                    | Enforced -> "enforced"
+                    | PartiallyEnforced -> "partially enforced"),
                   [
                     Log_type ("inferred_ty", inferred_ty);
                     Log_type ("expected_ty", ty.et_type);
@@ -3880,7 +3883,7 @@ and coerce_to_throwable pos env exn_ty =
     Reason.URthrow
     env
     exn_ty
-    { et_type = throwable_ty; et_enforced = false }
+    { et_type = throwable_ty; et_enforced = Unenforced }
     Errors.unify_error
 
 and shape_field_pos = function
@@ -4209,7 +4212,7 @@ and arraykey_value
       reason
       env
       ty
-      { et_type = ty_arraykey; et_enforced = true }
+      { et_type = ty_arraykey; et_enforced = Enforced }
       Errors.unify_error
   in
   (env, (te, ty))
@@ -5439,7 +5442,7 @@ and class_get_
               in
               ( env,
                 mk (Typing_reason.localize r, Tfun ft),
-                false,
+                Unenforced,
                 explicit_targs )
             (* unused *)
             | _ ->
@@ -6010,7 +6013,7 @@ and call
                 e_ty
                 {
                   Typing_defs_core.et_type = ty;
-                  Typing_defs_core.et_enforced = false;
+                  Typing_defs_core.et_enforced = Unenforced;
                 }
                 Errors.unify_error
             in

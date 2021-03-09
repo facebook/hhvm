@@ -24,7 +24,7 @@
               ft_params =
               [{ fp_pos = [5:56-61]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([5:22-55]),
                     (Tshape (Typing_defs_core.Closed_shape,
@@ -45,7 +45,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([5:64-74]),
                  (Tapply (([5:64-74], "\\Coordinate"), [])))
@@ -66,7 +66,7 @@
               ft_params =
               [{ fp_pos = [10:14-19]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([10:3-13]),
                     (Tapply (([10:3-13], "\\Coordinate"), [])))
@@ -80,7 +80,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([11:4-42]),
                  (Tshape (Typing_defs_core.Open_shape,
@@ -114,7 +114,7 @@
               ft_params =
               [{ fp_pos = [15:34-39]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([15:27-33]),
                     (Ttuple
@@ -130,7 +130,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-23]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([15:42-48]),
                  (Ttuple

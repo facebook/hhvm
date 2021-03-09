@@ -213,7 +213,7 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
                     fp_type =
                       {
                         et_type = mk (get_reason et_type, Tprim Tstring);
-                        et_enforced = false;
+                        et_enforced = Unenforced;
                       };
                   }
                 :: argl ) )

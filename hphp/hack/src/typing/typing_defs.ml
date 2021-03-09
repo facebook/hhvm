@@ -797,7 +797,7 @@ and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
 
 and possibly_enforced_ty_compare ?(normalize_lists = false) ety1 ety2 =
   match ty_compare ~normalize_lists ety1.et_type ety2.et_type with
-  | 0 -> Bool.compare ety1.et_enforced ety2.et_enforced
+  | 0 -> compare_enforcement ety1.et_enforced ety2.et_enforced
   | n -> n
 
 and ft_param_compare ?(normalize_lists = false) param1 param2 =
@@ -1035,7 +1035,7 @@ and equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
 
 and equal_decl_possibly_enforced_ty ety1 ety2 =
   equal_decl_ty ety1.et_type ety2.et_type
-  && Bool.equal ety1.et_enforced ety2.et_enforced
+  && equal_enforcement ety1.et_enforced ety2.et_enforced
 
 and equal_decl_fun_param param1 param2 =
   equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type

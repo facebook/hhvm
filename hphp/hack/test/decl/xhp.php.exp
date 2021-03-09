@@ -53,7 +53,7 @@
               ft_params =
               [{ fp_pos = [7:38-40]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([7:34-37]), (Tapply (([7:34-37], "\\xhp"), []))) };
                  fp_flags =
@@ -65,7 +65,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-33]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([7:43-47]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

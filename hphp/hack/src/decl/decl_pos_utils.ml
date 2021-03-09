@@ -126,6 +126,7 @@ struct
     | Rarray_unification p -> Rarray_unification (pos p)
     | Rconcat_operand p -> Rconcat_operand (pos p)
     | Rinterp_operand p -> Rinterp_operand (pos p)
+    | Rdynamic_coercion r -> Rdynamic_coercion (reason r)
 
   let rec ty t =
     let (p, x) = deref t in

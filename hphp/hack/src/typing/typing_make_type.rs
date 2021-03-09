@@ -370,7 +370,7 @@ impl<'a> TypeBuilder<'a> {
             type_: self.alloc(PossiblyEnforcedTy {
                 type_,
                 // TODO: set this correctly
-                enforced: false,
+                enforced: Enforcement::Unenforced,
             }),
             // TODO: set the following fields correctly
             flags: FunParamFlags::empty(),
@@ -388,7 +388,7 @@ impl<'a> TypeBuilder<'a> {
             ret: self.alloc(PossiblyEnforcedTy {
                 type_: ret,
                 // TODO: set this correctly
-                enforced: false,
+                enforced: Enforcement::Unenforced,
             }),
             params,
             implicit_params,

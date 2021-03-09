@@ -9,7 +9,7 @@
              ft_params =
              [{ fp_pos = [31:20-22]; fp_name = (Some "$x");
                 fp_type =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type =
                   (Rhint ([31:13-19]),
                    (Tapply (([31:13-19], "\\MyNamespace\\MyType"), [])))
@@ -23,7 +23,7 @@
                ];
              ft_implicit_params = { capability = (CapDefaults [31:10-12]) };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type =
                (Rhint ([31:25-32]),
                 (Tapply (([31:25-32], "\\MyNamespace\\MyType"), [])))
@@ -44,7 +44,7 @@
               ft_params =
               [{ fp_pos = [35:31-33]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([35:19-30]),
                     (Tapply (([35:19-30], "\\MyNamespace\\MyOtherType"), [])))
@@ -58,7 +58,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [35:10-18]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([35:36-48]),
                  (Tapply (([35:36-48], "\\MyNamespace\\MyOtherType"), [])))
@@ -79,7 +79,7 @@
               ft_params =
               [{ fp_pos = [39:33-35]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([39:20-32]),
                     (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"), 
@@ -94,7 +94,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [39:10-19]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([39:38-51]),
                  (Tapply (([39:38-51], "\\MyNamespace\\MyBracedType"), [])))

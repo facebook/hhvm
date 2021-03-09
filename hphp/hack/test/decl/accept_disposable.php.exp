@@ -19,7 +19,7 @@
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-28]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type = (Rhint ([5:32-36]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
@@ -36,7 +36,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [6:19-22]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([6:26-30]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
@@ -57,7 +57,7 @@
               ft_params =
               [{ fp_pos = [9:42-44]; fp_name = (Some "$h");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([9:35-41]), (Tapply (([9:35-41], "\\Handle"), [])))
                    };
@@ -70,7 +70,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-11]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([9:47-51]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

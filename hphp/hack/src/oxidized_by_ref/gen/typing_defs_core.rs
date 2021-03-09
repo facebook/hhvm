@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e53493548931c09d4ad5004d60327bbc>>
+// @generated SignedSource<<25e5bba1f922afdc5f05feb161568ece>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -387,6 +387,28 @@ pub struct WhereConstraint<'a>(
 );
 impl<'a> TrivialDrop for WhereConstraint<'a> {}
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum Enforcement {
+    Unenforced,
+    Enforced,
+    PartiallyEnforced,
+}
+impl TrivialDrop for Enforcement {}
+
 #[derive(Clone, Debug, FromOcamlRepIn, Hash, NoPosHash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::T_<'a>, pub Ty_<'a>);
 impl<'a> TrivialDrop for Ty<'a> {}
@@ -692,7 +714,7 @@ impl<'a> TrivialDrop for FunArity<'a> {}
 )]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
-    pub enforced: bool,
+    pub enforced: Enforcement,
     pub type_: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}

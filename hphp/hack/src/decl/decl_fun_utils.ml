@@ -164,7 +164,7 @@ let make_param_ty env ~is_lambda param =
   {
     fp_pos = param_pos;
     fp_name = Some param.param_name;
-    fp_type = { et_type = ty; et_enforced = false };
+    fp_type = { et_type = ty; et_enforced = Unenforced };
     fp_flags =
       make_fp_flags
         ~mode
@@ -188,7 +188,7 @@ let make_ellipsis_param_ty :
   {
     fp_pos = pos;
     fp_name = None;
-    fp_type = { et_type = ty; et_enforced = false };
+    fp_type = { et_type = ty; et_enforced = Unenforced };
     fp_flags =
       make_fp_flags
         ~mode:FPnormal

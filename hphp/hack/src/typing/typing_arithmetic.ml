@@ -65,7 +65,7 @@ let check_dynamic_or_enforce_num env p t r =
       Reason.URnone
       env
       t
-      { et_type = MakeType.num r; et_enforced = true }
+      { et_type = MakeType.num r; et_enforced = Enforced }
       Errors.unify_error
   in
   let widen_for_arithmetic env ty =
@@ -98,7 +98,7 @@ let check_dynamic_or_enforce_int env p t r =
       Reason.URnone
       env
       t
-      { et_type = MakeType.int r; et_enforced = true }
+      { et_type = MakeType.int r; et_enforced = Enforced }
       Errors.unify_error
   in
   (env, Typing_utils.is_dynamic env t)

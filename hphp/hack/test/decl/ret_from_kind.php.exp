@@ -8,7 +8,7 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:16-29]) };
              ft_ret =
-             { et_enforced = false;
+             { et_enforced = Typing_defs_core.Unenforced;
                et_type =
                (Rret_fun_kind_from_decl ([3:16-29]),
                 (Tapply (([3:16-29], "\\HH\\Awaitable"),
@@ -29,7 +29,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:10-27]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rret_fun_kind_from_decl ([5:10-27]),
                  (Tapply (([5:10-27], "\\Generator"),
@@ -53,7 +53,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [9:16-39]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rret_fun_kind_from_decl ([9:16-39]),
                  (Tapply (([9:16-39], "\\HH\\AsyncGenerator"),

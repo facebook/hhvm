@@ -24,7 +24,7 @@
                 ft_params =
                 [{ fp_pos = [4:28-30]; fp_name = (Some "$a");
                    fp_type =
-                   { et_enforced = false;
+                   { et_enforced = Typing_defs_core.Unenforced;
                      et_type = (Rhint ([4:25-27]), (Tgeneric ("Ta", []))) };
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -35,7 +35,7 @@
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
-                { et_enforced = false;
+                { et_enforced = Typing_defs_core.Unenforced;
                   et_type = (Rhint ([4:33-35]), (Tgeneric ("Ta", []))) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
@@ -58,7 +58,7 @@
                  ft_params =
                  [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
                     fp_type =
-                    { et_enforced = false;
+                    { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([8:25-27]), (Tgeneric ("Tb", []))) };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -70,7 +70,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [8:19-20]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([8:33-35]), (Tgeneric ("Tb", []))) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false

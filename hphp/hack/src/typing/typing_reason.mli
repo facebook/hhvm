@@ -143,6 +143,7 @@ type _ t_ =
   | Rarray_unification : Pos.t -> locl_phase t_
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
+  | Rdynamic_coercion of locl_phase t_
 
 type t = locl_phase t_
 

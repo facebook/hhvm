@@ -71,7 +71,7 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [15:28-29]) };
                  ft_ret =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([15:33-40]),
                     (Taccess

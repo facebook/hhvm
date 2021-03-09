@@ -87,7 +87,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
             ft_where_constraints = where_constraints;
             ft_params = params;
             ft_implicit_params = { capability };
-            ft_ret = { et_type = ret_ty; et_enforced = false };
+            ft_ret = { et_type = ret_ty; et_enforced = Unenforced };
             ft_flags =
               make_ft_flags
                 f.f_fun_kind

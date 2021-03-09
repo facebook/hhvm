@@ -234,7 +234,7 @@ let method_type env m =
     ft_where_constraints = where_constraints;
     ft_params = params;
     ft_implicit_params = { capability };
-    ft_ret = { et_type = ret; et_enforced = false };
+    ft_ret = { et_type = ret; et_enforced = Unenforced };
     ft_flags =
       make_ft_flags
         m.m_fun_kind

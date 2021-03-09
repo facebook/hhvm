@@ -129,8 +129,11 @@ module Full = struct
   and possibly_enforced_ty ~ty to_doc st env { et_enforced; et_type } =
     Concat
       [
-        ( if show_verbose env && et_enforced then
-          text "enforced" ^^ Space
+        ( if show_verbose env then
+          match et_enforced with
+          | Enforced -> text "enforced" ^^ Space
+          | PartiallyEnforced -> text "partially enforced" ^^ Space
+          | Unenforced -> Nothing
         else
           Nothing );
         ty to_doc st env et_type;
@@ -1359,7 +1362,7 @@ module Json = struct
                 >>= fun param_type ->
                 Ok
                   {
-                    fp_type = { et_type = param_type; et_enforced = false };
+                    fp_type = { et_type = param_type; et_enforced = Unenforced };
                     fp_flags =
                       make_fp_flags
                         ~mode:callconv
@@ -1383,7 +1386,7 @@ module Json = struct
                {
                  ft_params;
                  ft_implicit_params = { capability = CapDefaults Pos.none };
-                 ft_ret = { et_type = ft_ret; et_enforced = false };
+                 ft_ret = { et_type = ft_ret; et_enforced = Unenforced };
                  (* Dummy values: these aren't currently serialized. *)
                  ft_arity = Fstandard;
                  ft_tparams = [];

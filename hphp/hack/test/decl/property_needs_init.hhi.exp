@@ -26,7 +26,7 @@
                      ft_params =
                      [{ fp_pos = [5:46-48]; fp_name = (Some "$s");
                         fp_type =
-                        { et_enforced = false;
+                        { et_enforced = Typing_defs_core.Unenforced;
                           et_type = (Rhint ([5:39-45]), (Tprim Tstring)) };
                         fp_flags =
                         (make_fp_flags ~accept_disposable:false
@@ -39,7 +39,7 @@
                      ft_implicit_params =
                      { capability = (CapDefaults [5:19-30]) };
                      ft_ret =
-                     { et_enforced = false;
+                     { et_enforced = Typing_defs_core.Unenforced;
                        et_type =
                        (Rwitness_from_decl ([5:19-30]), (Tprim Tvoid)) };
                      ft_flags =

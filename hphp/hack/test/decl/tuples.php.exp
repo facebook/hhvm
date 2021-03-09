@@ -19,7 +19,7 @@
               ft_params =
               [{ fp_pos = [5:37-42]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([5:22-36]),
                     (Ttuple
@@ -35,7 +35,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([5:45-55]),
                  (Tapply (([5:45-55], "\\Coordinate"), [])))
@@ -56,7 +56,7 @@
               ft_params =
               [{ fp_pos = [9:35-40]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([9:24-34]),
                     (Tapply (([9:24-34], "\\Coordinate"), [])))
@@ -70,7 +70,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([9:43-57]),
                  (Ttuple
@@ -99,7 +99,7 @@
               ft_params =
               [{ fp_pos = [13:34-39]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = false;
+                 { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([13:27-33]),
                     (Ttuple
@@ -115,7 +115,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [13:10-23]) };
               ft_ret =
-              { et_enforced = false;
+              { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([13:42-48]),
                  (Ttuple

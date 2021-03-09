@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebe3ae7b1a61b1646945db12ec9b1efd>>
+// @generated SignedSource<<543658730cda7ab1e10dbb06545e9e23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -998,44 +998,6 @@ impl ReifyKind {
         match self {
             ReifyKind::Reified => true,
             _ => false,
-        }
-    }
-}
-impl ClassConstFrom {
-    pub fn mk_self_() -> Self {
-        ClassConstFrom::Self_
-    }
-    pub fn mk_from(p0: String) -> Self {
-        ClassConstFrom::From(p0)
-    }
-    pub fn is_self_(&self) -> bool {
-        match self {
-            ClassConstFrom::Self_ => true,
-            _ => false,
-        }
-    }
-    pub fn is_from(&self) -> bool {
-        match self {
-            ClassConstFrom::From(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_from(&self) -> Option<&String> {
-        match self {
-            ClassConstFrom::From(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_from_mut(&mut self) -> Option<&mut String> {
-        match self {
-            ClassConstFrom::From(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_from_into(self) -> Option<String> {
-        match self {
-            ClassConstFrom::From(p0) => Some(p0),
-            _ => None,
         }
     }
 }

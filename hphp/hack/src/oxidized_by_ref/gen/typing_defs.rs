@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1716a9b70bb105457f97dea4e91b0433>>
+// @generated SignedSource<<b7ac05f028cd12d12c5150985d3066ff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -21,6 +21,68 @@ use crate::*;
 pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
+
+/// Origin of Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
+///
+/// class_const_from encodes the origin (class vs self).
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ClassConstFrom<'a> {
+    Self_,
+    From(&'a str),
+}
+impl<'a> TrivialDrop for ClassConstFrom<'a> {}
+
+/// Class Constant References:
+/// In order to be able to detect cycle definitions like
+/// class C {
+/// const int A = D::A;
+/// }
+/// class D {
+/// const int A = C::A;
+/// }
+/// we need to remember which constants were used during initialization.
+///
+/// Currently the syntax of constants allows direct references to another class
+/// like D::A, or self references using self::A.
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ClassConstRef<'a>(pub ClassConstFrom<'a>, pub &'a str);
+impl<'a> TrivialDrop for ClassConstRef<'a> {}
 
 #[derive(
     Clone,
@@ -108,7 +170,7 @@ pub struct ClassConst<'a> {
     /// identifies the class from which this const originates
     pub origin: &'a str,
     /// references to the constants used in the initializer
-    pub refs: &'a [&'a aast::ClassConstRef<'a>],
+    pub refs: &'a [&'a ClassConstRef<'a>],
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
 

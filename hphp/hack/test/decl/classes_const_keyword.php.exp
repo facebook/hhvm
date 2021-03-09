@@ -230,7 +230,7 @@
                [(Rhint ([45:19-30]),
                  (Tapply (([45:19-30], "\\TupleConsts"), [])))]
                )));
-           scc_refs = [((Aast_defs.From "\\TupleConsts"), "class")] };
+           scc_refs = [((Typing_defs.From "\\TupleConsts"), "class")] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([46:36-47], "CCLASSNAME2");
             scc_type =
@@ -239,7 +239,7 @@
                 [(Rhint ([46:19-34]),
                   (Tapply (([46:19-34], "\\ClassnameConsts"), [])))]
                 )));
-            scc_refs = [(Aast_defs.Self, "class")] }
+            scc_refs = [(Typing_defs.Self, "class")] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

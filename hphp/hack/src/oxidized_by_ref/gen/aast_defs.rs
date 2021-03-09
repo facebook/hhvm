@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<770871abb21282cf6f2e3247b8863d2b>>
+// @generated SignedSource<<cf6ad708219ac1905b7b07b22ba317b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -333,65 +333,3 @@ pub struct WhereConstraintHint<'a>(
 impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
 
 pub use oxidized::aast_defs::ReifyKind;
-
-/// Origin of Class Constant References:
-/// In order to be able to detect cycle definitions like
-/// class C {
-/// const int A = D::A;
-/// }
-/// class D {
-/// const int A = C::A;
-/// }
-/// we need to remember which constants were used during initialization.
-///
-/// Currently the syntax of constants allows direct references to another class
-/// like D::A, or self references using self::A.
-///
-/// class_const_from encodes the origin (class vs self).
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ClassConstFrom<'a> {
-    Self_,
-    From(&'a str),
-}
-impl<'a> TrivialDrop for ClassConstFrom<'a> {}
-
-/// Class Constant References:
-/// In order to be able to detect cycle definitions like
-/// class C {
-/// const int A = D::A;
-/// }
-/// class D {
-/// const int A = C::A;
-/// }
-/// we need to remember which constants were used during initialization.
-///
-/// Currently the syntax of constants allows direct references to another class
-/// like D::A, or self references using self::A.
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct ClassConstRef<'a>(pub ClassConstFrom<'a>, pub &'a str);
-impl<'a> TrivialDrop for ClassConstRef<'a> {}

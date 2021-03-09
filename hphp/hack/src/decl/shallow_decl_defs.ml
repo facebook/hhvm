@@ -155,7 +155,7 @@ type shallow_class_const = {
   scc_abstract: bool;
   scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
-  scc_refs: Aast.class_const_ref list;
+  scc_refs: Typing_defs.class_const_ref list;
 }
 [@@deriving eq, show]
 

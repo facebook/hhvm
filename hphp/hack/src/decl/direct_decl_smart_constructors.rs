@@ -20,7 +20,7 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use oxidized_by_ref::{
-    aast, aast_defs,
+    aast,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
@@ -2193,8 +2193,8 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 }
 
 fn insert_cc_ref<'a>(
-    acc: &mut Vec<'a, &'a aast_defs::ClassConstRef<'a>>,
-    cc_ref: &'a aast_defs::ClassConstRef<'a>,
+    acc: &mut Vec<'a, &'a typing_defs::ClassConstRef<'a>>,
+    cc_ref: &'a typing_defs::ClassConstRef<'a>,
 ) {
     // Insert sorted
     match acc.binary_search(&cc_ref) {
@@ -2236,7 +2236,7 @@ fn insert_cc_ref<'a>(
 */
 fn constants_from_expr<'a>(
     arena: &'a Bump,
-    acc: &mut Vec<'a, &'a aast_defs::ClassConstRef<'a>>,
+    acc: &mut Vec<'a, &'a typing_defs::ClassConstRef<'a>>,
     expr: &'a nast::Expr<'a>,
 ) {
     use aast::Expr_::*;
@@ -2258,15 +2258,15 @@ fn constants_from_expr<'a>(
         }
         ClassConst(&(cid, name)) => match &cid.1 {
             nast::ClassId_::CI(sid) => {
-                let ccref = arena.alloc(aast_defs::ClassConstRef(
-                    aast_defs::ClassConstFrom::From(sid.1),
+                let ccref = arena.alloc(typing_defs::ClassConstRef(
+                    typing_defs::ClassConstFrom::From(sid.1),
                     name.1,
                 ));
                 insert_cc_ref(acc, ccref)
             }
             nast::ClassId_::CIself => {
-                let ccref = arena.alloc(aast_defs::ClassConstRef(
-                    aast_defs::ClassConstFrom::Self_,
+                let ccref = arena.alloc(typing_defs::ClassConstRef(
+                    typing_defs::ClassConstFrom::Self_,
                     name.1,
                 ));
                 insert_cc_ref(acc, ccref)
@@ -2284,7 +2284,7 @@ fn constants_from_expr<'a>(
 fn gather_constants<'a>(
     arena: &'a Bump,
     expr: &'a nast::Expr<'a>,
-) -> &'a [&'a aast_defs::ClassConstRef<'a>] {
+) -> &'a [&'a typing_defs::ClassConstRef<'a>] {
     let mut acc = Vec::new_in(arena);
     constants_from_expr(arena, &mut acc, expr);
     acc.into_bump_slice()

@@ -17,8 +17,8 @@
             scc_name = ([6:15-16], "X");
 -           scc_type = (Rhint ([6:9-14]), Tmixed);
 -           scc_refs =
--           [((Aast_defs.From "\\C"), "KEY");
--             ((Aast_defs.From "\\C"), "class")]
+-           [((Typing_defs.From "\\C"), "KEY");
+-             ((Typing_defs.From "\\C"), "class")]
 -           }
 +           scc_type = (Rhint ([6:9-14]), Tmixed); scc_refs = [] }
           ];

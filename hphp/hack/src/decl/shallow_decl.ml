@@ -15,29 +15,6 @@ open Typing_defs
 module Attrs = Naming_attributes
 module FunUtils = Decl_fun_utils
 
-module CCR = struct
-  type t = Aast.class_const_ref
-
-  (* We're deriving the compare function by hand to sync it with the rust code.
-   * In the decl parser I need to sort these class_const_from in the same
-   * way. I used `cargo expand` to see how Cargo generated they Ord/PartialOrd
-   * functions.
-   *)
-  let compare_class_const_from ccf0 ccf1 =
-    match (ccf0, ccf1) with
-    | (Self, Self) -> 0
-    | (From lhs, From rhs) -> String.compare lhs rhs
-    | (Self, From _) -> -1
-    | (From _, Self) -> 1
-
-  let compare (ccf0, s0) (ccf1, s1) =
-    match compare_class_const_from ccf0 ccf1 with
-    | 0 -> String.compare s0 s1
-    | x -> x
-end
-
-module CCRSet = Caml.Set.Make (CCR)
-
 (* gather class constants used in a constant initializer *)
 let gather_constants =
   object (_ : 'self)

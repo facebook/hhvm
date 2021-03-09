@@ -261,38 +261,3 @@ let pp_og_null_flavor fmt flavor =
   match flavor with
   | OG_nullthrows -> "OG_nullthrows"
   | OG_nullsafe -> "OG_nullsafe"
-
-(** Origin of Class Constant References:
-    In order to be able to detect cycle definitions like
-    class C {
-      const int A = D::A;
-    }
-    class D {
-      const int A = C::A;
-    }
-    we need to remember which constants were used during initialization.
-
-    Currently the syntax of constants allows direct references to another class
-    like D::A, or self references using self::A.
-
-    class_const_from encodes the origin (class vs self).
- *)
-type class_const_from =
-  | Self
-  | From of string
-[@@deriving eq, show]
-
-(** Class Constant References:
-    In order to be able to detect cycle definitions like
-    class C {
-      const int A = D::A;
-    }
-    class D {
-      const int A = C::A;
-    }
-    we need to remember which constants were used during initialization.
-
-    Currently the syntax of constants allows direct references to another class
-    like D::A, or self references using self::A.
- *)
-type class_const_ref = class_const_from * string [@@deriving eq, show]

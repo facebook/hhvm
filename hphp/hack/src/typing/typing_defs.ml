@@ -11,6 +11,72 @@ open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
 
+(** Origin of Class Constant References:
+    In order to be able to detect cycle definitions like
+    class C {
+      const int A = D::A;
+    }
+    class D {
+      const int A = C::A;
+    }
+    we need to remember which constants were used during initialization.
+
+    Currently the syntax of constants allows direct references to another class
+    like D::A, or self references using self::A.
+
+    class_const_from encodes the origin (class vs self).
+ *)
+type class_const_from =
+  | Self
+  | From of string
+[@@deriving eq, show]
+
+(** Class Constant References:
+    In order to be able to detect cycle definitions like
+    class C {
+      const int A = D::A;
+    }
+    class D {
+      const int A = C::A;
+    }
+    we need to remember which constants were used during initialization.
+
+    Currently the syntax of constants allows direct references to another class
+    like D::A, or self references using self::A.
+ *)
+type class_const_ref = class_const_from * string [@@deriving eq, show]
+
+module CCR = struct
+  type t = class_const_ref [@@deriving show]
+
+  (* We're deriving the compare function by hand to sync it with the rust code.
+   * In the decl parser I need to sort these class_const_from in the same
+   * way. I used `cargo expand` to see how Cargo generated they Ord/PartialOrd
+   * functions.
+   *)
+  let compare_class_const_from ccf0 ccf1 =
+    match (ccf0, ccf1) with
+    | (Self, Self) -> 0
+    | (From lhs, From rhs) -> String.compare lhs rhs
+    | (Self, From _) -> -1
+    | (From _, Self) -> 1
+
+  let compare (ccf0, s0) (ccf1, s1) =
+    match compare_class_const_from ccf0 ccf1 with
+    | 0 -> String.compare s0 s1
+    | x -> x
+end
+
+module CCRSet = struct
+  include Caml.Set.Make (CCR)
+
+  type t_as_list = CCR.t list [@@deriving show]
+
+  let pp fmt set = pp_t_as_list fmt (elements set)
+
+  let show set = show_t_as_list (elements set)
+end
+
 type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
@@ -42,7 +108,7 @@ type class_const = {
   cc_type: decl_ty;
   cc_origin: string;
       (** identifies the class from which this const originates *)
-  cc_refs: Aast.class_const_ref list;
+  cc_refs: class_const_ref list;
       (** references to the constants used in the initializer *)
 }
 [@@deriving show]

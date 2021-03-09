@@ -114,7 +114,7 @@
                      )))
                   ]
                 )));
--           scc_refs = [((Aast_defs.From "\\Bar"), "class")] }
+-           scc_refs = [((Typing_defs.From "\\Bar"), "class")] }
 +           scc_refs = [] }
            ];
          sc_typeconsts = []; sc_props = []; sc_sprops = [];

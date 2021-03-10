@@ -38,9 +38,10 @@ struct VSDebugLogger final {
   static void SetLogRotationEnabled(bool enabled);
   static bool GetLogRotationEnabled();
 
-  static constexpr char* LogLevelError = "ERROR";
-  static constexpr char* LogLevelWarning = "WARNING";
-  static constexpr char* LogLevelInfo = "INFO";
+  static constexpr const char* LogLevelError = "ERROR";
+  static constexpr const char* LogLevelWarning = "WARNING";
+  static constexpr const char* LogLevelInfo = "INFO";
+  static constexpr const char* LogLevelVerbose = "VERBOSE";
 
   VSDebugLogger() :
     m_loggerTaskThread(this, &VSDebugLogger::loggerMaintenanceTask) {

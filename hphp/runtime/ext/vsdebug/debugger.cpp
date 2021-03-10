@@ -1312,6 +1312,11 @@ void Debugger::logClientCommand(
       ? "vsdebug-webserver"
       : "vsdebug-script";
     logger->log(mode, sandboxId, cmd, data);
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelVerbose,
+      "Logging client command: %s: %s\n",
+      cmd.c_str(), data.c_str()
+    );
   } catch (...) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,

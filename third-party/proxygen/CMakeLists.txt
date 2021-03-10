@@ -49,7 +49,6 @@ HHVM_REMOVE_MATCHES_FROM_LISTS(
   # Quic
   "/HQ"
   "Quic"
-  "/http/HTTP3ErrorCode.cpp"
 )
 list(APPEND CXX_SOURCES ${files})
 list(APPEND CXX_SOURCES "${PROXYGEN_EXTERNAL_DIR}/http_parser/http_parser_cpp.cpp")

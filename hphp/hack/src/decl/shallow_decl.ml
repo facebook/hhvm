@@ -77,6 +77,9 @@ let class_const env (cc : Nast.class_const) =
       let r = Reason.Rwitness_from_decl pos in
       (mk (r, Typing_defs.make_tany ()), true, CCRSet.empty)
   in
+  (* dropping to list to avoid the memory cost of a set. We don't really
+   * need a set once the elements are generated.
+   *)
   let scc_refs = CCRSet.elements scc_refs in
   Some
     {

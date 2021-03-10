@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
 use bstr::BStr;
@@ -2192,62 +2192,49 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     }
 }
 
-fn insert_cc_ref<'a>(
-    acc: &mut Vec<'a, &'a typing_defs::ClassConstRef<'a>>,
-    cc_ref: &'a typing_defs::ClassConstRef<'a>,
-) {
-    // Insert sorted
-    match acc.binary_search(&cc_ref) {
-        Ok(_pos) => {} // element already in vector @ `pos`
-        Err(pos) => acc.insert(pos, cc_ref),
-    }
-}
-
 /* gathering all constants that appear in a constant initializer expression */
 /* TODO: hand written reducer, temporary until we get a visitor for by-ref.
  * Here are the expressions that are not yet supported:
- Darray(&(_, args))
- Varray(&(_, args))
- Shape(& args)
- ValCollection(& (_, _, args))
- KeyValCollection(
- Collection(
- Clone(&'a Expr<'a, Ex, Fb, En, Hi>),
- ArrayGet(
- ObjGet(
- ClassGet(&(cid, cexpr, _)) => {},
- Call(
- Yield(&'a Afield<'a, Ex, Fb, En, Hi>),
- Eif(
- Is(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Hint<'a>)),
- As(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Hint<'a>, bool)),
- New(
- Record(
- Efun(&'a (&'a Fun_<'a, Ex, Fb, En, Hi>, &'a [&'a Lid<'a>])),
- Lfun(&'a (&'a Fun_<'a, Ex, Fb, En, Hi>, &'a [&'a Lid<'a>])),
- Xml(
- Callconv(&'a (oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, Fb, En, Hi>)),
- Import(&'a (oxidized::aast::ImportFlavor, &'a Expr<'a, Ex, Fb, En, Hi>)),
- ExpressionTree(&'a ExpressionTree<'a, Ex, Fb, En, Hi>),
- MethodId(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),
- MethodCaller(&'a (Sid<'a>, &'a Pstring<'a>)),
- SmethodId(&'a (&'a ClassId<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),
- ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
+ Darray
+ Varray
+ Shape
+ ValCollection
+ KeyValCollection
+ Collection
+ Clone
+ ArrayGet
+ ObjGet
+ ClassGet
+ Call
+ Yield
+ Eif
+ Is
+ As
+ New
+ Record
+ Efun
+ Lfun
+ Xml
+ Callconv
+ Import
+ ExpressionTree
+ MethodId
+ MethodCaller
+ SmethodId
+ ETSplice
 */
 fn constants_from_expr<'a>(
     arena: &'a Bump,
-    acc: &mut Vec<'a, &'a typing_defs::ClassConstRef<'a>>,
+    acc: &mut BTreeSet<typing_defs::ClassConstRef<'a>>,
     expr: &'a nast::Expr<'a>,
 ) {
     use aast::Expr_::*;
     /* Very approximative match, to test the idea first */
     match expr.1 {
         PrefixedString(&(_, expr)) => constants_from_expr(arena, acc, expr),
-        String2(args) | List(args) => {
-            for arg in args {
-                constants_from_expr(arena, acc, arg)
-            }
-        }
+        String2(args) | List(args) => args
+            .iter()
+            .for_each(|arg| constants_from_expr(arena, acc, arg)),
         Cast(&(_, expr)) | Unop(&(_, expr)) | Await(expr) | ReadonlyExpr(expr) => {
             constants_from_expr(arena, acc, expr)
         }
@@ -2258,18 +2245,13 @@ fn constants_from_expr<'a>(
         }
         ClassConst(&(cid, name)) => match &cid.1 {
             nast::ClassId_::CI(sid) => {
-                let ccref = arena.alloc(typing_defs::ClassConstRef(
-                    typing_defs::ClassConstFrom::From(sid.1),
-                    name.1,
-                ));
-                insert_cc_ref(acc, ccref)
+                let ccref =
+                    typing_defs::ClassConstRef(typing_defs::ClassConstFrom::From(sid.1), name.1);
+                let _ = acc.insert(ccref);
             }
             nast::ClassId_::CIself => {
-                let ccref = arena.alloc(typing_defs::ClassConstRef(
-                    typing_defs::ClassConstFrom::Self_,
-                    name.1,
-                ));
-                insert_cc_ref(acc, ccref)
+                let ccref = typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, name.1);
+                let _ = acc.insert(ccref);
             }
             nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {}
         },
@@ -2284,10 +2266,14 @@ fn constants_from_expr<'a>(
 fn gather_constants<'a>(
     arena: &'a Bump,
     expr: &'a nast::Expr<'a>,
-) -> &'a [&'a typing_defs::ClassConstRef<'a>] {
-    let mut acc = Vec::new_in(arena);
+) -> &'a [typing_defs::ClassConstRef<'a>] {
+    let mut acc = BTreeSet::new();
     constants_from_expr(arena, &mut acc, expr);
-    acc.into_bump_slice()
+    let mut elements = bumpalo::collections::Vec::with_capacity_in(acc.len(), arena);
+    for k in acc.into_iter() {
+        elements.push(k)
+    }
+    elements.into_bump_slice()
 }
 
 impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>

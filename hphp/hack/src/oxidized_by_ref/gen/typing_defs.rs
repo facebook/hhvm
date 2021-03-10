@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b7ac05f028cd12d12c5150985d3066ff>>
+// @generated SignedSource<<5aff5252df581a8035af1eae01800826>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -70,6 +70,7 @@ impl<'a> TrivialDrop for ClassConstFrom<'a> {}
 /// like D::A, or self references using self::A.
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -170,7 +171,7 @@ pub struct ClassConst<'a> {
     /// identifies the class from which this const originates
     pub origin: &'a str,
     /// references to the constants used in the initializer
-    pub refs: &'a [&'a ClassConstRef<'a>],
+    pub refs: &'a [ClassConstRef<'a>],
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
 

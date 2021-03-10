@@ -1,4 +1,3 @@
-aast_defs::ClassConstFrom
 aast_defs::Hint_
 aast_defs::ReifyKind
 aast_defs::Sid
@@ -140,6 +139,7 @@ typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
 typing_defs::CeVisibility
 typing_defs::ClassConstFrom
+typing_defs::ClassConstRef
 typing_defs::ConsistentKind
 typing_defs::ConstraintType
 typing_defs::DeserializationError

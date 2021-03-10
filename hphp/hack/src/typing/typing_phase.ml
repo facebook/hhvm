@@ -539,153 +539,6 @@ and localize_cstr_ty ~ety_env env ty tp_name =
   in
   (env, ty)
 
-(* Localize an explicit type argument to a constructor or function. We
- * support the use of wildcards at the top level only *)
-and localize_targ_with_kind
-    ~check_well_kinded env hint (nkind : KindDefs.Simple.named_kind) =
-  (* For explicit type arguments we support a wildcard syntax `_` for which
-   * Hack will generate a fresh type variable *)
-  let kind = snd nkind in
-  match hint with
-  | (_, Aast.Happly ((p, id), [])) when String.equal id SN.Typehints.wildcard ->
-    let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
-    if is_higher_kinded then
-      let () = Errors.wildcard_for_higher_kinded_type (fst hint) in
-      (env, (mk (Reason.none, Terr), hint))
-    else
-      let (env, ty) = Env.fresh_type env p in
-      (env, (ty, hint))
-  | _ ->
-    let ty = Decl_hint.hint env.decl_env hint in
-    if check_well_kinded then Kinding.Simple.check_well_kinded env ty nkind;
-    let (env, ty) = localize_with_self_and_kind env ty kind in
-    (env, (ty, hint))
-
-and localize_targ ~check_well_kinded env hint =
-  let named_kind =
-    KindDefs.Simple.with_dummy_name (KindDefs.Simple.fully_applied_type ())
-  in
-  localize_targ_with_kind ~check_well_kinded env hint named_kind
-
-(* See signature in .mli file for details *)
-and localize_targs_with_kinds
-    ~check_well_kinded
-    ~is_method
-    ~def_pos
-    ~use_pos
-    ~use_name
-    ?(check_explicit_targs = true)
-    ?(tparaml = [])
-    env
-    named_kinds
-    targl =
-  let targ_count = List.length targl in
-  let tparam_count =
-    match List.length tparaml with
-    | 0 -> List.length named_kinds
-    | n -> n
-  in
-  (* If there are explicit type arguments but too few or too many then
-   * report an error *)
-  if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
-    if is_method then
-      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count None
-    else
-      Errors.type_arity
-        use_pos
-        def_pos
-        ~expected:tparam_count
-        ~actual:targ_count;
-
-  (* Declare and localize the explicit type arguments *)
-  let targl =
-    if Int.( > ) targ_count tparam_count then
-      List.take targl tparam_count
-    else
-      targl
-  in
-  let (env, explicit_targs) =
-    List.map2_env
-      env
-      targl
-      (List.take named_kinds targ_count)
-      (localize_targ_with_kind ~check_well_kinded)
-  in
-  (* Generate fresh type variables for the remainder *)
-  let (env, implicit_targs) =
-    let mk_implicit_targ env (kind_name, kind) =
-      let wildcard_hint =
-        (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), []))
-      in
-      if
-        check_well_kinded
-        && KindDefs.Simple.get_arity kind > 0
-        && Int.( = ) targ_count 0
-      then (
-        (* We only throw an error if the user didn't provide any type arguments at all.
-           Otherwise, if they provided some, but not all of them, n arity mismatch
-           triggers earlier in this function, independently from higher-kindedness *)
-        Errors.implicit_type_argument_for_higher_kinded_type
-          ~use_pos
-          ~def_pos:(fst kind_name)
-          (snd kind_name);
-        (env, (mk (Reason.none, Terr), wildcard_hint))
-      ) else
-        let (env, tvar) =
-          Env.fresh_type_reason
-            env
-            (Reason.Rtype_variable_generics (use_pos, snd kind_name, use_name))
-        in
-        Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
-        (env, (tvar, wildcard_hint))
-    in
-    List.map_env env (List.drop named_kinds targ_count) mk_implicit_targ
-  in
-  let check_for_explicit_user_attribute tparam (_, hint) =
-    let is_wildcard =
-      match hint with
-      | (_, Aast.Happly ((_, class_id), _))
-        when String.equal class_id SN.Typehints.wildcard ->
-        true
-      | _ -> false
-    in
-    if
-      Attributes.mem SN.UserAttributes.uaExplicit tparam.tp_user_attributes
-      && is_wildcard
-    then
-      Errors.require_generic_explicit tparam.tp_name (fst hint)
-  in
-  if check_explicit_targs then
-    List.iter2
-      tparaml
-      (explicit_targs @ implicit_targs)
-      ~f:check_for_explicit_user_attribute
-    |> ignore;
-  (env, explicit_targs @ implicit_targs)
-
-and localize_targs
-    ~check_well_kinded
-    ~is_method
-    ~def_pos
-    ~use_pos
-    ~use_name
-    ?(check_explicit_targs = true)
-    env
-    tparaml
-    targl =
-  let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
-  localize_targs_with_kinds
-    ~check_well_kinded
-    ~is_method
-    ~def_pos
-    ~use_pos
-    ~use_name
-    ~tparaml
-    ~check_explicit_targs
-    env
-    nkinds
-    targl
-
 (* For the majority of cases when we localize a function type we instantiate
  * the function's type parameters to Tvars. There are two cases where we do not do this.
 
@@ -909,32 +762,6 @@ and check_where_constraints
         ty2
         ty1)
 
-(* Performs no substitutions of generics and initializes Tthis to
- * Env.get_self env
- *)
-and localize_with_self env ?pos ?(quiet = false) ?report_cycle ty =
-  let ety_env = env_with_self env ?pos ~quiet ?report_cycle in
-  localize env ty ~ety_env
-
-(* Like localize_with_self, but uses the supplied kind, enabling support
-   for higher-kinded types *)
-and localize_with_self_and_kind env ?pos ?(quiet = false) ?report_cycle ty kind
-    =
-  let ety_env = env_with_self env ?pos ~quiet ?report_cycle in
-  localize_with_kind ~ety_env env ty kind
-
-and localize_possibly_enforced_with_self env ety =
-  let (env, et_type) = localize_with_self env ety.et_type in
-  (env, { ety with et_type })
-
-and localize_hint_with_self env h =
-  let h = Decl_hint.hint env.decl_env h in
-  localize_with_self env h
-
-and localize_hint ~ety_env env hint =
-  let hint_ty = Decl_hint.hint env.decl_env hint in
-  localize ~ety_env env hint_ty
-
 (**
  * If a type annotation for a class is missing type arguments, create a type variable
  * for them and apply constraints.
@@ -984,7 +811,180 @@ and localize_missing_tparams_class env r sid class_ =
   in
   (env, tyl)
 
-and localize_targs_and_check_constraints
+(* Like localize_with_self, but uses the supplied kind, enabling support
+   for higher-kinded types *)
+let localize_with_self_and_kind env ?pos ?(quiet = false) ?report_cycle ty kind
+    =
+  let ety_env = env_with_self env ?pos ~quiet ?report_cycle in
+  localize_with_kind ~ety_env env ty kind
+
+(** Localize an explicit type argument to a constructor or function. We
+    support the use of wildcards at the top level only *)
+let localize_targ_with_kind
+    ~check_well_kinded env hint (nkind : KindDefs.Simple.named_kind) =
+  (* For explicit type arguments we support a wildcard syntax `_` for which
+   * Hack will generate a fresh type variable *)
+  let kind = snd nkind in
+  match hint with
+  | (_, Aast.Happly ((p, id), [])) when String.equal id SN.Typehints.wildcard ->
+    let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
+    if is_higher_kinded then
+      let () = Errors.wildcard_for_higher_kinded_type (fst hint) in
+      (env, (mk (Reason.none, Terr), hint))
+    else
+      let (env, ty) = Env.fresh_type env p in
+      (env, (ty, hint))
+  | _ ->
+    let ty = Decl_hint.hint env.decl_env hint in
+    if check_well_kinded then Kinding.Simple.check_well_kinded env ty nkind;
+    let (env, ty) = localize_with_self_and_kind env ty kind in
+    (env, (ty, hint))
+
+let localize_targ ~check_well_kinded env hint =
+  let named_kind =
+    KindDefs.Simple.with_dummy_name (KindDefs.Simple.fully_applied_type ())
+  in
+  localize_targ_with_kind ~check_well_kinded env hint named_kind
+
+(* See signature in .mli file for details *)
+let localize_targs_with_kinds
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    ?(check_explicit_targs = true)
+    ?(tparaml = [])
+    env
+    named_kinds
+    targl =
+  let targ_count = List.length targl in
+  let tparam_count =
+    match List.length tparaml with
+    | 0 -> List.length named_kinds
+    | n -> n
+  in
+  (* If there are explicit type arguments but too few or too many then
+   * report an error *)
+  if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
+    if is_method then
+      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count None
+    else
+      Errors.type_arity
+        use_pos
+        def_pos
+        ~expected:tparam_count
+        ~actual:targ_count;
+
+  (* Declare and localize the explicit type arguments *)
+  let targl =
+    if Int.( > ) targ_count tparam_count then
+      List.take targl tparam_count
+    else
+      targl
+  in
+  let (env, explicit_targs) =
+    List.map2_env
+      env
+      targl
+      (List.take named_kinds targ_count)
+      (localize_targ_with_kind ~check_well_kinded)
+  in
+  (* Generate fresh type variables for the remainder *)
+  let (env, implicit_targs) =
+    let mk_implicit_targ env (kind_name, kind) =
+      let wildcard_hint =
+        (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), []))
+      in
+      if
+        check_well_kinded
+        && KindDefs.Simple.get_arity kind > 0
+        && Int.( = ) targ_count 0
+      then (
+        (* We only throw an error if the user didn't provide any type arguments at all.
+           Otherwise, if they provided some, but not all of them, n arity mismatch
+           triggers earlier in this function, independently from higher-kindedness *)
+        Errors.implicit_type_argument_for_higher_kinded_type
+          ~use_pos
+          ~def_pos:(fst kind_name)
+          (snd kind_name);
+        (env, (mk (Reason.none, Terr), wildcard_hint))
+      ) else
+        let (env, tvar) =
+          Env.fresh_type_reason
+            env
+            (Reason.Rtype_variable_generics (use_pos, snd kind_name, use_name))
+        in
+        Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
+        (env, (tvar, wildcard_hint))
+    in
+    List.map_env env (List.drop named_kinds targ_count) mk_implicit_targ
+  in
+  let check_for_explicit_user_attribute tparam (_, hint) =
+    let is_wildcard =
+      match hint with
+      | (_, Aast.Happly ((_, class_id), _))
+        when String.equal class_id SN.Typehints.wildcard ->
+        true
+      | _ -> false
+    in
+    if
+      Attributes.mem SN.UserAttributes.uaExplicit tparam.tp_user_attributes
+      && is_wildcard
+    then
+      Errors.require_generic_explicit tparam.tp_name (fst hint)
+  in
+  if check_explicit_targs then
+    List.iter2
+      tparaml
+      (explicit_targs @ implicit_targs)
+      ~f:check_for_explicit_user_attribute
+    |> ignore;
+  (env, explicit_targs @ implicit_targs)
+
+let localize_targs
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    ?(check_explicit_targs = true)
+    env
+    tparaml
+    targl =
+  let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
+  localize_targs_with_kinds
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    ~tparaml
+    ~check_explicit_targs
+    env
+    nkinds
+    targl
+
+(* Performs no substitutions of generics and initializes Tthis to
+ * Env.get_self env
+ *)
+let localize_with_self env ?pos ?(quiet = false) ?report_cycle ty =
+  let ety_env = env_with_self env ?pos ~quiet ?report_cycle in
+  localize env ty ~ety_env
+
+let localize_possibly_enforced_with_self env ety =
+  let (env, et_type) = localize_with_self env ety.et_type in
+  (env, { ety with et_type })
+
+let localize_hint_with_self env h =
+  let h = Decl_hint.hint env.decl_env h in
+  localize_with_self env h
+
+let localize_hint ~ety_env env hint =
+  let hint_ty = Decl_hint.hint env.decl_env hint in
+  localize ~ety_env env hint_ty
+
+let localize_targs_and_check_constraints
     ~exact
     ~check_well_kinded
     ~check_constraints

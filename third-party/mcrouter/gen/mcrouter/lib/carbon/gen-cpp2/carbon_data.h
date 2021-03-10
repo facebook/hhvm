@@ -12,6 +12,4 @@
 
 namespace apache { namespace thrift {
 
-
-
 }} // apache::thrift

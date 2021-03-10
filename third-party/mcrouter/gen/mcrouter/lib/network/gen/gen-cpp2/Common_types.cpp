@@ -36,7 +36,7 @@ void TccStructTraits<::facebook::memcache::thrift::McVersionRequest>::translateF
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McVersionRequest::McVersionRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
+McVersionRequest::McVersionRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
@@ -90,6 +90,7 @@ template uint32_t McVersionRequest::serializedSizeZC<>(apache::thrift::CompactPr
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -114,7 +115,7 @@ void TccStructTraits<::facebook::memcache::thrift::McVersionReply>::translateFie
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McVersionReply::McVersionReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
+McVersionReply::McVersionReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     value(std::move(value__arg)),
     message(std::move(message__arg)),
@@ -198,6 +199,7 @@ template uint32_t McVersionReply::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -222,7 +224,7 @@ void TccStructTraits<::facebook::memcache::thrift::McStatsRequest>::translateFie
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McStatsRequest::McStatsRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
+McStatsRequest::McStatsRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
@@ -276,6 +278,7 @@ template uint32_t McStatsRequest::serializedSizeZC<>(apache::thrift::CompactProt
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -300,7 +303,7 @@ void TccStructTraits<::facebook::memcache::thrift::McStatsReply>::translateField
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McStatsReply::McStatsReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, int16_t appSpecificErrorCode__arg) :
+McStatsReply::McStatsReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
     stats(std::move(stats__arg)),
@@ -392,6 +395,7 @@ template uint32_t McStatsReply::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -416,7 +420,7 @@ void TccStructTraits<::facebook::memcache::thrift::McShutdownRequest>::translate
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McShutdownRequest::McShutdownRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
+McShutdownRequest::McShutdownRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
@@ -470,6 +474,7 @@ template uint32_t McShutdownRequest::serializedSizeZC<>(apache::thrift::CompactP
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -494,7 +499,7 @@ void TccStructTraits<::facebook::memcache::thrift::McShutdownReply>::translateFi
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McShutdownReply::McShutdownReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
+McShutdownReply::McShutdownReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
     appSpecificErrorCode(std::move(appSpecificErrorCode__arg)) {
@@ -568,6 +573,7 @@ template uint32_t McShutdownReply::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -592,7 +598,7 @@ void TccStructTraits<::facebook::memcache::thrift::McQuitRequest>::translateFiel
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McQuitRequest::McQuitRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
+McQuitRequest::McQuitRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
@@ -646,6 +652,7 @@ template uint32_t McQuitRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -670,7 +677,7 @@ void TccStructTraits<::facebook::memcache::thrift::McQuitReply>::translateFieldN
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McQuitReply::McQuitReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
+McQuitReply::McQuitReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
     appSpecificErrorCode(std::move(appSpecificErrorCode__arg)) {
@@ -744,6 +751,7 @@ template uint32_t McQuitReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -768,7 +776,7 @@ void TccStructTraits<::facebook::memcache::thrift::McExecRequest>::translateFiel
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McExecRequest::McExecRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
+McExecRequest::McExecRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
@@ -822,6 +830,7 @@ template uint32_t McExecRequest::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -846,7 +855,7 @@ void TccStructTraits<::facebook::memcache::thrift::McExecReply>::translateFieldN
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-McExecReply::McExecReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
+McExecReply::McExecReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     response(std::move(response__arg)),
     message(std::move(message__arg)),
@@ -930,6 +939,7 @@ template uint32_t McExecReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -993,6 +1003,7 @@ template uint32_t GoAwayAcknowledgement::serializedSizeZC<>(apache::thrift::Comp
 
 
 }}} // facebook::memcache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1017,7 +1028,7 @@ void TccStructTraits<::facebook::memcache::thrift::GoAwayRequest>::translateFiel
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-GoAwayRequest::GoAwayRequest(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string reason__arg) :
+GoAwayRequest::GoAwayRequest(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string reason__arg) :
     result(std::move(result__arg)),
     reason(std::move(reason__arg)) {
   __isset.result = true;

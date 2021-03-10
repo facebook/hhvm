@@ -179,6 +179,7 @@ class McVersionRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McVersionRequest;
@@ -192,7 +193,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McVersionRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McVersionRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
+  McVersionRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
 
   McVersionRequest(McVersionRequest&&) = default;
 
@@ -208,7 +209,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McVersionRequest() {}
 
  private:
-   ::carbon::thrift::IOBufKey key;
+  ::carbon::thrift::IOBufKey key;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -235,37 +236,37 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
     return {std::move(this->key), __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-  const  ::carbon::thrift::IOBufKey& get_key() const& {
+  const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
 
-   ::carbon::thrift::IOBufKey get_key() && {
+  ::carbon::thrift::IOBufKey get_key() && {
     return std::move(key);
   }
 
-  template <typename T_McVersionRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
-   ::carbon::thrift::IOBufKey& set_key(T_McVersionRequest_key_struct_setter&& key_) {
+  template <typename T_McVersionRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  ::carbon::thrift::IOBufKey& set_key(T_McVersionRequest_key_struct_setter&& key_) {
     key = std::forward<T_McVersionRequest_key_struct_setter>(key_);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
@@ -319,6 +320,7 @@ class McVersionReply  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McVersionReply;
@@ -334,7 +336,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       appSpecificErrorCode(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McVersionReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
+  McVersionReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
 
   McVersionReply(McVersionReply&&) = default;
 
@@ -350,13 +352,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McVersionReply() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   folly::IOBuf value;
  private:
   ::std::string message;
  private:
-  int16_t appSpecificErrorCode;
+  ::std::int16_t appSpecificErrorCode;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -386,22 +388,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -452,32 +454,32 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
@@ -519,11 +521,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
-  int16_t get_appSpecificErrorCode() const {
+  ::std::int16_t get_appSpecificErrorCode() const {
     return appSpecificErrorCode;
   }
 
-  int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
+  ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
@@ -577,6 +579,7 @@ class McStatsRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McStatsRequest;
@@ -590,7 +593,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McStatsRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McStatsRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
+  McStatsRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
 
   McStatsRequest(McStatsRequest&&) = default;
 
@@ -606,7 +609,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McStatsRequest() {}
 
  private:
-   ::carbon::thrift::IOBufKey key;
+  ::carbon::thrift::IOBufKey key;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -633,37 +636,37 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
     return {std::move(this->key), __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-  const  ::carbon::thrift::IOBufKey& get_key() const& {
+  const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
 
-   ::carbon::thrift::IOBufKey get_key() && {
+  ::carbon::thrift::IOBufKey get_key() && {
     return std::move(key);
   }
 
-  template <typename T_McStatsRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
-   ::carbon::thrift::IOBufKey& set_key(T_McStatsRequest_key_struct_setter&& key_) {
+  template <typename T_McStatsRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  ::carbon::thrift::IOBufKey& set_key(T_McStatsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McStatsRequest_key_struct_setter>(key_);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
@@ -717,6 +720,7 @@ class McStatsReply  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McStatsReply;
@@ -732,7 +736,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       appSpecificErrorCode(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McStatsReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, int16_t appSpecificErrorCode__arg);
+  McStatsReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, ::std::int16_t appSpecificErrorCode__arg);
 
   McStatsReply(McStatsReply&&) = default;
 
@@ -748,13 +752,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McStatsReply() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   ::std::string message;
  private:
   ::std::vector<::std::string> stats;
  private:
-  int16_t appSpecificErrorCode;
+  ::std::int16_t appSpecificErrorCode;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -784,22 +788,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -850,32 +854,32 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
@@ -911,11 +915,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     return stats;
   }
 
-  int16_t get_appSpecificErrorCode() const {
+  ::std::int16_t get_appSpecificErrorCode() const {
     return appSpecificErrorCode;
   }
 
-  int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
+  ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
@@ -969,6 +973,7 @@ class McShutdownRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McShutdownRequest;
@@ -982,7 +987,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McShutdownRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McShutdownRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
+  McShutdownRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
 
   McShutdownRequest(McShutdownRequest&&) = default;
 
@@ -998,7 +1003,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McShutdownRequest() {}
 
  private:
-   ::carbon::thrift::IOBufKey key;
+  ::carbon::thrift::IOBufKey key;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1025,37 +1030,37 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
     return {std::move(this->key), __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-  const  ::carbon::thrift::IOBufKey& get_key() const& {
+  const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
 
-   ::carbon::thrift::IOBufKey get_key() && {
+  ::carbon::thrift::IOBufKey get_key() && {
     return std::move(key);
   }
 
-  template <typename T_McShutdownRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
-   ::carbon::thrift::IOBufKey& set_key(T_McShutdownRequest_key_struct_setter&& key_) {
+  template <typename T_McShutdownRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  ::carbon::thrift::IOBufKey& set_key(T_McShutdownRequest_key_struct_setter&& key_) {
     key = std::forward<T_McShutdownRequest_key_struct_setter>(key_);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
@@ -1109,6 +1114,7 @@ class McShutdownReply  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McShutdownReply;
@@ -1124,7 +1130,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       appSpecificErrorCode(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McShutdownReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
+  McShutdownReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
 
   McShutdownReply(McShutdownReply&&) = default;
 
@@ -1140,11 +1146,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McShutdownReply() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   ::std::string message;
  private:
-  int16_t appSpecificErrorCode;
+  ::std::int16_t appSpecificErrorCode;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1173,22 +1179,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -1217,32 +1223,32 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
@@ -1267,11 +1273,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
-  int16_t get_appSpecificErrorCode() const {
+  ::std::int16_t get_appSpecificErrorCode() const {
     return appSpecificErrorCode;
   }
 
-  int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
+  ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
@@ -1325,6 +1331,7 @@ class McQuitRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McQuitRequest;
@@ -1338,7 +1345,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McQuitRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McQuitRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
+  McQuitRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
 
   McQuitRequest(McQuitRequest&&) = default;
 
@@ -1354,7 +1361,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McQuitRequest() {}
 
  private:
-   ::carbon::thrift::IOBufKey key;
+  ::carbon::thrift::IOBufKey key;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1381,37 +1388,37 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
     return {std::move(this->key), __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-  const  ::carbon::thrift::IOBufKey& get_key() const& {
+  const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
 
-   ::carbon::thrift::IOBufKey get_key() && {
+  ::carbon::thrift::IOBufKey get_key() && {
     return std::move(key);
   }
 
-  template <typename T_McQuitRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
-   ::carbon::thrift::IOBufKey& set_key(T_McQuitRequest_key_struct_setter&& key_) {
+  template <typename T_McQuitRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  ::carbon::thrift::IOBufKey& set_key(T_McQuitRequest_key_struct_setter&& key_) {
     key = std::forward<T_McQuitRequest_key_struct_setter>(key_);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
@@ -1465,6 +1472,7 @@ class McQuitReply  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McQuitReply;
@@ -1480,7 +1488,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       appSpecificErrorCode(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McQuitReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
+  McQuitReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
 
   McQuitReply(McQuitReply&&) = default;
 
@@ -1496,11 +1504,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McQuitReply() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   ::std::string message;
  private:
-  int16_t appSpecificErrorCode;
+  ::std::int16_t appSpecificErrorCode;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1529,22 +1537,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -1573,32 +1581,32 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
@@ -1623,11 +1631,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
-  int16_t get_appSpecificErrorCode() const {
+  ::std::int16_t get_appSpecificErrorCode() const {
     return appSpecificErrorCode;
   }
 
-  int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
+  ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
@@ -1681,6 +1689,7 @@ class McExecRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McExecRequest;
@@ -1694,7 +1703,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McExecRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McExecRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
+  McExecRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
 
   McExecRequest(McExecRequest&&) = default;
 
@@ -1710,7 +1719,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McExecRequest() {}
 
  private:
-   ::carbon::thrift::IOBufKey key;
+  ::carbon::thrift::IOBufKey key;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1737,37 +1746,37 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
     return {std::move(this->key), __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
     return {this->key, __isset.key};
   }
 
-  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-  const  ::carbon::thrift::IOBufKey& get_key() const& {
+  const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
   }
 
-   ::carbon::thrift::IOBufKey get_key() && {
+  ::carbon::thrift::IOBufKey get_key() && {
     return std::move(key);
   }
 
-  template <typename T_McExecRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
-   ::carbon::thrift::IOBufKey& set_key(T_McExecRequest_key_struct_setter&& key_) {
+  template <typename T_McExecRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  ::carbon::thrift::IOBufKey& set_key(T_McExecRequest_key_struct_setter&& key_) {
     key = std::forward<T_McExecRequest_key_struct_setter>(key_);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
@@ -1821,6 +1830,7 @@ class McExecReply  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = McExecReply;
@@ -1836,7 +1846,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       appSpecificErrorCode(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  McExecReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
+  McExecReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
 
   McExecReply(McExecReply&&) = default;
 
@@ -1852,13 +1862,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~McExecReply() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   ::std::string response;
  private:
   ::std::string message;
  private:
-  int16_t appSpecificErrorCode;
+  ::std::int16_t appSpecificErrorCode;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -1888,22 +1898,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -1954,32 +1964,32 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  template <typename..., typename T = int16_t>
+  template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
@@ -2021,11 +2031,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
-  int16_t get_appSpecificErrorCode() const {
+  ::std::int16_t get_appSpecificErrorCode() const {
     return appSpecificErrorCode;
   }
 
-  int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
+  ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
@@ -2079,6 +2089,7 @@ class GoAwayAcknowledgement  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = GoAwayAcknowledgement;
@@ -2172,6 +2183,7 @@ class GoAwayRequest  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
 
  public:
   using __fbthrift_cpp2_type = GoAwayRequest;
@@ -2186,7 +2198,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
       result( ::carbon::Result::UNKNOWN) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  GoAwayRequest(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string reason__arg);
+  GoAwayRequest(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string reason__arg);
 
   GoAwayRequest(GoAwayRequest&&) = default;
 
@@ -2202,7 +2214,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   virtual ~GoAwayRequest() {}
 
  private:
-   ::carbon::Result result;
+  ::carbon::Result result;
  private:
   ::std::string reason;
 
@@ -2232,22 +2244,22 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 #endif
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {std::move(this->result), __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->result, __isset.result};
   }
 
-  template <typename..., typename T =  ::carbon::Result>
+  template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
@@ -2275,11 +2287,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-   ::carbon::Result get_result() const {
+  ::carbon::Result get_result() const {
     return result;
   }
 
-   ::carbon::Result& set_result( ::carbon::Result result_) {
+  ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;

@@ -1066,6 +1066,8 @@ void ExternCompiler::start() {
   writeConfigs();
 }
 
+typedef std::unique_ptr<const char, void (*)(char const*)> rust_cstr_ptr_t;
+
 CompilerResult hackc_compile(
   const char* code,
   int len,
@@ -1174,11 +1176,13 @@ CompilerResult hackc_compile(
     std::array<char, 256> buf;
     buf.fill(0);
     buf_t error_buf {buf.data(), buf.size()};
-
-    auto const hhas = compile_from_text_cpp_ffi(&native_env, code, &output, &error_buf);
-    if (hhas) {
+    
+    rust_cstr_ptr_t hhas{compile_from_text_cpp_ffi(&native_env, code, &output, &error_buf),
+                         &compile_from_text_free_string_cpp_ffi};
+    if (hhas) { 
+      std::string hhas_str{hhas.get()};
       return assemble_string_handle_errors(code,
-                                           hhas,
+                                           hhas_str,
                                            filename,
                                            sha1,
                                            nativeFuncs,
@@ -1329,10 +1333,15 @@ ParseFactsResult extract_facts(
 
     auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
       try {
-        auto const facts = extract_as_json_cpp_ffi(flags, filename.data(), source_text, false);
-        return FactsJSONString { facts };
+        rust_cstr_ptr_t facts{extract_as_json_cpp_ffi(flags, filename.data(), source_text, false),
+                              &extract_as_json_free_string_cpp_ffi};
+        if (facts) {
+          std::string facts_str{facts.get()};
+          return FactsJSONString { facts_str };   
+        }
+        return FactsJSONString { "" }; // Swallow errors from HackC
       } catch (const std::exception& e) {
-        return FactsJSONString{ "" }; // Swallow errors from HackC
+        return FactsJSONString { "" }; // Swallow errors from HackC
       }
     };
 

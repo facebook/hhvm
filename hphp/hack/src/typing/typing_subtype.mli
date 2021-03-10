@@ -2,18 +2,6 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-module ConditionTypes : sig
-  val try_get_class_for_condition_type :
-    env ->
-    decl_ty ->
-    ((Ast_defs.pos * string) * Decl_provider.class_decl) option
-
-  val try_get_method_from_condition_type :
-    env -> decl_ty -> bool -> string -> class_elt option
-
-  val localize_condition_type : env -> decl_ty -> locl_ty
-end
-
 (** Non-side-effecting test for subtypes.
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know

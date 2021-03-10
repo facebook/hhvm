@@ -142,61 +142,6 @@ let detect_attempting_dynamic_coercion_reason r ty =
     | _ -> (r, ty))
   | _ -> (r, ty)
 
-module ConditionTypes = struct
-  let try_get_class_for_condition_type (env : env) (ty : decl_ty) =
-    match TUtils.try_unwrap_class_type ty with
-    | None -> None
-    | Some (_, ((_, x) as sid), _) ->
-      begin
-        match Env.get_class env x with
-        | None -> None
-        | Some cls -> Some (sid, cls)
-      end
-
-  let try_get_method_from_condition_type
-      (env : env) (ty : decl_ty) (is_static : bool) (method_name : string) =
-    match try_get_class_for_condition_type env ty with
-    | Some (_, cls) ->
-      let get =
-        if is_static then
-          Cls.get_smethod
-        else
-          Cls.get_method
-      in
-      get cls method_name
-    | None -> None
-
-  let localize_condition_type (env : env) (ty : decl_ty) : locl_ty =
-    (* if condition type is generic - we cannot specify type argument in attribute.
-       For cases when we check if containing type is a subtype of condition type
-       if condition type is generic instantiate it with TAny's *)
-    let do_localize ty =
-      let ty =
-        match try_get_class_for_condition_type env ty with
-        | None -> ty
-        | Some (((p, _) as sid), cls) ->
-          let tparams = Cls.tparams cls in
-          if List.is_empty tparams then
-            ty
-          else
-            let params =
-              List.map tparams ~f:(fun { tp_name = (p, x); _ } ->
-                  (* TODO(T69551141) handle type arguments *)
-                  MakeType.generic (Reason.Rwitness_from_decl p) x)
-            in
-            let subst = Decl_instantiate.make_subst tparams [] in
-            let ty = MakeType.apply (Reason.Rwitness_from_decl p) sid params in
-            Decl_instantiate.instantiate subst ty
-      in
-      let ety_env = Phase.env_with_self env in
-      let (_, t) = Phase.localize ~ety_env env ty in
-      t
-    in
-    match deref ty with
-    | (r, Toption ty) -> mk (Reason.localize r, Toption (do_localize ty))
-    | _ -> do_localize ty
-end
-
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `constraints` any necessary and
  * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that

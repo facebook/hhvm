@@ -9,9 +9,6 @@ class Foo {
 const int MY_CONST = 1;
 
 function foo(): void {
-  // Ban binary operators.
-  $x = Code`1 << 2`;
-
   // Ban instantiation.
   $z = Code`new Foo()`;
 

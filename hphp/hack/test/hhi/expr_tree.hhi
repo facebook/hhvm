@@ -189,6 +189,13 @@ abstract class ExampleInt extends ExampleMixed {
   public abstract function __lessThanEqual(ExampleInt $_): ExampleBool;
   public abstract function __greaterThan(ExampleInt $_): ExampleBool;
   public abstract function __greaterThanEqual(ExampleInt $_): ExampleBool;
+
+  public abstract function __amp(ExampleInt $_): ExampleInt;
+  public abstract function __bar(ExampleInt $_): ExampleInt;
+  public abstract function __caret(ExampleInt $_): ExampleInt;
+  public abstract function __lessThanLessThan(ExampleInt $_): ExampleInt;
+  public abstract function __greaterThanGreaterThan(ExampleInt $_): ExampleInt;
+  public abstract function __tilde(): ExampleInt;
 }
 
 abstract class ExampleBool extends ExampleMixed {

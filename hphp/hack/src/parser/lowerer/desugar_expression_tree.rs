@@ -355,6 +355,12 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Bop::Diff2 => *e = virtualize_binop(lhs, "__notTripleEquals", rhs, &e.0),
                     // Convert string concatenation
                     Bop::Dot => *e = virtualize_binop(lhs, "__dot", rhs, &e.0),
+                    // Convert bitwise operators, &, |, ^, <<, >>
+                    Bop::Amp => *e = virtualize_binop(lhs, "__amp", rhs, &e.0),
+                    Bop::Bar => *e = virtualize_binop(lhs, "__bar", rhs, &e.0),
+                    Bop::Xor => *e = virtualize_binop(lhs, "__caret", rhs, &e.0),
+                    Bop::Ltlt => *e = virtualize_binop(lhs, "__lessThanLessThan", rhs, &e.0),
+                    Bop::Gtgt => *e = virtualize_binop(lhs, "__greaterThanGreaterThan", rhs, &e.0),
                     // Assignment is special and not virtualized
                     Bop::Eq(None) => {}
                     _ => {
@@ -372,6 +378,8 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Uop::Unot => *e = virtualize_unop(operand, "__exclamationMark", &e.0),
                     // Allow negation -$x (required for supporting negative literals -123)
                     Uop::Uminus => *e = virtualize_unop(operand, "__negate", &e.0),
+                    // Allow bitwise complement
+                    Uop::Utild => *e = virtualize_unop(operand, "__tilde", &e.0),
                     _ => {
                         return Err((
                             pos,

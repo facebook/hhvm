@@ -177,21 +177,21 @@ checkObjEqualRecursively($msg, darray[
           "value" => "B",
         ],
         darray[
-          "type" => "array",
+          "type" => "vec",
           "name" => "\$c",
-          "value" => "varray[3]",
+          "value" => "vec[3]",
           "indexedVariables" => 3,
         ],
         darray[
-          "type" => "array",
+          "type" => "vec",
           "name" => "\$d",
-          "value" => "varray[2]",
+          "value" => "vec[2]",
           "indexedVariables" => 2,
         ],
         darray[
-          "type" => "array",
+          "type" => "vec",
           "name" => "\$e",
-          "value" => "varray[2]",
+          "value" => "vec[2]",
           "indexedVariables" => 2,
         ],
     ]]
@@ -514,9 +514,9 @@ $seq = sendVsCommand(darray[
             "value" => "1"
           ],
           darray[
-            "type" => "array",
+            "type" => "vec",
             "name" => "1",
-            "value" => "varray[2]",
+            "value" => "vec[2]",
             "variablesReference" => 22
           ]
         ]

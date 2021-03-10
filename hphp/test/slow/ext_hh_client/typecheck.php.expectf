@@ -13,11 +13,11 @@ object(HH\Client\TypecheckResult) (3) {
   ["error":"HH\Client\TypecheckResult":private]=>
   NULL
   ["rawResult":"HH\Client\TypecheckResult":private]=>
-  darray(3) {
+  dict(3) {
     ["passed"]=>
     bool(true)
     ["errors"]=>
-    darray(0) {
+    dict(0) {
     }
     ["version"]=>
     string(4) "mock"
@@ -30,17 +30,17 @@ object(HH\Client\TypecheckResult) (3) {
   ["error":"HH\Client\TypecheckResult":private]=>
   string(55) "Hack type error: Invalid return type at test.php line 1"
   ["rawResult":"HH\Client\TypecheckResult":private]=>
-  darray(3) {
+  dict(3) {
     ["passed"]=>
     bool(false)
     ["errors"]=>
-    darray(1) {
+    dict(1) {
       [0]=>
-      darray(1) {
+      dict(1) {
         ["message"]=>
-        darray(3) {
+        dict(3) {
           [0]=>
-          darray(6) {
+          dict(6) {
             ["descr"]=>
             string(19) "Invalid return type"
             ["path"]=>
@@ -55,7 +55,7 @@ object(HH\Client\TypecheckResult) (3) {
             int(4110)
           }
           [1]=>
-          darray(6) {
+          dict(6) {
             ["descr"]=>
             string(16) "This is a string"
             ["path"]=>
@@ -70,7 +70,7 @@ object(HH\Client\TypecheckResult) (3) {
             int(4110)
           }
           [2]=>
-          darray(6) {
+          dict(6) {
             ["descr"]=>
             string(30) "It is incompatible with an int"
             ["path"]=>

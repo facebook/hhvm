@@ -140,37 +140,37 @@ require(__DIR__ . '/common.inc');
         'variables' => varray[
           darray[
             'name' => '$_COOKIE',
-            'type' => 'array',
-            'indexedVariables' => 0,
+            'type' => 'dict',
+            'namedVariables' => 0,
           ],
           darray[
             'name' => '$_ENV',
-            'type' => 'array',
+            'type' => 'dict',
             // not asserting size of array; ENV may vary
           ],
           darray[
             'name' => '$_FILES',
-            'type' => 'array',
-            'indexedVariables' => 0,
+            'type' => 'dict',
+            'namedVariables' => 0,
           ],
           darray[
             'name' => '$_GET',
-            'type' => 'array',
-            'indexedVariables' => 0,
+            'type' => 'dict',
+            'namedVariables' => 0,
           ],
           darray[
             'name' => '$_POST',
-            'type' => 'array',
-            'indexedVariables' => 0,
+            'type' => 'dict',
+            'namedVariables' => 0,
           ],
           darray[
             'name' => '$_REQUEST',
-            'type' => 'array',
-            'indexedVariables' => 0,
+            'type' => 'dict',
+            'namedVariables' => 0,
           ],
           darray[
             'name' => '$_SERVER',
-            'type' => 'array',
+            'type' => 'dict',
             // not asserting size of array as it may vary
           ],
         ],

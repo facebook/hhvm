@@ -85,7 +85,7 @@ function test_http_build_query() {
 function test_parse_url() {
   $url = "http://username:password@hostname/path?arg=value#anchor";
   VS(print_r(parse_url($url), true),
-     "Array\n".
+     "Dict\n".
      "(\n".
      "    [scheme] => http\n".
      "    [host] => hostname\n".

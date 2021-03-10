@@ -85,7 +85,7 @@ function main_ext_variable() {
   VS(gettype(0), "integer");
   VS(gettype("test"), "string");
   VS(gettype("hi"), "string");
-  VS(gettype(varray[]), "array");
+  VS(gettype(varray[]), "vec");
   VS(gettype(new stdclass), "object");
   VS(gettype($valid_res), "resource");
   VS(gettype($invalid_res), "unknown type");
@@ -122,7 +122,7 @@ function main_ext_variable() {
   $v = darray["a" => "apple", "b" => 2, "c" => varray[1, "y", 3]];
   VS(
     serialize($v),
-    "a:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";a:3:{i:0;i:1;i:1;s:1:\"y\";i:2;i:3;}}",
+    "D:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";v:3:{i:1;s:1:\"y\";i:3;}}",
   );
 
   {

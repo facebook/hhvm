@@ -45,7 +45,7 @@ function test_icu_match() {
   // Test returning matches functionality.
   VERIFY(icu_match_with_matches("(PHP) is", $subject, inout $matches) != false);
   VS(print_r($matches, true),
-    "Array\n".
+    "Vec\n".
     "(\n".
     "    [0] => PHP is\n".
     "    [1] => PHP\n".
@@ -60,15 +60,15 @@ function test_icu_match() {
       false,
   );
   VS(print_r($matches, true),
-     "Array\n".
+     "Vec\n".
      "(\n".
-     "    [0] => Array\n".
+     "    [0] => Vec\n".
      "        (\n".
      "            [0] => is a\n".
      "            [1] => 7\n".
      "        )\n".
      "\n".
-     "    [1] => Array\n".
+     "    [1] => Vec\n".
      "        (\n".
      "            [0] => a\n".
      "            [1] => 10\n".
@@ -85,9 +85,9 @@ function test_icu_match() {
       false,
   );
   VS(print_r($matches, true),
-    "Array\n".
+    "Vec\n".
     "(\n".
-    "    [0] => Array\n".
+    "    [0] => Vec\n".
     "        (\n".
     "            [0] => . \xef\xba\xb0\n".
     "            [1] => 30\n".
@@ -106,15 +106,15 @@ function test_icu_match() {
       false,
   );
   VS(print_r($matches, true),
-    "Array\n".
+    "Vec\n".
     "(\n".
-    "    [0] => Array\n".
+    "    [0] => Vec\n".
     "        (\n".
     "            [0] => $junk1 $junk2\n".
     "            [1] => 4\n".
     "        )\n".
     "\n".
-    "    [1] => Array\n".
+    "    [1] => Vec\n".
     "        (\n".
     "            [0] => $junk2\n".
     "            [1] => 7\n".
@@ -127,7 +127,7 @@ function test_icu_match() {
   $expected="\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4".
     "\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85";
   VS(print_r($matches, true),
-    "Array\n".
+    "Vec\n".
     "(\n".
     "    [0] => $expected\n".
     ")\n");
@@ -196,7 +196,7 @@ function test_icu_tokenize() {
   $output_eng = icu_tokenize($input_eng);
 
   VS(print_r($output_eng, true),
-     "Array\n".
+     "Vec\n".
      "(\n".
      "    [0] => _B_\n".
      "    [1] => hello\n".
@@ -212,7 +212,7 @@ function test_icu_tokenize() {
   $output_long = icu_tokenize($input_long);
 
   VS(print_r($output_long, true),
-     "Array\n".
+     "Vec\n".
      "(\n".
      "    [0] => _B_\n".
      "    [1] => hello\n".
@@ -244,7 +244,7 @@ function test_icu_tokenize() {
   $output_de = icu_tokenize($input_de);
 
   VS(print_r($output_de, true),
-     "Array\n".
+     "Vec\n".
      "(\n".
      "    [0] => _B_\n".
      "    [1] => ich\n".
@@ -265,7 +265,7 @@ function test_icu_tokenize() {
   $input_hebrew = "היום יום רביעי, וזה ממש טוב.";
   $output_hebrew = icu_tokenize($input_hebrew);
   VS(print_r($output_hebrew, true),
-     "Array\n".
+     "Vec\n".
      "(\n".
      "    [0] => _B_\n".
      "    [1] => היום\n".

@@ -1,0 +1,7 @@
+-vRuntime.Eval.EmitClassPointers=2
+-vRuntime.Eval.ClassAsStringVarDump=false
+-vRuntime.Eval.ClassPassesClassname=true 
+-vRuntime.Eval.ClassnameNotices=true 
+-vRuntime.Eval.ClassStringHintNotices=true
+-vRuntime.Eval.RaiseClassConversionWarning=true
+-vRuntime.Eval.CheckPropTypeHints=3

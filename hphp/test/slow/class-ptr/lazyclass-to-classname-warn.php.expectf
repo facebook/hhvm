@@ -1,0 +1,31 @@
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 14
+class(A)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 13
+class(A)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 18
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 36
+class(B)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 25
+class(A)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 24
+class(A)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 29
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 41
+class(B)
+string(1) "A"
+string(1) "A"
+string(1) "B"
+string(1) "A"
+string(1) "A"
+string(1) "B"
+Error: Argument 1 passed to foo1() must be an instance of HH\classname, int given at %s/test/slow/class-ptr/classname-type-hint.inc(54)
+Error: Argument 1 passed to foo2() must be an instance of MyType, int given at %s/test/slow/class-ptr/classname-type-hint.inc(55)
+Error: Property 'Bar1::name' declared as type HH\classname, int assigned at %s/test/slow/class-ptr/classname-type-hint.inc(56)
+Error: Property 'Bar2::name' declared as type MyType, int assigned at %s/test/slow/class-ptr/classname-type-hint.inc(57)

@@ -285,13 +285,25 @@ void verifyTypeImpl(IRGS& env,
       assertx(valType <= TClsMeth);
       if (!clsMethToVec(val)) return genFail();
       return;
-    case AnnotAction::RecordCheck:
+    case AnnotAction::RecordCheck: {
       assertx(valType <= TRecord);
       auto const rec = Unit::lookupUniqueRecDesc(tc.typeName());
       auto const isPersistent = recordHasPersistentRDS(rec);
       auto const checkRecDesc = isPersistent ?
         cns(env, rec) : ldRecDescSafe(env, tc.typeName());
       verifyRecDesc(gen(env, LdRecDesc, val), checkRecDesc, val);
+      return;
+    }
+    case AnnotAction::WarnClassname:
+      assertx(valType <= TCls || valType <= TLazyCls);
+      gen(
+        env,
+        RaiseNotice,
+        cns(
+          env,
+          makeStaticString(Strings::CLASS_TO_CLASSNAME)
+        )
+      );
       return;
   }
   assertx(result == AnnotAction::ObjectCheck);

@@ -2130,6 +2130,9 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
       return TVec|TDict;
     case AnnotMetaType::ArrayLike:
       return TArrLike;
+    case AnnotMetaType::Classname:
+      assertx(RO::EvalClassPassesClassname);
+      return TStr | TCls | TLazyCls;
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nothing:

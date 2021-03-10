@@ -49,6 +49,7 @@ enum class AnnotMetaType : uint8_t {
   Nonnull = 11,
   NoReturn = 12,
   Nothing = 13,
+  Classname = 14,
 };
 
 enum class AnnotType : uint16_t {
@@ -78,7 +79,8 @@ enum class AnnotType : uint16_t {
   VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
   ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
   NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit,
-  Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit
+  Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit,
+  Classname  = (uint16_t)AnnotMetaType::Classname << 8  | (uint8_t)KindOfUninit
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -125,6 +127,7 @@ enum class AnnotAction {
   ConvertLazyClass,
   ClsMethCheck,
   RecordCheck,
+  WarnClassname,
 };
 
 /*
@@ -162,6 +165,10 @@ enum class AnnotAction {
  *
  * RecordCheck: 'at' and 'dt' are both records and the caller needs to check
  * if the record in the value matches annotation.
+ *
+ * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
+ * and RuntimeOption::ClassnameNotices is on. The 'dt' is compatible with 'at'
+ * but raises a notice at runtime.
  *
  */
 AnnotAction

@@ -339,6 +339,10 @@ MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(name.c_str(), "HH\\mixed"))    return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\classname") &&
+      RO::EvalClassPassesClassname) {
+    return folly::none;
+  }
 
   return KindOfObject;
 }

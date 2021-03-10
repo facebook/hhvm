@@ -288,6 +288,9 @@ struct TypeConstraint {
     assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
     return m_type == Type::VArrOrDArr;
   }
+  bool isClassname() const {
+    return m_type == Type::Classname;
+  }
 
   // Returns true if we should convert a ClsMeth to a varray for this typehint.
   bool convertClsMethToArrLike() const;

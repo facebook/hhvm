@@ -4426,6 +4426,10 @@ Type from_hni_constraint(SString s) {
     return union_of(std::move(ret), TArrLike);
   }
   if (!strcasecmp(p, "array")) return union_of(std::move(ret), TVArr, TDArr);
+  if (!strcasecmp(p, "HH\\classname") &&
+      RuntimeOption::EvalClassPassesClassname) {
+    return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
+  }
   if (!strcasecmp(p, "HH\\mixed"))    return TInitCell;
   if (!strcasecmp(p, "HH\\nonnull"))  return union_of(std::move(ret), TNonNull);
 

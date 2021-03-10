@@ -1246,6 +1246,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::VArrOrDArr: return TVArr | TDArr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
+      case A::Classname:  return TStr | TCls | TLazyCls;
       case A::This:
         always_assert(propCls != nullptr);
         return (isSProp && !tc.couldSeeMockObject())

@@ -611,7 +611,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isVArrayOrDArray() || tc.isArrayLike()) {
+      tc.isVArrayOrDArray() || tc.isArrayLike() || tc.isClassname()) {
     return ty == T::Mixed || ty == T::MixedTV;
   }
 
@@ -696,7 +696,7 @@ static bool tcCheckNativeIO(
   auto const& tc = pinfo.typeConstraint;
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isVArrayOrDArray() || tc.isArrayLike()) {
+      tc.isVArrayOrDArray() || tc.isArrayLike() || tc.isClassname()) {
     return ty == T::MixedIO;
   }
 

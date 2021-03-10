@@ -62,10 +62,11 @@ MaybeDataType nameToMaybeDataType(const std::string& typeName) {
 static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
   static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair = []() {
     std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mappedPairs;
-    const struct Pair {
+    struct Pair {
       const char* name;
       AnnotType type;
-    } pairs[] = {
+    };
+    std::vector<Pair> pairs = {
       { "HH\\nothing",  AnnotType::Nothing },
       { "HH\\noreturn", AnnotType::NoReturn },
       { "HH\\null",     AnnotType::Null },
@@ -101,7 +102,10 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\vec_or_dict", AnnotType::VecOrDict },
       { "HH\\AnyArray", AnnotType::ArrayLike },
     };
-    for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
+    if (RO::EvalClassPassesClassname) {
+      pairs.push_back({ "HH\\classname", AnnotType::Classname });
+    }
+    for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
       mappedPairs.second[pairs[i].name] = pairs[i].type;
     }
@@ -193,6 +197,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Nothing:
     case AnnotType::Record:
     case AnnotType::NoReturn:
+    case AnnotType::Classname:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:
     case AnnotType::Number:
@@ -280,6 +285,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return AnnotAction::ClsMethCheck;
       }
       return isArrayLikeType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
+    case AnnotMetaType::Classname:
+      if (isStringType(dt)) return AnnotAction::Pass;
+      if (isClassType(dt) || isLazyClassType(dt)) {
+        return RO::EvalClassnameNotices ?
+          AnnotAction::WarnClassname : AnnotAction::Pass;
+      }
+      return AnnotAction::Fail;
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;

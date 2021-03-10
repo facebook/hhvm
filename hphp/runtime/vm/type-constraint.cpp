@@ -161,6 +161,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Record:    str = "record"; break;
+      case AnnotType::Classname: str = "classname"; break;
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -366,6 +367,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::VecOrDict:
       case MetaType::VArrOrDArr:
       case MetaType::ArrayLike:
+      case MetaType::Classname:
       case MetaType::Precise:
         if (!tc.isObject()) {
           return std::make_tuple(tc.type(), nullptr, tc.isNullable());
@@ -484,6 +486,12 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         assertx(result == AnnotAction::RecordCheck);
         rec = td->rec;
         break;
+      case AnnotAction::WarnClassname:
+        assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+        assertx(RuntimeOption::EvalClassPassesClassname);
+        assertx(RuntimeOption::EvalClassnameNotices);
+        if (!Assert) raise_notice(Strings::CLASS_TO_CLASSNAME);
+        return true;
     }
     assertx (result == AnnotAction::ObjectCheck ||
              result == AnnotAction::RecordCheck);
@@ -559,7 +567,7 @@ bool TypeConstraint::checkTypeAliasImpl(const T* type) const {
   }();
   if (!td) return Assert;
 
-  // We found the type alias, check if an object of type cls
+  // We found the type alias, check if an object or record of type 'type'
   // is compatible
   switch (getAnnotMetaType(td->type)) {
     case AnnotMetaType::Precise:
@@ -577,6 +585,7 @@ bool TypeConstraint::checkTypeAliasImpl(const T* type) const {
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
+    case AnnotMetaType::Classname:  // TODO: T83332251
       return false;
     case AnnotMetaType::Self:
     case AnnotMetaType::Parent:
@@ -667,6 +676,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
         case MetaType::VArrOrDArr:
         case MetaType::VecOrDict:
         case MetaType::ArrayLike:
+        case MetaType::Classname:
           return false;
         case MetaType::Nonnull:
           return true;
@@ -706,6 +716,13 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::RecordCheck:
       assertx(isRecord());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
+    case AnnotAction::WarnClassname:
+      if (isPasses)  return false;
+      assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+      assertx(RuntimeOption::EvalClassPassesClassname);
+      assertx(RuntimeOption::EvalClassnameNotices);
+      if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
+      return true;
   }
   not_reached();
 }
@@ -758,6 +775,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::ConvertLazyClass:
       case AnnotAction::ClsMethCheck:
       case AnnotAction::RecordCheck:
+      case AnnotAction::WarnClassname:
         // Can't get these with objects
         break;
     }
@@ -777,6 +795,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
     case MetaType::VArrOrDArr:
     case MetaType::VecOrDict:
     case MetaType::ArrayLike:
+    case MetaType::Classname:
       return false;
     case MetaType::Nonnull:
       return true;
@@ -808,6 +827,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::ConvertLazyClass:
     case AnnotAction::ClsMethCheck:
     case AnnotAction::RecordCheck:
+    case AnnotAction::WarnClassname:
       return false;
   }
   not_reached();
@@ -1290,6 +1310,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
+    case AnnotMetaType::Classname:
       return MK::None;
   }
   not_reached();

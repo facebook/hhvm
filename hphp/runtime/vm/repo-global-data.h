@@ -157,6 +157,12 @@ struct Repo::GlobalData {
   /* Whether implicit class conversions can raise a warning */
   bool RaiseClassConversionWarning = false;
 
+  /* Whether classname type-hint accepts (lazy) classes */
+  bool ClassPassesClassname = false;
+
+  /* Whether passing (lazy) classes to classname can raise a notice */
+  bool ClassnameNotices = false;
+
   /* Whether implicit class meth conversions can raise a warning */
   bool RaiseClsMethConversionWarning = false;
 
@@ -208,6 +214,8 @@ struct Repo::GlobalData {
       (IsCompatibleClsMethType)
       (ArrayProvenance)
       (RaiseClassConversionWarning)
+      (ClassPassesClassname)
+      (ClassnameNotices)
       (RaiseClsMethConversionWarning)
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)

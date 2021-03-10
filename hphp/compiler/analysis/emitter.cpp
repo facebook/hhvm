@@ -175,6 +175,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.RaiseClassConversionWarning =
     RuntimeOption::EvalRaiseClassConversionWarning;
+  gd.ClassPassesClassname = RuntimeOption::EvalClassPassesClassname;
+  gd.ClassnameNotices = RuntimeOption::EvalClassnameNotices;
   gd.RaiseClsMethConversionWarning =
     RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;

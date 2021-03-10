@@ -308,6 +308,8 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
   RO::EvalArrayProvenance = gd.ArrayProvenance;
   RO::EvalRaiseClassConversionWarning = gd.RaiseClassConversionWarning;
+  RO::EvalClassPassesClassname = gd.ClassPassesClassname;
+  RO::EvalClassnameNotices = gd.ClassnameNotices;
   RO::EvalRaiseClsMethConversionWarning = gd.RaiseClsMethConversionWarning;
   RO::EvalNoticeOnCoerceForStrConcat = gd.NoticeOnCoerceForStrConcat;
   RO::EvalNoticeOnCoerceForBitOp = gd.NoticeOnCoerceForBitOp;
@@ -414,6 +416,10 @@ void write_global_data(
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.RaiseClassConversionWarning =
     RuntimeOption::EvalRaiseClassConversionWarning;
+  gd.ClassPassesClassname =
+    RuntimeOption::EvalClassPassesClassname;
+  gd.ClassnameNotices =
+    RuntimeOption::EvalClassnameNotices;
   gd.RaiseClsMethConversionWarning =
     RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;

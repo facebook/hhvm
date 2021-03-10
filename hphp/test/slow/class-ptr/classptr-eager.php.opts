@@ -1,4 +1,5 @@
 -vEval.EmitClassPointers=1
+-vEval.ClassPassesClassname=false
 -vEval.CheckPropTypeHints=3
 -vEval.RaiseClassConversionWarning=true
 -vEval.ClassStringHintNotices=true

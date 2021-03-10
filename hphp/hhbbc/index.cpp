@@ -5259,6 +5259,12 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(BDict)) return TDict;
       if (candidate.subtypeOf(BKeyset)) return TKeyset;
       return TArrLike;
+    case AnnotMetaType::Classname:
+      if (candidate.subtypeOf(BStr)) return TStr;
+      if (!RuntimeOption::EvalClassnameNotices) {
+        if (candidate.subtypeOf(BCls)) return TCls;
+        if (candidate.subtypeOf(BLazyCls)) return TLazyCls;
+      }
     }
     return ConstraintResolution{ folly::none, false };
   }();

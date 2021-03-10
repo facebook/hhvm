@@ -845,6 +845,7 @@ function extra_args($options): string {
 
   if (isset($options['lazyclass'])) {
     $args .= ' -vEval.EmitClassPointers=2';
+    $args .= ' -vEval.ClassPassesClassname=true';
   }
   return $args;
 }

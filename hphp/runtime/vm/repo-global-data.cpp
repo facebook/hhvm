@@ -54,6 +54,8 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(IsCompatibleClsMethType);
   SHOW(ArrayProvenance);
   SHOW(RaiseClassConversionWarning);
+  SHOW(ClassPassesClassname);
+  SHOW(ClassnameNotices);
   SHOW(RaiseClsMethConversionWarning);
   SHOW(StrictArrayFillKeys);
   SHOW(NoticeOnCoerceForStrConcat);

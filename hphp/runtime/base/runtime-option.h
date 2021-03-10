@@ -1193,6 +1193,10 @@ struct RuntimeOption {
   /* Raise a notice if a Class type is passed to function that expects a
      string */                                                          \
   F(bool, ClassStringHintNotices, false)                                \
+  /* When this options is on, classname type-hints accepts classes */   \
+  F(bool, ClassPassesClassname, false)                                  \
+  /* Raise notice if a Class type is passed to a classname type-hint */ \
+  F(bool, ClassnameNotices, false)                                      \
   /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
   F(bool, IsVecNotices, false)                                          \
   /*  Raise a notice if a ClsMeth type is passed to a function that

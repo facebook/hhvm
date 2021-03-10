@@ -257,9 +257,6 @@ let fun_def ctx f :
       let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
-      let (env, _) =
-        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
-      in
       Typing_check_decls.fun_ env f;
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
@@ -302,7 +299,6 @@ let fun_def ctx f :
       let partial_callback = Partial.should_check_error (Env.get_mode env) in
       let check_has_hint p t = check_param_has_hint env p t partial_callback in
       List.iter2_exn ~f:check_has_hint f.f_params param_tys;
-      Typing_memoize.check_function env f;
       let params_need_immutable = get_ctx_vars f.f_ctxs in
       let (env, typed_params) =
         let bind_param_and_check env param =
@@ -335,6 +331,10 @@ let fun_def ctx f :
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
       in
+      let (env, _) =
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+      in
+      Typing_memoize.check_function env f;
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
       in
@@ -799,56 +799,6 @@ let class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct Typing.type_param in
   (env, tparam_list)
 
-(* This function sets a temporary coeffect context to check constants
- * with the right one (either pure / write_props).
- * We need to carefully restore the locals, otherwise the next continuation
- * is just reset and the call to register_capabilities is a no-op, no
- * capability is registered.
- *)
-let expr_with_special_coeffects env ?expected e cap_ty unsafe_cap_ty =
-  let init =
-    Option.map (Env.next_cont_opt env) ~f:(fun next_cont ->
-        let initial_locals = next_cont.Typing_per_cont_env.local_types in
-        let tpenv = Env.get_tpenv env in
-        (initial_locals, tpenv))
-  in
-  let (env, (te, ty)) =
-    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
-        let env =
-          match init with
-          | None -> env
-          | Some (initial_locals, tpenv) ->
-            let env = Env.reinitialize_locals env in
-            let env = Env.set_locals env initial_locals in
-            let env = Env.env_with_tpenv env tpenv in
-            env
-        in
-        let (env, _ty) =
-          Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
-        in
-        let (env, te, ty) = Typing.expr ?expected env e in
-        (env, (te, ty)))
-  in
-  (env, te, ty)
-
-(* Some (legacy) special functions are allowed as class constant init.,
-  therefore treat them as pure and insert the matching capabilities. *)
-let expr_with_pure_coeffects env ?expected e =
-  let pure = MakeType.mixed (Reason.Rwitness (fst e)) in
-  expr_with_special_coeffects env ?expected e pure pure
-
-(* Enum class constant initializers are restricted to be `write_props` *)
-let expr_with_write_props_coeffects env ?expected e =
-  let e_pos = fst e in
-  let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
-  let enum_class_ctx =
-    Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
-  in
-  let (env, cap_ty, unsafe_cap_ty) =
-    Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
-  in
-  expr_with_special_coeffects env ?expected e cap_ty unsafe_cap_ty
-
 (** Checks that a dynamic element is also dynamic in the parents. *)
 let check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
   (* The non-static properties that we get passed do not start with '$', but the
@@ -1099,12 +1049,23 @@ let class_const_def ~in_enum_class c env cc =
   in
   let (env, eopt, ty) =
     match e with
-    | Some e ->
-      let (env, te, ty') =
+    | Some ((e_pos, _) as e) ->
+      let (env, cap, unsafe_cap) =
         if in_enum_class then
-          expr_with_write_props_coeffects env ?expected:opt_expected e
+          (* Enum class constant initializers are restricted to be `write_props` *)
+          let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
+          let enum_class_ctx =
+            Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
+          in
+          Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
         else
-          expr_with_pure_coeffects env ?expected:opt_expected e
+          let pure = MakeType.mixed (Reason.Rwitness e_pos) in
+          (env, pure, pure)
+      in
+      let (env, (te, ty')) =
+        Typing.(
+          with_special_coeffects env cap unsafe_cap @@ fun env ->
+          expr env ?expected:opt_expected e |> triple_to_pair)
       in
       (* If we are checking an enum class, wrap ty' into the right
        * HH\MemberOf<class name, ty'> alias
@@ -1184,7 +1145,7 @@ let class_var_def ~is_static cls env cv =
     match cv.cv_expr with
     | None -> (env, None)
     | Some e ->
-      let (env, te, ty) = expr_with_pure_coeffects env ?expected e in
+      let (env, te, ty) = Typing.expr_with_pure_coeffects env ?expected e in
       (* Check that the inferred type is a subtype of the expected type.
        * Eventually this will be the responsibility of `expr`
        *)
@@ -1630,7 +1591,7 @@ let gconst_def ctx cst =
         let expected =
           ExpectedTy.make_and_allow_coercion (fst hint) Reason.URhint dty
         in
-        expr_with_pure_coeffects env ~expected value
+        Typing.expr_with_pure_coeffects env ~expected value
       in
       let env =
         Typing_coercion.coerce_type
@@ -1648,7 +1609,7 @@ let gconst_def ctx cst =
         && Partial.should_check_error cst.cst_mode 2035
       then
         Errors.missing_typehint (fst cst.cst_name);
-      let (env, te, _value_type) = expr_with_pure_coeffects env value in
+      let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, env)
   in
   {
@@ -1672,7 +1633,7 @@ let record_field env f =
   let expected = ExpectedTy.make p Reason.URhint cty in
   match e with
   | Some e ->
-    let (env, te, ty) = expr_with_pure_coeffects env ~expected e in
+    let (env, te, ty) = Typing.expr_with_pure_coeffects env ~expected e in
     let env =
       Typing_coercion.coerce_type
         p

@@ -76,6 +76,30 @@ let debug_print_last_pos _ =
 
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
+let triple_to_pair (env, te, ty) = (env, (te, ty))
+
+let with_special_coeffects env cap_ty unsafe_cap_ty f =
+  let init =
+    Option.map (Env.next_cont_opt env) ~f:(fun next_cont ->
+        let initial_locals = next_cont.Typing_per_cont_env.local_types in
+        let tpenv = Env.get_tpenv env in
+        (initial_locals, tpenv))
+  in
+  Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+      let env =
+        match init with
+        | None -> env
+        | Some (initial_locals, tpenv) ->
+          let env = Env.reinitialize_locals env in
+          let env = Env.set_locals env initial_locals in
+          let env = Env.env_with_tpenv env tpenv in
+          env
+      in
+      let (env, _ty) =
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+      in
+      f env)
+
 (* Set all the types in an expression to the given type. *)
 let with_type ty env (e : Nast.expr) : Tast.expr =
   let visitor =
@@ -279,7 +303,20 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
           Reason.URparam
           ty1_enforced
       in
-      let (env, te, ty2) = expr ?expected env e ~allow_awaitable:(*?*) false in
+      let (env, (te, ty2)) =
+        let r = Reason.Rwitness_from_decl param.param_pos in
+        let pure = MakeType.mixed r in
+        let (env, cap) =
+          MakeType.apply
+            r
+            (* Accessing statics for default arguments is allowed *)
+            (param.param_pos, SN.Capabilities.accessStaticVariable)
+            []
+          |> Phase.localize_with_self env
+        in
+        with_special_coeffects env cap pure @@ fun env ->
+        expr ?expected env e ~allow_awaitable:(*?*) false |> triple_to_pair
+      in
       Typing_sequencing.sequence_check_expr e;
       let (env, ty1) =
         if
@@ -1197,6 +1234,17 @@ and expr
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
     Errors.exception_occurred p (Exception.wrap e);
     make_result env p Aast.Any @@ err_witness env p
+
+(* Some (legacy) special functions are allowed in initializers,
+  therefore treat them as pure and insert the matching capabilities. *)
+and expr_with_pure_coeffects
+    ?(expected : ExpectedTy.t option) ~allow_awaitable env e =
+  let pure = MakeType.mixed (Reason.Rwitness (fst e)) in
+  let (env, (te, ty)) =
+    with_special_coeffects env pure pure @@ fun env ->
+    expr env e ?expected ~allow_awaitable |> triple_to_pair
+  in
+  (env, te, ty)
 
 and raw_expr
     ?(accept_using_var = false)
@@ -7288,6 +7336,10 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
 let expr ?expected env e =
   Typing_env.with_origin2 env Decl_counters.Body (fun env ->
       expr ?expected env e ~allow_awaitable:(*?*) false)
+
+let expr_with_pure_coeffects ?expected env e =
+  Typing_env.with_origin2 env Decl_counters.Body (fun env ->
+      expr_with_pure_coeffects ?expected env e ~allow_awaitable:(*?*) false)
 
 let stmt env st =
   Typing_env.with_origin env Decl_counters.Body (fun env -> stmt env st)

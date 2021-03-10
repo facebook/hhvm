@@ -1,6 +1,2 @@
 File "parse_constants.php", line 8, characters 17-24:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "parse_constants.php", line 8, characters 13-13:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 20, characters 6-43:
-  But got `dynamic` because it is an unenforceable type

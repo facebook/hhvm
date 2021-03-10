@@ -1,4 +1,4 @@
-File "invalid_variable_name3_fail.php", line 14, characters 10-12:
+File "invalid_variable_name3_fail.php", line 14, characters 8-13:
 Splice syntax ${...} can only occur inside expression trees Foo``...``. (Parsing[1002])
 File "invalid_variable_name3_fail.php", line 14, characters 10-12:
 Unbound name: `foo` (a global constant) (Naming[2049])

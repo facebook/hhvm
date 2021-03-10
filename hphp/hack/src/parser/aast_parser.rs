@@ -132,7 +132,8 @@ impl<'src> AastParser {
             let empty_program = vec![];
             let aast = aast.unwrap_or(&empty_program);
             errors.extend(aast_check::check_program(&aast));
-            errors.extend(expression_tree_check::check_program(&aast));
+            errors.extend(expression_tree_check::check_splices(&aast));
+
             errors
         };
         if env.codegen {

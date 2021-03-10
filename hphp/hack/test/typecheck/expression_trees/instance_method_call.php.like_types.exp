@@ -1,10 +1,2 @@
 File "instance_method_call.php", line 13, characters 5-13:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "instance_method_call.php", line 12, characters 20-65:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 41, characters 41-79:
-  But got `dynamic` because it is an unenforceable type
-File "instance_method_call.php", line 13, characters 15-19:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 34, characters 5-45:
-  But got `dynamic` because it is an unenforceable type

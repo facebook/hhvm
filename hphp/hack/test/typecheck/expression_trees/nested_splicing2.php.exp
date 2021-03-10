@@ -1,6 +1,2 @@
-File "nested_splicing2.php", line 6, characters 16-16:
-Splice syntax ${...} can only occur inside expression trees Foo``...``. (Parsing[1002])
 File "nested_splicing2.php", line 6, characters 14-17:
-Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "nested_splicing2.php", line 6, characters 16-16:
-  But got `int`
+Splice syntax `${...}` cannot be nested. (Parsing[1002])

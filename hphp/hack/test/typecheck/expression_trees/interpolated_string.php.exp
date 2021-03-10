@@ -1,10 +1,2 @@
 File "interpolated_string.php", line 10, characters 7-19:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "interpolated_string.php", line 10, characters 8-9:
-You cannot use this object as a string (Typing[4067])
-  File "interpolated_string.php", line 8, characters 12-18:
-  This object doesn't implement `__toString`
-File "interpolated_string.php", line 10, characters 10-18:
-You cannot use this object as a string (Typing[4067])
-  File "interpolated_string.php", line 10, characters 10-18:
-  This object doesn't implement `__toString`

@@ -1993,8 +1993,19 @@ where
             )),
             PrefixedCodeExpression(c) => {
                 let src_expr = Self::p_expr(&c.expression, env)?;
+
                 let hint = Self::p_hint(&c.prefix, env)?;
-                let desugared_expr = desugar(&hint, &src_expr, env);
+
+                let desugared_expr = match desugar(&hint, src_expr.clone(), env) {
+                    Ok(desugared_expr) => desugared_expr,
+                    Err((pos, msg)) => {
+                        Self::raise_parsing_error_pos(&pos, env, &msg);
+                        // Discard the source AST and just use a null
+                        // literal, to prevent cascading errors.
+                        return Ok(E_::Null);
+                    }
+                };
+
                 Ok(E_::mk_expression_tree(ast::ExpressionTree {
                     hint,
                     src_expr,

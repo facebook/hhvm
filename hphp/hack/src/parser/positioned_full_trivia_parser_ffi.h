@@ -33,6 +33,27 @@ char const* parse_positioned_full_trivia_cpp_ffi(
 void parse_positioned_full_trivia_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
+
+#  include <memory>
+
+namespace HPHP {
+
+using parse_positioned_full_trivia_ptr =
+  std::unique_ptr<char const, void(*)(char const*)>;
+
+inline parse_positioned_full_trivia_ptr
+  parse_positioned_full_trivia(
+      char const* filename
+    , char const* source_text
+    , parse_positioned_full_trivia_environment const* env
+  ) {
+  return parse_positioned_full_trivia_ptr {
+      parse_positioned_full_trivia_cpp_ffi(filename, source_text, env)
+    , parse_positioned_full_trivia_free_string_cpp_ffi
+  };
+}
+
+}//namepsace HPHP
 #  endif /*defined(__cplusplus)*/
 
 #endif/*!defined(POSITIONED_FULL_TRIVIA_PARSER_FFI_H)*/

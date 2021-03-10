@@ -23,6 +23,27 @@ char const* extract_as_json_cpp_ffi(
 void extract_as_json_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
+
+#  include <memory>
+
+namespace HPHP {
+using extract_as_json_ptr =
+  std::unique_ptr<char const  , void(*)(char const*)>;
+
+inline extract_as_json_ptr
+  extract_as_json(
+      int32_t flags
+    , char const* filename
+    , char const* source_text
+    , bool mangle_xhp
+  ) {
+  return extract_as_json_ptr {
+      extract_as_json_cpp_ffi(flags, filename, source_text, mangle_xhp)
+    , extract_as_json_free_string_cpp_ffi
+  };
+}
+
+}//namespace HPHP
 #  endif /*defined(__cplusplus)*/
 
 #endif/*!defined(RUST_FACTS_FFI_H)*/

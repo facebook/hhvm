@@ -94,6 +94,28 @@ char const* compile_from_text_cpp_ffi(
 void compile_from_text_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
+
+#  include <memory>
+
+namespace HPHP {
+
+using compile_from_text_ptr =
+  std::unique_ptr<char const, void(*)(char const*)>;
+
+inline compile_from_text_ptr
+  compile_from_text(
+      native_environment const* env
+    , char const* source_text
+    , output_config const* config
+    , buf_t* error_buf
+  ) {
+  return compile_from_text_ptr {
+      compile_from_text_cpp_ffi(env, source_text, config, error_buf)
+    , compile_from_text_free_string_cpp_ffi
+  };
+}
+
+}//namespace HPHP
 #  endif /*defined(__cplusplus)*/
 
 #endif/*!defined(COMPILE_FFI_H)*/

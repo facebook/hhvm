@@ -160,7 +160,7 @@ module Naming = struct
     | SelfInNonFinalFunctionPointer [@value 2113]
     | ClassMethNonFinalCLASS [@value 2114]
     | WildcardTypeParamDisallowed [@value 2115]
-    | CallingAssert [@value 2116]
+    (* | CallingAssert [@value 2116] *)
     | InvalidWildcardContext [@value 2117]
   [@@deriving enum, show { with_path = false }]
 

@@ -1500,6 +1500,7 @@ let schema : schema_node list =
         [
           ("receiver", Aggregate Expression);
           ("type_args", ZeroOrOne (Just "TypeArguments"));
+          ("enum_atom", ZeroOrOne (Aggregate Expression));
           ("left_paren", Token);
           ("argument_list", ZeroOrMore (Aggregate Expression));
           ("right_paren", Token);

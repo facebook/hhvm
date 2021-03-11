@@ -1794,12 +1794,14 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
+            function_call_enum_atom;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
           } ->
         let acc = f acc function_call_receiver in
         let acc = f acc function_call_type_args in
+        let acc = f acc function_call_enum_atom in
         let acc = f acc function_call_left_paren in
         let acc = f acc function_call_argument_list in
         let acc = f acc function_call_right_paren in
@@ -3434,6 +3436,7 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
+            function_call_enum_atom;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -3441,6 +3444,7 @@ module WithToken (Token : TokenType) = struct
         [
           function_call_receiver;
           function_call_type_args;
+          function_call_enum_atom;
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
@@ -5060,6 +5064,7 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
+            function_call_enum_atom;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -5067,6 +5072,7 @@ module WithToken (Token : TokenType) = struct
         [
           "function_call_receiver";
           "function_call_type_args";
+          "function_call_enum_atom";
           "function_call_left_paren";
           "function_call_argument_list";
           "function_call_right_paren";
@@ -6870,6 +6876,7 @@ module WithToken (Token : TokenType) = struct
           [
             function_call_receiver;
             function_call_type_args;
+            function_call_enum_atom;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -6878,6 +6885,7 @@ module WithToken (Token : TokenType) = struct
           {
             function_call_receiver;
             function_call_type_args;
+            function_call_enum_atom;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;
@@ -9052,6 +9060,7 @@ module WithToken (Token : TokenType) = struct
       let make_function_call_expression
           function_call_receiver
           function_call_type_args
+          function_call_enum_atom
           function_call_left_paren
           function_call_argument_list
           function_call_right_paren =
@@ -9060,6 +9069,7 @@ module WithToken (Token : TokenType) = struct
             {
               function_call_receiver;
               function_call_type_args;
+              function_call_enum_atom;
               function_call_left_paren;
               function_call_argument_list;
               function_call_right_paren;

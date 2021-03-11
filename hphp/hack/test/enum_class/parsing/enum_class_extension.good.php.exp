@@ -1826,6 +1826,7 @@
                     }
                   },
                   "function_call_type_args":{"kind":"missing"},
+                  "function_call_enum_atom":{"kind":"missing"},
                   "function_call_left_paren":{
                     "kind":"token",
                     "token":{
@@ -2479,5 +2480,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\ninterface ExBox {}\n\nclass Box<T> implements ExBox {\n  public function __construct(public T $data) {}\n}\n\nclass IBox extends Box<int> {\n  public function add(int $x): void {\n    $this->data = $this->data + $x;\n  }\n}\n\nabstract final class Helper {\n  public static function ibox(): IBox {\n    return new IBox(42);\n  }\n}\n\nenum class E: ExBox {\n  Box<string> A = new Box('bli');\n  IBox B = Helper::ibox();\n  Box<int> C = new Box(42);\n}\n\nenum class F: ExBox extends E {\n  Box<int> D = new Box(1664);\n}\n",
-  "version":"2021-01-18-0001"
+  "version":"2021-03-08-0001"
 }

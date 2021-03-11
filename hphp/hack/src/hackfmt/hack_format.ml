@@ -2780,6 +2780,7 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
+          function_call_enum_atom = _enum_atom;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;
@@ -2832,6 +2833,7 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
+          function_call_enum_atom = _enum_atom;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;

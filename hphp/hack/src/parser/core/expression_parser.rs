@@ -1162,13 +1162,18 @@ where
                 let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
                 self.parse_scope_resolution_expression(type_specifier)
             }
-            TokenKind::LeftParen => {
+            TokenKind::Hash | TokenKind::LeftParen => {
+                let enum_atom = match self.peek_token_kind() {
+                    TokenKind::Hash => self.parse_atom(),
+                    _ => S!(make_missing, self, self.pos()),
+                };
                 let (left, args, right) = self.parse_expression_list_opt();
                 S!(
                     make_function_call_expression,
                     self,
                     term,
                     type_arguments,
+                    enum_atom,
                     left,
                     args,
                     right
@@ -1270,6 +1275,7 @@ where
                 // AND
                 // - <term> <operator> does not look like a prefix of
                 // some assignment expression
+
                 match assignment_prefix_kind {
                     BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
                         self.continue_from(parser1);
@@ -1346,7 +1352,7 @@ where
                         TokenKind::PlusPlus | TokenKind::MinusMinus => {
                             self.parse_postfix_unary(term)
                         }
-                        TokenKind::LeftParen => self.parse_function_call(term),
+                        TokenKind::Hash | TokenKind::LeftParen => self.parse_function_call(term),
                         TokenKind::LeftBracket | TokenKind::LeftBrace => self.parse_subscript(term),
                         TokenKind::Question => {
                             let token = self.assert_token(TokenKind::Question);
@@ -1625,6 +1631,10 @@ where
         // function-call-expression:
         //   postfix-expression  (  argument-expression-list-opt  )
         let type_arguments = S!(make_missing, self, self.pos());
+        let enum_atom = match self.peek_token_kind() {
+            TokenKind::Hash => self.parse_atom(),
+            _ => S!(make_missing, self, self.pos()),
+        };
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = true;
         let (left, args, right) = self.parse_expression_list_opt();
@@ -1633,6 +1643,7 @@ where
             self,
             receiver,
             type_arguments,
+            enum_atom,
             left,
             args,
             right

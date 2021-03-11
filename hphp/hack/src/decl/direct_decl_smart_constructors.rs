@@ -5049,6 +5049,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         &mut self,
         _receiver: Self::R,
         _type_args: Self::R,
+        _enum_atom: Self::R,
         _left_paren: Self::R,
         _argument_list: Self::R,
         _right_paren: Self::R,

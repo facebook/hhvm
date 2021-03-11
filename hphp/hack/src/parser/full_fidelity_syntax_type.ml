@@ -784,6 +784,7 @@ struct
     | FunctionCallExpression of {
         function_call_receiver: t;
         function_call_type_args: t;
+        function_call_enum_atom: t;
         function_call_left_paren: t;
         function_call_argument_list: t;
         function_call_right_paren: t;
@@ -2156,6 +2157,7 @@ struct
   and function_call_expression = {
     function_call_receiver: expression value;
     function_call_type_args: type_arguments option value;
+    function_call_enum_atom: expression option value;
     function_call_left_paren: Token.t value;
     function_call_argument_list: expression listesque value;
     function_call_right_paren: Token.t value;

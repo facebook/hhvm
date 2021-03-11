@@ -1182,10 +1182,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_call_expression(ctx: &C, receiver: Self, type_args: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
+    fn make_function_call_expression(ctx: &C, receiver: Self, type_args: Self, enum_atom: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(ctx.get_arena().alloc(FunctionCallExpressionChildren {
             receiver,
             type_args,
+            enum_atom,
             left_paren,
             argument_list,
             right_paren,

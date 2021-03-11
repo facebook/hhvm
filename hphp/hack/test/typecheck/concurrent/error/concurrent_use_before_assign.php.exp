@@ -1,4 +1,2 @@
 File "concurrent_use_before_assign.php", line 9, characters 21-22:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "concurrent_use_before_assign.php", line 8, characters 16-21:
-Did you mean `__tmp$1` instead?

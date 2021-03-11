@@ -1,4 +1,2 @@
 File "unbound_variables.php", line 9, characters 13-14:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "unbound_variables.php", line 9, characters 18-18:
-  Did you mean `$0splice0` instead?

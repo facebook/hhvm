@@ -66,9 +66,17 @@ std::unique_ptr<RecordDesc> testRecordDesc(const char* name,
   );
 }
 
+struct TypeTest : ::testing::Test {
+ protected:
+  void SetUp() override {
+    RO::EvalHackArrDVArrs = false;
+  }
+  void TearDown() override {}
+};
+
 }
 
-TEST(Type, Equality) {
+TEST_F(TypeTest, Equality) {
   EXPECT_NE(TCls, TPtrToObj);
   EXPECT_NE(TLazyCls, TPtrToObj);
   EXPECT_NE(TCls, TLvalToObj);
@@ -77,7 +85,7 @@ TEST(Type, Equality) {
   EXPECT_NE(TLazyCls, TMemToObj);
 }
 
-TEST(Type, Null) {
+TEST_F(TypeTest, Null) {
   EXPECT_TRUE(TUninit <= TNull);
   EXPECT_TRUE(TInitNull <= TNull);
   EXPECT_FALSE(TBool <= TNull);
@@ -90,7 +98,7 @@ TEST(Type, Null) {
   EXPECT_FALSE(TInitNull.needsReg());
 }
 
-TEST(Type, KnownDataType) {
+TEST_F(TypeTest, KnownDataType) {
   auto trueTypes = {
     TInt,
     TStaticStr,
@@ -142,7 +150,7 @@ TEST(Type, KnownDataType) {
   }
 }
 
-TEST(Type, ArrayLayout) {
+TEST_F(TypeTest, ArrayLayout) {
   auto const top     = ArrayLayout::Top();
   auto const vanilla = ArrayLayout::Vanilla();
   auto const bespoke = ArrayLayout::Bespoke();
@@ -253,7 +261,7 @@ TEST(Type, ArrayLayout) {
   EXPECT_EQ(foo & foo,         foo);
 }
 
-TEST(Type, ToString) {
+TEST_F(TypeTest, ToString) {
   EXPECT_EQ("Int", TInt.toString());
   EXPECT_EQ("Cell", TCell.toString());
 
@@ -313,7 +321,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
 }
 
-TEST(Type, Ptr) {
+TEST_F(TypeTest, Ptr) {
   EXPECT_TRUE(TPtrToInt <= TPtrToCell);
 
   EXPECT_EQ(TPtrToInt, TInt.ptr(Ptr::Ptr));
@@ -412,7 +420,7 @@ TEST(Type, Ptr) {
   EXPECT_EQ(subRecSpec, ptrToSubRec.recSpec());
 }
 
-TEST(Type, Lval) {
+TEST_F(TypeTest, Lval) {
   EXPECT_TRUE(TLvalToInt <= TLvalToCell);
 
   EXPECT_EQ(TInt, TLvalToInt.deref());
@@ -430,7 +438,7 @@ TEST(Type, Lval) {
   EXPECT_EQ(TBottom, TLvalToInt & TInt);
 }
 
-TEST(Type, Mem) {
+TEST_F(TypeTest, Mem) {
   EXPECT_TRUE(TMemToInt <= TMemToCell);
 
   EXPECT_EQ(TInt, TMemToInt.deref());
@@ -448,7 +456,7 @@ TEST(Type, Mem) {
   EXPECT_EQ(TBottom, TMemToInt & TInt);
 }
 
-TEST(Type, MemPtrLval) {
+TEST_F(TypeTest, MemPtrLval) {
   EXPECT_TRUE(TPtrToInt <= TMemToCell);
   EXPECT_TRUE(TLvalToInt <= TMemToCell);
   EXPECT_FALSE(TInt <= TMemToCell);
@@ -474,7 +482,7 @@ TEST(Type, MemPtrLval) {
   EXPECT_EQ(TLvalToUncounted, TLvalToUncounted - TPtrToUninit);
 }
 
-TEST(Type, Subtypes) {
+TEST_F(TypeTest, Subtypes) {
   Type numbers = TDbl | TInt;
   EXPECT_EQ("{Dbl|Int}", numbers.toString());
   EXPECT_TRUE(TDbl <= numbers);
@@ -500,7 +508,7 @@ TEST(Type, Subtypes) {
   EXPECT_FALSE(TCls <= funcOrlcls);
 }
 
-TEST(Type, Top) {
+TEST_F(TypeTest, Top) {
   for (auto t : allTypes()) {
     EXPECT_TRUE(t <= TTop);
   }
@@ -516,7 +524,7 @@ inline bool fits(Type t, GuardConstraint gc) {
 }
 }
 
-TEST(Type, GuardConstraints) {
+TEST_F(TypeTest, GuardConstraints) {
   EXPECT_TRUE(fits(TCell, DataTypeGeneric));
   EXPECT_FALSE(fits(TCell, DataTypeCountnessInit));
   EXPECT_FALSE(fits(TCell, DataTypeSpecific));
@@ -532,7 +540,7 @@ TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TVanillaVec, vanillaConstraint));
 }
 
-TEST(Type, RelaxType) {
+TEST_F(TypeTest, RelaxType) {
   auto gc = GuardConstraint{DataTypeSpecialized};
   gc.setDesiredClass(SystemLib::s_HH_IteratorClass);
   gc.category = DataTypeSpecialized;
@@ -549,12 +557,12 @@ TEST(Type, RelaxType) {
   EXPECT_EQ(subRec, relaxType(subRec, gc.category));
 }
 
-TEST(Type, RelaxConstraint) {
+TEST_F(TypeTest, RelaxConstraint) {
   EXPECT_EQ(GuardConstraint(DataTypeCountnessInit),
             relaxConstraint(GuardConstraint{DataTypeSpecific}, TCell, TDict));
 }
 
-TEST(Type, Specialized) {
+TEST_F(TypeTest, Specialized) {
   EXPECT_LE(TVanillaArr, TArr);
   EXPECT_LT(TVanillaArr, TArr);
   EXPECT_FALSE(TArr <= TVanillaArr);
@@ -618,7 +626,7 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TLazyCls, lclsOrStr - TStr);
 }
 
-TEST(Type, ArrayFitsSpec) {
+TEST_F(TypeTest, ArrayFitsSpec) {
   auto const nonempty = RepoAuthType::Array::Empty::No;
   auto const maybe_empty = RepoAuthType::Array::Empty::Maybe;
   auto const str_rat = RepoAuthType(RepoAuthType::Tag::Str);
@@ -672,7 +680,7 @@ TEST(Type, ArrayFitsSpec) {
   EXPECT_FALSE(Type::cns(darr2) <= ratType3);
 }
 
-TEST(Type, SpecializedArrays) {
+TEST_F(TypeTest, SpecializedArrays) {
   EXPECT_FALSE(TArr.isSpecialized());
   EXPECT_FALSE(TArr.arrSpec());
   EXPECT_FALSE(TArr.arrSpec().vanilla());
@@ -692,7 +700,7 @@ TEST(Type, SpecializedArrays) {
   EXPECT_TRUE(const_dict.arrSpec().vanilla());
 }
 
-TEST(Type, SpecializedObjects) {
+TEST_F(TypeTest, SpecializedObjects) {
   auto const A = SystemLib::s_HH_IteratorClass;
   auto const B = SystemLib::s_HH_TraversableClass;
   EXPECT_TRUE(A->classof(B));
@@ -735,7 +743,7 @@ TEST(Type, SpecializedObjects) {
   EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
-TEST(Type, SpecializedRecords) {
+TEST_F(TypeTest, SpecializedRecords) {
   auto const rA = testRecordDesc("A", "B");
   auto const A = rA.get();
   auto const B = A->parent();
@@ -778,7 +786,7 @@ TEST(Type, SpecializedRecords) {
   EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
-TEST(Type, SpecializedClass) {
+TEST_F(TypeTest, SpecializedClass) {
   auto const A = SystemLib::s_HH_IteratorClass;
   auto const B = SystemLib::s_HH_TraversableClass;
 
@@ -820,7 +828,7 @@ TEST(Type, SpecializedClass) {
   EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
-TEST(Type, Const) {
+TEST_F(TypeTest, Const) {
   auto five = Type::cns(5);
   auto fiveArr = five | TArr;
   EXPECT_LT(five, TInt);
@@ -950,7 +958,7 @@ TEST(Type, Const) {
   EXPECT_EQ(TBottom, constLazyCls & True);
 }
 
-TEST(Type, DVArray) {
+TEST_F(TypeTest, DVArray) {
   EXPECT_EQ("DArr", TDArr.toString());
   EXPECT_TRUE(TDArr <= TArr);
   EXPECT_FALSE(TDArr <= TVArr);
@@ -967,14 +975,14 @@ TEST(Type, DVArray) {
   EXPECT_EQ(TBottom, TVArr & TDArr);
 }
 
-TEST(Type, NarrowToVanilla) {
+TEST_F(TypeTest, NarrowToVanilla) {
   EXPECT_EQ("Arr=Vanilla", TArr.narrowToVanilla().toString());
   EXPECT_EQ("Vec=Vanilla", TVec.narrowToVanilla().toString());
   EXPECT_EQ("{Vec=Vanilla|Int}", (TVec|TInt).narrowToVanilla().toString());
   EXPECT_EQ("{Vec|Obj}", (TVec|TObj).narrowToVanilla().toString());
 }
 
-TEST(Type, VanillaArray) {
+TEST_F(TypeTest, VanillaArray) {
   EXPECT_EQ("Arr=Vanilla", TVanillaArr.toString());
   EXPECT_EQ("ArrLike=Vanilla", TVanillaArrLike.toString());
   EXPECT_TRUE(TVanillaArr <= TArr);
@@ -983,7 +991,7 @@ TEST(Type, VanillaArray) {
   EXPECT_TRUE(TVanillaArr.arrSpec().vanilla());
 }
 
-TEST(Type, VanillaVec) {
+TEST_F(TypeTest, VanillaVec) {
   EXPECT_EQ("Vec", TVec.toString());
   EXPECT_FALSE(TVec.arrSpec().type());
   EXPECT_FALSE(TVec.arrSpec().vanilla());
@@ -1000,7 +1008,7 @@ TEST(Type, VanillaVec) {
   EXPECT_TRUE(TVanillaVec < TVec);
 }
 
-TEST(Type, BespokeVec) {
+TEST_F(TypeTest, BespokeVec) {
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
@@ -1025,7 +1033,7 @@ TEST(Type, BespokeVec) {
   EXPECT_EQ(TBottom, vecVanillaBar);
 }
 
-TEST(Type, BespokeVecRAT) {
+TEST_F(TypeTest, BespokeVecRAT) {
   RO::EvalBespokeArrayLikeMode = 2;
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
@@ -1050,7 +1058,7 @@ TEST(Type, BespokeVecRAT) {
   EXPECT_EQ(TBottom, vecRatBespoke.narrowToLayout(bar_layout));
 }
 
-TEST(Type, VanillaVecRAT) {
+TEST_F(TypeTest, VanillaVecRAT) {
   ArrayTypeTable::Builder ratBuilder;
   auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                       RepoAuthType(RepoAuthType::Tag::Str));
@@ -1083,7 +1091,7 @@ TEST(Type, VanillaVecRAT) {
   EXPECT_FALSE(vecRat < TVanillaVec);
 }
 
-TEST(Type, BespokeHierarchy) {
+TEST_F(TypeTest, BespokeHierarchy) {
   /*
    *    top(L)
    *   /     \
@@ -1255,7 +1263,7 @@ TEST(Type, BespokeHierarchy) {
   EXPECT_EQ(ter, ter & ter);
 }
 
-TEST(Type, BespokeRanges) {
+TEST_F(TypeTest, BespokeRanges) {
   /*
    *    top(L)
    *   /     \
@@ -1295,7 +1303,7 @@ TEST(Type, BespokeRanges) {
   qop_layout.bespokeLayoutTest();
 }
 
-TEST(Type, PtrKinds) {
+TEST_F(TypeTest, PtrKinds) {
   auto const frameCell    = TCell.ptr(Ptr::Frame);
   auto const frameUninit = TUninit.ptr(Ptr::Frame);
   auto const frameBool   = TBool.ptr(Ptr::Frame);
@@ -1348,7 +1356,7 @@ TEST(Type, PtrKinds) {
   EXPECT_EQ(TInt | TArr, frameCellOrCell & stackOrArrOrInt);
 }
 
-TEST(Type, ConstantPtrTypes) {
+TEST_F(TypeTest, ConstantPtrTypes) {
   std::vector<TypedValue> darrays;
   for (auto const key : {"foo", "bar"}) {
     DArrayInit dinit{1};

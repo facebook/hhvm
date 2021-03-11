@@ -27,12 +27,22 @@
 namespace HPHP {
 
 namespace {
+
 bool same_arrays(const Array& a1, const Array& a2) {
   return a1->same(a2.get());
 }
+
+struct ArrayTest : ::testing::Test {
+ protected:
+  void SetUp() override {
+    RO::EvalHackArrDVArrs = false;
+  }
+  void TearDown() override {}
+};
+
 }
 
-TEST(ARRAY, Constructors) {
+TEST_F(ArrayTest, Constructors) {
   const String s_name("name");
 
   Array arr;
@@ -120,7 +130,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_FALSE(arr.isPHPArray());
 }
 
-TEST(ARRAY, Iteration) {
+TEST_F(ArrayTest, Iteration) {
   Array arr = make_map_array("n1", "v1", "n2", "v2");
   int i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
@@ -174,7 +184,7 @@ TEST(ARRAY, Iteration) {
   EXPECT_TRUE(i == 2);
 }
 
-TEST(ARRAY, Conversions) {
+TEST_F(ArrayTest, Conversions) {
   const String s_Vec("Vec");
   const String s_Dict("Dict");
   const String s_Keyset("Keyset");
@@ -248,7 +258,7 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(keyset1.toDouble() == 1.0);
 }
 
-TEST(Array, Offsets) {
+TEST_F(ArrayTest, Offsets) {
   const String s_n1("n1");
   const String s_n2("n2");
   const String s_1("1");
@@ -362,7 +372,7 @@ TEST(Array, Offsets) {
   }
 }
 
-TEST(ARRAY, Membership) {
+TEST_F(ArrayTest, Membership) {
   const String s_n1("n1");
   const String s_n2("n2");
   const String s_name("name");
@@ -496,7 +506,7 @@ TEST(ARRAY, Membership) {
   }
 }
 
-TEST(ARRAY, IsVectorData) {
+TEST_F(ArrayTest, IsVectorData) {
   {
     Array arr = make_map_array(0, "a", 1, "b");
     EXPECT_TRUE(arr->isVectorData());

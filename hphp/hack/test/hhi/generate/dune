@@ -1,0 +1,18 @@
+(alias
+    (name generate_hhis_test)
+    (deps %{exe:../../../src/hh_parse.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/hhi/generate/*.php)
+          (glob_files %{project_root}/test/hhi/generate/*.hack)
+          (glob_files %{project_root}/test/hhi/generate/*.hhi.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/hhi/generate
+    --out-extension .hhi.out
+    --expect-extension .hhi.exp
+    --program %{exe:../../../src/hh_parse.exe}
+    --flags
+    --generate-hhi)))
+
+(alias
+  (name runtest)
+  (deps (alias generate_hhis_test)))

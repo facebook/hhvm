@@ -8,7 +8,7 @@
 type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
 external parse_decls_and_mode_ffi :
-  (* (disable_xhp_element_mangling, array_unification, interpret_soft_types_as_like_types) *)
+  (* (disable_xhp_element_mangling, hack_arr_dv_arrs, interpret_soft_types_as_like_types) *)
   DeclParserOptions.t ->
   Relative_path.t ->
   string ->

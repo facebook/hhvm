@@ -149,7 +149,7 @@ let make_param_local_ty env decl_hint param =
       let r = Reason.Rvar_param param.param_pos in
       let arr_values = mk (r, t) in
       let unification =
-        TypecheckerOptions.array_unification (Env.get_tcopt env)
+        TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
       in
       MakeType.varray ~unification r arr_values
     | _ -> ty

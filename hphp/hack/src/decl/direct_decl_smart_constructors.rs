@@ -1082,7 +1082,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Varray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.opts.array_unification {
+                let ty_ = if self.opts.hack_arr_dv_arrs {
                     Ty_::Tapply(self.alloc((
                         PosId(self.token_pos(t), naming_special_names::collections::VEC),
                         self.alloc([tany]),
@@ -1095,7 +1095,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Token(t) if t.kind() == TokenKind::Darray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.opts.array_unification {
+                let ty_ = if self.opts.hack_arr_dv_arrs {
                     Ty_::Tapply(self.alloc((
                         PosId(self.token_pos(t), naming_special_names::collections::DICT),
                         self.alloc([tany, tany]),
@@ -1136,7 +1136,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         "varray_or_darray" => {
                             let key_type = self.varray_or_darray_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                            if self.opts.array_unification {
+                            if self.opts.hack_arr_dv_arrs {
                                 Ty_::TvecOrDict(self.alloc((key_type, value_type)))
                             } else {
                                 Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
@@ -1703,7 +1703,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     /// The type used when a `varray_or_darray` typehint is missing its key type argument.
     fn varray_or_darray_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
-        if self.opts.array_unification {
+        if self.opts.hack_arr_dv_arrs {
             self.vec_or_dict_key(pos)
         } else {
             self.alloc(Ty(
@@ -2813,7 +2813,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                             .unwrap_or_else(|| self.tany_with_pos(id_pos)),
                     ));
 
-                    if self.opts.array_unification {
+                    if self.opts.hack_arr_dv_arrs {
                         Ty_::TvecOrDict(tup)
                     } else {
                         Ty_::TvarrayOrDarray(tup)
@@ -2825,7 +2825,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
                         self.node_to_ty(*tv)
                             .unwrap_or_else(|| self.tany_with_pos(id_pos)),
                     ));
-                    if self.opts.array_unification {
+                    if self.opts.hack_arr_dv_arrs {
                         Ty_::TvecOrDict(tup)
                     } else {
                         Ty_::TvarrayOrDarray(tup)
@@ -4480,7 +4480,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         };
         self.hint_ty(
             self.merge_positions(varray_keyword, greater_than),
-            if self.opts.array_unification {
+            if self.opts.hack_arr_dv_arrs {
                 Ty_::Tapply(self.alloc((
                     PosId(
                         self.get_pos(varray_keyword),
@@ -4509,7 +4509,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
         self.hint_ty(
             pos,
-            if self.opts.array_unification {
+            if self.opts.hack_arr_dv_arrs {
                 Ty_::Tapply(self.alloc((
                     PosId(
                         self.get_pos(darray),

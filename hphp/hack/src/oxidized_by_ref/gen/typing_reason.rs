@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1b568cdddc78f572e9ae0d23d86d62f>>
+// @generated SignedSource<<050c7742f2bf9fc67920bd2a6f6ef7a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -237,7 +237,7 @@ pub enum T_<'a> {
     Rsplice(&'a pos::Pos<'a>),
     RetBoolean(&'a pos::Pos<'a>),
     RdefaultCapability(&'a pos_or_decl::PosOrDecl<'a>),
-    RarrayUnification(&'a pos::Pos<'a>),
+    RhackArrDvArrs(&'a pos::Pos<'a>),
     RconcatOperand(&'a pos::Pos<'a>),
     RinterpOperand(&'a pos::Pos<'a>),
     RdynamicCoercion(&'a T_<'a>),

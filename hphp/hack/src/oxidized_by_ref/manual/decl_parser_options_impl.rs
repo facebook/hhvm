@@ -20,7 +20,7 @@ impl Default for &DeclParserOptions<'_> {
 impl DeclParserOptions<'_> {
     pub const fn from_parser_options<'a>(opts: &ParserOptions<'a>) -> DeclParserOptions<'a> {
         DeclParserOptions {
-            array_unification: opts.po_array_unification,
+            hack_arr_dv_arrs: opts.po_hack_arr_dv_arrs,
             auto_namespace_map: opts.po_auto_namespace_map,
             disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,

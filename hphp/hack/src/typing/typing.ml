@@ -1554,7 +1554,7 @@ and expr_
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
       | Varray _ ->
         let unification =
-          TypecheckerOptions.array_unification (Env.get_tcopt env)
+          TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
         in
         if unification then
           ( get_vc_inst Vec,
@@ -1562,10 +1562,8 @@ and expr_
             array_value,
             (fun th elements -> Aast.ValCollection (Vec, th, elements)),
             fun value_ty ->
-              MakeType.varray
-                ~unification
-                (Reason.Rarray_unification p)
-                value_ty )
+              MakeType.varray ~unification (Reason.Rhack_arr_dv_arrs p) value_ty
+          )
         else
           ( get_varray_inst,
             "varray",
@@ -1619,7 +1617,7 @@ and expr_
         )
       | Darray _ ->
         let unification =
-          TypecheckerOptions.array_unification (Env.get_tcopt env)
+          TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
         in
         let name = "darray" in
         if unification then
@@ -1627,7 +1625,7 @@ and expr_
             name,
             (fun th pairs -> Aast.KeyValCollection (Dict, th, pairs)),
             fun k v ->
-              MakeType.darray ~unification (Reason.Rarray_unification p) k v )
+              MakeType.darray ~unification (Reason.Rhack_arr_dv_arrs p) k v )
         else
           ( get_darray_inst p,
             name,
@@ -3272,7 +3270,7 @@ and closure_bind_variadic env vparam variadic_ty =
   in
   let r = Reason.Rvar_param pos in
   let arr_values = mk (r, get_node ty) in
-  let unification = TypecheckerOptions.array_unification (Env.get_tcopt env) in
+  let unification = TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env) in
   let ty = MakeType.varray ~unification r arr_values in
   let (env, t_variadic) = bind_param env (ty, vparam) in
   (env, t_variadic)
@@ -4537,7 +4535,7 @@ and dispatch_call
             let r = Reason.Rwitness p in
             let tmixed = MakeType.mixed r in
             let unification =
-              TypecheckerOptions.array_unification (Env.get_tcopt env)
+              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
             in
             let super =
               mk
@@ -4597,7 +4595,7 @@ and dispatch_call
           | (r, Tvarray tv) ->
             let (env, tv) = get_value_type env tv in
             let unification =
-              TypecheckerOptions.array_unification (Env.get_tcopt env)
+              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
             in
             (env, MakeType.varray ~unification r tv)
           | (r, Tunion tyl) ->
@@ -4616,7 +4614,7 @@ and dispatch_call
             let (env, tk) = Env.fresh_type env p in
             let (env, tv) = Env.fresh_type env p in
             let unification =
-              TypecheckerOptions.array_unification (Env.get_tcopt env)
+              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
             in
             Errors.try_
               (fun () ->
@@ -4715,7 +4713,7 @@ and dispatch_call
             ( env,
               fun env tr ->
                 let unification =
-                  TypecheckerOptions.array_unification (Env.get_tcopt env)
+                  TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
                 in
                 (env, MakeType.varray ~unification r tr) )
           | (r, Tany _) ->
@@ -4741,7 +4739,7 @@ and dispatch_call
             let (env, tk) = Env.fresh_type env p in
             let (env, tv) = Env.fresh_type env p in
             let unification =
-              TypecheckerOptions.array_unification (Env.get_tcopt env)
+              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
             in
             let try_vector env =
               let vector_type = MakeType.const_vector r_fty tv in
@@ -7062,7 +7060,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
        * involved process. Let's separate out that logic so we can re-use it.
        *)
       let unification =
-        TypecheckerOptions.array_unification (Env.get_tcopt env)
+        TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
       in
       let array_ty =
         let safe_isarray_enabled =

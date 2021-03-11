@@ -115,7 +115,7 @@ type t = {
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
   po_enable_enum_supertyping: bool;
-  po_array_unification: bool;
+  po_hack_arr_dv_arrs: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
   tco_ignore_unsafe_cast: bool;
@@ -296,7 +296,7 @@ let default =
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = [];
     po_enable_enum_supertyping = false;
-    po_array_unification = false;
+    po_hack_arr_dv_arrs = false;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
     tco_ignore_unsafe_cast = false;
@@ -428,7 +428,7 @@ let make
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
-    ?(po_array_unification = default.po_array_unification)
+    ?(po_hack_arr_dv_arrs = default.po_hack_arr_dv_arrs)
     ?(po_interpret_soft_types_as_like_types =
       default.po_interpret_soft_types_as_like_types)
     ?(tco_enable_strict_string_concat_interp =
@@ -544,7 +544,7 @@ let make
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
     po_enable_enum_supertyping;
-    po_array_unification;
+    po_hack_arr_dv_arrs;
     po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp;
     tco_ignore_unsafe_cast;
@@ -792,7 +792,7 @@ let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
 
 let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
 
-let po_array_unification t = t.po_array_unification
+let po_hack_arr_dv_arrs t = t.po_hack_arr_dv_arrs
 
 let po_interpret_soft_types_as_like_types t =
   t.po_interpret_soft_types_as_like_types

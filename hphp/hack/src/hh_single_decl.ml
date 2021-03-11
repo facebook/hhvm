@@ -15,7 +15,7 @@ let popt
     ~disable_xhp_element_mangling
     ~enable_enum_classes
     ~enable_enum_supertyping
-    ~array_unification
+    ~hack_arr_dv_arrs
     ~interpret_soft_types_as_like_types =
   let po = ParserOptions.default in
   let po =
@@ -31,7 +31,7 @@ let popt
   let po =
     ParserOptions.with_enable_enum_supertyping po enable_enum_supertyping
   in
-  let po = ParserOptions.with_array_unification po array_unification in
+  let po = ParserOptions.with_hack_arr_dv_arrs po hack_arr_dv_arrs in
   let po =
     ParserOptions.with_interpret_soft_types_as_like_types
       po
@@ -156,7 +156,7 @@ let () =
   let disable_xhp_element_mangling = ref false in
   let enable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
-  let array_unification = ref false in
+  let hack_arr_dv_arrs = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
@@ -191,8 +191,8 @@ let () =
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         "Enable the enum supertyping extension." );
-      ( "--array-unification",
-        Arg.Set array_unification,
+      ( "--hack-arr-dv-arrs",
+        Arg.Set hack_arr_dv_arrs,
         "Treat varray as vec, darray as dict, TODO varray_or_darray as vec_or_dict"
       );
       ( "--interpret-soft-types-as-like-types",
@@ -270,7 +270,7 @@ let () =
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
         let enable_enum_classes = !enable_enum_classes in
         let enable_enum_supertyping = !enable_enum_supertyping in
-        let array_unification = !array_unification in
+        let hack_arr_dv_arrs = !hack_arr_dv_arrs in
         let interpret_soft_types_as_like_types =
           !interpret_soft_types_as_like_types
         in
@@ -281,7 +281,7 @@ let () =
             ~disable_xhp_element_mangling
             ~enable_enum_classes
             ~enable_enum_supertyping
-            ~array_unification
+            ~hack_arr_dv_arrs
             ~interpret_soft_types_as_like_types
         in
         let ctx = init (Path.dirname file) popt in

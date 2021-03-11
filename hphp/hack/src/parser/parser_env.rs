@@ -21,7 +21,7 @@ pub struct ParserEnv {
     pub disable_modes: bool,
     pub disallow_hash_comments: bool,
     pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
-    pub array_unification: bool,
+    pub hack_arr_dv_arrs: bool,
     pub interpret_soft_types_as_like_types: bool,
 }
 
@@ -38,7 +38,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             disable_modes: env.disable_modes,
             disallow_hash_comments: env.disallow_hash_comments,
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
-            array_unification: env.array_unification,
+            hack_arr_dv_arrs: env.hack_arr_dv_arrs,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
         }
     }
@@ -47,7 +47,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
 impl From<&DeclParserOptions<'_>> for ParserEnv {
     fn from(opts: &DeclParserOptions<'_>) -> Self {
         Self {
-            array_unification: opts.array_unification,
+            hack_arr_dv_arrs: opts.hack_arr_dv_arrs,
             disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
             ..Default::default()

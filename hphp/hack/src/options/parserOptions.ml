@@ -145,10 +145,10 @@ let disallow_inst_meth = GlobalOptions.po_disallow_inst_meth
 let with_disallow_inst_meth po b =
   { po with GlobalOptions.po_disallow_inst_meth = b }
 
-let array_unification = GlobalOptions.po_array_unification
+let hack_arr_dv_arrs = GlobalOptions.po_hack_arr_dv_arrs
 
-let with_array_unification po b =
-  { po with GlobalOptions.po_array_unification = b }
+let with_hack_arr_dv_arrs po b =
+  { po with GlobalOptions.po_hack_arr_dv_arrs = b }
 
 let interpret_soft_types_as_like_types =
   GlobalOptions.po_interpret_soft_types_as_like_types
@@ -184,7 +184,7 @@ let make
     ~disable_array_typehint
     ~disallow_hash_comments
     ~disallow_fun_and_cls_meth_pseudo_funcs
-    ~array_unification
+    ~hack_arr_dv_arrs
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth =
   GlobalOptions.
@@ -218,7 +218,7 @@ let make
       po_disallow_hash_comments = disallow_hash_comments;
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
-      po_array_unification = array_unification;
+      po_hack_arr_dv_arrs = hack_arr_dv_arrs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       po_disallow_inst_meth = disallow_inst_meth;
     }
@@ -272,6 +272,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     allow_unstable_features po,
     disallow_hash_comments po,
     disallow_fun_and_cls_meth_pseudo_funcs po,
-    array_unification po,
+    hack_arr_dv_arrs po,
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po )

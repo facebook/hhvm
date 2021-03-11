@@ -107,7 +107,7 @@ impl<'a> Reason<'a> {
             | RdefaultCapability(p)
             | RconcatOperand(p)
             | RinterpOperand(p) => Some(p),
-            RarrayUnification(p) => Some(p),
+            RhackArrDvArrs(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

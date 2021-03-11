@@ -354,7 +354,7 @@ let to_array env pos shape_ty res =
   in
   to_collection env shape_ty res (fun env r key value ->
       let unification =
-        TypecheckerOptions.array_unification (Env.get_tcopt env)
+        TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
       in
       Typing_enforceability.make_locl_like_type
         env

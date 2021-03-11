@@ -643,7 +643,7 @@ and try_castable_hint
       ~allow_retonly:false
   in
   let unif env =
-    TypecheckerOptions.array_unification
+    TypecheckerOptions.hack_arr_dv_arrs
       (Provider_context.get_tcopt (fst env).ctx)
   in
   let canon = String.lowercase x in

@@ -7,7 +7,7 @@
  *)
 
 type t = {
-  array_unification: bool;
+  hack_arr_dv_arrs: bool;
   auto_namespace_map: (string * string) list;
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;
@@ -16,7 +16,7 @@ type t = {
 
 let from_parser_options popt =
   {
-    array_unification = popt.GlobalOptions.po_array_unification;
+    hack_arr_dv_arrs = popt.GlobalOptions.po_hack_arr_dv_arrs;
     auto_namespace_map = popt.GlobalOptions.po_auto_namespace_map;
     disable_xhp_element_mangling =
       popt.GlobalOptions.po_disable_xhp_element_mangling;

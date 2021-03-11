@@ -23,7 +23,7 @@ struct CParserEnv {
     disable_modes: bool,
     disallow_hash_comments: bool,
     disallow_fun_and_cls_meth_pseudo_funcs: bool,
-    array_unification: bool,
+    hack_arr_dv_arrs: bool,
     interpret_soft_types_as_like_types: bool,
 }
 
@@ -47,7 +47,7 @@ impl CParserEnv {
             disable_modes: env.disable_modes,
             disallow_hash_comments: env.disallow_hash_comments,
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
-            array_unification: env.array_unification,
+            hack_arr_dv_arrs: env.hack_arr_dv_arrs,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
         })
     }

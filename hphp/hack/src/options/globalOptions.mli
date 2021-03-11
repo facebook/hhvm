@@ -278,7 +278,7 @@ type t = {
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
   (* Treat varray as vec, dict as dict, TODO varray_or_darray as vec_or_dict *)
-  po_array_unification: bool;
+  po_hack_arr_dv_arrs: bool;
   (* <<__Soft>> T -> ~T *)
   po_interpret_soft_types_as_like_types: bool;
   (* Restricts string concatenation and interpolation to arraykeys *)
@@ -397,7 +397,7 @@ val make :
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
-  ?po_array_unification:bool ->
+  ?po_hack_arr_dv_arrs:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->
@@ -647,7 +647,7 @@ val tco_use_direct_decl_parser : t -> bool
 
 val po_enable_enum_supertyping : t -> bool
 
-val po_array_unification : t -> bool
+val po_hack_arr_dv_arrs : t -> bool
 
 val po_interpret_soft_types_as_like_types : t -> bool
 

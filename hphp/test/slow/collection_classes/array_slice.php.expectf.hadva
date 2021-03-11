@@ -106,33 +106,27 @@ dict(2) {
   [1]=>
   int(2)
 }
-
-Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/test/slow/collection_classes/array_slice.php on line 38
 dict(2) {
-  [12]=>
+  ["12"]=>
   int(1)
-  [6]=>
+  ["6"]=>
   int(2)
 }
-
-Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/test/slow/collection_classes/array_slice.php on line 39
+dict(2) {
+  ["12"]=>
+  int(1)
+  ["6"]=>
+  int(2)
+}
+dict(2) {
+  [6]=>
+  int(1)
+  ["6"]=>
+  int(2)
+}
 dict(2) {
   [0]=>
   int(1)
-  [1]=>
-  int(2)
-}
-
-Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/test/slow/collection_classes/array_slice.php on line 41
-dict(1) {
-  [6]=>
-  int(2)
-}
-
-Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/test/slow/collection_classes/array_slice.php on line 42
-dict(2) {
-  [0]=>
-  int(1)
-  [1]=>
+  ["6"]=>
   int(2)
 }

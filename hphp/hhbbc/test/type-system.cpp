@@ -63,6 +63,16 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+struct TypeTest : ::testing::Test {
+ protected:
+  void SetUp() override {
+    RO::EvalHackArrDVArrs = false;
+  }
+  void TearDown() override {}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 const StaticString s_test("test");
 const StaticString s_TestClass("TestClass");
 const StaticString s_Base("Base");
@@ -954,7 +964,7 @@ auto const allBits = folly::lazy([]{
 
 }
 
-TEST(Type, Bits) {
+TEST_F(TypeTest, Bits) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -982,7 +992,7 @@ TEST(Type, Bits) {
   }
 }
 
-TEST(Type, Top) {
+TEST_F(TypeTest, Top) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1005,7 +1015,7 @@ TEST(Type, Top) {
   }
 }
 
-TEST(Type, Bottom) {
+TEST_F(TypeTest, Bottom) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1026,7 +1036,7 @@ TEST(Type, Bottom) {
   }
 }
 
-TEST(Type, Prims) {
+TEST_F(TypeTest, Prims) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1262,7 +1272,7 @@ void test_basic_operators(const std::vector<Type>& types) {
 
 }
 
-TEST(Type, BasicOperators) {
+TEST_F(TypeTest, BasicOperators) {
   auto const program = make_test_program();
   Index index { program.get() };
   test_basic_operators(withData(index));
@@ -1271,7 +1281,7 @@ TEST(Type, BasicOperators) {
   EXPECT_EQ(union_of(TInt,sval(s_A)), TUncArrKey);
 }
 
-TEST(Type, SpecializedArrays) {
+TEST_F(TypeTest, SpecializedArrays) {
   test_basic_operators(specialized_arrays());
 
   EXPECT_EQ(
@@ -1552,7 +1562,7 @@ TEST(Type, SpecializedArrays) {
   );
 }
 
-TEST(Type, Split) {
+TEST_F(TypeTest, Split) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1718,7 +1728,7 @@ TEST(Type, Split) {
   EXPECT_EQ(split.second, TInt);
 }
 
-TEST(Type, Remove) {
+TEST_F(TypeTest, Remove) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1810,7 +1820,7 @@ TEST(Type, Remove) {
   EXPECT_EQ(remove_obj(make_specialized_sub_object(BObj|BFalse, *clsA)), TFalse);
 }
 
-TEST(Type, Prim) {
+TEST_F(TypeTest, Prim) {
   const std::initializer_list<std::pair<Type, Type>> subtype_true{
     { TInt,      TPrim },
     { TBool,     TPrim },
@@ -1902,7 +1912,7 @@ TEST(Type, Prim) {
   EXPECT_FALSE(TPrim.couldBe(TClsMeth));
 }
 
-TEST(Type, CouldBeValues) {
+TEST_F(TypeTest, CouldBeValues) {
   EXPECT_FALSE(ival(2).couldBe(ival(3)));
   EXPECT_TRUE(ival(2).couldBe(ival(2)));
 
@@ -1928,7 +1938,7 @@ TEST(Type, CouldBeValues) {
   EXPECT_FALSE(sval_nonstatic(s_test).couldBe(sval(s_A)));
 }
 
-TEST(Type, Unc) {
+TEST_F(TypeTest, Unc) {
   EXPECT_TRUE(TInt.subtypeOf(BInitUnc));
   EXPECT_TRUE(TInt.subtypeOf(BUnc));
   EXPECT_TRUE(TDbl.subtypeOf(BInitUnc));
@@ -1969,7 +1979,7 @@ TEST(Type, Unc) {
   }
 }
 
-TEST(Type, DblNan) {
+TEST_F(TypeTest, DblNan) {
   auto const qnan = std::numeric_limits<double>::quiet_NaN();
   EXPECT_TRUE(dval(qnan).subtypeOf(dval(qnan)));
   EXPECT_TRUE(dval(qnan).couldBe(dval(qnan)));
@@ -1979,7 +1989,7 @@ TEST(Type, DblNan) {
   EXPECT_EQ(intersection_of(dval(qnan), dval(qnan)), dval(qnan));
 }
 
-TEST(Type, ToObj) {
+TEST_F(TypeTest, ToObj) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2024,7 +2034,7 @@ TEST(Type, ToObj) {
             make_specialized_sub_class(BCls, awaitable));
 }
 
-TEST(Type, Option) {
+TEST_F(TypeTest, Option) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2111,7 +2121,7 @@ TEST(Type, Option) {
     wait_handle(index, dval(2.0))));
 }
 
-TEST(Type, OptUnionOf) {
+TEST_F(TypeTest, OptUnionOf) {
   EXPECT_EQ(opt(ival(2)), union_of(ival(2), TInitNull));
   EXPECT_EQ(opt(dval(2.0)), union_of(TInitNull, dval(2.0)));
   EXPECT_EQ(opt(sval(s_test)), union_of(sval(s_test), TInitNull));
@@ -2176,7 +2186,7 @@ TEST(Type, OptUnionOf) {
   EXPECT_TRUE(union_of(owh2, wh3) == owh1);
 }
 
-TEST(Type, TV) {
+TEST_F(TypeTest, TV) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2391,7 +2401,7 @@ TEST(Type, TV) {
   );
 }
 
-TEST(Type, OptCouldBe) {
+TEST_F(TypeTest, OptCouldBe) {
   for (auto const& t : optionals()) {
     if (t.subtypeOf(BInitNull)) continue;
     EXPECT_TRUE(t.couldBe(unopt(t)));
@@ -2470,7 +2480,7 @@ TEST(Type, OptCouldBe) {
   }
 }
 
-TEST(Type, ArrayLikeElem) {
+TEST_F(TypeTest, ArrayLikeElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2850,7 +2860,7 @@ TEST(Type, ArrayLikeElem) {
   }
 }
 
-TEST(Type, ArrayLikeNewElem) {
+TEST_F(TypeTest, ArrayLikeNewElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -3175,7 +3185,7 @@ TEST(Type, ArrayLikeNewElem) {
   }
 }
 
-TEST(Type, ArrayLikeSetElem) {
+TEST_F(TypeTest, ArrayLikeSetElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -3491,7 +3501,7 @@ TEST(Type, ArrayLikeSetElem) {
   }
 }
 
-TEST(Type, SpecificExamples) {
+TEST_F(TypeTest, SpecificExamples) {
   // Random examples to stress option types, values, etc:
 
   EXPECT_TRUE(!TInt.subtypeOf(ival(1)));
@@ -3572,7 +3582,7 @@ TEST(Type, SpecificExamples) {
   }
 }
 
-TEST(Type, IndexBased) {
+TEST_F(TypeTest, IndexBased) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -3722,7 +3732,7 @@ TEST(Type, IndexBased) {
   EXPECT_TRUE(opt(subObjBaseTy).couldBe(opt(objExactTy)));
 }
 
-TEST(Type, Hierarchies) {
+TEST_F(TypeTest, Hierarchies) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -4082,7 +4092,7 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(opt(subObjAATy), objExactTestClassTy), opt(TObj));
 }
 
-TEST(Type, Interface) {
+TEST_F(TypeTest, Interface) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -4147,7 +4157,7 @@ TEST(Type, Interface) {
   EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
 }
 
-TEST(Type, LoosenInterfaces) {
+TEST_F(TypeTest, LoosenInterfaces) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -4182,7 +4192,7 @@ TEST(Type, LoosenInterfaces) {
   }
 }
 
-TEST(Type, WaitH) {
+TEST_F(TypeTest, WaitH) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -4293,7 +4303,7 @@ TEST(Type, WaitH) {
   }
 }
 
-TEST(Type, FromHNIConstraint) {
+TEST_F(TypeTest, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\resource")), TOptRes);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\resource")), TRes);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\bool")), TBool);
@@ -4315,7 +4325,7 @@ TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("")), TCell);
 }
 
-TEST(Type, DictPacked1) {
+TEST_F(TypeTest, DictPacked1) {
   auto const a1 = dict_packed({ival(2), TSStr, TInt});
   auto const a2 = dict_packed({TInt,    TStr,  TInitCell});
   auto const s1 = sdict_packed({ival(2), TSStr, TInt});
@@ -4353,7 +4363,7 @@ TEST(Type, DictPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST(Type, OptDictPacked1) {
+TEST_F(TypeTest, OptDictPacked1) {
   auto const a1 = opt(dict_packed({ival(2), TSStr, TInt}));
   auto const a2 = opt(dict_packed({TInt,    TStr,  TInitCell}));
   auto const s1 = opt(sdict_packed({ival(2), TSStr, TInt}));
@@ -4391,7 +4401,7 @@ TEST(Type, OptDictPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST(Type, DictPacked2) {
+TEST_F(TypeTest, DictPacked2) {
   {
     auto const a1 = dict_packed({TInt, TInt, TDbl});
     auto const a2 = dict_packed({TInt, TInt});
@@ -4437,7 +4447,7 @@ TEST(Type, DictPacked2) {
   }
 }
 
-TEST(Type, DictPackedUnion) {
+TEST_F(TypeTest, DictPackedUnion) {
   {
     auto const a1 = dict_packed({TInt, TDbl});
     auto const a2 = dict_packed({TDbl, TInt});
@@ -4494,7 +4504,7 @@ TEST(Type, DictPackedUnion) {
   }
 }
 
-TEST(Type, DictPackedN) {
+TEST_F(TypeTest, DictPackedN) {
   auto const packedDict = static_dict(0, 42, 1, 23, 2, 12);
   auto const a1 = dict_val(packedDict);
   auto const a2 = sdict_packed({TInt, TInt});
@@ -4530,7 +4540,7 @@ TEST(Type, DictPackedN) {
   EXPECT_FALSE(s2.couldBe(sn2));
 }
 
-TEST(Type, DictStruct) {
+TEST_F(TypeTest, DictStruct) {
   auto const test_map_a          = MapElems{map_elem(s_test, ival(2))};
   auto const test_map_b          = MapElems{map_elem(s_test, TInt)};
   auto const test_map_c          = MapElems{map_elem(s_test, ival(2)),
@@ -4583,7 +4593,7 @@ TEST(Type, DictStruct) {
   EXPECT_TRUE(se.couldBe(dict_val(testDict)));
 }
 
-TEST(Type, DictMapN) {
+TEST_F(TypeTest, DictMapN) {
   auto const test_map =
     dict_val(static_dict(s_A.get(), s_B.get(), s_test.get(), 12));
   EXPECT_TRUE(test_map != dict_n(TSStr, TInitUnc));
@@ -4614,7 +4624,7 @@ TEST(Type, DictMapN) {
   EXPECT_FALSE(tstruct.couldBe(dict_n(TSStr, TObj)));
 }
 
-TEST(Type, DictEquivalentRepresentations) {
+TEST_F(TypeTest, DictEquivalentRepresentations) {
   {
     auto const simple = dict_val(static_dict(0, 42, 1, 23, 2, 12));
     auto const bulky  = sdict_packed({ival(42), ival(23), ival(12)});
@@ -4634,7 +4644,7 @@ TEST(Type, DictEquivalentRepresentations) {
   }
 }
 
-TEST(Type, DictUnions) {
+TEST_F(TypeTest, DictUnions) {
   auto const test_map_a    = MapElems{map_elem(s_test, ival(2))};
   auto const tstruct       = sdict_map(test_map_a);
 
@@ -4671,7 +4681,7 @@ TEST(Type, DictUnions) {
   );
 }
 
-TEST(Type, DictIntersections) {
+TEST_F(TypeTest, DictIntersections) {
   auto const test_map_a    = MapElems{map_elem(s_test, ival(2))};
   auto const tstruct       = sdict_map(test_map_a);
 
@@ -4761,7 +4771,7 @@ TEST(Type, DictIntersections) {
   );
 }
 
-TEST(Type, DictOfDict) {
+TEST_F(TypeTest, DictOfDict) {
   auto const t1 = dict_n(TSStr, dict_n(TInt, TSStr));
   auto const t2 = dict_n(TSStr, TDict);
   auto const t3 = dict_n(TSStr, dict_packedn(TSStr));
@@ -4776,7 +4786,7 @@ TEST(Type, DictOfDict) {
   EXPECT_TRUE(t4.subtypeOf(t2));
 }
 
-TEST(Type, WideningAlreadyStable) {
+TEST_F(TypeTest, WideningAlreadyStable) {
   // A widening union on types that are already stable should not move
   // the type anywhere.
   auto const program = make_test_program();
@@ -4803,7 +4813,7 @@ TEST(Type, WideningAlreadyStable) {
   EXPECT_EQ(deepMapN, widening_union(deepMapN, sdict_n(TInt, deepMapN)));
 }
 
-TEST(Type, EmptyDict) {
+TEST_F(TypeTest, EmptyDict) {
   {
     auto const possible_e = union_of(dict_packedn(TInt), dict_empty());
     EXPECT_TRUE(possible_e.couldBe(dict_empty()));
@@ -4836,7 +4846,7 @@ TEST(Type, EmptyDict) {
   );
 }
 
-TEST(Type, ArrKey) {
+TEST_F(TypeTest, ArrKey) {
   EXPECT_TRUE(TInt.subtypeOf(BArrKey));
   EXPECT_TRUE(TStr.subtypeOf(BArrKey));
   EXPECT_TRUE(ival(0).subtypeOf(BArrKey));
@@ -4867,7 +4877,7 @@ TEST(Type, ArrKey) {
   EXPECT_EQ(unopt(TOptUncArrKey), TUncArrKey);
 }
 
-TEST(Type, LoosenStaticness) {
+TEST_F(TypeTest, LoosenStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5000,7 +5010,7 @@ TEST(Type, LoosenStaticness) {
   }
 }
 
-TEST(Type, LoosenStringStaticness) {
+TEST_F(TypeTest, LoosenStringStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5051,7 +5061,7 @@ TEST(Type, LoosenStringStaticness) {
   }
 }
 
-TEST(Type, LoosenArrayStaticness) {
+TEST_F(TypeTest, LoosenArrayStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5159,7 +5169,7 @@ TEST(Type, LoosenArrayStaticness) {
   }
 }
 
-TEST(Type, Emptiness) {
+TEST_F(TypeTest, Emptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5196,7 +5206,7 @@ TEST(Type, Emptiness) {
   }
 }
 
-TEST(Type, AssertNonEmptiness) {
+TEST_F(TypeTest, AssertNonEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5264,7 +5274,7 @@ TEST(Type, AssertNonEmptiness) {
   }
 }
 
-TEST(Type, AssertEmptiness) {
+TEST_F(TypeTest, AssertEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5333,7 +5343,7 @@ TEST(Type, AssertEmptiness) {
   }
 }
 
-TEST(Type, LoosenEmptiness) {
+TEST_F(TypeTest, LoosenEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5404,7 +5414,7 @@ TEST(Type, LoosenEmptiness) {
   }
 }
 
-TEST(Type, LoosenValues) {
+TEST_F(TypeTest, LoosenValues) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
     auto const func = [&]() -> php::Func* {
@@ -5482,7 +5492,7 @@ TEST(Type, LoosenValues) {
   EXPECT_TRUE(loosen_values(opt(subObj(*cls))) == opt(subObj(*cls)));
 }
 
-TEST(Type, LoosenArrayValues) {
+TEST_F(TypeTest, LoosenArrayValues) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5498,7 +5508,7 @@ TEST(Type, LoosenArrayValues) {
   }
 }
 
-TEST(Type, LoosenStringValues) {
+TEST_F(TypeTest, LoosenStringValues) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5514,7 +5524,7 @@ TEST(Type, LoosenStringValues) {
   }
 }
 
-TEST(Type, AddNonEmptiness) {
+TEST_F(TypeTest, AddNonEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5591,7 +5601,7 @@ TEST(Type, AddNonEmptiness) {
   }
 }
 
-TEST(Type, LoosenVecishOrDictish) {
+TEST_F(TypeTest, LoosenVecishOrDictish) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5687,7 +5697,7 @@ TEST(Type, LoosenVecishOrDictish) {
   }
 }
 
-TEST(Type, Scalarize) {
+TEST_F(TypeTest, Scalarize) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5746,7 +5756,7 @@ TEST(Type, Scalarize) {
   }
 }
 
-TEST(Type, StrValues) {
+TEST_F(TypeTest, StrValues) {
   auto const t1 = sval(s_test);
   auto const t2 = sval_nonstatic(s_test);
   auto const t3 = sval(s_A);
@@ -5809,7 +5819,7 @@ TEST(Type, StrValues) {
   EXPECT_EQ(union_of(t5, t2), TStr);
 }
 
-TEST(Type, DictMapOptValues) {
+TEST_F(TypeTest, DictMapOptValues) {
   auto const test_map_a = MapElems{map_elem(s_A, TInt), map_elem(s_B, TDbl)};
   auto const test_map_b = MapElems{map_elem(s_A, TInt)};
   auto const test_map_c = MapElems{map_elem(s_A, TInt), map_elem(s_test, TInt)};
@@ -6054,7 +6064,7 @@ TEST(Type, DictMapOptValues) {
   );
 }
 
-TEST(Type, ContextDependent) {
+TEST_F(TypeTest, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
   auto const program = make_test_program();
@@ -6427,7 +6437,7 @@ TEST(Type, ContextDependent) {
 #undef REFINE_EQ
 }
 
-TEST(Type, ArrLike) {
+TEST_F(TypeTest, ArrLike) {
   const std::initializer_list<std::pair<Type, Type>> subtype_true{
     // Expect all static arrays to be subtypes
     { TSKeyset, TArrLike },
@@ -6485,7 +6495,7 @@ TEST(Type, ArrLike) {
   }
 }
 
-TEST(Type, LoosenLikeness) {
+TEST_F(TypeTest, LoosenLikeness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -6517,7 +6527,7 @@ TEST(Type, LoosenLikeness) {
   }
 }
 
-TEST(Type, LoosenLikenessRecursively) {
+TEST_F(TypeTest, LoosenLikenessRecursively) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -6607,7 +6617,7 @@ TEST(Type, LoosenLikenessRecursively) {
   }
 }
 
-TEST(Type, ArrayProvenance) {
+TEST_F(TypeTest, ArrayProvenance) {
   RO::EvalArrayProvenance = true;
 
   auto const program = make_test_program();
@@ -6646,7 +6656,7 @@ TEST(Type, ArrayProvenance) {
   }
 }
 
-TEST(Type, IterTypes) {
+TEST_F(TypeTest, IterTypes) {
   auto const elem1 = map_elem(s_A, TObj);
   auto const elem2 = map_elem_nonstatic(s_B, TInt);
   auto const sdict1 = static_dict(s_A, 100);

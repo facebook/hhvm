@@ -207,68 +207,44 @@ fn type_info_from_class_body(
     type_facts.attributes = attributes_into_facts(namespace, attributes);
 }
 
-fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
-    match attributes {
-        Node::List(nodes) => nodes
-            .into_iter()
-            .fold(Attributes::new(), |mut attributes, node| match node {
-                Node::ListItem(item) => {
-                    let attribute_values_aux = |attribute_node| match attribute_node {
-                        Node::Name(name) => {
-                            let mut attribute_values = Vec::new();
-                            attribute_values.push(name.to_string());
-                            attribute_values
-                        }
-                        Node::String(name) => {
-                            let mut attribute_values = Vec::new();
-                            attribute_values.push(name.to_unescaped_string());
-                            attribute_values
-                        }
-                        Node::List(nodes) => {
-                            nodes
-                                .into_iter()
-                                .fold(Vec::new(), |mut attribute_values, node| match node {
-                                    Node::Name(name) => {
-                                        attribute_values.push(name.to_string());
-                                        attribute_values
-                                    }
+fn attributes_into_facts(namespace: &str, attributes_node: Node) -> Attributes {
+    let mut attributes = Attributes::new();
+    if let Node::List(nodes) = attributes_node {
+        for node in nodes {
+            if let Node::ListItem(item) = node {
+                let (name_node, values_node) = *item;
+                if let Some(name) = qualified_name(namespace, name_node, false) {
+                    attributes.insert(
+                        name,
+                        if let Node::List(nodes) = values_node {
+                            let mut attribute_values = vec![];
+                            for node in nodes {
+                                match node {
                                     Node::String(name) => {
-                                        // TODO(T47593892) fold constant
                                         attribute_values.push(name.to_unescaped_string());
-                                        attribute_values
                                     }
                                     Node::ScopeResolutionExpression(expr) => {
-                                        if let (Node::Name(name), Node::Class) = *expr {
-                                            attribute_values.push(if namespace.is_empty() {
-                                                name.to_string()
-                                            } else {
-                                                namespace.to_owned() + "\\" + &name.to_string()
-                                            });
+                                        if let (name_node, Node::Class) = *expr {
+                                            if let Some(name) =
+                                                qualified_name(namespace, name_node, false)
+                                            {
+                                                attribute_values.push(name);
+                                            }
                                         }
-                                        attribute_values
                                     }
-                                    _ => attribute_values,
-                                })
-                        }
-                        _ => Vec::new(),
-                    };
-                    match &(item.0) {
-                        Node::Name(name) => {
-                            attributes.insert(name.to_string(), attribute_values_aux(item.1));
-                            attributes
-                        }
-                        Node::String(name) => {
-                            attributes
-                                .insert(name.to_unescaped_string(), attribute_values_aux(item.1));
-                            attributes
-                        }
-                        _ => attributes,
-                    }
+                                    _ => {}
+                                }
+                            }
+                            attribute_values
+                        } else {
+                            vec![]
+                        },
+                    );
                 }
-                _ => attributes,
-            }),
-        _ => Attributes::new(),
+            }
+        }
     }
+    attributes
 }
 
 fn class_decl_into_facts(

@@ -12,10 +12,8 @@ Stack trace:
 #0 %s/tail-calls.php(10): test0()
 #1 %s/tail-calls.php(14): test1()
 #2 %s/tail-calls.php(18): test2()
-#3 (): test3()
-#4 (): HH\Asio\join()
-#5 (): __SystemLib\enter_async_entry_point()
-#6 {main}"
+#3 %s: test3()
+%A
 int(4)
 int(5)
 string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5

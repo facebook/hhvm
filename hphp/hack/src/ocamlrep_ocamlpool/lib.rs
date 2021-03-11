@@ -16,6 +16,7 @@ extern "C" {
     fn ocamlpool_enter();
     fn ocamlpool_leave();
     fn ocamlpool_reserve_block(tag: u8, size: usize) -> usize;
+    fn caml_failwith(msg: *const i8);
     static ocamlpool_generation: usize;
     static ocamlpool_color: usize;
 }
@@ -147,7 +148,7 @@ pub fn catch_unwind_with_handler(
         Ok(value) => return value,
         Err(err) => unsafe {
             let msg = CString::new(err).unwrap();
-            ocaml::core::fail::caml_failwith(msg.as_ptr());
+            caml_failwith(msg.as_ptr());
         },
     }
     unreachable!();

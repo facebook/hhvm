@@ -379,12 +379,9 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
 }
 
 ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad =  MakeReserveVec(capacity);
-    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return  MakeReserveVec(capacity);
   }
-
   auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
   ad->m_size = 0;
   ad->m_extra = kDefaultVanillaArrayExtra;
@@ -445,10 +442,8 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
 ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad = MakeVec(size, values);
-    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return MakeVec(size, values);
   }
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
   assertx(ad->isPackedKind());
@@ -465,12 +460,9 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
 }
 
 ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* values) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad = MakeVecNatural(size, values);
-    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return MakeVecNatural(size, values);
   }
-
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
   assertx(ad->isPackedKind());
   assertx(ad->isVArray());
@@ -484,10 +476,8 @@ ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) 
 }
 
 ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad = MakeUninitializedVec(size);
-    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return MakeUninitializedVec(size);
   }
   auto ad = MakeReserveImpl(size, HeaderKind::Packed);
   ad->m_size = size;

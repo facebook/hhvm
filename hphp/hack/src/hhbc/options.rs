@@ -163,7 +163,6 @@ prefixed_flags!(
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
     HACK_ARR_COMPAT_NOTICES,
-    HACK_ARR_DV_ARR_MARK,
     HACK_ARR_DV_ARRS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
@@ -765,9 +764,6 @@ mod tests {
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
-  "hhvm.hack_arr_dv_arr_mark": {
-    "global_value": false
-  },
   "hhvm.hack_arr_dv_arrs": {
     "global_value": false
   },
@@ -1178,7 +1174,7 @@ bitflags! {
         const RUST_EMITTER = 1 << 51;
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
-        const HACK_ARR_DV_ARR_MARK = 1 << 54;
+        // No longer using bit 54.
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;

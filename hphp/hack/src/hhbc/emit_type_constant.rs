@@ -21,13 +21,9 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
-fn hack_arr_dv_arr_mark(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
-}
-
 fn vec_or_varray(opts: &Options, l: Vec<TypedValue>) -> TypedValue {
     if hack_arr_dv_arrs(opts) {
-        TypedValue::Vec((l, None, hack_arr_dv_arr_mark(opts)))
+        TypedValue::Vec((l, None, false))
     } else {
         TypedValue::VArray((l, None))
     }
@@ -35,7 +31,7 @@ fn vec_or_varray(opts: &Options, l: Vec<TypedValue>) -> TypedValue {
 
 fn dict_or_darray(opts: &Options, kv: Vec<(TypedValue, TypedValue)>) -> TypedValue {
     if hack_arr_dv_arrs(opts) {
-        TypedValue::Dict((kv, None, hack_arr_dv_arr_mark(opts)))
+        TypedValue::Dict((kv, None, false))
     } else {
         TypedValue::DArray((kv, None))
     }

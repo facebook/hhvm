@@ -33,7 +33,7 @@ enum hhbc_flags {
   , EMIT_METH_CALLER_FUNC_POINTERS=1 << 11
   , RX_IS_ENABLED=1 << 12
   , ARRAY_PROVENANCE=1 << 13
-  , HACK_ARR_DV_ARR_MARK=1 << 14
+  // No longer using bit 14.
   , FOLD_LAZY_CLASS_KEYS=1 << 15
   , EMIT_INST_METH_POINTERS=1 << 16
 };

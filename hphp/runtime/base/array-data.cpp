@@ -1146,13 +1146,7 @@ void ArrayData::setLegacyArrayInPlace(bool legacy) {
 
 ArrayData* ArrayData::toDVArrayWithLogging(bool copy) {
   assertx(isVecType() || isDictType());
-  if (RO::EvalHackArrDVArrs) {
-    if (RO::EvalHackArrDVArrMark) {
-      return setLegacyArray(copy, /*legacy=*/true);
-    }
-    return this;
-  }
-  return toDVArray(copy);
+  return RO::EvalHackArrDVArrs ? this : toDVArray(copy);
 }
 
 ArrayData* ArrayData::toHackArrWithLogging(bool copy) {

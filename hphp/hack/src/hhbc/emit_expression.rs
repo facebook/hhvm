@@ -273,30 +273,6 @@ mod inout_locals {
     }
 }
 
-pub fn wrap_array_mark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
-    if mark_as_legacy(e.options()) {
-        InstrSeq::gather(vec![
-            ins,
-            instr::false_(),
-            instr::instr(Instruct::IMisc(InstructMisc::ArrayMarkLegacy)),
-        ])
-    } else {
-        ins
-    }
-}
-
-pub fn wrap_array_unmark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
-    if mark_as_legacy(e.options()) {
-        InstrSeq::gather(vec![
-            ins,
-            instr::false_(),
-            instr::instr(Instruct::IMisc(InstructMisc::ArrayUnmarkLegacy)),
-        ])
-    } else {
-        ins
-    }
-}
-
 pub fn get_type_structure_for_hint(
     e: &mut Emitter,
     tparams: &[&str],
@@ -822,11 +798,6 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
 
 fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
-
-fn mark_as_legacy(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-        && opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
 }
 
 fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Result {
@@ -1411,7 +1382,7 @@ fn emit_dynamic_collection(
                     InstructLitConst::NewVArray(n)
                 }
             });
-            Ok(wrap_array_mark_legacy(e, instrs?))
+            Ok(instrs?)
         }
         E_::Darray(_) => {
             if is_struct_init(e, env, fields, false /* allow_numerics */)? {
@@ -1424,7 +1395,7 @@ fn emit_dynamic_collection(
                     };
                     Ok(emit_pos_then(pos, instr))
                 });
-                Ok(wrap_array_mark_legacy(e, instrs?))
+                Ok(instrs?)
             } else {
                 let constr = if hack_arr_dv_arrs(e.options()) {
                     InstructLitConst::NewDictArray(count as isize)
@@ -1433,7 +1404,7 @@ fn emit_dynamic_collection(
                 };
                 let instrs =
                     emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
-                Ok(wrap_array_mark_legacy(e, instrs?))
+                Ok(instrs?)
             }
         }
         _ => Err(unrecoverable("plain PHP arrays cannot be constructed")),
@@ -1756,7 +1727,7 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
                 instr::new_varray(targs.len() as isize)
             },
         ]);
-        wrap_array_mark_legacy(e, instrs)
+        instrs
     })
 }
 
@@ -2671,16 +2642,11 @@ fn emit_special_function(
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => {
                         let inner = emit_exprs(e, env, args)?;
-                        let unmarked_inner = match lower_fq_name {
-                            "HH\\dict" | "HH\\vec" => wrap_array_unmark_legacy(e, inner),
-                            _ => inner,
-                        };
-                        let instrs =
-                            InstrSeq::gather(vec![unmarked_inner, emit_pos(pos), instr::instr(i)]);
-                        match lower_fq_name {
-                            "HH\\varray" | "HH\\darray" => Some(wrap_array_mark_legacy(e, instrs)),
-                            _ => Some(instrs),
-                        }
+                        Some(InstrSeq::gather(vec![
+                            inner,
+                            emit_pos(pos),
+                            instr::instr(i),
+                        ]))
                     }
                     _ => None,
                 },
@@ -2710,15 +2676,7 @@ fn emit_inst_meth(
             instr::new_varray(2)
         },
     ]);
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
-    {
-        Ok(instrs)
-    } else {
-        Ok(wrap_array_mark_legacy(e, instrs))
-    }
+    Ok(instrs)
 }
 
 fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Expr) -> Result {
@@ -2773,7 +2731,7 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
                 instr::new_varray(2)
             },
         ]);
-        Ok(wrap_array_mark_legacy(e, instrs))
+        Ok(instrs)
     }
 }
 

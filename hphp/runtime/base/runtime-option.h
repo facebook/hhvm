@@ -1148,8 +1148,6 @@ struct RuntimeOption {
   /* Raise notices when we cast a marked dvarray to a vec or a marked   \
    * darray to a dict (implicitly clearing the legacy mark). */         \
   F(bool, HackArrCompatCastMarkedArrayNotices, false)                   \
-  /* When this flag is on, d/varray constructions are marked. */        \
-  F(bool, HackArrDVArrMark, false)                                      \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \
   /* This is the flag for "unification", meaning that darrays are       \

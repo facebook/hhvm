@@ -26,12 +26,7 @@ namespace HPHP {
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
   void* vp1 = &s_theEmptyVArray;
   void* vp2 = &s_theEmptyVec;
-  void* vp3 = &s_theEmptyMarkedVec;
-  return static_cast<ArrayData*>(
-    RuntimeOption::EvalHackArrDVArrs ?
-    RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
-    : vp1
-  );
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedVArray() {
@@ -53,12 +48,7 @@ ALWAYS_INLINE ArrayData* staticEmptyMarkedVec() {
 ALWAYS_INLINE ArrayData* staticEmptyDArray() {
   void* vp1 = s_theEmptyDArrayPtr;
   void* vp2 = s_theEmptyDictArrayPtr;
-  void* vp3 = s_theEmptyMarkedDictArrayPtr;
-  return static_cast<ArrayData*>(
-    RuntimeOption::EvalHackArrDVArrs ?
-    RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
-    : vp1
-  );
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedDArray() {
@@ -92,7 +82,7 @@ ALWAYS_INLINE ArrayData* ArrayData::Create(bool legacy) {
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag, /* = {} */
                                                  bool legacy /* = false */) {
   if (RO::EvalHackArrDVArrs) {
-    return CreateVec(RO::EvalHackArrDVArrMark || legacy);
+    return CreateVec(legacy);
   }
   if (legacy) return staticEmptyMarkedVArray();
   auto const ad = staticEmptyVArray();
@@ -102,7 +92,7 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag, /* = {} */
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag, /* = {} */
                                                  bool legacy /* = false */) {
   if (RO::EvalHackArrDVArrs) {
-    return CreateDict(RO::EvalHackArrDVArrMark || legacy);
+    return CreateDict(legacy);
   }
   if (legacy) return staticEmptyMarkedDArray();
   auto const ad = staticEmptyDArray();

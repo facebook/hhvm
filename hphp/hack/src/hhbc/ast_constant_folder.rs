@@ -27,10 +27,6 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
-fn hack_arr_dv_arr_mark(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotLiteral,
@@ -137,11 +133,7 @@ fn varray_to_typed_value(
         .map(|x| expr_to_typed_value(emitter, ns, x))
         .collect();
     if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Vec((
-            tv_fields?,
-            Some(pos.clone()),
-            hack_arr_dv_arr_mark(emitter.options()),
-        )))
+        Ok(TypedValue::Vec((tv_fields?, Some(pos.clone()), false)))
     } else {
         Ok(TypedValue::VArray((tv_fields?, Some(pos.clone()))))
     }
@@ -166,7 +158,7 @@ fn darray_to_typed_value(
         Ok(TypedValue::Dict((
             update_duplicates_in_map(tv_fields),
             Some(pos.clone()),
-            hack_arr_dv_arr_mark(emitter.options()),
+            false,
         )))
     } else {
         Ok(TypedValue::DArray((

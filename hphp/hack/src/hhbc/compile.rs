@@ -84,7 +84,7 @@ bitflags! {
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
         const RX_IS_ENABLED=1 << 12;
         const ARRAY_PROVENANCE=1 << 13;
-        const HACK_ARR_DV_ARR_MARK=1 << 14;
+        // No longer using bit 14.
         const FOLD_LAZY_CLASS_KEYS=1 << 15;
         const EMIT_INST_METH_POINTERS=1 << 16;
     }
@@ -154,9 +154,6 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::HACK_ARR_COMPAT_NOTICES) {
             f |= HhvmFlags::HACK_ARR_COMPAT_NOTICES;
-        }
-        if self.contains(HHBCFlags::HACK_ARR_DV_ARR_MARK) {
-            f |= HhvmFlags::HACK_ARR_DV_ARR_MARK;
         }
         if self.contains(HHBCFlags::HACK_ARR_DV_ARRS) {
             f |= HhvmFlags::HACK_ARR_DV_ARRS;

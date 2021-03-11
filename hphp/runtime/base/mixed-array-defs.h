@@ -310,9 +310,8 @@ void ConvertTvToUncounted(
         assertx(data.pclsmeth->getCls()->isPersistent());
         break;
       }
-      if (RuntimeOption::EvalHackArrDVArrs) {
+      if (RO::EvalHackArrDVArrs) {
         tvCastToVecInPlace(source);
-        tvSetLegacyArrayInPlace(source, RuntimeOption::EvalHackArrDVArrMark);
         type = KindOfPersistentVec;
         auto& ad = data.parr;
         if (handlePersistent(ad)) break;

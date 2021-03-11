@@ -181,12 +181,9 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 }
 
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad = MakeReserveDict(size);
-    ad->setLegacyArrayInPlace(RO::EvalHackArrDVArrMark);
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return MakeReserveDict(size);
   }
-
   auto ad = MakeReserveImpl(size, HeaderKind::Mixed);
   assertx(ad->isMixedKind());
   assertx(ad->isDArray());
@@ -370,14 +367,9 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 }
 
 MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const ad = MakeDict(size, kvs);
-    if (RO::EvalHackArrDVArrMark && ad != nullptr) {
-      ad->setLegacyArrayInPlace(true);
-    }
-    return ad;
+  if (RO::EvalHackArrDVArrs) {
+    return MakeDict(size, kvs);
   }
-
   auto const ad = MakeMixedImpl<HeaderKind::Mixed>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kMixedKind);
   assertx(ad == nullptr || ad->isDArray());
@@ -400,11 +392,8 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
 
   ad->initHash(scale);
 
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    ad->initHeader_16(
-        HeaderKind::Dict,
-        OneReference,
-        aux | (RO::EvalHackArrDVArrMark ? ArrayData::kLegacyArray : 0));
+  if (RO::EvalHackArrDVArrs) {
+    ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   } else {
     ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   }
@@ -1351,10 +1340,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   assertx(ret->hasExactlyOneRef());
   auto const aux = asMixed(ad)->keyTypes().packForAux();
   auto const hk  = RO::EvalHackArrDVArrs ? HeaderKind::Dict : HeaderKind::Mixed;
-  ret->initHeader_16(hk, OneReference,
-      aux |
-      (RO::EvalHackArrDVArrMark && RO::EvalHackArrDVArrs ?
-       ArrayData::kLegacyArray : 0));
+  ret->initHeader_16(hk, OneReference, aux);
   if (elems->hasVanillaMixedLayout()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();

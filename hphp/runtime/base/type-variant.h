@@ -1024,10 +1024,8 @@ struct Variant : private TypedValue {
   }
 
   Array toVArray() const {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      auto a = toVec();
-      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
-      return a;
+    if (RO::EvalHackArrDVArrs) {
+      return toVec();
     }
     if (isArrayLikeType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
@@ -1037,10 +1035,8 @@ struct Variant : private TypedValue {
   }
 
   Array toDArray() const {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      auto a = toDict();
-      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
-      return a;
+    if (RO::EvalHackArrDVArrs) {
+      return toDict();
     }
     if (isArrayLikeType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;

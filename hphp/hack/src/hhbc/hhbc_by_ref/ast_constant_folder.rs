@@ -27,10 +27,6 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
-fn hack_arr_dv_arr_mark(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotLiteral,
@@ -147,11 +143,7 @@ fn varray_to_typed_value<'arena>(
     )
     .into_bump_slice();
     if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Vec((
-            tv_fields,
-            Some(pos.clone()),
-            hack_arr_dv_arr_mark(emitter.options()),
-        )))
+        Ok(TypedValue::Vec((tv_fields, Some(pos.clone()), false)))
     } else {
         Ok(TypedValue::VArray((tv_fields, Some(pos.clone()))))
     }
@@ -179,11 +171,7 @@ fn darray_to_typed_value<'arena>(
     let fields =
         bumpalo::collections::Vec::from_iter_in(tv_fields_.into_iter(), alloc).into_bump_slice();
     if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Dict((
-            fields,
-            Some(pos.clone()),
-            hack_arr_dv_arr_mark(emitter.options()),
-        )))
+        Ok(TypedValue::Dict((fields, Some(pos.clone()), false)))
     } else {
         Ok(TypedValue::DArray((fields, Some(pos.clone()))))
     }

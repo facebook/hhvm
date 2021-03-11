@@ -391,7 +391,6 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
       };
       if (RO::EvalHackArrDVArrs) {
         tvCastToVecInPlace(tv);
-        tvSetLegacyArrayInPlace(tv, RuntimeOption::EvalHackArrDVArrMark);
       } else {
         tvCastToVArrayInPlace(tv);
         check_dvarray();

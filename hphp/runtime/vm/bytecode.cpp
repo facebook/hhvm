@@ -843,9 +843,8 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   auto const numParams = func->numNonVariadicParams();
   if (LIKELY(numArgs == numParams)) {
     // Convert unpack args to the proper type.
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RO::EvalHackArrDVArrs) {
       tvCastToVecInPlace(&unpackArgs);
-      tvSetLegacyArrayInPlace(&unpackArgs, RuntimeOption::EvalHackArrDVArrMark);
       stack.pushVec(unpackArgs.m_data.parr);
     } else {
       tvCastToVArrayInPlace(&unpackArgs);
@@ -3379,9 +3378,8 @@ OPTBLD_INLINE void iopArrayIdx() {
   auto const  key = tvClassToString(*vmStack().indTV(1));
   TypedValue* arr = vmStack().indTV(2);
   if (isClsMethType(type(arr))) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RO::EvalHackArrDVArrs) {
       tvCastToVecInPlace(arr);
-      tvSetLegacyArrayInPlace(arr, RuntimeOption::EvalHackArrDVArrMark);
     } else {
       tvCastToVArrayInPlace(arr);
     }

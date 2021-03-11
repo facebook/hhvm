@@ -1149,9 +1149,6 @@ CompilerResult hackc_compile(
     if (RuntimeOption::EvalArrayProvenance) {
       hhbc_flags |= ARRAY_PROVENANCE;
     }
-    if (RuntimeOption::EvalHackArrDVArrMark) {
-      hhbc_flags |= HACK_ARR_DV_ARR_MARK;
-    }
     if (RuntimeOption::EvalFoldLazyClassKeys) {
       hhbc_flags |= FOLD_LAZY_CLASS_KEYS;
     }

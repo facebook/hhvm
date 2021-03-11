@@ -20,7 +20,6 @@ type t = {
   option_php7_uvs: bool;
   option_php7_ltr_assign: bool;
   option_hack_arr_compat_notices: bool;
-  option_hack_arr_dv_arr_mark: bool;
   option_hack_arr_dv_arrs: bool;
   option_repo_authoritative: bool;
   option_jit_enable_rename_function: bool;
@@ -76,7 +75,6 @@ let default =
      * HHVM it's helpful to renumber in order that the labels match more closely *)
     option_relabel = true;
     option_hack_arr_compat_notices = false;
-    option_hack_arr_dv_arr_mark = false;
     option_hack_arr_dv_arrs = false;
     option_repo_authoritative = false;
     option_jit_enable_rename_function = false;
@@ -134,8 +132,6 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 let php7_ltr_assign o = o.option_php7_ltr_assign
 
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
-
-let hack_arr_dv_arr_mark o = o.option_hack_arr_dv_arr_mark
 
 let hack_arr_dv_arrs o = o.option_hack_arr_dv_arrs
 
@@ -247,7 +243,6 @@ let to_string o =
       @@ enable_uniform_variable_syntax o;
       Printf.sprintf "php7_ltr_assign: %B" @@ php7_ltr_assign o;
       Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o;
-      Printf.sprintf "hack_arr_dv_arr_mark: %B" @@ hack_arr_dv_arr_mark o;
       Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o;
       Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o;
       Printf.sprintf "jit_enable_rename_function: %B"
@@ -330,8 +325,6 @@ let set_option options name value =
   | "hack.compiler.relabel" -> { options with option_relabel = as_bool value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
-  | "eval.hackarrdvarrmark" ->
-    { options with option_hack_arr_dv_arr_mark = as_bool value }
   | "eval.hackarrdvarrs" ->
     { options with option_hack_arr_dv_arrs = as_bool value }
   | "hhvm.repo_authoritative" ->
@@ -497,8 +490,6 @@ let value_setters =
       { opts with option_php7_ltr_assign = v = 1 } );
     ( set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int
     @@ fun opts v -> { opts with option_hack_arr_compat_notices = v = 1 } );
-    ( set_value "hhvm.hack_arr_dv_arr_mark" get_value_from_config_int
-    @@ fun opts v -> { opts with option_hack_arr_dv_arr_mark = v = 1 } );
     ( set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int
     @@ fun opts v -> { opts with option_hack_arr_dv_arrs = v = 1 } );
     ( set_value "hhvm.repo.authoritative" get_value_from_config_int

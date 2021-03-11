@@ -1735,7 +1735,18 @@ where
                             }
                             _ => recv,
                         };
-                        let (args, varargs) = split_args_vararg(args, env)?;
+                        let (mut args, varargs) = split_args_vararg(args, env)?;
+
+                        // If the function has an enum atom expression, that's
+                        // the first argument.
+                        if let EnumAtomExpression(e) = &c.enum_atom.children {
+                            let enum_atom = ast::Expr::new(
+                                Self::p_pos(&c.enum_atom, env),
+                                E_::EnumAtom(Self::pos_name(&e.expression, env)?.1),
+                            );
+                            args.insert(0, enum_atom);
+                        }
+
                         Ok(E_::mk_call(recv, targs, args, varargs))
                     }
                 }

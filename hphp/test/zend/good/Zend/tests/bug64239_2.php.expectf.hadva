@@ -1,0 +1,24 @@
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/bug64239_2.php
+            [line] => 17
+            [function] => Bmethod
+            [class] => B
+            [type] => ->
+        )
+
+)
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/bug64239_2.php
+            [line] => 17
+            [function] => Bmethod
+            [class] => B
+            [type] => ->
+        )
+
+)

@@ -1,0 +1,28 @@
+InvalidArgumentException: Invalid operand type was used: array_fill_keys expects an array or collection
+NULL
+dict(0) {
+}
+dict(2) {
+  ["foo"]=>
+  NULL
+  ["bar"]=>
+  NULL
+}
+dict(4) {
+  [5]=>
+  int(123)
+  ["foo"]=>
+  int(123)
+  [10]=>
+  int(123)
+  ["1.23"]=>
+  int(123)
+}
+dict(3) {
+  ["test"]=>
+  string(0) ""
+  [10]=>
+  string(0) ""
+  [100]=>
+  string(0) ""
+}

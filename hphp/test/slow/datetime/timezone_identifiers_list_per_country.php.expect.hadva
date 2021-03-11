@@ -1,0 +1,45 @@
+vec(29) {
+  string(12) "America/Adak"
+  string(17) "America/Anchorage"
+  string(13) "America/Boise"
+  string(15) "America/Chicago"
+  string(14) "America/Denver"
+  string(15) "America/Detroit"
+  string(28) "America/Indiana/Indianapolis"
+  string(20) "America/Indiana/Knox"
+  string(23) "America/Indiana/Marengo"
+  string(26) "America/Indiana/Petersburg"
+  string(25) "America/Indiana/Tell_City"
+  string(21) "America/Indiana/Vevay"
+  string(25) "America/Indiana/Vincennes"
+  string(23) "America/Indiana/Winamac"
+  string(14) "America/Juneau"
+  string(27) "America/Kentucky/Louisville"
+  string(27) "America/Kentucky/Monticello"
+  string(19) "America/Los_Angeles"
+  string(17) "America/Menominee"
+  string(18) "America/Metlakatla"
+  string(16) "America/New_York"
+  string(12) "America/Nome"
+  string(27) "America/North_Dakota/Beulah"
+  string(27) "America/North_Dakota/Center"
+  string(30) "America/North_Dakota/New_Salem"
+  string(15) "America/Phoenix"
+  string(13) "America/Sitka"
+  string(15) "America/Yakutat"
+  string(16) "Pacific/Honolulu"
+}
+vec(3) {
+  string(15) "Atlantic/Azores"
+  string(16) "Atlantic/Madeira"
+  string(13) "Europe/Lisbon"
+}
+vec(1) {
+  string(13) "Europe/Athens"
+}
+vec(1) {
+  string(14) "Asia/Jerusalem"
+}
+vec(1) {
+  string(14) "America/Belize"
+}

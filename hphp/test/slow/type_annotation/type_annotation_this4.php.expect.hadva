@@ -1,0 +1,32 @@
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(9) "Foo\Child"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(14) "Foo\GrandChild"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(5) "Foo\I"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(14) "Foo\GrandChild"
+  ["exact"]=>
+  bool(true)
+}

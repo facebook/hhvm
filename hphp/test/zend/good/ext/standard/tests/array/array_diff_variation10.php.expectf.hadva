@@ -1,0 +1,10 @@
+*** Testing array_diff() : usage variations ***
+dict(1) {
+  [0]=>
+  string(1) "1"
+}
+dict(1) {
+  [2]=>
+  string(4) "test"
+}
+Done

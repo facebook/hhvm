@@ -1,0 +1,18 @@
+reflection:
+vec(3) {
+  int(1)
+  vec(1) {
+    string(2) "42"
+  }
+  string(3) "foo"
+}
+string(68) "varray[\SORT_NUMERIC, varray[\Foo\Derived::NUM], \Foo\Bar\Base::STR]"
+NULL
+call:
+vec(3) {
+  int(1)
+  vec(1) {
+    string(2) "42"
+  }
+  string(3) "foo"
+}

@@ -1,0 +1,10 @@
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'a' in %s/test/slow/lang/invariant_cb.php:6
+Stack trace:
+#0 %s/test/slow/lang/invariant_cb.php(6): HH\invariant_violation()
+#1 (): main()
+#2 {main}

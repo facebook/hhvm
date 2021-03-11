@@ -1,0 +1,28 @@
+dict(1) {
+  ["A"]=>
+  vec(1) {
+    int(1)
+  }
+}
+dict(1) {
+  ["B"]=>
+  vec(1) {
+    string(3) "two"
+  }
+}
+dict(1) {
+  ["C"]=>
+  vec(1) {
+    vec(1) {
+      int(3)
+    }
+  }
+}
+dict(1) {
+  ["D"]=>
+  vec(1) {
+    vec(1) {
+      string(4) "four"
+    }
+  }
+}

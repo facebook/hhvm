@@ -1,0 +1,100 @@
+*** Testing date() : usage variation -  unexpected values to first argument $format***
+
+-- int 0 --
+
+Warning: date() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- int 1 --
+
+Warning: date() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- int 12345 --
+
+Warning: date() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- int -12345 --
+
+Warning: date() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- float 10.5 --
+
+Warning: date() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- float -10.5 --
+
+Warning: date() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- float .5 --
+
+Warning: date() expects parameter 1 to be string, double given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- empty array --
+
+Warning: date() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- int indexed array --
+
+Warning: date() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- associative array --
+
+Warning: date() expects parameter 1 to be string, dict given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- nested arrays --
+
+Warning: date() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- uppercase NULL --
+
+Warning: date() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- lowercase null --
+
+Warning: date() expects parameter 1 to be string, null given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- lowercase true --
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- lowercase false --
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- uppercase TRUE --
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- uppercase FALSE --
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- empty string DQ --
+string(0) ""
+
+-- empty string SQ --
+string(0) ""
+
+-- string DQ --
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+
+-- string SQ --
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+
+-- mixed case string --
+string(40) "30GMTFri, 27 Feb 2009 10:44:30 +00000210"
+
+-- heredoc --
+string(76) "10Europe/LondonFridayFriday2009 52009Fri, 27 Feb 2009 10:44:30 +0000Friday27"
+
+-- instance of classWithToString --
+
+Warning: date() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- instance of classWithoutToString --
+
+Warning: date() expects parameter 1 to be string, object given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+
+-- resource --
+
+Warning: date() expects parameter 1 to be string, resource given in %s/test/zend/good/ext/date/tests/date_variation1.php on line 91
+===DONE===

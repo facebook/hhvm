@@ -1,0 +1,14 @@
+object(A) (2) {
+  ["x":"A":private]=>
+  dict(1) {
+    [0]=>
+    int(0)
+  }
+  ["y":"A":private]=>
+  string(6) "string"
+}
+string(6) "string"
+dict(1) {
+  [0]=>
+  int(0)
+}

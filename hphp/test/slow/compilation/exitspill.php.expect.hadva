@@ -1,0 +1,9 @@
+int(32)
+vec(6) {
+  int(1)
+  int(32)
+  int(32)
+  int(32)
+  int(32)
+  int(32)
+}

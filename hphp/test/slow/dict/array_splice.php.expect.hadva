@@ -1,0 +1,20 @@
+dict(0) {
+}
+dict(0) {
+}
+dict(2) {
+  ["bar"]=>
+  int(1)
+  ["baz"]=>
+  int(3)
+}
+dict(1) {
+  ["foo"]=>
+  int(0)
+}
+dict(0) {
+}
+dict(1) {
+  ["bing"]=>
+  int(42)
+}

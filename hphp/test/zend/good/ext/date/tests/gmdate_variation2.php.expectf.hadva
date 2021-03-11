@@ -1,0 +1,96 @@
+*** Testing gmdate() : usage variation ***
+
+--int 0--
+string(24) "1970-01-01T00:00:00+0000"
+
+--int 1--
+string(24) "1970-01-01T00:00:01+0000"
+
+--int 12345--
+string(24) "1970-01-01T03:25:45+0000"
+
+--int -12345--
+string(24) "1969-12-31T20:34:15+0000"
+
+--float 10.5--
+
+Warning: gmdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--float -10.5--
+
+Warning: gmdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--float .5--
+
+Warning: gmdate() expects parameter 2 to be integer, double given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--empty array--
+
+Warning: gmdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--int indexed array--
+
+Warning: gmdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--associative array--
+
+Warning: gmdate() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--nested arrays--
+
+Warning: gmdate() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--uppercase NULL--
+bool(true)
+
+--lowercase null--
+bool(true)
+
+--lowercase true--
+
+Warning: gmdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--lowercase false--
+
+Warning: gmdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--uppercase TRUE--
+
+Warning: gmdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--uppercase FALSE--
+
+Warning: gmdate() expects parameter 2 to be integer, boolean given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--empty string DQ--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--empty string SQ--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--string DQ--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--string SQ--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--mixed case string--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--heredoc--
+
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--instance of classWithToString--
+
+Warning: gmdate() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+
+--instance of classWithoutToString--
+
+Warning: gmdate() expects parameter 2 to be integer, object given in %s/test/zend/good/ext/date/tests/gmdate_variation2.php on line 98
+===DONE===

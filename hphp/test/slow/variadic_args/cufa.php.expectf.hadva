@@ -1,0 +1,407 @@
+********* test_cuf **********
+
+* variadic_only_no_vv
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_only
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_some
+bool(true)
+bool(true)
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_hack_only
+int(3)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_hack_some
+int(3)
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= static methods ==========
+
+* C::st_variadic_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_some
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_hack_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_hack_some
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= instance methods ==========
+
+* C::variadic_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_some
+bool(true)
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_hack_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_hack_some
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+********* test_cuf_insuffient_calls **********
+
+* variadic_only_no_vv
+bool(true)
+vec(0) {
+}
+
+* variadic_only
+bool(true)
+vec(0) {
+}
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
+
+* variadic_hack_only
+int(0)
+vec(0) {
+}
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
+
+========= static methods ==========
+
+* C::st_variadic_only
+vec(0) {
+}
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
+
+* C::st_variadic_hack_only
+vec(0) {
+}
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
+
+========= instance methods ==========
+
+* C::variadic_only
+vec(0) {
+}
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
+
+* C::variadic_hack_only
+vec(0) {
+}
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
+
+********* test_cufa **********
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+========= functions ==========
+
+* variadic_only_no_vv
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_only
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_some
+bool(true)
+bool(true)
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_hack_only
+int(3)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic_hack_some
+int(3)
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= static methods ==========
+
+* C::st_variadic_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_some
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_hack_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::st_variadic_hack_some
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= instance methods ==========
+
+* C::variadic_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_some
+bool(true)
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_hack_only
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::variadic_hack_some
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+********* test_cufa **********
+vec(1) {
+  string(1) "a"
+}
+
+========= functions ==========
+
+* variadic_only_no_vv
+bool(true)
+vec(1) {
+  string(1) "a"
+}
+
+* variadic_only
+bool(true)
+vec(1) {
+  string(1) "a"
+}
+
+* variadic_some
+bool(true)
+bool(true)
+vec(0) {
+}
+
+* variadic_hack_only
+int(1)
+vec(1) {
+  string(1) "a"
+}
+
+* variadic_hack_some
+int(1)
+dict(1) {
+  [0]=>
+  string(1) "a"
+}
+
+========= static methods ==========
+
+* C::st_variadic_only
+vec(1) {
+  string(1) "a"
+}
+
+* C::st_variadic_some
+vec(0) {
+}
+
+* C::st_variadic_hack_only
+vec(1) {
+  string(1) "a"
+}
+
+* C::st_variadic_hack_some
+dict(1) {
+  [0]=>
+  string(1) "a"
+}
+
+========= instance methods ==========
+
+* C::variadic_only
+vec(1) {
+  string(1) "a"
+}
+
+* C::variadic_some
+bool(true)
+vec(0) {
+}
+
+* C::variadic_hack_only
+vec(1) {
+  string(1) "a"
+}
+
+* C::variadic_hack_some
+dict(1) {
+  [0]=>
+  string(1) "a"
+}
+
+********* test_cufa **********
+vec(0) {
+}
+
+========= functions ==========
+
+* variadic_only_no_vv
+bool(true)
+vec(0) {
+}
+
+* variadic_only
+bool(true)
+vec(0) {
+}
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
+
+* variadic_hack_only
+int(0)
+vec(0) {
+}
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
+
+========= static methods ==========
+
+* C::st_variadic_only
+vec(0) {
+}
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
+
+* C::st_variadic_hack_only
+vec(0) {
+}
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
+
+========= instance methods ==========
+
+* C::variadic_only
+vec(0) {
+}
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
+
+* C::variadic_hack_only
+vec(0) {
+}
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
+
+********* test_stack_should_not_overflow **********
+bool(true)
+int(10001)
+
+********* test_stack_should_not_overflow **********
+bool(true)
+int(30001)

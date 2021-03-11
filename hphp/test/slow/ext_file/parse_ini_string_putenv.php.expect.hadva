@@ -1,0 +1,5 @@
+bool(false)
+dict(1) {
+  ["foo"]=>
+  string(4) "derp"
+}

@@ -1,0 +1,34 @@
+dict(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+}
+dict(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+}
+dict(3) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+  ["nullable"]=>
+  bool(true)
+}
+dict(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(7) "MyClass"
+}

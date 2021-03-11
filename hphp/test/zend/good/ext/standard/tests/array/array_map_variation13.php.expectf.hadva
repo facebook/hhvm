@@ -1,0 +1,41 @@
+*** Testing array_map() : callback with diff return value ***
+-- with integer return value --
+vec(3) {
+  int(4)
+  int(6)
+  int(8)
+}
+-- with string return value --
+vec(3) {
+  string(2) "13"
+  string(2) "24"
+  string(2) "35"
+}
+-- with bool return value --
+vec(3) {
+  bool(true)
+  bool(true)
+  bool(true)
+}
+-- with null return value --
+dict(3) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+}
+-- with no return value --
+callback_without_ret called
+callback_without_ret called
+callback_without_ret called
+dict(3) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+}
+Done

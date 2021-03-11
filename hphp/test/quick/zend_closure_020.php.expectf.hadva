@@ -1,0 +1,18 @@
+object(foo) (2) {
+  ["test":"foo":private]=>
+  int(3)
+  ["a"]=>
+  object(Closure%s) (2) {
+    ["static"]=>
+    dict(1) {
+      ["a"]=>
+      *RECURSION*
+    }
+    ["this"]=>
+    *RECURSION*
+  }
+}
+bool(true)
+bool(true)
+
+Fatal error: Cannot access private property foo::$test in %s on line 19

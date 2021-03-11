@@ -1,0 +1,17 @@
+bool(true)
+bool(true)
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(9) "HH\Vector"
+  ["generic_types"]=>
+  vec(1) {
+    dict(2) {
+      ["nullable"]=>
+      bool(true)
+      ["kind"]=>
+      int(1)
+    }
+  }
+}

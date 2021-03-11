@@ -1,0 +1,10 @@
+vec(3) {
+  object(stdClass) (1) {
+    ["a"]=>
+    int(1)
+  }
+  object(stdClass) (0) {
+  }
+  object(stdClass) (0) {
+  }
+}

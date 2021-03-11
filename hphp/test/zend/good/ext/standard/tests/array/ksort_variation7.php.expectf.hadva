@@ -1,0 +1,104 @@
+*** Testing ksort() : usage variations ***
+
+-- Testing ksort() by supplying various arrays containing sub arrays --
+
+-- Iteration 1 --
+- With defualt sort flag -
+bool(true)
+vec(0) {
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(0) {
+}
+
+-- Iteration 2 --
+- With defualt sort flag -
+bool(true)
+dict(1) {
+  [1]=>
+  vec(0) {
+  }
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+dict(1) {
+  [1]=>
+  vec(0) {
+  }
+}
+
+-- Iteration 3 --
+- With defualt sort flag -
+bool(true)
+dict(3) {
+  [1]=>
+  int(11)
+  [3]=>
+  vec(2) {
+    int(64)
+    int(61)
+  }
+  [4]=>
+  int(44)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+dict(3) {
+  [1]=>
+  int(11)
+  [3]=>
+  vec(2) {
+    int(64)
+    int(61)
+  }
+  [4]=>
+  int(44)
+}
+
+-- Iteration 4 --
+- With defualt sort flag -
+bool(true)
+dict(4) {
+  [0]=>
+  vec(0) {
+  }
+  [1]=>
+  vec(1) {
+    int(11)
+  }
+  [2]=>
+  vec(2) {
+    int(22)
+    int(-55)
+  }
+  [3]=>
+  vec(3) {
+    int(33)
+    int(-5)
+    int(6)
+  }
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+dict(4) {
+  [0]=>
+  vec(0) {
+  }
+  [1]=>
+  vec(1) {
+    int(11)
+  }
+  [2]=>
+  vec(2) {
+    int(22)
+    int(-55)
+  }
+  [3]=>
+  vec(3) {
+    int(33)
+    int(-5)
+    int(6)
+  }
+}
+Done

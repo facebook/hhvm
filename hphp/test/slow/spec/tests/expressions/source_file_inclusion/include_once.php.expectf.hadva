@@ -1,0 +1,19 @@
+Warning: include_once(XXPositions.inc): File not found in %s/test/slow/spec/tests/expressions/source_file_inclusion/include_once.php on line 8
+bool(false)
+----------------------------------
+bool(true)
+bool(true)
+int(3)
+int(1)
+----------------------------------
+bool(true)
+----------------------------------
+bool(true)
+----------------------------------
+Vec
+(
+    [0] => %s/test/slow/spec/tests/expressions/source_file_inclusion/include_once.php
+    [1] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Positions.inc
+    [2] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Point.inc
+    [3] => %s/test/slow/spec/tests/expressions/source_file_inclusion/Circle.inc
+)

@@ -1,0 +1,188 @@
+*** Testing array_column() : basic functionality ***
+-- first_name column from recordset --
+dict(3) {
+  [0]=>
+  string(4) "John"
+  [1]=>
+  string(5) "Sally"
+  [2]=>
+  string(4) "Jane"
+}
+-- id column from recordset --
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+-- last_name column from recordset, keyed by value from id column --
+dict(3) {
+  [1]=>
+  string(3) "Doe"
+  [2]=>
+  string(5) "Smith"
+  [3]=>
+  string(5) "Jones"
+}
+-- last_name column from recordset, keyed by value from first_name column --
+dict(3) {
+  ["John"]=>
+  string(3) "Doe"
+  ["Sally"]=>
+  string(5) "Smith"
+  ["Jane"]=>
+  string(5) "Jones"
+}
+
+*** Testing multiple data types ***
+dict(8) {
+  [0]=>
+  object(stdClass) (0) {
+  }
+  [1]=>
+  float(34.2345)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+  [5]=>
+  int(1234)
+  [6]=>
+  string(3) "Foo"
+  [7]=>
+  resource(4) of type (stream)
+}
+dict(8) {
+  [1]=>
+  object(stdClass) (0) {
+  }
+  [2]=>
+  float(34.2345)
+  [3]=>
+  bool(true)
+  [4]=>
+  bool(false)
+  [5]=>
+  NULL
+  [6]=>
+  int(1234)
+  [7]=>
+  string(3) "Foo"
+  [8]=>
+  resource(4) of type (stream)
+}
+
+*** Testing numeric column keys ***
+dict(3) {
+  [0]=>
+  string(3) "111"
+  [1]=>
+  string(3) "222"
+  [2]=>
+  string(3) "333"
+}
+dict(3) {
+  ["aaa"]=>
+  string(3) "111"
+  ["bbb"]=>
+  string(3) "222"
+  ["ccc"]=>
+  string(3) "333"
+}
+dict(3) {
+  ["aaa"]=>
+  string(3) "111"
+  ["bbb"]=>
+  string(3) "222"
+  ["ccc"]=>
+  string(3) "333"
+}
+dict(3) {
+  [0]=>
+  string(3) "111"
+  [1]=>
+  string(3) "222"
+  ["ddd"]=>
+  string(3) "333"
+}
+
+*** Testing failure to find specified column ***
+dict(0) {
+}
+dict(0) {
+}
+dict(3) {
+  [0]=>
+  string(3) "aaa"
+  [1]=>
+  string(3) "bbb"
+  [2]=>
+  string(3) "ccc"
+}
+dict(0) {
+}
+
+*** Testing single dimensional array ***
+dict(0) {
+}
+
+*** Testing columns not present in all rows ***
+dict(1) {
+  [0]=>
+  string(3) "qux"
+}
+dict(1) {
+  ["baz"]=>
+  string(3) "qux"
+}
+dict(3) {
+  [0]=>
+  string(3) "foo"
+  ["aaa"]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "eee"
+}
+dict(3) {
+  ["bbb"]=>
+  string(3) "foo"
+  [0]=>
+  string(3) "baz"
+  ["ggg"]=>
+  string(3) "eee"
+}
+dict(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "fff"
+}
+dict(2) {
+  ["foo"]=>
+  string(3) "bar"
+  ["eee"]=>
+  string(3) "fff"
+}
+
+*** Testing use of object converted to string ***
+dict(3) {
+  [0]=>
+  string(3) "Doe"
+  [1]=>
+  string(5) "Smith"
+  [2]=>
+  string(5) "Jones"
+}
+dict(3) {
+  ["John"]=>
+  string(3) "Doe"
+  ["Sally"]=>
+  string(5) "Smith"
+  ["Jane"]=>
+  string(5) "Jones"
+}
+Done

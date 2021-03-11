@@ -1,0 +1,51 @@
+vec(3) {
+  dict(3) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "g"
+    ["type"]=>
+    string(2) "->"
+  }
+  dict(3) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "f"
+    ["type"]=>
+    string(2) "->"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+}
+------------------------
+vec(3) {
+  dict(4) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "g"
+    ["object"]=>
+    object(C) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+  }
+  dict(4) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "f"
+    ["object"]=>
+    object(C) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+}

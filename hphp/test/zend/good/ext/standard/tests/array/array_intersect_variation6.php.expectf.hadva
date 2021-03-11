@@ -1,0 +1,113 @@
+*** Testing array_intersect() : assoc array with diff keys to $arr2 argument ***
+-- Iterator 1 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 2 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 3 --
+dict(1) {
+  [0]=>
+  int(1)
+}
+dict(1) {
+  [0]=>
+  int(1)
+}
+-- Iterator 4 --
+dict(1) {
+  [0]=>
+  int(1)
+}
+dict(1) {
+  [0]=>
+  int(1)
+}
+-- Iterator 5 --
+dict(1) {
+  [1]=>
+  string(5) "float"
+}
+dict(1) {
+  [1]=>
+  string(5) "float"
+}
+-- Iterator 6 --
+dict(1) {
+  [2]=>
+  string(2) "f4"
+}
+dict(1) {
+  [2]=>
+  string(2) "f4"
+}
+-- Iterator 7 --
+dict(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
+}
+dict(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
+}
+-- Iterator 8 --
+dict(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
+}
+dict(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
+}
+-- Iterator 9 --
+dict(2) {
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
+}
+dict(2) {
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
+}
+-- Iterator 10 --
+dict(1) {
+  [3]=>
+  string(5) "hello"
+}
+dict(1) {
+  [3]=>
+  string(5) "hello"
+}
+-- Iterator 11 --
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "float"
+  [4]=>
+  float(2.2)
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(5) "float"
+  [4]=>
+  float(2.2)
+}
+Done

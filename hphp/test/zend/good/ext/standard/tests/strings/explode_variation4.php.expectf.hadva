@@ -1,0 +1,11 @@
+*** Testing explode() function: match longer string ***
+vec(7) {
+  string(6) "piece1"
+  string(5) "iece2"
+  string(5) "iece3"
+  string(5) "iece4"
+  string(5) "iece5"
+  string(5) "iece6"
+  string(0) ""
+}
+===DONE===

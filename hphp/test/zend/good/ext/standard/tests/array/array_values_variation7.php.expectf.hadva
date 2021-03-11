@@ -1,0 +1,22 @@
+*** Testing array_values() : usage variations ***
+
+-- $input argument: --
+dict(4) {
+  [3]=>
+  string(5) "three"
+  [2]=>
+  string(3) "two"
+  [1]=>
+  string(3) "one"
+  [0]=>
+  string(4) "zero"
+}
+
+-- Result of array_values() --
+vec(4) {
+  string(5) "three"
+  string(3) "two"
+  string(3) "one"
+  string(4) "zero"
+}
+Done

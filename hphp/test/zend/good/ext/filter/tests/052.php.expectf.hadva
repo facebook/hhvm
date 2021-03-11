@@ -1,0 +1,16 @@
+dict(1) {
+  ["bar"]=>
+  dict(2) {
+    [0]=>
+    string(5) "fubar"
+    [1]=>
+    string(5) "barfu"
+  }
+}
+dict(1) {
+  ["bar"]=>
+  vec(2) {
+    string(13) "fu<script>bar"
+    string(13) "bar<script>fu"
+  }
+}

@@ -1,0 +1,18 @@
+dict(2) {
+  ["friends"]=>
+  int(5)
+  ["children"]=>
+  dict(1) {
+    ["dogs"]=>
+    int(0)
+  }
+}
+dict(2) {
+  ["friends"]=>
+  int(10)
+  ["children"]=>
+  dict(1) {
+    ["cats"]=>
+    int(5)
+  }
+}

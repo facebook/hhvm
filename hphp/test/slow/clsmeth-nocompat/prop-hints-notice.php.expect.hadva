@@ -1,0 +1,208 @@
+[TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_static (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_static (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_static (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_foo_dynamic (wanted: Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_foo_dynamic (wanted: ?Foo, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
+[TYPE VIOLATION] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL
+NULL
+vec(0) {
+}
+vec(0) {
+}
+NULL
+NULL
+NULL

@@ -1,0 +1,14 @@
+int(4)
+int(5)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+string(52) "strlen() expects parameter 1 to be string, vec given"
+string(55) "strlen() expects parameter 1 to be string, object given"
+string(55) "strlen() expects parameter 1 to be string, object given"

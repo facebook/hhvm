@@ -1,0 +1,9 @@
+object(SimpleXMLElement) (2) {
+  ["@attributes"]=>
+  dict(1) {
+    ["name"]=>
+    string(5) "value"
+  }
+  [0]=>
+  string(6) "whoops"
+}

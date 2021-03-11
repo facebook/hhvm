@@ -1,0 +1,241 @@
+Testing: [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
+DECODE: AS OBJECT
+dict(1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    dict(1) {
+      [0]=>
+      dict(1) {
+        [0]=>
+        dict(1) {
+          [0]=>
+          dict(1) {
+            [0]=>
+            dict(1) {
+              [0]=>
+              dict(1) {
+                [0]=>
+                dict(1) {
+                  [0]=>
+                  dict(1) {
+                    [0]=>
+                    dict(1) {
+                      [0]=>
+                      dict(1) {
+                        [0]=>
+                        dict(1) {
+                          [0]=>
+                          dict(1) {
+                            [0]=>
+                            dict(1) {
+                              [0]=>
+                              dict(1) {
+                                [0]=>
+                                dict(1) {
+                                  [0]=>
+                                  dict(1) {
+                                    [0]=>
+                                    dict(1) {
+                                      [0]=>
+                                      string(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+DECODE: AS ARRAY
+dict(1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    dict(1) {
+      [0]=>
+      dict(1) {
+        [0]=>
+        dict(1) {
+          [0]=>
+          dict(1) {
+            [0]=>
+            dict(1) {
+              [0]=>
+              dict(1) {
+                [0]=>
+                dict(1) {
+                  [0]=>
+                  dict(1) {
+                    [0]=>
+                    dict(1) {
+                      [0]=>
+                      dict(1) {
+                        [0]=>
+                        dict(1) {
+                          [0]=>
+                          dict(1) {
+                            [0]=>
+                            dict(1) {
+                              [0]=>
+                              dict(1) {
+                                [0]=>
+                                dict(1) {
+                                  [0]=>
+                                  dict(1) {
+                                    [0]=>
+                                    dict(1) {
+                                      [0]=>
+                                      string(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+ENCODE: FROM OBJECT
+{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":"Not too deep"}}}}}}}}}}}}}}}}}}}
+ENCODE: FROM ARRAY
+{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":{"0":"Not too deep"}}}}}}}}}}}}}}}}}}}
+DECODE AGAIN: AS OBJECT
+object(stdClass) (1) {
+  ["0"]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    object(stdClass) (1) {
+      ["0"]=>
+      object(stdClass) (1) {
+        ["0"]=>
+        object(stdClass) (1) {
+          ["0"]=>
+          object(stdClass) (1) {
+            ["0"]=>
+            object(stdClass) (1) {
+              ["0"]=>
+              object(stdClass) (1) {
+                ["0"]=>
+                object(stdClass) (1) {
+                  ["0"]=>
+                  object(stdClass) (1) {
+                    ["0"]=>
+                    object(stdClass) (1) {
+                      ["0"]=>
+                      object(stdClass) (1) {
+                        ["0"]=>
+                        object(stdClass) (1) {
+                          ["0"]=>
+                          object(stdClass) (1) {
+                            ["0"]=>
+                            object(stdClass) (1) {
+                              ["0"]=>
+                              object(stdClass) (1) {
+                                ["0"]=>
+                                object(stdClass) (1) {
+                                  ["0"]=>
+                                  object(stdClass) (1) {
+                                    ["0"]=>
+                                    object(stdClass) (1) {
+                                      ["0"]=>
+                                      string(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+DECODE AGAIN: AS ARRAY
+dict(1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    dict(1) {
+      [0]=>
+      dict(1) {
+        [0]=>
+        dict(1) {
+          [0]=>
+          dict(1) {
+            [0]=>
+            dict(1) {
+              [0]=>
+              dict(1) {
+                [0]=>
+                dict(1) {
+                  [0]=>
+                  dict(1) {
+                    [0]=>
+                    dict(1) {
+                      [0]=>
+                      dict(1) {
+                        [0]=>
+                        dict(1) {
+                          [0]=>
+                          dict(1) {
+                            [0]=>
+                            dict(1) {
+                              [0]=>
+                              dict(1) {
+                                [0]=>
+                                dict(1) {
+                                  [0]=>
+                                  dict(1) {
+                                    [0]=>
+                                    dict(1) {
+                                      [0]=>
+                                      string(12) "Not too deep"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

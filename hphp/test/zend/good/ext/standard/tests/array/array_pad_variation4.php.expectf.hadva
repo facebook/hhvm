@@ -1,0 +1,18 @@
+*** Testing array_pad() : Passing binary values to $pad_value argument ***
+vec(6) {
+  int(1)
+  int(2)
+  int(3)
+  string(5) "hello"
+  string(5) "hello"
+  string(5) "hello"
+}
+vec(6) {
+  string(5) "hello"
+  string(5) "hello"
+  string(5) "hello"
+  int(1)
+  int(2)
+  int(3)
+}
+Done

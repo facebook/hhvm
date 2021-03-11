@@ -1,0 +1,11 @@
+bool(false)
+dict(0) {
+}
+bool(true)
+int(1)
+dict(1) {
+  [0]=>
+  string(28) " uma string utf8 bem formada"
+}
+bool(true)
+Done

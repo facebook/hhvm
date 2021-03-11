@@ -1,0 +1,43 @@
+*** Testing array_merge_recursive() : array with binary data for $arr1 argument ***
+-- With default argument --
+dict(5) {
+  [0]=>
+  string(1) "1"
+  ["hello"]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+  ["str1"]=>
+  string(5) "hello"
+  ["str2"]=>
+  string(5) "world"
+}
+-- With more arguments --
+dict(5) {
+  [0]=>
+  string(1) "1"
+  ["hello"]=>
+  dict(2) {
+    [0]=>
+    string(5) "hello"
+    [1]=>
+    string(6) "binary"
+  }
+  [1]=>
+  string(5) "world"
+  ["str1"]=>
+  dict(2) {
+    [0]=>
+    string(5) "hello"
+    [1]=>
+    string(6) "binary"
+  }
+  ["str2"]=>
+  dict(2) {
+    [0]=>
+    string(5) "world"
+    [1]=>
+    string(6) "binary"
+  }
+}
+Done

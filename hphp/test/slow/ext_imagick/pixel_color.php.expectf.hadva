@@ -1,0 +1,85 @@
+Dict
+(
+    [hue] => 0.167
+    [saturation] => 1
+    [luminosity] => 0.500
+)
+
+Dict
+(
+    [r] => 1
+    [g] => 1
+    [b] => 0
+    [a] => 1
+)
+
+Dict
+(
+    [hue] => 0.167
+    [saturation] => 1
+    [luminosity] => 0.500
+)
+
+Dict
+(
+    [r] => 255
+    [g] => 255
+    [b] => 0
+    [a] => 1
+)
+
+Dict
+(
+    [hue] => 0.300
+    [saturation] => 0.400
+    [luminosity] => 0.500
+)
+
+Dict
+(
+    [r] => 97
+    [g] => 179
+    [b] => 77
+    [a] => 1
+)
+
+Dict
+(
+    [hue] => 0.300
+    [saturation] => 0.400
+    [luminosity] => 0.500
+)
+
+Dict
+(
+    [r] => 0.380
+    [g] => 0.700
+    [b] => 0.300
+    [a] => 1
+)
+
+0
+0.533
+0.941
+0.169
+0.941
+0.533
+0.169
+1
+0
+Dict
+(
+    [hue] => 0.921
+    [saturation] => 0.868
+    [luminosity] => 0.555
+)
+
+Dict
+(
+    [r] => 240
+    [g] => 43
+    [b] => 136
+    [a] => 1
+)
+
+==DONE==

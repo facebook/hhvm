@@ -1,0 +1,18 @@
+vec(1) {
+  object(stdClass) (0) {
+  }
+}
+vec(1) {
+  object(stdClass) (0) {
+  }
+}
+vec(1) {
+  object(stdClass) (0) {
+  }
+}
+vec(1) {
+  object(stdClass) (0) {
+  }
+}
+
+Catchable fatal error: Argument 1 passed to X::__construct() must be an instance of HH\varray, string given in %s/test/slow/ir_refcount/refcount001.php on line 18

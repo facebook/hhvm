@@ -1,0 +1,448 @@
+takes_int
+int(123)
+takes_bool
+bool(true)
+takes_str
+string(3) "abc"
+takes_double
+float(3.141)
+takes_arrkey
+int(707)
+takes_vector
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Cls1::getInstanceKey
+takes_cls1
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "xyz"
+}
+Cls2::getInstanceKey
+takes_cls2
+object(Cls2) (1) {
+  ["x"]=>
+  int(311)
+}
+Cls3::getInstanceKey
+takes_cls3
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls1 could not be converted to string
+takes_cls3
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+takes_opt_int
+int(123)
+takes_opt_bool
+bool(true)
+takes_opt_str
+string(3) "abc"
+takes_opt_dbl
+float(3.141)
+takes_opt_vector
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Cls1::getInstanceKey
+takes_opt_cls1
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "xyz"
+}
+Cls2::getInstanceKey
+takes_opt_cls2
+object(Cls2) (1) {
+  ["x"]=>
+  int(311)
+}
+Cls3::getInstanceKey
+takes_opt_cls3
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls1 could not be converted to string
+takes_opt_cls3
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+takes_int
+int(987)
+takes_bool
+bool(false)
+takes_str
+string(3) "foo"
+takes_double
+float(9.871)
+takes_arrkey
+string(3) "bar"
+takes_vector
+object(HH\Vector) (3) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(8)
+  [2]=>
+  int(9)
+}
+Cls1::getInstanceKey
+takes_cls1
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "biz"
+}
+Cls2::getInstanceKey
+takes_cls2
+object(Cls2) (1) {
+  ["x"]=>
+  int(1001)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls2 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+takes_opt_int
+NULL
+takes_opt_bool
+NULL
+takes_opt_str
+NULL
+takes_opt_dbl
+NULL
+takes_opt_vector
+NULL
+takes_opt_cls1
+NULL
+takes_opt_cls2
+NULL
+takes_opt_cls3
+NULL
+takes_opt_cls4
+NULL
+takes_anything
+NULL
+takes_anything
+bool(true)
+takes_anything
+bool(false)
+takes_anything
+int(500)
+takes_anything
+string(8) "a-string"
+takes_anything
+string(0) ""
+takes_anything
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+takes_anything
+vec(3) {
+  int(4)
+  int(5)
+  int(6)
+}
+takes_anything
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+takes_anything
+keyset(3) {
+  string(1) "z"
+  string(1) "y"
+  string(1) "x"
+}
+takes_anything
+object(HH\Vector) (2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+Cls1::getInstanceKey
+takes_anything
+object(Cls1) (1) {
+  ["x"]=>
+  string(6) "cls1-1"
+}
+Cls1::getInstanceKey
+takes_anything
+object(Cls1) (1) {
+  ["x"]=>
+  string(6) "cls1-2"
+}
+Cls2::getInstanceKey
+takes_anything
+object(Cls2) (1) {
+  ["x"]=>
+  int(999)
+}
+Cls2::getInstanceKey
+takes_anything
+object(Cls2) (1) {
+  ["x"]=>
+  int(666)
+}
+Cls3::getInstanceKey
+takes_anything
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+takes_anything
+object(Cls3) (1) {
+  ["x"]=>
+  bool(false)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls2 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  bool(false)
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+=======================================
+int(123)
+bool(true)
+string(3) "abc"
+float(3.141)
+int(707)
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Cls1::getInstanceKey
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "xyz"
+}
+Cls2::getInstanceKey
+object(Cls2) (1) {
+  ["x"]=>
+  int(311)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls1 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+int(123)
+bool(true)
+string(3) "abc"
+float(3.141)
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Cls1::getInstanceKey
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "xyz"
+}
+Cls2::getInstanceKey
+object(Cls2) (1) {
+  ["x"]=>
+  int(311)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls1 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+int(987)
+bool(false)
+string(3) "foo"
+float(9.871)
+string(3) "bar"
+object(HH\Vector) (3) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(8)
+  [2]=>
+  int(9)
+}
+Cls1::getInstanceKey
+object(Cls1) (1) {
+  ["x"]=>
+  string(3) "biz"
+}
+Cls2::getInstanceKey
+object(Cls2) (1) {
+  ["x"]=>
+  int(1001)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls2 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  object(Cls1) (1) {
+    ["x"]=>
+    string(4) "aaaa"
+  }
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+bool(true)
+bool(false)
+int(500)
+string(8) "a-string"
+string(0) ""
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(4)
+  int(5)
+  int(6)
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+keyset(3) {
+  string(1) "z"
+  string(1) "y"
+  string(1) "x"
+}
+object(HH\Vector) (2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+Cls1::getInstanceKey
+object(Cls1) (1) {
+  ["x"]=>
+  string(6) "cls1-1"
+}
+Cls1::getInstanceKey
+object(Cls1) (1) {
+  ["x"]=>
+  string(6) "cls1-2"
+}
+Cls2::getInstanceKey
+object(Cls2) (1) {
+  ["x"]=>
+  int(999)
+}
+Cls2::getInstanceKey
+object(Cls2) (1) {
+  ["x"]=>
+  int(666)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  bool(true)
+}
+Cls3::getInstanceKey
+object(Cls3) (1) {
+  ["x"]=>
+  bool(false)
+}
+Cls3::getInstanceKey
+ERROR: Object of class Cls2 could not be converted to string
+object(Cls3) (1) {
+  ["x"]=>
+  bool(false)
+}
+Cannot serialize object of type Cls4 because it does not implement HH\IMemoizeParam

@@ -1,0 +1,35 @@
+*** Testing asort() :usage variations  ***
+
+-- Testing asort() 'flag' value is defualt --
+bool(true)
+dict(3) {
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+
+-- Testing asort() 'flag' = SORT_REGULAR --
+bool(true)
+dict(3) {
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+
+-- Testing asort() 'flag' = SORT_NUMERIC --
+bool(true)
+dict(3) {
+  [2]=>
+  int(33)
+  [1]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+Done

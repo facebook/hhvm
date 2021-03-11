@@ -1,0 +1,8 @@
+vec(6) {
+  string(3) "One"
+  string(7) "\"Two\""
+  string(7) "Three\""
+  string(4) "Four"
+  string(2) "\\"
+  string(28) "\\\\\\\\\\\\\\\\\\\\\\\"\\\\"
+}

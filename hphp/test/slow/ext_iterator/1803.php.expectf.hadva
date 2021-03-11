@@ -1,0 +1,74 @@
+vec(6) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+}
+vec(6) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+}
+vec(5) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+}
+vec(5) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir dir
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+}
+vec(10) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty empty
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file file
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc fix_mtimes.inc
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink symlink
+"
+}

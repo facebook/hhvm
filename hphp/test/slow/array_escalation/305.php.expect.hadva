@@ -1,0 +1,12 @@
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  int(1)
+}
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  int(1)
+}

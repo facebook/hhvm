@@ -1,0 +1,155 @@
+=== A ===
+string(7) "~HH\int"
+dict(2) {
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+}
+=== B ===
+string(15) "HH\vec<~HH\int>"
+dict(2) {
+  ["kind"]=>
+  int(20)
+  ["generic_types"]=>
+  vec(1) {
+    dict(2) {
+      ["like"]=>
+      bool(true)
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+=== C ===
+string(27) "~HH\dict<HH\string, HH\int>"
+dict(3) {
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(19)
+  ["generic_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+=== D ===
+string(28) "(HH\int, ~HH\float, HH\bool)"
+dict(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  vec(3) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    dict(2) {
+      ["like"]=>
+      bool(true)
+      ["kind"]=>
+      int(3)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}
+=== E ===
+string(46) "HH\shape('x'=>HH\string, 'y'=>HH\vec<~HH\int>)"
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["x"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    ["y"]=>
+    dict(2) {
+      ["kind"]=>
+      int(20)
+      ["generic_types"]=>
+      vec(1) {
+        dict(2) {
+          ["like"]=>
+          bool(true)
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+  }
+}
+=== F ===
+string(22) "(function (): ~HH\int)"
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(2) {
+    ["like"]=>
+    bool(true)
+    ["kind"]=>
+    int(1)
+  }
+  ["param_types"]=>
+  vec(0) {
+  }
+}
+=== G ===
+string(11) "~HH\this::F"
+dict(4) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(2) {
+    ["like"]=>
+    bool(true)
+    ["kind"]=>
+    int(1)
+  }
+  ["param_types"]=>
+  vec(0) {
+  }
+  ["like"]=>
+  bool(true)
+}
+=== H ===
+string(8) "~?HH\int"
+dict(3) {
+  ["nullable"]=>
+  bool(true)
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+}
+=== I ===
+string(2) "~C"
+dict(3) {
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}
+=== J ===
+string(7) "~HH\int"
+dict(2) {
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+}

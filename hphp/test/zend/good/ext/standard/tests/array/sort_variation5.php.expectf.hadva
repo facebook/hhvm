@@ -1,0 +1,110 @@
+*** Testing sort() : usage variations ***
+
+-- Testing sort() by supplying various string arrays --
+
+-- Iteration 1 --
+- With Default sort flag -
+bool(true)
+vec(12) {
+  NULL
+  NULL
+  string(1) "	"
+  string(1) "
+"
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) ""
+  string(2) "\a"
+  string(3) "\cx"
+  string(4) "\ddd"
+  string(4) "\xhh"
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(12) {
+  NULL
+  NULL
+  string(1) "	"
+  string(1) "
+"
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) ""
+  string(2) "\a"
+  string(3) "\cx"
+  string(4) "\ddd"
+  string(4) "\xhh"
+}
+- Sort flag = SORT_STRING -
+bool(true)
+vec(12) {
+  NULL
+  NULL
+  string(1) "	"
+  string(1) "
+"
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) ""
+  string(2) "\a"
+  string(3) "\cx"
+  string(4) "\ddd"
+  string(4) "\xhh"
+}
+
+-- Iteration 2 --
+- With Default sort flag -
+bool(true)
+vec(12) {
+  string(6) "BANANA"
+  string(6) "Orange"
+  string(4) "TTTT"
+  string(4) "Test"
+  string(1) "X"
+  string(5) "apple"
+  string(6) "banana"
+  string(5) "lemoN"
+  string(6) "oraNGe"
+  string(3) "ttt"
+  string(2) "ww"
+  string(1) "x"
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(12) {
+  string(6) "BANANA"
+  string(6) "Orange"
+  string(4) "TTTT"
+  string(4) "Test"
+  string(1) "X"
+  string(5) "apple"
+  string(6) "banana"
+  string(5) "lemoN"
+  string(6) "oraNGe"
+  string(3) "ttt"
+  string(2) "ww"
+  string(1) "x"
+}
+- Sort flag = SORT_STRING -
+bool(true)
+vec(12) {
+  string(6) "BANANA"
+  string(6) "Orange"
+  string(4) "TTTT"
+  string(4) "Test"
+  string(1) "X"
+  string(5) "apple"
+  string(6) "banana"
+  string(5) "lemoN"
+  string(6) "oraNGe"
+  string(3) "ttt"
+  string(2) "ww"
+  string(1) "x"
+}
+Done

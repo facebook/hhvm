@@ -1,0 +1,38 @@
+dict(2) {
+  ["a_ids"]=>
+  dict(3) {
+    ["aaa"]=>
+    bool(true)
+    ["ccc"]=>
+    vec(2) {
+      vec(2) {
+        string(4) "tcks"
+        string(4) "none"
+      }
+      vec(2) {
+        string(4) "tcks"
+        string(3) "ids"
+      }
+    }
+    ["bbb"]=>
+    string(4) "aaaa"
+  }
+  ["user_id"]=>
+  dict(3) {
+    ["aaa"]=>
+    bool(true)
+    ["ccc"]=>
+    vec(2) {
+      vec(2) {
+        string(4) "tcks"
+        string(4) "none"
+      }
+      vec(2) {
+        string(4) "tcks"
+        string(2) "id"
+      }
+    }
+    ["bbb"]=>
+    string(4) "bbbb"
+  }
+}

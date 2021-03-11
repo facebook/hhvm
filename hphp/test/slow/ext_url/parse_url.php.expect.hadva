@@ -1,0 +1,66 @@
+dict(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(16) "www.facebook.com"
+}
+dict(6) {
+  ["scheme"]=>
+  string(5) "https"
+  ["host"]=>
+  string(16) "www.facebook.com"
+  ["port"]=>
+  int(14159)
+  ["user"]=>
+  string(3) "lol"
+  ["pass"]=>
+  string(5) "12345"
+  ["path"]=>
+  string(9) "/hhvmabcd"
+}
+dict(4) {
+  ["scheme"]=>
+  string(3) "irc"
+  ["host"]=>
+  string(17) "chat.freenode.net"
+  ["path"]=>
+  string(1) "/"
+  ["fragment"]=>
+  string(4) "hhvm"
+}
+dict(1) {
+  ["path"]=>
+  string(12) "content/:/\*"
+}
+dict(3) {
+  ["host"]=>
+  string(11) "example.org"
+  ["port"]=>
+  int(8088)
+  ["path"]=>
+  string(30) "/sites/default/files/drums.mp3"
+}
+dict(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(12) "www.test.com"
+  ["port"]=>
+  int(12345)
+  ["user"]=>
+  string(7) "xx23124"
+  ["pass"]=>
+  string(11) "__ffdfdef__"
+  ["path"]=>
+  string(4) "/dir"
+}
+dict(1) {
+  ["path"]=>
+  string(9) "127.0.0.1"
+}
+dict(2) {
+  ["host"]=>
+  string(9) "127.0.0.1"
+  ["port"]=>
+  int(1234)
+}

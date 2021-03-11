@@ -1,0 +1,20 @@
+vec(1) {
+  string(6) "barbaz"
+}
+vec(2) {
+  string(3) "foo"
+  string(1) "z"
+}
+vec(2) {
+  string(3) "foo"
+  string(1) "r"
+}
+vec(1) {
+  string(1) "z"
+}
+vec(1) {
+  string(3) "foo"
+}
+vec(1) {
+  string(1) "r"
+}

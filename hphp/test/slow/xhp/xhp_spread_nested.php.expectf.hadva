@@ -1,0 +1,37 @@
+string(7) "xhp_foo"
+dict(1) {
+  ["age"]=>
+  int(3)
+}
+string(7) "xhp_foo"
+dict(1) {
+  ["age"]=>
+  int(1)
+}
+string(7) "xhp_foo"
+dict(2) {
+  ["...$0"]=>
+  object(xhp_foo) (0) {
+  }
+  ["age"]=>
+  int(2)
+}
+string(7) "xhp_foo"
+dict(3) {
+  ["...$0"]=>
+  object(xhp_foo) (0) {
+  }
+  ["...$1"]=>
+  object(xhp_foo) (0) {
+  }
+  ["age"]=>
+  int(4)
+}
+string(7) "xhp_foo"
+dict(2) {
+  ["...$0"]=>
+  object(xhp_foo) (0) {
+  }
+  ["age"]=>
+  int(5)
+}

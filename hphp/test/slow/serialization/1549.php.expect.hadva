@@ -1,0 +1,9227 @@
+string(1181) "O:1:"X":12:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";O:1:"X":1:{s:3:"foo";v:3:{i:1;i:2;i:3;}}s:2:"x1";O:1:"X":2:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;}s:2:"x2";O:1:"X":3:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;}s:2:"x3";O:1:"X":4:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;}s:2:"x4";O:1:"X":5:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;}s:2:"x5";O:1:"X":6:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;s:2:"x4";r:32;}s:2:"x6";O:1:"X":7:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;s:2:"x4";r:32;s:2:"x5";r:41;}s:2:"x7";O:1:"X":8:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;s:2:"x4";r:32;s:2:"x5";r:41;s:2:"x6";r:51;}s:2:"x8";O:1:"X":9:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;s:2:"x4";r:32;s:2:"x5";r:41;s:2:"x6";r:51;s:2:"x7";r:62;}s:2:"x9";O:1:"X":10:{s:3:"foo";v:3:{i:1;i:2;i:3;}s:2:"x0";r:6;s:2:"x1";r:11;s:2:"x2";r:17;s:2:"x3";r:24;s:2:"x4";r:32;s:2:"x5";r:41;s:2:"x6";r:51;s:2:"x7";r:62;s:2:"x8";r:74;}s:3:"bar";v:3:{i:1;i:2;i:3;}}"
+object(X) (12) {
+  ["foo"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["x0"]=>
+  object(X) (1) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+  ["x1"]=>
+  object(X) (2) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+  }
+  ["x2"]=>
+  object(X) (3) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+  }
+  ["x3"]=>
+  object(X) (4) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+  }
+  ["x4"]=>
+  object(X) (5) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+  }
+  ["x5"]=>
+  object(X) (6) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+    ["x4"]=>
+    object(X) (5) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ["x6"]=>
+  object(X) (7) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+    ["x4"]=>
+    object(X) (5) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x5"]=>
+    object(X) (6) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ["x7"]=>
+  object(X) (8) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+    ["x4"]=>
+    object(X) (5) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x5"]=>
+    object(X) (6) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x6"]=>
+    object(X) (7) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ["x8"]=>
+  object(X) (9) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+    ["x4"]=>
+    object(X) (5) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x5"]=>
+    object(X) (6) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x6"]=>
+    object(X) (7) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x7"]=>
+    object(X) (8) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x6"]=>
+      object(X) (7) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+        ["x5"]=>
+        object(X) (6) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+          ["x4"]=>
+          object(X) (5) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ["x9"]=>
+  object(X) (10) {
+    ["foo"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+    ["x0"]=>
+    object(X) (1) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+    ["x1"]=>
+    object(X) (2) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+    }
+    ["x2"]=>
+    object(X) (3) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+    }
+    ["x3"]=>
+    object(X) (4) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+    }
+    ["x4"]=>
+    object(X) (5) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x5"]=>
+    object(X) (6) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x6"]=>
+    object(X) (7) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x7"]=>
+    object(X) (8) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x6"]=>
+      object(X) (7) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+        ["x5"]=>
+        object(X) (6) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+          ["x4"]=>
+          object(X) (5) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ["x8"]=>
+    object(X) (9) {
+      ["foo"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+      ["x0"]=>
+      object(X) (1) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+      }
+      ["x1"]=>
+      object(X) (2) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+      }
+      ["x2"]=>
+      object(X) (3) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+      }
+      ["x3"]=>
+      object(X) (4) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+      }
+      ["x4"]=>
+      object(X) (5) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x5"]=>
+      object(X) (6) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x6"]=>
+      object(X) (7) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+        ["x5"]=>
+        object(X) (6) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+          ["x4"]=>
+          object(X) (5) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ["x7"]=>
+      object(X) (8) {
+        ["foo"]=>
+        vec(3) {
+          int(1)
+          int(2)
+          int(3)
+        }
+        ["x0"]=>
+        object(X) (1) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+        }
+        ["x1"]=>
+        object(X) (2) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+        }
+        ["x2"]=>
+        object(X) (3) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+        }
+        ["x3"]=>
+        object(X) (4) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+        }
+        ["x4"]=>
+        object(X) (5) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+        }
+        ["x5"]=>
+        object(X) (6) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+          ["x4"]=>
+          object(X) (5) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        ["x6"]=>
+        object(X) (7) {
+          ["foo"]=>
+          vec(3) {
+            int(1)
+            int(2)
+            int(3)
+          }
+          ["x0"]=>
+          object(X) (1) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+          }
+          ["x1"]=>
+          object(X) (2) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+          }
+          ["x2"]=>
+          object(X) (3) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+          }
+          ["x3"]=>
+          object(X) (4) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+          }
+          ["x4"]=>
+          object(X) (5) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+          }
+          ["x5"]=>
+          object(X) (6) {
+            ["foo"]=>
+            vec(3) {
+              int(1)
+              int(2)
+              int(3)
+            }
+            ["x0"]=>
+            object(X) (1) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+            }
+            ["x1"]=>
+            object(X) (2) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+            }
+            ["x2"]=>
+            object(X) (3) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+            }
+            ["x3"]=>
+            object(X) (4) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+            }
+            ["x4"]=>
+            object(X) (5) {
+              ["foo"]=>
+              vec(3) {
+                int(1)
+                int(2)
+                int(3)
+              }
+              ["x0"]=>
+              object(X) (1) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+              }
+              ["x1"]=>
+              object(X) (2) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+              }
+              ["x2"]=>
+              object(X) (3) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+              }
+              ["x3"]=>
+              object(X) (4) {
+                ["foo"]=>
+                vec(3) {
+                  int(1)
+                  int(2)
+                  int(3)
+                }
+                ["x0"]=>
+                object(X) (1) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                }
+                ["x1"]=>
+                object(X) (2) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                }
+                ["x2"]=>
+                object(X) (3) {
+                  ["foo"]=>
+                  vec(3) {
+                    int(1)
+                    int(2)
+                    int(3)
+                  }
+                  ["x0"]=>
+                  object(X) (1) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                  }
+                  ["x1"]=>
+                  object(X) (2) {
+                    ["foo"]=>
+                    vec(3) {
+                      int(1)
+                      int(2)
+                      int(3)
+                    }
+                    ["x0"]=>
+                    object(X) (1) {
+                      ["foo"]=>
+                      vec(3) {
+                        int(1)
+                        int(2)
+                        int(3)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ["bar"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+vec(3) {
+  int(0)
+  int(1)
+  int(2)
+}

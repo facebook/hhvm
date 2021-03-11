@@ -1,0 +1,65 @@
+intercept1 DONE
+vec(4) {
+  dict(6) {
+    ["file"]=>
+    string(%d) "%s/test/slow/intercept/prolog.php"
+    ["line"]=>
+    int(5)
+    ["function"]=>
+    string(10) "intercept2"
+    ["class"]=>
+    string(3) "Cls"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    vec(5) {
+      string(9) "Cls::func"
+      object(Cls) (0) {
+      }
+      vec(0) {
+      }
+      NULL
+      bool(true)
+    }
+  }
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/slow/intercept/prolog.php"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(4) "func"
+    ["class"]=>
+    string(3) "Cls"
+    ["object"]=>
+    object(Cls) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/intercept/prolog.php"
+    ["line"]=>
+    int(27)
+    ["function"]=>
+    string(4) "test"
+    ["args"]=>
+    vec(1) {
+      string(10) "intercept2"
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+intercept2 DONE
+Caught exception: intercept3
+intercept3 DONE

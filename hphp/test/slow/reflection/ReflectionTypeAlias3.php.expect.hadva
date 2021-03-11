@@ -1,0 +1,31 @@
+TypeAlias [ Matrix : ?HH\Vector<HH\Vector<T>> ]
+dict(6) {
+  ["nullable"]=>
+  bool(true)
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(9) "HH\Vector"
+  ["generic_types"]=>
+  vec(1) {
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      vec(1) {
+        dict(2) {
+          ["kind"]=>
+          int(13)
+          ["name"]=>
+          string(1) "T"
+        }
+      }
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(6) "Matrix"
+}

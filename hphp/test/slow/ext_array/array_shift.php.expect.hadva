@@ -1,0 +1,18 @@
+dict(1) {
+  ["b"]=>
+  int(2)
+}
+dict(1) {
+  [0]=>
+  int(2)
+}
+dict(1) {
+  [0]=>
+  int(2)
+}
+vec(3) {
+  string(6) "banana"
+  string(5) "apple"
+  string(9) "raspberry"
+}
+string(6) "orange"

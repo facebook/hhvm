@@ -1,0 +1,21 @@
+dict(2) {
+  ["a"]=>
+  NULL
+  ["aa"]=>
+  NULL
+}
+dict(6) {
+  ["a"]=>
+  NULL
+  ["aa"]=>
+  NULL
+  ["b"]=>
+  NULL
+  ["bb"]=>
+  NULL
+  ["c"]=>
+  NULL
+  ["cc"]=>
+  NULL
+}
+NULL

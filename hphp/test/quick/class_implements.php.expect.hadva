@@ -1,0 +1,65 @@
+interfaces of Base:
+dict(2) {
+  ["IA"]=>
+  string(2) "IA"
+  ["IB"]=>
+  string(2) "IB"
+}
+
+interfaces of Derived:
+dict(2) {
+  ["IA"]=>
+  string(2) "IA"
+  ["IB"]=>
+  string(2) "IB"
+}
+
+interfaces of DerivedDerived:
+dict(3) {
+  ["IA"]=>
+  string(2) "IA"
+  ["IB"]=>
+  string(2) "IB"
+  ["IC"]=>
+  string(2) "IC"
+}
+
+interfaces of LotsOfInterfaces:
+dict(3) {
+  ["IA"]=>
+  string(2) "IA"
+  ["ID"]=>
+  string(2) "ID"
+  ["IE"]=>
+  string(2) "IE"
+}
+
+interfaces of MostOfTheInterfaces:
+dict(5) {
+  ["IA"]=>
+  string(2) "IA"
+  ["IB"]=>
+  string(2) "IB"
+  ["ID"]=>
+  string(2) "ID"
+  ["IE"]=>
+  string(2) "IE"
+  ["IG"]=>
+  string(2) "IG"
+}
+
+interfaces of AllTheInterfaces:
+dict(6) {
+  ["IA"]=>
+  string(2) "IA"
+  ["IB"]=>
+  string(2) "IB"
+  ["IC"]=>
+  string(2) "IC"
+  ["ID"]=>
+  string(2) "ID"
+  ["IE"]=>
+  string(2) "IE"
+  ["IG"]=>
+  string(2) "IG"
+}

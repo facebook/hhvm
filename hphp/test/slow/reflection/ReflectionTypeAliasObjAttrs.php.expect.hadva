@@ -1,0 +1,32 @@
+dict(0) {
+}
+dict(1) {
+  ["Attr1"]=>
+  vec(1) {
+    int(1337)
+  }
+}
+dict(2) {
+  ["Attr2"]=>
+  vec(0) {
+  }
+  ["Attr3"]=>
+  vec(0) {
+  }
+}
+dict(2) {
+  ["Attr2"]=>
+  vec(0) {
+  }
+  ["Attr3"]=>
+  vec(0) {
+  }
+}
+dict(2) {
+  ["Attr2"]=>
+  vec(0) {
+  }
+  ["Attr3"]=>
+  vec(0) {
+  }
+}

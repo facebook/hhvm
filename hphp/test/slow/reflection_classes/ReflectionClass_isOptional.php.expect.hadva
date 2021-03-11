@@ -1,0 +1,44 @@
+dict(7) {
+  ["arguments_1_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(false)
+    bool(false)
+  }
+  ["arguments_2_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(false)
+    bool(false)
+  }
+  ["arguments_3_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(false)
+    bool(true)
+  }
+  ["arguments_12_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(false)
+    bool(false)
+  }
+  ["arguments_13_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(false)
+    bool(true)
+  }
+  ["arguments_23_defaults"]=>
+  vec(3) {
+    bool(false)
+    bool(true)
+    bool(true)
+  }
+  ["arguments_123_defaults"]=>
+  vec(3) {
+    bool(true)
+    bool(true)
+    bool(true)
+  }
+}

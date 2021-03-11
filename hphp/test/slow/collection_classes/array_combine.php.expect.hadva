@@ -1,0 +1,364 @@
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
+  string(1) "b"
+}
+========
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
+  string(1) "b"
+}
+========
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [11]=>
+  string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
+  string(1) "b"
+}
+========
+bool(true)
+dict(3) {
+  [33]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [22]=>
+  string(1) "d"
+}
+bool(true)
+dict(3) {
+  [33]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [22]=>
+  string(1) "d"
+}
+bool(true)
+dict(3) {
+  [33]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [22]=>
+  string(1) "d"
+}
+bool(true)
+dict(3) {
+  [33]=>
+  string(1) "d"
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "c"
+}
+
+
+========
+
+
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(33)
+  ["b"]=>
+  int(11)
+  ["c"]=>
+  string(2) "22"
+  ["d"]=>
+  int(22)
+}
+========
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(33)
+  ["b"]=>
+  int(11)
+  ["c"]=>
+  string(2) "22"
+  ["d"]=>
+  int(22)
+}
+========
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["a"]=>
+  int(33)
+  ["b"]=>
+  int(11)
+  ["c"]=>
+  string(2) "22"
+  ["d"]=>
+  int(22)
+}
+========
+bool(true)
+dict(4) {
+  ["d"]=>
+  int(11)
+  ["a"]=>
+  int(22)
+  ["b"]=>
+  int(33)
+  ["c"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["d"]=>
+  int(11)
+  ["a"]=>
+  int(22)
+  ["b"]=>
+  int(33)
+  ["c"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["d"]=>
+  int(11)
+  ["a"]=>
+  int(22)
+  ["b"]=>
+  int(33)
+  ["c"]=>
+  string(2) "22"
+}
+bool(true)
+dict(4) {
+  ["d"]=>
+  int(33)
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  string(2) "22"
+  ["c"]=>
+  int(22)
+}
+
+
+========
+
+
+bool(true)
+dict(2) {
+  ["a"]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+}
+bool(true)
+dict(2) {
+  ["a"]=>
+  string(1) "b"
+  [1]=>
+  int(2)
+}
+bool(true)
+dict(2) {
+  ["b"]=>
+  string(1) "b"
+  [2]=>
+  int(2)
+}
+bool(true)
+dict(2) {
+  ["b"]=>
+  string(1) "b"
+  [2]=>
+  int(2)
+}

@@ -1,0 +1,18 @@
+NULL
+NULL
+vec(1) {
+  int(5)
+}
+vec(1) {
+  int(6)
+}
+dict(2) {
+  ["Y"]=>
+  vec(1) {
+    int(5)
+  }
+  ["Z"]=>
+  vec(1) {
+    int(6)
+  }
+}

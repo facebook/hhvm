@@ -1,7 +1,7 @@
 <?hh
 function my_generator() {
   $value = yield null;
-  var_dump(debug_backtrace());
+  var_dump(coerce_to_hack_arrays(debug_backtrace()));
 }
 
 function my_wrapper() {
@@ -13,7 +13,7 @@ function my_wrapper() {
 class my_class {
   static function my_member_generator() {
     $value = yield null;
-    var_dump(debug_backtrace());
+    var_dump(coerce_to_hack_arrays(debug_backtrace()));
   }
 }
 
@@ -27,4 +27,21 @@ function entrypoint_debug_backtrace_continuation(): void {
 
   my_wrapper();
   my_class_wrapper();
+}
+
+function coerce_to_hack_arrays($input) {
+  if (HH\is_vec_or_varray($input)) {
+    $result = vec[];
+    foreach ($input as $v) {
+      $result[] = coerce_to_hack_arrays($v);
+    }
+    return $result;
+  } else if (HH\is_dict_or_darray($input)) {
+    $result = dict[];
+    foreach ($input as $k => $v) {
+      $result[$k] = coerce_to_hack_arrays($v);
+    }
+    return $result;
+  }
+  return $input;
 }

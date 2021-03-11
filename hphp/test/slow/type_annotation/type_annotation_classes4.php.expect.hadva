@@ -1,0 +1,32 @@
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(5) "Foo\D"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["exact"]=>
+  bool(true)
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(5) "Foo\E"
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(5) "Foo\D"
+}

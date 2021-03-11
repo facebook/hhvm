@@ -1,0 +1,73 @@
+*** Testing array_splice() basic operations ***
+test truncation 
+dict(2) {
+  [0]=>
+  string(4) "blue"
+  [1]=>
+  string(6) "yellow"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+}
+test removing entries from the middle 
+dict(2) {
+  [0]=>
+  string(5) "green"
+  [1]=>
+  string(4) "blue"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "yellow"
+}
+test substitution at end 
+dict(3) {
+  [0]=>
+  string(5) "green"
+  [1]=>
+  string(4) "blue"
+  [2]=>
+  string(6) "yellow"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "orange"
+}
+dict(1) {
+  [0]=>
+  string(6) "yellow"
+}
+dict(5) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  string(4) "blue"
+  [3]=>
+  string(5) "black"
+  [4]=>
+  string(6) "maroon"
+}
+test insertion 
+dict(0) {
+}
+dict(5) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  string(4) "blue"
+  [3]=>
+  string(6) "purple"
+  [4]=>
+  string(6) "yellow"
+}

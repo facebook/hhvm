@@ -1,0 +1,36 @@
+*** Testing array_change_key_case() : usage variations ***
+
+-- Iteration 1 : int data --
+dict(4) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+  [12345]=>
+  string(8) "positive"
+  [-2345]=>
+  string(8) "negative"
+}
+
+-- Iteration 2 : empty double quotes data --
+dict(1) {
+  [""]=>
+  string(6) "emptyd"
+}
+
+-- Iteration 3 : empty single quotes data --
+dict(1) {
+  [""]=>
+  string(6) "emptys"
+}
+
+-- Iteration 4 : string data --
+dict(3) {
+  ["STRINGD"]=>
+  string(7) "stringd"
+  ["STRINGS"]=>
+  string(7) "strings"
+  ["HELLO WORLD"]=>
+  string(7) "stringh"
+}
+Done

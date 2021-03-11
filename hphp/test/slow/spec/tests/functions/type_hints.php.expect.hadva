@@ -1,0 +1,29 @@
+--------------- test type hint array ---------------------
+Inside f1
+vec(2) {
+  int(10)
+  int(20)
+}
+--------------- test type hint class-name ---------------------
+Inside f2
+object(C1) (0) {
+}
+Inside f2
+object(D1) (0) {
+}
+--------------- test type hint object ---------------------
+--------------- test type hint interface-name ---------------------
+Inside f4
+object(C2) (0) {
+}
+Inside f4
+object(D2) (0) {
+}
+--------------- test type hint callable ---------------------
+Inside f5
+string(5) "hello"
+Hello!
+--------------- test type hint + by inout ---------------------
+Inside f6
+object(C1) (0) {
+}

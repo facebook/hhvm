@@ -1,0 +1,23 @@
+vec(2) {
+  dict(4) {
+    ["file"]=>
+    string(6) "string"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(3) {
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    vec(0) {
+    }
+    ["file"]=>
+    string(6) "string"
+  }
+}
+int(16)

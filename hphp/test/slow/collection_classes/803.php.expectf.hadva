@@ -1,0 +1,25 @@
+=== Vector ===
+vec(1) {
+  int(123)
+}
+int(123)
+vec(0) {
+}
+=== Set ===
+dict(0) {
+}
+dict(3) {
+  [123]=>
+  int(123)
+  ["123"]=>
+  string(3) "123"
+  ["foo"]=>
+  string(3) "foo"
+}
+bool(true)
+dict(2) {
+  [123]=>
+  int(123)
+  ["foo"]=>
+  string(3) "foo"
+}

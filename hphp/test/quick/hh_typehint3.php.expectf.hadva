@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 to foo() must be of type ?xhp_url, HH\vec given in %s/test/quick/hh_typehint3.php on line 11

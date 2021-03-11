@@ -1,0 +1,112 @@
+*** Testing mb_split() : usage variations ***
+
+-- Iteration 1 --
+vec(1) {
+  string(10) "string_val"
+}
+
+-- Iteration 2 --
+vec(1) {
+  string(10) "string_val"
+}
+
+-- Iteration 3 --
+vec(10) {
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(1) "_"
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+
+-- Iteration 4 --
+vec(10) {
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(1) "_"
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+
+-- Iteration 5 --
+
+Warning: mb_split() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 6 --
+
+Warning: mb_split() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 7 --
+
+Warning: mb_split() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 8 --
+
+Warning: mb_split() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 9 --
+
+Warning: mb_split() expects parameter 3 to be integer, double given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 10 --
+
+Warning: mb_split() expects parameter 3 to be integer, null given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 11 --
+
+Warning: mb_split() expects parameter 3 to be integer, null given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 12 --
+
+Warning: mb_split() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 13 --
+
+Warning: mb_split() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 14 --
+
+Warning: mb_split() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 15 --
+
+Warning: mb_split() expects parameter 3 to be integer, boolean given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 16 --
+
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 17 --
+
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 18 --
+
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 19 --
+
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 20 --
+
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 21 --
+
+Warning: mb_split() expects parameter 3 to be integer, object given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+
+-- Iteration 22 --
+
+Warning: mb_split() expects parameter 3 to be integer, resource given in %s/test/zend/good/ext/mbstring/tests/mb_split_variation3.php on line 80
+Done

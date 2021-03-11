@@ -1,0 +1,28 @@
+Order with array assignment:
+in f()
+in g()
+dict(1) {
+  ["name"]=>
+  string(14) "assigned value"
+}
+
+
+Order with static array property assignment:
+in f()
+in g()
+dict(1) {
+  ["name"]=>
+  string(14) "assigned value"
+}
+
+
+Order with indexed string assignment:
+in getOffset()
+in newChar()
+string(5) "jello"
+
+
+Order with static string property assignment:
+in getOffset()
+in newChar()
+string(5) "jello"

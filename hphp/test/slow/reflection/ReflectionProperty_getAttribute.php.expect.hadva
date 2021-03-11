@@ -1,0 +1,31 @@
+vec(3) {
+  int(1)
+  string(3) "two"
+  vec(1) {
+    int(3)
+  }
+}
+bool(true)
+NULL
+bool(false)
+vec(2) {
+  string(1) "a"
+  dict(1) {
+    ["b"]=>
+    string(1) "c"
+  }
+}
+bool(true)
+NULL
+bool(false)
+vec(2) {
+  string(7) "promote"
+  vec(1) {
+    string(2) "me"
+  }
+}
+bool(true)
+NULL
+bool(false)
+NULL
+bool(false)

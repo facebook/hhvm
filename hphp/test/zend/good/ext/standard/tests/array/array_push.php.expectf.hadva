@@ -1,0 +1,202 @@
+*** Testing Error Conditions ***
+
+Warning: array_push() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 36
+
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 39
+NULL
+
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_push.php on line 42
+NULL
+int(11)
+int(1)
+
+*** Testing with various array inputs ***
+
+-- Input Array for Iteration 1 is --
+Vec
+(
+)
+
+Output after push is :
+int(2)
+
+-- Input Array for Iteration 2 is --
+Vec
+(
+    [0] => 1
+    [1] => 2
+    [2] => 3
+    [3] => 4
+    [4] => 5
+    [5] => 6
+    [6] => 7
+    [7] => 8
+    [8] => 9
+    [9] => 1
+    [10] => 2
+)
+
+Output after push is :
+int(13)
+
+-- Input Array for Iteration 3 is --
+Vec
+(
+    [0] => One
+    [1] => _Two
+    [2] => Three
+    [3] => Four
+    [4] => Five
+)
+
+Output after push is :
+int(7)
+
+-- Input Array for Iteration 4 is --
+Vec
+(
+    [0] => 6
+    [1] => six
+    [2] => 7
+    [3] => seven
+    [4] => 8
+    [5] => eight
+    [6] => 9
+    [7] => nine
+)
+
+Output after push is :
+int(10)
+
+-- Input Array for Iteration 5 is --
+Dict
+(
+    [a] => aaa
+    [A] => AAA
+    [c] => ccc
+    [d] => ddd
+    [e] => eee
+)
+
+Output after push is :
+int(7)
+
+-- Input Array for Iteration 6 is --
+Dict
+(
+    [1] => one
+    [2] => two
+    [3] => three
+    [4] => four
+    [5] => five
+)
+
+Output after push is :
+int(7)
+
+-- Input Array for Iteration 7 is --
+Dict
+(
+    [1] => one
+    [2] => two
+    [3] => 7
+    [4] => four
+    [5] => five
+)
+
+Output after push is :
+int(7)
+
+-- Input Array for Iteration 8 is --
+Dict
+(
+    [f] => fff
+    [1] => one
+    [4] => 6
+    [] => 3
+    [2] => float
+    [F] => FFF
+    [blank] => 
+    [3] => 3.7
+    [5] => 7
+    [6] => 8.6
+    [5] => Five
+    [4name] => jonny
+    [a] => 
+)
+
+Output after push is :
+int(15)
+
+-- Input Array for Iteration 9 is --
+Vec
+(
+    [0] => 12
+    [1] => name
+    [2] => age
+    [3] => 45
+)
+
+Output after push is :
+int(6)
+
+-- Input Array for Iteration 10 is --
+Vec
+(
+    [0] => Vec
+        (
+            [0] => oNe
+            [1] => tWo
+            [2] => 4
+        )
+
+    [1] => Vec
+        (
+            [0] => 10
+            [1] => 20
+            [2] => 30
+            [3] => 40
+            [4] => 50
+        )
+
+    [2] => Vec
+        (
+        )
+
+)
+
+Output after push is :
+int(5)
+
+-- Input Array for Iteration 11 is --
+Dict
+(
+    [one] => 2
+    [three] => 3
+    [0] => 3
+    [1] => 4
+    [3] => 33
+    [4] => 44
+    [5] => 57
+    [6] => 6
+    [5.4] => 554
+    [5.7] => 557
+)
+
+Output after push is :
+int(12)
+
+*** Checking for return value and the new array formed from push operation ***
+int(8)
+vec(8) {
+  string(3) "One"
+  string(4) "_Two"
+  string(5) "Three"
+  string(4) "Four"
+  string(4) "Five"
+  int(22)
+  int(33)
+  string(2) "44"
+}
+
+Done

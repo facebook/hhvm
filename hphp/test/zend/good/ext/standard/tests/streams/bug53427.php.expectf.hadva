@@ -1,0 +1,12 @@
+dict(2) {
+  [1]=>
+  resource(4) of type (stream)
+  ["myindex"]=>
+  resource(4) of type (stream)
+}
+dict(2) {
+  [1]=>
+  resource(4) of type (stream)
+  ["myindex"]=>
+  resource(4) of type (stream)
+}

@@ -1,0 +1,7 @@
+int(100)
+====
+Vec
+(
+    [0] => %s/test/slow/spec/tests/expressions/source_file_inclusion/test.php
+)
+====

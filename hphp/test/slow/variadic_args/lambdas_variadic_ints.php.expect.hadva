@@ -1,0 +1,56 @@
+Int provider ...$x
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider int...$x
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider ...
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider long closure: int...$x
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider long closure: ...$x
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider lambda1
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Int provider lambda2
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}

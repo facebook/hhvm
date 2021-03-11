@@ -9,7 +9,7 @@ function main() {
   $decode = ($text) ==> {
     $arr = json_decode($text, true);
     $decls = $arr['parse_tree']['script_declarations']['elements'];
-    $ret = darray[];
+    $ret = dict[];
     foreach ($decls as $elt) {
       if ($elt['kind'] !== 'function_declaration') continue;
       $attrs = $elt['function_attribute_spec']
@@ -23,9 +23,17 @@ function main() {
     }
     return $ret;
   };
-  var_dump(new ReflectionFunction("foo")->getAttributes());
+
+  $attrs = dict[];
+  foreach (new ReflectionFunction("foo")->getAttributes() as $name => $attr) {
+    $attrs[$name] = vec($attr);
+  }
+  var_dump($attrs);
+
   try {
-    var_dump(hh\facts_parse("/",varray[__FILE__],true,false)[__FILE__]['functions']);
+    $facts = hh\facts_parse("/",varray[__FILE__],true,false);
+    var_dump(vec($facts[__FILE__]['functions']));
   } catch (InvalidOperationException $e) {}
+
   var_dump($decode(hh\ffp_parse_string_native(file_get_contents(__FILE__))));
 }

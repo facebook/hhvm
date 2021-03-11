@@ -1,0 +1,21 @@
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["a"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["b"]=>
+    dict(2) {
+      ["kind"]=>
+      int(4)
+      ["optional_shape_field"]=>
+      bool(true)
+    }
+  }
+  ["alias"]=>
+  string(8) "MyAlias1"
+}

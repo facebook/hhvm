@@ -1,0 +1,23 @@
+Accessing I from global scope:
+vec(1) {
+  string(4) "pubI"
+}
+Accessing C from global scope:
+vec(3) {
+  string(4) "pubI"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing I from C:
+vec(1) {
+  string(4) "pubI"
+}
+Accessing C from C:
+vec(5) {
+  string(4) "pubI"
+  string(5) "privC"
+  string(5) "protC"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Done

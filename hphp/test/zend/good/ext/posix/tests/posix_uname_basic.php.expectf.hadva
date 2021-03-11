@@ -1,0 +1,10 @@
+Basic test of POSIX uname function
+Dict
+(
+    [sysname] => %s
+    [nodename] => %s
+    [release] => %s
+    [version] => %s
+    [machine] => %s
+)
+===DONE====

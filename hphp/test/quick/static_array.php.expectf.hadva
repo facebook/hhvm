@@ -1,0 +1,105 @@
+vec(0) {
+}
+vec(1) {
+  NULL
+}
+vec(1) {
+  bool(true)
+}
+vec(1) {
+  int(42)
+}
+vec(1) {
+  float(12.34)
+}
+vec(1) {
+  string(5) "hello"
+}
+vec(1) {
+  vec(0) {
+  }
+}
+vec(6) {
+  NULL
+  bool(true)
+  int(42)
+  float(12.34)
+  string(5) "hello"
+  vec(2) {
+    int(1)
+    vec(2) {
+      int(2)
+      vec(1) {
+        int(3)
+      }
+    }
+  }
+}
+vec(6) {
+  NULL
+  bool(true)
+  int(42)
+  float(12.34)
+  string(5) "hello"
+  vec(2) {
+    int(1)
+    vec(2) {
+      int(2)
+      vec(1) {
+        int(3)
+      }
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  string(1) "0"
+}
+dict(1) {
+  [42]=>
+  string(2) "42"
+}
+dict(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+vec(1) {
+  NULL
+}
+dict(1) {
+  [0]=>
+  string(1) "0"
+}
+dict(1) {
+  [0]=>
+  string(1) "0"
+}
+dict(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+dict(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+vec(1) {
+  vec(1) {
+    int(0)
+  }
+}
+vec(2) {
+  vec(1) {
+    int(0)
+  }
+  vec(1) {
+    int(0)
+  }
+}
+vec(2) {
+  vec(1) {
+    int(0)
+  }
+  vec(1) {
+    int(0)
+  }
+}

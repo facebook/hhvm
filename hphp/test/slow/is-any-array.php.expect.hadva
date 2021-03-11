@@ -1,0 +1,43 @@
+-----
+vec(0) {
+}
+bool(true)
+bool(true)
+-----
+dict(0) {
+}
+bool(true)
+bool(true)
+-----
+vec(0) {
+}
+bool(true)
+bool(true)
+-----
+vec(0) {
+}
+bool(true)
+bool(true)
+-----
+dict(0) {
+}
+bool(true)
+bool(true)
+-----
+keyset(0) {
+}
+bool(true)
+bool(true)
+-----
+int(3)
+bool(false)
+bool(false)
+-----
+string(4) "what"
+bool(false)
+bool(false)
+-----
+object(Foo) (0) {
+}
+bool(false)
+bool(false)

@@ -1,0 +1,25 @@
+*** Testing get_included_files()
+
+-- List included files at start --
+vec(1) {
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
+}
+
+-- List included files atfter including inc1 -
+vec(2) {
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc1.inc"
+}
+
+-- List included files atfter including inc2 which will include inc3 which includes inc1 --
+vec(4) {
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php"
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc1.inc"
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc2.inc"
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/get_included_files_inc3.inc"
+}
+
+-- Error cases --
+
+Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/test/zend/good/ext/standard/tests/general_functions/get_included_files.php on line 25
+===DONE===

@@ -1,0 +1,5 @@
+int(1)
+vec(1) {
+  string(%d) "%s/variables/predefined_variables.php"
+}
+dict(%d) {%a}

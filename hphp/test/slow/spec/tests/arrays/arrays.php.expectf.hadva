@@ -1,0 +1,298 @@
+================= array of zero elements is possible =================
+dict(0) {
+}
+dict(0) {
+}
+================= array of 1 element is possible =================
+vec(1) {
+  bool(true)
+}
+vec(1) {
+  bool(true)
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+================= array of 2 elements each having the same type =================
+vec(2) {
+  int(123)
+  int(-56)
+}
+vec(2) {
+  int(123)
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+================= array of 5 elements each having different type =================
+vec(5) {
+  NULL
+  bool(false)
+  int(123)
+  float(34000000000000)
+  string(5) "Hello"
+}
+vec(5) {
+  NULL
+  bool(false)
+  int(123)
+  float(34000000000000)
+  string(5) "Hello"
+}
+dict(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+dict(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+dict(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+dict(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+================= trailing comma permitted if list has at least one entry =================
+vec(1) {
+  bool(true)
+}
+vec(1) {
+  bool(true)
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+vec(2) {
+  int(123)
+  int(-56)
+}
+vec(2) {
+  int(123)
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+dict(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+================= specify keys in arbitrary order, initial values of runtime expressions, leave gaps =================
+dict(3) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+}
+dict(3) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+}
+123,6,13,
+Out of bounds dict access: invalid index 1
+Undefined variable: v1
+Out of bounds dict access: invalid index 4
+Undefined variable: v1
+dict(5) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+  [1]=>
+  bool(true)
+  [4]=>
+  int(99)
+}
+123,6,13,1,99,
+================= duplicate keys allowed, but lexically final one used =================
+dict(1) {
+  [2]=>
+  int(6)
+}
+================= string keys can be expressions too =================
+dict(2) {
+  ["color"]=>
+  string(3) "red"
+  ["shape"]=>
+  string(6) "square"
+}
+================= arrays some of whose elements are arrays, and so on =================
+vec(4) {
+  int(10)
+  vec(3) {
+    string(3) "red"
+    string(5) "white"
+    string(4) "blue"
+  }
+  NULL
+  vec(3) {
+    bool(false)
+    NULL
+    vec(3) {
+      string(3) "red"
+      string(5) "white"
+      string(4) "blue"
+    }
+  }
+}
+vec(3) {
+  vec(4) {
+    int(2)
+    int(4)
+    int(6)
+    int(8)
+  }
+  vec(2) {
+    int(5)
+    int(10)
+  }
+  vec(3) {
+    int(100)
+    int(200)
+    int(300)
+  }
+}
+================= see if int keys can be specified in any base. =================
+dict(4) {
+  [12]=>
+  int(10)
+  [16]=>
+  int(16)
+  [8]=>
+  int(8)
+  [3]=>
+  int(2)
+}
+================= what about int-looking strings? It appears not. =================
+dict(4) {
+  ["12"]=>
+  int(10)
+  ["0x10"]=>
+  int(16)
+  ["010"]=>
+  int(8)
+  ["0b11"]=>
+  int(2)
+}
+================= iterate using foreach and compare with for loop =================
+dict(4) {
+  [2]=>
+  bool(true)
+  [0]=>
+  int(123)
+  [1]=>
+  float(34.5)
+  [-1]=>
+  string(3) "red"
+}
+1,123,34.5,red,
+red,123,34.5,1,
+================= remove some elements from an array =================
+dict(4) {
+  ["red"]=>
+  bool(true)
+  [0]=>
+  int(123)
+  [9]=>
+  float(34000000000000)
+  [10]=>
+  string(5) "Hello"
+}
+dict(2) {
+  [9]=>
+  float(34000000000000)
+  [10]=>
+  string(5) "Hello"
+}

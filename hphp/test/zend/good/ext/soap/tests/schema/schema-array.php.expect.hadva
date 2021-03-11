@@ -1,0 +1,36 @@
+object(stdClass) (1) {
+  ["testItem"]=>
+  dict(2) {
+    [0]=>
+    int(17)
+    [1]=>
+    string(3) "foo"
+  }
+}
+object(stdClass) (1) {
+  ["testItem"]=>
+  dict(2) {
+    [0]=>
+    int(34)
+    [1]=>
+    string(3) "foo"
+  }
+}
+object(stdClass) (1) {
+  ["testItem"]=>
+  dict(2) {
+    [0]=>
+    int(51)
+    [1]=>
+    string(3) "foo"
+  }
+}
+object(stdClass) (1) {
+  ["testItem"]=>
+  dict(2) {
+    [0]=>
+    int(68)
+    [1]=>
+    string(3) "foo"
+  }
+}

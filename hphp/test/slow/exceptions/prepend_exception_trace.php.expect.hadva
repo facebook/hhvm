@@ -1,0 +1,7 @@
+dict(1) {
+  ["prepended_key"]=>
+  string(15) "prepended_value"
+}
+string(66) "#0 (): <unknown>()
+#1 (): main_prepend_exception_trace()
+#2 {main}"

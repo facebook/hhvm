@@ -1,0 +1,15 @@
+string(13) "\-oh really\?"
+dict(1) {
+  [0]=>
+  string(4) "a---"
+}
+dict(1) {
+  [0]=>
+  string(1) "a"
+}
+dict(1) {
+  [0]=>
+  string(5) "a----"
+}
+dict(0) {
+}

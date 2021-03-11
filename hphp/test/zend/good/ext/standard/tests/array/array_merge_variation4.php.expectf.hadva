@@ -1,0 +1,94 @@
+*** Testing array_merge() : usage variations ***
+
+-- Iteration 1: int data --
+dict(6) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(8) "positive"
+  [3]=>
+  string(8) "negative"
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(6) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(8) "positive"
+  [3]=>
+  string(8) "negative"
+}
+
+-- Iteration 2: empty double quotes data --
+dict(3) {
+  [""]=>
+  string(6) "emptyd"
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(3) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  [""]=>
+  string(6) "emptyd"
+}
+
+-- Iteration 3: empty single quotes data --
+dict(3) {
+  [""]=>
+  string(6) "emptys"
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(3) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  [""]=>
+  string(6) "emptys"
+}
+
+-- Iteration 4: string data --
+dict(5) {
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(5) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
+}
+Done

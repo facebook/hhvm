@@ -1,0 +1,26 @@
+*** Testing array_intersect_assoc() : basic functionality ***
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  string(5) "hello"
+  [3]=>
+  string(5) "world"
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(0) {
+}
+dict(0) {
+}
+Done

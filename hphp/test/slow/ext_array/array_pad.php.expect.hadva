@@ -1,0 +1,29 @@
+vec(5) {
+  int(12)
+  int(10)
+  int(9)
+  int(0)
+  int(0)
+}
+vec(7) {
+  int(-1)
+  int(-1)
+  int(-1)
+  int(-1)
+  int(12)
+  int(10)
+  int(9)
+}
+vec(3) {
+  int(12)
+  int(10)
+  int(9)
+}
+dict(3) {
+  [0]=>
+  string(4) "test"
+  [1]=>
+  string(4) "test"
+  ["9"]=>
+  string(1) "b"
+}

@@ -1,0 +1,110 @@
+string(28) "?HH\darray<HH\int, @HH\bool>"
+dict(3) {
+  ["nullable"]=>
+  bool(true)
+  ["kind"]=>
+  int(24)
+  ["generic_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    dict(2) {
+      ["soft"]=>
+      bool(true)
+      ["kind"]=>
+      int(2)
+    }
+  }
+}
+string(49) "HH\Map<HH\arraykey, HH\Vector<HH\varray<HH\int>>>"
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(6) "HH\Map"
+  ["generic_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(7)
+    }
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      vec(1) {
+        dict(2) {
+          ["kind"]=>
+          int(25)
+          ["generic_types"]=>
+          vec(1) {
+            dict(1) {
+              ["kind"]=>
+              int(1)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+string(28) "(HH\int, ?HH\float, HH\bool)"
+dict(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  vec(3) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    dict(2) {
+      ["nullable"]=>
+      bool(true)
+      ["kind"]=>
+      int(3)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}
+string(22) "(function (): HH\void)"
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(0)
+  }
+  ["param_types"]=>
+  vec(0) {
+  }
+}
+string(47) "(function (HH\mixed, HH\resource): HH\AnyArray)"
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(27)
+  }
+  ["param_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(9)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(5)
+    }
+  }
+}

@@ -1,0 +1,5 @@
+bool(true)
+bool(true)
+bool(true)
+Out of bounds dict access: invalid index "13"
+Out of bounds dict access: invalid index "13foo"

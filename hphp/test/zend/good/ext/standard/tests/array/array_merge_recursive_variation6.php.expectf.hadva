@@ -1,0 +1,65 @@
+*** Testing array_merge_recursive() : array with duplicate keys for $arr1 argument ***
+-- With default argument --
+dict(3) {
+  [0]=>
+  vec(2) {
+    string(9) "duplicate"
+    string(7) "strings"
+  }
+  [1]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  [2]=>
+  string(5) "three"
+}
+dict(2) {
+  ["str1"]=>
+  string(5) "world"
+  ["str2"]=>
+  float(111.111)
+}
+-- With more arguments --
+dict(6) {
+  [0]=>
+  vec(2) {
+    string(9) "duplicate"
+    string(7) "strings"
+  }
+  [1]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  [2]=>
+  string(5) "three"
+  [3]=>
+  string(3) "one"
+  ["str1"]=>
+  string(3) "two"
+  [4]=>
+  vec(2) {
+    string(3) "one"
+    string(3) "two"
+  }
+}
+dict(4) {
+  ["str1"]=>
+  dict(2) {
+    [0]=>
+    string(5) "world"
+    [1]=>
+    string(3) "two"
+  }
+  ["str2"]=>
+  float(111.111)
+  [0]=>
+  string(3) "one"
+  [1]=>
+  vec(2) {
+    string(3) "one"
+    string(3) "two"
+  }
+}
+Done

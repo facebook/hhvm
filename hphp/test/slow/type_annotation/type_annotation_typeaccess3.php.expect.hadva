@@ -1,0 +1,26 @@
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["foo"]=>
+    dict(1) {
+      ["kind"]=>
+      int(3)
+    }
+    ["bar"]=>
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      vec(1) {
+        dict(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+}

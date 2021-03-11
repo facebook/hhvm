@@ -1,0 +1,9 @@
+dict(1) {
+  ["sitemap"]=>
+  dict(2) {
+    ["/home"]=>
+    string(13) "default:index"
+    ["/info"]=>
+    string(12) "default:info"
+  }
+}

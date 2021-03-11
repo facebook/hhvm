@@ -1,0 +1,10 @@
+*** Testing array_slice() : usage variations ***
+
+-- Call array_slice() --
+dict(2) {
+  [0]=>
+  string(12) "twenty-three"
+  [1]=>
+  string(4) "zero"
+}
+Done

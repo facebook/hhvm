@@ -1,0 +1,125 @@
+====================================================
+Testing: keyset(0) {
+}
+	gettype: string(6) "keyset"
+	is_null: bool(false)
+	is_bool: bool(false)
+	is_int: bool(false)
+	is_float: bool(false)
+	is_numeric: bool(false)
+	is_string: bool(false)
+	is_scalar: bool(false)
+	is_php_array: bool(false)
+	is_vec: bool(false)
+	is_dict: bool(false)
+	is_keyset: bool(true)
+	is_object: bool(false)
+	is_resource: bool(false)
+is Traversable: bool(true)
+is KeyedTraversable: bool(true)
+is Container: bool(true)
+is KeyedContainer: bool(true)
+is XHPChild: bool(true)
+is Vector: bool(false)
+is Map: bool(false)
+is Foo: bool(false)
+is (string) HH\Traversable: bool(false)
+is (string) HH\KeyedTraversable: bool(false)
+is (string) HH\Container: bool(false)
+is (string) HH\KeyedContainer: bool(false)
+is (string) XHPChild: bool(false)
+is (string) Vector: bool(false)
+is (string) Map: bool(false)
+is (string) Foo: bool(false)
+====================================================
+Testing: keyset(4) {
+  int(123)
+  string(3) "456"
+  int(789)
+  string(3) "abc"
+}
+	gettype: string(6) "keyset"
+	is_null: bool(false)
+	is_bool: bool(false)
+	is_int: bool(false)
+	is_float: bool(false)
+	is_numeric: bool(false)
+	is_string: bool(false)
+	is_scalar: bool(false)
+	is_php_array: bool(false)
+	is_vec: bool(false)
+	is_dict: bool(false)
+	is_keyset: bool(true)
+	is_object: bool(false)
+	is_resource: bool(false)
+is Traversable: bool(true)
+is KeyedTraversable: bool(true)
+is Container: bool(true)
+is KeyedContainer: bool(true)
+is XHPChild: bool(true)
+is Vector: bool(false)
+is Map: bool(false)
+is Foo: bool(false)
+is (string) HH\Traversable: bool(false)
+is (string) HH\KeyedTraversable: bool(false)
+is (string) HH\Container: bool(false)
+is (string) HH\KeyedContainer: bool(false)
+is (string) XHPChild: bool(false)
+is (string) Vector: bool(false)
+is (string) Map: bool(false)
+is (string) Foo: bool(false)
+====================================================
+Testing for is_keyset: NULL
+NO
+====================================================
+Testing for is_keyset: bool(false)
+NO
+====================================================
+Testing for is_keyset: int(7)
+NO
+====================================================
+Testing for is_keyset: float(1.23)
+NO
+====================================================
+Testing for is_keyset: string(4) "abcd"
+NO
+====================================================
+Testing for is_keyset: object(stdClass) (0) {
+}
+NO
+====================================================
+Testing for is_keyset: vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+NO
+====================================================
+Testing for is_keyset: object(HH\Vector) (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+NO
+====================================================
+Testing for is_keyset: object(HH\Map) (2) {
+  [100]=>
+  string(1) "a"
+  ["b"]=>
+  int(200)
+}
+NO
+====================================================
+Testing for is_keyset: object(HH\Pair) (2) {
+  [0]=>
+  int(123)
+  [1]=>
+  string(3) "abc"
+}
+NO
+====================================================
+Testing for is_keyset: resource(4) of type (gd)
+NO

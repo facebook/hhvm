@@ -1,0 +1,58 @@
+Test string with badly formed strings
+NULL
+dict(2) {
+  ["arr_1"]=>
+  string(3) "sid"
+  ["arr"]=>
+  dict(1) {
+    [4]=>
+    string(4) "fred"
+  }
+}
+NULL
+dict(2) {
+  ["arr1]"]=>
+  string(3) "sid"
+  ["arr"]=>
+  dict(1) {
+    [4]=>
+    string(4) "fred"
+  }
+}
+NULL
+dict(2) {
+  ["arr_one"]=>
+  string(3) "sid"
+  ["arr"]=>
+  dict(1) {
+    [4]=>
+    string(4) "fred"
+  }
+}
+
+Test string with badly formed % numbers
+NULL
+dict(3) {
+  ["first"]=>
+  string(1) "A"
+  ["second"]=>
+  string(2) "%a"
+  ["third"]=>
+  string(2) "%b"
+}
+
+Test string with non-binary safe name
+NULL
+dict(1) {
+  ["arr_test"]=>
+  dict(2) {
+    [1]=>
+    string(3) "sid"
+    [4]=>
+    dict(1) {
+      ["two"]=>
+      string(4) "fred"
+    }
+  }
+}
+===DONE===

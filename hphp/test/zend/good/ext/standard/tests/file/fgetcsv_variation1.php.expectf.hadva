@@ -1,0 +1,1022 @@
+*** Testing fgetcsv() : with all parameters specified ***
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(14)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(2) {
+  string(5) "water"
+  string(5) "fruit"
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(2) {
+  string(11) "water=fruit"
+  string(0) ""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(1) {
+  string(14) "water-fruitair"
+}
+int(18)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(3) {
+  string(11) "water-fruit"
+  string(3) "air"
+  string(0) ""
+}
+int(22)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+vec(6) {
+  string(4) """"""
+  string(1) """
+  string(1) ","
+  string(1) """
+  string(1) ","
+  string(4) ",,,,"
+}
+int(24)
+bool(false)
+Done

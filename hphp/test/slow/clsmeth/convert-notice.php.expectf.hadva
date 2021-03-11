@@ -1,0 +1,486 @@
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST RET: clsmeth -> HH\varray_or_darray
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
+** CAST ARG(2): clsmeth -> HH\varray
+** CAST ARG(3): clsmeth -> HH\Traversable
+** CAST ARG(4): clsmeth -> HH\Container
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> vec
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+** CAST: clsmeth -> HH\KeyedTraversable
+** CAST: clsmeth -> vec
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}

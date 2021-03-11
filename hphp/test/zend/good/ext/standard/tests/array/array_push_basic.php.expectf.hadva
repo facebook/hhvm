@@ -1,0 +1,25 @@
+*** Testing array_push() : basic functionality ***
+
+-- Push values onto an indexed array --
+int(5)
+vec(5) {
+  string(4) "zero"
+  string(3) "one"
+  string(3) "two"
+  string(5) "three"
+  string(4) "four"
+}
+
+-- Push values onto an associative array --
+int(4)
+dict(4) {
+  ["one"]=>
+  string(2) "un"
+  ["two"]=>
+  string(4) "deux"
+  [0]=>
+  string(5) "three"
+  [1]=>
+  string(4) "four"
+}
+Done

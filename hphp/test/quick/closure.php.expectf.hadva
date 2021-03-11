@@ -1,0 +1,29 @@
+Use: 246
+Args: 777 500
+#0  funk() called at [%s:15]
+#1  Closure$main() called at [%s:25]
+#2  main()
+Use: 246
+Args: 888 500
+#0  funk() called at [%s:15]
+#1  Closure$main()
+#2  call_user_func() called at [%s:26]
+#3  main()
+object(Closure%s) (2) {
+  ["static"]=>
+  dict(1) {
+    ["use_by_val"]=>
+    int(123)
+  }
+  ["parameter"]=>
+  dict(2) {
+    ["$arg"]=>
+    string(10) "<required>"
+    ["$dv"]=>
+    string(10) "<optional>"
+  }
+}
+int(123)
+bool(true)
+bool(true)
+bool(true)

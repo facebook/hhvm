@@ -1,0 +1,17 @@
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["value"]=>
+      dict(2) {
+        ["kind"]=>
+        int(101)
+        ["classname"]=>
+        string(1) "E"
+      }
+    }
+  }
+}

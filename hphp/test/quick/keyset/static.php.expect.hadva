@@ -1,0 +1,24 @@
+keyset(4) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+}
+keyset(4) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+}
+keyset(1) {
+  string(3) "bar"
+}
+dict(1) {
+  ["TestAttr"]=>
+  vec(1) {
+    keyset(2) {
+      int(1)
+      string(1) "1"
+    }
+  }
+}

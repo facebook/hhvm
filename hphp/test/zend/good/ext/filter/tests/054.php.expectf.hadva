@@ -1,0 +1,10 @@
+dict(1) {
+  ["foo"]=>
+  string(3) "123"
+}
+dict(2) {
+  ["foo"]=>
+  string(3) "123"
+  ["bar"]=>
+  NULL
+}

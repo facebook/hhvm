@@ -1,0 +1,113 @@
+*** Testing array_intersect() : assoc array with diff keys to $arr1 argument ***
+-- Iterator 1 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 2 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 3 --
+dict(1) {
+  [1]=>
+  string(1) "1"
+}
+dict(1) {
+  [1]=>
+  string(1) "1"
+}
+-- Iterator 4 --
+dict(1) {
+  [1]=>
+  string(1) "1"
+}
+dict(1) {
+  [1]=>
+  string(1) "1"
+}
+-- Iterator 5 --
+dict(1) {
+  [2]=>
+  string(5) "float"
+}
+dict(1) {
+  [2]=>
+  string(5) "float"
+}
+-- Iterator 6 --
+dict(1) {
+  [33333333]=>
+  string(2) "f4"
+}
+dict(1) {
+  [33333333]=>
+  string(2) "f4"
+}
+-- Iterator 7 --
+dict(2) {
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
+  float(2.2)
+}
+dict(2) {
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
+  float(2.2)
+}
+-- Iterator 8 --
+dict(2) {
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
+  float(2.2)
+}
+dict(2) {
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
+  float(2.2)
+}
+-- Iterator 9 --
+dict(2) {
+  [0]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
+}
+dict(2) {
+  [0]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
+}
+-- Iterator 10 --
+dict(1) {
+  [""]=>
+  string(5) "hello"
+}
+dict(1) {
+  [""]=>
+  string(5) "hello"
+}
+-- Iterator 11 --
+dict(3) {
+  ["hello"]=>
+  int(1)
+  ["fruit"]=>
+  float(2.2)
+  [444]=>
+  string(5) "float"
+}
+dict(3) {
+  ["hello"]=>
+  int(1)
+  ["fruit"]=>
+  float(2.2)
+  [444]=>
+  string(5) "float"
+}
+Done

@@ -1,0 +1,6 @@
+string(1) "t"
+class(X)
+vec(2) {
+  string(1) "X"
+  string(1) "y"
+}

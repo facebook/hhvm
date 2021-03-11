@@ -1,0 +1,16 @@
+a: dict(1) {
+  [1]=>
+  string(2) "a0"
+}
+aa: dict(1) {
+  [1]=>
+  string(2) "aa"
+}
+aaa: dict(1) {
+  [1]=>
+  string(4) "aaa0"
+}
+aaaa: dict(1) {
+  [1]=>
+  string(4) "aaaa"
+}

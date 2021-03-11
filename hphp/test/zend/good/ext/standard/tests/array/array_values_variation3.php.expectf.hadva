@@ -1,0 +1,27 @@
+*** Testing array_values() : usage variations ***
+
+-- Iteration 1: int data --
+vec(4) {
+  string(4) "zero"
+  string(3) "one"
+  string(8) "positive"
+  string(8) "negative"
+}
+
+-- Iteration 2: empty double quotes data --
+vec(1) {
+  string(6) "emptyd"
+}
+
+-- Iteration 3: empty single quotes data --
+vec(1) {
+  string(6) "emptys"
+}
+
+-- Iteration 4: string data --
+vec(3) {
+  string(7) "stringd"
+  string(7) "strings"
+  string(7) "stringh"
+}
+Done

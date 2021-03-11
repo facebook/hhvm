@@ -1,0 +1,19 @@
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip.php on line 12
+
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip.php on line 12
+
+Warning: Can only flip STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_flip.php on line 12
+dict(6) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [0]=>
+  string(1) "z"
+  ["G"]=>
+  int(0)
+  ["h"]=>
+  int(1)
+  ["i"]=>
+  int(2)
+}

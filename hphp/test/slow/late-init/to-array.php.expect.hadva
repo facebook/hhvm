@@ -1,0 +1,15 @@
+============= test_iter ===============
+Accessing <<__LateInit>> property 'A::y' before initialization
+123 700 abc 
+Accessing <<__LateInit>> property 'A::y' before initialization
+============= test_obj_prop_array ===============
+Accessing <<__LateInit>> property 'A::y' before initialization
+dict(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(700)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__LateInit>> property 'A::y' before initialization

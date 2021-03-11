@@ -1,0 +1,44 @@
+*** Testing localtime() : basic functionality ***
+dict(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+vec(9) {
+  int(10)
+  int(0)
+  int(0)
+  int(1)
+  int(0)
+  int(70)
+  int(4)
+  int(0)
+  int(0)
+}
+vec(9) {
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+}
+===DONE===

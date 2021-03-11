@@ -1,0 +1,25 @@
+square
+a:Vec
+(
+    [0] => x2
+    [1] => buggy
+    [2] => unfold
+    [3] => __construct
+)
+b:Vec
+(
+    [0] => x2
+    [1] => buggy
+    [2] => unfold
+    [3] => __construct
+)
+Vec
+(
+    [0] => buggy
+    [1] => __construct
+)
+Vec
+(
+    [0] => buggy
+    [1] => __construct
+)

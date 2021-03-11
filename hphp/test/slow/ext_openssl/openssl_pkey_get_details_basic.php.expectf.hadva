@@ -1,0 +1,17 @@
+Dict
+(
+    [bits] => 256
+    [key] => -----BEGIN PUBLIC KEY-----%a
+-----END PUBLIC KEY-----
+
+    [ec] => Dict
+        (
+            [curve_name] => prime256v1
+            [curve_oid] => 1.2.840.10045.3.1.7
+            [x] => %a
+            [y] => %a
+            [d] => %a
+        )
+
+    [type] => 3
+)

@@ -1,0 +1,8 @@
+vec(3) {
+  int(1)
+  string(4) "test"
+  int(3)
+}
+int(1)
+int(3)
+string(1) "t"

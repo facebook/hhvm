@@ -1,0 +1,40 @@
+int(10)
+int(20)
+f In:  $p1: 10, $p2: 20
+f Out: $p1: 100, $p2: 200
+int(10)
+int(200)
+vec(3) {
+  int(10)
+  int(20)
+  int(30)
+}
+f In:  $p1: 10, $p2: 20
+f Out: $p1: 100, $p2: 200
+int(10)
+vec(3) {
+  int(10)
+  int(20)
+  int(30)
+}
+g In:  $p1: 1.
+g Out: $p1: 200.
+int(200)
+g In:  $p1: -123.
+g Out: $p1: 200.
+int(200)
+g In:  $p1: 1230.
+g Out: $p1: 200.
+int(200)
+g In:  $p1: .
+g Out: $p1: 200.
+int(200)
+g In:  $p1: abc.
+g Out: $p1: 200.
+int(200)
+g In:  $p1: Array.
+g Out: $p1: 200.
+int(200)
+g In:  $p1: 10.
+g Out: $p1: 200.
+int(200)

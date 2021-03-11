@@ -1,0 +1,3 @@
+vec(1) {
+  string(%d) "%s/test/zend/good/Zend/tests/get_required_files.php"
+}

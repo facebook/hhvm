@@ -1,0 +1,96 @@
+vec(3) {
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
+    ["line"]=>
+    int(11)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(1) {
+      int(1)
+    }
+  }
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
+    ["line"]=>
+    int(18)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(1) {
+      int(1)
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(3) {
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
+    ["line"]=>
+    int(11)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(1) {
+      int(65537)
+    }
+  }
+  dict(8) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_obj.php"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(1) {
+      int(65537)
+    }
+    ["metadata"]=>
+    string(8) "I am foo"
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}

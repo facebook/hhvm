@@ -1,0 +1,14 @@
+string(8) "Foo::bar"
+vec(3) {
+  int(1)
+  bool(true)
+  string(1) "c"
+}
+string(10) "inside bar"
+string(4) "meep"
+vec(3) {
+  int(1)
+  bool(true)
+  string(1) "c"
+}
+string(11) "inside meep"

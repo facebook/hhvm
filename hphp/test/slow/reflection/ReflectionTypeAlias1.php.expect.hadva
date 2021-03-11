@@ -1,0 +1,48 @@
+TypeAlias [ MyType : HH\Vector<HH\int> ]
+dict(4) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(9) "HH\Vector"
+  ["generic_types"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(6) "MyType"
+}
+TypeAlias [ MyOpaqueType : (function (HH\string, HH\Set<HH\int>): HH\void) ]
+dict(4) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(1) {
+    ["kind"]=>
+    int(0)
+  }
+  ["param_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(6) "HH\Set"
+      ["generic_types"]=>
+      vec(1) {
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+  }
+  ["alias"]=>
+  string(12) "MyOpaqueType"
+}

@@ -1,0 +1,94 @@
+>>> Testing strings <<<
+string(34) "This string is 34 characters long."
+string(34) "This puppy  is 34 characters long."
+string(34) "This kitty  is 34 characters long."
+string(34) "This kitty  is 34 characters long."
+string(34) "sihT kitty  is 34 characters long."
+string(34) "THIS STRING IS 34 CHARACTERS LONG!"
+string(34) "THIS 321zyxwvutsrqponmlkjihgfedcba"
+dict(1) {
+  ["a"]=>
+  string(21) "this is inside a dict"
+}
+dict(1) {
+  ["a"]=>
+  string(21) "This is inside a dict"
+}
+string(34) "This string is 34 characters long."
+>>> End of strings <<<
+>>> Testing primitive types <<<
+string(44) "The quick brown fox jumps over the lazy dog."
+string(44) "The quick brown fox jumps over the lazy dog!"
+string(44) "The kwick brown fox jumps over the lazy dog!"
+'The kwick brown fox jumps over the lazy ' . "\0" . '' . "\0" . '' . "\0" . '' . "\0" . ''
+string(44) "The kwick brown fox jumps over the large cat"
+'The' . "\0" . 'kwick brown fox jumps over the large cat'
+float(128.25)
+float(256.125)
+>>> End of primitive types <<<
+>>> Testing vecs <<<
+dict(6) {
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+  [5]=>
+  int(45)
+  [6]=>
+  int(45)
+}
+dict(6) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(1)
+  [3]=>
+  int(0)
+  [4]=>
+  int(0)
+  [5]=>
+  int(45)
+  [6]=>
+  int(45)
+}
+string(32) "--------------------------------"
+string(32) "hello---------------------------"
+string(32) "olleh---------------------------"
+string(32) "------------!!------------------"
+string(32) "------------!!!!??--------------"
+string(32) "----blahblahbleh??--------------"
+string(32) "----blehblahblah??--------------"
+string(32) "Secret message! ----------------"
+float(1)
+float(2)
+float(1)
+float(2)
+>>> End of vecs <<<
+>>> Testing failure cases <<<
+Caught OutOfBoundsException: Cannot read 4-byte range from 3-byte source string
+Caught InvalidOperationException: Invalid size 2 for string source
+Caught InvalidOperationException: Multiple types in vec source: integer at index 0; double at index 2
+Caught OutOfBoundsException: Cannot read 4 elements from vec of size 3
+Caught InvalidOperationException: Bad type (double) and element size (1) combination in vec source
+Caught InvalidOperationException: Bad type (double) and element size (2) combination in vec source
+Caught InvalidOperationException: Bad type (boolean) and element size (4) combination in vec source
+Caught InvalidOperationException: Bad type (boolean) and element size (8) combination in vec source
+Caught InvalidOperationException: Invalid base type integer for range set operation
+Caught OutOfBoundsException: Cannot set 1-byte range at offset 40 in string of length 34
+Caught OutOfBoundsException: Cannot set 4-byte range at offset 32 in string of length 34
+Caught OutOfBoundsException: Cannot set 8-byte range at offset 27 in string of length 34
+Caught OutOfBoundsException: Cannot set 5-byte range at offset 30 in string of length 34
+Caught OutOfBoundsException: Cannot set 12-byte range at offset 30 in string of length 34
+Caught InvalidOperationException: Invalid size 2 for bool source
+Caught InvalidOperationException: Invalid size 1 for double source
+Caught InvalidOperationException: Cannot set reverse range for primitive type boolean
+Caught InvalidOperationException: Cannot set reverse range for primitive type integer
+Caught InvalidOperationException: Cannot set reverse range for primitive type double
+string(34) "This string is 34 characters long."
+string(34) "This branch is 34 characters long."
+string(34) "This branch is 34 characters long?"
+>>> End of failure cases <<<

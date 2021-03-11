@@ -1,0 +1,125 @@
+===elem/@attr2===
+vec(3) {
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "12"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "22"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "32"
+    }
+  }
+}
+===//@attr2===
+vec(3) {
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "12"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "22"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "32"
+    }
+  }
+}
+===//@*===
+vec(9) {
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr1"]=>
+      string(2) "11"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "12"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr3"]=>
+      string(2) "13"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr1"]=>
+      string(2) "21"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "22"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr3"]=>
+      string(2) "23"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr1"]=>
+      string(2) "31"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "32"
+    }
+  }
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr3"]=>
+      string(2) "33"
+    }
+  }
+}
+===elem[2]/@attr2===
+vec(1) {
+  object(SimpleXMLElement) (1) {
+    ["@attributes"]=>
+    dict(1) {
+      ["attr2"]=>
+      string(2) "22"
+    }
+  }
+}
+===DONE===

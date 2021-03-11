@@ -1,0 +1,19 @@
+dict(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+dict(1) {
+  ["kind"]=>
+  int(1)
+}

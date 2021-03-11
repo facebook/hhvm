@@ -1,0 +1,91 @@
+vec(3) {
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+}
+vec(3) {
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+}
+vec(1) {
+  string(1) "d"
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+vec(5) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+}
+vec(2) {
+  string(1) "c"
+  string(1) "d"
+}
+dict(2) {
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+dict(2) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+dict(2) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+dict(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+dict(2) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+dict(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+dict(2) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+dict(2) {
+  [12]=>
+  int(1)
+  [6]=>
+  int(2)
+}
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}

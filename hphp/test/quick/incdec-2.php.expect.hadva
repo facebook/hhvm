@@ -1,0 +1,16 @@
+bool(false)
+vec(1) {
+  int(1)
+}
+bool(true)
+vec(1) {
+  int(1)
+}
+int(2)
+vec(1) {
+  int(1)
+}
+float(2)
+vec(1) {
+  int(1)
+}

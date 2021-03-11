@@ -1,0 +1,12 @@
+*** Testing array_change_key_case() : usage variations ***
+
+-- Call array_change_key_case() --
+dict(3) {
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
+}
+Done

@@ -1,0 +1,98 @@
+*** Testing array_map() : associative array with diff. values for 'arr1' argument ***
+-- Iteration 1 --
+dict(0) {
+}
+-- Iteration 2 --
+dict(1) {
+  ["0"]=>
+  int(0)
+}
+-- Iteration 3 --
+dict(1) {
+  ["1"]=>
+  int(1)
+}
+-- Iteration 4 --
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  [4]=>
+  int(4)
+}
+-- Iteration 5 --
+dict(1) {
+  ["float"]=>
+  float(2.3333)
+}
+-- Iteration 6 --
+dict(4) {
+  ["f1"]=>
+  float(1.2)
+  ["f2"]=>
+  float(3.33)
+  [3]=>
+  float(4.8999992284)
+  ["f4"]=>
+  float(33333333.3333)
+}
+-- Iteration 7 --
+dict(4) {
+  [111]=>
+  string(6) "	Hello"
+  ["red"]=>
+  string(6) "col	or"
+  [2]=>
+  string(7) "world"
+  [3]=>
+  string(4) "pen
+"
+}
+-- Iteration 8 --
+dict(4) {
+  [111]=>
+  string(7) "\tHello"
+  ["red"]=>
+  string(7) "col\tor"
+  [2]=>
+  string(9) "\v\fworld"
+  [3]=>
+  string(5) "pen\n"
+}
+-- Iteration 9 --
+dict(2) {
+  [1]=>
+  string(5) "hello"
+  ["heredoc"]=>
+  string(11) "Hello world"
+}
+-- Iteration 10 --
+dict(2) {
+  [11]=>
+  object(classA) (0) {
+  }
+  ["resource"]=>
+  resource(4) of type (stream)
+}
+-- Iteration 11 --
+dict(7) {
+  [1]=>
+  string(5) "hello"
+  [2]=>
+  object(classA) (0) {
+  }
+  [222]=>
+  string(5) "fruit"
+  ["resource"]=>
+  resource(4) of type (stream)
+  ["int"]=>
+  int(133)
+  ["float"]=>
+  float(444.432)
+  ["heredoc"]=>
+  string(11) "Hello world"
+}
+Done

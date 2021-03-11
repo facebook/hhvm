@@ -1,0 +1,36 @@
+*** Testing array_diff() : usage variations ***
+-- Basic Comparison --
+dict(3) {
+  [0]=>
+  string(2) "&a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+-- $a changed --
+dict(3) {
+  [0]=>
+  string(2) "&a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Done

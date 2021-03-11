@@ -1,0 +1,41 @@
+dict(1) {
+  ["xhtml"]=>
+  string(31) "http://www.w3.org/TR/REC-html40"
+}
+dict(3) {
+  ["xhtml"]=>
+  string(31) "http://www.w3.org/TR/REC-html40"
+  ["html"]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+  ["foo"]=>
+  string(6) "foobar"
+}
+dict(2) {
+  ["html"]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+  ["xhtml"]=>
+  string(31) "http://www.w3.org/TR/REC-html40"
+}
+dict(4) {
+  ["html"]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+  ["xhtml"]=>
+  string(31) "http://www.w3.org/TR/REC-html40"
+  ["foo"]=>
+  string(6) "foobar"
+  ["baz"]=>
+  string(9) "foobarbaz"
+}
+dict(1) {
+  [""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+}
+dict(1) {
+  [""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+}
+dict(0) {
+}
+dict(0) {
+}
+===DONE===

@@ -1,0 +1,84 @@
+Function provider ...$fns
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+Function provider (function (int...):void) ...$fns
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+Function provider lambda1
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+Function provider lambda2
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}

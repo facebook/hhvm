@@ -1,0 +1,49 @@
+bool(true)
+vec(2) {
+  string(1) "C"
+  string(1) "f"
+}
+bool(true)
+dict(2) {
+  [0]=>
+  string(1) "C"
+  [1]=>
+  string(1) "f"
+}
+bool(true)
+vec(2) {
+  string(1) "C"
+  string(1) "f"
+}
+bool(true)
+dict(2) {
+  [0]=>
+  string(1) "C"
+  [1]=>
+  string(1) "f"
+}
+bool(true)
+vec(2) {
+  string(1) "C"
+  string(1) "f"
+}
+bool(true)
+dict(2) {
+  [0]=>
+  string(1) "C"
+  [1]=>
+  string(1) "f"
+}
+bool(true)
+vec(2) {
+  string(1) "C"
+  string(1) "f"
+}
+bool(true)
+dict(2) {
+  [0]=>
+  string(1) "C"
+  [1]=>
+  string(1) "f"
+}
+bool(false)

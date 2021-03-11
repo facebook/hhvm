@@ -1,0 +1,23 @@
+dict(3) {
+  ["a"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(1)
+  }
+  ["b"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(1)
+  }
+  ["c"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(0)
+  }
+}

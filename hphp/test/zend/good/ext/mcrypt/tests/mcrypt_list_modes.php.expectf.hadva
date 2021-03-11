@@ -1,0 +1,10 @@
+vec(8) {
+  string(3) "cbc"
+  string(3) "cfb"
+  string(3) "ctr"
+  string(3) "ecb"
+  string(4) "ncfb"
+  string(4) "nofb"
+  string(3) "ofb"
+  string(6) "stream"
+}

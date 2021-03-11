@@ -1,0 +1,38 @@
+*** Testing sort() : usage variations ***
+
+-- Testing sort() by supplying bool value array, 'flag' value is defualt --
+bool(true)
+vec(4) {
+  bool(false)
+  bool(false)
+  bool(true)
+  bool(true)
+}
+
+-- Testing sort() by supplying bool value array, 'flag' value is SORT_REGULAR --
+bool(true)
+vec(4) {
+  bool(false)
+  bool(false)
+  bool(true)
+  bool(true)
+}
+
+-- Testing sort() by supplying bool value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+vec(4) {
+  bool(false)
+  bool(false)
+  bool(true)
+  bool(true)
+}
+
+-- Testing sort() by supplying bool value array, 'flag' value is SORT_STRING --
+bool(true)
+vec(4) {
+  bool(false)
+  bool(false)
+  bool(true)
+  bool(true)
+}
+Done

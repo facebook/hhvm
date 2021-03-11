@@ -1,0 +1,30 @@
+Unshift dict
+int(2)
+dict(2) {
+  [0]=>
+  int(2)
+  ["1"]=>
+  int(42)
+}
+Unshift darray
+int(2)
+dict(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(42)
+}
+bool(true)
+Unshift vec
+int(2)
+vec(2) {
+  int(2)
+  int(42)
+}
+Unshift varray
+int(2)
+vec(2) {
+  int(2)
+  int(42)
+}
+bool(true)

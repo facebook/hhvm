@@ -1,0 +1,10 @@
+Out of bounds vec access: invalid index 8589934592
+vec(1) {
+  string(5) "value"
+}
+vec(1) {
+  string(5) "value"
+}
+vec(1) {
+  string(5) "value"
+}

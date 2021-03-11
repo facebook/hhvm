@@ -1,0 +1,12 @@
+C1 Super::foo
+C2 Param::foo
+-------reflection-------
+trait T1 requires:
+vec(2) {
+  string(5) "Super"
+  string(2) "I1"
+}
+trait T2 requires:
+vec(1) {
+  string(5) "Param"
+}

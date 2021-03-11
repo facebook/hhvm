@@ -1,0 +1,55 @@
+Odd :
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["c"]=>
+  int(3)
+  ["e"]=>
+  int(5)
+}
+dict(3) {
+  [1]=>
+  int(7)
+  [3]=>
+  int(9)
+  [5]=>
+  int(11)
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+Even:
+dict(2) {
+  ["b"]=>
+  int(2)
+  ["d"]=>
+  int(4)
+}
+dict(5) {
+  [0]=>
+  int(6)
+  [2]=>
+  int(8)
+  [4]=>
+  int(10)
+  [6]=>
+  int(12)
+  [7]=>
+  int(0)
+}
+dict(2) {
+  [1]=>
+  bool(false)
+  [2]=>
+  NULL
+}
+dict(0) {
+}
+
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter.php on line 26
+NULL
+
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter.php on line 27
+NULL
+== DONE ==

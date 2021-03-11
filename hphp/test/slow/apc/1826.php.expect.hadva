@@ -1,0 +1,6 @@
+vec(2) {
+  string(4) "afoo"
+  vec(1) {
+    string(3) "foo"
+  }
+}

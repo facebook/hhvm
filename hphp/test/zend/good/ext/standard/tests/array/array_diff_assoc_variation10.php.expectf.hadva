@@ -1,0 +1,20 @@
+*** Testing array_diff_assoc() : usage variations ***
+dict(4) {
+  [0]=>
+  string(1) "1"
+  [2]=>
+  string(5) "world"
+  ["str1"]=>
+  string(5) "hello"
+  ["str2"]=>
+  string(5) "world"
+}
+dict(3) {
+  ["1"]=>
+  string(5) "hello"
+  [0]=>
+  string(5) "world"
+  [2]=>
+  string(4) "test"
+}
+Done

@@ -1,0 +1,32 @@
+*** Testing array_diff_key() : usage variation ***
+
+--decimal indexed--
+dict(1) {
+  [-7]=>
+  string(3) "-07"
+}
+dict(1) {
+  ["-17"]=>
+  string(3) "-17"
+}
+
+--octal indexed--
+dict(1) {
+  [-7]=>
+  string(3) "-07"
+}
+dict(1) {
+  [-9]=>
+  string(4) "-011"
+}
+
+--hexa  indexed--
+dict(1) {
+  [10]=>
+  string(3) "0xA"
+}
+dict(1) {
+  [18]=>
+  string(4) "0x12"
+}
+===DONE===

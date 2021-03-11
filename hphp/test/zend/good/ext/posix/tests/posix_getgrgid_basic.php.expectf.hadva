@@ -1,0 +1,11 @@
+Basic test of POSIX getgid and getgrid fucntions
+Dict
+(
+    [name] => %s
+    [passwd] => %a
+    [members] => Vec
+%a
+
+    [gid] => %d
+)
+===DONE===

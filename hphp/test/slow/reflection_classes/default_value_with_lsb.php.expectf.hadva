@@ -1,0 +1,46 @@
+hello
+
+Warning: Failed to eval default value of JJTest::test()'s $answer argument for reflection, assigning NULL instead in %s/test/slow/reflection_classes/default_value_with_lsb.php on line 11
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(6) "answer"
+      ["type"]=>
+      string(6) "HH\int"
+      ["type_hint"]=>
+      string(6) "HH\int"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(4) "test"
+      ["class"]=>
+      string(6) "JJTest"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(15) "\static::ANSWER"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(6) "answer"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(6) "HH\int"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+}

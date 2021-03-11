@@ -1,0 +1,120 @@
+vec(3) {
+  dict(2) {
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(13) "fb_setprofile"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(3) {
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(6) "f<int>"
+    ["class"]=>
+    string(1) "C"
+    ["object"]=>
+    object(C) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(3) {
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(6) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(1) "f"
+    ["class"]=>
+    string(1) "C"
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(2) {
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/reified-generics/backtrace-on-exit.php"
+    ["line"]=>
+    int(16)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}

@@ -1,0 +1,25 @@
+Warning: Empty regular expression in %s/test/zend/good/ext/pcre/tests/match_flags3.php on line 4
+bool(false)
+int(1)
+dict(1) {
+  [0]=>
+  string(3) "789"
+}
+int(1)
+dict(1) {
+  [0]=>
+  string(3) "123"
+}
+int(2)
+dict(1) {
+  [0]=>
+  dict(2) {
+    [0]=>
+    string(3) "789"
+    [1]=>
+    string(3) "012"
+  }
+}
+
+Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/test/zend/good/ext/pcre/tests/match_flags3.php on line 19
+bool(false)

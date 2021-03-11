@@ -1,0 +1,5 @@
+vec(3) {
+  float(1.23456789E+34)
+  float(INF)
+  float(NAN)
+}

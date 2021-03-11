@@ -1,0 +1,361 @@
+substr_replace('try this', 'bala ', 2)
+string(7) "trbala "
+
+substr_replace('try this', 'bala ', 2, 3)
+string(10) "trbala his"
+
+substr_replace('try this', 'bala ', 2, 0)
+string(13) "trbala y this"
+
+substr_replace('try this', 'bala ', 2, -2)
+string(9) "trbala is"
+
+
+
+substr_replace('try this', vec [  'bala ',], 4
+string(9) "try bala "
+
+substr_replace('try this', vec [  'bala ',], 4
+string(10) "try bala s"
+
+
+
+
+substr_replace(vec [  'ala portokala',], vec [  'bala ',], vec [  4,]
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+substr_replace(vec [  'ala portokala',], vec [  'bala ',], vec [  4,], vec [  3,])
+dict(1) {
+  [0]=>
+  string(15) "ala bala tokala"
+}
+
+substr_replace(vec [  'ala portokala',], vec [  'bala ',], vec [  4,], vec [  0,])
+dict(1) {
+  [0]=>
+  string(18) "ala bala portokala"
+}
+
+substr_replace(vec [  'ala portokala',], vec [  'bala ',], vec [  4,], vec [  -2,])
+dict(1) {
+  [0]=>
+  string(11) "ala bala la"
+}
+
+
+
+substr_replace(vec [  'ala portokala',], 'bala ',4)
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],4, 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(5) "try s"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',4, 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(10) "try bala s"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],4, 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(8) "try this"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',4, 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(13) "try bala this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],4, -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(6) "try is"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',4, -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(11) "try bala is"
+}
+
+
+
+
+
+
+substr_replace(vec [  'ala portokala',], 'bala ',vec [  4,])
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,], 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(5) " this"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,], 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(10) "bala  this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,], 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(8) "try this"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,], 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(13) "bala try this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,], -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(2) "is"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,], -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(7) "bala is"
+}
+
+
+
+
+
+
+
+substr_replace(vec [  'ala portokala',], 'bala ',vec [  4,  2,])
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(5) "trhis"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], 3)
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(10) "trbala his"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(8) "try this"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], 0)
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(13) "trbala y this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(4) "tris"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], -2)
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(9) "trbala is"
+}
+
+
+
+
+
+
+
+substr_replace(vec [  'ala portokala',], 'bala ',vec [  4,  2,])
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  3,])
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(2) "tr"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  3,])
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(7) "trbala "
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  0,])
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(2) "tr"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  0,])
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(7) "trbala "
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  -2,])
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(2) "tr"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  -2,])
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(7) "trbala "
+}
+
+
+
+
+
+
+
+substr_replace(vec [  'ala portokala',], 'bala ',vec [  4,  2,])
+dict(1) {
+  [0]=>
+  string(9) "ala bala "
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  3,  2,])
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(6) "trthis"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  3,  2,])
+dict(2) {
+  [0]=>
+  string(15) "ala bala tokala"
+  [1]=>
+  string(11) "trbala this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  0,  0,])
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(8) "try this"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  0,  0,])
+dict(2) {
+  [0]=>
+  string(18) "ala bala portokala"
+  [1]=>
+  string(13) "trbala y this"
+}
+
+substr_replace(vec [  'ala portokala',  'try this',], vec [  'bala ',],vec [  4,  2,], vec [  -2,  -3,])
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(5) "trhis"
+}
+
+
+substr_replace(vec [  'ala portokala',  'try this',], 'bala ',vec [  4,  2,], vec [  -2,  -3,])
+dict(2) {
+  [0]=>
+  string(11) "ala bala la"
+  [1]=>
+  string(10) "trbala his"
+}

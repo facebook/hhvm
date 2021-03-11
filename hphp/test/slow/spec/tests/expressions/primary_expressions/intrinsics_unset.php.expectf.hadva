@@ -1,0 +1,78 @@
+--------- TRUE -------------
+bool(true)
+bool(false)
+--------- NULL -------------
+bool(false)
+bool(false)
+--------- TRUE, 12.3, NULL -------------
+bool(true)
+bool(false)
+--------- undefined parameter -------------
+string(21) "Undefined variable: p"
+NULL
+bool(false)
+bool(false)
+int(10)
+bool(true)
+bool(false)
+---------- dynamic property ------------
+bool(false)
+bool(true)
+bool(false)
+---------- unsetting inside a function ($GLOBALS) ------------
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+---------- unsetting inside a function (pass-by-inout) ------------
+bool(true)
+bool(false)
+string(22) "Undefined variable: p2"
+bool(true)
+int(10)
+bool(true)
+int(20)
+---------- unsetting inside a function (static) ------------
+count = 1
+bool(true)
+bool(false)
+count = 2
+bool(true)
+bool(false)
+---------- unsetting a property ------------
+object(C) (1) {
+  ["prop"]=>
+  int(10)
+}
+bool(true)
+bool(false)
+object(C) (0) {
+}
+-----------
+object(C) (1) {
+  ["prop"]=>
+  int(10)
+}
+bool(true)
+---------- unsetting array elements ------------
+Dict
+(
+    [0] => 10
+    [1] => 20
+    [xx] => 30
+)
+Dict
+(
+    [0] => 10
+    [xx] => 30
+)
+Dict
+(
+    [0] => 10
+    [xx] => 30
+)
+Dict
+(
+    [0] => 10
+    [xx] => 30
+)

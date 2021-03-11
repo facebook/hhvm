@@ -1,0 +1,96 @@
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: True
+$m is Container: True
+$m is (string,string): True
+$m[0] is string: True
+$m[1] is string: True
+shape!
+shape!
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+$m === varray($m): True
+$m === ($m as Traversable): True
+$m === varray($m): True
+$m === ($m as Traversable): True
+$m === varray($m): True
+$m === ($m as Traversable): True
+$m === varray($m): True
+$m === ($m as AnyArray): True
+$m === varray($m): True
+$m === ($m as AnyArray): True
+$m === varray($m): True
+$m === ($m as AnyArray): True

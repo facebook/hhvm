@@ -1,0 +1,11 @@
+object(A) (2) {
+  ["x":"A":private]=>
+  vec(3) {
+    int(0)
+    int(2)
+    int(3)
+  }
+  ["y":"A":private]=>
+  string(6) "string"
+}
+string(6) "string"

@@ -1,0 +1,22 @@
+*** Testing array_slice() : usage variations ***
+
+-- Slice a two-dimensional array --
+dict(3) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  vec(3) {
+    string(4) "zero"
+    string(2) "un"
+    string(4) "deux"
+  }
+  [2]=>
+  string(4) "nine"
+}
+
+-- $input is a sub-array --
+vec(2) {
+  string(2) "un"
+  string(4) "deux"
+}
+Done

@@ -1,0 +1,36 @@
+vec(3) {
+  dict(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "c"
+    [1]=>
+    string(1) "d"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "e"
+  }
+}
+vec(3) {
+  dict(2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+  }
+  dict(2) {
+    [2]=>
+    string(1) "c"
+    [3]=>
+    string(1) "d"
+  }
+  dict(1) {
+    [4]=>
+    string(1) "e"
+  }
+}

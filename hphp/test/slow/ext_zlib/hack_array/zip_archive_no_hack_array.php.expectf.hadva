@@ -1,0 +1,119 @@
+int(5)
+dict(7) {
+  ["name"]=>
+  string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foo"
+  ["index"]=>
+  int(0)
+  ["crc"]=>
+  int(2117232040)
+  ["size"]=>
+  int(4)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(4)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobar"
+  ["index"]=>
+  int(1)
+  ["crc"]=>
+  int(2989266759)
+  ["size"]=>
+  int(7)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(7)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobaz"
+  ["index"]=>
+  int(2)
+  ["crc"]=>
+  int(2062884175)
+  ["size"]=>
+  int(7)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(7)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(4) "bing"
+  ["index"]=>
+  int(3)
+  ["crc"]=>
+  int(3957234157)
+  ["size"]=>
+  int(5)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(5)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(4) "bong"
+  ["index"]=>
+  int(4)
+  ["crc"]=>
+  int(3468019249)
+  ["size"]=>
+  int(5)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(5)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(4) "bing"
+  ["index"]=>
+  int(3)
+  ["crc"]=>
+  int(3957234157)
+  ["size"]=>
+  int(5)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(5)
+  ["comp_method"]=>
+  int(0)
+}
+dict(7) {
+  ["name"]=>
+  string(4) "bong"
+  ["index"]=>
+  int(4)
+  ["crc"]=>
+  int(3468019249)
+  ["size"]=>
+  int(5)
+  ["mtime"]=>
+  int(%d)
+  ["comp_size"]=>
+  int(5)
+  ["comp_method"]=>
+  int(0)
+}
+vec(4) {
+  string(1) "."
+  string(2) ".."
+  string(4) "bing"
+  string(4) "bong"
+}

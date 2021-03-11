@@ -1,0 +1,44 @@
+*** Testing sort() : usage variations ***
+
+-- Testing sort() by supplying octal value array, 'flag' value is defualt  --
+bool(true)
+vec(9) {
+  int(-229)
+  int(-54)
+  int(0)
+  int(54)
+  int(63)
+  int(209)
+  int(229)
+  int(506)
+  int(669)
+}
+
+-- Testing sort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
+bool(true)
+vec(9) {
+  int(-229)
+  int(-54)
+  int(0)
+  int(54)
+  int(63)
+  int(209)
+  int(229)
+  int(506)
+  int(669)
+}
+
+-- Testing sort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+vec(9) {
+  int(-229)
+  int(-54)
+  int(0)
+  int(54)
+  int(63)
+  int(209)
+  int(229)
+  int(506)
+  int(669)
+}
+Done

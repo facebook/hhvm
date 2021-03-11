@@ -1,0 +1,58 @@
+Locale is: en_US
+vec [
+  4560,
+  123,
+  37.073,
+]
+vec [
+  4560,
+  123,
+  37.073,
+]
+
+Locale is: ru_UA
+vec [
+  4560,
+  123,
+  37.073,
+]
+vec [
+  4560,
+  123,
+  37.073,
+]
+
+Locale is: de
+vec [
+  4560,
+  123,
+  37.073,
+]
+vec [
+  4560,
+  123,
+  37.073,
+]
+
+Locale is: en_UK
+vec [
+  4560,
+  123,
+  37.073,
+]
+vec [
+  4560,
+  123,
+  37.073,
+]
+
+Locale is: root
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+
+Locale is: fr
+vec [
+  42,
+]
+vec [
+  42,
+]

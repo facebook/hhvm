@@ -1,0 +1,5 @@
+string(31) "xxx bbb ccc ddd eee ccc xxx bbb"
+vec(2) {
+  string(3) "aaa"
+  string(3) "aaa"
+}

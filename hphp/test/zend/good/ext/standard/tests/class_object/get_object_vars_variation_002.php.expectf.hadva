@@ -1,0 +1,14 @@
+dict(0) {
+}
+dict(1) {
+  ["val"]=>
+  string(10) "original.a"
+}
+dict(1) {
+  ["val"]=>
+  string(11) "changed.val"
+}
+object(stdClass) (1) {
+  ["val"]=>
+  string(10) "original.a"
+}

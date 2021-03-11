@@ -1,0 +1,18 @@
+*** Testing array_fill_keys() : parameter variations ***
+
+-- Testing array_fill_keys() function with both wrong arguments --
+InvalidArgumentException: Invalid operand type was used: array_fill_keys expects an array or collection
+NULL
+
+-- Testing array_fill_keys() function with unusual second arguments --
+dict(2) {
+  ["one"]=>
+  resource(4) of type (stream)
+  ["two"]=>
+  resource(4) of type (stream)
+}
+
+-- Testing array_fill_keys() function with mixed array --
+InvalidArgumentException: Invalid operand type was used: array_fill_keys expects an array or collection
+NULL
+Done

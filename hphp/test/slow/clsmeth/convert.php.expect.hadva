@@ -1,0 +1,408 @@
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+string(3) "Foo"
+string(3) "bar"
+dict(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}

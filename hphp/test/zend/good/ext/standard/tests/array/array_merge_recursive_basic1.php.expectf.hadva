@@ -1,0 +1,55 @@
+*** Testing array_merge_recursive() : array with default keys ***
+-- With default argument --
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+}
+-- With more arguments --
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  [2]=>
+  int(3)
+  [3]=>
+  vec(2) {
+    string(5) "hello"
+    string(5) "world"
+  }
+}
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  [2]=>
+  int(3)
+  [3]=>
+  vec(2) {
+    string(5) "hello"
+    string(5) "world"
+  }
+  [4]=>
+  vec(2) {
+    int(6)
+    int(7)
+  }
+  [5]=>
+  vec(2) {
+    string(4) "str1"
+    string(4) "str2"
+  }
+}
+Done

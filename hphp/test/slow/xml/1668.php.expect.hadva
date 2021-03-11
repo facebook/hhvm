@@ -1,0 +1,20 @@
+vec(2) {
+  resource(4) of type (xml)
+  string(5) "CHILD"
+}
+vec(2) {
+  resource(4) of type (xml)
+  string(3) "TAG"
+}
+vec(3) {
+  resource(5) of type (xml)
+  string(3) "TAG"
+  dict(0) {
+  }
+}
+vec(3) {
+  resource(5) of type (xml)
+  string(5) "CHILD"
+  dict(0) {
+  }
+}

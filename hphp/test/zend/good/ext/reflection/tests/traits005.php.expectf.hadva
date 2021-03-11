@@ -1,0 +1,21 @@
+class C1:
+dict(0) {
+}
+
+class C2:
+dict(0) {
+}
+
+class C3:
+dict(1) {
+  ["a1"]=>
+  string(6) "T1::m1"
+}
+
+class C4:
+dict(2) {
+  ["a1"]=>
+  string(6) "T1::m1"
+  ["a2"]=>
+  string(6) "T1::m2"
+}

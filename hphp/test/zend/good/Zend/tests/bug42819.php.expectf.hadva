@@ -1,0 +1,158 @@
+first
+foo\C
+foo\foo\C
+foo\foo\foo::C
+foo\foo::C
+foo\foo::C
+1
+1
+second
+foo\C
+foo\foo\C
+foo\foo\foo::C
+foo\C
+foo\foo::C
+1
+1
+Dict
+(
+    [11] => 0
+)
+Dict
+(
+    [12] => 0
+)
+Dict
+(
+    [32] => 0
+)
+Dict
+(
+    [11] => 0
+)
+Dict
+(
+    [22] => 0
+)
+Dict
+(
+    [1] => 0
+)
+Dict
+(
+    [1] => 0
+)
+Dict
+(
+    [11] => 11
+)
+Dict
+(
+    [12] => 11
+)
+Dict
+(
+    [32] => 11
+)
+Dict
+(
+    [11] => 11
+)
+Dict
+(
+    [22] => 11
+)
+Dict
+(
+    [1] => 11
+)
+Dict
+(
+    [1] => 11
+)
+Dict
+(
+    [11] => 12
+)
+Dict
+(
+    [12] => 12
+)
+Dict
+(
+    [32] => 12
+)
+Dict
+(
+    [11] => 12
+)
+Dict
+(
+    [22] => 12
+)
+Dict
+(
+    [1] => 12
+)
+Dict
+(
+    [1] => 12
+)
+Dict
+(
+    [11] => 1
+)
+Dict
+(
+    [12] => 1
+)
+Dict
+(
+    [32] => 1
+)
+Dict
+(
+    [11] => 1
+)
+Dict
+(
+    [22] => 1
+)
+Dict
+(
+    [1] => 1
+)
+Dict
+(
+    [1] => 1
+)
+Dict
+(
+    [11] => 1
+)
+Dict
+(
+    [12] => 1
+)
+Dict
+(
+    [32] => 1
+)
+Dict
+(
+    [11] => 1
+)
+Dict
+(
+    [22] => 1
+)
+Dict
+(
+    [1] => 1
+)
+Dict
+(
+    [1] => 1
+)
+
+Fatal error: Undefined constant 'foo\foo\unknown' in %s/test/zend/good/Zend/tests/bug42819.php on line 80

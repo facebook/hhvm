@@ -1,0 +1,130 @@
+*** Testing sort() : object functionality ***
+
+-- Testing sort() by supplying various object arrays, 'flag' value is defualt --
+bool(true)
+vec(6) {
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(-5)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(0)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    float(0.001)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(11)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(23)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(66)
+  }
+}
+bool(true)
+vec(8) {
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "Lemon"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(6) "Orange"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "aPPle"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "apple"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(3) "axx"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(2) "py"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(1) "t"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(1) "w"
+  }
+}
+
+-- Testing sort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
+bool(true)
+vec(6) {
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(-5)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(0)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    float(0.001)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(11)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(23)
+  }
+  object(for_integer_sort) (1) {
+    ["class_value"]=>
+    int(66)
+  }
+}
+bool(true)
+vec(8) {
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "Lemon"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(6) "Orange"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "aPPle"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(5) "apple"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(3) "axx"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(2) "py"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(1) "t"
+  }
+  object(for_string_sort) (1) {
+    ["class_value"]=>
+    string(1) "w"
+  }
+}
+Done

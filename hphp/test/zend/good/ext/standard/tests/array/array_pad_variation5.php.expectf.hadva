@@ -1,0 +1,72 @@
+*** Testing array_pad() : Passing 2-d array to $pad_value argument ***
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  vec(3) {
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      string(5) "hello"
+      string(5) "world"
+    }
+    dict(2) {
+      ["one"]=>
+      int(1)
+      ["two"]=>
+      int(2)
+    }
+  }
+  vec(3) {
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      string(5) "hello"
+      string(5) "world"
+    }
+    dict(2) {
+      ["one"]=>
+      int(1)
+      ["two"]=>
+      int(2)
+    }
+  }
+}
+vec(5) {
+  vec(3) {
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      string(5) "hello"
+      string(5) "world"
+    }
+    dict(2) {
+      ["one"]=>
+      int(1)
+      ["two"]=>
+      int(2)
+    }
+  }
+  vec(3) {
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      string(5) "hello"
+      string(5) "world"
+    }
+    dict(2) {
+      ["one"]=>
+      int(1)
+      ["two"]=>
+      int(2)
+    }
+  }
+  int(1)
+  int(2)
+  int(3)
+}
+Done

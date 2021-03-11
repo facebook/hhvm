@@ -1,0 +1,190 @@
+*** Testing array_fill() : usage variations ***
+--- Testing array_fill() with different types of array values for 'val' argument ---
+-- Iteration 1 --
+vec(2) {
+  vec(0) {
+  }
+  vec(0) {
+  }
+}
+-- Iteration 2 --
+vec(2) {
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+}
+-- Iteration 3 --
+vec(2) {
+  dict(2) {
+    [1]=>
+    string(2) "Hi"
+    [2]=>
+    string(5) "Hello"
+  }
+  dict(2) {
+    [1]=>
+    string(2) "Hi"
+    [2]=>
+    string(5) "Hello"
+  }
+}
+-- Iteration 4 --
+vec(2) {
+  vec(3) {
+    string(7) "Saffron"
+    string(5) "White"
+    string(5) "Green"
+  }
+  vec(3) {
+    string(7) "Saffron"
+    string(5) "White"
+    string(5) "Green"
+  }
+}
+-- Iteration 5 --
+vec(2) {
+  dict(2) {
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+  dict(2) {
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+}
+-- Iteration 6 --
+vec(2) {
+  dict(2) {
+    ["color"]=>
+    string(3) "red"
+    [2]=>
+    string(6) "green "
+  }
+  dict(2) {
+    ["color"]=>
+    string(3) "red"
+    [2]=>
+    string(6) "green "
+  }
+}
+-- Iteration 7 --
+vec(2) {
+  dict(2) {
+    ["colour"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+  dict(2) {
+    ["colour"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+}
+-- Iteration 8 --
+vec(2) {
+  dict(2) {
+    [1]=>
+    string(3) "red"
+    [0]=>
+    string(5) "green"
+  }
+  dict(2) {
+    [1]=>
+    string(3) "red"
+    [0]=>
+    string(5) "green"
+  }
+}
+-- Iteration 9 --
+vec(2) {
+  dict(2) {
+    [1]=>
+    string(3) "red"
+    [0]=>
+    string(5) "green"
+  }
+  dict(2) {
+    [1]=>
+    string(3) "red"
+    [0]=>
+    string(5) "green"
+  }
+}
+-- Iteration 10 --
+vec(2) {
+  dict(3) {
+    [1]=>
+    string(2) "Hi"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+  dict(3) {
+    [1]=>
+    string(2) "Hi"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+  }
+}
+-- Iteration 11 --
+vec(2) {
+  dict(2) {
+    [""]=>
+    string(2) "Hi"
+    ["1"]=>
+    string(5) "Green"
+  }
+  dict(2) {
+    [""]=>
+    string(2) "Hi"
+    ["1"]=>
+    string(5) "Green"
+  }
+}
+-- Iteration 12 --
+vec(2) {
+  dict(2) {
+    [""]=>
+    int(1)
+    ["color"]=>
+    string(5) "green"
+  }
+  dict(2) {
+    [""]=>
+    int(1)
+    ["color"]=>
+    string(5) "green"
+  }
+}
+-- Iteration 13 --
+vec(2) {
+  vec(3) {
+    string(7) "Saffron"
+    string(5) "White"
+    string(5) "Green"
+  }
+  vec(3) {
+    string(7) "Saffron"
+    string(5) "White"
+    string(5) "Green"
+  }
+}
+Done

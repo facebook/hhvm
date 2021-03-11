@@ -1,0 +1,18 @@
+string(41) "HH\shape(D::F1=>HH\int, D::F2=>HH\string)"
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    [42]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["bar"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+}

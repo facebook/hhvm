@@ -1,0 +1,96 @@
+---------------- start -------------------
+---------------- calling var_export -------------------
+string(90) "Point::__set_state(darray[
+  'x' => 3,
+  'y' => 5,
+  'proti' => NULL,
+  'pubi' => NULL,
+])"
+---------------- calling eval -------------------
+Inside Point::__set_state
+dict(4) {
+  ["x"]=>
+  int(3)
+  ["y"]=>
+  int(5)
+  ["proti"]=>
+  NULL
+  ["pubi"]=>
+  NULL
+}
+object(Point) (4) {
+  ["x":"Point":private]=>
+  int(3)
+  ["y":"Point":private]=>
+  int(5)
+  ["proti":protected]=>
+  NULL
+  ["pubi"]=>
+  NULL
+}
+Point $z is (3,5)
+---------------- test with inheritance -------------------
+---------------- test with type B -------------------
+string(42) "B::__set_state(darray[
+  'bprop' => 10,
+])"
+Inside B::__set_state
+dict(1) {
+  ["bprop"]=>
+  int(10)
+}
+object(B) (1) {
+  ["bprop":"B":private]=>
+  int(10)
+}
+about to return from B::__set_state
+object(B) (1) {
+  ["bprop":"B":private]=>
+  int(10)
+}
+---------------- test with type D -------------------
+string(59) "D::__set_state(darray[
+  'dprop' => 30,
+  'bprop' => 20,
+])"
+Inside D::__set_state
+dict(2) {
+  ["dprop"]=>
+  int(30)
+  ["bprop"]=>
+  int(20)
+}
+Inside B::__set_state
+dict(2) {
+  ["dprop"]=>
+  int(30)
+  ["bprop"]=>
+  int(20)
+}
+object(D) (2) {
+  ["dprop":"D":private]=>
+  NULL
+  ["bprop":"B":private]=>
+  int(20)
+}
+about to return from B::__set_state
+object(D) (2) {
+  ["dprop":"D":private]=>
+  NULL
+  ["bprop":"B":private]=>
+  int(20)
+}
+object(D) (2) {
+  ["dprop":"D":private]=>
+  int(30)
+  ["bprop":"B":private]=>
+  int(20)
+}
+about to return from D::__set_state
+object(D) (2) {
+  ["dprop":"D":private]=>
+  int(30)
+  ["bprop":"B":private]=>
+  int(20)
+}
+---------------- end -------------------

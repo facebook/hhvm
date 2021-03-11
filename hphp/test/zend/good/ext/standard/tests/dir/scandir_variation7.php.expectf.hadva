@@ -1,0 +1,72 @@
+*** Testing scandir() : usage variations ***
+
+-- Iteration 1 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 2 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 3 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 4 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 5 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 6 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 7 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 8 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 9 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+
+-- Iteration 10 --
+bool(true)
+vec(2) {
+  string(1) "."
+  string(2) ".."
+}
+===DONE===

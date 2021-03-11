@@ -1,0 +1,18 @@
+dict(1) {
+  ["args"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+not folding
+dict(1) {
+  ["args"]=>
+  vec(3) {
+    int(4)
+    int(5)
+    int(6)
+  }
+}
+not folding

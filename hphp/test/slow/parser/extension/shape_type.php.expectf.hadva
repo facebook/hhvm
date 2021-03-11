@@ -1,0 +1,12 @@
+dict(2) {
+  ["a"]=>
+  vec(2) {
+    string(2) "?X"
+    bool(false)
+  }
+  ["b"]=>
+  vec(2) {
+    string(28) "(function (): Awaitable<?Y>)"
+    bool(true)
+  }
+}

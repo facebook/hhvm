@@ -1,0 +1,18 @@
+const from MyTrait
+const from J
+const from I
+========== reflect ==========
+Vec
+(
+    [0] => J
+    [1] => I
+)
+Dict
+(
+    [ONE] => const from MyTrait
+    [ABC] => const from J
+    [XYZ] => const from I
+)
+Dict
+(
+)

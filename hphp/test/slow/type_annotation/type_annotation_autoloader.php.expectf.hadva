@@ -1,0 +1,60 @@
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(17) "HH\KeyedContainer"
+  ["alias"]=>
+  string(12) "BuiltinClass"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(11) "LoadedClass"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(20) "TestAutoloadedClass1"
+  ["alias"]=>
+  string(14) "AutoloadClass1"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(20) "TestAutoloadedClass2"
+  ["alias"]=>
+  string(14) "AutoloadClass2"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(6) "HH\Map"
+  ["alias"]=>
+  string(13) "AutoloadType1"
+}
+dict(2) {
+  ["kind"]=>
+  int(7)
+  ["alias"]=>
+  string(13) "AutoloadType2"
+}
+dict(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(26) "TestTypeStructureTypeAlias"
+}

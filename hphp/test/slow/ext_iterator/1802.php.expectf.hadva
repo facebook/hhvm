@@ -1,0 +1,4 @@
+vec(1) {
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir
+"
+}

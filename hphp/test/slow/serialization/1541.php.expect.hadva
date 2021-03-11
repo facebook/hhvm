@@ -1,0 +1,379 @@
+object(Big) (6) {
+  ["groupAll"]=>
+  vec(10) {
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo0"
+      ["num"]=>
+      int(0)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo1"
+      ["num"]=>
+      int(3)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo2"
+      ["num"]=>
+      int(6)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo3"
+      ["num"]=>
+      int(9)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo4"
+      ["num"]=>
+      int(12)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo5"
+      ["num"]=>
+      int(15)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo6"
+      ["num"]=>
+      int(18)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo7"
+      ["num"]=>
+      int(21)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo8"
+      ["num"]=>
+      int(24)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo9"
+      ["num"]=>
+      int(27)
+    }
+  }
+  ["group1"]=>
+  vec(5) {
+    vec(2) {
+      string(4) "foo0"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo0"
+        ["num"]=>
+        int(0)
+      }
+    }
+    vec(2) {
+      string(4) "foo2"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo2"
+        ["num"]=>
+        int(6)
+      }
+    }
+    vec(2) {
+      string(4) "foo4"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo4"
+        ["num"]=>
+        int(12)
+      }
+    }
+    vec(2) {
+      string(4) "foo6"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo6"
+        ["num"]=>
+        int(18)
+      }
+    }
+    vec(2) {
+      string(4) "foo8"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo8"
+        ["num"]=>
+        int(24)
+      }
+    }
+  }
+  ["group2"]=>
+  vec(5) {
+    vec(2) {
+      string(4) "foo1"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo1"
+        ["num"]=>
+        int(3)
+      }
+    }
+    vec(2) {
+      string(4) "foo3"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo3"
+        ["num"]=>
+        int(9)
+      }
+    }
+    vec(2) {
+      string(4) "foo5"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo5"
+        ["num"]=>
+        int(15)
+      }
+    }
+    vec(2) {
+      string(4) "foo7"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo7"
+        ["num"]=>
+        int(21)
+      }
+    }
+    vec(2) {
+      string(4) "foo9"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo9"
+        ["num"]=>
+        int(27)
+      }
+    }
+  }
+  ["wacky"]=>
+  vec(2) {
+    int(10)
+    int(10)
+  }
+  ["nothing"]=>
+  NULL
+  ["unrelated"]=>
+  vec(3) {
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+  }
+}
+string(947) "O:3:"Big":6:{s:8:"groupAll";v:10:{O:5:"Small":2:{s:4:"name";s:4:"foo0";s:3:"num";i:0;}O:5:"Small":2:{s:4:"name";s:4:"foo1";s:3:"num";i:3;}O:5:"Small":2:{s:4:"name";s:4:"foo2";s:3:"num";i:6;}O:5:"Small":2:{s:4:"name";s:4:"foo3";s:3:"num";i:9;}O:5:"Small":2:{s:4:"name";s:4:"foo4";s:3:"num";i:12;}O:5:"Small":2:{s:4:"name";s:4:"foo5";s:3:"num";i:15;}O:5:"Small":2:{s:4:"name";s:4:"foo6";s:3:"num";i:18;}O:5:"Small":2:{s:4:"name";s:4:"foo7";s:3:"num";i:21;}O:5:"Small":2:{s:4:"name";s:4:"foo8";s:3:"num";i:24;}O:5:"Small":2:{s:4:"name";s:4:"foo9";s:3:"num";i:27;}}s:6:"group1";v:5:{v:2:{s:4:"foo0";r:3;}v:2:{s:4:"foo2";r:9;}v:2:{s:4:"foo4";r:15;}v:2:{s:4:"foo6";r:21;}v:2:{s:4:"foo8";r:27;}}s:6:"group2";v:5:{v:2:{s:4:"foo1";r:6;}v:2:{s:4:"foo3";r:12;}v:2:{s:4:"foo5";r:18;}v:2:{s:4:"foo7";r:24;}v:2:{s:4:"foo9";r:30;}}s:5:"wacky";v:2:{i:10;i:10;}s:7:"nothing";N;s:9:"unrelated";v:3:{O:5:"Small":2:{s:4:"name";s:5:"foo10";s:3:"num";i:30;}r:70;r:70;}}"
+object(Big) (6) {
+  ["groupAll"]=>
+  vec(10) {
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo0"
+      ["num"]=>
+      int(0)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo1"
+      ["num"]=>
+      int(3)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo2"
+      ["num"]=>
+      int(6)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo3"
+      ["num"]=>
+      int(9)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo4"
+      ["num"]=>
+      int(12)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo5"
+      ["num"]=>
+      int(15)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo6"
+      ["num"]=>
+      int(18)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo7"
+      ["num"]=>
+      int(21)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo8"
+      ["num"]=>
+      int(24)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(4) "foo9"
+      ["num"]=>
+      int(27)
+    }
+  }
+  ["group1"]=>
+  vec(5) {
+    vec(2) {
+      string(4) "foo0"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo0"
+        ["num"]=>
+        int(0)
+      }
+    }
+    vec(2) {
+      string(4) "foo2"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo2"
+        ["num"]=>
+        int(6)
+      }
+    }
+    vec(2) {
+      string(4) "foo4"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo4"
+        ["num"]=>
+        int(12)
+      }
+    }
+    vec(2) {
+      string(4) "foo6"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo6"
+        ["num"]=>
+        int(18)
+      }
+    }
+    vec(2) {
+      string(4) "foo8"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo8"
+        ["num"]=>
+        int(24)
+      }
+    }
+  }
+  ["group2"]=>
+  vec(5) {
+    vec(2) {
+      string(4) "foo1"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo1"
+        ["num"]=>
+        int(3)
+      }
+    }
+    vec(2) {
+      string(4) "foo3"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo3"
+        ["num"]=>
+        int(9)
+      }
+    }
+    vec(2) {
+      string(4) "foo5"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo5"
+        ["num"]=>
+        int(15)
+      }
+    }
+    vec(2) {
+      string(4) "foo7"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo7"
+        ["num"]=>
+        int(21)
+      }
+    }
+    vec(2) {
+      string(4) "foo9"
+      object(Small) (2) {
+        ["name"]=>
+        string(4) "foo9"
+        ["num"]=>
+        int(27)
+      }
+    }
+  }
+  ["wacky"]=>
+  vec(2) {
+    int(10)
+    int(10)
+  }
+  ["nothing"]=>
+  NULL
+  ["unrelated"]=>
+  vec(3) {
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    object(Small) (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+  }
+}

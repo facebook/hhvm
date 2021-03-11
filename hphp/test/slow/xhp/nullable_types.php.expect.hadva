@@ -1,0 +1,44 @@
+dict(6) {
+  ["mystring"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(1)
+  }
+  ["mynullablestring"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(0)
+  }
+  ["myobject"]=>
+  vec(4) {
+    int(5)
+    string(7) "MyClass"
+    NULL
+    int(1)
+  }
+  ["mynullableobject"]=>
+  vec(4) {
+    int(5)
+    string(7) "MyClass"
+    NULL
+    int(0)
+  }
+  ["myint"]=>
+  vec(4) {
+    int(3)
+    NULL
+    NULL
+    int(1)
+  }
+  ["mynullableint"]=>
+  vec(4) {
+    int(3)
+    NULL
+    NULL
+    int(1)
+  }
+}

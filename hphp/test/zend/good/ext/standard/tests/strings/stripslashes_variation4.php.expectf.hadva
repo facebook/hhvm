@@ -1,0 +1,92 @@
+*** Testing stripslashes() : with double dimensional arrays ***
+
+-- Iteration 1 --
+dict(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  dict(0) {
+  }
+}
+
+-- Iteration 2 --
+dict(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  dict(1) {
+    [0]=>
+    string(0) ""
+  }
+}
+
+-- Iteration 3 --
+dict(3) {
+  [0]=>
+  string(4) "f'oo"
+  [1]=>
+  string(4) "b'ar"
+  [2]=>
+  dict(2) {
+    [0]=>
+    string(4) "fo'o"
+    [1]=>
+    string(4) "b'ar"
+  }
+}
+
+-- Iteration 4 --
+dict(3) {
+  [0]=>
+  string(4) "f'oo"
+  [1]=>
+  string(4) "b'ar"
+  [2]=>
+  dict(1) {
+    [0]=>
+    string(0) ""
+  }
+}
+
+-- Iteration 5 --
+dict(3) {
+  [0]=>
+  string(4) "f'oo"
+  [1]=>
+  string(4) "b'ar"
+  [2]=>
+  dict(3) {
+    [0]=>
+    string(4) "fo'o"
+    [1]=>
+    string(4) "b'ar"
+    [2]=>
+    dict(1) {
+      [0]=>
+      string(0) ""
+    }
+  }
+}
+
+-- Iteration 6 --
+dict(3) {
+  [0]=>
+  string(4) "f'oo"
+  [1]=>
+  string(4) "b'ar"
+  [2]=>
+  dict(3) {
+    [0]=>
+    string(4) "fo'o"
+    [1]=>
+    string(4) "b'ar"
+    [2]=>
+    dict(2) {
+      [0]=>
+      string(4) "fo'o"
+      [1]=>
+      string(4) "b'ar"
+    }
+  }
+}
+Done

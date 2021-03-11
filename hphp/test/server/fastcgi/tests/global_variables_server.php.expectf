@@ -1,22 +1,22 @@
 ------------ -dalways_populate_raw_post_data=1 --------
 NULL
 bool(true)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(true)
-darray(3) {
+dict(3) {
   ["var"]=>
   string(6) "COOKIE"
   ["get"]=>
@@ -27,26 +27,26 @@ darray(3) {
 ------------ -dalways_populate_raw_post_data=1 --------
 string(15) "var=POST&post=2"
 bool(true)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(4) "POST"
   ["post"]=>
   string(1) "2"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(true)
-darray(4) {
+dict(4) {
   ["var"]=>
   string(6) "COOKIE"
   ["get"]=>
@@ -59,26 +59,26 @@ darray(4) {
 ------------  --------
 NULL
 bool(true)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(4) "POST"
   ["post"]=>
   string(1) "2"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(true)
-darray(4) {
+dict(4) {
   ["var"]=>
   string(6) "COOKIE"
   ["get"]=>
@@ -91,50 +91,50 @@ darray(4) {
 ------------ -dvariables_order=NONE -drequest_order= --------
 NULL
 bool(false)
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 bool(false)
-darray(0) {
+dict(0) {
 }
 ------------ -dvariables_order=E -drequest_order=GPC --------
 NULL
 bool(true)
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
-darray(0) {
+dict(0) {
 }
 bool(false)
-darray(0) {
+dict(0) {
 }
 ------------ -dvariables_order=CGP -drequest_order=GP --------
 NULL
 bool(false)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(4) "POST"
   ["post"]=>
   string(1) "2"
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(false)
-darray(3) {
+dict(3) {
   ["var"]=>
   string(4) "POST"
   ["get"]=>
@@ -145,22 +145,22 @@ darray(3) {
 ------------ -dvariables_order=GC -drequest_order=CG --------
 NULL
 bool(false)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(false)
-darray(3) {
+dict(3) {
   ["var"]=>
   string(3) "GET"
   ["cookie"]=>
@@ -171,22 +171,22 @@ darray(3) {
 ------------ -dvariables_order=GC -drequest_order=GC --------
 NULL
 bool(false)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(false)
-darray(3) {
+dict(3) {
   ["var"]=>
   string(6) "COOKIE"
   ["get"]=>
@@ -197,20 +197,20 @@ darray(3) {
 ------------ -dvariables_order=GC -drequest_order=P --------
 NULL
 bool(false)
-darray(2) {
+dict(2) {
   ["var"]=>
   string(3) "GET"
   ["get"]=>
   string(1) "1"
 }
-darray(0) {
+dict(0) {
 }
-darray(2) {
+dict(2) {
   ["var"]=>
   string(6) "COOKIE"
   ["cookie"]=>
   string(1) "3"
 }
 bool(false)
-darray(0) {
+dict(0) {
 }

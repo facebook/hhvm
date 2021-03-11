@@ -1,0 +1,10 @@
+string(13) "HH\shape(...)"
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["fields"]=>
+  dict(0) {
+  }
+}

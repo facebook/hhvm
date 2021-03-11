@@ -1,0 +1,14 @@
+vec [
+  'A',
+  'f1',
+]
+vec(2) {
+  string(1) "A"
+  string(2) "f1"
+}
+
+class_meth('A', 'f1')
+classMeth{
+  class(A)
+  function(f1)
+}

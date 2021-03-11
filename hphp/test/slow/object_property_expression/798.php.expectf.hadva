@@ -1,0 +1,25 @@
+string(3) "bar"
+string(23) "Undefined variable: foo"
+string(3) "foo"
+object(X) (4) {
+  ["a"]=>
+  dict(1) {
+    ["x"]=>
+    object(Y) (1) {
+      ["y"]=>
+      NULL
+    }
+  }
+  ["qq"]=>
+  object(Y) (1) {
+    ["y"]=>
+    int(1)
+  }
+  ["q"]=>
+  NULL
+  ["y"]=>
+  NULL
+}
+vec(0) {
+}
+bool(false)

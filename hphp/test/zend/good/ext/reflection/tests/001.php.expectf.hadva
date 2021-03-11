@@ -1,0 +1,8 @@
+vec(0) {
+}
+vec(2) {
+  string(3) "bla"
+  string(4) "name"
+}
+string(17) "ReflectionClassEx"
+===DONE===

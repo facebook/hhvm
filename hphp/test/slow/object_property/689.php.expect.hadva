@@ -1,0 +1,7 @@
+object(A) (1) {
+  ["a":"A":private]=>
+  vec(1) {
+    string(5) "apple"
+  }
+}
+string(1) "a"

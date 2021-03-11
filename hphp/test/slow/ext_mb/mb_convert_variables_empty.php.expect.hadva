@@ -1,0 +1,16 @@
+object(A) (4) {
+  ["test"]=>
+  bool(false)
+  ["test2"]=>
+  string(0) ""
+  ["test3"]=>
+  dict(0) {
+  }
+  ["_"]=>
+  bool(false)
+}
+dict(1) {
+  ["test"]=>
+  dict(0) {
+  }
+}

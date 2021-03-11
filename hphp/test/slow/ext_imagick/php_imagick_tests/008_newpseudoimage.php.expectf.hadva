@@ -1,0 +1,25 @@
+dict(2) {
+  ["width"]=>
+  int(100)
+  ["height"]=>
+  int(100)
+}
+dict(2) {
+  ["width"]=>
+  int(640)
+  ["height"]=>
+  int(480)
+}
+dict(2) {
+  ["width"]=>
+  int(640)
+  ["height"]=>
+  int(480)
+}
+dict(2) {
+  ["width"]=>
+  int(70)
+  ["height"]=>
+  int(46)
+}
+fail

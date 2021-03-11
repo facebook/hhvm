@@ -1,0 +1,42 @@
+dict(7) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(-23234)
+  [4]=>
+  bool(false)
+  [5]=>
+  bool(false)
+  [6]=>
+  dict(0) {
+  }
+}
+dict(7) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  float(1.7)
+  [2]=>
+  bool(false)
+  [3]=>
+  float(-23234.123)
+  [4]=>
+  bool(false)
+  [5]=>
+  bool(false)
+  [6]=>
+  dict(0) {
+  }
+}
+
+Warning: filter_var() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/filter/tests/010.php on line 5
+string(1) "1"
+string(1) "1"
+string(1) "1"
+bool(false)
+bool(false)
+Done

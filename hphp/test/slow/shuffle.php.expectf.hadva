@@ -1,0 +1,121 @@
+bool(true)
+vec(0) {
+}
+bool(true)
+vec(5) {
+  int(3)
+  int(4)
+  int(5)
+  int(1)
+  int(2)
+}
+bool(true)
+dict(3) {
+  [0]=>
+  string(1) "c"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
+bool(true)
+vec(0) {
+}
+bool(true)
+vec(5) {
+  int(4)
+  int(2)
+  int(5)
+  int(1)
+  int(3)
+}
+bool(true)
+vec(3) {
+  string(1) "b"
+  string(1) "c"
+  string(1) "a"
+}
+bool(true)
+dict(0) {
+}
+bool(true)
+dict(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "a"
+}
+bool(true)
+dict(3) {
+  [0]=>
+  int(300)
+  [1]=>
+  int(100)
+  [2]=>
+  int(200)
+}
+bool(true)
+keyset(0) {
+}
+bool(true)
+keyset(5) {
+  int(2)
+  int(5)
+  int(4)
+  int(3)
+  int(1)
+}
+bool(true)
+keyset(3) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "c"
+}
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+NULL
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+bool(true)
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+bool(false)
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+int(123)
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+string(3) "abc"
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+float(3.14)
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+resource(4) of type (stream)
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+object(stdClass) (0) {
+}
+
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
+bool(false)
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}

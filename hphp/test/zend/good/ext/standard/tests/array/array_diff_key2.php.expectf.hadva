@@ -1,0 +1,24 @@
+vec(4) {
+  dict(2) {
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
+  }
+  dict(2) {
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
+  }
+  dict(1) {
+    [2]=>
+    bool(true)
+  }
+  dict(2) {
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
+  }
+}

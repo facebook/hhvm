@@ -1,0 +1,18 @@
+Dict
+(
+    [1] => bar
+    [2] => baz
+)
+Dict
+(
+    [0] => foo
+)
+Dict
+(
+    [bar] => 2
+    [baz] => 3
+)
+Dict
+(
+    [foo] => 1
+)

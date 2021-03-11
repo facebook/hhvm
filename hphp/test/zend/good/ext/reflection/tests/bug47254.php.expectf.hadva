@@ -1,0 +1,15 @@
+Vec
+(
+    [0] => ReflectionMethod Object
+        (
+            [name] => b
+            [class] => B
+        )
+
+    [1] => ReflectionMethod Object
+        (
+            [name] => a
+            [class] => A
+        )
+
+)

@@ -1,0 +1,9 @@
+dict(2) {
+  ["x"]=>
+  bool(false)
+  [0]=>
+  dict(1) {
+    ["x"]=>
+    bool(false)
+  }
+}

@@ -1,0 +1,46 @@
+vec(3) {
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
+    ["line"]=>
+    int(9)
+    ["function"]=>
+    string(3) "bar"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(3) "foo"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+}
+vec(3) {
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
+    ["line"]=>
+    int(9)
+    ["function"]=>
+    string(3) "bar"
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/metadata_simple.php"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(3) "foo"
+    ["metadata"]=>
+    string(8) "I am foo"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+}

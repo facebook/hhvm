@@ -1,0 +1,84 @@
+*** Testing array_chunk() : basic functionality ***
+
+-- Iteration 1 --
+vec(3) {
+  dict(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  dict(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+  }
+  dict(1) {
+    [0]=>
+    int(5)
+  }
+}
+
+-- Iteration 2 --
+vec(2) {
+  dict(2) {
+    [0]=>
+    string(6) "value1"
+    [1]=>
+    string(6) "value2"
+  }
+  dict(1) {
+    [0]=>
+    string(6) "value3"
+  }
+}
+
+-- Iteration 3 --
+vec(2) {
+  dict(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  dict(1) {
+    [0]=>
+    int(3)
+  }
+}
+
+-- Iteration 4 --
+vec(2) {
+  dict(2) {
+    [0]=>
+    string(3) "one"
+    [1]=>
+    string(3) "two"
+  }
+  dict(1) {
+    [0]=>
+    string(5) "three"
+  }
+}
+
+-- Iteration 5 --
+vec(3) {
+  dict(2) {
+    [0]=>
+    string(3) "one"
+    [1]=>
+    string(3) "two"
+  }
+  dict(2) {
+    [0]=>
+    string(5) "three"
+    [1]=>
+    int(4)
+  }
+  dict(1) {
+    [0]=>
+    int(5)
+  }
+}
+Done

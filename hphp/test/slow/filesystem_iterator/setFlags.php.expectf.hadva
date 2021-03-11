@@ -1,0 +1,21 @@
+Key as Pathname:
+vec(7) {
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/."
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/.."
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/dir"
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/empty"
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/file"
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/fix_mtimes.inc"
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/symlink"
+}
+
+Key as Filename:
+vec(7) {
+  string(1) "."
+  string(2) ".."
+  string(3) "dir"
+  string(5) "empty"
+  string(4) "file"
+  string(14) "fix_mtimes.inc"
+  string(7) "symlink"
+}

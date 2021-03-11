@@ -1,0 +1,21 @@
+dict(3) {
+  [0]=>
+  string(4) "blub"
+  ["name"]=>
+  string(4) "blub"
+  [1]=>
+  string(4) "blub"
+}
+string(15) "bla blub/4 blah"
+int(1)
+dict(3) {
+  [0]=>
+  string(4) "blub"
+  ["name"]=>
+  string(4) "blub"
+  [1]=>
+  string(4) "blub"
+}
+
+Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/test/zend/good/ext/pcre/tests/bug37911.php on line 16
+NULL

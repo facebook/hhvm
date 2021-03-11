@@ -1,0 +1,100 @@
+DateTime
+object(DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-23 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+string(131) "O:8:"DateTime":3:{s:4:"date";s:26:"2012-06-23 11:00:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:19:"America/Los_Angeles";}"
+object(DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-23 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+vec(19) {
+  string(3) "add"
+  string(11) "__construct"
+  string(16) "createFromFormat"
+  string(4) "diff"
+  string(6) "format"
+  string(13) "getLastErrors"
+  string(9) "getOffset"
+  string(12) "getTimestamp"
+  string(11) "getTimezone"
+  string(6) "modify"
+  string(7) "setDate"
+  string(10) "setISODate"
+  string(7) "setTime"
+  string(12) "setTimestamp"
+  string(11) "setTimezone"
+  string(3) "sub"
+  string(7) "__sleep"
+  string(8) "__wakeup"
+  string(11) "__debugInfo"
+}
+================
+A_DateTime
+object(A_DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-23 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+string(134) "O:10:"A_DateTime":3:{s:4:"date";s:26:"2012-06-23 11:00:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:19:"America/Los_Angeles";}"
+object(A_DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-23 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+vec(20) {
+  string(7) "__clone"
+  string(3) "add"
+  string(11) "__construct"
+  string(16) "createFromFormat"
+  string(4) "diff"
+  string(6) "format"
+  string(13) "getLastErrors"
+  string(9) "getOffset"
+  string(12) "getTimestamp"
+  string(11) "getTimezone"
+  string(6) "modify"
+  string(7) "setDate"
+  string(10) "setISODate"
+  string(7) "setTime"
+  string(12) "setTimestamp"
+  string(11) "setTimezone"
+  string(3) "sub"
+  string(7) "__sleep"
+  string(8) "__wakeup"
+  string(11) "__debugInfo"
+}
+================
+object(A_DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-23 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+string(10) "2012-06-23"
+object(A_DateTime) (3) {
+  ["date"]=>
+  string(26) "2012-06-26 11:00:00.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+string(10) "2012-06-26"
+================

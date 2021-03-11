@@ -1,0 +1,30 @@
+dict(1) {
+  ["1"]=>
+  NULL
+}
+dict(1) {
+  ["100"]=>
+  bool(false)
+}
+dict(2) {
+  ["123"]=>
+  bool(true)
+  [123]=>
+  bool(false)
+}
+dict(2) {
+  [123]=>
+  bool(false)
+  ["123"]=>
+  bool(true)
+}
+dict(4) {
+  [123]=>
+  string(1) "a"
+  ["456"]=>
+  string(1) "b"
+  ["123"]=>
+  string(1) "c"
+  [456]=>
+  string(1) "d"
+}

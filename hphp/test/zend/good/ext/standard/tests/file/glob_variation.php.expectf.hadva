@@ -1,0 +1,298 @@
+*** Testing glob() : usage variations ***
+
+-- Iteration 1 --
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder/"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+
+-- Iteration 2 --
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder/"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+
+-- Iteration 3 --
+vec(2) {
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(2) {
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(2) {
+  string(%d) "%s"
+  string(%d) "%s"
+}
+vec(2) {
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(2) {
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(2) {
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+
+-- Iteration 4 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(%d) "%s/glob_variation/*der5"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 5 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(%d) "%s/glob_variation/??onder*"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 6 --
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder/"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+vec(3) {
+  string(%d) "%s/glob_variation/wonder"
+  string(%d) "%s/glob_variation/wonder12345"
+  string(%d) "%s/glob_variation/wonder;123456"
+}
+
+-- Iteration 7 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(%d) "%s/glob_variation/++onder*"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 8 --
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 39
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 40
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 41
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 42
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 43
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 44
+NULL
+
+-- Iteration 9 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(16) "$dirname/wonder5"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 10 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(%d) "%s/glob_variation/?wonder?"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 11 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(%d) "%s/glob_variation/wonder?"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+-- Iteration 12 --
+vec(0) {
+}
+vec(0) {
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "1"
+}
+vec(0) {
+}
+vec(0) {
+}
+
+*** Testing glob() with pattern within braces ***
+vec(1) {
+  string(%d) "%s/glob_variation/wonder12345"
+}
+
+*** Testing glob() on directories ***
+-- Iteration 1 --
+vec(1) {
+  string(%d) "%s/glob_variation/wonder1"
+}
+-- Iteration 2 --
+vec(1) {
+  string(%d) "%s/glob_variation/wonder1"
+}
+-- Iteration 3 --
+vec(1) {
+  string(%d) "%s/glob_variation/wonder1"
+}
+-- Iteration 4 --
+vec(0) {
+}
+-- Iteration 5 --
+vec(0) {
+}
+-- Iteration 6 --
+vec(1) {
+  string(%d) "%s/glob_variation/wonder1"
+}
+-- Iteration 7 --
+vec(0) {
+}
+-- Iteration 8 --
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 66
+NULL
+-- Iteration 9 --
+vec(0) {
+}
+-- Iteration 10 --
+vec(0) {
+}
+-- Iteration 11 --
+vec(1) {
+  string(%d) "%s/glob_variation/wonder1"
+}
+-- Iteration 12 --
+vec(0) {
+}
+Done

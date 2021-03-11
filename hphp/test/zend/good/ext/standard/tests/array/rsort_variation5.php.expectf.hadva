@@ -1,0 +1,102 @@
+*** Testing rsort() : variation ***
+
+-- Iteration 1 --
+- With Default sort flag -
+bool(true)
+vec(11) {
+  string(4) "\xhh"
+  string(4) "\ddd"
+  string(3) "\cx"
+  string(2) "\a"
+  string(1) ""
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) "	"
+  NULL
+  NULL
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(11) {
+  string(4) "\xhh"
+  string(4) "\ddd"
+  string(3) "\cx"
+  string(2) "\a"
+  string(1) ""
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) "	"
+  NULL
+  NULL
+}
+- Sort flag = SORT_STRING -
+bool(true)
+vec(11) {
+  string(4) "\xhh"
+  string(4) "\ddd"
+  string(3) "\cx"
+  string(2) "\a"
+  string(1) ""
+  string(1) ""
+  string(1) ""
+  string(1) "
+"
+  string(1) "	"
+  NULL
+  NULL
+}
+
+-- Iteration 2 --
+- With Default sort flag -
+bool(true)
+vec(12) {
+  string(1) "x"
+  string(2) "ww"
+  string(3) "ttt"
+  string(6) "oraNGe"
+  string(5) "lemoN"
+  string(6) "banana"
+  string(5) "apple"
+  string(1) "X"
+  string(4) "Test"
+  string(4) "TTTT"
+  string(6) "Orange"
+  string(6) "BANANA"
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(12) {
+  string(1) "x"
+  string(2) "ww"
+  string(3) "ttt"
+  string(6) "oraNGe"
+  string(5) "lemoN"
+  string(6) "banana"
+  string(5) "apple"
+  string(1) "X"
+  string(4) "Test"
+  string(4) "TTTT"
+  string(6) "Orange"
+  string(6) "BANANA"
+}
+- Sort flag = SORT_STRING -
+bool(true)
+vec(12) {
+  string(1) "x"
+  string(2) "ww"
+  string(3) "ttt"
+  string(6) "oraNGe"
+  string(5) "lemoN"
+  string(6) "banana"
+  string(5) "apple"
+  string(1) "X"
+  string(4) "Test"
+  string(4) "TTTT"
+  string(6) "Orange"
+  string(6) "BANANA"
+}
+Done

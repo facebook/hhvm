@@ -1,0 +1,66 @@
+object(X) (6) {
+  ["prop10":"X":private]=>
+  vec(0) {
+  }
+  ["prop11":"X":private]=>
+  dict(3) {
+    [0]=>
+    int(10)
+    ["a"]=>
+    string(3) "red"
+    [1]=>
+    bool(true)
+  }
+  ["prop12":"X":private]=>
+  dict(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    ["xx"]=>
+    dict(3) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      NULL
+      ["zz"]=>
+      vec(3) {
+        int(12)
+        bool(false)
+        string(3) "zzz"
+      }
+    }
+  }
+  ["prop20":"X":private]=>
+  dict(0) {
+  }
+  ["prop21":"X":private]=>
+  dict(3) {
+    [0]=>
+    int(10)
+    ["a"]=>
+    string(3) "red"
+    [1]=>
+    bool(true)
+  }
+  ["prop22":"X":private]=>
+  dict(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    ["xx"]=>
+    dict(3) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      NULL
+      ["zz"]=>
+      vec(3) {
+        int(12)
+        bool(false)
+        string(3) "zzz"
+      }
+    }
+  }
+}

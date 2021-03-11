@@ -1,0 +1,42 @@
+file():
+vec(5) {
+  string(7) "Line 1
+"
+  string(1) "
+"
+  string(2) " 
+"
+  string(3) "  
+"
+  string(7) "\Line 3"
+}
+
+file() with FILE_IGNORE_NEW_LINES:
+vec(5) {
+  string(6) "Line 1"
+  string(0) ""
+  string(1) " "
+  string(2) "  "
+  string(7) "\Line 3"
+}
+
+file() with FILE_SKIP_EMPTY_LINES:
+vec(5) {
+  string(7) "Line 1
+"
+  string(1) "
+"
+  string(2) " 
+"
+  string(3) "  
+"
+  string(7) "\Line 3"
+}
+
+file() with FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES:
+vec(4) {
+  string(6) "Line 1"
+  string(1) " "
+  string(2) "  "
+  string(7) "\Line 3"
+}

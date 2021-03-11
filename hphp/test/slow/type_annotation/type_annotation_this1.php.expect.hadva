@@ -1,0 +1,126 @@
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(4) "Base"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(5) "Child"
+  ["exact"]=>
+  bool(true)
+}
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(4) "Base"
+    ["exact"]=>
+    bool(true)
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(4) "Base"
+      ["exact"]=>
+      bool(true)
+    }
+  }
+}
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(5) "Child"
+    ["exact"]=>
+    bool(true)
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(5) "Child"
+      ["exact"]=>
+      bool(true)
+    }
+  }
+}
+dict(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(4) "Base"
+    ["exact"]=>
+    bool(true)
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(4) "Base"
+      ["exact"]=>
+      bool(true)
+    }
+  }
+}
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["foo"]=>
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(5) "Child"
+      ["exact"]=>
+      bool(true)
+    }
+    ["bar"]=>
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(6) "HH\Map"
+      ["generic_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        dict(3) {
+          ["kind"]=>
+          int(15)
+          ["classname"]=>
+          string(5) "Child"
+          ["exact"]=>
+          bool(true)
+        }
+      }
+    }
+  }
+}

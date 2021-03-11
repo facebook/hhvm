@@ -1,0 +1,42 @@
+vec(3) {
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace_trait_helper.inc"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(15) "print_backtrace"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace_trait.php"
+    ["line"]=>
+    int(6)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "C"
+    ["object"]=>
+    object(C) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(1) {
+      object(stdClass) (0) {
+      }
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(32) "entrypoint_debug_backtrace_trait"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+
+Catchable fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %s/test/quick/debug_backtrace_trait.php on line 7

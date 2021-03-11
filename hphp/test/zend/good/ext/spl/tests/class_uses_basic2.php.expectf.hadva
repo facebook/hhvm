@@ -1,0 +1,26 @@
+*** Testing class_uses() : basic ***
+dict(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+dict(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+dict(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+dict(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+dict(0) {
+}
+dict(0) {
+}
+===DONE===

@@ -1,0 +1,58 @@
+object(__SystemLib\DynMethCallerHelper) (3) {
+  ["class":"__SystemLib\DynMethCallerHelper":private]=>
+  string(3) "Foo"
+  ["method":"__SystemLib\DynMethCallerHelper":private]=>
+  string(9) "inst_meth"
+  ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
+  object(Closure$main;%d) (1) {
+    ["parameter"]=>
+    dict(3) {
+      ["$o"]=>
+      string(10) "<required>"
+      ["$m"]=>
+      string(10) "<required>"
+      ["$args"]=>
+      string(10) "<required>"
+    }
+  }
+}
+object(__SystemLib\DynMethCallerHelper) (3) {
+  ["class":"__SystemLib\DynMethCallerHelper":private]=>
+  string(3) "Foo"
+  ["method":"__SystemLib\DynMethCallerHelper":private]=>
+  string(11) "static_meth"
+  ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
+  object(Closure$main#2;%d) (1) {
+    ["parameter"]=>
+    dict(3) {
+      ["$o"]=>
+      string(10) "<required>"
+      ["$m"]=>
+      string(10) "<required>"
+      ["$args"]=>
+      string(10) "<required>"
+    }
+  }
+}
+object(__SystemLib\DynMethCallerHelper) (3) {
+  ["class":"__SystemLib\DynMethCallerHelper":private]=>
+  string(3) "Foo"
+  ["method":"__SystemLib\DynMethCallerHelper":private]=>
+  string(10) "not_a_meth"
+  ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
+  object(Closure$main#3;%d) (1) {
+    ["parameter"]=>
+    dict(3) {
+      ["$o"]=>
+      string(10) "<required>"
+      ["$m"]=>
+      string(10) "<required>"
+      ["$args"]=>
+      string(10) "<required>"
+    }
+  }
+}
+inst_meth
+string(61) "Static method Foo::static_meth() cannot be called on instance"
+
+Fatal error: Call to undefined method Foo::not_a_meth() in %s/dyn-meth-caller.php on line 12

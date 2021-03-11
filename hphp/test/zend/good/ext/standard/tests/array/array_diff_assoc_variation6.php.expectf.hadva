@@ -1,0 +1,134 @@
+*** Testing array_diff_assoc() : usage variations ***
+
+-- Iteration 1 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  ["two"]=>
+  float(2)
+}
+dict(3) {
+  [0]=>
+  string(16) "2.00000000000001"
+  [2]=>
+  string(4) "zero"
+  [3]=>
+  string(1) "a"
+}
+
+-- Iteration 2 --
+dict(1) {
+  ["two"]=>
+  float(2)
+}
+dict(2) {
+  [2]=>
+  string(16) "2.00000000000001"
+  [3]=>
+  string(1) "a"
+}
+
+-- Iteration 3 --
+dict(3) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  int(1)
+  ["two"]=>
+  float(2)
+}
+dict(4) {
+  ["2"]=>
+  string(16) "2.00000000000001"
+  ["1"]=>
+  string(1) "1"
+  ["0"]=>
+  string(4) "zero"
+  ["3"]=>
+  string(1) "a"
+}
+
+-- Iteration 4 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  ["two"]=>
+  float(2)
+}
+dict(2) {
+  [0]=>
+  int(2)
+  [2]=>
+  int(0)
+}
+
+-- Iteration 5 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  ["two"]=>
+  float(2)
+}
+dict(2) {
+  [2]=>
+  int(2)
+  [0]=>
+  int(0)
+}
+
+-- Iteration 6 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  int(1)
+}
+dict(2) {
+  ["1"]=>
+  int(1)
+  ["0"]=>
+  int(0)
+}
+
+-- Iteration 7 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  ["two"]=>
+  float(2)
+}
+dict(2) {
+  [0]=>
+  float(2)
+  [2]=>
+  float(1.0E-11)
+}
+
+-- Iteration 8 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  ["two"]=>
+  float(2)
+}
+dict(2) {
+  [2]=>
+  float(2)
+  [0]=>
+  float(1.0E-11)
+}
+
+-- Iteration 9 --
+dict(2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  int(1)
+}
+dict(2) {
+  ["1"]=>
+  float(1)
+  ["0"]=>
+  float(1.0E-11)
+}
+Done

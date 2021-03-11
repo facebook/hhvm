@@ -1,0 +1,7 @@
+Warning: class_uses(): Class A does not exist in %s/test/slow/eval_order/1532.php on line 16
+bool(false)
+dict(1) {
+  ["T"]=>
+  string(1) "T"
+}
+bool(true)

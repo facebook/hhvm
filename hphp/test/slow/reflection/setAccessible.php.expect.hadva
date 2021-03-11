@@ -1,0 +1,32 @@
+dict(6) {
+  ["b"]=>
+  vec(2) {
+    string(1) "b"
+    string(6) "newval"
+  }
+  ["c"]=>
+  vec(2) {
+    string(1) "c"
+    string(6) "newval"
+  }
+  ["d"]=>
+  vec(2) {
+    string(1) "d"
+    string(6) "newval"
+  }
+  ["f"]=>
+  vec(2) {
+    string(1) "f"
+    string(6) "newval"
+  }
+  ["g"]=>
+  vec(2) {
+    string(1) "g"
+    string(6) "newval"
+  }
+  ["h"]=>
+  vec(2) {
+    string(1) "h"
+    string(6) "newval"
+  }
+}

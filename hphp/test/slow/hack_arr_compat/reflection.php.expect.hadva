@@ -1,0 +1,34 @@
+vec(4) {
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(5) "prop1"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(5) "prop2"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(5) "prop3"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(5) "prop4"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

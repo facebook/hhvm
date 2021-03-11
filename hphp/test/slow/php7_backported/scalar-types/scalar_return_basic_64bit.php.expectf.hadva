@@ -1,0 +1,149 @@
+Testing 'int' typehint:
+*** Trying int(1)
+int(1)
+*** Trying string(1) "1"
+*** Caught Return value of {closure}() must be of the type integer, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying float(1)
+*** Caught Return value of {closure}() must be of the type integer, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying float(1.5)
+*** Caught Return value of {closure}() must be of the type integer, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying string(2) "1a"
+*** Caught Return value of {closure}() must be of the type integer, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying string(1) "a"
+*** Caught Return value of {closure}() must be of the type integer, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying string(0) ""
+*** Caught Return value of {closure}() must be of the type integer, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying int(9223372036854775807)
+int(9223372036854775807)
+*** Trying float(NAN)
+*** Caught Return value of {closure}() must be of the type integer, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying bool(true)
+*** Caught Return value of {closure}() must be of the type integer, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying bool(false)
+*** Caught Return value of {closure}() must be of the type integer, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying NULL
+*** Caught Return value of {closure}() must be of the type integer, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying vec(0) {
+}
+*** Caught Return value of {closure}() must be of the type integer, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying object(stdClass) (0) {
+}
+*** Caught Return value of {closure}() must be of the type integer, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying object(Stringable) (0) {
+}
+*** Caught Return value of {closure}() must be of the type integer, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+*** Trying resource(4) of type (stream)
+*** Caught Return value of {closure}() must be of the type integer, resource given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 6
+
+Testing 'float' typehint:
+*** Trying int(1)
+*** Caught Return value of {closure}() must be of the type float, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying string(1) "1"
+*** Caught Return value of {closure}() must be of the type float, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying float(1)
+float(1)
+*** Trying float(1.5)
+float(1.5)
+*** Trying string(2) "1a"
+*** Caught Return value of {closure}() must be of the type float, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying string(1) "a"
+*** Caught Return value of {closure}() must be of the type float, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying string(0) ""
+*** Caught Return value of {closure}() must be of the type float, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying int(9223372036854775807)
+*** Caught Return value of {closure}() must be of the type float, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying float(NAN)
+float(NAN)
+*** Trying bool(true)
+*** Caught Return value of {closure}() must be of the type float, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying bool(false)
+*** Caught Return value of {closure}() must be of the type float, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying NULL
+*** Caught Return value of {closure}() must be of the type float, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying vec(0) {
+}
+*** Caught Return value of {closure}() must be of the type float, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying object(stdClass) (0) {
+}
+*** Caught Return value of {closure}() must be of the type float, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying object(Stringable) (0) {
+}
+*** Caught Return value of {closure}() must be of the type float, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+*** Trying resource(4) of type (stream)
+*** Caught Return value of {closure}() must be of the type float, resource given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 7
+
+Testing 'string' typehint:
+*** Trying int(1)
+*** Caught Return value of {closure}() must be of the type string, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying string(1) "1"
+string(1) "1"
+*** Trying float(1)
+*** Caught Return value of {closure}() must be of the type string, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying float(1.5)
+*** Caught Return value of {closure}() must be of the type string, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying string(2) "1a"
+string(2) "1a"
+*** Trying string(1) "a"
+string(1) "a"
+*** Trying string(0) ""
+string(0) ""
+*** Trying int(9223372036854775807)
+*** Caught Return value of {closure}() must be of the type string, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying float(NAN)
+*** Caught Return value of {closure}() must be of the type string, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying bool(true)
+*** Caught Return value of {closure}() must be of the type string, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying bool(false)
+*** Caught Return value of {closure}() must be of the type string, boolean given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying NULL
+*** Caught Return value of {closure}() must be of the type string, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying vec(0) {
+}
+*** Caught Return value of {closure}() must be of the type string, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying object(stdClass) (0) {
+}
+*** Caught Return value of {closure}() must be of the type string, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying object(Stringable) (0) {
+}
+*** Caught Return value of {closure}() must be of the type string, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+*** Trying resource(4) of type (stream)
+*** Caught Return value of {closure}() must be of the type string, resource given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 8
+
+Testing 'bool' typehint:
+*** Trying int(1)
+*** Caught Return value of {closure}() must be of the type boolean, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying string(1) "1"
+*** Caught Return value of {closure}() must be of the type boolean, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying float(1)
+*** Caught Return value of {closure}() must be of the type boolean, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying float(1.5)
+*** Caught Return value of {closure}() must be of the type boolean, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying string(2) "1a"
+*** Caught Return value of {closure}() must be of the type boolean, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying string(1) "a"
+*** Caught Return value of {closure}() must be of the type boolean, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying string(0) ""
+*** Caught Return value of {closure}() must be of the type boolean, string given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying int(9223372036854775807)
+*** Caught Return value of {closure}() must be of the type boolean, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying float(NAN)
+*** Caught Return value of {closure}() must be of the type boolean, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying bool(true)
+bool(true)
+*** Trying bool(false)
+bool(false)
+*** Trying NULL
+*** Caught Return value of {closure}() must be of the type boolean, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying vec(0) {
+}
+*** Caught Return value of {closure}() must be of the type boolean, HH\vec given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying object(stdClass) (0) {
+}
+*** Caught Return value of {closure}() must be of the type boolean, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying object(Stringable) (0) {
+}
+*** Caught Return value of {closure}() must be of the type boolean, object given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+*** Trying resource(4) of type (stream)
+*** Caught Return value of {closure}() must be of the type boolean, resource given, called in %s/test/slow/php7_backported/scalar-types/scalar_return_basic_64bit.php on line 9
+
+Done

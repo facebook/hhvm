@@ -1,0 +1,6 @@
+class(main)
+vec(3) {
+  int(1)
+  class(main)
+  string(3) "foo"
+}

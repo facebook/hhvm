@@ -1,0 +1,42 @@
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+vec(1) {
+  string(3) "lol"
+}
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+vec(1) {
+  string(3) "lol"
+}
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+keyset(1) {
+  string(3) "lol"
+}
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+vec(1) {
+  string(3) "lol"
+}
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+vec(1) {
+  string(3) "lol"
+}
+dict(1) {
+  [42]=>
+  string(3) "lol"
+}
+keyset(1) {
+  string(3) "lol"
+}

@@ -1,0 +1,82 @@
+*** Testing array_keys() on various arrays ***
+-- Iteration 0 --
+vec(0) {
+}
+
+-- Iteration 1 --
+vec(1) {
+  int(0)
+}
+
+-- Iteration 2 --
+vec(1) {
+  int(0)
+}
+
+-- Iteration 3 --
+vec(1) {
+  string(5) "Hello"
+}
+
+-- Iteration 4 --
+vec(1) {
+  string(0) ""
+}
+
+-- Iteration 5 --
+vec(4) {
+  int(0)
+  int(1)
+  int(2)
+  string(1) "d"
+}
+
+-- Iteration 6 --
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+
+-- Iteration 7 --
+vec(4) {
+  int(0)
+  int(1)
+  int(2)
+  int(3)
+}
+
+-- Iteration 8 --
+vec(5) {
+  int(0)
+  int(1)
+  string(1) "a"
+  int(3)
+  string(1) "5"
+}
+
+-- Iteration 9 --
+vec(5) {
+  int(1)
+  int(0)
+  string(0) ""
+  int(2)
+  int(3)
+}
+
+-- Iteration 10 --
+vec(3) {
+  string(1) "a"
+  string(2) "ab"
+  string(2) "cd"
+}
+
+-- Iteration 11 --
+vec(4) {
+  int(0)
+  int(1)
+  int(2)
+  string(0) ""
+}
+Done

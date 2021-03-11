@@ -1,0 +1,29 @@
+string(4) "Base"
+dict(2) {
+  ["aaa"]=>
+  int(1)
+  ["bbb"]=>
+  int(2)
+}
+string(4) "Base"
+dict(3) {
+  ["aaa"]=>
+  int(1)
+  ["bbb"]=>
+  int(2)
+  ["ccc"]=>
+  int(3)
+}
+string(5) "Child"
+dict(5) {
+  ["ddd"]=>
+  int(4)
+  ["eee"]=>
+  int(5)
+  ["aaa"]=>
+  int(1)
+  ["bbb"]=>
+  int(2)
+  ["ccc"]=>
+  int(3)
+}

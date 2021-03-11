@@ -1,0 +1,48 @@
+dict(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+}
+dict(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+}
+dict(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+}
+dict(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+}
+dict(2) {
+  [0]=>
+  string(2) "zx"
+  [1]=>
+  string(2) "zy"
+}
+dict(2) {
+  [0]=>
+  string(1) "z"
+  [1]=>
+  string(1) "z"
+}
+dict(2) {
+  [0]=>
+  string(1) "z"
+  [1]=>
+  string(1) "z"
+}
+dict(2) {
+  [0]=>
+  string(2) "zx"
+  [1]=>
+  string(2) "zy"
+}

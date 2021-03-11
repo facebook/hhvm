@@ -1,0 +1,36 @@
+*** Testing array_diff_assoc() : usage variations ***
+
+-- Iteration 1 --
+dict(4) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+  [12345]=>
+  string(8) "positive"
+  [-2345]=>
+  string(8) "negative"
+}
+
+-- Iteration 2 --
+dict(1) {
+  [""]=>
+  string(6) "emptys"
+}
+
+-- Iteration 3 --
+dict(2) {
+  ["string"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
+}
+
+-- Iteration 4 --
+dict(2) {
+  ["binary1"]=>
+  string(8) "binary 1"
+  ["binary2"]=>
+  string(8) "binary 2"
+}
+Done

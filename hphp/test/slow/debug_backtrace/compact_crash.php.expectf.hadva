@@ -1,0 +1,27 @@
+string(5) "hello"
+vec(3) {
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(7) "profile"
+  }
+  dict(5) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "X"
+    ["type"]=>
+    string(2) "::"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+}

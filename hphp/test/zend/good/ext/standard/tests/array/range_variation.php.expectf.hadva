@@ -1,0 +1,402 @@
+*** Testing range() with various low and high values ***
+-- creating an array with low = 'ABCD' and high = 'ABCD' --
+vec(1) {
+  string(1) "A"
+}
+
+-- creating an array with low = 'ABCD' and high = '-10.5555' --
+vec(11) {
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = 'ABCD' and high = '1' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = 'ABCD' and high = 'Array' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '-10.5555' and high = 'ABCD' --
+vec(11) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '-10.5555' --
+vec(1) {
+  float(-10.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '1' --
+vec(12) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+  float(0.4445)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+vec(11) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+vec(11) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = '' --
+vec(11) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+}
+
+-- creating an array with low = '-10.5555' and high = 'Array' --
+vec(12) {
+  float(-10.5555)
+  float(-9.5555)
+  float(-8.5555)
+  float(-7.5555)
+  float(-6.5555)
+  float(-5.5555)
+  float(-4.5555)
+  float(-3.5555)
+  float(-2.5555)
+  float(-1.5555)
+  float(-0.5555)
+  float(0.4445)
+}
+
+-- creating an array with low = '1' and high = 'ABCD' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '-10.5555' --
+vec(12) {
+  float(1)
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = '1' and high = '1' --
+vec(1) {
+  int(1)
+}
+
+-- creating an array with low = '1' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = '1' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = '1' and high = 'Array' --
+vec(1) {
+  int(1)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+vec(11) {
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+vec(11) {
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+vec(11) {
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+vec(1) {
+  int(0)
+}
+
+-- creating an array with low = '' and high = 'Array' --
+vec(2) {
+  int(0)
+  int(1)
+}
+
+-- creating an array with low = 'Array' and high = 'ABCD' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '-10.5555' --
+vec(12) {
+  float(1)
+  float(0)
+  float(-1)
+  float(-2)
+  float(-3)
+  float(-4)
+  float(-5)
+  float(-6)
+  float(-7)
+  float(-8)
+  float(-9)
+  float(-10)
+}
+
+-- creating an array with low = 'Array' and high = '1' --
+vec(1) {
+  int(1)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = '' --
+vec(2) {
+  int(1)
+  int(0)
+}
+
+-- creating an array with low = 'Array' and high = 'Array' --
+vec(1) {
+  int(1)
+}
+
+*** Possible variatins with steps ***
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Done

@@ -1,0 +1,27 @@
+vec(1) {
+  reifiedFunction{
+    function(foo)
+    ["reified_generics"]=>
+    vec(1) {
+      dict(1) {
+        ["kind"]=>
+        int(1)
+      }
+    }
+  }
+}
+Vec
+(
+    [0] => reifiedFunction{
+        function(foo)
+        ["reified_generics"] => Vec
+            (
+                [0] => Dict
+                    (
+                        [kind] => 1
+                    )
+
+            )
+    }
+
+)

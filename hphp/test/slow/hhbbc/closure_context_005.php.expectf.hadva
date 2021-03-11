@@ -1,0 +1,25 @@
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(Closure%s) (1) {
+  ["this"]=>
+  object(Foo) (1) {
+    ["prop":"Foo":private]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+}
+NULL
+object(Closure%s) (1) {
+  ["this"]=>
+  object(Foo) (1) {
+    ["prop":"Foo":private]=>
+    NULL
+  }
+}
+NULL

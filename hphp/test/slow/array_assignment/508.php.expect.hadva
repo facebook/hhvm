@@ -1,0 +1,12 @@
+string(3) "sub"
+Dict
+(
+    [1] => main
+    [2] => sub
+)
+string(4) "main"
+Dict
+(
+    [1] => main
+    [2] => sub
+)

@@ -1,0 +1,40 @@
+*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***
+dict(6) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(-1)
+  [3]=>
+  int(10)
+  [4]=>
+  int(100)
+  [5]=>
+  int(1000)
+}
+dict(8) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(-1)
+  [3]=>
+  int(10)
+  [4]=>
+  int(100)
+  [5]=>
+  int(1000)
+  [6]=>
+  string(5) "Hello"
+  [7]=>
+  NULL
+}
+
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter_variation9.php on line 22
+NULL
+
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/zend/good/ext/standard/tests/array/array_filter_variation9.php on line 25
+NULL
+Done

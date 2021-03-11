@@ -1,0 +1,28 @@
+string(83) "dynamic_meth_caller(): Foo::inst_meth is not a dynamically callable instance method"
+string(85) "dynamic_meth_caller(): Foo::static_meth is not a dynamically callable instance method"
+string(84) "dynamic_meth_caller(): Foo::not_a_meth is not a dynamically callable instance method"
+object(__SystemLib\DynMethCallerHelper) (3) {
+  ["class":"__SystemLib\DynMethCallerHelper":private]=>
+  string(3) "Foo"
+  ["method":"__SystemLib\DynMethCallerHelper":private]=>
+  string(8) "inst_dyn"
+  ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
+  object(Closure$main;%d) (1) {
+    ["parameter"]=>
+    dict(3) {
+      ["$o"]=>
+      string(10) "<required>"
+      ["$m"]=>
+      string(10) "<required>"
+      ["$args"]=>
+      string(10) "<required>"
+    }
+  }
+}
+string(21) "Undefined variable: a"
+string(21) "Undefined variable: b"
+string(21) "Undefined variable: c"
+inst_dyn
+string(21) "Undefined variable: a"
+string(21) "Undefined variable: b"
+string(21) "Undefined variable: c"

@@ -1,0 +1,19 @@
+dict(3) {
+  ["color"]=>
+  dict(1) {
+    ["favorite"]=>
+    string(3) "red"
+  }
+  [0]=>
+  int(5)
+  [1]=>
+  dict(2) {
+    ["color"]=>
+    dict(1) {
+      ["favorite"]=>
+      string(5) "green"
+    }
+    [0]=>
+    string(4) "blue"
+  }
+}

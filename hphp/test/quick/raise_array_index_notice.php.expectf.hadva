@@ -1,0 +1,10 @@
+0
+1
+2
+3
+
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds dict access: invalid index 4' in %s/test/quick/raise_array_index_notice.php:9
+Stack trace:
+#0 %s/test/quick/raise_array_index_notice.php(14): rain()
+#1 (): main()
+#2 {main}

@@ -1,0 +1,78 @@
+vec(6) {
+  int(1)
+  int(54)
+  int(3)
+  int(23)
+  int(5)
+  int(2)
+}
+vec(6) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+}
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(5)
+  [4]=>
+  int(23)
+  [5]=>
+  int(54)
+}
+dict(6) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "f"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "e"
+  [4]=>
+  string(1) "d"
+  [5]=>
+  string(1) "b"
+}
+dict(6) {
+  [0]=>
+  int(54)
+  [1]=>
+  int(23)
+  [2]=>
+  int(5)
+  [3]=>
+  int(3)
+  [4]=>
+  int(2)
+  [5]=>
+  int(1)
+}
+dict(6) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "d"
+  [2]=>
+  string(1) "e"
+  [3]=>
+  string(1) "c"
+  [4]=>
+  string(1) "f"
+  [5]=>
+  string(1) "a"
+}
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'array_multisort3() expects parameter 1 to be inout, but the call was not annotated with 'inout'' in %s/test/slow/lang/ref_args.php:19
+Stack trace:
+#0 %s/test/slow/lang/ref_args.php(31): main5()
+#1 (): main_ref_args()
+#2 {main}

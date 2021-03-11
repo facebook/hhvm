@@ -1,0 +1,23 @@
+Constants from class C: 
+dict(1) {
+  ["a"]=>
+  string(12) "hello from C"
+}
+Constants from class D: 
+dict(1) {
+  ["a"]=>
+  string(12) "hello from C"
+}
+Constants from class E: 
+dict(1) {
+  ["a"]=>
+  string(12) "hello from C"
+}
+Constants from class F: 
+dict(1) {
+  ["a"]=>
+  string(12) "hello from F"
+}
+Constants from class X: 
+dict(0) {
+}

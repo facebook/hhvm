@@ -1,0 +1,70 @@
+string(7) "xhp_bar"
+dict(2) {
+  ["name"]=>
+  string(4) "test"
+  ["age"]=>
+  int(21)
+}
+string(7) "xhp_foo"
+dict(1) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+}
+string(7) "xhp_foo"
+dict(2) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+  ["name"]=>
+  string(4) "foo2"
+}
+string(7) "xhp_foo"
+dict(3) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+  ["name"]=>
+  string(4) "foo2"
+  ["...$1"]=>
+  object(xhp_bar) (0) {
+  }
+}
+string(7) "xhp_bar"
+dict(2) {
+  ["name"]=>
+  string(4) "test"
+  ["age"]=>
+  int(21)
+}
+string(7) "xhp_foo"
+dict(1) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+}
+string(7) "xhp_bar"
+dict(3) {
+  ["name"]=>
+  string(4) "test"
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+  ["age"]=>
+  int(21)
+}
+string(7) "xhp_foo"
+dict(1) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+}
+string(7) "xhp_bar"
+dict(0) {
+}
+string(7) "xhp_foo"
+dict(1) {
+  ["...$0"]=>
+  object(xhp_bar) (0) {
+  }
+}

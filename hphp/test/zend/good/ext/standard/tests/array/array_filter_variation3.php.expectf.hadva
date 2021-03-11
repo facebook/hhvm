@@ -1,0 +1,164 @@
+*** Testing array_filter() : usage variations - different types of array for 'input' argument***
+-- Iteration 1 --
+dict(5) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(-1)
+  [4]=>
+  int(28)
+  [5]=>
+  int(74)
+}
+dict(6) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(-1)
+  [4]=>
+  int(28)
+  [5]=>
+  int(74)
+}
+dict(0) {
+}
+-- Iteration 2 --
+dict(3) {
+  [1]=>
+  float(1.2)
+  [2]=>
+  float(1200)
+  [3]=>
+  float(0.0012)
+}
+dict(4) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(1.2)
+  [2]=>
+  float(1200)
+  [3]=>
+  float(0.0012)
+}
+dict(0) {
+}
+-- Iteration 3 --
+dict(3) {
+  [0]=>
+  string(6) "value1"
+  [1]=>
+  string(6) "value2"
+  [3]=>
+  string(1) " "
+}
+dict(5) {
+  [0]=>
+  string(6) "value1"
+  [1]=>
+  string(6) "value2"
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(1) " "
+  [4]=>
+  string(0) ""
+}
+dict(0) {
+}
+-- Iteration 4 --
+dict(2) {
+  [0]=>
+  bool(true)
+  [2]=>
+  bool(true)
+}
+dict(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(false)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+}
+dict(0) {
+}
+-- Iteration 5 --
+dict(0) {
+}
+dict(2) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+}
+dict(0) {
+}
+-- Iteration 6 --
+dict(2) {
+  [1]=>
+  string(3) "one"
+  [-2]=>
+  string(5) "value"
+}
+dict(3) {
+  [1]=>
+  string(3) "one"
+  ["zero"]=>
+  int(0)
+  [-2]=>
+  string(5) "value"
+}
+dict(0) {
+}
+-- Iteration 7 --
+dict(4) {
+  ["one"]=>
+  int(1)
+  [""]=>
+  string(5) "empty"
+  [5]=>
+  string(5) "float"
+  [1]=>
+  int(1)
+}
+dict(4) {
+  ["one"]=>
+  int(1)
+  [""]=>
+  string(5) "empty"
+  [5]=>
+  string(5) "float"
+  [1]=>
+  int(1)
+}
+dict(0) {
+}
+-- Iteration 8 --
+dict(3) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  int(2)
+  ["key"]=>
+  string(5) "value"
+}
+dict(3) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  int(2)
+  ["key"]=>
+  string(5) "value"
+}
+dict(0) {
+}
+Done

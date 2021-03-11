@@ -1,0 +1,182 @@
+HH\Asio\vf() => object(HH\Vector) (5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(false)
+  [2]=>
+  int(1)
+  [3]=>
+  float(2)
+  [4]=>
+  string(11) "Hello World"
+}
+HH\Asio\vm() => object(HH\Vector) (7) {
+  [0]=>
+  vec(1) {
+    NULL
+  }
+  [1]=>
+  vec(1) {
+    bool(true)
+  }
+  [2]=>
+  vec(1) {
+    bool(false)
+  }
+  [3]=>
+  vec(1) {
+    int(1)
+  }
+  [4]=>
+  vec(1) {
+    float(2)
+  }
+  [5]=>
+  vec(1) {
+    string(11) "Hello World"
+  }
+  [6]=>
+  vec(1) {
+    vec(1) {
+      float(3.14)
+    }
+  }
+}
+HH\Asio\vfk() => object(HH\Vector) (3) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(1)
+  [2]=>
+  string(11) "Hello World"
+}
+HH\Asio\vmk() => object(HH\Vector) (7) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    NULL
+  }
+  [1]=>
+  dict(1) {
+    [1]=>
+    bool(true)
+  }
+  [2]=>
+  dict(1) {
+    [2]=>
+    bool(false)
+  }
+  [3]=>
+  dict(1) {
+    [3]=>
+    int(1)
+  }
+  [4]=>
+  dict(1) {
+    [4]=>
+    float(2)
+  }
+  [5]=>
+  dict(1) {
+    [5]=>
+    string(11) "Hello World"
+  }
+  [6]=>
+  dict(1) {
+    [6]=>
+    vec(1) {
+      float(3.14)
+    }
+  }
+}
+HH\Asio\mf() => object(HH\Map) (5) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+}
+HH\Asio\mm() => object(HH\Map) (7) {
+  [0]=>
+  vec(1) {
+    NULL
+  }
+  [1]=>
+  vec(1) {
+    bool(true)
+  }
+  [2]=>
+  vec(1) {
+    bool(false)
+  }
+  [3]=>
+  vec(1) {
+    int(1)
+  }
+  [4]=>
+  vec(1) {
+    float(2)
+  }
+  [5]=>
+  vec(1) {
+    string(11) "Hello World"
+  }
+  [6]=>
+  vec(1) {
+    vec(1) {
+      float(3.14)
+    }
+  }
+}
+HH\Asio\mfk() => object(HH\Map) (3) {
+  [1]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [5]=>
+  string(11) "Hello World"
+}
+HH\Asio\mmk() => object(HH\Map) (7) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    NULL
+  }
+  [1]=>
+  dict(1) {
+    [1]=>
+    bool(true)
+  }
+  [2]=>
+  dict(1) {
+    [2]=>
+    bool(false)
+  }
+  [3]=>
+  dict(1) {
+    [3]=>
+    int(1)
+  }
+  [4]=>
+  dict(1) {
+    [4]=>
+    float(2)
+  }
+  [5]=>
+  dict(1) {
+    [5]=>
+    string(11) "Hello World"
+  }
+  [6]=>
+  dict(1) {
+    [6]=>
+    vec(1) {
+      float(3.14)
+    }
+  }
+}

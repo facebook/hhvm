@@ -1,0 +1,22 @@
+Warning: Cannot access property on non-object in %s/test/slow/hhbbc/array_019.php on line 8
+
+Notice: Cannot access property on non-object in %s/test/slow/hhbbc/array_019.php on line 9
+NULL
+dict(1) {
+  ["x"]=>
+  dict(1) {
+    ["y"]=>
+    int(2)
+  }
+}
+int(42)
+dict(1) {
+  ["x"]=>
+  dict(1) {
+    ["y"]=>
+    object(stdClass) (1) {
+      ["x"]=>
+      int(42)
+    }
+  }
+}

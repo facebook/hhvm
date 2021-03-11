@@ -1,0 +1,160 @@
+
+Warning: Invalid argument: option: -1337 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: seconds: cannot be negative in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: nanoseconds: has to be 0 to 999999999 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: timestamp: Sleep until to time is less than current time in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: compression level (-2) must be within -1..9 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: compression level (-2) must be within -1..9 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: formdata: (need Array or Object) in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: parse_url(): Invalid URL component identifier 100 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: type: INVALID_TYPE in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: class not found: INVALID_CLASS in %s/test/slow/invalid_argument/1381.php on line %d
+NULL
+
+Warning: Invalid argument: simplexml_load_string() expects parameter 2 to be a class name derived from SimpleXMLElement, 'stdClass' given in %s/test/slow/invalid_argument/1381.php on line %d
+NULL
+
+Warning: stream_get_contents() expects parameter 1 to be resource, string given in %s/test/slow/invalid_argument/1381.php on line %d
+
+Warning: Invalid argument: length (negative): -1 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+int(69)
+int(69)
+
+Warning: Invalid argument: arrays: (inconsistent sizes) in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+string(37) "eat pizza, beer, and fiber every day."
+string(25) "Undefined variable: count"
+
+Warning: Invalid argument: locale: not string) in %s/test/slow/invalid_argument/1381.php on line %d
+string(5) "de_DE"
+
+Warning: Invalid argument: locale name is too long: a%w in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Type %r\xf4%r: unknown format code in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: 4 arguments unused in %s/test/slow/invalid_argument/1381.php on line %d
+string(5) "%r\x00\x00\x00\x00\x00%r"
+
+Warning: Invalid argument: Type h: illegal hex digit - in %s/test/slow/invalid_argument/1381.php on line %d
+string(1) "%r\x00%r"
+string(1) "%r\x01%r"
+
+Warning: Invalid argument: Invalid format type %r\xf4%r in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+NULL
+
+Warning: Invalid argument: Bad scan conversion character "z" in %s/test/slow/invalid_argument/1381.php on line %d
+NULL
+NULL
+NULL
+
+Warning: Invalid argument: argnum: must be greater than zero in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: argnum: must be greater than zero in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: argnum: must be greater than zero in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: argnum: must be greater than zero in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: charlist: Invalid '..'-range, missing left of '..' in %s/test/slow/invalid_argument/1381.php on line %d
+
+Warning: Invalid argument: charlist: Invalid '..'-range, missing right of '..' in %s/test/slow/invalid_argument/1381.php on line %d
+dict(1) {
+  [0]=>
+  string(3) "abc"
+}
+
+Warning: Invalid argument: charlist: '..'-range needs to be incrementing in %s/test/slow/invalid_argument/1381.php on line %d
+dict(1) {
+  [0]=>
+  string(3) "abc"
+}
+
+Warning: Invalid argument: charlist: Invalid '..'-range in %s/test/slow/invalid_argument/1381.php on line %d
+dict(1) {
+  [0]=>
+  string(3) "abc"
+}
+
+Warning: Invalid argument: Invalid tobase: 37 in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Invalid argument: Unknown source charset: y in %s/test/slow/invalid_argument/1381.php on line %d
+
+Warning: Invalid argument: Unknown destination charset: z in %s/test/slow/invalid_argument/1381.php on line %d
+string(3) "abc"
+bool(false)
+
+Warning: Invalid argument: format: Only a single %ci or %cn token can be used in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+string(37) "Invalid argument: pad_string: (empty)"
+string(31) "Invalid argument: pad_type: 100"
+string(0) ""
+string(0) ""
+
+Warning: Break string cannot be empty in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)
+
+Warning: Break string cannot be empty in %s/test/slow/invalid_argument/1381.php on line %d
+bool(false)

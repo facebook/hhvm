@@ -1,0 +1,96 @@
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/gmp/tests/007.php on line 3
+
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/gmp/tests/007.php on line 4
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(1) "0"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(1) "0"
+  }
+}
+
+Warning: gmp_div_qr(): Zero operand not allowed in %s/test/zend/good/ext/gmp/tests/007.php on line 7
+bool(false)
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(1) "0"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(5) "12653"
+  }
+}
+
+Warning: gmp_div_qr(): Invalid rounding mode in %s/test/zend/good/ext/gmp/tests/007.php on line 9
+bool(false)
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9131"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(2) "10"
+  }
+}
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9132"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "-113"
+  }
+}
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9131"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(2) "10"
+  }
+}
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9131"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(2) "10"
+  }
+}
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9132"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "-113"
+  }
+}
+vec(2) {
+  object(GMP) (1) {
+    ["num"]=>
+    string(4) "9131"
+  }
+  object(GMP) (1) {
+    ["num"]=>
+    string(2) "10"
+  }
+}
+
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/007.php on line 19
+bool(false)
+
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/test/zend/good/ext/gmp/tests/007.php on line 20
+bool(false)
+Done

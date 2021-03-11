@@ -1,0 +1,12 @@
+dict(2) {
+  ["old"]=>
+  dict(1) {
+    ["key"]=>
+    string(18) "should_be_modified"
+  }
+  ["new"]=>
+  dict(1) {
+    ["key"]=>
+    string(18) "should_be_modified"
+  }
+}

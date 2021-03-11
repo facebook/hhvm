@@ -1,0 +1,26 @@
+*** Testing sort() :usage variations  ***
+
+-- Testing sort() by supplying reference variable array, 'flag' value is defualt --
+bool(true)
+vec(3) {
+  int(33)
+  int(100)
+  int(555)
+}
+
+-- Testing sort() by supplying reference variable array, 'flag' = SORT_REGULAR --
+bool(true)
+vec(3) {
+  int(33)
+  int(100)
+  int(555)
+}
+
+-- Testing sort() by supplying reference variable array, 'flag' = SORT_NUMERIC --
+bool(true)
+vec(3) {
+  int(33)
+  int(100)
+  int(555)
+}
+Done

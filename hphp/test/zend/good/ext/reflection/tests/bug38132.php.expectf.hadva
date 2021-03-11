@@ -1,0 +1,13 @@
+dict(2) {
+  ["bar"]=>
+  string(3) "baz"
+  ["a"]=>
+  string(1) "a"
+}
+vec(2) {
+  string(3) "bar"
+  string(1) "a"
+}
+bool(false)
+bool(false)
+bool(true)

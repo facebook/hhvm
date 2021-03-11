@@ -1,0 +1,98 @@
+values...
+object(HH\ImmVector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toDArray...
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toKeysArray...
+vec(3) {
+  int(0)
+  int(1)
+  int(2)
+}
+
+toValuesArray...
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toSet...
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toImmSet...
+object(HH\ImmSet) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toVector...
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+linearSearch...
+int(1)
+int(-1)
+
+fromItems...
+---- HH\ImmVector ----
+int(1)
+int(2)
+int(3)
+----
+---- HH\ImmVector ----
+int(4)
+int(5)
+int(6)
+----
+
+fromKeysOf...
+---- HH\ImmVector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\ImmVector ----
+int(0)
+int(1)
+int(2)
+----
+---- HH\ImmVector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\ImmVector ----
+string(1) "a"
+string(1) "b"
+----
+---- HH\ImmVector ----
+int(4)
+int(5)
+int(6)
+----

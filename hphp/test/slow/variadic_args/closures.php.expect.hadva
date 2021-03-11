@@ -1,0 +1,28 @@
+basic closure
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+eager async closure
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+blocking async closure
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+CWithClosures::{closure}
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+string(1) "a"
+string(6) "prop-a"
+CWithClosures::variadic
+vec(3) {
+  string(1) "a"
+  string(6) "prop-a"
+  string(1) "a"
+}

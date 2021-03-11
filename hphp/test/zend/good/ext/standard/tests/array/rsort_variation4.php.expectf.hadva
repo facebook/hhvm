@@ -1,0 +1,18 @@
+*** Testing rsort() : variation ***
+
+-- 'flag' value is defualt --
+bool(true)
+vec(3) {
+  int(555)
+  int(100)
+  int(33)
+}
+
+-- 'flag' = SORT_REGULAR --
+bool(true)
+vec(3) {
+  int(555)
+  int(100)
+  int(33)
+}
+Done

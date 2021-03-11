@@ -1,0 +1,5 @@
+int(2)
+string(2) "ok"
+vec(1) {
+  int(1)
+}

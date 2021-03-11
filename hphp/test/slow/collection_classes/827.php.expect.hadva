@@ -1,0 +1,18 @@
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["c"]=>
+  vec(0) {
+  }
+}
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["c"]=>
+  vec(0) {
+  }
+}

@@ -1,0 +1,50 @@
+vec(1) {
+  int(0)
+}
+vec(1) {
+  int(0)
+}
+vec(2) {
+  int(9)
+  int(10)
+}
+vec(2) {
+  int(9)
+  int(10)
+}
+bool(false)
+bool(false)
+bool(false)
+vec(3) {
+  int(9223372036854775807)
+  int(9223372036854775806)
+  int(9223372036854775805)
+}
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+vec(2) {
+  int(9)
+  int(10)
+}
+bool(false)
+bool(false)
+bool(false)
+vec(3) {
+  int(9223372036854775807)
+  int(9223372036854775806)
+  int(9223372036854775805)
+}
+bool(false)
+bool(false)
+vec(1) {
+  float(0)
+}
+vec(1) {
+  float(0)
+}
+vec(1) {
+  int(0)
+}
+bool(false)

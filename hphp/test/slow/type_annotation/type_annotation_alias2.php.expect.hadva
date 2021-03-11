@@ -1,0 +1,55 @@
+string(56) "HH\shape('foo'=>HH\Vector<MyAlias3>, 'bar'=>MyAlias3::U)"
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["foo"]=>
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      vec(1) {
+        dict(3) {
+          ["kind"]=>
+          int(15)
+          ["classname"]=>
+          string(1) "C"
+          ["alias"]=>
+          string(8) "MyAlias3"
+        }
+      }
+    }
+    ["bar"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias1"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias2"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias3"
+}

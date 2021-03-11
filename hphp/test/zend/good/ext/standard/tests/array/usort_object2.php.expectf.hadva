@@ -1,0 +1,66 @@
+*** Testing usort() : object functionality ***
+-- Testing usort() with StaticClass objects --
+bool(true)
+dict(4) {
+  [0]=>
+  object(StaticClass) (0) {
+  }
+  [1]=>
+  object(StaticClass) (0) {
+  }
+  [2]=>
+  object(StaticClass) (0) {
+  }
+  [3]=>
+  object(StaticClass) (0) {
+  }
+}
+-- Testing usort() with EmptyClass objects --
+bool(true)
+dict(4) {
+  [0]=>
+  object(EmptyClass) (0) {
+  }
+  [1]=>
+  object(EmptyClass) (0) {
+  }
+  [2]=>
+  object(EmptyClass) (0) {
+  }
+  [3]=>
+  object(EmptyClass) (0) {
+  }
+}
+-- Testing usort() with ChildClass objects --
+bool(true)
+dict(4) {
+  [0]=>
+  object(ChildClass) (2) {
+    ["child_value"]=>
+    int(15)
+    ["pub_value"]=>
+    NULL
+  }
+  [1]=>
+  object(ChildClass) (2) {
+    ["child_value"]=>
+    int(20)
+    ["pub_value"]=>
+    NULL
+  }
+  [2]=>
+  object(ChildClass) (2) {
+    ["child_value"]=>
+    int(500)
+    ["pub_value"]=>
+    NULL
+  }
+  [3]=>
+  object(ChildClass) (2) {
+    ["child_value"]=>
+    int(700)
+    ["pub_value"]=>
+    NULL
+  }
+}
+===DONE===

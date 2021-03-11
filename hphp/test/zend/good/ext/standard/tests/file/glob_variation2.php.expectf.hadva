@@ -1,0 +1,14 @@
+Testing glob() with relative paths:
+vec(1) {
+  string(11) "./file.text"
+}
+vec(1) {
+  string(22) "../glob_test/file.text"
+}
+vec(1) {
+  string(19) "glob_test/file.text"
+}
+vec(1) {
+  string(9) "glob_test"
+}
+Done

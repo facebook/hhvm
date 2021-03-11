@@ -1,0 +1,12 @@
+string(21) "Undefined variable: x"
+string(21) "Undefined variable: x"
+dict(4) {
+  ["class"]=>
+  string(1) "X"
+  ["file"]=>
+  string(%d) "%s/test/slow/traits/error_file.inc2"
+  ["function"]=>
+  string(1) "h"
+  ["line"]=>
+  int(12)
+}

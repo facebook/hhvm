@@ -1,0 +1,20 @@
+interfaces:hhvm differs slightly from PHP5 slightly here
+Vec
+(
+    [0] => J
+    [1] => X
+    [2] => I
+)
+constants:
+Dict
+(
+    [ABS] => const from Abs
+    [J] => const from J
+    [I] => const from I
+    [X] => const from X
+)
+methods:
+fromAbs
+fromJ
+fromI
+fromX

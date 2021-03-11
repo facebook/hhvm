@@ -1,0 +1,37 @@
+file() on a path containing .. and .
+vec(3) {
+  string(7) "Line 1
+"
+  string(7) "Line 2
+"
+  string(6) "Line 3"
+}
+
+file() on a path containing .. with invalid directories
+vec(3) {
+  string(7) "Line 1
+"
+  string(7) "Line 2
+"
+  string(6) "Line 3"
+}
+
+file() on a linked file
+bool(true)
+vec(3) {
+  string(7) "Line 1
+"
+  string(7) "Line 2
+"
+  string(6) "Line 3"
+}
+bool(true)
+
+file() on a relative path from a different working directory
+vec(3) {
+  string(7) "Line 1
+"
+  string(7) "Line 2
+"
+  string(6) "Line 3"
+}

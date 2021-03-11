@@ -1,0 +1,475 @@
+======= base_elem_warn =============================
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= base_elem ==================================
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= base_define ================================
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= base_unset =================================
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= base_new_elem_set ==========================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= base_str_to_arr ============================
+Exception: "Invalid operation on keyset"
+======= base_prop_get ==============================
+
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 85
+NULL
+======= base_prop_set ==============================
+
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 93
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= dim_elem_warn ==============================
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= dim_elem ===================================
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= dim_define =================================
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= dim_unset ==================================
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= dim_new_elem_set ===========================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= dim_str_to_arr =============================
+Exception: "Invalid operation on keyset"
+======= dim_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 181
+NULL
+======= dim_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 189
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_cget_warn =============================
+int(1)
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_cget_warn =============================
+int(1)
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_empty =================================
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_isset =================================
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_set ===================================
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_set_new_elem ==========================
+vec(2) {
+  NULL
+  keyset(5) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+    int(123)
+  }
+}
+======= fini_incdec ================================
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_incdec_new_elem =======================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= fini_setop =================================
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_setop_new_elem =======================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= fini_unset =================================
+vec(2) {
+  NULL
+  keyset(3) {
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+vec(2) {
+  NULL
+  keyset(3) {
+    int(1)
+    int(2)
+    string(0) ""
+  }
+}
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_str_to_arr ============================
+Exception: "Invalid operation on keyset"
+======= fini_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 359
+NULL
+======= fini_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line 367
+vec(2) {
+  NULL
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}

@@ -1,0 +1,19 @@
+float(1.23E+27)
+vec(3) {
+  int(10)
+  bool(true)
+  NULL
+}
+vec(3) {
+  int(10)
+  bool(true)
+  NULL
+}
+float(1.23E+27)
+int(10)
+$p is set
+f In:  $p: 10
+f Out: $p: 200
+int(200)
+int(200)
+string(40) "f() expects exactly 1 parameter, 0 given"

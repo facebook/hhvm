@@ -1,0 +1,55 @@
+string(4) "C::X"
+string(4) "I::Y"
+string(10) "I::Y via Z"
+string(4) "J::X"
+string(4) "I::Y"
+string(10) "I::Y via Z"
+
+== reflect ==
+dict(2) {
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+dict(2) {
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+dict(1) {
+  ["X"]=>
+  string(1) "X"
+}
+bool(false)
+dict(1) {
+  ["X"]=>
+  string(4) "C::X"
+}
+dict(3) {
+  ["X"]=>
+  string(4) "C::X"
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+dict(0) {
+}
+bool(true)
+dict(1) {
+  ["X"]=>
+  string(4) "J::X"
+}
+dict(3) {
+  ["X"]=>
+  string(4) "J::X"
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+dict(0) {
+}
+bool(true)

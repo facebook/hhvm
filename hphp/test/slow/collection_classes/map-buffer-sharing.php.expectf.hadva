@@ -1,0 +1,76 @@
+object(HH\ImmMap) (1) {
+  [0]=>
+  int(1)
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  int(1)
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  NULL
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  NULL
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  object(stdClass) (1) {
+    ["prop"]=>
+    int(73)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  string(3) "foo"
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  vec(1) {
+    int(1)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  vec(1) {
+    int(1)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    int(1)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  object(HH\Map) (1) {
+    [0]=>
+    int(2)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  object(HH\Map) (1) {
+    [0]=>
+    int(3)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  object(HH\Map) (2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+object(HH\ImmMap) (1) {
+  [0]=>
+  object(HH\Map) (1) {
+    [0]=>
+    int(2)
+  }
+}

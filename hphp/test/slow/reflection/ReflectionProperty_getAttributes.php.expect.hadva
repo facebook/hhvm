@@ -1,0 +1,40 @@
+dict(2) {
+  ["A"]=>
+  vec(0) {
+  }
+  ["B"]=>
+  vec(3) {
+    int(1)
+    string(3) "two"
+    vec(1) {
+      int(3)
+    }
+  }
+}
+dict(2) {
+  ["C"]=>
+  vec(0) {
+  }
+  ["D"]=>
+  vec(2) {
+    string(1) "a"
+    dict(1) {
+      ["b"]=>
+      string(1) "c"
+    }
+  }
+}
+dict(2) {
+  ["E"]=>
+  vec(0) {
+  }
+  ["F"]=>
+  vec(2) {
+    string(7) "promote"
+    vec(1) {
+      string(2) "me"
+    }
+  }
+}
+dict(0) {
+}

@@ -1,0 +1,60 @@
+*** Testing parse_ini_file() : variation ***
+dict(8) {
+  ["section1"]=>
+  dict(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section2"]=>
+  dict(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section3"]=>
+  dict(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section4"]=>
+  dict(2) {
+    ["value1"]=>
+    string(0) ""
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section5"]=>
+  dict(2) {
+    ["value1"]=>
+    string(2) "on"
+    ["value2"]=>
+    string(3) "off"
+  }
+  ["section6"]=>
+  dict(2) {
+    ["value1"]=>
+    string(4) "true"
+    ["value2"]=>
+    string(5) "false"
+  }
+  ["section7"]=>
+  dict(2) {
+    ["value1"]=>
+    string(3) "yes"
+    ["value2"]=>
+    string(2) "no"
+  }
+  ["section8"]=>
+  dict(2) {
+    ["value1"]=>
+    string(4) "null"
+    ["value2"]=>
+    string(0) ""
+  }
+}
+===DONE===

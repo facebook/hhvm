@@ -1,0 +1,9 @@
+*** Testing array_keys() on basic array operation ***
+vec(5) {
+  string(1) "a"
+  string(1) "b"
+  int(2)
+  int(-23)
+  int(3)
+}
+Done

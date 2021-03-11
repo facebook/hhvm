@@ -1,0 +1,21 @@
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(-1)
+int(0)
+float(1.5)
+int(-1)
+int(122)
+float(1.5)
+NULL
+bool(true)
+bool(false)
+object(stdClass) (0) {
+}
+vec(0) {
+}
+int(9223372036854775807)
+int(9223372036854775807)
+Done

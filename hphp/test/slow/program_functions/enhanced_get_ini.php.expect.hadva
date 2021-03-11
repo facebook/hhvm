@@ -1,0 +1,19 @@
+string(1) "2"
+vec(2) {
+  string(2) "ls"
+  string(2) "cp"
+}
+dict(3) {
+  ["MYBOOL"]=>
+  string(1) "1"
+  ["MYINT"]=>
+  string(1) "1"
+  ["MYSTR"]=>
+  string(13) "Custom String"
+}
+dict(2) {
+  [0]=>
+  string(30) "Key will be next available int"
+  [1]=>
+  string(36) "Key will be next available int again"
+}

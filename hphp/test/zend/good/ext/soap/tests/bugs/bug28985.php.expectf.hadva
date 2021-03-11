@@ -1,0 +1,152 @@
+vec(42) {
+  string(100) "struct LoginMGDIS {
+ string iUserLogin;
+ string iUserId;
+ string iUserPassword;
+ string iProfilId;
+}"
+  string(29) "struct LoginMGDISResponse {
+}"
+  string(28) "struct GetIdentification {
+}"
+  string(77) "struct GetIdentificationResponse {
+ ArrayOfAnyType GetIdentificationResult;
+}"
+  string(43) "struct ArrayOfAnyType {
+ anyType anyType;
+}"
+  string(37) "struct RollbackCurrentTransaction {
+}"
+  string(45) "struct RollbackCurrentTransactionResponse {
+}"
+  string(68) "struct GetListeProfil {
+ string iUserLogin;
+ string iUserPassword;
+}"
+  string(87) "struct MGCodeLibelle {
+ string Code;
+ string Libelle;
+ boolean Default;
+ anyType Tag;
+}"
+  string(61) "struct ArrayOfMGCodeLibelle {
+ MGCodeLibelle MGCodeLibelle;
+}"
+  string(77) "struct GetListeProfilResponse {
+ ArrayOfMGCodeLibelle GetListeProfilResult;
+}"
+  string(41) "struct GetListeValCodif {
+ string Code;
+}"
+  string(43) "struct ArrayOfMGCodif {
+ MGCodif MGCodif;
+}"
+  string(18) "struct MGCodif {
+}"
+  string(75) "struct GetListeValCodifResponse {
+ ArrayOfMGCodif GetListeValCodifResult;
+}"
+  string(39) "struct TestPhpSoap {
+ MGCodif entree;
+}"
+  string(57) "struct TestPhpSoapResponse {
+ string TestPhpSoapResult;
+}"
+  string(50) "struct GetListeCodif {
+ boolean iGetListeValeur;
+}"
+  string(87) "struct MGCodifGrp {
+ string TypeCodif;
+ string LibCodif;
+ ArrayOfMGCodif ListeCodifs;
+}"
+  string(52) "struct ArrayOfMGCodifGrp {
+ MGCodifGrp MGCodifGrp;
+}"
+  string(72) "struct GetListeCodifResponse {
+ ArrayOfMGCodifGrp GetListeCodifResult;
+}"
+  string(57) "struct DroitCreation {
+ string iObjet;
+ string iProfil;
+}"
+  string(62) "struct DroitCreationResponse {
+ boolean DroitCreationResult;
+}"
+  string(74) "struct ListeDroitCreation {
+ ArrayOfString iListeObjet;
+ string iProfil;
+}"
+  string(40) "struct ArrayOfString {
+ string string;
+}"
+  string(79) "struct ListeDroitCreationResponse {
+ ArrayOfAnyType ListeDroitCreationResult;
+}"
+  string(87) "struct GetDroitsObjetProtege {
+ string iObjet;
+ string iProfil;
+ string iUtilisateur;
+}"
+  string(154) "struct MGDroitsObjetProtege {
+ string LbUti;
+ string LbProf;
+ string LbServ;
+ string LbDir;
+ boolean isProtected;
+ ArrayOfMGDroitAcces ListeDroitsAcces;
+}"
+  string(58) "struct ArrayOfMGDroitAcces {
+ MGDroitAcces MGDroitAcces;
+}"
+  string(104) "struct MGDroitAcces {
+ string IdProfil;
+ boolean Lecture;
+ boolean Modification;
+ boolean Suppression;
+}"
+  string(91) "struct GetDroitsObjetProtegeResponse {
+ MGDroitsObjetProtege GetDroitsObjetProtegeResult;
+}"
+  string(76) "struct GetPrivileges {
+ string iIdSupport;
+ int iIdForme;
+ string iProfil;
+}"
+  string(68) "struct GetPrivilegesResponse {
+ ArrayOfString GetPrivilegesResult;
+}"
+  string(46) "struct GetLibelleProfil {
+ string iIdProfil;
+}"
+  string(67) "struct GetLibelleProfilResponse {
+ string GetLibelleProfilResult;
+}"
+  string(91) "struct GetValeurRecherche {
+ string iChampSource;
+ string iTable;
+ string iOrderByClause;
+}"
+  string(78) "struct GetValeurRechercheResponse {
+ ArrayOfString GetValeurRechercheResult;
+}"
+  string(128) "struct GetValeurRechercheWithClauseWhere {
+ string iChampSource;
+ string iTable;
+ string iClauseWhere;
+ string iOrderByClause;
+}"
+  string(108) "struct GetValeurRechercheWithClauseWhereResponse {
+ ArrayOfString GetValeurRechercheWithClauseWhereResult;
+}"
+  string(27) "struct GetEnvironnement {
+}"
+  string(106) "struct MGEnvironnement {
+ string RepBureautique;
+ string RepBureautiqueImage;
+ string RepBureautiqueDoc;
+}"
+  string(76) "struct GetEnvironnementResponse {
+ MGEnvironnement GetEnvironnementResult;
+}"
+}

@@ -1,0 +1,9 @@
+NULL
+string(3) "str"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(321)
+int(42)

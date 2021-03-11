@@ -1,0 +1,11 @@
+float(1)
+string(5) "hello"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "world"
+object(stdClass) (0) {
+}
+string(6) "foobar"

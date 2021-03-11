@@ -1,0 +1,25 @@
+dict(2) {
+  ["kind"]=>
+  int(23)
+  ["alias"]=>
+  string(1) "T"
+}
+dict(1) {
+  ["kind"]=>
+  int(23)
+}
+dict(2) {
+  ["kind"]=>
+  int(19)
+  ["generic_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    dict(1) {
+      ["kind"]=>
+      int(23)
+    }
+  }
+}

@@ -1,0 +1,7 @@
+dict(2) {
+  [0]=>
+  string(45) "The bear black slow jumped over the lazy dog."
+  [1]=>
+  string(52) "The bear black slow jumped over the bear black slow."
+}
+bool(true)

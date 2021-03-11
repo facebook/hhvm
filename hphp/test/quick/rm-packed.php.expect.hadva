@@ -1,0 +1,4 @@
+vec(2) {
+  string(1) "a"
+  string(3) "foo"
+}

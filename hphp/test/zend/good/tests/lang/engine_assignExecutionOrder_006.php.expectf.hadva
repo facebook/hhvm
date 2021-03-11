@@ -1,0 +1,63 @@
+i1
+i2
+i3
+i4
+i5
+i6
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}
+i1
+i2
+i3
+i4
+i5
+i6
+vec(1) {
+  vec(1) {
+    int(-2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(-2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}
+i1
+i2
+i3
+i4
+i5
+i6
+vec(1) {
+  vec(1) {
+    int(-2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}
+vec(1) {
+  vec(1) {
+    int(2)
+  }
+}

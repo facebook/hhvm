@@ -1,0 +1,46 @@
+object(Closure%s) (0) {
+}
+string(%d) "Closure%s"
+object(Closure%s) (0) {
+}
+string(%d) "Closure%s"
+object(Closure%s) (1) {
+  ["static"]=>
+  dict(1) {
+    ["ext_var"]=>
+    int(1)
+  }
+}
+string(%d) "Closure%s"
+object(Closure%s) (1) {
+  ["parameter"]=>
+  dict(1) {
+    ["$param"]=>
+    string(10) "<required>"
+  }
+}
+string(%d) "Closure%s"
+object(Closure%s) (2) {
+  ["static"]=>
+  dict(2) {
+    ["ext_var"]=>
+    int(1)
+    ["another_ext"]=>
+    object(stdClass) (0) {
+    }
+  }
+  ["parameter"]=>
+  dict(1) {
+    ["$param"]=>
+    string(10) "<required>"
+  }
+}
+string(%d) "Closure%s"
+object(Closure%s) (1) {
+  ["parameter"]=>
+  dict(1) {
+    ["$param"]=>
+    string(10) "<optional>"
+  }
+}
+string(%d) "Closure%s"

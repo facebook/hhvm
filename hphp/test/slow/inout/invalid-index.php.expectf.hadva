@@ -1,0 +1,41 @@
+Out of bounds dict access: invalid index 10
+Out of bounds dict access: invalid index "banana"
+int(5)
+string(43) "Out of bounds dict access: invalid index 50"
+Caught: Out of bounds dict access: invalid index 10
+Caught: Out of bounds dict access: invalid index "banana"
+int(5)
+Caught: Out of bounds dict access: invalid index 50
+dict(1) {
+  ["apple"]=>
+  dict(1) {
+    ["orange"]=>
+    int(12)
+  }
+}
+Caught: Out of bounds dict access: invalid index 10
+Caught: Out of bounds dict access: invalid index "banana"
+int(5)
+Caught: Out of bounds dict access: invalid index 50
+dict(1) {
+  ["apple"]=>
+  dict(1) {
+    ["orange"]=>
+    int(12)
+  }
+}
+Caught: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays
+Caught: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays
+int(0)
+Caught: Invalid operation on keyset
+Caught: Out of bounds keyset access: invalid index 50
+Caught: Out of bounds keyset access: invalid index 50
+int(1)
+Caught: Out of bounds vec access: invalid index 100
+vec(3) {
+  int(0)
+  int(12)
+  int(2)
+}
+Caught: Out of bounds vec access: invalid index 50
+Caught: Out of bounds vec access: invalid index 50

@@ -1,0 +1,6 @@
+vec(1) {
+  int(0)
+}
+int(32)
+int(30)
+string(3) "baz"

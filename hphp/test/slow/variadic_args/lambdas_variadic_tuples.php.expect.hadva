@@ -1,0 +1,75 @@
+Tuple provider ...$x
+vec(3) {
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(1)
+    int(3)
+  }
+  vec(2) {
+    int(5)
+    int(6)
+  }
+}
+Tuple provider (int, int)...$x
+vec(3) {
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(1)
+    int(3)
+  }
+  vec(2) {
+    int(5)
+    int(6)
+  }
+}
+Tuple provider ...
+vec(3) {
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(1)
+    int(3)
+  }
+  vec(2) {
+    int(5)
+    int(6)
+  }
+}
+Tuple provider lambda1
+vec(3) {
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(1)
+    int(3)
+  }
+  vec(2) {
+    int(5)
+    int(6)
+  }
+}
+Tuple provider lambda2
+vec(3) {
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(1)
+    int(3)
+  }
+  vec(2) {
+    int(5)
+    int(6)
+  }
+}

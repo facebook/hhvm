@@ -1,0 +1,14 @@
+vec(1) {
+  string(3) "foo"
+}
+vec(1) {
+  string(3) "foo"
+}
+vec(1) {
+  string(3) "foo"
+}
+vec(2) {
+  string(3) "foo"
+  string(3) "bar"
+}
+string(6) "foobar"

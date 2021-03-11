@@ -1,0 +1,9 @@
+string(13) "Object,Object"
+dict(2) {
+  [0]=>
+  object(foo) (0) {
+  }
+  [1]=>
+  object(foo) (0) {
+  }
+}

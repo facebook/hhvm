@@ -1,0 +1,33 @@
+*** Testing array_filter() : usage variations - Anonymous callback functions ***
+Anonymous callback function with regular parameter and statement
+dict(3) {
+  [3]=>
+  int(10)
+  [4]=>
+  int(100)
+  [5]=>
+  int(1000)
+}
+Anonymous callback funciton with null argument
+dict(8) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(-1)
+  [3]=>
+  int(10)
+  [4]=>
+  int(100)
+  [5]=>
+  int(1000)
+  [6]=>
+  string(5) "Hello"
+  [7]=>
+  NULL
+}
+Anonymous callback function with regular argument and null statement
+dict(0) {
+}
+Done

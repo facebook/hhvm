@@ -1,0 +1,44 @@
+vec(2) {
+  int(2003)
+  int(2004)
+}
+vec(26) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+  string(1) "l"
+  string(1) "m"
+  string(1) "n"
+  string(1) "o"
+  string(1) "p"
+  string(1) "q"
+  string(1) "r"
+  string(1) "s"
+  string(1) "t"
+  string(1) "u"
+  string(1) "v"
+  string(1) "w"
+  string(1) "x"
+  string(1) "y"
+  string(1) "z"
+}
+vec(10) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+  int(8)
+  int(9)
+  int(10)
+}

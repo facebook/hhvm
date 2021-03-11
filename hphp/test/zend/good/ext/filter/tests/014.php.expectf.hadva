@@ -1,0 +1,33 @@
+bool(false)
+bool(false)
+bool(false)
+dict(5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(false)
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(false)
+  [4]=>
+  dict(2) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+  }
+}
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Done

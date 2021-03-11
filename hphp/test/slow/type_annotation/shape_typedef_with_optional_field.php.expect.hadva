@@ -1,0 +1,15 @@
+string(22) "HH\shape(?'a'=>HH\int)"
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["a"]=>
+    dict(2) {
+      ["kind"]=>
+      int(1)
+      ["optional_shape_field"]=>
+      bool(true)
+    }
+  }
+}

@@ -1,0 +1,16 @@
+string(3) "foo"
+string(3) "foo"
+string(8) "C::snoot"
+string(3) "foo"
+string(3) "foo"
+string(8) "C::snoot"
+string(3) "bar"
+string(3) "bar"
+string(8) "C::snoot"
+object(C) (0) {
+}
+vec(0) {
+}
+NULL
+bool(true)
+string(8) "C::snoot"

@@ -1,0 +1,18 @@
+dict(6) {
+  ["product_id"]=>
+  string(17) "libgd%3Cscript%3E"
+  ["component"]=>
+  vec(1) {
+    string(17) "10dhsajkkdhk <do>"
+  }
+  ["versions"]=>
+  string(6) "2.0.33"
+  ["doesnotexist"]=>
+  NULL
+  ["testscalar"]=>
+  bool(false)
+  ["testarray"]=>
+  vec(1) {
+    int(2)
+  }
+}

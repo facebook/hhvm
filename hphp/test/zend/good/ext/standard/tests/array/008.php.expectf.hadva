@@ -1,0 +1,226 @@
+-=-=-=-=-=-=-=-=-=-= TEST 1 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+$a=dict [
+  0 => 1,
+  'big' => 2,
+  1 => 2,
+  2 => 6,
+  3 => 3,
+  4 => 5,
+  5 => 3,
+  6 => 3,
+  7 => 454,
+  8 => 'some_string',
+  9 => 3,
+  10 => 3,
+  11 => 3,
+  12 => 3,
+  13 => 3,
+  14 => 3,
+  15 => 3,
+  16 => 3,
+  17 => 17,
+];
+$b=vec [
+  2,
+  2,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  17,
+  25,
+  'some_string',
+  7,
+  8,
+  9,
+  109,
+  78,
+  17,
+];
+$c=vec [
+  -1,
+  2,
+  1,
+  15,
+  25,
+  17,
+];
+array_intersect($a,$b,$c);
+dict(3) {
+  ["big"]=>
+  int(2)
+  [1]=>
+  int(2)
+  [17]=>
+  int(17)
+}
+array_intersect_assoc($a,$b,$c);
+dict(1) {
+  [1]=>
+  int(2)
+}
+array_intersect($a,$b);
+dict(15) {
+  ["big"]=>
+  int(2)
+  [1]=>
+  int(2)
+  [3]=>
+  int(3)
+  [5]=>
+  int(3)
+  [6]=>
+  int(3)
+  [8]=>
+  string(11) "some_string"
+  [9]=>
+  int(3)
+  [10]=>
+  int(3)
+  [11]=>
+  int(3)
+  [12]=>
+  int(3)
+  [13]=>
+  int(3)
+  [14]=>
+  int(3)
+  [15]=>
+  int(3)
+  [16]=>
+  int(3)
+  [17]=>
+  int(17)
+}
+array_intersect_assoc($a,$b);
+dict(10) {
+  [1]=>
+  int(2)
+  [3]=>
+  int(3)
+  [5]=>
+  int(3)
+  [6]=>
+  int(3)
+  [9]=>
+  int(3)
+  [10]=>
+  int(3)
+  [11]=>
+  int(3)
+  [12]=>
+  int(3)
+  [13]=>
+  int(3)
+  [14]=>
+  int(3)
+}
+-=-=-=-=-=-=-=-=-=-= TEST 2 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+$a=dict [
+  'a' => 2,
+  'b' => 'some',
+  'c' => 'done',
+  'z' => 'foo',
+  'f' => 5,
+  'fan' => 'fen',
+  'bad' => 'bed',
+  'gate' => 'web',
+  7 => 18,
+  9 => 25,
+  11 => 42,
+  12 => 42,
+  45 => 42,
+  73 => 'foo',
+  95 => 'some',
+  'som3' => 'some',
+  'want' => 'wanna',
+];
+$b=dict [
+  'a' => 7,
+  7 => 18,
+  9 => 13,
+  11 => 42,
+  45 => 46,
+  'som3' => 'some',
+  'foo' => 'some',
+  'goo' => 'foo',
+  'f' => 5,
+  'z' => 'equal',
+  'gate' => 'web',
+];
+$c=dict [
+  'gate' => 'web',
+  73 => 'foo',
+  95 => 'some',
+];
+
+
+Results:
+
+array_intersect($a,$b,$c);
+dict(6) {
+  ["b"]=>
+  string(4) "some"
+  ["z"]=>
+  string(3) "foo"
+  ["gate"]=>
+  string(3) "web"
+  [73]=>
+  string(3) "foo"
+  [95]=>
+  string(4) "some"
+  ["som3"]=>
+  string(4) "some"
+}
+array_intersect_assoc($a,$b,$c);
+dict(1) {
+  ["gate"]=>
+  string(3) "web"
+}
+array_intersect($a,$b);
+dict(11) {
+  ["b"]=>
+  string(4) "some"
+  ["z"]=>
+  string(3) "foo"
+  ["f"]=>
+  int(5)
+  ["gate"]=>
+  string(3) "web"
+  [7]=>
+  int(18)
+  [11]=>
+  int(42)
+  [12]=>
+  int(42)
+  [45]=>
+  int(42)
+  [73]=>
+  string(3) "foo"
+  [95]=>
+  string(4) "some"
+  ["som3"]=>
+  string(4) "some"
+}
+array_intersect_assoc($a,$b);
+dict(5) {
+  ["f"]=>
+  int(5)
+  ["gate"]=>
+  string(3) "web"
+  [7]=>
+  int(18)
+  [11]=>
+  int(42)
+  ["som3"]=>
+  string(4) "some"
+}

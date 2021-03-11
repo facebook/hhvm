@@ -1,0 +1,37 @@
+*** Testing array_fill() : basic functionality ***
+-- Iteration 1 --
+vec(2) {
+  NULL
+  NULL
+}
+-- Iteration 2 --
+vec(2) {
+  int(0)
+  int(0)
+}
+-- Iteration 3 --
+vec(2) {
+  int(1)
+  int(1)
+}
+-- Iteration 4 --
+vec(2) {
+  float(1.5)
+  float(1.5)
+}
+-- Iteration 5 --
+vec(2) {
+  string(2) "hi"
+  string(2) "hi"
+}
+-- Iteration 6 --
+vec(2) {
+  string(2) "hi"
+  string(2) "hi"
+}
+-- Iteration 7 --
+vec(2) {
+  string(5) "Hello"
+  string(5) "Hello"
+}
+Done

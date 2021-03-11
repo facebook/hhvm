@@ -1,0 +1,369 @@
+==== array ====
+f1:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f2:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f3:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f4:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f5:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f6:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f7:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f8:
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+==== Vector ====
+f1:
+f1() threw an exception
+f2:
+f2() threw an exception
+f3:
+Triggered E_WARNING with message "Argument 1 to f3() must be of type @HH\varray, HH\Vector given"
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+f4:
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Vector given"
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+f5:
+f5() threw an exception
+f6:
+f6() threw an exception
+f7:
+Triggered E_WARNING with message "Argument 1 to f7() must be of type @HH\varray, HH\Vector given"
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Vector given"
+f8:
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Vector given"
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Vector given"
+==== Map ====
+f1:
+f1() threw an exception
+f2:
+f2() threw an exception
+f3:
+Triggered E_WARNING with message "Argument 1 to f3() must be of type @HH\varray, HH\Map given"
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+object(HH\Map) (4) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+  ["z"]=>
+  int(4)
+}
+f4:
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Map given"
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+object(HH\Map) (4) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+  ["z"]=>
+  int(4)
+}
+f5:
+f5() threw an exception
+f6:
+f6() threw an exception
+f7:
+Triggered E_WARNING with message "Argument 1 to f7() must be of type @HH\varray, HH\Map given"
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+object(HH\Map) (4) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+  ["z"]=>
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Map given"
+f8:
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Map given"
+object(HH\Map) (3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+object(HH\Map) (4) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+  ["z"]=>
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Map given"
+==== Set ====
+f1:
+f1() threw an exception
+f2:
+f2() threw an exception
+f3:
+Triggered E_WARNING with message "Argument 1 to f3() must be of type @HH\varray, HH\Set given"
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Set) (4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f4:
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, HH\Set given"
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Set) (4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+f5:
+f5() threw an exception
+f6:
+f6() threw an exception
+f7:
+Triggered E_WARNING with message "Argument 1 to f7() must be of type @HH\varray, HH\Set given"
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Set) (4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, HH\Set given"
+f8:
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, HH\Set given"
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Set) (4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, HH\Set given"
+==== stdClass ====
+f1:
+f1() threw an exception
+f2:
+f2() threw an exception
+f3:
+Triggered E_WARNING with message "Argument 1 to f3() must be of type @HH\varray, stdClass given"
+object(stdClass) (0) {
+}
+f4:
+Triggered E_WARNING with message "Argument 1 to f4() must be of type @?HH\varray, stdClass given"
+object(stdClass) (0) {
+}
+f5:
+f5() threw an exception
+f6:
+f6() threw an exception
+f7:
+Triggered E_WARNING with message "Argument 1 to f7() must be of type @HH\varray, stdClass given"
+object(stdClass) (0) {
+}
+Triggered E_WARNING with message "Argument 1 returned from f7() as an inout parameter must be of type @HH\varray, stdClass given"
+f8:
+Triggered E_WARNING with message "Argument 1 to f8() must be of type @?HH\varray, stdClass given"
+object(stdClass) (0) {
+}
+Triggered E_WARNING with message "Argument 1 returned from f8() as an inout parameter must be of type @?HH\varray, stdClass given"

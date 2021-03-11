@@ -1,0 +1,10 @@
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  bool(true)
+}
+is_variadic = 1
+name = objects
+type = array<HH\int>

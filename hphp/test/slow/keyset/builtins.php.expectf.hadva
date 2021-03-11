@@ -1,0 +1,1117 @@
+apc_add: bool(true)
+apc_fetch: keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+array_change_key_case: dict(2) {
+  ["foo"]=>
+  string(3) "FOO"
+  ["bar"]=>
+  string(3) "Bar"
+}
+array_chunk 1: vec(2) {
+  dict(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  dict(1) {
+    [0]=>
+    int(3)
+  }
+}
+array_chunk 2: vec(2) {
+  dict(2) {
+    [1]=>
+    int(1)
+    [2]=>
+    int(2)
+  }
+  dict(1) {
+    [3]=>
+    int(3)
+  }
+}
+array_column 1: dict(2) {
+  [0]=>
+  string(4) "bar1"
+  [1]=>
+  string(3) "foo"
+}
+array_column 2: dict(2) {
+  ["qux1"]=>
+  string(4) "bar1"
+  ["baz"]=>
+  string(3) "foo"
+}
+---- running with_keyset with
+keyset(6) {
+  string(1) "q"
+  string(1) "u"
+  string(1) "e"
+  string(1) "n"
+  string(1) "t"
+  string(1) "i"
+}
+array_diff_assoc: dict(4) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_diff: dict(4) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_diff_key: dict(5) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_diff_uassoc: dict(5) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_diff_ukey: dict(4) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_udiff: dict(4) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_udiff_assoc: dict(5) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_udiff_uassoc: dict(4) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 40
+bool(false)
+array_combine 2: dict(6) {
+  ["q"]=>
+  int(1)
+  ["u"]=>
+  int(2)
+  ["e"]=>
+  int(3)
+  ["n"]=>
+  int(4)
+  ["t"]=>
+  int(5)
+  ["i"]=>
+  int(6)
+}
+array_uintersect_assoc: dict(1) {
+  ["q"]=>
+  string(1) "q"
+}
+array_uintersect_uassoc: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_intersect_assoc: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_intersect_key: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_intersect_uassoc: dict(1) {
+  ["q"]=>
+  string(1) "q"
+}
+array_intersect_ukey: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_intersect: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_uintersect: dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["n"]=>
+  string(1) "n"
+}
+array_filter: dict(3) {
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["i"]=>
+  string(1) "i"
+}
+array_flip: dict(6) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_map: dict(3) {
+  ["H"]=>
+  string(2) "HH"
+  ["A"]=>
+  string(2) "AA"
+  ["L"]=>
+  string(2) "LL"
+}
+array_merge: dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: dict(6) {
+  ["i"]=>
+  string(1) "i"
+  ["t"]=>
+  string(1) "t"
+  ["n"]=>
+  string(1) "n"
+  ["e"]=>
+  string(1) "e"
+  ["u"]=>
+  string(1) "u"
+  ["q"]=>
+  string(1) "q"
+}
+array_slice: dict(4) {
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_key_exists: vec(2) {
+  bool(false)
+  bool(true)
+}
+array_keys: vec(6) {
+  string(1) "q"
+  string(1) "u"
+  string(1) "e"
+  string(1) "n"
+  string(1) "t"
+  string(1) "i"
+}
+array_pop: string(1) "i"
+keyset(5) {
+  string(1) "q"
+  string(1) "u"
+  string(1) "e"
+  string(1) "n"
+  string(1) "t"
+}
+array_product: float(0)
+array_rand: string(1) "i"
+array_reduce: string(6) "quenti"
+array_search 1: string(1) "n"
+array_search 2: bool(false)
+array_shift: string(1) "q"
+keyset(4) {
+  string(1) "u"
+  string(1) "e"
+  string(1) "n"
+  string(1) "t"
+}
+array_sum: float(0)
+in_array: vec(2) {
+  bool(false)
+  bool(true)
+}
+count: int(6)
+array_pad 1: dict(7) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+  [0]=>
+  string(1) "n"
+}
+array_pad 2: dict(6) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_replace: dict(6) {
+  ["q"]=>
+  string(1) "r"
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_unique 1: dict(6) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array_unique 2: dict(0) {
+}
+int(5)
+int(6)
+keyset(6) {
+  string(1) "q"
+  string(1) "u"
+  string(1) "e"
+  string(1) "n"
+  string(1) "t"
+  string(1) "i"
+}
+array_splice: dict(4) {
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+}
+---- running with_keyset with
+keyset(4) {
+  int(5)
+  int(7)
+  int(8)
+  int(10)
+}
+array_diff_assoc: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_key: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_uassoc: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_ukey: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff_assoc: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff_uassoc: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 40
+bool(false)
+array_combine 2: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 42
+bool(false)
+array_uintersect_assoc: dict(0) {
+}
+array_uintersect_uassoc: dict(0) {
+}
+array_intersect_assoc: dict(0) {
+}
+array_intersect_key: dict(0) {
+}
+array_intersect_uassoc: dict(0) {
+}
+array_intersect_ukey: dict(0) {
+}
+array_intersect: dict(0) {
+}
+array_uintersect: dict(0) {
+}
+array_filter: dict(0) {
+}
+array_flip: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_map: dict(3) {
+  ["H"]=>
+  string(2) "HH"
+  ["A"]=>
+  string(2) "AA"
+  ["L"]=>
+  string(2) "LL"
+}
+array_merge: dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: dict(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(8)
+  [2]=>
+  int(7)
+  [3]=>
+  int(5)
+}
+array_slice: dict(2) {
+  [0]=>
+  int(8)
+  [1]=>
+  int(10)
+}
+array_key_exists: vec(2) {
+  bool(false)
+  bool(false)
+}
+array_keys: vec(4) {
+  int(5)
+  int(7)
+  int(8)
+  int(10)
+}
+array_pop: int(10)
+keyset(3) {
+  int(5)
+  int(7)
+  int(8)
+}
+array_product: int(2800)
+array_rand: int(10)
+array_reduce: string(5) "57810"
+array_search 1: bool(false)
+array_search 2: bool(false)
+array_shift: int(5)
+keyset(2) {
+  int(7)
+  int(8)
+}
+array_sum: int(30)
+in_array: vec(2) {
+  bool(false)
+  bool(false)
+}
+count: int(4)
+array_pad 1: dict(7) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+  [11]=>
+  string(1) "n"
+  [12]=>
+  string(1) "n"
+  [13]=>
+  string(1) "n"
+}
+array_pad 2: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_replace: dict(5) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+  ["q"]=>
+  string(1) "r"
+}
+array_unique 1: dict(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_unique 2: dict(0) {
+}
+int(3)
+int(4)
+keyset(4) {
+  string(1) "q"
+  int(7)
+  int(8)
+  string(1) "i"
+}
+array_splice: dict(2) {
+  [0]=>
+  int(8)
+  ["i"]=>
+  string(1) "i"
+}
+dict(2) {
+  ["q"]=>
+  string(1) "q"
+  [0]=>
+  int(7)
+}
+---- running with_keyset with
+keyset(4) {
+  string(1) "5"
+  string(1) "7"
+  string(1) "8"
+  string(2) "10"
+}
+array_diff_assoc: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_key: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_uassoc: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_ukey: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff_assoc: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff_uassoc: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 40
+bool(false)
+array_combine 2: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 42
+bool(false)
+array_uintersect_assoc: dict(0) {
+}
+array_uintersect_uassoc: dict(0) {
+}
+array_intersect_assoc: dict(0) {
+}
+array_intersect_key: dict(0) {
+}
+array_intersect_uassoc: dict(0) {
+}
+array_intersect_ukey: dict(0) {
+}
+array_intersect: dict(0) {
+}
+array_uintersect: dict(0) {
+}
+array_filter: dict(0) {
+}
+array_flip: dict(4) {
+  [5]=>
+  string(1) "5"
+  [7]=>
+  string(1) "7"
+  [8]=>
+  string(1) "8"
+  [10]=>
+  string(2) "10"
+}
+array_map: dict(3) {
+  ["H"]=>
+  string(2) "HH"
+  ["A"]=>
+  string(2) "AA"
+  ["L"]=>
+  string(2) "LL"
+}
+array_merge: dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: dict(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(8)
+  [2]=>
+  int(7)
+  [3]=>
+  int(5)
+}
+array_slice: 
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/test/slow/keyset/builtins.php on line 70
+dict(2) {
+  [0]=>
+  string(1) "8"
+  [1]=>
+  string(2) "10"
+}
+array_key_exists: vec(2) {
+  bool(false)
+  bool(false)
+}
+array_keys: vec(4) {
+  string(1) "5"
+  string(1) "7"
+  string(1) "8"
+  string(2) "10"
+}
+array_pop: string(2) "10"
+keyset(3) {
+  string(1) "5"
+  string(1) "7"
+  string(1) "8"
+}
+array_product: int(2800)
+array_rand: string(2) "10"
+array_reduce: string(5) "57810"
+array_search 1: bool(false)
+array_search 2: bool(false)
+array_shift: string(1) "5"
+keyset(2) {
+  string(1) "7"
+  string(1) "8"
+}
+array_sum: int(30)
+in_array: vec(2) {
+  bool(false)
+  bool(false)
+}
+count: int(4)
+array_pad 1: dict(7) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+  [0]=>
+  string(1) "n"
+  [1]=>
+  string(1) "n"
+  [2]=>
+  string(1) "n"
+}
+array_pad 2: dict(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_replace: dict(5) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+  ["q"]=>
+  string(1) "r"
+}
+array_unique 1: dict(4) {
+  [5]=>
+  string(1) "5"
+  [7]=>
+  string(1) "7"
+  [8]=>
+  string(1) "8"
+  [10]=>
+  string(2) "10"
+}
+array_unique 2: dict(0) {
+}
+int(3)
+int(4)
+keyset(4) {
+  string(1) "q"
+  string(1) "7"
+  string(1) "8"
+  string(1) "i"
+}
+array_splice: dict(2) {
+  ["8"]=>
+  string(1) "8"
+  ["i"]=>
+  string(1) "i"
+}
+dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["7"]=>
+  string(1) "7"
+}
+---- running with_keyset with
+keyset(0) {
+}
+array_diff_assoc: dict(0) {
+}
+array_diff: dict(0) {
+}
+array_diff_key: dict(0) {
+}
+array_diff_uassoc: dict(0) {
+}
+array_diff_ukey: dict(0) {
+}
+array_udiff: dict(0) {
+}
+array_udiff_assoc: dict(0) {
+}
+array_udiff_uassoc: dict(0) {
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 40
+bool(false)
+array_combine 2: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/keyset/builtins.php on line 42
+bool(false)
+array_uintersect_assoc: dict(0) {
+}
+array_uintersect_uassoc: dict(0) {
+}
+array_intersect_assoc: dict(0) {
+}
+array_intersect_key: dict(0) {
+}
+array_intersect_uassoc: dict(0) {
+}
+array_intersect_ukey: dict(0) {
+}
+array_intersect: dict(0) {
+}
+array_uintersect: dict(0) {
+}
+array_filter: dict(0) {
+}
+array_flip: dict(0) {
+}
+array_map: dict(3) {
+  ["H"]=>
+  string(2) "HH"
+  ["A"]=>
+  string(2) "AA"
+  ["L"]=>
+  string(2) "LL"
+}
+array_merge: dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: dict(0) {
+}
+array_slice: dict(0) {
+}
+array_key_exists: vec(2) {
+  bool(false)
+  bool(false)
+}
+array_keys: vec(0) {
+}
+array_pop: NULL
+keyset(0) {
+}
+array_product: int(1)
+array_rand: 
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/test/slow/keyset/builtins.php on line 87
+NULL
+array_reduce: string(0) ""
+array_search 1: bool(false)
+array_search 2: bool(false)
+array_shift: NULL
+keyset(0) {
+}
+array_sum: int(0)
+in_array: vec(2) {
+  bool(false)
+  bool(false)
+}
+count: int(0)
+array_pad 1: dict(7) {
+  [0]=>
+  string(1) "n"
+  [1]=>
+  string(1) "n"
+  [2]=>
+  string(1) "n"
+  [3]=>
+  string(1) "n"
+  [4]=>
+  string(1) "n"
+  [5]=>
+  string(1) "n"
+  [6]=>
+  string(1) "n"
+}
+array_pad 2: dict(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "x"
+}
+array_replace: dict(1) {
+  ["q"]=>
+  string(1) "r"
+}
+array_unique 1: dict(0) {
+}
+array_unique 2: dict(0) {
+}
+int(1)
+int(2)
+keyset(2) {
+  string(1) "q"
+  string(1) "i"
+}
+array_splice: dict(0) {
+}
+dict(2) {
+  ["q"]=>
+  string(1) "q"
+  ["i"]=>
+  string(1) "i"
+}
+array_merge_recursive: dict(3) {
+  ["colors"]=>
+  dict(3) {
+    ["green"]=>
+    dict(2) {
+      [0]=>
+      string(5) "green"
+      [1]=>
+      string(5) "green"
+    }
+    ["red"]=>
+    string(3) "red"
+    ["blue"]=>
+    string(4) "blue"
+  }
+  [0]=>
+  int(5)
+  [1]=>
+  int(10)
+}
+array_replace_recursive 1: dict(3) {
+  ["colors"]=>
+  keyset(2) {
+    string(5) "green"
+    string(3) "red"
+  }
+  [0]=>
+  int(5)
+  ["green"]=>
+  string(4) "blue"
+}
+array_replace_recursive 2: dict(2) {
+  ["colors"]=>
+  dict(2) {
+    ["green"]=>
+    string(4) "blue"
+    ["red"]=>
+    string(3) "red"
+  }
+  [0]=>
+  int(5)
+}
+array_multisort: 
+Warning: Invalid operand type was used: array_multisort expects array(s) in %s/test/slow/keyset/builtins.php on line 183
+bool(false)
+array_fill_keys: dict(2) {
+  ["fizz"]=>
+  int(42)
+  ["buzz"]=>
+  int(42)
+}
+array_fill: dict(2) {
+  [10]=>
+  int(42)
+  [11]=>
+  int(42)
+}

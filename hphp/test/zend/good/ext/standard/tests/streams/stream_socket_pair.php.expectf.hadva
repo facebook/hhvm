@@ -1,0 +1,5 @@
+vec(2) {
+  resource(%d) of type (stream)
+  resource(%d) of type (stream)
+}
+string(3) "foo"

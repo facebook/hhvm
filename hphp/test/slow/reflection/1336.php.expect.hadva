@@ -1,0 +1,18 @@
+vec(7) {
+  string(3) "bar"
+  string(3) "foo"
+  string(4) "foo2"
+  string(5) "ifoo2"
+  string(5) "ifoo1"
+  string(5) "ifoo4"
+  string(5) "ifoo3"
+}
+vec(7) {
+  string(3) "bar"
+  string(3) "foo"
+  string(4) "foo2"
+  string(5) "ifoo4"
+  string(5) "ifoo3"
+  string(5) "ifoo2"
+  string(5) "ifoo1"
+}

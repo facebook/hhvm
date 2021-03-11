@@ -1,0 +1,48 @@
+FF00FF
+
+Warning: Color index -1 out of range in %s/test/zend/good/ext/gd/tests/colorclosest.php on line 10
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 0
+)
+Dict
+(
+    [red] => 254
+    [green] => 0
+    [blue] => 0
+    [alpha] => 0
+)
+Dict
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 0
+)
+64FF00FF
+
+Warning: Color index -1 out of range in %s/test/zend/good/ext/gd/tests/colorclosest.php on line 44
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 1
+)
+Dict
+(
+    [red] => 254
+    [green] => 0
+    [blue] => 0
+    [alpha] => 1
+)
+Dict
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 1
+)

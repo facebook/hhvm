@@ -1,0 +1,78 @@
+*** Testing readdir() : usage variations ***
+
+-- Iteration 1 --
+resource(4) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 2 --
+resource(5) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 3 --
+resource(6) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 4 --
+resource(7) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 5 --
+resource(8) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 6 --
+resource(9) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 7 --
+resource(10) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 8 --
+resource(11) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 9 --
+resource(12) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 10 --
+resource(13) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 11 --
+resource(14) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 12 --
+resource(15) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 13 --
+resource(16) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Iteration 14 --
+resource(17) of type (stream)
+string(56) "fwrite() expects parameter 2 to be string, integer given"
+
+-- Call to readdir() --
+vec(16) {
+  string(9) "-10.5.tmp"
+  string(9) "-2345.tmp"
+  string(1) "."
+  string(2) ".."
+  string(4) ".tmp"
+  string(7) "0.5.tmp"
+  string(5) "0.tmp"
+  string(17) "1.23456789E-9.tmp"
+  string(5) "1.tmp"
+  string(8) "10.5.tmp"
+  string(9) "12345.tmp"
+  string(16) "123456789000.tmp"
+  string(9) "Array.tmp"
+  string(15) "double_file.tmp"
+  string(11) "hd_file.tmp"
+  string(15) "single_file.tmp"
+}
+===DONE===

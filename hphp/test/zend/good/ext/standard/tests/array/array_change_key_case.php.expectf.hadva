@@ -1,0 +1,754 @@
+*** Testing basic operations ***
+** Iteration 1 **
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+
+** Iteration 2 **
+dict(1) {
+  [0]=>
+  int(0)
+}
+dict(1) {
+  [0]=>
+  int(0)
+}
+dict(1) {
+  [0]=>
+  int(0)
+}
+
+** Iteration 3 **
+dict(1) {
+  [0]=>
+  int(1)
+}
+dict(1) {
+  [0]=>
+  int(1)
+}
+dict(1) {
+  [0]=>
+  int(1)
+}
+
+** Iteration 4 **
+dict(1) {
+  [0]=>
+  int(-1)
+}
+dict(1) {
+  [0]=>
+  int(-1)
+}
+dict(1) {
+  [0]=>
+  int(-1)
+}
+
+** Iteration 5 **
+dict(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+dict(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+dict(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+
+** Iteration 6 **
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+
+** Iteration 7 **
+dict(1) {
+  [""]=>
+  int(1)
+}
+dict(1) {
+  [""]=>
+  int(1)
+}
+dict(1) {
+  [""]=>
+  int(1)
+}
+
+** Iteration 8 **
+dict(1) {
+  ["a"]=>
+  int(1)
+}
+dict(1) {
+  ["A"]=>
+  int(1)
+}
+dict(1) {
+  ["a"]=>
+  int(1)
+}
+
+** Iteration 9 **
+dict(1) {
+  ["z"]=>
+  int(1)
+}
+dict(1) {
+  ["Z"]=>
+  int(1)
+}
+dict(1) {
+  ["z"]=>
+  int(1)
+}
+
+** Iteration 10 **
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+dict(1) {
+  ["ONE"]=>
+  int(1)
+}
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+
+** Iteration 11 **
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+dict(1) {
+  ["ONE"]=>
+  int(1)
+}
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+
+** Iteration 12 **
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+dict(1) {
+  ["ONE"]=>
+  int(1)
+}
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+
+** Iteration 13 **
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+dict(1) {
+  ["ONE"]=>
+  int(1)
+}
+dict(1) {
+  ["one"]=>
+  int(1)
+}
+
+** Iteration 14 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 15 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 16 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 17 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 18 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 19 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 20 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 21 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 22 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 23 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 24 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 25 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 26 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 27 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 28 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 29 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+
+** Iteration 30 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+** Iteration 31 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+** Iteration 32 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+** Iteration 33 **
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+** Iteration 34 **
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "four"
+}
+dict(4) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+  ["FOUR"]=>
+  string(4) "four"
+}
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "four"
+}
+
+** Iteration 35 **
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "FOUR"
+}
+dict(4) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+  ["FOUR"]=>
+  string(4) "FOUR"
+}
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "FOUR"
+}
+
+** Iteration 36 **
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "FOUR"
+}
+dict(4) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+  ["FOUR"]=>
+  string(4) "FOUR"
+}
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "FOUR"
+}
+
+** Iteration 37 **
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "four"
+}
+dict(4) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+  ["FOUR"]=>
+  string(4) "four"
+}
+dict(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+  ["three"]=>
+  int(3)
+  ["four"]=>
+  string(4) "four"
+}
+
+end

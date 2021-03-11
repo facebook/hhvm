@@ -1,0 +1,65 @@
+*** Testing array_rand() : with multi-dimensional array ***
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+*** Testing array_rand() with arrays having different types of values ***
+
+-- Iteration 1 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 2 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 3 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 4 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 5 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 6 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 7 --
+int(%d)
+vec(3) {
+  int(%d)
+  int(%d)
+  int(%d)
+}
+Done

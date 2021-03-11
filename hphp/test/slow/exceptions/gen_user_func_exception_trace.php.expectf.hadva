@@ -1,0 +1,23 @@
+vec(3) {
+  string(4) "args"
+  string(2) "go"
+  string(4) "here"
+}
+
+Fatal error: Uncaught exception 'Exception' with message 'thrown from child' in %s/gen_user_func_exception_trace.php:5
+Stack trace:
+#0 (): child_main()
+#1 (): xbox_process_call_message()
+#2 {main}
+
+Fatal error: Uncaught exception 'Exception' with message 'exception 'Exception' with message 'thrown from child' in %s/gen_user_func_exception_trace.php:5
+Stack trace:
+#0 (): child_main()
+#1 (): xbox_process_call_message()
+#2 {main}' in %s/gen_user_func_exception_trace.php:15
+Stack trace:
+#0 %s/gen_user_func_exception_trace.php(15): <unknown>()
+#1 (): Closure$main()
+#2 %s/gen_user_func_exception_trace.php(16): HH\Asio\join()
+#3 (): main()
+#4 {main}

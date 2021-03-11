@@ -1,0 +1,19 @@
+*** Testing get_class_methods() : basic functionality ***
+Argument is class name:
+vec(3) {
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+}
+Argument is class instance:
+vec(3) {
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+}
+Argument is name of class which has no methods:
+vec(0) {
+}
+Argument is non existent class:
+NULL
+Done

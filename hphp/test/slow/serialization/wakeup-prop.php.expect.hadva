@@ -1,0 +1,20 @@
+dict(3) {
+  [0]=>
+  object(stdClass) (1) {
+    ["0"]=>
+    dict(1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  object(obj) (1) {
+    ["prop"]=>
+    string(5) "awake"
+  }
+  [2]=>
+  dict(1) {
+    [0]=>
+    int(1)
+  }
+}

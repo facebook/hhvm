@@ -1,0 +1,11 @@
+Out of bounds dict access: invalid index "z"
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+dict(1) {
+  ["z"]=>
+  dict(0) {
+  }
+}

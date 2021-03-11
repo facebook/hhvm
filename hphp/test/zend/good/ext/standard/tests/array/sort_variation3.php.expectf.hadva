@@ -1,0 +1,162 @@
+*** Testing sort() : usage variations ***
+
+-- Testing sort() by supplying various integer/float arrays --
+
+-- Iteration 1 --
+- With Defualt sort flag -
+bool(true)
+vec(9) {
+  int(-41)
+  int(-31)
+  int(-21)
+  int(-11)
+  int(0)
+  int(11)
+  int(21)
+  int(31)
+  int(41)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(9) {
+  int(-41)
+  int(-31)
+  int(-21)
+  int(-11)
+  int(0)
+  int(11)
+  int(21)
+  int(31)
+  int(41)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+vec(9) {
+  int(-41)
+  int(-31)
+  int(-21)
+  int(-11)
+  int(0)
+  int(11)
+  int(21)
+  int(31)
+  int(41)
+}
+
+-- Iteration 2 --
+- With Defualt sort flag -
+bool(true)
+vec(7) {
+  float(-10.5)
+  float(-0.1)
+  float(0.01)
+  float(0.106)
+  float(0.5)
+  float(10.5)
+  float(1050)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(7) {
+  float(-10.5)
+  float(-0.1)
+  float(0.01)
+  float(0.106)
+  float(0.5)
+  float(10.5)
+  float(1050)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+vec(7) {
+  float(-10.5)
+  float(-0.1)
+  float(0.01)
+  float(0.106)
+  float(0.5)
+  float(10.5)
+  float(1050)
+}
+
+-- Iteration 3 --
+- With Defualt sort flag -
+bool(true)
+vec(11) {
+  int(-1)
+  float(-0.9)
+  float(-0.106)
+  float(-0.01)
+  int(0)
+  float(0.0001)
+  float(0.0021)
+  float(0.09)
+  float(0.106)
+  int(2)
+  int(33)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(11) {
+  int(-1)
+  float(-0.9)
+  float(-0.106)
+  float(-0.01)
+  int(0)
+  float(0.0001)
+  float(0.0021)
+  float(0.09)
+  float(0.106)
+  int(2)
+  int(33)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+vec(11) {
+  int(-1)
+  float(-0.9)
+  float(-0.106)
+  float(-0.01)
+  int(0)
+  float(0.0001)
+  float(0.0021)
+  float(0.09)
+  float(0.106)
+  int(2)
+  int(33)
+}
+
+-- Iteration 4 --
+- With Defualt sort flag -
+bool(true)
+vec(7) {
+  int(-2147483649)
+  int(-2147483648)
+  int(-2147483647)
+  int(0)
+  int(0)
+  int(2147483647)
+  int(2147483648)
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+vec(7) {
+  int(-2147483649)
+  int(-2147483648)
+  int(-2147483647)
+  int(0)
+  int(0)
+  int(2147483647)
+  int(2147483648)
+}
+- Sort flag = SORT_NUMERIC -
+bool(true)
+vec(7) {
+  int(-2147483649)
+  int(-2147483648)
+  int(-2147483647)
+  int(0)
+  int(0)
+  int(2147483647)
+  int(2147483648)
+}
+Done

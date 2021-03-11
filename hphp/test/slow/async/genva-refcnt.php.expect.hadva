@@ -1,0 +1,11 @@
+dict(0) {
+}
+genva 1
+unset a
+unset b
+genva 2
+genva 3
+done
+dict(0) {
+}
+exit

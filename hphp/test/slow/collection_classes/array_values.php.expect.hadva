@@ -1,0 +1,80 @@
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+int(2)
+int(3)
+vec(4) {
+  int(11)
+  int(22)
+  int(33)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+vec(2) {
+  int(22)
+  string(2) "22"
+}
+bool(true)
+int(0)
+int(1)
+vec(2) {
+  int(22)
+  string(2) "22"
+}

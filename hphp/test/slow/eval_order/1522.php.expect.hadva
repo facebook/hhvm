@@ -1,0 +1,15 @@
+dict(1) {
+  ["key"]=>
+  string(3) "1.0"
+}
+dict(1) {
+  ["key"]=>
+  dict(1) {
+    ["key"]=>
+    string(3) "1.0"
+  }
+}
+dict(1) {
+  ["key"]=>
+  string(4) "1.01"
+}

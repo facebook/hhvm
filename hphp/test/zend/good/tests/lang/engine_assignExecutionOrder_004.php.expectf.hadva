@@ -1,0 +1,12 @@
+i1
+i2
+i3
+i4
+vec(6) {
+  int(10)
+  int(11)
+  int(0)
+  int(30)
+  int(40)
+  int(3)
+}

@@ -1,0 +1,17 @@
+NULL
+
+Warning: error_get_last() expects exactly 0 parameters, 1 given in %s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php on line 4
+NULL
+
+Notice: Cannot access property on non-object in %s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php on line 8
+dict(4) {
+  ["type"]=>
+  int(8)
+  ["message"]=>
+  string(36) "Cannot access property on non-object"
+  ["file"]=>
+  string(%d) "%s/test/zend/good/ext/standard/tests/general_functions/error_get_last.php"
+  ["line"]=>
+  int(8)
+}
+Done

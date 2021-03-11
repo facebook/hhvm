@@ -1,0 +1,18 @@
+*** Testing array_diff_ukey() : usage variation ***
+
+-- Testing array_diff_ukey() function with multi dimensional array --
+dict(1) {
+  ["third"]=>
+  dict(1) {
+    [0]=>
+    string(4) "zero"
+  }
+}
+dict(1) {
+  ["fourth"]=>
+  dict(1) {
+    [2]=>
+    string(3) "two"
+  }
+}
+===DONE===

@@ -1,0 +1,113 @@
+int(2)
+dict(2) {
+  [0]=>
+  dict(7) {
+    [0]=>
+    string(24) "unsigned int xpto = 124;"
+    [1]=>
+    string(12) "unsigned int"
+    [2]=>
+    string(0) ""
+    [3]=>
+    string(0) ""
+    [4]=>
+    string(4) "xpto"
+    [5]=>
+    string(1) "="
+    [6]=>
+    string(0) ""
+  }
+  [1]=>
+  dict(7) {
+    [0]=>
+    string(11) "short a, b;"
+    [1]=>
+    string(5) "short"
+    [2]=>
+    string(0) ""
+    [3]=>
+    string(0) ""
+    [4]=>
+    string(1) "a"
+    [5]=>
+    string(0) ""
+    [6]=>
+    string(3) ", b"
+  }
+}
+int(3)
+dict(3) {
+  [0]=>
+  dict(4) {
+    [0]=>
+    string(3) "&a,"
+    [1]=>
+    string(1) "&"
+    [2]=>
+    string(1) "a"
+    [3]=>
+    string(0) ""
+  }
+  [1]=>
+  dict(4) {
+    [0]=>
+    string(2) "b,"
+    [1]=>
+    string(0) ""
+    [2]=>
+    string(1) "b"
+    [3]=>
+    string(0) ""
+  }
+  [2]=>
+  dict(4) {
+    [0]=>
+    string(2) "&c"
+    [1]=>
+    string(1) "&"
+    [2]=>
+    string(1) "c"
+    [3]=>
+    string(0) ""
+  }
+}
+int(1)
+dict(1) {
+  [0]=>
+  dict(3) {
+    [0]=>
+    vec(2) {
+      string(46) "zend_parse_parameters( 0, "addd|s/", a, b, &c)"
+      int(0)
+    }
+    [1]=>
+    vec(2) {
+      string(7) "addd|s/"
+      int(27)
+    }
+    [2]=>
+    vec(2) {
+      string(9) "a, b, &c)"
+      int(37)
+    }
+  }
+}
+dict(3) {
+  [0]=>
+  vec(2) {
+    string(0) ""
+    int(0)
+  }
+  [1]=>
+  vec(2) {
+    string(13) "s, preg_match"
+    int(13)
+  }
+  [2]=>
+  vec(2) {
+    string(9) "
+{
+lalala"
+    int(27)
+  }
+}

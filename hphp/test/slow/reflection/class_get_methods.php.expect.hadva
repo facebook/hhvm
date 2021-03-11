@@ -1,0 +1,83 @@
+dict(1) {
+  [0]=>
+  string(11) "A::fetchAll"
+}
+vec(1) {
+  string(8) "fetchAll"
+}
+dict(24) {
+  [0]=>
+  string(21) "PDOStatement::execute"
+  [1]=>
+  string(19) "PDOStatement::fetch"
+  [2]=>
+  string(25) "PDOStatement::fetchObject"
+  [3]=>
+  string(25) "PDOStatement::fetchColumn"
+  [4]=>
+  string(22) "PDOStatement::fetchAll"
+  [5]=>
+  string(23) "PDOStatement::bindValue"
+  [6]=>
+  string(22) "PDOStatement::rowCount"
+  [7]=>
+  string(23) "PDOStatement::errorCode"
+  [8]=>
+  string(23) "PDOStatement::errorInfo"
+  [9]=>
+  string(26) "PDOStatement::setAttribute"
+  [10]=>
+  string(26) "PDOStatement::getAttribute"
+  [11]=>
+  string(25) "PDOStatement::columnCount"
+  [12]=>
+  string(27) "PDOStatement::getColumnMeta"
+  [13]=>
+  string(26) "PDOStatement::setFetchMode"
+  [14]=>
+  string(24) "PDOStatement::nextRowset"
+  [15]=>
+  string(25) "PDOStatement::closeCursor"
+  [16]=>
+  string(29) "PDOStatement::debugDumpParams"
+  [17]=>
+  string(21) "PDOStatement::current"
+  [18]=>
+  string(17) "PDOStatement::key"
+  [19]=>
+  string(18) "PDOStatement::next"
+  [20]=>
+  string(20) "PDOStatement::rewind"
+  [21]=>
+  string(19) "PDOStatement::valid"
+  [22]=>
+  string(22) "PDOStatement::__wakeup"
+  [23]=>
+  string(21) "PDOStatement::__sleep"
+}
+vec(24) {
+  string(7) "execute"
+  string(5) "fetch"
+  string(11) "fetchObject"
+  string(11) "fetchColumn"
+  string(8) "fetchAll"
+  string(9) "bindValue"
+  string(8) "rowCount"
+  string(9) "errorCode"
+  string(9) "errorInfo"
+  string(12) "setAttribute"
+  string(12) "getAttribute"
+  string(11) "columnCount"
+  string(13) "getColumnMeta"
+  string(12) "setFetchMode"
+  string(10) "nextRowset"
+  string(11) "closeCursor"
+  string(15) "debugDumpParams"
+  string(7) "current"
+  string(3) "key"
+  string(4) "next"
+  string(6) "rewind"
+  string(5) "valid"
+  string(8) "__wakeup"
+  string(7) "__sleep"
+}

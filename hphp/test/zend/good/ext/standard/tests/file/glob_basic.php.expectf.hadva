@@ -1,0 +1,23 @@
+*** Testing glob() : basic functions ***
+vec(3) {
+  string(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder12345"
+}
+vec(1) {
+  string(%d) "%s/glob_basic/wonder.txt"
+}
+vec(1) {
+  string(%d) "%s/glob_basic/wonder.txt"
+}
+vec(2) {
+  string(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/wonder.txt"
+}
+vec(0) {
+}
+vec(2) {
+  string(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/wonder.txt"
+}
+Done

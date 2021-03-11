@@ -1,0 +1,24 @@
+vec(3) {
+  string(1) "0"
+  string(0) ""
+  string(1) "2"
+}
+vec(3) {
+  string(1) "0"
+  string(1) " "
+  string(1) "2"
+}
+vec(5) {
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+vec(5) {
+  string(1) " "
+  string(2) "  "
+  string(0) ""
+  string(0) ""
+  string(1) " "
+}

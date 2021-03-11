@@ -1,0 +1,29 @@
+DOMImplementation
+object(DOMImplementation) (0) {
+}
+string(29) "O:17:"DOMImplementation":0:{}"
+object(DOMImplementation) (0) {
+}
+vec(4) {
+  string(11) "__construct"
+  string(14) "createDocument"
+  string(18) "createDocumentType"
+  string(10) "hasFeature"
+}
+================
+A_DOMImplementation
+object(A_DOMImplementation) (1) {
+  ["___x"]=>
+  NULL
+}
+string(44) "O:19:"A_DOMImplementation":1:{s:4:"___x";N;}"
+object(A_DOMImplementation) (1) {
+  ["___x"]=>
+  NULL
+}
+vec(4) {
+  string(11) "__construct"
+  string(14) "createDocument"
+  string(18) "createDocumentType"
+  string(10) "hasFeature"
+}

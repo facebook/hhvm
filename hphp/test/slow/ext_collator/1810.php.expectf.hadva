@@ -1,0 +1,489 @@
+Test 1.4c4e270d56c36a4af3ae75a8ca4403f2:
+vec [
+  'aaa',
+  'abc',
+  'abd',
+]
+ Result: true
+
+Test 2.c9cbf285979fdf3cb078d5852f739f45:
+vec [
+  '_',
+  '1',
+  'm',
+]
+ Result: true
+
+Test 3.1ab9c7eec494cf3ca5e1dce81bc54b87:
+vec [
+  'a',
+  'aa',
+  'aaa',
+]
+ Result: true
+
+Test 4.8c015f033e63ec77bbd338b437932ef3:
+vec [
+  'ab',
+  'b',
+  'ba',
+]
+ Result: true
+
+Test 5.e85df79912ccf40db467a3d41e5945e4:
+vec [
+  'a',
+  'c',
+  'e',
+]
+ Result: true
+
+Test 6.713dced11e1bb70002c6661587683a00:
+vec [
+  '25',
+  '36',
+  '100',
+]
+ Result: true
+
+Test 7.6bcd5099afc31c1b7f7b09450137c8d5:
+vec [
+  2,
+  5,
+  '30',
+]
+ Result: true
+
+Test 8.6e8b96676ae67c86db1660b0ce70ce45:
+vec [
+  '',
+  ' a',
+  'd',
+]
+ Result: true
+
+Test 9.4e3a927e92fef57dcba48f88517ea8e4:
+vec [
+  ' a',
+  'd ',
+  'f ',
+]
+ Result: true
+
+Test 10.fafc77ca66955b539693d68becac29f6:
+vec [
+  NULL,
+  '3',
+  'a',
+]
+ Result: true
+
+Test 11.9fe68c05033cdd06abb380826afbb058:
+vec [
+  'i',
+  'k',
+  'y',
+]
+ Result: true
+
+Test 12.d43626e3930520561d084366b840107e:
+vec [
+  '100',
+  '25',
+  '36',
+]
+ Result: true
+
+Test 13.6f79ed7ec0bfc08087f5ab2948a76766:
+vec [
+  2,
+  '30',
+  5,
+]
+ Result: true
+
+Test 14.6e8b96676ae67c86db1660b0ce70ce45:
+vec [
+  '',
+  ' a',
+  'd',
+]
+ Result: true
+
+Test 15.9fe68c05033cdd06abb380826afbb058:
+vec [
+  'i',
+  'k',
+  'y',
+]
+ Result: true
+
+Test 16.0b977711afdd45554644f555d4b9014f:
+vec [
+  'ааа',
+  'абв',
+  'абв',
+  'абг',
+]
+ Result: true
+
+Test 17.5d27a145952612b4e10782f74f3eeea3:
+vec [
+  'а',
+  'аа',
+  'ааа',
+]
+ Result: true
+
+Test 18.9ec4e88c7d969a27847c3b1b44abbb5f:
+vec [
+  'i',
+  'y',
+  'k',
+]
+ Result: truevec(5) {
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+  int(100)
+}
+vec(5) {
+  int(100)
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+}
+vec(5) {
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+  int(100)
+}
+vec(3) {
+  string(2) "25"
+  string(2) "36"
+  string(3) "100"
+}
+vec(3) {
+  string(3) "100"
+  string(2) "25"
+  string(2) "36"
+}
+vec(3) {
+  string(2) "25"
+  string(2) "36"
+  string(3) "100"
+}
+vec(9) {
+  int(2)
+  string(1) "2"
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  string(2) "30"
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(10)
+  int(11)
+  int(17)
+  string(1) "2"
+  int(2)
+  string(2) "30"
+  int(5)
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(2)
+  string(1) "2"
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  string(2) "30"
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(2)
+  int(2)
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  int(30)
+  int(54)
+  int(64)
+}
+vec(9) {
+  int(10)
+  int(11)
+  int(17)
+  int(2)
+  int(2)
+  int(30)
+  int(5)
+  int(54)
+  int(64)
+}
+vec(9) {
+  int(2)
+  int(2)
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  int(30)
+  int(54)
+  int(64)
+}
+vec(5) {
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+  int(100)
+}
+vec(5) {
+  int(100)
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+}
+vec(5) {
+  int(25)
+  string(5) "30.12"
+  string(4) "30.2"
+  int(36)
+  int(100)
+}
+vec(3) {
+  string(2) "25"
+  string(2) "36"
+  string(3) "100"
+}
+vec(3) {
+  string(3) "100"
+  string(2) "25"
+  string(2) "36"
+}
+vec(3) {
+  string(2) "25"
+  string(2) "36"
+  string(3) "100"
+}
+vec(9) {
+  int(2)
+  string(1) "2"
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  string(2) "30"
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(10)
+  int(11)
+  int(17)
+  string(1) "2"
+  int(2)
+  string(2) "30"
+  int(5)
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(2)
+  string(1) "2"
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  string(2) "30"
+  string(2) "54"
+  int(64)
+}
+vec(9) {
+  int(2)
+  int(2)
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  int(30)
+  int(54)
+  int(64)
+}
+vec(9) {
+  int(10)
+  int(11)
+  int(17)
+  int(2)
+  int(2)
+  int(30)
+  int(5)
+  int(54)
+  int(64)
+}
+vec(9) {
+  int(2)
+  int(2)
+  int(5)
+  int(10)
+  int(11)
+  int(17)
+  int(30)
+  int(54)
+  int(64)
+}
+Locale: 'EN-US-ODESSA'
+  ULOC_VALID_LOCALE     = 'en_US'
+Locale: 'UK_UA_ODESSA'
+  ULOC_VALID_LOCALE     = 'uk'
+Locale: ''
+  ULOC_VALID_LOCALE     = 'en_US_POSIX'
+Locale: 'root'
+  ULOC_VALID_LOCALE     = 'root'
+Locale: 'uk@currency=EURO'
+  ULOC_VALID_LOCALE     = 'uk'
+vec [
+  'a',
+  'b',
+  'c',
+]
+vec [
+  'a',
+  'b',
+  'c',
+]
+vec [
+  'b',
+  'a',
+  'c',
+]
+vec [
+  'а',
+  'б',
+  'в',
+]
+vec [
+  'а',
+  'б',
+  'в',
+]
+vec [
+  'б',
+  'а',
+  'в',
+]
+di Silva < Di Silva < diSilva < U.S.A. < USA
+di Silva = diSilva < Di Silva < U.S.A. = USA
+di Silva < diSilva < Di Silva < U.S.A. < USA
+
+
+
+Test 1.4c4e270d56c36a4af3ae75a8ca4403f2:
+vec [
+  'aaa',
+  'abc',
+  'abd',
+]
+ Result: true
+
+Test 2.c9cbf285979fdf3cb078d5852f739f45:
+vec [
+  '_',
+  '1',
+  'm',
+]
+ Result: true
+
+Test 3.1ab9c7eec494cf3ca5e1dce81bc54b87:
+vec [
+  'a',
+  'aa',
+  'aaa',
+]
+ Result: true
+
+Test 4.8c015f033e63ec77bbd338b437932ef3:
+vec [
+  'ab',
+  'b',
+  'ba',
+]
+ Result: true
+
+Test 5.e85df79912ccf40db467a3d41e5945e4:
+vec [
+  'a',
+  'c',
+  'e',
+]
+ Result: true
+
+Test 6.6e8b96676ae67c86db1660b0ce70ce45:
+vec [
+  '',
+  ' a',
+  'd',
+]
+ Result: true
+
+Test 7.4e3a927e92fef57dcba48f88517ea8e4:
+vec [
+  ' a',
+  'd ',
+  'f ',
+]
+ Result: true
+
+Test 8.fafc77ca66955b539693d68becac29f6:
+vec [
+  NULL,
+  '3',
+  'a',
+]
+ Result: true
+
+Test 9.9fe68c05033cdd06abb380826afbb058:
+vec [
+  'i',
+  'k',
+  'y',
+]
+ Result: true
+
+Test 10.0b977711afdd45554644f555d4b9014f:
+vec [
+  'ааа',
+  'абв',
+  'абв',
+  'абг',
+]
+ Result: true
+
+Test 11.5d27a145952612b4e10782f74f3eeea3:
+vec [
+  'а',
+  'аа',
+  'ааа',
+]
+ Result: true
+
+Test 12.9ec4e88c7d969a27847c3b1b44abbb5f:
+vec [
+  'i',
+  'y',
+  'k',
+]
+ Result: true

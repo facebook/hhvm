@@ -1,0 +1,6 @@
+dict(2) {
+  ["b"]=>
+  string(4) "test"
+  ["a"]=>
+  string(4) "test"
+}

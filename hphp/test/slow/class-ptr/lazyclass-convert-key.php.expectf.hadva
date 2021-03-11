@@ -1,0 +1,129 @@
+===keyset:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 46
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 47
+keyset(2) {
+  string(3) "Foo"
+  string(3) "Bar"
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 49
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 50
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 51
+string(3) "Foo"
+===dict:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 10
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 11
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 17
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 18
+bool(true)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 19
+int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 20
+bool(true)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 21
+int(10)
+===Set===
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 56
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 57
+object(HH\Set) (2) {
+  class(Foo)
+  string(3) "Bar"
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 59
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 60
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 61
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 62
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 63
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 64
+bool(true)
+===Map:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 26
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 27
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 28
+int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 29
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
+int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 31
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 32
+int(10)
+===vec:===vec(3) {
+  class(Foo)
+  class(Fizz)
+  class(Baz)
+}
+class(Foo)
+class(Fizz)
+class(Baz)
+===Vector:===object(HH\Vector) (3) {
+  [0]=>
+  class(Baz)
+  [1]=>
+  class(Fizz)
+  [2]=>
+  class(Foo)
+}
+===dvarray:===vec(2) {
+  class(Baz)
+  class(Fizz)
+}
+vec(2) {
+  int(0)
+  int(1)
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 84
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
+vec(2) {
+  string(3) "Foo"
+  string(3) "Baz"
+}
+===shape===
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 91
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 94
+dict(3) {
+  ["Foo"]=>
+  int(3)
+  ["Bar"]=>
+  int(2)
+  ["Fizz"]=>
+  int(4)
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 96
+int(3)
+
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/class-key-convert.inc on line 97
+int(3)

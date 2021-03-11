@@ -1,0 +1,31 @@
+string(70) "HH\shape(D::O=>HH\shape(D::L=>HH\string, D::N=>HH\int), D::M=>HH\bool)"
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["bar"]=>
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(2) {
+        [123]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+        [456]=>
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+    ["foo"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}

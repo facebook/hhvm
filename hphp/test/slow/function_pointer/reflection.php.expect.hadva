@@ -1,0 +1,267 @@
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func1"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      classMeth{
+        class(Foo)
+        function(bar)
+      }
+      ["defaultText"]=>
+      string(10) "Foo::bar<>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func2"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      classMeth{
+        class(Foo)
+        function(bar_with_generic)
+      }
+      ["defaultText"]=>
+      string(24) "Foo::bar_with_generic<_>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func3"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      classMeth{
+        class(Foo)
+        function(bar_with_generics)
+      }
+      ["defaultText"]=>
+      string(34) "Foo::bar_with_generics<_, _, _, _>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func4"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      function(baz)
+      ["defaultText"]=>
+      string(5) "baz<>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func5"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      function(baz_with_generic)
+      ["defaultText"]=>
+      string(19) "baz_with_generic<_>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func6"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      function(baz_with_generics)
+      ["defaultText"]=>
+      string(29) "baz_with_generics<_, _, _, _>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}

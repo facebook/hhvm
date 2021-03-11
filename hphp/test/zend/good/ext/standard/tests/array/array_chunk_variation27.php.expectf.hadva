@@ -1,0 +1,27 @@
+vec(1) {
+  int(1)
+}
+[0]
+NULL
+NULL
+NULL
+
+[1]
+vec(1) {
+  dict(1) {
+    [0]=>
+    int(1)
+  }
+}
+vec(1) {
+  dict(1) {
+    [0]=>
+    int(1)
+  }
+}
+vec(1) {
+  dict(1) {
+    [0]=>
+    int(1)
+  }
+}

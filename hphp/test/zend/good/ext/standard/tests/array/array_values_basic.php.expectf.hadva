@@ -1,0 +1,9 @@
+*** Testing array_values() : basic functionality ***
+vec(5) {
+  string(4) "zero"
+  string(3) "one"
+  string(3) "two"
+  int(3)
+  string(3) "ten"
+}
+Done

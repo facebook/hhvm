@@ -1,0 +1,20 @@
+dict(1) {
+  ["kind"]=>
+  int(1)
+}
+dict(1) {
+  ["kind"]=>
+  int(1)
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}

@@ -1,0 +1,36 @@
+object(NewStruct) (1) {
+  ["features"]=>
+  dict(2) {
+    [1]=>
+    float(314)
+    [2]=>
+    float(271.8)
+  }
+}
+object(OldStruct) (1) {
+  ["features"]=>
+  dict(2) {
+    [1]=>
+    float(314)
+    [2]=>
+    float(271.79998779297)
+  }
+}
+object(NewStruct) (1) {
+  ["features"]=>
+  dict(2) {
+    [1]=>
+    float(314)
+    [2]=>
+    float(271.8)
+  }
+}
+object(OldStruct) (1) {
+  ["features"]=>
+  dict(2) {
+    [1]=>
+    float(314)
+    [2]=>
+    float(271.79998779297)
+  }
+}

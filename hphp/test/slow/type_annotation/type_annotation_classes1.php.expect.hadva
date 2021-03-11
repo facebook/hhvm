@@ -1,0 +1,56 @@
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(7) "MyClass"
+}
+dict(2) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(11) "MyInterface"
+}
+dict(2) {
+  ["kind"]=>
+  int(17)
+  ["classname"]=>
+  string(7) "MyTrait"
+}
+dict(2) {
+  ["kind"]=>
+  int(18)
+  ["classname"]=>
+  string(6) "MyEnum"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(7) "MyClass"
+  ["generic_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(18)
+      ["classname"]=>
+      string(6) "MyEnum"
+    }
+  }
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(7) "MyClass"
+  ["generic_types"]=>
+  vec(1) {
+    dict(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "C"
+      ["exact"]=>
+      bool(true)
+    }
+  }
+}

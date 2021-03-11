@@ -1,0 +1,64 @@
+*** Testing scandir() : usage variations ***
+
+-- Iteration 1 --
+resource(4) of type (stream)
+
+-- Iteration 2 --
+resource(4) of type (stream)
+
+-- Iteration 3 --
+resource(4) of type (stream)
+
+-- Iteration 4 --
+resource(4) of type (stream)
+
+-- Iteration 5 --
+resource(4) of type (stream)
+
+-- Iteration 6 --
+resource(4) of type (stream)
+
+-- Iteration 7 --
+resource(4) of type (stream)
+
+-- Iteration 8 --
+resource(4) of type (stream)
+
+-- Iteration 9 --
+resource(4) of type (stream)
+
+-- Iteration 10 --
+resource(4) of type (stream)
+
+-- Iteration 11 --
+resource(4) of type (stream)
+
+-- Iteration 12 --
+resource(4) of type (stream)
+
+-- Iteration 13 --
+resource(4) of type (stream)
+
+-- Iteration 14 --
+resource(4) of type (stream)
+
+-- Call to scandir() --
+vec(16) {
+  string(9) "-10.5.tmp"
+  string(9) "-2345.tmp"
+  string(1) "."
+  string(2) ".."
+  string(4) ".tmp"
+  string(7) "0.5.tmp"
+  string(5) "0.tmp"
+  string(17) "1.23456789E-9.tmp"
+  string(5) "1.tmp"
+  string(8) "10.5.tmp"
+  string(9) "12345.tmp"
+  string(16) "123456789000.tmp"
+  string(9) "Array.tmp"
+  string(15) "double_file.tmp"
+  string(11) "hd_file.tmp"
+  string(15) "single_file.tmp"
+}
+===DONE===

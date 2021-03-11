@@ -1,0 +1,18 @@
+dict(1) {
+  ["options"]=>
+  dict(1) {
+    ["http"]=>
+    dict(2) {
+      ["header"]=>
+      vec(2) {
+        string(21) "Accept-Encoding: gzip"
+        string(39) "User-Agent: Composer/source PHP 5.5.99)"
+      }
+      ["tls"]=>
+      dict(1) {
+        ["verify_peer_name"]=>
+        bool(true)
+      }
+    }
+  }
+}

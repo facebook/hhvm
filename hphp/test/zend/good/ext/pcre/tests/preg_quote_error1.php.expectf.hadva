@@ -1,0 +1,11 @@
+*** Testing preg_quote() : error conditions ***
+
+Arg value is: this is a string
+string(16) "this is a string"
+
+Arg value is: Array
+
+Warning: preg_quote() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/pcre/tests/preg_quote_error1.php on line 14
+
+Warning: preg_quote() expects parameter 1 to be string, object given in %s/test/zend/good/ext/pcre/tests/preg_quote_error1.php on line 17
+Done

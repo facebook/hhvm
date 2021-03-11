@@ -1,0 +1,92 @@
+Dict
+(
+    [green] => green
+    [red] => red
+    [yellow] => yellow
+)
+Dict
+(
+    [green] => 1
+    [red] => 2
+    [yellow] => 3
+)
+Dict
+(
+    [green] => 0
+    [red] => 1
+    [yellow] => 2
+)
+Dict
+(
+    [green] => 1
+    [red] => 
+    [yellow] => 
+)
+Dict
+(
+    [1] => green
+    [2] => red
+    [3] => yellow
+)
+Dict
+(
+    [1] => 1
+    [2] => 2
+    [3] => 3
+)
+Dict
+(
+    [1] => 0
+    [2] => 1
+    [3] => 2
+)
+Dict
+(
+    [1] => 1
+    [2] => 
+    [3] => 
+)
+Dict
+(
+    [0] => green
+    [1] => red
+    [2] => yellow
+)
+Dict
+(
+    [0] => 1
+    [1] => 2
+    [2] => 3
+)
+Dict
+(
+    [0] => 0
+    [1] => 1
+    [2] => 2
+)
+Dict
+(
+    [0] => 1
+    [1] => 
+    [2] => 
+)
+Dict
+(
+    [1] => green
+    [] => yellow
+)
+Dict
+(
+    [1] => 1
+    [] => 3
+)
+Dict
+(
+    [1] => 0
+    [] => 2
+)
+Dict
+(
+    [1] => 1
+    [] => 
+)

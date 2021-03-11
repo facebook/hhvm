@@ -1,0 +1,170 @@
+dict(1) {
+  [1]=>
+  dict(1) {
+    [1]=>
+    dict(1) {
+      [1]=>
+      dict(1) {
+        [1]=>
+        dict(1) {
+          [1]=>
+          dict(1) {
+            [1]=>
+            dict(1) {
+              [1]=>
+              dict(1) {
+                [1]=>
+                dict(1) {
+                  [1]=>
+                  dict(1) {
+                    [1]=>
+                    int(1)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+vec(1) {
+  vec(1) {
+    vec(1) {
+      vec(1) {
+        vec(1) {
+          vec(1) {
+            vec(1) {
+              vec(1) {
+                vec(1) {
+                  vec(0) {
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+vec(1) {
+  vec(1) {
+    vec(1) {
+      vec(1) {
+        vec(1) {
+          vec(1) {
+            vec(1) {
+              vec(1) {
+                vec(1) {
+                  vec(1) {
+                    int(1)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+dict(1) {
+  [1]=>
+  dict(1) {
+    [1]=>
+    dict(1) {
+      [1]=>
+      dict(1) {
+        [1]=>
+        dict(1) {
+          [1]=>
+          dict(1) {
+            [1]=>
+            dict(1) {
+              [1]=>
+              dict(1) {
+                [1]=>
+                dict(1) {
+                  [1]=>
+                  dict(0) {
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+dict(1) {
+  [1]=>
+  dict(1) {
+    [1]=>
+    dict(1) {
+      [1]=>
+      dict(1) {
+        [1]=>
+        dict(1) {
+          [1]=>
+          dict(1) {
+            [1]=>
+            dict(1) {
+              [1]=>
+              dict(1) {
+                [1]=>
+                dict(1) {
+                  [1]=>
+                  dict(1) {
+                    [1]=>
+                    int(1)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+vec(1) {
+  vec(1) {
+    vec(1) {
+      vec(1) {
+        vec(1) {
+          vec(1) {
+            vec(1) {
+              vec(1) {
+                vec(1) {
+                  vec(0) {
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)

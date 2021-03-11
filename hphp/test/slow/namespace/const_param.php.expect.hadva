@@ -1,0 +1,32 @@
+string(11) "5.6.99-hhvm"
+string(12) "\PHP_VERSION"
+string(12) "\PHP_VERSION"
+string(1) "c"
+string(4) "\A\B"
+string(4) "\A\B"
+vec(1) {
+  string(11) "5.6.99-hhvm"
+}
+string(20) "varray[\PHP_VERSION]"
+NULL
+vec(1) {
+  string(1) "c"
+}
+string(12) "varray[\A\B]"
+NULL
+string(11) "5.6.99-hhvm"
+string(12) "\PHP_VERSION"
+string(12) "\PHP_VERSION"
+string(1) "c"
+string(4) "\A\B"
+string(4) "\A\B"
+vec(1) {
+  string(11) "5.6.99-hhvm"
+}
+string(20) "varray[\PHP_VERSION]"
+NULL
+vec(1) {
+  string(1) "c"
+}
+string(12) "varray[\A\B]"
+NULL

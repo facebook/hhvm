@@ -1,0 +1,112 @@
+*** Testing array_slice() : usage variations ***
+
+-- Iteration 1 --
+dict(0) {
+}
+
+-- Iteration 2 --
+dict(1) {
+  ["three"]=>
+  int(3)
+}
+
+-- Iteration 3 --
+dict(2) {
+  ["three"]=>
+  int(3)
+  [0]=>
+  int(4)
+}
+
+-- Iteration 4 --
+dict(0) {
+}
+
+-- Iteration 5 --
+dict(2) {
+  ["three"]=>
+  int(3)
+  [0]=>
+  int(4)
+}
+
+-- Iteration 6 --
+dict(0) {
+}
+
+-- Iteration 7 --
+dict(2) {
+  ["three"]=>
+  int(3)
+  [0]=>
+  int(4)
+}
+
+-- Iteration 8 --
+dict(0) {
+}
+
+-- Iteration 9 --
+dict(0) {
+}
+
+-- Iteration 10 --
+dict(2) {
+  ["three"]=>
+  int(3)
+  [0]=>
+  int(4)
+}
+
+-- Iteration 11 --
+dict(2) {
+  ["three"]=>
+  int(3)
+  [0]=>
+  int(4)
+}
+
+-- Iteration 12 --
+dict(1) {
+  ["three"]=>
+  int(3)
+}
+
+-- Iteration 13 --
+dict(0) {
+}
+
+-- Iteration 14 --
+dict(1) {
+  ["three"]=>
+  int(3)
+}
+
+-- Iteration 15 --
+dict(0) {
+}
+
+-- Iteration 16 --
+dict(0) {
+}
+
+-- Iteration 17 --
+dict(0) {
+}
+
+-- Iteration 18 --
+dict(0) {
+}
+
+-- Iteration 19 --
+dict(0) {
+}
+
+-- Iteration 20 --
+dict(0) {
+}
+
+-- Iteration 21 --
+dict(0) {
+}
+Done

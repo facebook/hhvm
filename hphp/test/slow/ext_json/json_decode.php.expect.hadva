@@ -1,0 +1,126 @@
+dict(1) {
+  ["fbid"]=>
+  int(101501853510151001)
+}
+dict(1) {
+  [0]=>
+  dict(1) {
+    ["00"]=>
+    int(0)
+  }
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  float(2.3)
+  [3]=>
+  string(4) "test"
+}
+dict(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+}
+dict(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+  [2]=>
+  bool(true)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+}
+NULL
+dict(1) {
+  ["z"]=>
+  int(1)
+}
+NULL
+dict(1) {
+  ["z"]=>
+  string(1) "z"
+}
+NULL
+dict(1) {
+  ["x"]=>
+  int(1)
+}
+NULL
+dict(1) {
+  ["y"]=>
+  int(1)
+}
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+NULL
+NULL
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(2) {
+  [0]=>
+  dict(1) {
+    ["a"]=>
+    string(5) "apple"
+  }
+  [1]=>
+  dict(1) {
+    ["b"]=>
+    string(6) "banana"
+  }
+}
+dict(2) {
+  [0]=>
+  dict(1) {
+    ["a"]=>
+    dict(1) {
+      [0]=>
+      dict(1) {
+        ["n"]=>
+        string(3) "1st"
+      }
+    }
+  }
+  [1]=>
+  dict(1) {
+    ["b"]=>
+    dict(1) {
+      [0]=>
+      dict(1) {
+        ["n"]=>
+        string(3) "2nd"
+      }
+    }
+  }
+}

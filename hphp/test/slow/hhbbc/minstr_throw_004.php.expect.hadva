@@ -1,0 +1,7 @@
+bool(true)
+vec(1) {
+  dict(1) {
+    ["asd"]=>
+    bool(true)
+  }
+}

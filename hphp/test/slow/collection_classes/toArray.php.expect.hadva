@@ -1,0 +1,30 @@
+vec(2) {
+  int(1)
+  int(2)
+}
+vec(2) {
+  int(1)
+  int(2)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(4)
+}
+object(HH\Vector) (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(HH\ImmVector) (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}

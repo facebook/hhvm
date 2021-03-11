@@ -1,0 +1,27 @@
+* eager async *
+eager execution
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* blocking async *
+before blocking
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+after blocking
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* generator *
+string(1) "a"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}

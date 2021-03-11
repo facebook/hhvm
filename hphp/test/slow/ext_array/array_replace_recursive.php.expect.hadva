@@ -1,0 +1,20 @@
+dict(2) {
+  ["color"]=>
+  dict(1) {
+    ["favoritte"]=>
+    string(3) "red"
+  }
+  [0]=>
+  vec(2) {
+    int(10)
+    dict(1) {
+      ["color"]=>
+      dict(2) {
+        ["favorite"]=>
+        string(5) "green"
+        [0]=>
+        string(4) "blue"
+      }
+    }
+  }
+}

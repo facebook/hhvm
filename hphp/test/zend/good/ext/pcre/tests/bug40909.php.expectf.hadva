@@ -1,0 +1,18 @@
+int(1)
+dict(3) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    string(33) " an_attribute="simpleValueInside""
+  }
+  [1]=>
+  dict(1) {
+    [0]=>
+    string(12) "an_attribute"
+  }
+  [2]=>
+  dict(1) {
+    [0]=>
+    string(19) ""simpleValueInside""
+  }
+}

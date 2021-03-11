@@ -1,0 +1,13 @@
+vec(2) {
+  int(0)
+  string(5) "color"
+}
+vec(2) {
+  string(5) "color"
+  string(4) "size"
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}

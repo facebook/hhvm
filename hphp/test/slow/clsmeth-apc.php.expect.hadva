@@ -1,0 +1,24 @@
+classMeth{
+  class(C)
+  function(f)
+}
+vec(3) {
+  int(1)
+  classMeth{
+    class(C)
+    function(f)
+  }
+  string(3) "foo"
+}
+classMeth{
+  class(HH\Map)
+  function(fromItems)
+}
+vec(3) {
+  int(10)
+  classMeth{
+    class(HH\Map)
+    function(fromItems)
+  }
+  string(3) "foo"
+}

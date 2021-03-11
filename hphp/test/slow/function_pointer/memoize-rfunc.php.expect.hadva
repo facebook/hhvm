@@ -1,0 +1,10 @@
+foo(1)
+dict(1) {
+  ["kind"]=>
+  int(1)
+}
+foo(2)
+dict(1) {
+  ["kind"]=>
+  int(1)
+}

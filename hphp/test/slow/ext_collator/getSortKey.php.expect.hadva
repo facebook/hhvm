@@ -1,0 +1,64 @@
+dict(1) {
+  ["en_US"]=>
+  vec(3) {
+    string(1) "1"
+    string(2) "10"
+    string(1) "2"
+  }
+}
+dict(1) {
+  ["en_US numeric"]=>
+  vec(3) {
+    string(1) "1"
+    string(1) "2"
+    string(2) "10"
+  }
+}
+dict(1) {
+  ["lt_LT"]=>
+  vec(3) {
+    string(1) "1"
+    string(2) "10"
+    string(1) "2"
+  }
+}
+dict(1) {
+  ["lt_LT numeric"]=>
+  vec(3) {
+    string(1) "1"
+    string(1) "2"
+    string(2) "10"
+  }
+}
+dict(1) {
+  ["en_US"]=>
+  vec(3) {
+    string(1) "i"
+    string(1) "k"
+    string(1) "y"
+  }
+}
+dict(1) {
+  ["en_US numeric"]=>
+  vec(3) {
+    string(1) "i"
+    string(1) "k"
+    string(1) "y"
+  }
+}
+dict(1) {
+  ["lt_LT"]=>
+  vec(3) {
+    string(1) "i"
+    string(1) "y"
+    string(1) "k"
+  }
+}
+dict(1) {
+  ["lt_LT numeric"]=>
+  vec(3) {
+    string(1) "i"
+    string(1) "y"
+    string(1) "k"
+  }
+}

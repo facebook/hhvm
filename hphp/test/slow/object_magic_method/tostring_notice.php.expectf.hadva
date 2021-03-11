@@ -1,0 +1,159 @@
+==== explicit call ====
+__toString called
+string(6) "string"
+==== explicit cast ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 19
+__toString called
+string(6) "string"
+==== direct comparisons ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 23
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 24
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 25
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 26
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 27
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 28
+__toString called
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 31
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 32
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 33
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 34
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 35
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 36
+__toString called
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+==== nested comparisons ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 42
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 43
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 44
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 45
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 46
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 47
+__toString called
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 50
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 51
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 52
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 53
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 54
+__toString called
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 55
+__toString called
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+==== concatenations ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 59
+__toString called
+string(7) "astring"
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 60
+__toString called
+string(7) "strings"
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 62
+__toString called
+string(7) "astring"
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 65
+__toString called
+string(7) "strings"
+==== array-like write to string ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 70
+__toString called
+string(5) "spall"
+==== array_diff ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 74
+__toString called
+dict(1) {
+  [0]=>
+  string(3) "int"
+}
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 75
+__toString called
+dict(1) {
+  [0]=>
+  string(3) "int"
+}
+==== array_intersect ====
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 78
+__toString called
+dict(1) {
+  [1]=>
+  string(6) "string"
+}
+
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 79
+__toString called
+dict(1) {
+  [1]=>
+  object(C) (0) {
+  }
+}

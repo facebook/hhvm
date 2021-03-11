@@ -1,0 +1,11 @@
+vec(1) {
+  string(26) "int Test(Test $parameters)"
+}
+vec(1) {
+  string(47) "struct Test {
+ boolean boolA;
+ boolean boolB;
+}"
+}
+bool(true)
+bool(true)

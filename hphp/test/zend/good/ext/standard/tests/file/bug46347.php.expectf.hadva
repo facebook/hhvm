@@ -1,0 +1,4 @@
+dict(1) {
+  ["part1.*.part2"]=>
+  string(1) "1"
+}

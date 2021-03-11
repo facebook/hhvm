@@ -1,0 +1,5 @@
+apple,"""banana"""
+vec(2) {
+  string(5) "apple"
+  string(8) ""banana""
+}

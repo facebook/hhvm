@@ -1,0 +1,9 @@
+----HANDLER----
+string(3) "foo"
+NULL
+vec(2) {
+  string(4) "Hey!"
+  int(1)
+}
+---------------
+int(7)

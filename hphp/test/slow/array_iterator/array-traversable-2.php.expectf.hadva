@@ -1,0 +1,19 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+Traversable
+vec(0) {
+}
+KeyedTraversable
+vec(0) {
+}
+Container
+vec(0) {
+}
+KeyedContainer
+vec(0) {
+}
+
+Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, HH\vec given in %s/test/slow/array_iterator/array-traversable-2.php on line 36

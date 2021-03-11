@@ -1,0 +1,210 @@
+empty...
+bool(false)
+bool(true)
+
+count...
+int(3)
+int(0)
+
+items...
+int(1)
+int(2)
+int(3)
+
+values...
+object(HH\ImmVector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\ImmVector) (0) {
+}
+
+lazy...
+int(1)
+int(2)
+int(3)
+
+contains...
+bool(true)
+bool(false)
+bool(false)
+
+map...
+bool(true)
+----
+int(2)
+int(4)
+int(6)
+----
+
+mapWithKey...
+bool(true)
+----
+int(1)
+int(4)
+int(9)
+----
+
+filter...
+bool(true)
+----
+int(2)
+----
+
+filterWithKey...
+bool(true)
+----
+int(3)
+----
+
+toDArray...
+dict(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+
+toKeysArray...
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toValuesArray...
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+toVector...
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toImmVector...
+object(HH\ImmVector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toSet...
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+__toString...
+ImmSet
+
+__get...
+Cannot access a property on a collection
+
+__set...
+Cannot access a property on a collection
+
+__isSet...
+bool(false)
+
+__unset...
+Cannot access a property on a collection
+
+fromItems...
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(4)
+int(5)
+int(6)
+----
+
+fromKeysOf...
+----
+int(0)
+int(1)
+int(2)
+----
+----
+int(0)
+int(1)
+int(2)
+----
+----
+string(1) "a"
+string(1) "b"
+----
+----
+string(1) "a"
+string(1) "b"
+----
+----
+int(4)
+int(5)
+int(6)
+----
+
+fromArrays...
+----
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(6)
+----
+----
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(6)
+----
+
+constructors
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----

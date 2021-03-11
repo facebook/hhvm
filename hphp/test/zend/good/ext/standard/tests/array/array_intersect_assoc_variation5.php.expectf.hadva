@@ -1,0 +1,91 @@
+*** Testing array_intersect_assoc() : assoc array with diff keys to $arr1 argument ***
+-- Iteration 1 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 2 --
+dict(1) {
+  [0]=>
+  string(1) "0"
+}
+dict(1) {
+  [0]=>
+  string(1) "0"
+}
+-- Iteration 3 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 4 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 5 --
+dict(1) {
+  [2]=>
+  string(5) "float"
+}
+dict(1) {
+  [2]=>
+  string(5) "float"
+}
+-- Iteration 6 --
+dict(2) {
+  [4]=>
+  string(2) "f3"
+  [33333333]=>
+  string(2) "f4"
+}
+dict(2) {
+  [4]=>
+  string(2) "f3"
+  [33333333]=>
+  string(2) "f4"
+}
+-- Iteration 7 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 8 --
+dict(2) {
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
+}
+dict(2) {
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
+}
+-- Iteration 9 --
+dict(1) {
+  ["Hello world"]=>
+  string(6) "string"
+}
+dict(1) {
+  ["Hello world"]=>
+  string(6) "string"
+}
+-- Iteration 10 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 11 --
+dict(1) {
+  [133]=>
+  string(3) "int"
+}
+dict(1) {
+  [133]=>
+  string(3) "int"
+}
+Done

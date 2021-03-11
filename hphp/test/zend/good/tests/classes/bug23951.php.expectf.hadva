@@ -1,0 +1,15 @@
+A Object
+(
+    [a_var] => Dict
+        (
+            [1] => foo1_value
+            [2] => foo2_value
+        )
+
+)
+Dict
+(
+    [1] => foo1_value
+    [2] => foo2_value
+)
+foo

@@ -1,0 +1,18 @@
+vec(5) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  vec(0) {
+  }
+  vec(0) {
+  }
+  vec(3) {
+    int(4)
+    int(5)
+    int(6)
+  }
+  vec(0) {
+  }
+}

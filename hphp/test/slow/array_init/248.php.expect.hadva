@@ -1,0 +1,42 @@
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+dict(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+dict(4) {
+  [2]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+  [6]=>
+  string(1) "c"
+  [7]=>
+  string(1) "d"
+}
+dict(4) {
+  [-2]=>
+  string(1) "a"
+  [-4]=>
+  string(1) "b"
+  [-6]=>
+  string(1) "c"
+  [0]=>
+  string(1) "d"
+}
+dict(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}

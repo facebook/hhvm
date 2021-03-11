@@ -1,0 +1,23 @@
+int(1)
+dict(1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    string(5) "aeiou"
+  }
+}
+int(0)
+dict(1) {
+  [0]=>
+  dict(0) {
+  }
+}
+int(1)
+dict(1) {
+  [0]=>
+  dict(1) {
+    [0]=>
+    string(6) "aeiou
+"
+  }
+}

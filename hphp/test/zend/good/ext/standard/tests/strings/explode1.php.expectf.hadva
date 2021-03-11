@@ -1,0 +1,206 @@
+*** Testing explode() for basic operations ***
+-- Iteration 1 --
+
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 30
+bool(false)
+
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 31
+bool(false)
+
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 32
+bool(false)
+
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 33
+bool(false)
+-- Iteration 2 --
+string(54) "explode() expects parameter 1 to be string, null given"
+string(54) "explode() expects parameter 1 to be string, null given"
+string(54) "explode() expects parameter 1 to be string, null given"
+string(54) "explode() expects parameter 1 to be string, null given"
+-- Iteration 3 --
+vec(1) {
+  string(10) "1234NULL23"
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(2) {
+  string(10) "1234NULL23"
+  string(43) "00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+-- Iteration 4 --
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+-- Iteration 5 --
+vec(5) {
+  string(14) "1234NULL23abcd"
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(2) {
+  string(14) "1234NULL23abcd"
+  string(42) "0000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+-- Iteration 6 --
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+-- Iteration 7 --
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+string(57) "explode() expects parameter 1 to be string, boolean given"
+-- Iteration 8 --
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+-- Iteration 9 --
+string(56) "explode() expects parameter 1 to be string, double given"
+string(56) "explode() expects parameter 1 to be string, double given"
+string(56) "explode() expects parameter 1 to be string, double given"
+string(56) "explode() expects parameter 1 to be string, double given"
+-- Iteration 10 --
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+string(57) "explode() expects parameter 1 to be string, integer given"
+-- Iteration 11 --
+vec(2) {
+  string(48) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24"
+  string(3) "PHP"
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(1) {
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+vec(2) {
+  string(48) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24"
+  string(8) "PHP%ZEND"
+}
+
+*** Testing explode() with miscelleneous input arguments ***
+
+-- Passing positive values of Limit to explode() --
+vec(2) {
+  string(3) "mon"
+  string(31) "tues::wed::thurs::fri::sat::sun"
+}
+
+-- Passing limit values 0 and 1 to explode() --
+vec(1) {
+  string(29) "Name:Phone:Address:City:State"
+}
+vec(1) {
+  string(29) "Name:Phone:Address:City:State"
+}
+
+*** Testing explode() for maximum limit of string with Limit = -1 ***
+vec(51) {
+  string(1) "1"
+  string(1) "2"
+  string(1) "3"
+  string(1) "4"
+  string(1) "5"
+  string(1) "6"
+  string(1) "7"
+  string(1) "7"
+  string(1) "5"
+  string(1) "6"
+  string(1) "7"
+  string(1) "3"
+  string(1) "4"
+  string(1) "5"
+  string(1) "2"
+  string(1) "8"
+  string(1) "9"
+  string(1) "0"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(2) "55"
+  string(1) "5"
+  string(1) "5"
+  string(2) "5%"
+  string(1) "%"
+  string(1) "%"
+  string(1) "%"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "%"
+  string(1) "%"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(1) "5"
+  string(2) "5%"
+  string(1) "%"
+  string(1) "%"
+  string(2) "55"
+  string(1) "1"
+}
+
+*** Testing explode() with string variations as input argument ***
+
+-- Testing string with escape characters --
+vec(2) {
+  string(4) "1234"
+  string(10) "5678
+	9100"
+}
+vec(4) {
+  string(4) "1234"
+  string(4) "abcd"
+  string(4) "5678"
+  string(4) "rstu"
+}
+
+-- Testing string with embedded NULL --
+vec(4) {
+  string(4) "abcd"
+  string(5) "n1234"
+  string(5) "05678"
+  string(12) "00efgh\xijkl"
+}
+vec(7) {
+  string(4) "abcd"
+  string(4) "efgh"
+  string(4) "ijkl"
+  string(4) "mnop"
+  string(5) "0qrst"
+  string(4) "uvwx"
+  string(2) "yz"
+}
+
+*** Testing error conditions ***
+
+Warning: explode() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 66
+
+Warning: explode() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 67
+Done

@@ -1,0 +1,198 @@
+dict(5) {
+  ["kind"]=>
+  int(101)
+  ["classname"]=>
+  string(6) "HH\Set"
+  ["generic_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["opaque"]=>
+  bool(true)
+}
+dict(5) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(6) "HH\Set"
+  ["generic_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(7) "MyAlias"
+}
+dict(5) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(101)
+    ["classname"]=>
+    string(6) "HH\Map"
+    ["generic_types"]=>
+    vec(2) {
+      dict(2) {
+        ["kind"]=>
+        int(13)
+        ["name"]=>
+        string(2) "Tk"
+      }
+      dict(2) {
+        ["kind"]=>
+        int(13)
+        ["name"]=>
+        string(2) "Tv"
+      }
+    }
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(2) "Tk"
+    }
+  }
+  ["typevars"]=>
+  string(5) "Tk,Tv"
+  ["opaque"]=>
+  bool(true)
+}
+dict(5) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(6) "HH\Map"
+    ["generic_types"]=>
+    vec(2) {
+      dict(2) {
+        ["kind"]=>
+        int(13)
+        ["name"]=>
+        string(2) "Tk"
+      }
+      dict(2) {
+        ["kind"]=>
+        int(13)
+        ["name"]=>
+        string(2) "Tv"
+      }
+    }
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(2) "Tk"
+    }
+  }
+  ["typevars"]=>
+  string(5) "Tk,Tv"
+  ["alias"]=>
+  string(8) "MyAlias2"
+}
+dict(5) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  dict(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(6) "HH\Map"
+    ["generic_types"]=>
+    vec(2) {
+      dict(1) {
+        ["kind"]=>
+        int(1)
+      }
+      dict(5) {
+        ["kind"]=>
+        int(15)
+        ["classname"]=>
+        string(6) "HH\Set"
+        ["generic_types"]=>
+        vec(1) {
+          dict(1) {
+            ["kind"]=>
+            int(4)
+          }
+        }
+        ["alias"]=>
+        string(7) "MyAlias"
+        ["typevar_types"]=>
+        dict(1) {
+          ["T"]=>
+          dict(1) {
+            ["kind"]=>
+            int(4)
+          }
+        }
+      }
+    }
+  }
+  ["param_types"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(8) "MyAlias2"
+  ["typevar_types"]=>
+  dict(2) {
+    ["Tk"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["Tv"]=>
+    dict(5) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(6) "HH\Set"
+      ["generic_types"]=>
+      vec(1) {
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+      }
+      ["alias"]=>
+      string(7) "MyAlias"
+      ["typevar_types"]=>
+      dict(1) {
+        ["T"]=>
+        dict(1) {
+          ["kind"]=>
+          int(4)
+        }
+      }
+    }
+  }
+}

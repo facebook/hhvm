@@ -1,0 +1,41 @@
+Out of bounds dict access: invalid index "baz"
+dict(1) {
+  ["e"]=>
+  dict(1) {
+    ["foo"]=>
+    int(30)
+  }
+}
+NULL
+dict(1) {
+  ["e"]=>
+  dict(2) {
+    ["baz"]=>
+    int(40)
+    ["foo"]=>
+    int(30)
+  }
+}
+int(40)
+Out of bounds dict access: invalid index "baz"
+dict(1) {
+  ["y"]=>
+  dict(1) {
+    ["foo"]=>
+    int(30)
+  }
+}
+NULL
+NULL
+Out of bounds dict access: invalid index "baz"
+dict(1) {
+  ["y"]=>
+  dict(1) {
+    ["foo"]=>
+    int(30)
+  }
+}
+NULL
+NULL
+Out of bounds dict access: invalid index 0
+int(30)

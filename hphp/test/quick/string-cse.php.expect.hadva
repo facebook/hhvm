@@ -1,0 +1,10 @@
+Calling main
+dict(1) {
+  ["0"]=>
+  string(5) "hello"
+}
+dict(1) {
+  ["0"]=>
+  string(5) "hello"
+}
+Done

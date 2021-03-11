@@ -1,0 +1,264 @@
+bool(true)
+dict(5) {
+  ["ts"]=>
+  int(1000000)
+  ["time"]=>
+  string(24) "1970-01-12T13:46:40+0000"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(false)
+  ["abbr"]=>
+  string(3) "BST"
+}
+bool(true)
+dict(5) {
+  ["ts"]=>
+  int(89172000)
+  ["time"]=>
+  string(24) "1972-10-29T02:00:00+0000"
+  ["offset"]=>
+  int(0)
+  ["isdst"]=>
+  bool(false)
+  ["abbr"]=>
+  string(3) "GMT"
+}
+dict(5) {
+  ["ts"]=>
+  int(985482000)
+  ["time"]=>
+  string(24) "2001-03-25T01:00:00+0000"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(true)
+  ["abbr"]=>
+  string(3) "BST"
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(1383176624)
+    ["time"]=>
+    string(24) "2013-10-30T23:43:44+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-2147483648)
+    ["time"]=>
+    string(24) "1901-12-13T20:45:52+0000"
+    ["offset"]=>
+    int(19270)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "MMT"
+  }
+}
+vec(6) {
+  dict(5) {
+    ["ts"]=>
+    int(-2147483648)
+    ["time"]=>
+    string(24) "1901-12-13T20:45:52+0000"
+    ["offset"]=>
+    int(19270)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "MMT"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-2019705670)
+    ["time"]=>
+    string(24) "1905-12-31T18:38:50+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-891581400)
+    ["time"]=>
+    string(24) "1941-09-30T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-764145000)
+    ["time"]=>
+    string(24) "1945-10-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+vec(2) {
+  dict(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  dict(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-872058599)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:01+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-862637399)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:01+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-862637399)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:01+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(1000000)
+    ["time"]=>
+    string(24) "1970-01-12T13:46:40+0000"
+    ["offset"]=>
+    int(0)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "UTC"
+  }
+}
+vec(1) {
+  dict(5) {
+    ["ts"]=>
+    int(-9223372036854775808)
+    ["time"]=>
+    string(30) "-219246529-01-27T08:29:52+0000"
+    ["offset"]=>
+    int(0)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "UTC"
+  }
+}

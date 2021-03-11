@@ -1,0 +1,388 @@
+HH\Asio\v() => object(HH\Vector) (7) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vw() => object(HH\Vector) (7) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vf() => object(HH\Vector) (5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(1)
+  [2]=>
+  float(2)
+  [3]=>
+  string(11) "Hello World"
+  [4]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vfw() => object(HH\Vector) (5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(1)
+  [2]=>
+  float(2)
+  [3]=>
+  string(11) "Hello World"
+  [4]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vm() => object(HH\Vector) (7) {
+  [0]=>
+  string(4) "NULL"
+  [1]=>
+  string(4) "true"
+  [2]=>
+  string(5) "false"
+  [3]=>
+  string(1) "1"
+  [4]=>
+  string(1) "2"
+  [5]=>
+  string(13) "'Hello World'"
+  [6]=>
+  string(15) "vec [
+  3.14,
+]"
+}
+HH\Asio\vmw() => object(HH\Vector) (7) {
+  [0]=>
+  string(4) "NULL"
+  [1]=>
+  string(4) "true"
+  [2]=>
+  string(5) "false"
+  [3]=>
+  string(1) "1"
+  [4]=>
+  string(1) "2"
+  [5]=>
+  string(13) "'Hello World'"
+  [6]=>
+  string(15) "vec [
+  3.14,
+]"
+}
+HH\Asio\vfk() => object(HH\Vector) (5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(1)
+  [2]=>
+  float(2)
+  [3]=>
+  string(11) "Hello World"
+  [4]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vfkw() => object(HH\Vector) (5) {
+  [0]=>
+  bool(true)
+  [1]=>
+  int(1)
+  [2]=>
+  float(2)
+  [3]=>
+  string(11) "Hello World"
+  [4]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\vmk() => object(HH\Vector) (7) {
+  [0]=>
+  string(21) "dict [
+  0 => NULL,
+]"
+  [1]=>
+  string(21) "dict [
+  1 => true,
+]"
+  [2]=>
+  string(22) "dict [
+  2 => false,
+]"
+  [3]=>
+  string(18) "dict [
+  3 => 1,
+]"
+  [4]=>
+  string(18) "dict [
+  4 => 2,
+]"
+  [5]=>
+  string(30) "dict [
+  5 => 'Hello World',
+]"
+  [6]=>
+  string(39) "dict [
+  6 => 
+  vec [
+    3.14,
+  ],
+]"
+}
+HH\Asio\vmkw() => object(HH\Vector) (7) {
+  [0]=>
+  string(21) "dict [
+  0 => NULL,
+]"
+  [1]=>
+  string(21) "dict [
+  1 => true,
+]"
+  [2]=>
+  string(22) "dict [
+  2 => false,
+]"
+  [3]=>
+  string(18) "dict [
+  3 => 1,
+]"
+  [4]=>
+  string(18) "dict [
+  4 => 2,
+]"
+  [5]=>
+  string(30) "dict [
+  5 => 'Hello World',
+]"
+  [6]=>
+  string(39) "dict [
+  6 => 
+  vec [
+    3.14,
+  ],
+]"
+}
+HH\Asio\m() => object(HH\Map) (7) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mw() => object(HH\Map) (7) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mf() => object(HH\Map) (5) {
+  [1]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mfw() => object(HH\Map) (5) {
+  [1]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mm() => object(HH\Map) (7) {
+  [0]=>
+  string(4) "NULL"
+  [1]=>
+  string(4) "true"
+  [2]=>
+  string(5) "false"
+  [3]=>
+  string(1) "1"
+  [4]=>
+  string(1) "2"
+  [5]=>
+  string(13) "'Hello World'"
+  [6]=>
+  string(15) "vec [
+  3.14,
+]"
+}
+HH\Asio\mmw() => object(HH\Map) (7) {
+  [0]=>
+  string(4) "NULL"
+  [1]=>
+  string(4) "true"
+  [2]=>
+  string(5) "false"
+  [3]=>
+  string(1) "1"
+  [4]=>
+  string(1) "2"
+  [5]=>
+  string(13) "'Hello World'"
+  [6]=>
+  string(15) "vec [
+  3.14,
+]"
+}
+HH\Asio\mfk() => object(HH\Map) (5) {
+  [1]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mfkw() => object(HH\Map) (5) {
+  [1]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  vec(1) {
+    float(3.14)
+  }
+}
+HH\Asio\mmk() => object(HH\Map) (7) {
+  [0]=>
+  string(21) "dict [
+  0 => NULL,
+]"
+  [1]=>
+  string(21) "dict [
+  1 => true,
+]"
+  [2]=>
+  string(22) "dict [
+  2 => false,
+]"
+  [3]=>
+  string(18) "dict [
+  3 => 1,
+]"
+  [4]=>
+  string(18) "dict [
+  4 => 2,
+]"
+  [5]=>
+  string(30) "dict [
+  5 => 'Hello World',
+]"
+  [6]=>
+  string(39) "dict [
+  6 => 
+  vec [
+    3.14,
+  ],
+]"
+}
+HH\Asio\mmkw() => object(HH\Map) (7) {
+  [0]=>
+  string(21) "dict [
+  0 => NULL,
+]"
+  [1]=>
+  string(21) "dict [
+  1 => true,
+]"
+  [2]=>
+  string(22) "dict [
+  2 => false,
+]"
+  [3]=>
+  string(18) "dict [
+  3 => 1,
+]"
+  [4]=>
+  string(18) "dict [
+  4 => 2,
+]"
+  [5]=>
+  string(30) "dict [
+  5 => 'Hello World',
+]"
+  [6]=>
+  string(39) "dict [
+  6 => 
+  vec [
+    3.14,
+  ],
+]"
+}

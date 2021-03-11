@@ -1,0 +1,70 @@
+Accessing D from global scope:
+vec(4) {
+  string(4) "pubD"
+  string(9) "testFromD"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing C from C:
+vec(4) {
+  string(5) "privC"
+  string(5) "protC"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing D from C:
+vec(7) {
+  string(5) "protD"
+  string(4) "pubD"
+  string(9) "testFromD"
+  string(5) "privC"
+  string(5) "protC"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing X from C:
+vec(2) {
+  string(4) "pubX"
+  string(9) "testFromX"
+}
+Accessing C from D:
+vec(3) {
+  string(5) "protC"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing D from D:
+vec(7) {
+  string(5) "privD"
+  string(5) "protD"
+  string(4) "pubD"
+  string(9) "testFromD"
+  string(5) "protC"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing X from D:
+vec(2) {
+  string(4) "pubX"
+  string(9) "testFromX"
+}
+Accessing C from X:
+vec(2) {
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing D from X:
+vec(4) {
+  string(4) "pubD"
+  string(9) "testFromD"
+  string(4) "pubC"
+  string(9) "testFromC"
+}
+Accessing X from X:
+vec(4) {
+  string(5) "privX"
+  string(5) "protX"
+  string(4) "pubX"
+  string(9) "testFromX"
+}
+Done

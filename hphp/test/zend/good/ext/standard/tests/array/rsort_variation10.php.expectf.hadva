@@ -1,0 +1,44 @@
+*** Testing rsort() : variation ***
+
+-- Sort flag = default  --
+bool(true)
+vec(9) {
+  int(669)
+  int(506)
+  int(229)
+  int(209)
+  int(63)
+  int(54)
+  int(0)
+  int(-54)
+  int(-229)
+}
+
+-- Sort flag = SORT_REGULAR  --
+bool(true)
+vec(9) {
+  int(669)
+  int(506)
+  int(229)
+  int(209)
+  int(63)
+  int(54)
+  int(0)
+  int(-54)
+  int(-229)
+}
+
+-- Sort flag = SORT_NUMERIC  --
+bool(true)
+vec(9) {
+  int(669)
+  int(506)
+  int(229)
+  int(209)
+  int(63)
+  int(54)
+  int(0)
+  int(-54)
+  int(-229)
+}
+Done

@@ -1,0 +1,96 @@
+vec(0) {
+}
+vec(1) {
+  NULL
+}
+vec(1) {
+  bool(true)
+}
+vec(1) {
+  bool(false)
+}
+vec(1) {
+  int(0)
+}
+vec(1) {
+  int(1)
+}
+vec(1) {
+  float(1)
+}
+vec(1) {
+  string(3) "1.0"
+}
+vec(1) {
+  float(1.23456789E+34)
+}
+vec(1) {
+  float(INF)
+}
+vec(1) {
+  float(NAN)
+}
+vec(1) {
+  string(4) "a bc"
+}
+vec(1) {
+  string(4) "Á bc"
+}
+vec(13) {
+  NULL
+  bool(true)
+  bool(false)
+  int(0)
+  int(1)
+  float(1)
+  string(3) "1.0"
+  float(1.23456789E+34)
+  float(1.7976931348623E+308)
+  float(INF)
+  float(NAN)
+  string(4) "a bc"
+  string(4) "Á bc"
+}
+dict(6) {
+  [""]=>
+  bool(true)
+  [1]=>
+  float(1)
+  ["1.0"]=>
+  float(1.23456789E+34)
+  [0]=>
+  float(INF)
+  [-9223372036854775808]=>
+  string(4) "a bc"
+  [2]=>
+  string(4) "Á bc"
+}
+dict(7) {
+  [""]=>
+  bool(true)
+  [1]=>
+  float(1)
+  ["1.0"]=>
+  float(1.23456789E+34)
+  [0]=>
+  float(INF)
+  [-9223372036854775808]=>
+  string(4) "a bc"
+  [2]=>
+  string(4) "Á bc"
+  [3]=>
+  dict(6) {
+    [""]=>
+    bool(true)
+    [0]=>
+    float(INF)
+    [1]=>
+    float(1)
+    ["1.0"]=>
+    float(1.23456789E+34)
+    [-9223372036854775808]=>
+    string(4) "a bc"
+    [2]=>
+    string(4) "Á bc"
+  }
+}

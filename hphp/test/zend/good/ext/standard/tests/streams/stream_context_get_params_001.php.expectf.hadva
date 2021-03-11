@@ -1,0 +1,90 @@
+resource(4) of type (stream-context)
+dict(1) {
+  ["options"]=>
+  dict(0) {
+  }
+}
+bool(true)
+dict(1) {
+  ["options"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["bar"]=>
+      string(3) "baz"
+    }
+  }
+}
+bool(true)
+dict(2) {
+  ["notification"]=>
+  string(28) "stream_notification_callback"
+  ["options"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["bar"]=>
+      string(3) "baz"
+    }
+  }
+}
+bool(true)
+dict(2) {
+  ["notification"]=>
+  vec(2) {
+    string(6) "stream"
+    string(21) "notification_callback"
+  }
+  ["options"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["bar"]=>
+      string(3) "baz"
+    }
+  }
+}
+dict(2) {
+  ["notification"]=>
+  vec(2) {
+    string(6) "stream"
+    string(21) "notification_callback"
+  }
+  ["options"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["bar"]=>
+      string(3) "baz"
+    }
+  }
+}
+dict(1) {
+  ["foo"]=>
+  dict(1) {
+    ["bar"]=>
+    string(3) "baz"
+  }
+}
+dict(2) {
+  ["notification"]=>
+  vec(2) {
+    string(6) "stream"
+    string(21) "notification_callback"
+  }
+  ["options"]=>
+  dict(1) {
+    ["foo"]=>
+    dict(1) {
+      ["bar"]=>
+      string(3) "baz"
+    }
+  }
+}
+dict(1) {
+  ["foo"]=>
+  dict(1) {
+    ["bar"]=>
+    string(3) "baz"
+  }
+}

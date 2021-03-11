@@ -60,8 +60,16 @@ function get_expect_file_and_type($test, $options) {
       }
     }
   }
+
+  // We're going to try to avoid adding hadva versions of the other types of
+  // expect files used above. The whole split expect file thing is a temporary
+  // hack until we complete Hack Array Migration unification.
+  $hadva = isset($options['hadva']);
   foreach ($types as $type) {
     $fname = "$test.$type";
+    if ($hadva && file_exists("$fname.hadva")) {
+      return varray["$fname.hadva", $type];
+    }
     if (file_exists($fname)) {
       return varray[$fname, $type];
     }
@@ -840,7 +848,6 @@ function extra_args($options): string {
 
   if (isset($options['hadva'])) {
     $args .= ' -vEval.HackArrDVArrs=true';
-    $args .= ' -vEval.HackArrDVArrMark=true';
   }
 
   if (isset($options['lazyclass'])) {

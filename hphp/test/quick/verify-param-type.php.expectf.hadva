@@ -1,0 +1,62 @@
+vec(6) {
+  int(2)
+  string(59) "Argument 1 to test_soft() must be of type @int, float given"
+  string(%d) "%s/test/quick/verify-param-type.php"
+  int(13)
+  dict(0) {
+  }
+  vec(3) {
+    dict(2) {
+      ["file"]=>
+      string(%d) "%s/test/quick/verify-param-type.php"
+      ["line"]=>
+      int(13)
+    }
+    dict(4) {
+      ["file"]=>
+      string(%d) "%s/test/quick/verify-param-type.php"
+      ["line"]=>
+      int(22)
+      ["function"]=>
+      string(9) "test_soft"
+      ["args"]=>
+      vec(1) {
+        float(0)
+      }
+    }
+    dict(2) {
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      vec(0) {
+      }
+    }
+  }
+}
+in test_soft
+bool(false)
+vec(6) {
+  int(4096)
+  string(72) "Argument 1 passed to test_hard() must be an instance of int, float given"
+  string(%d) "%s/test/quick/verify-param-type.php"
+  int(23)
+  dict(0) {
+  }
+  vec(2) {
+    dict(2) {
+      ["file"]=>
+      string(%d) "%s/test/quick/verify-param-type.php"
+      ["line"]=>
+      int(23)
+    }
+    dict(2) {
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      vec(0) {
+      }
+    }
+  }
+}
+
+Fatal error: Error handler tried to recover from typehint violation in %s/test/quick/verify-param-type.php on line 17

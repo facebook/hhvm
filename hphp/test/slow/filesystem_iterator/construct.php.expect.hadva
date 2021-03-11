@@ -1,0 +1,7 @@
+vec(5) {
+  string(3) "dir"
+  string(5) "empty"
+  string(4) "file"
+  string(14) "fix_mtimes.inc"
+  string(7) "symlink"
+}

@@ -1,0 +1,7 @@
+vec(1) {
+  string(3) "foo"
+}
+dict(1) {
+  ["kind"]=>
+  int(1)
+}

@@ -1,0 +1,6 @@
+dict(2) {
+  ["a"]=>
+  string(5) "green"
+  [0]=>
+  string(3) "red"
+}

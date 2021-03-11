@@ -1,0 +1,92 @@
+--- binary ---
+object(OuterStruct) (3) {
+  ["value"]=>
+  string(3) "foo"
+  ["nested"]=>
+  object(InnerStruct) (1) {
+    ["value"]=>
+    int(42)
+  }
+  ["collection"]=>
+  object(HH\Map) (2) {
+    [1]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(2)
+    }
+    [4]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(8)
+    }
+  }
+}
+string(32) "b872923726eb925a531e5bcca1be12cd"
+object(OuterStruct) (3) {
+  ["value"]=>
+  string(3) "foo"
+  ["nested"]=>
+  object(InnerStruct) (1) {
+    ["value"]=>
+    int(42)
+  }
+  ["collection"]=>
+  dict(2) {
+    [1]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(2)
+    }
+    [4]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(8)
+    }
+  }
+}
+--- compact ---
+object(OuterStruct) (3) {
+  ["value"]=>
+  string(3) "foo"
+  ["nested"]=>
+  object(InnerStruct) (1) {
+    ["value"]=>
+    int(42)
+  }
+  ["collection"]=>
+  object(HH\Map) (2) {
+    [1]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(2)
+    }
+    [4]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(8)
+    }
+  }
+}
+string(32) "3a099ec3cbd671616d379a9c0b56e51d"
+object(OuterStruct) (3) {
+  ["value"]=>
+  string(3) "foo"
+  ["nested"]=>
+  object(InnerStruct) (1) {
+    ["value"]=>
+    int(42)
+  }
+  ["collection"]=>
+  dict(2) {
+    [1]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(2)
+    }
+    [4]=>
+    object(InnerStruct) (1) {
+      ["value"]=>
+      int(8)
+    }
+  }
+}

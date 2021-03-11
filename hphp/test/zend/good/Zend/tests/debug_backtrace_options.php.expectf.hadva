@@ -1,0 +1,404 @@
+==default
+#0  doit(a, b, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==1
+#0  doit(a, b, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==0
+#0  doit(a, b, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==DEBUG_BACKTRACE_PROVIDE_OBJECT
+#0  doit(a, b, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall(doit, debug_print_backtrace) called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==DEBUG_BACKTRACE_IGNORE_ARGS
+#0  doit() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==both
+#0  doit() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:33]
+#1  foo->doCall() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:39]
+#2  foo::statCall() called at [%s/test/zend/good/Zend/tests/debug_backtrace_options.php:44]
+#3  entrypoint_debug_backtrace_options()
+==default
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 16
+            [function] => backtrace_print
+            [args] => Vec
+                (
+                    [0] => 
+                )
+
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+            [args] => Vec
+                (
+                    [0] => a
+                    [1] => b
+                    [2] => backtrace_print
+                )
+
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [object] => foo Object
+                (
+                )
+
+            [type] => ->
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Vec
+                (
+                )
+
+        )
+
+)
+==1
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 18
+            [function] => backtrace_print
+            [args] => Vec
+                (
+                    [0] => 1
+                )
+
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+            [args] => Vec
+                (
+                    [0] => a
+                    [1] => b
+                    [2] => backtrace_print
+                )
+
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [object] => foo Object
+                (
+                )
+
+            [type] => ->
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Vec
+                (
+                )
+
+        )
+
+)
+==0
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 20
+            [function] => backtrace_print
+            [args] => Vec
+                (
+                    [0] => 0
+                )
+
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+            [args] => Vec
+                (
+                    [0] => a
+                    [1] => b
+                    [2] => backtrace_print
+                )
+
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [type] => ->
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Vec
+                (
+                )
+
+        )
+
+)
+==DEBUG_BACKTRACE_PROVIDE_OBJECT
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 22
+            [function] => backtrace_print
+            [args] => Vec
+                (
+                    [0] => 1
+                )
+
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+            [args] => Vec
+                (
+                    [0] => a
+                    [1] => b
+                    [2] => backtrace_print
+                )
+
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [object] => foo Object
+                (
+                )
+
+            [type] => ->
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+            [args] => Vec
+                (
+                    [0] => doit
+                    [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Vec
+                (
+                )
+
+        )
+
+)
+==DEBUG_BACKTRACE_IGNORE_ARGS
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 24
+            [function] => backtrace_print
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [type] => ->
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+        )
+
+)
+==both
+Vec
+(
+    [0] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 26
+            [function] => backtrace_print
+        )
+
+    [1] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 33
+            [function] => doit
+        )
+
+    [2] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 39
+            [function] => doCall
+            [class] => foo
+            [object] => foo Object
+                (
+                )
+
+            [type] => ->
+        )
+
+    [3] => Dict
+        (
+            [file] => %s/test/zend/good/Zend/tests/debug_backtrace_options.php
+            [line] => 45
+            [function] => statCall
+            [class] => foo
+            [type] => ::
+        )
+
+    [4] => Dict
+        (
+            [function] => entrypoint_debug_backtrace_options
+        )
+
+)

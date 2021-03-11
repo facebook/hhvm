@@ -1,0 +1,19 @@
+*** Testing array_keys() on range of values ***
+vec(6) {
+  int(2147483647)
+  int(2147483648)
+  int(-2147483647)
+  int(-2147483648)
+  int(-2147483649)
+  int(0)
+}
+
+*** Testing array_keys() on an array created on the fly ***
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+vec(0) {
+}
+Done

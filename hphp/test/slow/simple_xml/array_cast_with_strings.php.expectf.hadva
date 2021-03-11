@@ -1,0 +1,27 @@
+dict(5) {
+  ["hello"]=>
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(5) "world"
+  }
+  ["how"]=>
+  object(SimpleXMLElement) (1) {
+    ["are"]=>
+    string(3) "you"
+  }
+  ["hi"]=>
+  object(SimpleXMLElement) (0) {
+  }
+  ["ho"]=>
+  object(SimpleXMLElement) (0) {
+  }
+  ["test"]=>
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(4) "best"
+  }
+}
+dict(1) {
+  ["world"]=>
+  int(1)
+}

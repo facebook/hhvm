@@ -1,0 +1,24 @@
+dict(3) {
+  ["foo"]=>
+  NULL
+  ["bar"]=>
+  int(1)
+  ["baz"]=>
+  int(10)
+}
+dict(5) {
+  ["qux"]=>
+  int(10)
+  ["val"]=>
+  int(20)
+  ["foo"]=>
+  NULL
+  ["bar"]=>
+  int(1)
+  ["baz"]=>
+  int(10)
+}
+dict(1) {
+  ["data"]=>
+  int(1)
+}

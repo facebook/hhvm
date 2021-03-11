@@ -1,0 +1,90 @@
+int(33)
+vec(2) {
+  int(11)
+  int(22)
+}
+int(33)
+object(HH\Vector) (2) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+}
+int(33)
+object(HH\Map) (2) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+}
+int(33)
+object(HH\Set) (2) {
+  int(11)
+  int(22)
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmVector) (3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmMap) (3) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmSet) (3) {
+  int(11)
+  int(22)
+  int(33)
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\Pair) (2) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+}
+NULL
+vec(0) {
+}
+NULL
+object(HH\Vector) (0) {
+}
+NULL
+object(HH\Map) (0) {
+}
+NULL
+object(HH\Set) (0) {
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmVector) (0) {
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmMap) (0) {
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/test/slow/collection_classes/array-pop.php on line 21
+NULL
+object(HH\ImmSet) (0) {
+}

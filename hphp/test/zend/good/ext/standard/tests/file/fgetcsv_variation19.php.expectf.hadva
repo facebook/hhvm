@@ -1,0 +1,677 @@
+*** Testing fgetcsv() : with default enclosure & delimiter of two chars ***
+
+-- Testing fgetcsv() with file opened using r mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation19.php on line 72
+vec(1) {
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+Done

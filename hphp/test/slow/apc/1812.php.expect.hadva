@@ -1,0 +1,17 @@
+Vec
+(
+    [0] => Ref Object
+        (
+            [a] => Vec
+                (
+                    [0] => Ref Object
+                        (
+                            [a] => Array
+ *RECURSION*
+                        )
+
+                )
+
+        )
+
+)

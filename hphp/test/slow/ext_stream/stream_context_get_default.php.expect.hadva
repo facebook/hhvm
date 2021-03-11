@@ -1,0 +1,34 @@
+dict(0) {
+}
+dict(1) {
+  ["http"]=>
+  dict(1) {
+    ["header"]=>
+    string(14) "X-Hello: world"
+  }
+}
+dict(1) {
+  ["http"]=>
+  dict(1) {
+    ["header"]=>
+    string(14) "X-Hello: world"
+  }
+}
+dict(1) {
+  ["http"]=>
+  dict(2) {
+    ["header"]=>
+    string(14) "X-Hello: world"
+    ["method"]=>
+    string(4) "POST"
+  }
+}
+dict(1) {
+  ["http"]=>
+  dict(2) {
+    ["header"]=>
+    string(14) "X-Hello: world"
+    ["method"]=>
+    string(4) "POST"
+  }
+}

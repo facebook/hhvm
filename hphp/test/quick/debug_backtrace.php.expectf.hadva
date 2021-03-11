@@ -1,0 +1,254 @@
+vec(7) {
+  dict(6) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(9)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "A"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(7) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "A"
+    ["object"]=>
+    object(A) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(3) {
+      int(1)
+      string(3) "str"
+      vec(3) {
+        int(1)
+        int(2)
+        int(3)
+      }
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    vec(1) {
+      string(3) "bar"
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(35)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(26) "entrypoint_debug_backtrace"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(7) {
+  dict(6) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(9)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "A"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(5) {
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "A"
+    ["object"]=>
+    object(A) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      NULL
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    vec(1) {
+      string(3) "bar"
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(35)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(26) "entrypoint_debug_backtrace"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(7) {
+  dict(6) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(9)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "A"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(5) {
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "A"
+    ["object"]=>
+    object(A) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      NULL
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    vec(1) {
+      string(3) "bar"
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/test/quick/debug_backtrace.php"
+    ["line"]=>
+    int(35)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(26) "entrypoint_debug_backtrace"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}

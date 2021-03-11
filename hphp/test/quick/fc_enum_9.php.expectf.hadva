@@ -1,0 +1,17 @@
+vec(3) {
+  int(0)
+  int(3)
+  int(2)
+}
+vec(3) {
+  int(0)
+  int(1)
+  int(3)
+}
+
+Fatal error: Uncaught exception 'UnexpectedValueException' with message '300 is not a valid value for Foo' in %s/test/quick/fc_enum_9.php:12
+Stack trace:
+#0 (): HH\BuiltinEnum::assert()
+#1 %s/test/quick/fc_enum_9.php(12): HH\BuiltinEnum::assertAll()
+#2 (): main()
+#3 {main}

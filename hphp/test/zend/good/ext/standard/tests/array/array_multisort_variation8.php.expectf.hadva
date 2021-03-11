@@ -1,0 +1,25 @@
+*** Testing array_multisort() : usage variation  - test sort order of all types***
+bool(true)
+dict(9) {
+  ["uppercase NULL"]=>
+  NULL
+  ["empty string DQ"]=>
+  string(0) ""
+  ["instance of classWithoutToString"]=>
+  object(classWithoutToString) (0) {
+  }
+  ["float -10.5"]=>
+  float(-10.5)
+  ["int 0"]=>
+  int(0)
+  ["lowercase true"]=>
+  bool(true)
+  [0]=>
+  string(5) "Array"
+  ["instance of classWithToString"]=>
+  object(classWithToString) (0) {
+  }
+  ["string DQ"]=>
+  string(6) "string"
+}
+===DONE===

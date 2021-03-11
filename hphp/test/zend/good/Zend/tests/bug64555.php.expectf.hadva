@@ -1,0 +1,9 @@
+Unsetting: unsetme
+Changing: keepme
+dict(1) {
+  ["keepme"]=>
+  int(43)
+}
+vec(1) {
+  string(6) "keepme"
+}

@@ -1,0 +1,99 @@
+*** Testing array_combine() : assoc array with diff values to both $keys and $values argument ***
+-- Iteration 1 --
+dict(0) {
+}
+-- Iteration 2 --
+dict(1) {
+  [0]=>
+  int(0)
+}
+-- Iteration 3 --
+dict(1) {
+  [1]=>
+  int(1)
+}
+-- Iteration 4 --
+dict(4) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+}
+-- Iteration 5 --
+dict(1) {
+  ["2.3333"]=>
+  float(2.3333)
+}
+-- Iteration 6 --
+dict(4) {
+  ["1.2"]=>
+  float(1.2)
+  ["3.33"]=>
+  float(3.33)
+  ["4.8999992284"]=>
+  float(4.8999992284)
+  ["33333333.333"]=>
+  float(33333333.333)
+}
+-- Iteration 7 --
+dict(4) {
+  ["	Hello"]=>
+  string(6) "	Hello"
+  ["col	or"]=>
+  string(6) "col	or"
+  ["world"]=>
+  string(7) "world"
+  ["pen
+"]=>
+  string(4) "pen
+"
+}
+-- Iteration 8 --
+dict(4) {
+  ["\tHello"]=>
+  string(7) "\tHello"
+  ["col\tor"]=>
+  string(7) "col\tor"
+  ["\v\fworld"]=>
+  string(9) "\v\fworld"
+  ["pen\n"]=>
+  string(5) "pen\n"
+}
+-- Iteration 9 --
+dict(2) {
+  ["hello"]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(11) "Hello world"
+}
+-- Iteration 10 --
+dict(2) {
+  ["Class A object"]=>
+  object(classA) (0) {
+  }
+  ["Resource id #4"]=>
+  resource(4) of type (stream)
+}
+-- Iteration 11 --
+dict(7) {
+  ["hello"]=>
+  string(5) "hello"
+  ["Class A object"]=>
+  object(classA) (0) {
+  }
+  ["fruit"]=>
+  string(5) "fruit"
+  ["Resource id #4"]=>
+  resource(4) of type (stream)
+  [133]=>
+  int(133)
+  ["444.432"]=>
+  float(444.432)
+  ["Hello world"]=>
+  string(11) "Hello world"
+}
+Done

@@ -1,0 +1,13 @@
+dict(1) {
+  ["7"]=>
+  int(0)
+}
+bool(false)
+bool(true)
+----------
+dict(1) {
+  [7]=>
+  int(0)
+}
+bool(true)
+bool(false)

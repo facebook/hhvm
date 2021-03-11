@@ -1,0 +1,96 @@
+Test 1.4c4e270d56c36a4af3ae75a8ca4403f2:
+vec [
+  'aaa',
+  'abc',
+  'abd',
+]
+ Result: true
+
+Test 2.c9cbf285979fdf3cb078d5852f739f45:
+vec [
+  '_',
+  '1',
+  'm',
+]
+ Result: true
+
+Test 3.1ab9c7eec494cf3ca5e1dce81bc54b87:
+vec [
+  'a',
+  'aa',
+  'aaa',
+]
+ Result: true
+
+Test 4.8c015f033e63ec77bbd338b437932ef3:
+vec [
+  'ab',
+  'b',
+  'ba',
+]
+ Result: true
+
+Test 5.e85df79912ccf40db467a3d41e5945e4:
+vec [
+  'a',
+  'c',
+  'e',
+]
+ Result: true
+
+Test 6.6e8b96676ae67c86db1660b0ce70ce45:
+vec [
+  '',
+  ' a',
+  'd',
+]
+ Result: true
+
+Test 7.4e3a927e92fef57dcba48f88517ea8e4:
+vec [
+  ' a',
+  'd ',
+  'f ',
+]
+ Result: true
+
+Test 8.fafc77ca66955b539693d68becac29f6:
+vec [
+  NULL,
+  '3',
+  'a',
+]
+ Result: true
+
+Test 9.9fe68c05033cdd06abb380826afbb058:
+vec [
+  'i',
+  'k',
+  'y',
+]
+ Result: true
+
+Test 10.6a356206232f5cbf71028611c88859f0:
+vec [
+  'ааа',
+  'абв',
+  'абг',
+  'abc',
+]
+ Result: true
+
+Test 11.5d27a145952612b4e10782f74f3eeea3:
+vec [
+  'а',
+  'аа',
+  'ааа',
+]
+ Result: true
+
+Test 12.9ec4e88c7d969a27847c3b1b44abbb5f:
+vec [
+  'i',
+  'y',
+  'k',
+]
+ Result: true

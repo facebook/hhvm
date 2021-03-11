@@ -1,0 +1,39 @@
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+dict(1) {
+  [0]=>
+  string(14) "DEFGH:/MNRPQR/"
+}
+dict(1) {
+  [0]=>
+  string(17) "bobDEFGH:/MNRPQR/"
+}
+dict(1) {
+  [0]=>
+  string(3) "bob"
+}
+dict(1) {
+  [0]=>
+  string(3) "bob"
+}
+string(6) "abcxyz"
+dict(1) {
+  [0]=>
+  int(2350001)
+}
+NULL
+dict(1) {
+  [0]=>
+  int(30)
+}
+NULL

@@ -1,0 +1,22 @@
+object(HH\Map) (2) {
+  ["42"]=>
+  string(2) "65"
+  [42]=>
+  int(65)
+}
+dict(2) {
+  ["42"]=>
+  string(2) "65"
+  [42]=>
+  int(65)
+}
+object(HH\Set) (2) {
+  string(2) "42"
+  int(42)
+}
+dict(2) {
+  ["42"]=>
+  string(2) "42"
+  [42]=>
+  int(42)
+}

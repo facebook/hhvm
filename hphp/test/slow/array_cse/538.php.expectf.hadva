@@ -1,0 +1,19 @@
+vec(1) {
+  vec(3) {
+    int(0)
+    int(1)
+    int(2)
+  }
+}
+string(3) "abc"
+Out of bounds vec access: invalid index 0
+vec(1) {
+  int(10)
+}
+int(10)
+string(12) "first/second"
+string(12) "first/second"
+string(3) "A/B"
+string(3) "A/B"
+string(2) "e1"
+string(2) "e1"

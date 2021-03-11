@@ -1,0 +1,10 @@
+vec(3) {
+  string(11) "val1---val1"
+  string(11) "val2---val2"
+  string(11) "val3---val3"
+}
+vec(3) {
+  string(11) "val1---val1"
+  string(11) "val2---val2"
+  string(11) "val3---val3"
+}

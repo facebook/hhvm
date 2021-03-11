@@ -1,0 +1,6 @@
+dict(2) {
+  [0]=>
+  string(50) "Parameter #0 [ <optional> HH\string $str = 'baz' ]"
+  [1]=>
+  string(42) "Parameter #1 [ <optional> HH\int $i = 42 ]"
+}

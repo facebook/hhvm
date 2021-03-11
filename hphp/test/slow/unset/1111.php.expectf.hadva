@@ -1,0 +1,4 @@
+vec(1) {
+  string(4) "test"
+}
+string(27) "Undefined property: A::$arr"

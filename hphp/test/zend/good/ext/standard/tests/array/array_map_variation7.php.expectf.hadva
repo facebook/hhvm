@@ -1,0 +1,72 @@
+*** Testing array_map() : arrays with diff. size ***
+vec(3) {
+  vec(2) {
+    int(1)
+    NULL
+  }
+  vec(2) {
+    int(2)
+    NULL
+  }
+  vec(2) {
+    int(3)
+    NULL
+  }
+}
+vec(3) {
+  vec(2) {
+    NULL
+    string(1) "a"
+  }
+  vec(2) {
+    NULL
+    string(1) "b"
+  }
+  vec(2) {
+    NULL
+    string(1) "c"
+  }
+}
+vec(3) {
+  vec(2) {
+    int(1)
+    string(1) "a"
+  }
+  vec(2) {
+    int(2)
+    string(1) "b"
+  }
+  vec(2) {
+    int(3)
+    NULL
+  }
+}
+vec(3) {
+  vec(2) {
+    int(10)
+    float(2.3)
+  }
+  vec(2) {
+    int(47)
+    float(1240)
+  }
+  vec(2) {
+    int(26)
+    NULL
+  }
+}
+vec(3) {
+  vec(2) {
+    NULL
+    int(1)
+  }
+  vec(2) {
+    NULL
+    int(2)
+  }
+  vec(2) {
+    NULL
+    int(3)
+  }
+}
+Done

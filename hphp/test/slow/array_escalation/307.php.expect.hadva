@@ -1,0 +1,16 @@
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  vec(1) {
+    int(0)
+  }
+}
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  vec(1) {
+    int(0)
+  }
+}

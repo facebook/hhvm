@@ -1,0 +1,24 @@
+*** Testing array_map() : string keys ***
+dict(1) {
+  ["stringkey"]=>
+  vec(1) {
+    string(5) "value"
+  }
+}
+vec(1) {
+  vec(2) {
+    string(5) "value"
+    string(5) "value"
+  }
+}
+dict(1) {
+  ["stringkey"]=>
+  string(5) "value"
+}
+vec(1) {
+  vec(2) {
+    string(5) "value"
+    string(5) "value"
+  }
+}
+Done

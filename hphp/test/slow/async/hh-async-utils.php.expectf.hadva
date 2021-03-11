@@ -1,0 +1,40 @@
+object(HH\Vector) (3) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(456)
+  [2]=>
+  int(789)
+}
+object(HH\Map) (3) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(456)
+  [2]=>
+  int(789)
+}
+object(HH\Vector) (2) {
+  [0]=>
+  string(3) "456"
+  [1]=>
+  string(4) "derp"
+}
+object(HH\Map) (2) {
+  ["123"]=>
+  string(3) "456"
+  ["herp"]=>
+  string(4) "derp"
+}
+vec(3) {
+  int(123)
+  int(456)
+  int(789)
+}
+vec(3) {
+  int(123)
+  string(3) "foo"
+  vec(1) {
+    int(1)
+  }
+}

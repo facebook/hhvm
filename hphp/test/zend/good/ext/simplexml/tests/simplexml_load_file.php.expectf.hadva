@@ -1,0 +1,18 @@
+object(SimpleXMLElement) (1) {
+  ["book"]=>
+  vec(2) {
+    object(SimpleXMLElement) (2) {
+      ["title"]=>
+      string(19) "The Grapes of Wrath"
+      ["author"]=>
+      string(14) "John Steinbeck"
+    }
+    object(SimpleXMLElement) (2) {
+      ["title"]=>
+      string(9) "The Pearl"
+      ["author"]=>
+      string(14) "John Steinbeck"
+    }
+  }
+}
+Done

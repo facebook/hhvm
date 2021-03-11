@@ -1,0 +1,189 @@
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(10) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "f"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["inout"]=>
+      bool(true)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+}
+vec(2) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(10) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "g"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["inout"]=>
+      bool(true)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(9) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(9) "not_inout"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "g"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(9) "not_inout"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+}
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(9) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "h"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  bool(true)
+}
+dict(2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(false)
+}
+dict(1) {
+  [0]=>
+  bool(false)
+}
+string(%d) "Function [ <user> function f ] {
+  @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
+
+  - Parameters [1] {
+    Parameter #0 [ <required> inout HH\bool $a ]
+  }
+}
+"
+string(%d) "Function [ <user> function g ] {
+  @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
+
+  - Parameters [2] {
+    Parameter #0 [ <required> inout HH\bool $a ]
+    Parameter #1 [ <required> HH\bool $not_inout ]
+  }
+}
+"
+string(%d) "Function [ <user> function h ] {
+  @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
+
+  - Parameters [1] {
+    Parameter #0 [ <required> HH\bool $a ]
+  }
+}
+"

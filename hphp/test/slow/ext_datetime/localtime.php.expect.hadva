@@ -1,0 +1,33 @@
+vec(9) {
+  int(56)
+  int(34)
+  int(12)
+  int(10)
+  int(8)
+  int(108)
+  int(3)
+  int(253)
+  int(1)
+}
+bool(true)
+dict(9) {
+  ["tm_sec"]=>
+  int(56)
+  ["tm_min"]=>
+  int(34)
+  ["tm_hour"]=>
+  int(12)
+  ["tm_mday"]=>
+  int(10)
+  ["tm_mon"]=>
+  int(8)
+  ["tm_year"]=>
+  int(108)
+  ["tm_wday"]=>
+  int(3)
+  ["tm_yday"]=>
+  int(253)
+  ["tm_isdst"]=>
+  int(1)
+}
+bool(true)

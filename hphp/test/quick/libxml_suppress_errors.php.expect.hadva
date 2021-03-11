@@ -1,0 +1,24 @@
+bool(false)
+suppressing
+vec(0) {
+}
+unsuppressing
+vec(1) {
+  object(LibXMLError) (6) {
+    ["level"]=>
+    int(3)
+    ["code"]=>
+    int(76)
+    ["column"]=>
+    int(56)
+    ["message"]=>
+    string(57) "Opening and ending tag mismatch: titles line 4 and title
+"
+    ["file"]=>
+    NULL
+    ["line"]=>
+    int(4)
+  }
+}
+bool(true)
+Done

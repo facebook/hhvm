@@ -1,0 +1,19 @@
+*** Testing error conditions ***
+Warning: array_keys() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 4
+NULL
+
+Warning: array_keys() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 5
+NULL
+
+Warning: array_keys() expects parameter 1 to be an array or collection in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 6
+NULL
+
+Warning: array_keys() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 7
+
+Warning: array_keys() expects exactly 1 parameter, 4 given in %s/test/zend/good/ext/standard/tests/array/array_keys_error.php on line 8
+vec(3) {
+  int(0)
+  int(1)
+  int(2)
+}
+Done

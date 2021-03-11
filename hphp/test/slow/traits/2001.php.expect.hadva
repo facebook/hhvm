@@ -1,0 +1,62 @@
+T1:
+dict(0) {
+}
+vec(0) {
+}
+
+T3:
+dict(1) {
+  ["T2"]=>
+  string(2) "T2"
+}
+vec(1) {
+  string(2) "T2"
+}
+
+C1:
+dict(0) {
+}
+vec(0) {
+}
+
+C2:
+dict(1) {
+  ["T1"]=>
+  string(2) "T1"
+}
+vec(1) {
+  string(2) "T1"
+}
+
+C3:
+dict(2) {
+  ["T1"]=>
+  string(2) "T1"
+  ["T2"]=>
+  string(2) "T2"
+}
+vec(2) {
+  string(2) "T1"
+  string(2) "T2"
+}
+
+C4:
+dict(1) {
+  ["T3"]=>
+  string(2) "T3"
+}
+vec(1) {
+  string(2) "T3"
+}
+
+C5:
+dict(0) {
+}
+vec(0) {
+}
+
+I1:
+dict(0) {
+}
+vec(0) {
+}

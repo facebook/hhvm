@@ -1,0 +1,39 @@
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(1) {
+  string(1) "a"
+}
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}

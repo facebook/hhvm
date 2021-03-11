@@ -1,0 +1,10 @@
+vec(1) {
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "X"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

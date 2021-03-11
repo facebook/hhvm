@@ -1,0 +1,5 @@
+vec(2) {
+  string(3) "Sub"
+  string(3) "Add"
+}
+ok

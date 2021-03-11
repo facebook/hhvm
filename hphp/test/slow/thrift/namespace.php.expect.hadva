@@ -1,0 +1,73 @@
+object(A\TestStruct) (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(1234)
+  ["aString"]=>
+  string(6) "abcdef"
+  ["aDouble"]=>
+  float(1.2345)
+  ["anInt64"]=>
+  int(8589934592)
+  ["aList"]=>
+  vec(3) {
+    float(13.3)
+    float(23.4)
+    float(3576.2)
+  }
+  ["aMap"]=>
+  dict(2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  dict(2) {
+    [10]=>
+    bool(true)
+    [11]=>
+    bool(true)
+  }
+  ["anByte"]=>
+  int(123)
+  ["anI16"]=>
+  int(1234)
+}
+string(32) "6b4fbe9563551f3dee970a74b883f923"
+object(A\TestStruct) (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(1234)
+  ["aString"]=>
+  string(6) "abcdef"
+  ["aDouble"]=>
+  float(1.2345)
+  ["anInt64"]=>
+  int(8589934592)
+  ["aList"]=>
+  vec(3) {
+    float(13.3)
+    float(23.4)
+    float(3576.2)
+  }
+  ["aMap"]=>
+  dict(2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  dict(2) {
+    [10]=>
+    bool(true)
+    [11]=>
+    bool(true)
+  }
+  ["anByte"]=>
+  int(123)
+  ["anI16"]=>
+  int(1234)
+}

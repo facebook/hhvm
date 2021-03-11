@@ -1,0 +1,76 @@
+*** Testing str_split() : different intger values for 'split_length' ***
+-- Iteration 1 --
+
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/zend/good/ext/standard/tests/strings/str_split_variation6_64bit.php on line 33
+bool(false)
+-- Iteration 2 --
+vec(42) {
+  string(1) "T"
+  string(1) "h"
+  string(1) "i"
+  string(1) "s"
+  string(1) " "
+  string(1) "i"
+  string(1) "s"
+  string(1) " "
+  string(1) "a"
+  string(1) " "
+  string(1) "s"
+  string(1) "t"
+  string(1) "r"
+  string(1) "i"
+  string(1) "n"
+  string(1) "g"
+  string(1) " "
+  string(1) "w"
+  string(1) "i"
+  string(1) "t"
+  string(1) "h"
+  string(1) " "
+  string(1) "1"
+  string(1) "2"
+  string(1) "3"
+  string(1) " "
+  string(1) "&"
+  string(1) " "
+  string(1) "e"
+  string(1) "s"
+  string(1) "c"
+  string(1) "a"
+  string(1) "p"
+  string(1) "e"
+  string(1) " "
+  string(1) "c"
+  string(1) "h"
+  string(1) "a"
+  string(1) "r"
+  string(1) " "
+  string(1) "\"
+  string(1) "t"
+}
+-- Iteration 3 --
+
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/zend/good/ext/standard/tests/strings/str_split_variation6_64bit.php on line 33
+bool(false)
+-- Iteration 4 --
+vec(1) {
+  string(42) "This is a string with 123 & escape char \t"
+}
+-- Iteration 5 --
+vec(2) {
+  string(26) "This is a string with 123 "
+  string(16) "& escape char \t"
+}
+-- Iteration 6 --
+vec(1) {
+  string(42) "This is a string with 123 & escape char \t"
+}
+-- Iteration 7 --
+vec(1) {
+  string(42) "This is a string with 123 & escape char \t"
+}
+-- Iteration 8 --
+
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/zend/good/ext/standard/tests/strings/str_split_variation6_64bit.php on line 33
+bool(false)
+Done

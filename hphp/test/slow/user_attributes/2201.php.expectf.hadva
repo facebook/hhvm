@@ -1,0 +1,158 @@
+>>> no_attrs =>
+---- non-recursive: ----
+p1:
+dict(0) {
+}
+p2:
+dict(0) {
+}
+>>> simple_attr =>
+---- non-recursive: ----
+param:
+dict(1) {
+  ["Attribute"]=>
+  vec(0) {
+  }
+}
+>>> two_attrs =>
+---- non-recursive: ----
+p1:
+dict(1) {
+  ["Attr1"]=>
+  vec(0) {
+  }
+}
+p2:
+dict(1) {
+  ["Attr2"]=>
+  vec(0) {
+  }
+}
+>>> C::m =>
+---- non-recursive: ----
+param:
+dict(1) {
+  ["Attr"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+>>> C::n =>
+---- non-recursive: ----
+param:
+dict(2) {
+  ["Bar"]=>
+  vec(0) {
+  }
+  ["Foo"]=>
+  vec(0) {
+  }
+}
+>>> C::o =>
+---- non-recursive: ----
+param:
+dict(1) {
+  ["Hi"]=>
+  vec(1) {
+    string(3) "bye"
+  }
+}
+>>> C::p =>
+---- non-recursive: ----
+param:
+dict(2) {
+  ["A"]=>
+  vec(2) {
+    string(1) "b"
+    vec(2) {
+      string(1) "c"
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  vec(1) {
+    string(2) "fg"
+  }
+}
+>>> C::q =>
+---- non-recursive: ----
+tuv:
+dict(1) {
+  ["RS"]=>
+  vec(0) {
+  }
+}
+>>> C::wxy =>
+---- non-recursive: ----
+z:
+dict(1) {
+  ["And_"]=>
+  vec(0) {
+  }
+}
+wont_you_sing_with_me:
+dict(1) {
+  ["NextTime"]=>
+  vec(0) {
+  }
+}
+>>> D::m =>
+---- non-recursive: ----
+param:
+dict(0) {
+}
+>>> D::n =>
+---- non-recursive: ----
+param:
+dict(2) {
+  ["Bar"]=>
+  vec(0) {
+  }
+  ["Foo"]=>
+  vec(0) {
+  }
+}
+>>> D::o =>
+---- non-recursive: ----
+param:
+dict(1) {
+  ["Hi"]=>
+  vec(1) {
+    string(5) "hello"
+  }
+}
+>>> D::p =>
+---- non-recursive: ----
+param:
+dict(2) {
+  ["A"]=>
+  vec(2) {
+    string(1) "b"
+    vec(2) {
+      string(1) "c"
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  vec(1) {
+    string(2) "fg"
+  }
+}
+>>> D::q =>
+---- non-recursive: ----
+rstuv:
+dict(0) {
+}
+>>> D::wxy =>
+---- non-recursive: ----
+z:
+dict(1) {
+  ["EnglishPeopleCallThisZed"]=>
+  vec(0) {
+  }
+}
+wont_you_sing_with_me:
+dict(0) {
+}

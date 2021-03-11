@@ -1,0 +1,81 @@
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(3) "aaa"
+  string(3) "bbb"
+}
+vec(2) {
+  string(0) ""
+  string(0) ""
+}
+vec(2) {
+  string(3) "aaa"
+  string(0) ""
+}
+vec(2) {
+  string(0) ""
+  string(3) "aaa"
+}
+vec(2) {
+  string(0) ""
+  string(0) ""
+}
+vec(2) {
+  string(2) "\""
+  string(3) "aaa"
+}
+vec(2) {
+  string(2) """"
+  string(0) ""
+}
+vec(1) {
+  string(7) """,aaa
+"
+}
+vec(1) {
+  string(8) "\"",aaa
+"
+}
+vec(2) {
+  string(3) "aaa"
+  string(10) "\"bbb,ccc
+"
+}
+vec(2) {
+  string(3) "aaa"
+  string(6) "bbb   "
+}
+vec(2) {
+  string(3) "aaa"
+  string(6) "bbb   "
+}
+vec(2) {
+  string(8) "aaa"aaa""
+  string(6) "bbbbbb"
+}
+vec(2) {
+  string(10) "aaa"aaa""""
+  string(3) "bbb"
+}
+vec(2) {
+  string(8) "aaa"\"a""
+  string(3) "bbb"
+}

@@ -1,0 +1,92 @@
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["Herp"]=>
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\MyShape"
+}
+dict(3) {
+  ["kind"]=>
+  int(18)
+  ["classname"]=>
+  string(11) "MyNS\MyEnum"
+  ["alias"]=>
+  string(6) "MyNS\T"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["SomeNS\Foo"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesFoo"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["SomeNS\Bar"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesBar"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["SomeNS\Baz"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesBaz"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["Herp"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(21) "MyNS\ExplicitRelative"
+}
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(1) {
+    ["Herp"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(21) "MyNS\ImplicitRelative"
+}

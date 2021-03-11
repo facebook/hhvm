@@ -1,0 +1,15 @@
+string(26) "HH\shape('a'=>HH\int, ...)"
+dict(3) {
+  ["kind"]=>
+  int(14)
+  ["allows_unknown_fields"]=>
+  bool(true)
+  ["fields"]=>
+  dict(1) {
+    ["a"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}

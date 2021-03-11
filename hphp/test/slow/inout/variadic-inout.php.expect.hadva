@@ -1,0 +1,26 @@
+vec(11) {
+  int(1)
+  int(2)
+  int(3)
+  int(24)
+  int(42)
+  string(5) "apple"
+  int(200)
+  int(8)
+  int(99)
+  string(5) "green"
+  int(16)
+}
+int(16)
+string(5) "green"
+int(99)
+int(8)
+vec(7) {
+  int(1)
+  int(2)
+  int(3)
+  int(24)
+  int(42)
+  string(5) "apple"
+  int(200)
+}

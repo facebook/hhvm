@@ -1,0 +1,30 @@
+dict(1) {
+  ["42"]=>
+  int(10)
+}
+dict(2) {
+  ["42"]=>
+  int(10)
+  ["10"]=>
+  int(5)
+}
+Out of bounds dict access: invalid index 42
+int(10)
+dict(2) {
+  ["42"]=>
+  string(6) "string"
+  [42]=>
+  string(3) "int"
+}
+string(6) "string"
+string(3) "int"
+dict(2) {
+  ["42"]=>
+  string(6) "string"
+  [42]=>
+  string(3) "int"
+}
+vec(2) {
+  string(6) "string"
+  string(3) "int"
+}

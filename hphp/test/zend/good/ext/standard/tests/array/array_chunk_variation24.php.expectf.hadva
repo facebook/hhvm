@@ -1,0 +1,28 @@
+dict(1) {
+  ["a"]=>
+  string(1) "A"
+}
+[0]
+NULL
+NULL
+NULL
+
+[1]
+vec(1) {
+  dict(1) {
+    [0]=>
+    string(1) "A"
+  }
+}
+vec(1) {
+  dict(1) {
+    ["a"]=>
+    string(1) "A"
+  }
+}
+vec(1) {
+  dict(1) {
+    [0]=>
+    string(1) "A"
+  }
+}

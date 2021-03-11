@@ -1,0 +1,37 @@
+dict(2) {
+  ["001099030277"]=>
+  dict(1) {
+    ["option1"]=>
+    string(1) "1"
+  }
+  ["011099030277"]=>
+  dict(1) {
+    ["option2"]=>
+    string(1) "1"
+  }
+}
+dict(2) {
+  ["option1"]=>
+  string(1) "1"
+  ["option2"]=>
+  string(1) "1"
+}
+dict(2) {
+  ["23.44"]=>
+  dict(1) {
+    ["option1"]=>
+    string(1) "1"
+  }
+  ["9633337363542736472364"]=>
+  dict(1) {
+    ["option2"]=>
+    string(1) "1"
+  }
+}
+dict(2) {
+  ["option1"]=>
+  string(1) "1"
+  ["option2"]=>
+  string(1) "1"
+}
+Done

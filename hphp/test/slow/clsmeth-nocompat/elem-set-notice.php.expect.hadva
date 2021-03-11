@@ -1,0 +1,496 @@
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+[NOTICE] Cannot use a scalar value as an array
+classMeth{
+  class(Foo)
+  function(bar)
+}
+vec(1) {
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+dict(1) {
+  [0]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  classMeth{
+    class(Foo)
+    function(bar)
+  }
+}

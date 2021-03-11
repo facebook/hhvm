@@ -1,0 +1,11 @@
+object(Closure%s) (1) {
+  ["static"]=>
+  dict(1) {
+    ["x"]=>
+    object(C) (1) {
+      ["a"]=>
+      *RECURSION*
+    }
+  }
+}
+int(1)

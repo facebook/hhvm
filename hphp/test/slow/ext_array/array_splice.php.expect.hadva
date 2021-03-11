@@ -1,0 +1,80 @@
+dict(2) {
+  [0]=>
+  string(4) "test"
+  [1]=>
+  string(5) "apple"
+}
+dict(2) {
+  [0]=>
+  string(4) "test"
+  [1]=>
+  string(5) "apple"
+}
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["0"]=>
+  string(5) "apple"
+}
+dict(2) {
+  [0]=>
+  string(4) "test"
+  ["1"]=>
+  string(5) "apple"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+}
+vec(2) {
+  string(3) "red"
+  string(5) "green"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "yellow"
+}
+vec(2) {
+  string(3) "red"
+  string(6) "yellow"
+}
+dict(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "orange"
+}
+dict(5) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  string(4) "blue"
+  [3]=>
+  string(5) "black"
+  [4]=>
+  string(6) "maroon"
+}
+dict(5) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  string(4) "blue"
+  [3]=>
+  string(6) "purple"
+  [4]=>
+  string(6) "yellow"
+}

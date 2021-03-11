@@ -1,0 +1,33 @@
+Path: %s/test/slow/directory/../../sample_dir/
+vec(7) {
+  string(2) ".
+"
+  string(3) "..
+"
+  string(4) "dir
+"
+  string(6) "empty
+"
+  string(5) "file
+"
+  string(15) "fix_mtimes.inc
+"
+  string(8) "symlink
+"
+}
+vec(7) {
+  string(2) ".
+"
+  string(3) "..
+"
+  string(4) "dir
+"
+  string(6) "empty
+"
+  string(5) "file
+"
+  string(15) "fix_mtimes.inc
+"
+  string(8) "symlink
+"
+}

@@ -1,0 +1,20 @@
+dict(9) {
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/dir.zip"]=>
+  string(15) "application/zip"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.awk"]=>
+  string(10) "text/plain"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.bmp"]=>
+  string(14) "image/x-ms-bmp"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.gif"]=>
+  string(9) "image/gif"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.jpg"]=>
+  string(10) "image/jpeg"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.mp3"]=>
+  string(10) "audio/mpeg"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.pdf"]=>
+  string(15) "application/pdf"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.png"]=>
+  string(9) "image/png"
+  ["%s/test/zend/good/ext/fileinfo/tests/resources/test.ppt"]=>
+  string(29) "application/vnd.ms-powerpoint"
+}

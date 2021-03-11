@@ -1,0 +1,12 @@
+string(73) "get_html_translation_table() expects parameter 3 to be string, null given"
+dict(4) {
+  ["""]=>
+  string(6) "&quot;"
+  ["&"]=>
+  string(5) "&amp;"
+  ["<"]=>
+  string(4) "&lt;"
+  [">"]=>
+  string(4) "&gt;"
+}
+string(76) "get_html_translation_table() expects parameter 3 to be string, integer given"

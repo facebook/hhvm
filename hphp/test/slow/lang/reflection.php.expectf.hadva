@@ -1,0 +1,459 @@
+Test begin
+--- getDocComment("f") ---
+string(35) "/**
+ * This is f's doc comment.
+ */"
+
+--- getStartLine("f") ---
+int(13)
+
+--- getEndLine("f") ---
+int(18)
+
+--- getFileName("f") ---
+string(%d) "%s/test/slow/lang/reflection.php"
+
+--- getName("f") ---
+string(1) "f"
+
+--- getNumberOfParameters("f") ---
+int(4)
+
+--- getNumberOfRequiredParameters("f") ---
+int(2)
+
+--- getParameters("f") ---
+vec(4) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(10) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(11) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(1) "b"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["inout"]=>
+      bool(true)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "b"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(2)
+      ["name"]=>
+      string(1) "c"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(4) "NULL"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "c"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(3)
+      ["name"]=>
+      string(1) "d"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      vec(3) {
+        int(1)
+        int(2)
+        string(11) "some string"
+      }
+      ["defaultText"]=>
+      string(27) "varray[1, 2, SOME_CONSTANT]"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "d"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+
+--- isInternal("f") ---
+bool(false)
+
+--- isUserDefined("f") ---
+bool(true)
+
+--- export("f") ---
+string(%d) "/**
+ * This is f's doc comment.
+ */
+Function [ <user> function f ] {
+  @@ %s/test/slow/lang/reflection.php 13 - 18
+
+  - Parameters [4] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> inout $b ]
+    Parameter #2 [ <optional> $c = NULL ]
+    Parameter #3 [ <optional> $d = vec [
+    1,
+    2,
+    'some string',
+  ] ]
+  }
+}
+"
+
+--- invoke("g") ---
+In g(a, b, some string)
+NULL
+In g(a, b, some string)
+NULL
+
+--- export("g") ---
+string(%d) "/**
+ * This is g's doc comment.
+ */
+Function [ <user> function g ] {
+  @@ %s/test/slow/lang/reflection.php 36 - 38
+
+  - Parameters [3] {
+    Parameter #0 [ <optional> $a = NULL ]
+    Parameter #1 [ <optional> $b = vec [
+    1,
+    2,
+    3,
+  ] ]
+    Parameter #2 [ <optional> $c = 'some string' ]
+  }
+}
+"
+
+--- export() ---
+string(%d) "/**
+ * This is B's doc comment.
+ */
+Class [ <user> class B extends A implements I, K, H, J ] {
+  @@ %s/test/slow/lang/reflection.php 64-80
+
+  - Constants [2] {
+    Constant [ string C0 {B::C0} ]
+    Constant [ string C1 {B::C1} ]
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/test/slow/lang/reflection.php 74 - 74
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/test/slow/lang/reflection.php 75 - 75
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> private $p0 ]
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+  }
+
+  - Methods [6] {
+    Method [ <user, implements I> public method methI ] {
+      @@ %s/test/slow/lang/reflection.php 76 - 76
+    }
+    Method [ <user, implements J> public method methJ ] {
+      @@ %s/test/slow/lang/reflection.php 77 - 77
+    }
+    Method [ <user, implements K> public method methK ] {
+      @@ %s/test/slow/lang/reflection.php 78 - 78
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/test/slow/lang/reflection.php 79 - 79
+    }
+    Method [ <user, inherits A> public method methH ] {
+      @@ %s/test/slow/lang/reflection.php 58 - 58
+    }
+    Method [ <user, inherits A> protected method methA ] {
+      @@ %s/test/slow/lang/reflection.php 59 - 59
+    }
+  }
+}
+"
+
+--- getConstant() ---
+string(5) "B::C0"
+string(5) "B::C1"
+
+--- getConstants() ---
+dict(2) {
+  ["C0"]=>
+  string(5) "B::C0"
+  ["C1"]=>
+  string(5) "B::C1"
+}
+
+--- getConstructor() ---
+NULL
+
+--- getDocComment() ---
+string(35) "/**
+ * This is B's doc comment.
+ */"
+
+--- getStartLine() ---
+int(64)
+
+--- getEndLine() ---
+int(80)
+
+--- getFileName() ---
+string(%d) "%s/test/slow/lang/reflection.php"
+
+--- getInterfaceNames() ---
+vec(4) {
+  string(1) "I"
+  string(1) "K"
+  string(1) "H"
+  string(1) "J"
+}
+
+--- getInterfaces() ---
+
+--- getMethod() ---
+
+--- getMethods() ---
+
+--- getModifiers() ---
+int(0)
+
+--- getName() ---
+string(1) "B"
+
+--- getParentClass() ---
+object(ReflectionClass) (2) {
+  ["name"]=>
+  string(1) "A"
+  ["obj":"ReflectionClass":private]=>
+  NULL
+}
+string(1) "A"
+
+--- getProperties() ---
+
+--- getProperty() ---
+
+--- getStaticProperties() ---
+
+--- setStaticPropertyValue() ---
+NULL
+
+--- getStaticPropertyValue() ---
+string(16) "new value for s0"
+NULL
+
+--- hasConstant() ---
+bool(true)
+bool(false)
+
+--- hasMethod() ---
+bool(true)
+bool(false)
+
+--- hasProperty() ---
+bool(true)
+bool(false)
+
+--- implementsInterface() ---
+bool(true)
+bool(false)
+
+--- isAbstract() ---
+bool(false)
+
+--- isFinal() ---
+bool(false)
+
+--- isInstance() ---
+bool(true)
+bool(false)
+
+--- isInstantiable() ---
+bool(true)
+
+--- isInterface() ---
+bool(false)
+
+--- isInternal() ---
+bool(false)
+
+--- isIterateable() ---
+bool(false)
+
+--- isSubclassOf() ---
+bool(true)
+bool(false)
+
+--- isUserDefined() ---
+bool(true)
+
+--- newInstance() ---
+object(B) (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- newInstanceArgs() ---
+object(B) (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- get_defined_functions() ---
+vec(3) {
+  string(21) "entrypoint_reflection"
+  string(1) "f"
+  string(1) "g"
+}
+--- get_defined_constants() ---
+SOME_CONSTANT: some string
+SOME_CONSTANT: some string
+ANOTHER_CONSTANT: some other string
+--- get_declared_classes() ---
+Found class A
+Found class B
+Found class C
+--- get_declared_interfaces() ---
+Found interface H
+Found interface I
+Found interface J
+Found interface K
+Found interface L
+Test end

@@ -1,0 +1,180 @@
+*** Testing date_sun_info() : usage variations ***
+
+-- Iteration 1 --
+
+Warning: date_sun_info() expects parameter 2 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 2 --
+
+Warning: date_sun_info() expects parameter 2 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 3 --
+
+Warning: date_sun_info() expects parameter 2 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 4 --
+
+Warning: date_sun_info() expects parameter 2 to be double, integer given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 5 --
+dict(9) {
+  ["sunrise"]=>
+  int(1165895237)
+  ["sunset"]=>
+  int(1165936713)
+  ["transit"]=>
+  int(1165915975)
+  ["civil_twilight_begin"]=>
+  int(1165893873)
+  ["civil_twilight_end"]=>
+  int(1165938077)
+  ["nautical_twilight_begin"]=>
+  int(1165892293)
+  ["nautical_twilight_end"]=>
+  int(1165939656)
+  ["astronomical_twilight_begin"]=>
+  int(1165890721)
+  ["astronomical_twilight_end"]=>
+  int(1165941229)
+}
+
+-- Iteration 6 --
+dict(9) {
+  ["sunrise"]=>
+  int(1165893058)
+  ["sunset"]=>
+  int(1165938891)
+  ["transit"]=>
+  int(1165915975)
+  ["civil_twilight_begin"]=>
+  int(1165891680)
+  ["civil_twilight_end"]=>
+  int(1165940269)
+  ["nautical_twilight_begin"]=>
+  int(1165890055)
+  ["nautical_twilight_end"]=>
+  int(1165941895)
+  ["astronomical_twilight_begin"]=>
+  int(1165888402)
+  ["astronomical_twilight_end"]=>
+  int(1165943548)
+}
+
+-- Iteration 7 --
+dict(9) {
+  ["sunrise"]=>
+  int(1165894152)
+  ["sunset"]=>
+  int(1165937798)
+  ["transit"]=>
+  int(1165915975)
+  ["civil_twilight_begin"]=>
+  int(1165892809)
+  ["civil_twilight_end"]=>
+  int(1165939141)
+  ["nautical_twilight_begin"]=>
+  int(1165891239)
+  ["nautical_twilight_end"]=>
+  int(1165940710)
+  ["astronomical_twilight_begin"]=>
+  int(1165889663)
+  ["astronomical_twilight_end"]=>
+  int(1165942287)
+}
+
+-- Iteration 8 --
+dict(9) {
+  ["sunrise"]=>
+  int(1165894152)
+  ["sunset"]=>
+  int(1165937798)
+  ["transit"]=>
+  int(1165915975)
+  ["civil_twilight_begin"]=>
+  int(1165892809)
+  ["civil_twilight_end"]=>
+  int(1165939141)
+  ["nautical_twilight_begin"]=>
+  int(1165891239)
+  ["nautical_twilight_end"]=>
+  int(1165940710)
+  ["astronomical_twilight_begin"]=>
+  int(1165889663)
+  ["astronomical_twilight_end"]=>
+  int(1165942287)
+}
+
+-- Iteration 9 --
+dict(9) {
+  ["sunrise"]=>
+  int(1165894203)
+  ["sunset"]=>
+  int(1165937747)
+  ["transit"]=>
+  int(1165915975)
+  ["civil_twilight_begin"]=>
+  int(1165892860)
+  ["civil_twilight_end"]=>
+  int(1165939090)
+  ["nautical_twilight_begin"]=>
+  int(1165891292)
+  ["nautical_twilight_end"]=>
+  int(1165940658)
+  ["astronomical_twilight_begin"]=>
+  int(1165889717)
+  ["astronomical_twilight_end"]=>
+  int(1165942233)
+}
+
+-- Iteration 10 --
+
+Warning: date_sun_info() expects parameter 2 to be double, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 11 --
+
+Warning: date_sun_info() expects parameter 2 to be double, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 12 --
+
+Warning: date_sun_info() expects parameter 2 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 13 --
+
+Warning: date_sun_info() expects parameter 2 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 14 --
+
+Warning: date_sun_info() expects parameter 2 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 15 --
+
+Warning: date_sun_info() expects parameter 2 to be double, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 16 --
+
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 17 --
+
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 18 --
+
+Warning: date_sun_info() expects parameter 2 to be double, vec given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 19 --
+
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 20 --
+
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 21 --
+
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+
+-- Iteration 22 --
+
+Warning: date_sun_info() expects parameter 2 to be double, resource given in %s/test/zend/good/ext/date/tests/date_sun_info_variation2.php on line 63
+===Done===

@@ -1,0 +1,59 @@
+int(2)
+dict(1) {
+  [0]=>
+  dict(2) {
+    [0]=>
+    vec(2) {
+      string(0) ""
+      int(0)
+    }
+    [1]=>
+    vec(2) {
+      string(0) ""
+      int(1)
+    }
+  }
+}
+dict(3) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "'"
+}
+dict(3) {
+  [0]=>
+  vec(2) {
+    string(0) ""
+    int(0)
+  }
+  [1]=>
+  vec(2) {
+    string(1) "a"
+    int(0)
+  }
+  [2]=>
+  vec(2) {
+    string(1) "'"
+    int(1)
+  }
+}
+dict(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "'"
+}
+dict(2) {
+  [0]=>
+  vec(2) {
+    string(1) "a"
+    int(0)
+  }
+  [1]=>
+  vec(2) {
+    string(1) "'"
+    int(1)
+  }
+}

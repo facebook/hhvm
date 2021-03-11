@@ -1,0 +1,378 @@
+dict(6) {
+  ["p"]=>
+  string(1) "A"
+  ["q"]=>
+  string(1) "B"
+  ["r"]=>
+  string(1) "C"
+  ["s"]=>
+  string(1) "D"
+  ["u"]=>
+  string(1) "E"
+  ["v"]=>
+  string(1) "F"
+}
+[0]
+NULL
+NULL
+NULL
+
+[1]
+vec(6) {
+  dict(1) {
+    [0]=>
+    string(1) "A"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "B"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "C"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "D"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "E"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "F"
+  }
+}
+vec(6) {
+  dict(1) {
+    ["p"]=>
+    string(1) "A"
+  }
+  dict(1) {
+    ["q"]=>
+    string(1) "B"
+  }
+  dict(1) {
+    ["r"]=>
+    string(1) "C"
+  }
+  dict(1) {
+    ["s"]=>
+    string(1) "D"
+  }
+  dict(1) {
+    ["u"]=>
+    string(1) "E"
+  }
+  dict(1) {
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(6) {
+  dict(1) {
+    [0]=>
+    string(1) "A"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "B"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "C"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "D"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "E"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "F"
+  }
+}
+
+[2]
+vec(3) {
+  dict(2) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "C"
+    [1]=>
+    string(1) "D"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "E"
+    [1]=>
+    string(1) "F"
+  }
+}
+vec(3) {
+  dict(2) {
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+  }
+  dict(2) {
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+  }
+  dict(2) {
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(3) {
+  dict(2) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "C"
+    [1]=>
+    string(1) "D"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "E"
+    [1]=>
+    string(1) "F"
+  }
+}
+
+[3]
+vec(2) {
+  dict(3) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+  }
+  dict(3) {
+    [0]=>
+    string(1) "D"
+    [1]=>
+    string(1) "E"
+    [2]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(3) {
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+  }
+  dict(3) {
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(3) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+  }
+  dict(3) {
+    [0]=>
+    string(1) "D"
+    [1]=>
+    string(1) "E"
+    [2]=>
+    string(1) "F"
+  }
+}
+
+[4]
+vec(2) {
+  dict(4) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "E"
+    [1]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(4) {
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+  }
+  dict(2) {
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(4) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+  }
+  dict(2) {
+    [0]=>
+    string(1) "E"
+    [1]=>
+    string(1) "F"
+  }
+}
+
+[5]
+vec(2) {
+  dict(5) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+    [4]=>
+    string(1) "E"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(5) {
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
+  }
+  dict(1) {
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(2) {
+  dict(5) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+    [4]=>
+    string(1) "E"
+  }
+  dict(1) {
+    [0]=>
+    string(1) "F"
+  }
+}
+
+[6]
+vec(1) {
+  dict(6) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+    [4]=>
+    string(1) "E"
+    [5]=>
+    string(1) "F"
+  }
+}
+vec(1) {
+  dict(6) {
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
+  }
+}
+vec(1) {
+  dict(6) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "B"
+    [2]=>
+    string(1) "C"
+    [3]=>
+    string(1) "D"
+    [4]=>
+    string(1) "E"
+    [5]=>
+    string(1) "F"
+  }
+}

@@ -1,0 +1,4 @@
+vec(2) {
+  string(4) "priv"
+  string(4) "func"
+}

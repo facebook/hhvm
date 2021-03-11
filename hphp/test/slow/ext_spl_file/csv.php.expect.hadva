@@ -1,0 +1,10 @@
+vec(3) {
+  string(1) ";"
+  string(1) """
+  string(1) "\"
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}

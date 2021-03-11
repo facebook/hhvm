@@ -1,0 +1,16 @@
+vec(1) {
+  string(%d) "  %s/test/slow/ext_iterator/../../sample_dir/dir/empty
+"
+}
+vec(5) {
+  string(%d) " %s/test/slow/ext_iterator/../../sample_dir/dir
+"
+  string(%d) " %s/test/slow/ext_iterator/../../sample_dir/empty
+"
+  string(%d) " %s/test/slow/ext_iterator/../../sample_dir/file
+"
+  string(%d) " %s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc
+"
+  string(%d) " %s/test/slow/ext_iterator/../../sample_dir/symlink
+"
+}

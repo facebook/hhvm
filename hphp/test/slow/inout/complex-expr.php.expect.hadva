@@ -1,0 +1,96 @@
+string(6) "value1"
+string(6) "fuzzed"
+string(4) "fuzz"
+string(4) "main"
+dict(2) {
+  [0]=>
+  dict(1) {
+    [12]=>
+    vec(1) {
+      dict(1) {
+        ["bar"]=>
+        dict(1) {
+          ["x"]=>
+          string(6) "fuzzed"
+        }
+      }
+    }
+  }
+  [18]=>
+  vec(1) {
+    dict(1) {
+      ["hello"]=>
+      dict(1) {
+        ["y"]=>
+        string(6) "value2"
+      }
+    }
+  }
+}
+string(6) "value2"
+string(6) "fuzzed"
+string(4) "fuzz"
+string(4) "main"
+dict(2) {
+  [0]=>
+  dict(1) {
+    [12]=>
+    vec(1) {
+      dict(1) {
+        ["bar"]=>
+        dict(1) {
+          ["x"]=>
+          string(6) "fuzzed"
+        }
+      }
+    }
+  }
+  [18]=>
+  vec(1) {
+    dict(1) {
+      ["hello"]=>
+      dict(1) {
+        ["y"]=>
+        string(6) "fuzzed"
+      }
+    }
+  }
+}
+object(HH\Vector) (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+string(6) "fuzzed"
+string(4) "fuzz"
+string(4) "main"
+vec(1) {
+  string(6) "fuzzed"
+}
+vec(1) {
+  object(HH\Vector) (2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+string(6) "fuzzed"
+string(4) "fuzz"
+string(4) "main"
+string(6) "fuzzed"
+object(HH\Vector) (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+string(6) "fuzzed"
+string(4) "fuzz"
+string(4) "main"
+vec(1) {
+  vec(1) {
+    string(6) "fuzzed"
+  }
+}

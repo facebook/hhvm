@@ -1,0 +1,80 @@
+Array containing same object twice:
+dict(2) {
+  [0]=>
+  object(stdClass) (0) {
+  }
+  [1]=>
+  object(stdClass) (0) {
+  }
+}
+string(37) "D:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+dict(2) {
+  [0]=>
+  object(stdClass) (0) {
+  }
+  [1]=>
+  object(stdClass) (0) {
+  }
+}
+dict(2) {
+  [0]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+  [1]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+}
+dict(2) {
+  [0]=>
+  string(10) "a0.changed"
+  [1]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+}
+
+
+Object containing same object twice:object(stdClass) (2) {
+  ["a"]=>
+  object(stdClass) (0) {
+  }
+  ["b"]=>
+  object(stdClass) (0) {
+  }
+}
+string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";r:2;}"
+object(stdClass) (2) {
+  ["a"]=>
+  object(stdClass) (0) {
+  }
+  ["b"]=>
+  object(stdClass) (0) {
+  }
+}
+object(stdClass) (2) {
+  ["a"]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+  ["b"]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+}
+object(stdClass) (2) {
+  ["a"]=>
+  string(20) "container->a.changed"
+  ["b"]=>
+  object(stdClass) (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+}
+Done

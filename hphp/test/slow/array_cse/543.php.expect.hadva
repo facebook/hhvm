@@ -1,0 +1,34 @@
+int(0)
+int(0)
+int(0)
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(0)
+int(1)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(1)
+int(2)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(2)
+int(3)
+bool(false)
+bool(true)
+vec(1) {
+  bool(true)
+}

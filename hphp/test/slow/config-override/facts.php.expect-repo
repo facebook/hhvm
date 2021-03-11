@@ -1,13 +1,13 @@
-darray(2) {
+dict(2) {
   ["SoIsThis"]=>
-  varray(1) {
+  vec(1) {
     string(3) "ABC"
   }
   ["ThisIsAnAttribute"]=>
-  varray(0) {
+  vec(0) {
   }
 }
-darray(2) {
+dict(2) {
   ["foo"]=>
   int(2)
   ["main"]=>

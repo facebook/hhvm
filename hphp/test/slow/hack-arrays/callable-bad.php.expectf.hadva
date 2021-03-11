@@ -1,0 +1,155 @@
+===== call1/00 =====
+
+Fatal error: Function name must be a string in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/01 =====
+
+Fatal error: Call to undefined function nonexistent() in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/02 =====
+
+Fatal error: Call to undefined function A::func1() in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/03 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/04 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/05 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/06 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/07 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/08 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/09 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/10 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/11 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/12 =====
+
+Fatal error: Invalid callable (array) in %s/test/slow/hack-arrays/callable-bad.php on line 9
+===== call1/13 =====
+string(7) "A::meth"
+int(42)
+===== call2/00 =====
+
+Warning: Invalid argument: function: not string, closure, or array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/01 =====
+
+Warning: Invalid argument: function: method 'nonexistent' not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/02 =====
+
+Warning: Invalid argument: function: method 'func1' not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/03 =====
+
+Warning: Invalid argument: function: class not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/04 =====
+
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/05 =====
+
+Warning: Invalid argument: function: method 'func2' not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/06 =====
+
+Warning: Invalid argument: function: class not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/07 =====
+
+Warning: Invalid argument: function: class not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/08 =====
+
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/09 =====
+
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/10 =====
+
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/11 =====
+
+Warning: Invalid argument: function: not a valid callback array in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/12 =====
+
+Warning: Invalid argument: function: method 'func3' not found in %s/test/slow/hack-arrays/callable-bad.php on line 10
+NULL
+===== call2/13 =====
+string(7) "A::meth"
+int(42)
+===== call3/00 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/01 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/02 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/03 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/04 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/05 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/06 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/07 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/08 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/09 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/10 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/11 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/12 =====
+
+Warning: array_map() expects parameter 1 to be a valid callback in %s/test/slow/hack-arrays/callable-bad.php on line 11
+NULL
+===== call3/13 =====
+string(7) "A::meth"
+dict(1) {
+  [0]=>
+  int(42)
+}

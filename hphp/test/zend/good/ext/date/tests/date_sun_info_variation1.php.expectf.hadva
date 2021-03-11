@@ -1,0 +1,162 @@
+*** Testing date_sun_info() : usage variations ***
+
+-- Iteration 1 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 2 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 3 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 4 --
+dict(9) {
+  ["sunrise"]=>
+  int(-69665)
+  ["sunset"]=>
+  int(-33260)
+  ["transit"]=>
+  int(-51462)
+  ["civil_twilight_begin"]=>
+  int(-71269)
+  ["civil_twilight_end"]=>
+  int(-31655)
+  ["nautical_twilight_begin"]=>
+  int(-73092)
+  ["nautical_twilight_end"]=>
+  int(-29832)
+  ["astronomical_twilight_begin"]=>
+  int(-74874)
+  ["astronomical_twilight_end"]=>
+  int(-28050)
+}
+
+-- Iteration 5 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 6 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 7 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 8 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 9 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, double given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 10 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 11 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, null given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 12 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 13 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 14 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 15 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, boolean given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 16 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 17 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 18 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 19 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 20 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 21 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+
+-- Iteration 22 --
+
+Warning: date_sun_info() expects parameter 1 to be integer, resource given in %s/test/zend/good/ext/date/tests/date_sun_info_variation1.php on line 63
+===Done===

@@ -1,0 +1,64 @@
+*** Testing get_class_methods() : usage variations ***
+
+Arg value 0 
+NULL
+
+Arg value 1 
+NULL
+
+Arg value 12345 
+NULL
+
+Arg value -2345 
+NULL
+
+Arg value 10.5 
+NULL
+
+Arg value -10.5 
+NULL
+
+Arg value 101234567000 
+NULL
+
+Arg value 1.07654321E-9 
+NULL
+
+Arg value 0.5 
+NULL
+
+Arg value  
+NULL
+
+Arg value  
+NULL
+
+Arg value 1 
+NULL
+
+Arg value  
+NULL
+
+Arg value 1 
+NULL
+
+Arg value  
+NULL
+
+Arg value  
+NULL
+
+Arg value  
+NULL
+
+Arg value string 
+NULL
+
+Arg value string 
+NULL
+Error: 4096 - Object of class stdClass could not be converted to string, %s/test/zend/good/ext/standard/tests/class_object/get_class_methods_variation_001.php(62)
+
+Arg value  
+vec(0) {
+}
+Done

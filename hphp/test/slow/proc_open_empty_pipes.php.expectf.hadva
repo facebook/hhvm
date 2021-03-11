@@ -1,0 +1,7 @@
+resource(4) of type (process)
+dict(2) {
+  [0]=>
+  resource(5) of type (stream)
+  [1]=>
+  resource(6) of type (stream)
+}

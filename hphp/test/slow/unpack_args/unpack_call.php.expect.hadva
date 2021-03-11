@@ -1,0 +1,439 @@
+= test_call_array_equivalent =
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* variadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::stVariadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::variadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+= test_call_array_equivalent =
+object(HH\Vector) (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* variadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::stVariadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::regular
+string(1) "a"
+string(1) "b"
+string(1) "c"
+* C::variadic
+string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+
+= test_param_mix =
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::stVariadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic
+string(16) "passed regularly"
+vec(5) {
+  string(21) "also passed regularly"
+  string(47) "arg that ensures more args passed than declared"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* variadic_with_func_get_args
+vec(5) {
+  string(16) "passed regularly"
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::stVariadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+= test_param_mix =
+object(HH\Vector) (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::stVariadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic
+string(16) "passed regularly"
+vec(5) {
+  string(21) "also passed regularly"
+  string(47) "arg that ensures more args passed than declared"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* variadic_with_func_get_args
+vec(5) {
+  string(16) "passed regularly"
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::stVariadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* C::__construct
+string(1) "a"
+string(1) "b"
+string(1) "c"
+= test_param_mix_typed =
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::stVariadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::regular
+string(16) "passed regularly"
+string(1) "a"
+string(1) "b"
+* C::variadic
+string(16) "passed regularly"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+* variadic
+string(16) "passed regularly"
+vec(5) {
+  string(21) "also passed regularly"
+  string(47) "arg that ensures more args passed than declared"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* variadic_with_func_get_args
+vec(5) {
+  string(16) "passed regularly"
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::stRegular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::stVariadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::__construct
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+* C::regular
+string(16) "passed regularly"
+string(21) "also passed regularly"
+string(1) "a"
+* C::variadic
+string(16) "passed regularly"
+vec(4) {
+  string(21) "also passed regularly"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+Done

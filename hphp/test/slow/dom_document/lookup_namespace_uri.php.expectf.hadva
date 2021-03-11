@@ -1,0 +1,6 @@
+Empty: NULL
+string: NULL
+null: string(29) "http://www.website.org/somens"
+array: 
+Warning: DOMNode::lookupNamespaceUri() expects parameter 1 to be string, vec given in %s/test/slow/dom_document/lookup_namespace_uri.php on line 20
+NULL

@@ -1,0 +1,38 @@
+*** Testing rsort() : variation ***
+
+-- 'flag' value is defualt --
+bool(true)
+vec(4) {
+  bool(true)
+  bool(true)
+  bool(false)
+  bool(false)
+}
+
+-- 'flag' value is SORT_REGULAR --
+bool(true)
+vec(4) {
+  bool(true)
+  bool(true)
+  bool(false)
+  bool(false)
+}
+
+-- 'flag' value is SORT_NUMERIC  --
+bool(true)
+vec(4) {
+  bool(true)
+  bool(true)
+  bool(false)
+  bool(false)
+}
+
+-- 'flag' value is SORT_STRING --
+bool(true)
+vec(4) {
+  bool(true)
+  bool(true)
+  bool(false)
+  bool(false)
+}
+Done

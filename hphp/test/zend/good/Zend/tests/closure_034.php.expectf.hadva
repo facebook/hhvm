@@ -1,0 +1,11 @@
+object(Closure%s) (1) {
+  ["static"]=>
+  dict(1) {
+    ["c"]=>
+    object(C) (1) {
+      ["a"]=>
+      *RECURSION*
+    }
+  }
+}
+===DONE===

@@ -1,0 +1,15 @@
+Test begin
+vec(1) {
+  int(23)
+}
+object(T) (2) {
+  ["str"]=>
+  string(9) "eine:zwei"
+  ["int"]=>
+  int(3)
+}
+vec(1) {
+  int(6)
+}
+OutOfBoundsException: Out of bounds vec access: invalid index 17
+Test end

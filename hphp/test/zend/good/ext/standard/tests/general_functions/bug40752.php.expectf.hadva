@@ -1,0 +1,12 @@
+dict(1) {
+  ["foo"]=>
+  dict(1) {
+    [0]=>
+    string(1) "1"
+  }
+}
+dict(1) {
+  ["foo"]=>
+  string(1) "1"
+}
+Done

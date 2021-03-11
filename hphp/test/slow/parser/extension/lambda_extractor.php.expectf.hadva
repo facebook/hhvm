@@ -1,0 +1,31 @@
+bool(true)
+vec(2) {
+  vec(2) {
+    int(7)
+    int(100)
+  }
+  vec(2) {
+    int(9)
+    int(131)
+  }
+}
+vec(2) {
+  vec(2) {
+    int(12)
+    int(219)
+  }
+  vec(2) {
+    int(12)
+    int(220)
+  }
+}
+vec(2) {
+  vec(2) {
+    int(13)
+    int(269)
+  }
+  vec(2) {
+    int(13)
+    int(282)
+  }
+}

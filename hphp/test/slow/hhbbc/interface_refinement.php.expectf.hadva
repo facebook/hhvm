@@ -1,0 +1,10 @@
+object(Closure%s) (1) {
+  ["static"]=>
+  dict(1) {
+    ["c"]=>
+    object(D) (0) {
+    }
+  }
+}
+object(D) (0) {
+}

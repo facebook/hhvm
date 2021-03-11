@@ -1,0 +1,10 @@
+object(PDOStatement) (1) {
+  ["queryString"]=>
+  string(17) "SELECT * FROM foo"
+}
+vec(3) {
+  string(5) "00000"
+  NULL
+  NULL
+}
+string(1) "2"

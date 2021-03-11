@@ -1,0 +1,12 @@
+int(9)
+vec(0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(5)
+int(1)
+Out of bounds dict access: invalid index "123"
+string(1) "6"

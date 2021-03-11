@@ -1,0 +1,7 @@
+vec(4) {
+  string(6) "orange"
+  string(6) "banana"
+  string(5) "apple"
+  string(9) "raspberry"
+}
+int(4)

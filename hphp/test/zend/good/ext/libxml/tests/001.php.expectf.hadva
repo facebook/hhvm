@@ -1,0 +1,10 @@
+bool(false)
+bool(false)
+bool(true)
+
+Warning: libxml_use_internal_errors() expects parameter 1 to be boolean, object given in %s/test/zend/good/ext/libxml/tests/001.php on line 6
+vec(0) {
+}
+bool(false)
+NULL
+Done

@@ -1,0 +1,18 @@
+int(1)
+float(1.5)
+string(3) "foo"
+bool(false)
+resource(4) of type (stream)
+object(stdClass) (0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}

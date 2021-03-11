@@ -1,0 +1,28 @@
+bool(false)
+bool(true)
+int(823)
+string(0) ""
+string(3) "foo"
+dict(1) {
+  [0]=>
+  string(2) "12"
+}
+dict(2) {
+  [0]=>
+  dict(0) {
+  }
+  [1]=>
+  dict(0) {
+  }
+}
+dict(3) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+object(stdClass) (0) {
+}
+===DONE===

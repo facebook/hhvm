@@ -1,0 +1,44 @@
+FF00FF
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 0
+)
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 0
+    [alpha] => 0
+)
+Dict
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 0
+)
+64FF00FF
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 100
+)
+Dict
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 0
+    [alpha] => 1
+)
+Dict
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 1
+)

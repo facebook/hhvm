@@ -1,0 +1,65 @@
+*** Testing array_chunk() : usage variations ***
+
+-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --
+vec(2) {
+  dict(2) {
+    [0]=>
+    vec(0) {
+    }
+    [1]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+  dict(1) {
+    [0]=>
+    vec(1) {
+      int(1)
+    }
+  }
+}
+
+-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = true --
+vec(2) {
+  dict(2) {
+    ["array1"]=>
+    vec(0) {
+    }
+    ["array2"]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+  dict(1) {
+    ["array3"]=>
+    vec(1) {
+      int(1)
+    }
+  }
+}
+
+-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = false --
+vec(2) {
+  dict(2) {
+    [0]=>
+    vec(0) {
+    }
+    [1]=>
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+  dict(1) {
+    [0]=>
+    vec(1) {
+      int(1)
+    }
+  }
+}
+Done

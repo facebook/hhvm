@@ -1,0 +1,8 @@
+*** Testing array_diff_uassoc() : usage variation ***
+
+-- Result of comparing integers and floating point numbers --
+dict(0) {
+}
+dict(0) {
+}
+===DONE===

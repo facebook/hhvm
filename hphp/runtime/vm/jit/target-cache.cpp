@@ -356,12 +356,10 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // true that oldFunc->name() == name bitwise.
   assertx(oldFunc->name()->isame(name));
   if (LIKELY(cand->name() == name)) {
-    if (LIKELY(cand->attrs() & AttrPublic)) {
-      // If the candidate function is public, then it has to be the
-      // right function.  There can be no other function with this
-      // name on `cls', and we already ruled out the case where
-      // dispatch should've gone to a private function with the same
-      // name, above.
+    if (LIKELY((cand->attrs() & AttrPublic) && !cand->hasPrivateAncestor())) {
+      // If the candidate function is public, then we also need to check it
+      // does not have a private ancestor. The private ancestor wins if 
+      // the context has access to it, so this is a conservative check.
       //
       // The normal case here is an overridden public method.  But this
       // case can also occur on unrelated classes that happen to have

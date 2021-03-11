@@ -1591,9 +1591,9 @@ void emitBaseSC(IRGS& env,
 
   auto const disallowConst = mode == MOpMode::Define ||
     mode == MOpMode::Unset || mode == MOpMode::InOut;
-  auto const spropPtr = ldClsPropAddr(
-    env, cls, name, true, false, disallowConst
-  ).propPtr;
+    
+  const LdClsPropOptions opts { true, false, disallowConst };
+  auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);
 }
 

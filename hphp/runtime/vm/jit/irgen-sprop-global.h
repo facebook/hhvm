@@ -42,11 +42,15 @@ struct ClsPropLookup {
   Slot slot;
 };
 
+struct LdClsPropOptions {
+  bool raise;
+  bool ignoreLateInit;
+  bool disallowConst;
+};
+
 ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool);
-ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool, bool);
+ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, const LdClsPropOptions&);
 
 //////////////////////////////////////////////////////////////////////
 
 }}}
-
-

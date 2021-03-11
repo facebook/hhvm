@@ -8,59 +8,6 @@
 
 open Hh_prelude
 
-type args = {
-  base_naming_table: string;
-  base_naming_table_sqlite: bool;
-  new_naming_table: string;
-  new_naming_table_sqlite: bool;
-  print_count: bool;
-}
-
-let die str =
-  prerr_endline str;
-  exit 2
-
-let parse_options () =
-  let naming_table_paths_ref = ref [] in
-  let first_file_sqlite = ref false in
-  let second_file_sqlite = ref false in
-  let count = ref false in
-  let options =
-    [
-      ( "--f1-sqlite",
-        Arg.Set first_file_sqlite,
-        "The first file is a sqlite file; Default is a marshaled ocaml blob" );
-      ( "--f2-sqlite",
-        Arg.Set second_file_sqlite,
-        "The second file is a sqlite file; Default is a marshaled ocaml blob" );
-      ( "--count",
-        Arg.Set count,
-        "Print a count of the difference; Default is full text print" );
-    ]
-  in
-  let usage =
-    Printf.sprintf
-      "Usage: diffNamingTable (%s) first_naming_table second_naming_table"
-      Sys.argv.(0)
-  in
-  let () =
-    Arg.parse
-      options
-      (fun naming_table_path ->
-        naming_table_paths_ref := !naming_table_paths_ref @ [naming_table_path])
-      usage
-  in
-  match !naming_table_paths_ref with
-  | [path1; path2] ->
-    {
-      base_naming_table = path1;
-      base_naming_table_sqlite = !first_file_sqlite;
-      new_naming_table = path2;
-      new_naming_table_sqlite = !second_file_sqlite;
-      print_count = !count;
-    }
-  | _ -> die usage
-
 let get_default_provider_context () =
   let () =
     Relative_path.set_path_prefix Relative_path.Root (Path.make_unsafe "root")
@@ -188,65 +135,59 @@ let file_info_diff_to_string path d =
   in
   String.concat ~sep:"\n" (Relative_path.S.to_string path :: t)
 
-let print_diff args diff =
+let print_diff print_count diff =
+  Hh_logger.log "Diffing the naming tables...";
   let no_difference =
     List.is_empty diff.added_files
     && List.is_empty diff.removed_files
     && List.is_empty diff.changed_files
   in
   if no_difference then
-    print_string "The naming tables are identical"
-  else if args.print_count then
+    Hh_logger.log "The naming tables are identical!"
+  else if print_count then (
     let print_category description change =
       if not (List.is_empty change) then
-        print_string
-          (description ^ " " ^ string_of_int (List.length change) ^ "\n")
+        Hh_logger.log "%s: %s" description (string_of_int @@ List.length change)
     in
-    let () = print_category "Added files:" diff.added_files in
-    let () = print_category "Removed files:" diff.removed_files in
-    let () = print_category "Changed files:" diff.changed_files in
-    let () = print_category "Added errors:" diff.added_errors in
-    let () = print_category "Removed errors:" diff.removed_errors in
-    ()
-  else
+    print_category "Added files" diff.added_files;
+    print_category "Removed files" diff.removed_files;
+    print_category "Changed files" diff.changed_files;
+    print_category "Added errors" diff.added_errors;
+    print_category "Removed errors" diff.removed_errors
+  ) else
     let concat_paths paths =
       let paths =
         List.map ~f:(fun path -> Relative_path.S.to_string path) paths
       in
-      String.concat paths ~sep:", "
+      String.concat paths ~sep:"\n"
     in
     let print_category description change =
       if not (List.is_empty change) then
-        let () = print_string (description ^ "\n") in
-        print_string (concat_paths change ^ "\n")
+        Hh_logger.log "%s:\n%s" description (concat_paths change)
     in
-    let () = print_category "Added files:" diff.added_files in
-    let () = print_category "Removed files:" diff.removed_files in
-    let () =
-      if not (List.is_empty diff.changed_files) then
-        let () = print_string "Changed files:\n" in
-        List.iter diff.changed_files ~f:(fun (path, d) ->
-            print_string (file_info_diff_to_string path d))
-    in
-    let () = print_category "Added errors:" diff.added_errors in
-    let () = print_category "Removed errors:" diff.removed_errors in
-    ()
+    print_category "Added files" diff.added_files;
+    print_category "Removed files" diff.removed_files;
+    if not (List.is_empty diff.changed_files) then (
+      Hh_logger.log "Changed files";
+      List.iter diff.changed_files ~f:(fun (path, d) ->
+          Hh_logger.log "%s" (file_info_diff_to_string path d))
+    );
+    print_category "Added errors" diff.added_errors;
+    print_category "Removed errors" diff.removed_errors
 
-let () =
-  let args = parse_options () in
+let diff (control_path, is_control_sqlite) (test_path, is_test_sqlite) =
   let provider_context = get_default_provider_context () in
-  let (naming_table1, errors1) =
-    get_naming_table_and_errors
-      provider_context
-      args.base_naming_table
-      args.base_naming_table_sqlite
+  let (control_naming_table, control_errors) =
+    get_naming_table_and_errors provider_context control_path is_control_sqlite
   in
-  let (naming_table2, errors2) =
-    get_naming_table_and_errors
-      provider_context
-      args.new_naming_table
-      args.new_naming_table_sqlite
+  let (test_naming_table, test_errors) =
+    get_naming_table_and_errors provider_context test_path is_test_sqlite
   in
-  let diff = calculate_diff naming_table1 naming_table2 errors1 errors2 in
-  let () = print_diff args diff in
-  ()
+  let diff =
+    calculate_diff
+      control_naming_table
+      test_naming_table
+      control_errors
+      test_errors
+  in
+  print_diff true diff

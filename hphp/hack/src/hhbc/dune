@@ -1,7 +1,7 @@
 (library
   (name hhbc)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (libraries
     annotated_ast
     ast
@@ -15,7 +15,7 @@
 (library
   (name options_ffi)
   (modules)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (wrapped false)
   (self_build_stubs_archive (options_ffi))
 )
@@ -34,7 +34,7 @@
 (library
   (name compile_ffi)
   (modules)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (wrapped false)
   (self_build_stubs_archive (compile_ffi))
 )

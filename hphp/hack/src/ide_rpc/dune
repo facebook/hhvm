@@ -3,7 +3,7 @@
   (wrapped false)
   (modules
     ide_api_types)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (libraries
     core_kernel
     file_content
@@ -14,7 +14,7 @@
   (wrapped false)
   (modules
     nuclide_rpc_message_printer)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (libraries
     coverage_level
     pos

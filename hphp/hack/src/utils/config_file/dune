@@ -9,7 +9,7 @@
     sys_utils
     utils_core
     utils_hash)
-  (preprocess (pps lwt_ppx)) ; See T41851208
+  (preprocess (pps lwt_ppx))
 )
 
 (library
@@ -24,7 +24,7 @@
     utils_core
     utils_exit
     utils_hash)
-  (preprocess (pps lwt_ppx)) ; See T41851208
+  (preprocess (pps lwt_ppx))
 )
 
 (library

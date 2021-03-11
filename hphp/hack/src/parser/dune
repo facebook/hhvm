@@ -2,7 +2,7 @@
   (name rust_parser_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries ocamlpool)
   (c_library_flags -lpthread)
   (self_build_stubs_archive (rust_parser_ffi))
@@ -24,7 +24,7 @@
   (name rust_parser_errors_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries ocamlpool)
   (c_library_flags -lpthread)
   (self_build_stubs_archive (rust_parser_errors_ffi))
@@ -127,7 +127,7 @@
     parser_return
     pretty_printing_library
     pretty_printing_library_sig)
-  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries
     ast
     fixme_provider
@@ -147,7 +147,7 @@
   (name hh_autoimport)
   (wrapped false)
   (modules hh_autoimport)
-  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries
     collections
     core_kernel
@@ -158,7 +158,7 @@
   (wrapped false)
   (modules
     parsing_service)
-  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries
     ast_provider
     decl

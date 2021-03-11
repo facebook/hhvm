@@ -36,7 +36,7 @@
     naming_provider
     shallow_decl_defs
     typing_defs)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name tast)
@@ -173,7 +173,7 @@
     tast
     tast_check
     nast_check)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name type_mapper_generic)
@@ -236,7 +236,7 @@
     ide_rpc_api_types
     tast
     typing_defs)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name typing_check)
@@ -264,7 +264,7 @@
     typing_service_api
     typing_service_api_stubs
     vfs)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name tast_typecheck)
@@ -277,4 +277,4 @@
     tast
     typing
     utils_core)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))

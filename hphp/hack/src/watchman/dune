@@ -11,7 +11,7 @@
     logging_common
     sys_utils
     utils_core)
-  (preprocess (pps lwt_ppx)) ; See T41851208
+  (preprocess (pps lwt_ppx))
 )
 
 (library
@@ -23,5 +23,5 @@
     hh_json
     logging
     utils_core)
-  (preprocess (pps lwt_ppx)) ; See T41851208
+  (preprocess (pps lwt_ppx))
 )

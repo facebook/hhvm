@@ -33,7 +33,7 @@
     utils_core
     utils_www_root
     version)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name diagnostic_subscription)
@@ -49,7 +49,7 @@
     pos
     relative_path
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server_utils)
@@ -71,7 +71,7 @@
     sys_utils
     utils_core
     watchman)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server_command_types)
@@ -104,7 +104,7 @@
     symbol
     typing_defs
     utils_lint)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server_client_provider)
@@ -120,7 +120,7 @@
     server_command_types
     server_utils
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std))) 
 
 (library
   (name server_services)
@@ -169,7 +169,7 @@
     typing_check
     typing_deps
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std))) 
 
 (library
   (name server_api)
@@ -188,7 +188,7 @@
     typing_check
     typing_service_api
     utils_core)
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name server)
@@ -278,7 +278,7 @@
     (facebook signed_source -> facebook/serverInvalidateUnits.ml)
     (-> ../stubs/serverInvalidateUnits.ml))
   )
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name hh_server_monitor)

@@ -5,7 +5,7 @@
     cost
     doc
     rule)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (libraries
     core_kernel
     utils_core))
@@ -13,14 +13,14 @@
 (library
   (name hackfmt_env)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (modules
     format_env))
 
 (library
   (name hackfmt)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (modules
     boundaries
     chunk

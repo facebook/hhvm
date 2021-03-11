@@ -6,7 +6,7 @@
   (name rust_facts_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (preprocess (pps ppx_deriving.std))
   (self_build_stubs_archive (rust_facts_ffi))
 )
 (rule

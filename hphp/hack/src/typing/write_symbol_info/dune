@@ -16,4 +16,4 @@
     server_services
     utils_core
     uutf)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))

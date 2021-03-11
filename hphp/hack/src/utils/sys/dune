@@ -20,4 +20,4 @@
     realpath
     sysinfo)
   (preprocess
-    (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+    (pps lwt_ppx ppx_deriving.std)))

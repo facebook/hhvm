@@ -12,7 +12,7 @@
   (name discover)
   (modules discover)
   (libraries dune.configurator)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (rule
   (targets generated_buildOptions.ml)
@@ -25,7 +25,7 @@
   (libraries (select buildOptions.ml from
     (facebook -> facebook/buildOptions.ml)
     (-> generated_buildOptions.ml)))
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name glean_options)
@@ -71,4 +71,4 @@
     typecheckerOptions)
   (libraries
     global_options)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
+  (preprocess (pps ppx_deriving.std)))

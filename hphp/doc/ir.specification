@@ -1615,12 +1615,13 @@ To string conversions:
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
+|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr) S(Int),
 |   CRc|PRc
 
   Transfer control to a callee S2, based on the pre-live activation record and
   set of args on the stack pointed to by S0 at `offset'. S1 is the current
   caller frame pointer. S3 is the context (nullptr, $this or static::class).
+  S4 is the ambient coeffects.
 
 | NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 

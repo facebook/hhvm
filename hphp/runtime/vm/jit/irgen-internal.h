@@ -83,12 +83,15 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
-inline RuntimeCoeffects curCoeffects(const IRGS& env) {
-  assertx(curFunc(env));
+inline SSATmp* curCoeffects(IRGS& env) {
+  auto const func = curFunc(env);
+  assertx(func);
+  if (!func->hasCoeffectRules()) {
+    return cns(env, func->staticCoeffects().toAmbient().value());
+  }
   // Pessimize enforcements in presence of coeffect rules,
   // as it is not tracked yet
-  if (curFunc(env)->hasCoeffectRules()) return RuntimeCoeffects::none();
-  return curFunc(env)->staticCoeffects().toAmbient();
+  return cns(env, RuntimeCoeffects::none().value());
 }
 
 //////////////////////////////////////////////////////////////////////

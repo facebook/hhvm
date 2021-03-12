@@ -806,9 +806,11 @@ ArrayData* loadClsTypeCnsHelper(
   return typeCns.m_data.parr;
 }
 
-void raiseCoeffectsCallViolationHelper(const Func* callee, uint64_t rawFlags,
+void raiseCoeffectsCallViolationHelper(const Func* callee,
+                                       uint64_t providedCoeffects,
                                        uint64_t requiredCoeffects) {
-  raiseCoeffectsCallViolation(callee, CallFlags(rawFlags),
+  raiseCoeffectsCallViolation(callee,
+                              RuntimeCoeffects::fromValue(providedCoeffects),
                               RuntimeCoeffects::fromValue(requiredCoeffects));
 }
 

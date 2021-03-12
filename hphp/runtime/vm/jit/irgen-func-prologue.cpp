@@ -255,8 +255,8 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
-                              SSATmp* callFlags, uint32_t argc,
-                              SSATmp* prologueCtx) {
+                              SSATmp* callFlags, SSATmp* providedCoeffects,
+                              uint32_t argc, SSATmp* prologueCtx) {
   assertx(callee);
   assertx(callFlags);
 
@@ -272,13 +272,17 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     return result;
   }();
 
+  // If ambient coeffects are directly provided use them, otherwise extract
+  // them from callFlags
+  if (!providedCoeffects) {
+    providedCoeffects =
+      gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+  }
+
   ifThen(
     env,
     [&] (Block* taken) {
       // providedCoeffects & (~requiredCoeffects) == 0
-
-      auto const providedCoeffects =
-        gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
 
       // The unused higher order bits of requiredCoeffects will be 0
       // We want to flip the used lower order bits
@@ -292,8 +296,8 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseCoeffectsCallViolation, FuncData{callee}, callFlags,
-          requiredCoeffects);
+      gen(env, RaiseCoeffectsCallViolation, FuncData{callee},
+          providedCoeffects, requiredCoeffects);
     }
   );
 }
@@ -361,7 +365,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
-  emitCalleeCoeffectChecks(env, callee, callFlags, argc, prologueCtx);
+  emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, argc, prologueCtx);
   emitCalleeImplicitContextChecks(env, callee);
 
   // Emit early stack overflow check if necessary.

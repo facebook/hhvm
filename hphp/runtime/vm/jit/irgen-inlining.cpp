@@ -226,8 +226,8 @@ void beginInlining(IRGS& env,
   auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
 
   // For cost calculation, use the most permissive coeffect
-  auto const coeffects =
-    curFunc(env) ? curCoeffects(env) : RuntimeCoeffects::none();
+  auto const coeffects = curFunc(env)
+    ? curCoeffects(env) : cns(env, RuntimeCoeffects::none().value());
 
   auto const callFlags = cns(env, CallFlags(
     fca.hasGenerics(),
@@ -235,13 +235,14 @@ void beginInlining(IRGS& env,
     returnTarget.asyncEagerOffset != kInvalidOffset,
     0, // call offset unused by the logic below
     0,
-    coeffects
+    RuntimeCoeffects::none() // coeffects may not be known statically
   ).value());
 
   // Callee checks and input initialization.
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
-  emitCalleeCoeffectChecks(env, target, callFlags, numArgsInclUnpack, ctx);
+  emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
+                           numArgsInclUnpack, ctx);
   emitCalleeImplicitContextChecks(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 

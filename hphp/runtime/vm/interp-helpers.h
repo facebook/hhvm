@@ -163,7 +163,7 @@ inline bool calleeCoeffectChecks(const Func* callee,
     return required;
   }();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
-  raiseCoeffectsCallViolation(callee, flags, requiredCoeffects);
+  raiseCoeffectsCallViolation(callee, providedCoeffects, requiredCoeffects);
   return false;
 }
 

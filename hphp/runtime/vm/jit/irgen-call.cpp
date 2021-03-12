@@ -172,7 +172,6 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     fca.numRets - 1,
     bcOff(env),
     genericsBitmap,
-    curCoeffects(env),
     fca.hasGenerics(),
     fca.hasUnpack(),
     skipRepack,
@@ -180,7 +179,16 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     asyncEagerReturn,
     env.formingRegion
   };
-  return gen(env, Call, data, sp(env), fp(env), callee, objOrClass);
+  return gen(
+    env,
+    Call,
+    data,
+    sp(env),
+    fp(env),
+    callee,
+    objOrClass,
+    curCoeffects(env)
+  );
 }
 
 void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,

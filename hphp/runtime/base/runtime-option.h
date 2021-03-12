@@ -124,16 +124,13 @@ struct RepoOptions {
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   std::uint32_t getParserFlags() const;
+  std::uint32_t getCompilerFlags() const;
+  std::uint32_t getFactsFlags() const;
   parse_positioned_full_trivia_environment getParserEnvironment() const;
+  std::string getAliasedNamespacesConfig() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
   std::string trustedDBPath() const noexcept { return TrustedDBPath; }
-  bool emitInstMethPointers() const noexcept { return EmitInstMethPointers; }
-  bool ltrAssign() const noexcept { return LTRAssign; }
-  bool uvs() const noexcept { return UVS; }
-  StringMap aliasedNamespaces() const noexcept {
-    return AliasedNamespaces;
-  }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have

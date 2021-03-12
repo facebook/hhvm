@@ -80,6 +80,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
+#include <folly/DynamicConverter.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
 #include <folly/portability/SysResource.h>
@@ -279,6 +280,76 @@ RepoOptions::getParserEnvironment() const {
     , true  // interpret_soft_types_as_like_types
     };
 }
+
+std::uint32_t RepoOptions::getCompilerFlags() const {
+  std::uint32_t hhbc_flags = 0;
+  if (EmitInstMethPointers) {
+    hhbc_flags |= EMIT_INST_METH_POINTERS;
+  }
+  if (LTRAssign) {
+    hhbc_flags |= LTR_ASSIGN;
+  }
+  if (UVS) {
+    hhbc_flags |= UVS;
+  }
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    hhbc_flags |= HACK_ARR_COMPAT_NOTICES;
+  }
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    hhbc_flags |= HACK_ARR_DV_ARRS;
+  }
+  if (RuntimeOption::RepoAuthoritative) {
+    hhbc_flags |= AUTHORITATIVE;
+  }
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    hhbc_flags |= JIT_ENABLE_RENAME_FUNCTION;
+  }
+  if (RuntimeOption::EvalLogExternCompilerPerf) {
+    hhbc_flags |= LOG_EXTERN_COMPILER_PERF;
+  }
+  if (RuntimeOption::EnableIntrinsicsExtension) {
+    hhbc_flags |= ENABLE_INTRINSICS_EXTENSION;
+  }
+  if (RuntimeOption::DisableNontoplevelDeclarations) {
+    hhbc_flags |= DISABLE_NONTOPLEVEL_DECLARATIONS;
+  }
+  if (RuntimeOption::DisableStaticClosures) {
+    hhbc_flags |= DISABLE_STATIC_CLOSURES;
+  }
+  if (RuntimeOption::EvalEmitClsMethPointers) {
+    hhbc_flags |= EMIT_CLS_METH_POINTERS;
+  }
+  if (RuntimeOption::EvalEmitMethCallerFuncPointers) {
+    hhbc_flags |= EMIT_METH_CALLER_FUNC_POINTERS;
+  }
+  if (RuntimeOption::EvalRxIsEnabled) {
+    hhbc_flags |= RX_IS_ENABLED;
+  }
+  if (RuntimeOption::EvalArrayProvenance) {
+    hhbc_flags |= ARRAY_PROVENANCE;
+  }
+  if (RuntimeOption::EvalFoldLazyClassKeys) {
+    hhbc_flags |= FOLD_LAZY_CLASS_KEYS;
+  }
+  return hhbc_flags;
+}
+
+std::string RepoOptions::getAliasedNamespacesConfig() const {
+  folly::dynamic m_config = folly::dynamic::object();
+  m_config["hhvm.aliased_namespaces"] =
+    folly::dynamic::object("global_value", folly::toDynamic(AliasedNamespaces));
+  return folly::toJson(m_config);
+}
+
+std::uint32_t RepoOptions::getFactsFlags() const {
+  int32_t flags =
+    1 << 0 |  //php5_compat_mode
+    1 << 1 |  //hhvm_compat_mode
+    AllowNewAttributeSyntax   << 2 |
+    EnableXHPClassModifier    << 3 |
+    DisableXHPElementMangling << 4;
+  return flags;
+}  
 
 std::uint32_t RepoOptions::getParserFlags() const {
   std::uint32_t parser_flags = 0;   

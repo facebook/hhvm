@@ -1,0 +1,12 @@
+File "union_type.php", line 34, characters 3-9:
+Invalid property assignment (Typing[4411])
+  File "union_type.php", line 34, characters 13-30:
+  This expression is readonly
+  File "union_type.php", line 8, characters 14-17:
+  But it's being assigned to a mutable property
+File "union_type.php", line 41, characters 3-9:
+Invalid property assignment (Typing[4411])
+  File "union_type.php", line 41, characters 13-30:
+  This expression is readonly
+  File "union_type.php", line 8, characters 14-17:
+  But it's being assigned to a mutable property

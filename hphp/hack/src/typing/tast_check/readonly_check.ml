@@ -387,6 +387,43 @@ let check =
           in
           Option.to_list prop
         | None -> [])
+      (* Accessing a property off of an intersection type
+        should involve exactly one kind of readonlyness, since for
+        the intersection type to exist, the property must be related
+        by some subtyping relationship anyways, and property readonlyness
+        is invariant. Thus we just grab the first one from the list where the prop exists. *)
+      | Tintersection [] -> []
+      | Tintersection tyl ->
+        (match
+           List.find_map
+             ~f:(fun ty ->
+               match self#grab_class_elts_from_ty ~static env ty prop_id with
+               | [] -> None
+               | tyl -> Some tyl)
+             tyl
+         with
+        | Some tyl -> tyl
+        | None -> [])
+      (* A union type is more interesting, where we must return all possible cases
+      and be conservative in our use case. *)
+      | Tunion tyl ->
+        List.concat_map
+          ~f:(fun ty -> self#grab_class_elts_from_ty ~static env ty prop_id)
+          tyl
+      (* Generic types can be treated similarly to an intersection type
+        where we find the first prop that works from the upper bounds *)
+      | Tgeneric (name, tyargs) ->
+        let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+        (match
+           List.find_map
+             ~f:(fun ty ->
+               match self#grab_class_elts_from_ty ~static env ty prop_id with
+               | [] -> None
+               | tyl -> Some tyl)
+             (Typing_set.elements upper_bounds)
+         with
+        | Some tyl -> tyl
+        | None -> [])
       (* TODO: Handle more complex types *)
       | _ -> []
 

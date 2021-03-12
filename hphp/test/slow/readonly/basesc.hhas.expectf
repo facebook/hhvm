@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property myA of class B must be mutable.' in %s/basesc.hhas:15
+%A

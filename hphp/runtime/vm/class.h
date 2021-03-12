@@ -985,12 +985,14 @@ public:
     Slot slot;
     bool accessible;
     bool constant;
+    bool readonly;
   };
 
   struct PropSlotLookup {
     Slot slot;
     bool accessible;
     bool constant;
+    bool readonly;
   };
 
   /*

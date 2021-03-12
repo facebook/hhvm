@@ -377,10 +377,10 @@ static CallMap s_callMap {
     /* Static prop helpers */
     {LdClsPropAddrOrNull,
                          getSPropOrNull, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}, {SSA, 5}, {SSA, 6}}},
     {LdClsPropAddrOrRaise,
                          getSPropOrRaise, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}, {SSA, 5}, {SSA, 6}}},
 
     {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
                            {{SSA, 0}, {SSA, 1}}},

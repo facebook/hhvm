@@ -1025,6 +1025,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 bool& visible,
                                 bool& accessible,
                                 bool& constant,
+                                bool& readonly,
                                 bool ignoreLateInit) {
   name = lookup_name(key);
   auto const ctx = arGetContextClass(fp);
@@ -1037,6 +1038,7 @@ static inline void lookup_sprop(ActRec* fp,
   slot = lookup.slot;
   visible = lookup.val != nullptr;
   constant = lookup.constant;
+  readonly = lookup.readonly;
   accessible = lookup.accessible;
 }
 
@@ -2568,6 +2570,7 @@ struct SpropState {
   bool visible;
   bool accessible;
   bool constant;
+  bool readonly;
   Stack& vmstack;
 };
 
@@ -2579,7 +2582,7 @@ SpropState::SpropState(Stack& vmstack, bool ignoreLateInit) : vmstack{vmstack} {
   }
   cls = clsCell->m_data.pclass;
   lookup_sprop(vmfp(), cls, name, nameCell, val,
-               slot, visible, accessible, constant, ignoreLateInit);
+               slot, visible, accessible, constant, readonly, ignoreLateInit);
   oldNameCell = *nameCell;
 }
 
@@ -2589,12 +2592,16 @@ SpropState::~SpropState() {
   tvDecRefGen(oldNameCell);
 }
 
-OPTBLD_INLINE void iopCGetS(ReadOnlyOp /*op*/) {
+OPTBLD_INLINE void iopCGetS(ReadOnlyOp op) {
   SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
                 ss.name->data());
+  }
+  if (ss.readonly && op != ReadOnlyOp::ReadOnly){
+    throw_must_be_mutable(ss.cls->name()->data(),
+      ss.name->data());
   }
   tvDup(*ss.val, *ss.output);
 }
@@ -2634,7 +2641,7 @@ OPTBLD_INLINE void iopBaseGL(tv_lval loc, MOpMode mode) {
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
                              uint32_t clsIdx,
                              MOpMode mode,
-                             ReadOnlyOp /*op*/) {
+                             ReadOnlyOp op) {
   auto& mstate = vmMInstrState();
   auto const clsCell = vmStack().indC(clsIdx);
   auto const key = vmStack().indTV(keyIdx);
@@ -2652,11 +2659,15 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
                 class_->name()->data(),
                 name->data());
   }
+  assertx(mode != MOpMode::InOut);
+  auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
 
-  if (lookup.constant && (mode == MOpMode::Define ||
-    mode == MOpMode::Unset || mode == MOpMode::InOut)) {
-      throw_cannot_modify_static_const_prop(class_->name()->data(),
-        name->data());
+  if (lookup.constant && writeMode) {
+    throw_cannot_modify_static_const_prop(class_->name()->data(),
+      name->data());
+  }
+  if (lookup.readonly && (writeMode || op != ReadOnlyOp::ReadOnly)) {
+    throw_must_be_mutable(class_->name()->data(), name->data());
   }
   mstate.base = tv_lval(lookup.val);
 }
@@ -3452,14 +3463,14 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS(ReadOnlyOp /*op*/) {
+OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
   TypedValue* tv1 = vmStack().topTV();
   TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible, constant;
+  bool visible, accessible, readonly, constant;
   Slot slot;
 
   if (!isClassType(clsCell->m_type)) {
@@ -3468,8 +3479,12 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp /*op*/) {
   auto const cls = clsCell->m_data.pclass;
 
   lookup_sprop(vmfp(), cls, name, propn, val, slot, visible,
-               accessible, constant, true);
+               accessible, constant, readonly, true);
+               
   SCOPE_EXIT { decRefStr(name); };
+  if (!readonly && op != ReadOnlyOp::Mutable) {
+    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
+  }
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
@@ -3525,7 +3540,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, ReadOnlyOp /*op*/) {
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible, constant;
+  bool visible, accessible, readonly, constant;
   Slot slot;
 
   if (!isClassType(clsCell->m_type)) {
@@ -3534,7 +3549,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, ReadOnlyOp /*op*/) {
   auto const cls = clsCell->m_data.pclass;
 
   lookup_sprop(vmfp(), cls, name, propn, val, slot, visible,
-               accessible, constant, false);
+               accessible, constant, readonly, false);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",

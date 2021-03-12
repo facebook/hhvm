@@ -504,12 +504,20 @@ TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool ignoreLateInit,
-                           bool disallowConst) {
+                           bool disallowConst,
+                           bool mustBeMutable,
+                           bool mustBeReadOnly) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
   if (disallowConst && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
+  if (mustBeMutable && UNLIKELY(lookup.readonly)) {
+    throw_must_be_mutable(cls->name()->data(), name->data());
+  }
+  if (mustBeReadOnly && UNLIKELY(!lookup.readonly)) {
+    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
@@ -520,8 +528,11 @@ TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
                             bool ignoreLateInit,
-                            bool disallowConst) {
-  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit, disallowConst);
+                            bool disallowConst,
+                            bool mustBeMutable,
+                            bool mustBeReadOnly) {
+  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit, disallowConst,
+                              mustBeMutable, mustBeReadOnly);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

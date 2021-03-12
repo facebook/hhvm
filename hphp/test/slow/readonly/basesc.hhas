@@ -1,0 +1,28 @@
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""y:0:{}""")] (14,16) <"HH\\void" N  > main() {
+  .srcloc 15:6,15:9;
+  String "myA"
+  String "B"
+  ClassGetC
+  .srcloc 15:16,15:17;
+  Int 10
+  BaseSC 2 1 Define Mutable
+  .srcloc 15:3,15:12;
+  SetM 2 PT:"b" Mutable
+  .srcloc 15:3,15:18;
+  PopC
+  .srcloc 16:2,16:2;
+  Null
+  RetC
+}
+
+.class {}  A (5,7) {
+  .property [public readonly] <"HH\\int" "HH\\int" extended_hint > b =
+    """i:5;""";
+}
+
+.class {}  B (9,11) {
+  .property [public static readonly sys_initial_val] <"A" "A" extended_hint > myA =
+    """N;""";
+}

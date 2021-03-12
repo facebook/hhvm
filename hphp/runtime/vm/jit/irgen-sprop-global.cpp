@@ -122,6 +122,8 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
   assertx(ssaCls->isA(TCls));
   assertx(ssaName->isA(TStr));
 
+  auto const mustBeMutable = opts.readOnlyCheck == ReadOnlyCheck::mustBeMutable;
+  auto const mustBeReadOnly = opts.readOnlyCheck == ReadOnlyCheck::mustBeReadOnly;
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
@@ -139,6 +141,8 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
     if (opts.disallowConst && lookup.constant) return false;
+    if (mustBeMutable && lookup.readonly) return false;
+    if (mustBeReadOnly && !lookup.readonly) return false;
     return true;
   }();
 
@@ -161,21 +165,25 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     ssaName,
     ctxTmp,
     cns(env, opts.ignoreLateInit),
-    cns(env, opts.disallowConst)
+    cns(env, opts.disallowConst),
+    cns(env, mustBeMutable),
+    cns(env, mustBeReadOnly)
   );
   return { propAddr, nullptr, nullptr, kInvalidSlot };
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env, ReadOnlyOp /*op*/) {
+void emitCGetS(IRGS& env, ReadOnlyOp op) {
   auto const ssaCls      = topC(env);
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) PUNT(CGetS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(CGetS-NotClass);
+  auto const readOnlyCheck =
+    op != ReadOnlyOp::ReadOnly ? ReadOnlyCheck::mustBeMutable : ReadOnlyCheck::Any;
 
-  const LdClsPropOptions opts { true, false, false };
+  const LdClsPropOptions opts { readOnlyCheck, true, false, false };
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, opts).propPtr;
   auto const ldMem    = gen(env, LdMem, propAddr->type().deref(), propAddr);
 
@@ -184,15 +192,17 @@ void emitCGetS(IRGS& env, ReadOnlyOp /*op*/) {
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env, ReadOnlyOp /*op*/) {
+void emitSetS(IRGS& env, ReadOnlyOp op) {
   auto const ssaCls      = topC(env, BCSPRelOffset{1});
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
+  auto const readOnlyCheck =
+    op != ReadOnlyOp::Mutable ? ReadOnlyCheck::mustBeReadOnly : ReadOnlyCheck::Any;
 
   if (!ssaPropName->isA(TStr)) PUNT(SetS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(SetS-NotClass);
 
   auto value  = popC(env, DataTypeGeneric);
-  const LdClsPropOptions opts { true, true, true };
+  const LdClsPropOptions opts { readOnlyCheck, true, true, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
   if (lookup.tc) {
@@ -225,7 +235,7 @@ void emitSetOpS(IRGS& env, SetOpOp op, ReadOnlyOp /*rop*/) {
   if (!ssaCls->isA(TCls))      PUNT(SetOpS-NotClass);
 
   auto const rhs = popC(env);
-  const LdClsPropOptions opts { true, false, true };
+  const LdClsPropOptions opts { ReadOnlyCheck::Any, true, false, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
   auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
@@ -276,7 +286,7 @@ void emitIssetS(IRGS& env) {
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      const LdClsPropOptions opts { false, true, false };
+      const LdClsPropOptions opts { ReadOnlyCheck::Any, false, true, false };
       auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, opts).propPtr;
       return gen(env, CheckNonNull, taken, propAddr);
     },
@@ -299,8 +309,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop, ReadOnlyOp /*op*/) {
 
   if (!ssaPropName->isA(TStr)) PUNT(IncDecS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(IncDecS-NotClass);
-  
-  const LdClsPropOptions opts { true, false, true };
+  const LdClsPropOptions opts { ReadOnlyCheck::Any, true, false, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
   auto const oldVal =
     gen(env, LdMem, lookup.propPtr->type().deref(), lookup.propPtr);

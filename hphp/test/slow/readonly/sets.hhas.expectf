@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot store readonly value in a non-readonly property a1 of class A.' in %s/sets.hhas:17
+%A

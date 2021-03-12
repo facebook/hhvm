@@ -1582,17 +1582,19 @@ void emitBaseSC(IRGS& env,
                 uint32_t propIdx,
                 uint32_t clsIdx,
                 MOpMode mode,
-                ReadOnlyOp /*op*/) {
+                ReadOnlyOp op) {
   auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
   if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
 
   auto const name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
 
-  auto const disallowConst = mode == MOpMode::Define ||
-    mode == MOpMode::Unset || mode == MOpMode::InOut;
+  assertx(mode != MOpMode::InOut);
+  auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
+  auto const readonlyCheck = writeMode || op != ReadOnlyOp::ReadOnly ?
+    ReadOnlyCheck::mustBeMutable : ReadOnlyCheck::Any;
     
-  const LdClsPropOptions opts { true, false, disallowConst };
+  const LdClsPropOptions opts { readonlyCheck, true, false, writeMode };
   auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);
 }

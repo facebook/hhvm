@@ -132,12 +132,16 @@ TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool ignoreLateInit,
-                           bool disallowConst);
+                           bool disallowConst,
+                           bool mustBeMutable,
+                           bool mustBeReadOnly);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
                             bool ignoreLateInit,
-                            bool disallowConst);
+                            bool disallowConst,
+                            bool mustBeMutable,
+                            bool mustBeReadOnly);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

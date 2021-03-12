@@ -42,7 +42,14 @@ struct ClsPropLookup {
   Slot slot;
 };
 
+enum class ReadOnlyCheck {
+  mustBeMutable,
+  mustBeReadOnly,
+  Any
+};
+
 struct LdClsPropOptions {
+  const ReadOnlyCheck readOnlyCheck;
   bool raise;
   bool ignoreLateInit;
   bool disallowConst;

@@ -364,6 +364,9 @@ bool is_constructor_name(const char* func);
                                                  const char* propName);
 [[noreturn]] void throw_cannot_modify_static_const_prop(const char* className,
                                                         const char* propName);
+[[noreturn]] void throw_cannot_write_non_readonly_prop(const char* className,
+                                                       const char* propName);
+[[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
@@ -462,4 +465,3 @@ bool function_exists(const String& function_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

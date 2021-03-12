@@ -15,6 +15,6 @@ fi
 
 # cleanup FB locations
 if [ -d "${HACK_DIR}/facebook" ]; then
-  rm -rf "${HACK_DIR}/facebook/opam"
+  rm -rf "${HACK_DIR}/facebook/redirect/opam"
   rm -rf "${HACK_DIR}/facebook/opam2-mini-repository"
 fi

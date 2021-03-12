@@ -108,14 +108,13 @@ let check =
       (* This is only valid as an lval *)
       | Array_get (_, None) -> Mut
       | Class_get (class_id, expr, _is_prop_call) ->
-        let class_elt = self#get_static_prop_elt env class_id expr in
-        (match class_elt with
-        | Some elt ->
-          if Typing_defs.get_ce_readonly_prop elt then
-            Readonly
-          else
-            Mut
-        | None -> Mut)
+        (* If any of the static props could be readonly, treat the expression as readonly *)
+        let class_elts = self#get_static_prop_elts env class_id expr in
+        (* Note that the empty list case (when the prop doesn't exist) returns Mut *)
+        if List.exists class_elts ~f:Typing_defs.get_ce_readonly_prop then
+          Readonly
+        else
+          Mut
       | Smethod_id _
       | Method_caller _
       | Call _ ->
@@ -208,6 +207,27 @@ let check =
       | Class_const _ -> Mut
 
     method assign env lval rval =
+      let check_prop_assignment prop_elts rval =
+        let mutable_prop =
+          List.find
+            ~f:(fun r -> not (Typing_defs.get_ce_readonly_prop r))
+            prop_elts
+        in
+        match (mutable_prop, self#ty_expr env rval) with
+        | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
+          ->
+          Errors.readonly_mismatch
+            "Invalid property assignment"
+            (Tast.get_position lval)
+            ~reason_sub:
+              [(Tast.get_position rval, "This expression is readonly")]
+            ~reason_super:
+              [
+                ( Lazy.force elt.Typing_defs.ce_pos,
+                  "But it's being assigned to a mutable property" );
+              ]
+        | _ -> ()
+      in
       match lval with
       | (_, Array_get (array, _)) ->
         (* TODO: appending to readonly value types is technically allowed *)
@@ -217,42 +237,17 @@ let check =
           | Mut -> ()
         end
       | (_, Class_get (id, expr, _)) ->
-        let prop_elt = self#get_static_prop_elt env id expr in
-        (match (prop_elt, self#ty_expr env rval) with
-        | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
-          ->
-          Errors.readonly_mismatch
-            "Invalid property assignment"
-            (Tast.get_position lval)
-            ~reason_sub:
-              [(Tast.get_position rval, "This expression is readonly")]
-            ~reason_super:
-              [
-                ( Lazy.force elt.Typing_defs.ce_pos,
-                  "But it's being assigned to a mutable property" );
-              ]
-        | _ -> ())
+        let prop_elts = self#get_static_prop_elts env id expr in
+        check_prop_assignment prop_elts rval
       | (_, Obj_get (obj, get, _, _)) ->
         begin
           match self#ty_expr env obj with
           | Readonly -> Errors.readonly_modified (Tast.get_position obj)
           | Mut -> ()
         end;
-        let prop_elt = self#get_prop_elt env obj get in
-        (match (prop_elt, self#ty_expr env rval) with
-        | (Some elt, Readonly) when not (Typing_defs.get_ce_readonly_prop elt)
-          ->
-          Errors.readonly_mismatch
-            "Invalid property assignment"
-            (Tast.get_position lval)
-            ~reason_sub:
-              [(Tast.get_position rval, "This expression is readonly")]
-            ~reason_super:
-              [
-                ( Lazy.force elt.Typing_defs.ce_pos,
-                  "But it's being assigned to a mutable property" );
-              ]
-        | _ -> ())
+        let prop_elts = self#get_prop_elts env obj get in
+        (* If there's a mutable prop, then there's a chance we're assigning to one *)
+        check_prop_assignment prop_elts rval
       | (_, Lvar (_, lid)) ->
         let var_ro_opt = SMap.find_opt (Local_id.to_string lid) ctx.lenv in
         begin
@@ -376,40 +371,51 @@ let check =
       check_readonly_call caller_ty is_readonly;
       check_args caller_ty args unpacked_arg
 
-    method grab_class_decl_from_ty env ty =
+    method grab_class_elts_from_ty ~static env ty prop_id =
       let open Typing_defs in
       match get_node ty with
       | Tclass (id, _exact, _args) ->
         let provider_ctx = Tast_env.get_ctx env in
-        Decl_provider.get_class provider_ctx (snd id)
+        let class_decl = Decl_provider.get_class provider_ctx (snd id) in
+        (match class_decl with
+        | Some class_decl ->
+          let prop =
+            if static then
+              Cls.get_sprop class_decl (snd prop_id)
+            else
+              Cls.get_prop class_decl (snd prop_id)
+          in
+          Option.to_list prop
+        | None -> [])
       (* TODO: Handle more complex types *)
-      | _ -> None
+      | _ -> []
 
-    method get_static_prop_elt env class_id get =
+    (* Return a list of possible static prop elts given a class_get expression *)
+    method get_static_prop_elts env class_id get =
       let (_, ty) = fst class_id in
-      let class_decl = self#grab_class_decl_from_ty env ty in
-      match (class_decl, get) with
-      | (Some class_decl, CGstring prop_id) ->
-        let prop = Cls.get_sprop class_decl (snd prop_id) in
-        prop
-      (* If we're grabbing a dynamic expression from a class, we won't know its type so give up *)
-      | (Some _, CGexpr _) -> None
-      (* Class doesn't exist, assume mutable *)
-      | _ -> None
+      match get with
+      | CGstring prop_id ->
+        self#grab_class_elts_from_ty ~static:true env ty prop_id
+      (* An expression is dynamic, so there's no way to tell the type generally *)
+      | CGexpr _ -> []
 
-    method get_prop_elt env obj get =
+    (* Return a list of possible prop elts given an obj get expression *)
+    method get_prop_elts env obj get =
       let ty = Tast.get_type obj in
-      let class_decl = self#grab_class_decl_from_ty env ty in
-      match (class_decl, get) with
-      | (Some class_decl, (_, Id prop_id)) ->
-        let prop = Cls.get_prop class_decl (snd prop_id) in
-        prop
+      match get with
+      | (_, Id prop_id) ->
+        self#grab_class_elts_from_ty ~static:false env ty prop_id
       (* TODO: Handle more complex  cases *)
-      | _ -> None
+      | _ -> []
 
     method obj_get env obj get =
-      let prop_elt = self#get_prop_elt env obj get in
-      match (prop_elt, self#ty_expr env obj) with
+      let prop_elts = self#get_prop_elts env obj get in
+      (* If there's any property in the list of possible properties that could be readonly,
+        it must be explicitly cast to readonly *)
+      let readonly_prop =
+        List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
+      in
+      match (readonly_prop, self#ty_expr env obj) with
       | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
         Errors.explicit_readonly_cast
           "property"

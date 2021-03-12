@@ -193,7 +193,7 @@ LowPtr<const Class> TSClassCache::write(rds::Handle handle, ArrayData* ad) {
   if (kind != TypeStructure::Kind::T_class) return nullptr;
   auto const name = get_ts_classname(ad);
   Class* c = Class::load(name);
-  if (UNLIKELY(!c)) return nullptr;
+  if (UNLIKELY(!c) || !classHasPersistentRDS(c)) return nullptr;
   assertx(!isInterface(c));
   pair->m_key = ad;
   pair->m_value = c;
@@ -358,7 +358,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   if (LIKELY(cand->name() == name)) {
     if (LIKELY((cand->attrs() & AttrPublic) && !cand->hasPrivateAncestor())) {
       // If the candidate function is public, then we also need to check it
-      // does not have a private ancestor. The private ancestor wins if 
+      // does not have a private ancestor. The private ancestor wins if
       // the context has access to it, so this is a conservative check.
       //
       // The normal case here is an overridden public method.  But this

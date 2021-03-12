@@ -570,6 +570,11 @@ function get_options($argv) {
     Status::$write_to_checkout = true;
   }
 
+  if (isset($options['hackc']) && isset($options['use-internal-compiler'])) {
+    echo "hackc and use-internal-compiler are mutually exclusive options\n";
+    exit(1);
+  }
+
   return varray[$options, $files];
 }
 
@@ -883,9 +888,11 @@ function hhvm_cmd_impl(
       // load/store counters don't work on Ivy Bridge so disable for tests
       '-vEval.ProfileHWEnable=false',
 
-      // use a fixed path for embedded data
-      '-vEval.HackCompilerExtractPath='
+      isset($options['use-internal-compiler']) ?  '' :
+        '-vEval.HackCompilerExtractPath='
         .escapeshellarg(bin_root().'/hackc_%{schema}'),
+
+      // use a fixed path for embedded data
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
       extra_args($options),
@@ -1117,7 +1124,8 @@ function hphp_cmd($options, $test, $program): string {
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
-    '-vRuntime.Eval.HackCompilerExtractPath='
+    isset($options['use-internal-compiler']) ?  '' :
+      '-vRuntime.Eval.HackCompilerExtractPath='
       .escapeshellarg(bin_root().'/hackc_%{schema}'),
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',

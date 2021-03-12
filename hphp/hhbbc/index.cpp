@@ -2106,25 +2106,23 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
         index.any_interceptable_functions = true;
       }
 
-      if (RuntimeOption::RepoAuthoritative) {
-        uint64_t refs = 0, cur = 1;
-        bool anyInOut = false;
-        for (auto& p : m->params) {
-          if (p.inout) {
-            refs |= cur;
-            anyInOut = true;
-          }
-          // It doesn't matter that we lose parameters beyond the 64th,
-          // for those, we'll conservatively check everything anyway.
-          cur <<= 1;
+      uint64_t refs = 0, cur = 1;
+      bool anyInOut = false;
+      for (auto& p : m->params) {
+        if (p.inout) {
+          refs |= cur;
+          anyInOut = true;
         }
-        if (anyInOut) {
-          // Multiple methods with the same name will be combined in the same
-          // cell, thus we use |=. This only makes sense in WholeProgram mode
-          // since we use this field to check that no functions has its n-th
-          // parameter as inout, which requires global knowledge.
-          index.method_inout_params_by_name[m->name] |= refs;
-        }
+        // It doesn't matter that we lose parameters beyond the 64th,
+        // for those, we'll conservatively check everything anyway.
+        cur <<= 1;
+      }
+      if (anyInOut) {
+        // Multiple methods with the same name will be combined in the same
+        // cell, thus we use |=. This only makes sense in WholeProgram mode
+        // since we use this field to check that no functions has its n-th
+        // parameter as inout, which requires global knowledge.
+        index.method_inout_params_by_name[m->name] |= refs;
       }
     }
 
@@ -3616,8 +3614,6 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
    * possible resolutions, HHBBC cannot deduce anything about by-val vs inout.
    * So the caller should make sure not calling this in single-unit mode.
    */
-  assertx(RuntimeOption::RepoAuthoritative);
-
   if (begin(range) == end(range)) {
     return func_param_prep_default();
   }
@@ -3654,8 +3650,6 @@ folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
    * possible resolutions, HHBBC cannot deduce anything about inout args.
    * So the caller should make sure not calling this in single-unit mode.
    */
-  assertx(RuntimeOption::RepoAuthoritative);
-
   if (begin(range) == end(range)) {
     return func_num_inout_default();
   }
@@ -4712,16 +4706,11 @@ folly::Optional<res::Record> Index::resolve_record(SString recName) const {
 
 res::Class Index::resolve_class(const php::Class* cls) const {
 
-  // If we are in repo mod or it is a builtin if we find it we can return it.
-  if (RuntimeOption::RepoAuthoritative ||
-        (!RuntimeOption::EvalJitEnableRenameFunction &&
-         cls->attrs & AttrBuiltin)) {
-    auto const it = m_data->classInfo.find(cls->name);
-    if (it != end(m_data->classInfo)) {
-      auto const cinfo = it->second;
-      if (cinfo->cls == cls) {
-        return res::Class { cinfo };
-      }
+  auto const it = m_data->classInfo.find(cls->name);
+  if (it != end(m_data->classInfo)) {
+    auto const cinfo = it->second;
+    if (cinfo->cls == cls) {
+      return res::Class { cinfo };
     }
   }
 
@@ -5087,12 +5076,8 @@ Index::resolve_func_helper(const php::Func* func, SString name) const {
   if (func->attrs & AttrInterceptable) return name_only(true);
 
   // single resolution, in whole-program mode, that's it
-  if (RuntimeOption::RepoAuthoritative) {
-    assertx(func->attrs & AttrUnique);
-    return do_resolve(func);
-  }
-
-  return name_only(false);
+  assertx(func->attrs & AttrUnique);
+  return do_resolve(func);
 }
 
 res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
@@ -5631,14 +5616,13 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
   return match<folly::Optional<uint32_t>>(
     rfunc.val,
     [&] (res::Func::FuncName s) -> folly::Optional<uint32_t> {
-      if (!RuntimeOption::RepoAuthoritative || s.renamable) return folly::none;
+      if (s.renamable) return folly::none;
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
        ? func_num_inout(it->second)
        : func_num_inout_default();
     },
     [&] (res::Func::MethodName s) -> folly::Optional<uint32_t> {
-      if (!RuntimeOption::RepoAuthoritative) return folly::none;
       auto const it = m_data->method_inout_params_by_name.find(s.name);
       if (it == end(m_data->method_inout_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
@@ -5655,7 +5639,6 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
       return func_num_inout(mte->second.func);
     },
     [&] (FuncFamily* fam) -> folly::Optional<uint32_t> {
-      assertx(RuntimeOption::RepoAuthoritative);
       return num_inout_from_set(fam->possibleFuncs());
     }
   );
@@ -5666,14 +5649,13 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
-      if (!RuntimeOption::RepoAuthoritative || s.renamable) return PrepKind::Unknown;
+      if (s.renamable) return PrepKind::Unknown;
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
         ? func_param_prep(it->second, paramId)
         : func_param_prep_default();
     },
     [&] (res::Func::MethodName s) {
-      if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
       auto const it = m_data->method_inout_params_by_name.find(s.name);
       if (it == end(m_data->method_inout_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
@@ -5695,7 +5677,6 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       return func_param_prep(mte->second.func, paramId);
     },
     [&] (FuncFamily* fam) {
-      assertx(RuntimeOption::RepoAuthoritative);
       return prep_kind_from_set(fam->possibleFuncs(), paramId);
     }
   );

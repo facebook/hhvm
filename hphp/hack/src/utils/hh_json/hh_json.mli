@@ -26,6 +26,7 @@ exception Syntax_error of string
  *)
 val pp_json : Format.formatter -> json -> unit
 
+(** Calling this with [~pretty:true] is the same as calling [json_to_multiline] *)
 val json_to_string : ?sort_keys:bool -> ?pretty:bool -> json -> string
 
 val json_to_multiline : ?sort_keys:bool -> json -> string
@@ -38,9 +39,17 @@ val json_of_string : ?strict:bool -> string -> json
 
 val json_of_file : ?strict:bool -> string -> json
 
+(** Truncate fields of a json object.
+    String fields will be truncated according to [max_string_length].
+    [max_object_child_count] determines the maximum number of children of objects.
+    [max_array_elt_count] determines the maximum number of array elements.
+    Fields at depth greater than [max_depth] will be removed.
+    [max_total_count] is the maximum total number of children of arrays and objects
+    aggregated over all arrays and objects *)
 val json_truncate :
   ?max_string_length:int ->
-  ?max_child_count:int ->
+  ?max_object_child_count:int ->
+  ?max_array_elt_count:int ->
   ?max_depth:int ->
   ?max_total_count:int ->
   ?has_changed:bool ref ->

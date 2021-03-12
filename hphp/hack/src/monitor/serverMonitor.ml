@@ -477,9 +477,13 @@ struct
       if
         (not env.ignore_hh_version)
         && not (String.equal client_version Build_id.build_revision)
-      then
+      then (
+        Hh_logger.log
+          "New client version is %s, while currently running server version is %s"
+          client_version
+          Build_id.build_revision;
         client_out_of_date env client_fd ServerMonitorUtils.current_build_info
-      else (
+      ) else (
         msg_to_channel client_fd Connection_ok;
         handle_monitor_rpc env client_fd
       )

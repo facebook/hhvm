@@ -759,7 +759,8 @@ let ( <=@ ) : int -> int option -> bool =
 
 let json_truncate
     ?(max_string_length : int option)
-    ?(max_child_count : int option)
+    ?(max_object_child_count : int option)
+    ?(max_array_elt_count : int option)
     ?(max_depth : int option)
     ?(max_total_count : int option)
     ?(has_changed : bool ref option)
@@ -770,20 +771,23 @@ let json_truncate
     | None -> ()
     | Some r -> r := true
   in
-  let rec truncate_children ~child_count children ~f =
-    match children with
-    | [] -> []
-    | _ when !total_count >=@ max_total_count ->
-      mark_changed ();
-      []
-    | _ when child_count >=@ max_child_count ->
-      mark_changed ();
-      []
-    | c :: rest ->
-      incr total_count;
-      let c' = f c in
-      (* because of mutable variable, it's important to do this first *)
-      c' :: truncate_children (child_count + 1) rest f
+  let truncate_children children max_child_count ~f =
+    let rec truncate_children child_count children =
+      match children with
+      | [] -> []
+      | _ when !total_count >=@ max_total_count ->
+        mark_changed ();
+        []
+      | _ when child_count >=@ max_child_count ->
+        mark_changed ();
+        []
+      | c :: rest ->
+        incr total_count;
+        let c' = f c in
+        (* because of mutable variable, it's important to do this first *)
+        c' :: truncate_children (child_count + 1) rest
+    in
+    truncate_children 0 children
   in
   let rec truncate ~(depth : int) (json : json) : json =
     match json with
@@ -799,14 +803,14 @@ let json_truncate
         mark_changed ();
         JSON_Object []
       ) else
-        JSON_Object (truncate_children ~child_count:0 props ~f)
+        JSON_Object (truncate_children props max_object_child_count ~f)
     | JSON_Array values ->
       let f v = truncate (depth + 1) v in
       if depth >=@ max_depth then (
         mark_changed ();
         JSON_Array []
       ) else
-        JSON_Array (truncate_children ~child_count:0 values ~f)
+        JSON_Array (truncate_children values max_array_elt_count ~f)
     | JSON_String s ->
       begin
         match max_string_length with
@@ -839,7 +843,8 @@ let json_truncate_string
     let truncated_json =
       json_truncate
         ?max_string_length
-        ?max_child_count
+        ?max_object_child_count:max_child_count
+        ?max_array_elt_count:max_child_count
         ?max_depth
         ?max_total_count
         ~has_changed

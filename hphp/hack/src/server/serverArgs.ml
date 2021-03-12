@@ -128,7 +128,7 @@ module Messages = struct
     ^ " starting and again when it's done starting"
 
   let watchman_debug_logging =
-    " Enable debug logging on Watchman client. This is very noisy"
+    " Logs full Watchman requests and responses. This is very noisy"
 
   let with_saved_state =
     " Init with the given saved state instead of fetching it.\n"

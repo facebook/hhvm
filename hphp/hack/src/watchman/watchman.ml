@@ -72,11 +72,25 @@ module Watchman_process_helpers = struct
         ()
     with Caml.Not_found -> ()
 
+  let max_array_elt_in_json_logging = 5
+
   (* Verifies that a watchman response is valid JSON and free from common errors *)
   let sanitize_watchman_response ~debug_logging output =
     if debug_logging then Hh_logger.info "Watchman response: %s" output;
     let response =
-      try Hh_json.json_of_string output
+      try
+        let response = Hh_json.json_of_string output in
+        if not debug_logging then
+          (* if debug_logging, we've already logged the full watchman response, so skip
+           * logging truncated one. *)
+          Hh_json.json_truncate
+            ~max_array_elt_count:max_array_elt_in_json_logging
+            response
+          |> Hh_json.json_to_string
+          |> Hh_logger.info
+               "Watchman response (arrays are truncated to max %d elements): %s"
+               max_array_elt_in_json_logging;
+        response
       with e ->
         let raw_stack = Caml.Printexc.get_raw_backtrace () in
         let stack = Caml.Printexc.raw_backtrace_to_string raw_stack in
@@ -115,7 +129,16 @@ end = struct
   (* Send a request to the watchman process *)
   let send_request ~debug_logging oc json =
     let json_str = Hh_json.(json_to_string json) in
-    if debug_logging then Hh_logger.info "Watchman request: %s" json_str;
+    if debug_logging then
+      Hh_logger.info "Watchman request: %s" json_str
+    else
+      Hh_logger.info
+        "Watchman request (arrays are truncated to max %d elements): %s"
+        max_array_elt_in_json_logging
+        ( Hh_json.json_truncate
+            json
+            ~max_array_elt_count:max_array_elt_in_json_logging
+        |> Hh_json.json_to_string );
     Out_channel.output_string oc json_str;
     Out_channel.output_string oc "\n";
     Out_channel.flush oc

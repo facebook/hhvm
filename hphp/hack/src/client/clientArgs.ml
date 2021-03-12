@@ -58,7 +58,7 @@ module Common_argspecs = struct
   let watchman_debug_logging value_ref =
     ( "--watchman-debug-logging",
       Arg.Set value_ref,
-      " Enable debug logging on Watchman client. This is very noisy" )
+      " Logs full Watchman requests and responses. This is very noisy" )
 
   let allow_non_opt_build value_ref =
     ( "--allow-non-opt-build",

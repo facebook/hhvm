@@ -439,6 +439,11 @@ type t = {
   interrupt_on_client: bool;
   trace_parsing: bool;
   prechecked_files: bool;
+  enable_type_check_filter_files: bool;
+  (* Let the user configure which files to type check and
+   * which files to ignore. This flag is not expected to be
+   * rolled out broadly, rather it is meant to be used by
+   * power users only. *)
   predeclare_ide: bool;
   predeclare_ide_deps: bool;
   max_typechecker_worker_memory_mb: int option;
@@ -585,6 +590,7 @@ let default =
     interrupt_on_client = false;
     trace_parsing = false;
     prechecked_files = false;
+    enable_type_check_filter_files = false;
     predeclare_ide = false;
     predeclare_ide_deps = false;
     max_typechecker_worker_memory_mb = None;
@@ -942,6 +948,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let enable_type_check_filter_files =
+    bool_if_min_version
+      "enable_type_check_filter_files"
+      ~default:default.enable_type_check_filter_files
+      ~current_version
+      config
+  in
   let predeclare_ide =
     bool_if_min_version
       "predeclare_ide"
@@ -1236,6 +1249,7 @@ let load_ fn ~silent ~current_version overrides =
     interrupt_on_client;
     trace_parsing;
     prechecked_files;
+    enable_type_check_filter_files;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     use_worker_clones;

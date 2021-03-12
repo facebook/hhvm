@@ -460,6 +460,7 @@ module type CheckKindType = sig
     phase_2_decl_defs:Naming_table.fast ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
+    enable_type_check_filter_files:bool ->
     Relative_path.Set.t * Relative_path.Set.t
 
   (* Update the global state based on resuts of parsing, naming and decl *)
@@ -510,7 +511,23 @@ module FullCheckKind : CheckKindType = struct
      * to approximate anything *)
     Relative_path.Set.empty
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~to_recheck ~env =
+  let get_defs_to_recheck
+      ~reparsed
+      ~phase_2_decl_defs
+      ~to_recheck
+      ~env
+      ~enable_type_check_filter_files =
+    (* If the user has enabled a custom file filter, we want to only
+     * type check files that pass the filter *)
+    let to_recheck =
+      if enable_type_check_filter_files then
+        ServerCheckUtils.user_filter_type_check_files
+          ~to_recheck
+          ~reparsed
+          ~is_ide_file:(Relative_path.Set.mem env.editor_open_files)
+      else
+        to_recheck
+    in
     (* Besides the files that actually changed, we want to also recheck
      * those that have typing errors referring to files that were
      * reparsed, since positions in those errors can be now stale.
@@ -629,7 +646,24 @@ module LazyCheckKind : CheckKindType = struct
         ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files ctx x)
       |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~to_recheck ~env =
+  let get_defs_to_recheck
+      ~reparsed
+      ~phase_2_decl_defs
+      ~to_recheck
+      ~env
+      ~enable_type_check_filter_files =
+    (* If the user has enabled a custom file filter, we want to only
+     * type check files that pass the filter. As such, we don't want
+     * to add unwanted files to the "type check later"-queue *)
+    let to_recheck =
+      if enable_type_check_filter_files then
+        ServerCheckUtils.user_filter_type_check_files
+          ~to_recheck
+          ~reparsed
+          ~is_ide_file:(is_ide_file env)
+      else
+        to_recheck
+    in
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
     let stale_errors =
@@ -1419,7 +1453,14 @@ functor
        open in the IDE, leaving other affected files to be lazily checked later.
        In either case, don't attempt to typecheck files with parse errors. *)
       let (files_to_check, lazy_check_later) =
-        CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
+        CheckKind.get_defs_to_recheck
+          ~reparsed:files_to_parse
+          ~phase_2_decl_defs:fast
+          ~to_recheck
+          ~env
+          ~enable_type_check_filter_files:
+            genv.ServerEnv.local_config
+              .ServerLocalConfig.enable_type_check_filter_files
       in
       let env =
         start_delegate_if_needed
@@ -1542,6 +1583,11 @@ functor
              ~value:
                genv.local_config
                  .ServerLocalConfig.defer_class_memory_mb_threshold
+        |> Telemetry.bool_
+             ~key:"enable_type_check_filter_files"
+             ~value:
+               genv.local_config
+                 .ServerLocalConfig.enable_type_check_filter_files
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

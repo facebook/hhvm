@@ -782,6 +782,23 @@ let type_check_dirty
       ~collect_garbage:false;
 
     let env = { env with changed_files = dirty_files_changed_hash } in
+    let files_to_check =
+      if
+        not
+          genv.ServerEnv.local_config
+            .ServerLocalConfig.enable_type_check_filter_files
+      then
+        files_to_check
+      else
+        Relative_path.Set.elements
+        @@ ServerCheckUtils.user_filter_type_check_files
+             ~to_recheck:(Relative_path.Set.of_list files_to_check)
+             ~reparsed:
+               (Relative_path.Set.union
+                  dirty_files_unchanged_hash
+                  dirty_files_changed_hash)
+             ~is_ide_file:(fun _ -> false)
+    in
     let init_telemetry =
       telemetry
       |> Telemetry.int_

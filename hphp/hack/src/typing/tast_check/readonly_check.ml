@@ -594,7 +594,59 @@ let check =
       | (_, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
         self#call ~is_readonly:false env pos constructor_fty args unpacked_arg
-      | _ -> super#on_expr env e
+      | (_, This)
+      | (_, ValCollection (_, _, _))
+      | (_, KeyValCollection (_, _, _))
+      | (_, Lvar _)
+      | (_, Clone _)
+      | (_, Array_get (_, _))
+      | (_, Class_get (_, _, _))
+      | (_, Yield _)
+      | (_, Await _)
+      | (_, List _)
+      | (_, Cast (_, _))
+      | (_, Unop (_, _))
+      | (_, Pipe (_, _, _))
+      | (_, Eif (_, _, _))
+      | (_, Is (_, _))
+      | (_, As (_, _, _))
+      | (_, Callconv (_, _))
+      | (_, Import (_, _))
+      | (_, Lplaceholder _)
+      | (_, Pair (_, _, _))
+      | (_, ReadonlyExpr _)
+      | (_, Binop _)
+      | (_, ExpressionTree _)
+      | (_, Xml _)
+      | (_, Efun _)
+      | (_, Any)
+      (* Neither this nor any of the *_id expressions call the function *)
+      | (_, Method_caller (_, _))
+      | (_, Smethod_id (_, _))
+      | (_, Fun_id _)
+      | (_, Method_id _)
+      | (_, FunctionPointer _)
+      | (_, Lfun _)
+      | (_, Record _)
+      | (_, Null)
+      | (_, True)
+      | (_, False)
+      | (_, Omitted)
+      | (_, Id _)
+      | (_, Shape _)
+      | (_, EnumAtom _)
+      | (_, ET_Splice _)
+      | (_, Darray _)
+      | (_, Varray _)
+      | (_, Int _)
+      | (_, Dollardollar _)
+      | (_, String _)
+      | (_, String2 _)
+      | (_, Collection (_, _, _))
+      | (_, Class_const _)
+      | (_, Float _)
+      | (_, PrefixedString _) ->
+        super#on_expr env e
 
     method! on_stmt_ env s =
       (match s with
@@ -609,7 +661,32 @@ let check =
             ~reason_super:[(pos, "But this function does not return readonly.")]
         (* If we don't have a ret ty we're not in a function, must have errored somewhere else *)
         | _ -> ())
-      | _ -> ());
+      | Return None -> ()
+      | Throw e ->
+        (match self#ty_expr env e with
+        | Readonly -> Errors.readonly_exception (Tast.get_position e)
+        | Mut -> ())
+      (* An awaitall contains assignment expressions that are recursed *)
+      | Awaitall (_, _) -> ()
+      | Break
+      | Continue
+      | Yield_break
+      | Noop
+      | Expr _
+      | If (_, _, _)
+      | Do (_, _)
+      | While (_, _)
+      | Using _
+      | For (_, _, _, _) (* Inner assignments are handled by recursive step *)
+      | Switch (_, _)
+      | Try (_, _, _)
+      | Block _
+      | Markup _
+      | AssertEnv (_, _)
+      | Fallthrough
+      (* Handled by on_Foreach *)
+      | Foreach _ ->
+        ());
       super#on_stmt_ env s
   end
 

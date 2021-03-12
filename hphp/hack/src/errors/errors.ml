@@ -5139,6 +5139,12 @@ let readonly_mismatch prefix pos ~reason_sub ~reason_super =
     (pos, prefix)
     (reason_sub @ reason_super)
 
+let readonly_exception pos =
+  add
+    (Typing.err_code Typing.ReadonlyException)
+    pos
+    "This exception is readonly; throwing readonly exceptions is not currently supported."
+
 let readonly_mismatch_on_error
     prefix pos ~reason_sub ~reason_super (on_error : typing_error_callback) =
   on_error

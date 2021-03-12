@@ -1,0 +1,2 @@
+File "exceptions.php", line 5, characters 11-13:
+This exception is readonly; throwing readonly exceptions is not currently supported. (Typing[4418])

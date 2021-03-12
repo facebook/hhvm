@@ -622,6 +622,7 @@ module Typing = struct
     | StrictStrInterpTypeMismatch [@value 4415]
     | InvalidMethCallerCallingConvention [@value 4416]
     | UnsafeCast [@value 4417]
+    | ReadonlyException [@value 4418]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

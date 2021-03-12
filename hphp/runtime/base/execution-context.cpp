@@ -1497,6 +1497,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   calleeGenericsChecks(f, hasGenerics);
   calleeArgumentArityChecks(f, numArgsInclUnpack);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
+  void* ctx = thiz ? (void*)thiz : (void*)cls;
+  calleeCoeffectChecks(f, RuntimeCoeffects::none(), numArgsInclUnpack, ctx);
   calleeImplicitContextChecks(f);
   initFuncInputs(f, numArgsInclUnpack);
 

@@ -938,6 +938,8 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
+  calleeCoeffectChecks(enterFnAr->func(), RuntimeCoeffects::none(),
+                       numArgsInclUnpack, enterFnAr->getThisUnsafe());
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
 
   if (
@@ -3666,7 +3668,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   calleeGenericsChecks(func, callFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
-  calleeCoeffectChecks(func, callFlags, numArgsInclUnpack, ctx);
+  calleeCoeffectChecks(func, callFlags.coeffects(), numArgsInclUnpack, ctx);
   calleeImplicitContextChecks(func);
   initFuncInputs(func, numArgsInclUnpack);
 

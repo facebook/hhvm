@@ -7,6 +7,7 @@ edition = "2018"
 verify_parser_ffi = { path = "../cargo/verify_parser_ffi", package = "verify_parser_ffi" }
 aast_parser_ffi = { path = "../cargo/aast_parser_ffi", package = "aast_parser_ffi" }
 positioned_by_ref_parser_ffi = { path = "../cargo/positioned_by_ref_parser_ffi", package = "positioned_by_ref_parser_ffi" }
+positioned_full_trivia_parser_ffi = { path = "../cargo/positioned_full_trivia_parser_ffi", package = "positioned_full_trivia_parser_ffi" }
 
 [lib]
 name = "rust_parser_ffi"

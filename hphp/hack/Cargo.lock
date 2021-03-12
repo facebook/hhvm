@@ -1248,6 +1248,7 @@ version = "3.49.0"
 dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
+ "positioned_full_trivia_parser_ffi",
  "verify_parser_ffi",
 ]
 
@@ -2258,6 +2259,20 @@ dependencies = [
  "parser",
  "positioned_smart_constructors",
  "serde",
+ "stack_limit",
+]
+
+[[package]]
+name = "positioned_full_trivia_parser_ffi"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "libc",
+ "ocamlrep",
+ "oxidized",
+ "parser_core_types",
+ "positioned_full_trivia_parser",
+ "serde_json",
  "stack_limit",
 ]
 

@@ -7,20 +7,7 @@
 #if !defined(POSITIONED_FULL_TRIVIA_PARSER_FFI_H)
 #  define POSITIONED_FULL_TRIVIA_PARSER_FFI_H
 
-struct parse_positioned_full_trivia_environment {
-  bool codegen;
-  bool hhvm_compat_mode;
-  bool php5_compat_mode;
-  bool allow_new_attribute_syntax;
-  bool enable_xhp_class_modifier;
-  bool disable_xhp_element_mangling;
-  bool disable_xhp_children_declarations;
-  bool disable_modes;
-  bool disallow_hash_comments;
-  bool disallow_fun_and_cls_meth_pseudo_funcs;
-  bool hack_arr_dv_arrs;
-  bool interpret_soft_types_as_like_types;
-};
+#  include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types_fwd.h"
 
 #  if defined(__cplusplus)
 extern "C" {

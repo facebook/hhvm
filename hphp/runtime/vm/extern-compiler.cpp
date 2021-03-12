@@ -34,6 +34,8 @@
 
 #include "hphp/hack/src/facts/rust_facts_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
+#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi.h"
+#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -1363,9 +1365,21 @@ FfpResult ffp_parse_file(
   int size,
   const RepoOptions& options
 ) {
-  return s_manager.get_hackc_pool().parse(file, contents, size, options);
+  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {
+    return s_manager.get_hackc_pool().parse(file, contents, size, options);
+  } else {    
+    auto const env = options.getParserEnvironment();
+    parse_positioned_full_trivia_ptr parse_tree{
+      parse_positioned_full_trivia(file.c_str(), contents, &env)
+    };
+    if (parse_tree) {
+      std::string ffp_str{parse_tree.get()};
+      return FfpJSONString { ffp_str }; 
+    } else {
+      return FfpJSONString { "{}" }; 
+    }
+  }
 }
-
 
 std::string hackc_version() {
   return s_manager.get_hackc_pool().getVersionString();

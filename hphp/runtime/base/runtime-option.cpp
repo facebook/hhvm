@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/hack/src/hhbc/compile_ffi.h"
+#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -259,6 +260,24 @@ bool walkDirTree(std::string fpath, F func) {
 
 RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
+}
+
+parse_positioned_full_trivia_environment
+RepoOptions::getParserEnvironment() const {
+  return parse_positioned_full_trivia_environment {
+      true // codegen
+    , true  // hhvm_compat_mode
+    , true  // php5_compat_mode
+    , AllowNewAttributeSyntax
+    , EnableXHPClassModifier
+    , DisableXHPElementMangling
+    , false // disable_xhp_children_declarations
+    , false // disable_modes
+    , DisallowHashComments
+    , DisallowFunAndClsMethPseudoFuncs
+    , true  // array_unification
+    , true  // interpret_soft_types_as_like_types
+    };
 }
 
 std::uint32_t RepoOptions::getParserFlags() const {

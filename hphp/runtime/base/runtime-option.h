@@ -38,6 +38,8 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
+#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types_fwd.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -122,6 +124,7 @@ struct RepoOptions {
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   std::uint32_t getParserFlags() const;
+  parse_positioned_full_trivia_environment getParserEnvironment() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
   std::string trustedDBPath() const noexcept { return TrustedDBPath; }

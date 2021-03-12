@@ -651,10 +651,10 @@ dict(4) {
 *** Testing error conditions ***
 Warning: array_merge() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 75
 
-Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 76
+Warning: Invalid operand type was used: %S expects array(s) or collection(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 76
 NULL
 
-Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 77
+Warning: Invalid operand type was used: %S expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 77
 NULL
 string(24) "Undefined variable: arr4"
 Done

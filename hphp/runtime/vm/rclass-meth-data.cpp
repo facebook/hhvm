@@ -41,11 +41,7 @@ bool RClsMethData::Same(const RClsMethData* rc1, const RClsMethData* rc2) {
   if (rc1->m_cls != rc2->m_cls || rc1->m_func != rc2->m_func) {
      return false;
   }
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    return PackedArray::VecSame(rc1->m_arr, rc2->m_arr);
-  } else {
-     return ArrayData::Same(rc1->m_arr, rc2->m_arr);
-  }
+  return ArrayData::Same(rc1->m_arr, rc2->m_arr);
 }
 
 void RClsMethData::release() noexcept {

@@ -42,11 +42,7 @@ bool RFuncData::Same(const RFuncData* rfunc1, const RFuncData* rfunc2) {
   if (rfunc1->m_func != rfunc2->m_func) {
     return false;
   }
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    return PackedArray::VecSame(rfunc1->m_arr, rfunc2->m_arr);
-  } else {
-    return ArrayData::Same(rfunc1->m_arr, rfunc2->m_arr);
-  }
+  return ArrayData::Same(rfunc1->m_arr, rfunc2->m_arr);
 }
 
 } // namespace HPHP

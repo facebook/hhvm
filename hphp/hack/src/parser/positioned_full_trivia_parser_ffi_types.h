@@ -16,6 +16,6 @@ struct parse_positioned_full_trivia_environment {
   bool disable_modes;
   bool disallow_hash_comments;
   bool disallow_fun_and_cls_meth_pseudo_funcs;
-  bool array_unification;
+  bool hack_arr_dv_arrs;
   bool interpret_soft_types_as_like_types;
 };

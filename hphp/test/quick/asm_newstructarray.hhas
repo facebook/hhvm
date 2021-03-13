@@ -3,7 +3,7 @@
   String "two"
   Double 3.1415
   Int 4
-  NewStructDArray <"one" "two" "three" "four">
+  NewStructDict <"one" "two" "three" "four">
   SetL $arr
   PopC
   NullUninit

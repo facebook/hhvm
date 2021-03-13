@@ -2,11 +2,11 @@
 # Test arrays for hhbc asm.
 #
 
-.adata my_array = """Y:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
+.adata my_array = """D:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
 
 .class ClassWithArray {
   .property [static public] arr =
-            """Y:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
+            """D:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
 }
 
 .function ArrayMember() {
@@ -43,7 +43,7 @@
   FCallFuncD <> 0 1 "" - "" "ArrayMember"
   PopC
 
-  Array @my_array
+  Dict @my_array
   SetL $arr
   PopC
 
@@ -97,7 +97,7 @@ unset_label:  String "win\n"
               NullUninit
               Int 1
               String "b"
-              NewVArray 2
+              NewVec 2
               FCallFuncD <> 1 1 "" - "" "var_dump"
               PopC
 

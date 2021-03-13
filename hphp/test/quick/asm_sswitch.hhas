@@ -3,12 +3,12 @@
 #
 
 # array(0,1,2,3,4)
-.adata my_array = """Y:6:{i:0;s:7:"label_0";i:1;s:7:"label_1";i:2;s:7:"label_2";i:3;s:7:"label_3";i:4;s:7:"label_4";i:5;s:7:"default";}""";
+.adata my_array = """D:6:{i:0;s:7:"label_0";i:1;s:7:"label_1";i:2;s:7:"label_2";i:3;s:7:"label_3";i:4;s:7:"label_4";i:5;s:7:"default";}""";
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
          .numiters 1;
 
-         Array @my_array
+         Dict @my_array
          SetL $arr
          PopC
 

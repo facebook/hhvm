@@ -1,4 +1,4 @@
-varray(64) {
+vec(64) {
   int(1)
   int(2)
   int(3)

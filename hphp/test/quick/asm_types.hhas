@@ -1,6 +1,6 @@
 # Test type annotations for hhas
 
-.adata A_0 = """Y:0:{}""";
+.adata A_0 = """D:0:{}""";
 
 
 .function use_class(<"@C" "C" extended_hint soft> $x) {
@@ -55,7 +55,7 @@
   PopC
   NullUninit
   NullUninit
-  Array @A_0
+  Dict @A_0
   FCallFuncD <> 1 1 "" - "" "use_int_soft"
   PopC
   NullUninit
@@ -80,12 +80,12 @@
   PopC
   NullUninit
   NullUninit
-  Array @A_0
+  Dict @A_0
   FCallFuncD <> 1 1 "" - "" "use_mixed"
   PopC
   NullUninit
   NullUninit
-  Array @A_0
+  Dict @A_0
   FCallFuncD <> 1 1 "" - "" "use_int"
   PopC
 

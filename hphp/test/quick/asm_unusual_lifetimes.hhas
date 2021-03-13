@@ -27,13 +27,13 @@
   Int 1
   Int 2
   Int 3
-  NewVArray 3
+  NewVec 3
   SetL $a
   PopC
   Int 1
   Int 2
   Int 3
-  NewVArray 3
+  NewVec 3
   SetL $b
   PopC
   NullUninit

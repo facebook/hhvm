@@ -1,9 +1,9 @@
 # Test for hhas return types
 
-.adata A_0 = """Y:0:{}""";
+.adata A_0 = """D:0:{}""";
 
 .function <"HH\\int" "HH\\int" extended_hint> fail() {
-  Array @A_0
+  Dict @A_0
   VerifyRetTypeC
   RetC
 }

@@ -1,6 +1,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .numiters 2;
-  NewDArray 3
+  NewDictArray 3
 
   String "hello"
   String "world"

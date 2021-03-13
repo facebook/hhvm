@@ -1,4 +1,4 @@
-0xXX+0: NewDArray 3
+0xXX+0: NewDictArray 3
 0xXX+2: String 1073741824
 0xXX+7: String 1073741825
 0xXX+12: AddElemC

@@ -129,9 +129,9 @@ impl CNativeEnv {
     }
 }
 
-// Return a result of `compile_from_text_cpp_ffi` to Rust.
+// Return a result of `hackc_compile_from_text_cpp_ffi` to Rust.
 #[no_mangle]
-unsafe extern "C" fn compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
+unsafe extern "C" fn hackc_compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
     // Safety:
     //   - This should only ever be called on a pointer obtained by
     //     `CString::into_raw`.
@@ -142,7 +142,7 @@ unsafe extern "C" fn compile_from_text_free_string_cpp_ffi(s: *mut c_char) {
 
 // Compile to HHAS from source text.
 #[no_mangle]
-unsafe extern "C" fn compile_from_text_cpp_ffi(
+unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
     env: usize,
     source_text: *const c_char,
     output_cfg: usize,
@@ -225,12 +225,12 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
         match job
             .with_elastic_stack(job_builder, on_retry, stack_slack)
             .map_err(|e| format!("{}", e))
-            .expect("compile_ffi: compile_from_text_cpp_ffi: retry failed")
+            .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: retry failed")
             .map_err(|e| e.to_string())
         {
             Ok(out) => {
                 let cs = std::ffi::CString::new(out)
-                    .expect("compile_ffi: compile_from_text_cpp_ffi: String::new failed");
+                    .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: String::new failed");
                 cs.into_raw() as *const c_char
             }
             Err(e) => {
@@ -263,7 +263,7 @@ unsafe extern "C" fn compile_from_text_cpp_ffi(
     }) {
         Ok(ptr) => ptr,
         Err(_) => {
-            eprintln!("Error: panic in ffi function compile_from_text_cpp_ffi");
+            eprintln!("Error: panic in ffi function hackc_compile_from_text_cpp_ffi");
             std::ptr::null()
         }
     }

@@ -10,7 +10,9 @@
 #  include<stdint.h>
 #  include<stddef.h>
 
-enum env_flags {
+#  include "hphp/hack/src/hhbc/compile_ffi_types_fwd.h"
+
+enum hackc_compile_env_flags {
     IS_SYSTEMLIB=1 << 0
   , IS_EVALED=1 << 1
   , FOR_DEBUGGER_EVAL=1 << 2
@@ -18,7 +20,7 @@ enum env_flags {
   , DISABLE_TOPLEVEL_ENUMERATION=1 << 4
 };
 
-enum hhbc_flags {
+enum hackc_compile_hhbc_flags {
   LTR_ASSIGN=1 << 0
   , UVS=1 << 1
   , HACK_ARR_COMPAT_NOTICES=1 << 2
@@ -38,7 +40,7 @@ enum hhbc_flags {
   , EMIT_INST_METH_POINTERS=1 << 16
 };
 
-enum parser_flags {
+enum hackc_compile_parser_flags {
    ABSTRACT_STATIC_PROPS=1 << 0
   , ALLOW_NEW_ATTRIBUTE_SYNTAX=1 << 1
   , ALLOW_UNSTABLE_FEATURES=1 << 2
@@ -61,37 +63,16 @@ enum parser_flags {
   , ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19
 };
 
-struct native_environment {
-  char const* filepath;
-  char const * aliased_namespaces;
-  char const * include_roots;
-  int32_t emit_class_pointers;
-  int32_t check_int_overflow;
-  uint32_t hhbc_flags;
-  uint32_t parser_flags;
-  uint8_t flags;
-};
-
-struct output_config {
-  bool include_header;
-  char const* output_file;
-};
-
-struct buf_t {
-  char* buf;
-  int buf_siz;
-};
-
 #  if defined(__cplusplus)
 extern "C" {
 #  endif /*defined(__cplusplus)*/
-char const* compile_from_text_cpp_ffi(
-       native_environment const* env
+char const* hackc_compile_from_text_cpp_ffi(
+       hackc_compile_native_environment const* env
      , char const* source_text
-     , output_config const* config
-     , buf_t* error_buf );
+     , hackc_compile_output_config const* config
+     , hackc_error_buf_t* error_buf );
 
-void compile_from_text_free_string_cpp_ffi(char const*);
+void hackc_compile_from_text_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
 
@@ -99,19 +80,19 @@ void compile_from_text_free_string_cpp_ffi(char const*);
 
 namespace HPHP {
 
-using compile_from_text_ptr =
+using hackc_compile_from_text_ptr =
   std::unique_ptr<char const, void(*)(char const*)>;
 
-inline compile_from_text_ptr
-  compile_from_text(
-      native_environment const* env
+inline hackc_compile_from_text_ptr
+  hackc_compile_from_text(
+      hackc_compile_native_environment const* env
     , char const* source_text
-    , output_config const* config
-    , buf_t* error_buf
+    , hackc_compile_output_config const* config
+    , hackc_error_buf_t* error_buf
   ) {
-  return compile_from_text_ptr {
-      compile_from_text_cpp_ffi(env, source_text, config, error_buf)
-    , compile_from_text_free_string_cpp_ffi
+  return hackc_compile_from_text_ptr {
+      hackc_compile_from_text_cpp_ffi(env, source_text, config, error_buf)
+    , hackc_compile_from_text_free_string_cpp_ffi
   };
 }
 

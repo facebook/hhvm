@@ -34,6 +34,7 @@
 
 #include "hphp/hack/src/facts/rust_facts_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
+#include "hphp/hack/src/hhbc/compile_ffi_types.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -1103,7 +1104,7 @@ CompilerResult hackc_compile(
 
     std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
-    native_environment const native_env = {
+    hackc_compile_native_environment const native_env = {
       filename,
       aliased_namespaces.data(),
       s_misc_config.data(),
@@ -1114,14 +1115,14 @@ CompilerResult hackc_compile(
       flags
     };
 
-    output_config const output{true, nullptr};
+    hackc_compile_output_config const output{true, nullptr};
 
     std::array<char, 256> buf;
     buf.fill(0);
-    buf_t error_buf {buf.data(), buf.size()};
+    hackc_error_buf_t error_buf {buf.data(), buf.size()};
     
-    compile_from_text_ptr hhas{
-      compile_from_text(&native_env, code, &output, &error_buf)
+    hackc_compile_from_text_ptr hhas{
+      hackc_compile_from_text(&native_env, code, &output, &error_buf)
     };
     if (hhas) { 
       std::string hhas_str{hhas.get()};

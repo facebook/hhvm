@@ -4,6 +4,7 @@ namespace HH {
 
 type XenonSample = shape(
   'time' => int,
+  'timeNano' => int,
   'stack' => varray,
   'phpStack' => varray,
   'ioWaitSample' => bool,

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "hphp/util/timer.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include <semaphore.h>

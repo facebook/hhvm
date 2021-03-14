@@ -91,6 +91,7 @@ const StaticString
   s_sourceType("sourceType"),
   s_stack("stack"),
   s_time("time"),
+  s_time_ns("timeNano"),
   s_unwinder("Unwinder");
 
 
@@ -272,6 +273,7 @@ Array XenonRequestLocalData::createResponse() {
     const auto& frame = it.second().toArray();
     stacks.append(make_darray(
       s_time, frame[s_time],
+      s_time_ns, frame[s_time_ns],
       s_stack, frame[s_stack].toArray(),
       s_phpStack, parsePhpStack(frame[s_stack].toArray()),
       s_isWait, frame[s_isWait],
@@ -299,6 +301,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
 
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
+  auto now_ns = gettime_ns(CLOCK_REALTIME);
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
                              .skipInlined(t == Xenon::EnterSample)
@@ -307,6 +310,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .ignoreArgs());
   m_stackSnapshots.append(make_darray(
     s_time, now,
+    s_time_ns, now_ns,
     s_stack, bt,
     s_sourceType, show(sourceType),
     s_isWait, !Xenon::isCPUTime(t)

@@ -13,6 +13,7 @@ namespace HH {
 type XenonSample = shape(
   'time' => int,
   'timeNano' => int,
+  'lastTriggerTimeNano' => int,
   /* HH_FIXME[2071] */
   'stack' => varray,
   /* HH_FIXME[2071] */

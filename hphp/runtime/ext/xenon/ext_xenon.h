@@ -127,11 +127,13 @@ struct Xenon final {
   void log(
     SampleType t,
     EventHook::Source sourceType,
-    c_WaitableWaitHandle* wh = nullptr) const;
+    c_WaitableWaitHandle* wh = nullptr
+  ) const;
   void surpriseAll();
   void onTimer();
   bool getIsProfiledRequest();
 
+  int64_t   m_lastSurpriseTime;
   bool      m_stopping;
  private:
   std::atomic<int64_t> m_missedSampleCount;

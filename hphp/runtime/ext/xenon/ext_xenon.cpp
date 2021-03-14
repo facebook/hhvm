@@ -55,7 +55,8 @@ struct XenonRequestLocalData final {
   void log(
     Xenon::SampleType t,
     EventHook::Source sourceType,
-    c_WaitableWaitHandle* wh = nullptr
+    c_WaitableWaitHandle* wh = nullptr,
+    int64_t triggerTime = 0
   );
   static StaticString show(EventHook::Source sourceType);
 
@@ -92,6 +93,7 @@ const StaticString
   s_stack("stack"),
   s_time("time"),
   s_time_ns("timeNano"),
+  s_lastTriggerTime("lastTriggerTimeNano"),
   s_unwinder("Unwinder");
 
 
@@ -147,7 +149,7 @@ Xenon& Xenon::getInstance() noexcept {
   return instance;
 }
 
-Xenon::Xenon() noexcept : m_stopping(false), m_missedSampleCount(0) {
+Xenon::Xenon() noexcept : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   m_timerid = 0;
 #endif
@@ -229,7 +231,7 @@ void Xenon::log(SampleType t,
       clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", show(t));
-    s_xenonData->log(t, sourceType, wh);
+    s_xenonData->log(t, sourceType, wh, m_lastSurpriseTime);
   }
 }
 
@@ -244,6 +246,7 @@ void Xenon::onTimer() {
 // passed to ExecutePerThread.
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
+  m_lastSurpriseTime = gettime_ns(CLOCK_REALTIME);
   RequestInfo::ExecutePerRequest(
     [] (RequestInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
   );
@@ -274,6 +277,7 @@ Array XenonRequestLocalData::createResponse() {
     stacks.append(make_darray(
       s_time, frame[s_time],
       s_time_ns, frame[s_time_ns],
+      s_lastTriggerTime, frame[s_lastTriggerTime],
       s_stack, frame[s_stack].toArray(),
       s_phpStack, parsePhpStack(frame[s_stack].toArray()),
       s_isWait, frame[s_isWait],
@@ -296,7 +300,9 @@ StaticString XenonRequestLocalData::show(EventHook::Source sourceType) {
 
 void XenonRequestLocalData::log(Xenon::SampleType t,
                                 EventHook::Source sourceType,
-                                c_WaitableWaitHandle* wh) {
+                                c_WaitableWaitHandle* wh,
+                                int64_t triggerTime
+) {
   if (!m_isProfiledRequest) return;
 
   TRACE(1, "XenonRequestLocalData::log\n");
@@ -311,6 +317,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   m_stackSnapshots.append(make_darray(
     s_time, now,
     s_time_ns, now_ns,
+    s_lastTriggerTime, triggerTime,
     s_stack, bt,
     s_sourceType, show(sourceType),
     s_isWait, !Xenon::isCPUTime(t)

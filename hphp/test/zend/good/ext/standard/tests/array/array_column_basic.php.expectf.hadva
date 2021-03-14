@@ -54,7 +54,7 @@ dict(8) {
   [6]=>
   string(3) "Foo"
   [7]=>
-  resource(4) of type (stream)
+  resource(%d) of type (stream)
 }
 dict(8) {
   [1]=>
@@ -73,7 +73,7 @@ dict(8) {
   [7]=>
   string(3) "Foo"
   [8]=>
-  resource(4) of type (stream)
+  resource(%d) of type (stream)
 }
 
 *** Testing numeric column keys ***

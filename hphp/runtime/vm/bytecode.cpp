@@ -938,8 +938,6 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
-  calleeCoeffectChecks(enterFnAr->func(), RuntimeCoeffects::none(),
-                       numArgsInclUnpack, enterFnAr->getThisUnsafe());
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
 
   if (
@@ -3482,7 +3480,7 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
 
   lookup_sprop(vmfp(), cls, name, propn, val, slot, visible,
                accessible, constant, readonly, true);
-               
+
   SCOPE_EXIT { decRefStr(name); };
   if (!readonly && op != ReadOnlyOp::Mutable) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());

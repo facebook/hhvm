@@ -1091,6 +1091,11 @@ let parse_and_name ctx files_contents =
             ~consts));
   (parsed_files, files_info)
 
+let parse_name_and_skip_decl ctx files_contents =
+  Errors.do_ (fun () ->
+      let (_parsed_files, files_info) = parse_and_name ctx files_contents in
+      files_info)
+
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
@@ -1501,22 +1506,8 @@ let handle_mode
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors
     else
-      let to_check =
-        Relative_path.Map.filter files_info ~f:(fun _p i ->
-            let open FileInfo in
-            match i.file_mode with
-            | None
-            | Some Mstrict ->
-              true
-            | _ -> false)
-      in
-      let errors =
-        check_file ~verbosity ctx [] to_check error_format max_errors
-      in
-      if not (List.is_empty errors) then
-        List.iter ~f:(print_error error_format) errors
-      else
-        Ai.do_ files_info ai_options ctx
+      (* No type check *)
+      Ai.do_ files_info ai_options ctx
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
@@ -2356,7 +2347,11 @@ let decl_and_run_mode
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)
   in
-  let (errors, files_info) = parse_name_and_decl ctx to_decl in
+  let (errors, files_info) =
+    match mode with
+    | Ai _ -> parse_name_and_skip_decl ctx to_decl
+    | _ -> parse_name_and_decl ctx to_decl
+  in
   handle_mode
     mode
     files

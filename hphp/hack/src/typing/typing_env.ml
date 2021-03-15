@@ -733,8 +733,8 @@ let get_enum_constraint env x =
     | Some e -> e.te_constraint)
 
 let get_enum env x =
-  match get_class_or_typedef env x with
-  | Some (ClassResult tc) when Option.is_some (Cls.enum_type tc) -> Some tc
+  match get_class env x with
+  | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
 let is_enum env x =

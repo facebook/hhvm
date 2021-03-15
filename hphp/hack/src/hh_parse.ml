@@ -45,6 +45,7 @@ module FullFidelityParseArgs = struct
     program_text: bool;
     pretty_print: bool;
     pretty_print_json: bool;
+    generate_hhi: bool;
     schema: bool;
     show_file_name: bool;
     (* Configuring the parser *)
@@ -89,6 +90,7 @@ module FullFidelityParseArgs = struct
       program_text
       pretty_print
       pretty_print_json
+      generate_hhi
       schema
       codegen
       php5_compat_mode
@@ -129,6 +131,7 @@ module FullFidelityParseArgs = struct
       program_text;
       pretty_print;
       pretty_print_json;
+      generate_hhi;
       schema;
       codegen;
       php5_compat_mode;
@@ -182,6 +185,8 @@ module FullFidelityParseArgs = struct
     let set_pretty_print () = pretty_print := true in
     let pretty_print_json = ref false in
     let set_pretty_print_json () = pretty_print_json := true in
+    let generate_hhi = ref false in
+    let set_generate_hhi () = generate_hhi := true in
     let schema = ref false in
     let set_schema () = schema := true in
     let codegen = ref false in
@@ -248,6 +253,9 @@ No errors are filtered out."
         ( "--program-text",
           Arg.Unit set_program_text,
           "Displays the text of the given file." );
+        ( "--generate-hhi",
+          Arg.Unit set_generate_hhi,
+          "Generate and display a .hhi file for the given input file." );
         ( "--pretty-print",
           Arg.Unit set_pretty_print,
           "Displays the text of the given file after pretty-printing." );
@@ -365,7 +373,7 @@ No errors are filtered out."
           "Disabled parsing of inst_meth()" );
         ( "--ignore-missing-json",
           Arg.Set ignore_missing_json,
-          "Ignore missing nodes in JSON ouput" );
+          "Ignore missing nodes in JSON output" );
       ]
     in
     Arg.parse options push_file usage;
@@ -396,6 +404,7 @@ No errors are filtered out."
       !program_text
       !pretty_print
       !pretty_print_json
+      !generate_hhi
       !schema
       !codegen
       !php5_compat_mode
@@ -556,6 +565,9 @@ let handle_existing_file args filename =
   ( if args.pretty_print then
     let pretty = Libhackfmt.format_tree syntax_tree in
     Printf.printf "%s\n" pretty );
+  ( if args.generate_hhi then
+    let hhi = Generate_hhi.go editable in
+    Printf.printf "%s\n" hhi );
 
   ( if print_errors then
     let level =

@@ -96,7 +96,8 @@
   (name hh_parse)
   (modes exe byte_complete)
   (modules
-    hh_parse)
+    hh_parse
+    generate_hhi)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config

@@ -1,0 +1,14 @@
+<?hh
+// @generated from implementation
+
+
+namespace GeneratedHHITest;
+
+/** Top level function doc block */
+function top_level_function(): void ;
+class Foo {
+  /** public method doc block */
+  public function publicMethod(): void ;
+  /** public static method doc block */
+  public static function publicStaticMethod(): void ;}
+

@@ -1195,12 +1195,9 @@ const hphp_fast_string_imap<int> s_vanilla_params{
 
 //////////////////////////////////////////////////////////////////////
 
-// If bespoke array-likes are enabled, we may encounter inlined NativeImpls
-// with optimized IR generation paths. In this case, we don't emit
-// layout-sensitive implementations to avoid making NativeImpl a
-// layout-sensitive bytecode. Therefore, when bespokes are enabled and we are
-// not at an FCallBuiltin bytecode, don't emit an optimized implementation if
-// it's layout-sensitive.
+// If we encounter an inlined NativeImpls in an optimized region, we can't use
+// a layout-sensitive implementation for the bytecode, today, because we don't
+// support arbitrary control flow with an inlined NativeImpl.
 bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
   return allowBespokeArrayLikes() &&
          s_vanilla_params.find(fname->data()) != s_vanilla_params.end();
@@ -1952,11 +1949,6 @@ void nativeImplInlined(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-int getBuiltinVanillaParam(const char* name) {
-  auto const it = s_vanilla_params.find(name);
-  return it != s_vanilla_params.end() ? it->second : -1;
-}
 
 SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   if (src->isA(TObj) && src->type().clsSpec()) {

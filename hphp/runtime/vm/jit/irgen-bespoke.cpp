@@ -580,46 +580,6 @@ void emitBespokeClassGetTS(IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
-template <bool isFirst, bool isKey>
-void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
-  auto const arr = popC(env);
-  // TODO(mcolavita): this type knowledge should ideally be pushed lower.
-  auto const elem = arrLikeFirstLastType(
-    arr->type(), isFirst, isKey, curClass(env));
-  auto const maybeEmpty = !elem.second;
-
-  auto const res = cond(
-    env,
-    [&](Block* taken) {
-      auto const size = gen(env, Count, arr);
-      if (maybeEmpty) gen(env, JmpZero, taken, size);
-    },
-    [&] {
-      auto const pos = isFirst
-        ? gen(env, BespokeIterFirstPos, arr)
-        : gen(env, BespokeIterLastPos, arr);
-      auto const val = isKey
-        ? gen(env, BespokeIterGetKey, arr, pos)
-        : gen(env, BespokeIterGetVal, arr, pos);
-
-      gen(env, IncRef, val);
-      return val;
-    },
-    [&] { return cns(env, maybeEmpty ? TInitNull : TBottom); }
-  );
-  push(env, res);
-  decRef(env, arr);
-}
-
-using BespokeOptEmitFn = void (*)(IRGS&, uint32_t);
-const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
-  {"HH\\Lib\\_Private\\Native\\first", emitBespokeFirstLast<true, false>},
-  {"HH\\Lib\\_Private\\Native\\last", emitBespokeFirstLast<false, false>},
-  {"HH\\Lib\\_Private\\Native\\first_key", emitBespokeFirstLast<true, true>},
-  {"HH\\Lib\\_Private\\Native\\last_key", emitBespokeFirstLast<false, true>},
-};
-
 void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",

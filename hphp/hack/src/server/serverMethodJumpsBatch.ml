@@ -35,7 +35,7 @@ let parallel_helper ctx workers classes filter =
 let go :
     Provider_context.t ->
     MultiWorker.worker list option ->
-    Decl_provider.class_key list ->
+    Decl_provider.type_key list ->
     ServerCommandTypes.Method_jumps.filter ->
     ServerCommandTypes.Method_jumps.result list =
  fun ctx workers classes filter ->

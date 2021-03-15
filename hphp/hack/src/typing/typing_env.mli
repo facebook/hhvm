@@ -74,32 +74,32 @@ val empty :
   droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
   env
 
-val is_typedef : env -> typedef_key -> bool
+val is_typedef : env -> type_key -> bool
 
-val get_enum : env -> class_key -> class_decl option
+val get_enum : env -> type_key -> class_decl option
 
-val is_enum : env -> class_key -> bool
+val is_enum : env -> type_key -> bool
 
-val is_enum_class : env -> class_key -> bool
+val is_enum_class : env -> type_key -> bool
 
-val get_enum_constraint : env -> class_key -> decl_ty option
+val get_enum_constraint : env -> type_key -> decl_ty option
 
 (** Register the constructor of the class with the given name as a dependency
     of the class being checked. *)
 val make_depend_on_constructor : env -> string -> unit
 
 (** Get class declaration from the appropriate backend and add dependency. *)
-val get_class : env -> class_key -> class_decl option
+val get_class : env -> type_key -> class_decl option
 
-val get_class_dep : env -> class_key -> class_decl option
+val get_class_dep : env -> type_key -> class_decl option
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 
 (** Get type alias declaration from the appropriate backend and add dependency. *)
-val get_typedef : env -> typedef_key -> typedef_decl option
+val get_typedef : env -> type_key -> typedef_decl option
 
-val get_class_or_typedef : env -> class_key -> class_or_typedef_result option
+val get_class_or_typedef : env -> type_key -> class_or_typedef_result option
 
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option

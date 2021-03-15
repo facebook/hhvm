@@ -63,11 +63,10 @@ val get_self_ty_exn : env -> Tast.ty
 val get_parent_id : env -> string option
 
 (** Return the info of the given class from the typing heap. *)
-val get_class :
-  env -> Decl_provider.class_key -> Decl_provider.class_decl option
+val get_class : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 
 val get_class_or_typedef :
-  env -> Decl_provider.class_key -> class_or_typedef_result option
+  env -> Decl_provider.type_key -> class_or_typedef_result option
 
 (** Return {true} when in the definition of a static property or method. *)
 val is_static : env -> bool

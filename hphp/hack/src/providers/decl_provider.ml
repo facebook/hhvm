@@ -11,11 +11,7 @@ module Class = Typing_classes_heap.Api
 
 type fun_key = string
 
-type class_key = string
-
-type record_def_key = string
-
-type typedef_key = string
+type type_key = string
 
 type gconst_key = string
 
@@ -137,7 +133,7 @@ let declare_folded_class_in_file
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
-    (class_name : class_key) : class_decl option =
+    (class_name : type_key) : class_decl option =
   Decl_counters.count_decl ?tracing_info Decl_counters.Class class_name
   @@ fun counter ->
   (* There's a confusing matrix of possibilities:

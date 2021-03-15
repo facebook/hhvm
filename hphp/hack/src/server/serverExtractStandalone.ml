@@ -168,19 +168,19 @@ end
 (* -- Decl_provider helpers ------------------------------------------------- *)
 module Decl : sig
   val get_class_exn :
-    Provider_context.t -> Decl_provider.class_key -> Decl_provider.class_decl
+    Provider_context.t -> Decl_provider.type_key -> Decl_provider.class_decl
 
   val get_class_pos :
-    Provider_context.t -> Decl_provider.class_key -> Pos.t option
+    Provider_context.t -> Decl_provider.type_key -> Pos.t option
 
-  val get_class_pos_exn : Provider_context.t -> Decl_provider.class_key -> Pos.t
+  val get_class_pos_exn : Provider_context.t -> Decl_provider.type_key -> Pos.t
 
   val get_fun_pos : Provider_context.t -> Decl_provider.fun_key -> Pos.t option
 
   val get_fun_pos_exn : Provider_context.t -> Decl_provider.fun_key -> Pos.t
 
   val get_typedef_pos :
-    Provider_context.t -> Decl_provider.typedef_key -> Pos.t option
+    Provider_context.t -> Decl_provider.type_key -> Pos.t option
 
   val get_gconst_pos :
     Provider_context.t -> Decl_provider.gconst_key -> Pos.t option
@@ -379,7 +379,7 @@ module Dep : sig
 
   val get_origin :
     Provider_context.t ->
-    Decl_provider.class_key ->
+    Decl_provider.type_key ->
     Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
     string
 

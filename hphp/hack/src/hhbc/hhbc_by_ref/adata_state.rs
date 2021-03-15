@@ -7,7 +7,7 @@
 pub struct AdataState<'arena> {
     pub array_identifier_counter: usize,
     pub array_identifier_map:
-        std::collections::BTreeMap<hhbc_by_ref_runtime::TypedValue<'arena>, String>,
+        std::collections::BTreeMap<hhbc_by_ref_runtime::TypedValue<'arena>, &'arena str>,
     pub adata: Vec<hhbc_by_ref_hhas_adata::HhasAdata<'arena>>,
 }
 

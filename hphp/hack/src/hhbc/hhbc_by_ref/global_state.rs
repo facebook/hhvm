@@ -38,6 +38,7 @@ pub struct GlobalState {
 }
 
 impl GlobalState {
+    #[allow(clippy::needless_lifetimes)]
     pub fn init<'arena>(_alloc: &'arena bumpalo::Bump) -> Self {
         GlobalState::default()
     }

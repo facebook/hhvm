@@ -66,7 +66,7 @@ impl<'arena> Emitter<'arena> {
         &mut self.local_gen
     }
 
-    pub fn local_gen(&self) -> &hhbc_by_ref_local::Gen {
+    pub fn local_gen(&self) -> &hhbc_by_ref_local::Gen<'arena> {
         &self.local_gen
     }
 

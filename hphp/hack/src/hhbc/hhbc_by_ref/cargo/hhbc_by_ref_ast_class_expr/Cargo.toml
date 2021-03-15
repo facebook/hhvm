@@ -10,7 +10,6 @@ path = "../../ast_class_expr.rs"
 [dependencies]
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
-hhbc_by_ref_global_state = { path = "../hhbc_by_ref_global_state" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

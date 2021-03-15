@@ -11,7 +11,7 @@ use hhbc_by_ref_runtime::TypedValue;
 use oxidized::ast_defs::Pos;
 use thiserror::Error;
 
-pub type Result<'a, T = InstrSeq<'a>> = std::result::Result<T, Error>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -38,10 +38,10 @@ pub enum InstrSeq<'a> {
     List(&'a mut [Instruct<'a>]),
     Concat(&'a mut [InstrSeq<'a>]),
 }
-
 // The slices are mutable because of `rewrite_user_labels`. This means
 // we can't derive `Clone` (because you can't have multiple mutable
-// references referring to the same resource.)
+// references referring to the same resource). It is possible to implement
+// deep copy functionality though: see `InstrSeq::clone()` below.
 
 impl<'a> std::convert::From<(&'a bumpalo::Bump, (InstrSeq<'a>, InstrSeq<'a>))> for InstrSeq<'a> {
     fn from((alloc, (i1, i2)): (&'a bumpalo::Bump, (InstrSeq<'a>, InstrSeq<'a>))) -> InstrSeq<'a> {
@@ -1578,6 +1578,12 @@ pub mod instr {
 }
 
 impl<'a> InstrSeq<'a> {
+    /// We can't implement `std::Clone`` because of the need for an
+    /// allocator. Instead, use this associated function.
+    pub fn clone(alloc: &'a bumpalo::Bump, s: &InstrSeq<'a>) -> InstrSeq<'a> {
+        InstrSeq::from_iter_in(alloc, InstrIter::new(s).cloned())
+    }
+
     /// We can't implement `std::Default` because of the need
     /// for an allocator. Instead, use this associated function
     /// to produce an empty instruction sequence.
@@ -1841,9 +1847,9 @@ impl<'a> InstrSeq<'a> {
     }
 
     #[allow(clippy::result_unit_err)]
-    pub fn map_result_mut<F>(&mut self, f: &mut F) -> Result<'a, ()>
+    pub fn map_result_mut<F>(&mut self, f: &mut F) -> Result<()>
     where
-        F: FnMut(&mut Instruct<'a>) -> Result<'a, ()>,
+        F: FnMut(&mut Instruct<'a>) -> Result<()>,
     {
         match self {
             InstrSeq::List(&mut []) => Ok(()),

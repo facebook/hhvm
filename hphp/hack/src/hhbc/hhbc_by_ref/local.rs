@@ -9,11 +9,19 @@ pub type Id = usize;
 /// those appearing in the .declvars declaration. These can also be
 /// referenced by number (0 to n-1), but we use Unnamed only for
 /// variables n and above not appearing in .declvars
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum Type<'arena> {
     Unnamed(Id),
     /// Named local, necessarily starting with `$`
     Named(&'arena str),
+}
+impl<'arena> Clone for Type<'arena> {
+    fn clone(&self) -> Type<'arena> {
+        match self {
+            Type::Unnamed(u) => Type::Unnamed(u.clone()),
+            Type::Named(r) => Type::Named(r),
+        }
+    }
 }
 
 #[derive(Default, Debug)]

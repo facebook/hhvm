@@ -163,6 +163,7 @@ prefixed_flags!(
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
     HACK_ARR_COMPAT_NOTICES,
+    HACK_ARR_DV_ARR_MARK,
     HACK_ARR_DV_ARRS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
@@ -412,7 +413,6 @@ thread_local! {
 pub(crate) type Cache = LruCache<(Vec<String>, Vec<String>), Options, fnv::FnvBuildHasher>;
 
 impl Options {
-    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         serde_json::to_string_pretty(&self).expect("failed to parse JSON")
     }
@@ -658,7 +658,7 @@ impl<K: std::cmp::Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
-    #[allow(clippy::redundant_static_lifetimes)]
+
     const HHVM_1: &'static str = r#"{
   "hhvm.aliased_namespaces": {
     "global_value": {
@@ -763,6 +763,9 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack_arr_compat_notices": {
+    "global_value": false
+  },
+  "hhvm.hack_arr_dv_arr_mark": {
     "global_value": false
   },
   "hhvm.hack_arr_dv_arrs": {
@@ -1174,7 +1177,7 @@ bitflags! {
         const RUST_EMITTER = 1 << 51;
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
-        // No longer using bit 54.
+        const HACK_ARR_DV_ARR_MARK = 1 << 54;
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;

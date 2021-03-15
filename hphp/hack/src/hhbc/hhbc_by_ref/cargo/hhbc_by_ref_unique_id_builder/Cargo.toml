@@ -6,6 +6,3 @@ edition = "2018"
 
 [lib]
 path = "../../unique_id_builder.rs"
-
-[dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }

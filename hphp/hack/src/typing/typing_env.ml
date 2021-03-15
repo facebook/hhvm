@@ -675,7 +675,7 @@ let is_typedef env x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
-let get_class (env : env) (name : string) : Cls.t option =
+let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   let res =
     print_size
       "class"

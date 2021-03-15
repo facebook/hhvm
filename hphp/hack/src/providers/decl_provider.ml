@@ -29,21 +29,21 @@ let tracked_names : FileInfo.names option ref = ref None
 
 let start_tracking () : unit = tracked_names := Some FileInfo.empty_names
 
-let record_fun (s : string) : unit =
+let record_fun (s : fun_key) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_funs = SSet.add s names.n_funs }
 
-let record_class (s : string) : unit =
+let record_class (s : type_key) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_classes = SSet.add s names.n_classes }
 
-let record_record_def (s : string) : unit =
+let record_record_def (s : type_key) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
@@ -51,14 +51,14 @@ let record_record_def (s : string) : unit =
       Some
         FileInfo.{ names with n_record_defs = SSet.add s names.n_record_defs }
 
-let record_typedef (s : string) : unit =
+let record_typedef (s : type_key) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
     tracked_names :=
       Some FileInfo.{ names with n_types = SSet.add s names.n_types }
 
-let record_const (s : string) : unit =
+let record_const (s : gconst_key) : unit =
   match !tracked_names with
   | None -> ()
   | Some names ->
@@ -118,7 +118,7 @@ module Cache =
     end)
 
 let declare_folded_class_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
     Decl_defs.decl_class_type * Decl_store.class_members option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
@@ -205,7 +205,7 @@ let get_class
       Some (counter, v))
 
 let declare_fun_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
     Typing_defs.fun_elt =
   match Ast_provider.find_fun_in_file ctx file name with
   | Some f ->
@@ -270,7 +270,7 @@ let get_fun
     Decl_service_client.rpc_get_fun decl fun_name
 
 let declare_typedef_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
     Typing_defs.typedef_type =
   match Ast_provider.find_typedef_in_file ctx file name with
   | Some t ->
@@ -282,7 +282,7 @@ let declare_typedef_in_file
 let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
-    (typedef_name : string) : typedef_decl option =
+    (typedef_name : type_key) : typedef_decl option =
   Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
@@ -336,7 +336,7 @@ let get_typedef
     Decl_service_client.rpc_get_typedef decl typedef_name
 
 let declare_record_def_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
     Typing_defs.record_def_type =
   match Ast_provider.find_record_def_in_file ctx file name with
   | Some rd ->
@@ -348,7 +348,7 @@ let declare_record_def_in_file
 let get_record_def
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
-    (record_name : string) : record_def_decl option =
+    (record_name : type_key) : record_def_decl option =
   Decl_counters.count_decl Decl_counters.Record_def ?tracing_info record_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
@@ -403,7 +403,7 @@ let get_record_def
     Decl_service_client.rpc_get_record_def decl record_name
 
 let declare_const_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
     gconst_decl =
   match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst ->
@@ -415,7 +415,7 @@ let declare_const_in_file
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
-    (gconst_name : string) : gconst_decl option =
+    (gconst_name : gconst_key) : gconst_decl option =
   Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with

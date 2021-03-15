@@ -261,13 +261,14 @@ val tast_env_as_typing_env : env -> Typing_env_types.env
 (** Verify that an XHP body expression is legal. *)
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 
-val get_enum : env -> string -> Decl_provider.class_decl option
+val get_enum : env -> Decl_provider.type_key -> Decl_provider.class_decl option
 
-val is_typedef : env -> string -> bool
+val is_typedef : env -> Decl_provider.type_key -> bool
 
-val get_typedef : env -> string -> Decl_provider.typedef_decl option
+val get_typedef :
+  env -> Decl_provider.type_key -> Decl_provider.typedef_decl option
 
-val is_enum : env -> string -> bool
+val is_enum : env -> Decl_provider.type_key -> bool
 
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 
@@ -275,4 +276,4 @@ val set_allow_wildcards : env -> env
 
 val get_allow_wildcards : env -> bool
 
-val is_enum_class : env -> string -> bool
+val is_enum_class : env -> Decl_provider.type_key -> bool

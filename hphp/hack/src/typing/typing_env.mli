@@ -86,7 +86,7 @@ val get_enum_constraint : env -> type_key -> decl_ty option
 
 (** Register the constructor of the class with the given name as a dependency
     of the class being checked. *)
-val make_depend_on_constructor : env -> string -> unit
+val make_depend_on_constructor : env -> type_key -> unit
 
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option

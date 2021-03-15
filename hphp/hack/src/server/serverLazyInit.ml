@@ -45,8 +45,10 @@ let deptable_with_filename ~(is_64bit : bool) (fn : string) : deptable =
     SQLiteDeptable fn
 
 let lock_and_load_deptable
-    (deptable : deptable) ~(ignore_hh_version : bool) ~(fail_if_missing : bool)
-    : unit =
+    ~(base_file_name : string)
+    ~(deptable : deptable)
+    ~(ignore_hh_version : bool)
+    ~(fail_if_missing : bool) : unit =
   match deptable with
   | SQLiteDeptable fn ->
     if String.length fn = 0 && not fail_if_missing then
@@ -72,6 +74,20 @@ let lock_and_load_deptable
         Caml.Printexc.raise_with_backtrace e stack
     end
   | CustomDeptable fn ->
+    let () =
+      if not ignore_hh_version then
+        let build_revision =
+          SaveStateService.saved_state_build_revision_read ~base_file_name
+        in
+        if not (String.equal build_revision Build_id.build_revision) then
+          raise
+          @@ Failure
+               (Printf.sprintf
+                  ( "Saved-state build mismatch, this saved-state was built "
+                  ^^ " for version '%s', but we expected '%s'" )
+                  build_revision
+                  Build_id.build_revision)
+    in
     (* The new dependency graph is threaded through function calls
      * instead of stored in a global *)
     Hh_logger.log "Custom dependency graph will be loaded lazily from %s" fn
@@ -149,7 +165,11 @@ let merge_saved_state_futures
           ~is_64bit:result.State_loader.deptable_is_64bit
           result.State_loader.deptable_fn
       in
-      lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
+      lock_and_load_deptable
+        ~base_file_name:result.State_loader.naming_table_path
+        ~deptable
+        ~ignore_hh_version
+        ~fail_if_missing;
       let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
       let shallow_decls = genv.local_config.SLC.shallow_class_decl in
       let naming_table_fallback_path =
@@ -381,7 +401,11 @@ let use_precomputed_state_exn
   in
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load deptable"
   @@ fun () ->
-  lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
+  lock_and_load_deptable
+    ~base_file_name:naming_table_path
+    ~deptable
+    ~ignore_hh_version
+    ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in

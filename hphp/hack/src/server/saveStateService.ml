@@ -247,6 +247,22 @@ let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
     let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
     { dep_table_edges_added }
 
+let saved_state_info_file_name ~base_file_name = base_file_name ^ "_info.json"
+
+let saved_state_build_revision_write ~(base_file_name : string) : unit =
+  let info_file = saved_state_info_file_name ~base_file_name in
+  let open Hh_json in
+  Out_channel.with_file info_file ~f:(fun fh ->
+      json_to_output fh
+      @@ JSON_Object [("build_revision", string_ Build_id.build_revision)])
+
+let saved_state_build_revision_read ~(base_file_name : string) : string =
+  let info_file = saved_state_info_file_name ~base_file_name in
+  let contents = Sys_utils.cat info_file in
+  let json = Some (Hh_json.json_of_string contents) in
+  let build_revision = Hh_json_helpers.Jget.string_exn json "build_revision" in
+  build_revision
+
 let dump_dep_graph_64bit
     ~mode ~db_name ~incremental_info_file ~replace_state_after_saving =
   let t = Unix.gettimeofday () in
@@ -319,12 +335,14 @@ let save_state
     dump_dep_graph_32bit ~db_name ~replace_state_after_saving
   | Typing_deps_mode.CustomMode _ ->
     let incremental_info_file = output_filename ^ "_incremental_info.json" in
+    saved_state_build_revision_write ~base_file_name:output_filename;
     dump_dep_graph_64bit
       ~mode:env.ServerEnv.deps_mode
       ~db_name
       ~incremental_info_file
       ~replace_state_after_saving
   | Typing_deps_mode.SaveCustomMode { graph = _; new_edges_dir } ->
+    saved_state_build_revision_write ~base_file_name:output_filename;
     Hh_logger.warn
       "saveStateService: not saving 64-bit dep graph edges to disk, because they are already in %s"
       new_edges_dir;

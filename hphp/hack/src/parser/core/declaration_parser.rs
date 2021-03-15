@@ -1002,9 +1002,6 @@ where
         //
         // TODO: What are the semantics of encapsulated expressions in double-quoted
         // string literals here?
-        // ERROR RECOVERY: We parse any expressions here;
-        // TODO: give an error in a later pass if the expressions are not literals.
-        // (This work is tracked by task T21175355)
         //
         // An empty list is illegal, but we allow it here and give an error in
         // a later pass.

@@ -1993,23 +1993,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ocaml"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b497481786e5fa6606783d684f5eb0671721fac38efae1930e8a58f4335b9d2a"
-
-[[package]]
 name = "ocaml_helper"
 version = "0.0.0"
 dependencies = [
  "pretty_assertions",
-]
-
-[[package]]
-name = "ocamlpool_rust"
-version = "0.0.0"
-dependencies = [
- "ocaml",
 ]
 
 [[package]]
@@ -2055,7 +2042,6 @@ name = "ocamlrep_ocamlpool"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "ocamlpool_rust",
  "ocamlrep",
 ]
 

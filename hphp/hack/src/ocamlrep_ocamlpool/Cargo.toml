@@ -9,5 +9,4 @@ path = "lib.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-ocamlpool_rust = { path = "../utils/ocamlpool_rust" }
 ocamlrep = { path = "../ocamlrep" }

@@ -6,7 +6,6 @@
 use std::ffi::CString;
 use std::panic::UnwindSafe;
 
-use ocamlpool_rust::utils::{caml_set_field, reserve_block};
 use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep};
 
 pub use bumpalo::Bump;
@@ -17,6 +16,7 @@ extern "C" {
     fn ocamlpool_leave();
     fn ocamlpool_reserve_block(tag: u8, size: usize) -> usize;
     fn caml_failwith(msg: *const i8);
+    fn caml_initialize(addr: *mut usize, value: usize);
     static ocamlpool_generation: usize;
     static ocamlpool_color: usize;
 }
@@ -66,7 +66,7 @@ impl Allocator for Pool {
 
     #[inline(always)]
     fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
-        let ptr = unsafe { reserve_block(tag, size) as *mut OpaqueValue<'_> };
+        let ptr = unsafe { ocamlpool_reserve_block(tag, size) as *mut OpaqueValue<'_> };
         BlockBuilder::new(ptr as usize, size)
     }
 
@@ -74,7 +74,10 @@ impl Allocator for Pool {
     fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         assert!(index < block.size());
         unsafe {
-            caml_set_field(self.block_ptr_mut(block) as usize, index, value.to_bits())
+            caml_initialize(
+                (self.block_ptr_mut(block) as *mut usize).add(index),
+                value.to_bits(),
+            )
         };
     }
 

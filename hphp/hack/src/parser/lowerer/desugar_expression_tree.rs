@@ -58,17 +58,11 @@ use oxidized::{
 /// )()
 /// ```
 pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
-    let visitor_name = {
-        if let Hint_::Happly(id, _) = &*hint.1 {
-            &id.1
-        } else {
-            ""
-        }
-    };
+    let visitor_name = hint_name(hint);
 
-    virtualize_expr_types(visitor_name.to_string(), &mut e)?;
-    virtualize_void_returns(visitor_name.to_string(), &mut e);
-    virtualize_expr_calls(visitor_name.to_string(), &mut e)?;
+    virtualize_expr_types(&visitor_name, &mut e)?;
+    virtualize_void_returns(&visitor_name, &mut e);
+    virtualize_expr_calls(&visitor_name, &mut e)?;
 
     let extracted_splices = extract_and_replace_splices(&mut e)?;
     let splice_count = extracted_splices.len();
@@ -210,13 +204,13 @@ fn wrap_fun_<TF>(
 ///
 /// If we encounter an unsupported operator, return its position and
 /// an error message.
-fn virtualize_expr_types(visitor_name: String, mut e: &mut Expr) -> Result<(), (Pos, String)> {
+fn virtualize_expr_types(visitor_name: &str, mut e: &mut Expr) -> Result<(), (Pos, String)> {
     let mut visitor = TypeVirtualizer { visitor_name };
     visitor.visit_expr(&mut (), &mut e)
 }
 
-struct TypeVirtualizer {
-    visitor_name: String,
+struct TypeVirtualizer<'a> {
+    visitor_name: &'a str,
 }
 
 fn dummy_expr() -> Expr {
@@ -230,7 +224,7 @@ fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
     meth_call(receiver, "__bool", vec![], &pos)
 }
 
-impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
+impl<'ast> VisitorMut<'ast> for TypeVirtualizer<'_> {
     type P = AstParams<(), (Pos, String)>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
@@ -286,7 +280,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             // Convert `1` to `__splice__(Visitor::intLiteral(1))`.
             Int(_) => {
                 *e = mk_splice(static_meth_call(
-                    &self.visitor_name,
+                    self.visitor_name,
                     "intLiteral",
                     vec![e.clone()],
                     &pos,
@@ -295,7 +289,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             // Convert `1.0` to `__splice__(Visitor::floatLiteral(1.0))`.
             Float(_) => {
                 *e = mk_splice(static_meth_call(
-                    &self.visitor_name,
+                    self.visitor_name,
                     "floatLiteral",
                     vec![e.clone()],
                     &pos,
@@ -304,7 +298,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             // Convert `"foo"` to `__splice__(Visitor::stringLiteral("foo"))`
             String(_) => {
                 *e = mk_splice(static_meth_call(
-                    &self.visitor_name,
+                    self.visitor_name,
                     "stringLiteral",
                     vec![e.clone()],
                     &pos,
@@ -313,7 +307,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             // Convert `true` to `__splice__(Visitor::boolLiteral(true))`
             True | False => {
                 *e = mk_splice(static_meth_call(
-                    &self.visitor_name,
+                    self.visitor_name,
                     "boolLiteral",
                     vec![e.clone()],
                     &pos,
@@ -322,7 +316,7 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             // Convert `null` to `__splice__(Visitor::nullLiteral())`
             Null => {
                 *e = mk_splice(static_meth_call(
-                    &self.visitor_name,
+                    self.visitor_name,
                     "nullLiteral",
                     vec![],
                     &pos,
@@ -479,16 +473,16 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
 }
 
 /// Virtualizes function calls
-fn virtualize_expr_calls(visitor_name: String, mut e: &mut Expr) -> Result<(), (Pos, String)> {
+fn virtualize_expr_calls(visitor_name: &str, mut e: &mut Expr) -> Result<(), (Pos, String)> {
     let mut visitor = CallVirtualizer { visitor_name };
     visitor.visit_expr(&mut (), &mut e)
 }
 
-struct CallVirtualizer {
-    visitor_name: String,
+struct CallVirtualizer<'a> {
+    visitor_name: &'a str,
 }
 
-impl<'ast> VisitorMut<'ast> for CallVirtualizer {
+impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
     type P = AstParams<(), (Pos, String)>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
@@ -530,7 +524,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                             ))),
                         );
                         let callee = mk_splice(static_meth_call(
-                            &self.visitor_name,
+                            self.visitor_name,
                             "symbol",
                             vec![fp],
                             &pos,
@@ -568,7 +562,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                         );
 
                         let callee = mk_splice(static_meth_call(
-                            &self.visitor_name,
+                            self.visitor_name,
                             "symbol",
                             vec![fp],
                             &pos,
@@ -635,16 +629,16 @@ fn only_void_return(lfun_body: &ast::Block) -> bool {
     checker.only_void_return
 }
 
-fn virtualize_void_returns(visitor_name: String, mut e: &mut Expr) {
+fn virtualize_void_returns(visitor_name: &str, mut e: &mut Expr) {
     let mut visitor = ReturnVirtualizer { visitor_name };
     visitor.visit_expr(&mut (), &mut e).unwrap();
 }
 
-struct ReturnVirtualizer {
-    visitor_name: String,
+struct ReturnVirtualizer<'a> {
+    visitor_name: &'a str,
 }
 
-impl<'ast> VisitorMut<'ast> for ReturnVirtualizer {
+impl<'ast> VisitorMut<'ast> for ReturnVirtualizer<'_> {
     type P = AstParams<(), ()>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
@@ -697,7 +691,7 @@ impl<'ast> VisitorMut<'ast> for ReturnVirtualizer {
                     *s = Stmt::new(
                         s.0.clone(),
                         Stmt_::Return(Box::new(Some(mk_splice(static_meth_call(
-                            &self.visitor_name,
+                            self.visitor_name,
                             "voidLiteral",
                             vec![],
                             &pos,
@@ -1186,4 +1180,15 @@ fn immediately_invoked_lambda<TF>(env: &Env<TF>, pos: &Pos, stmts: Vec<Stmt>) ->
         pos.clone(),
         Expr_::Call(Box::new((lambda_expr, vec![], vec![], None))),
     )
+}
+
+fn hint_name(hint: &aast::Hint) -> String {
+    let name = {
+        if let Hint_::Happly(id, _) = &*hint.1 {
+            &id.1
+        } else {
+            ""
+        }
+    };
+    name.into()
 }

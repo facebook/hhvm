@@ -74,7 +74,7 @@ let write_format_and_sign env filename contents =
   write filename contents
 
 let convert_files env out_dir files regen_command =
-  ignore (Sys.command (sprintf "rm %S/*.rs" out_dir));
+  ignore (Sys.command (sprintf "rm -f %S/*.rs" out_dir));
   let header =
     match regen_command with
     | None -> header

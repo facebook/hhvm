@@ -38,6 +38,10 @@ type error =
 (** Turns an rpc_error into a detailed string suitable for debugging, maybe including stack trace *)
 val error_to_verbose_string : error -> string
 
+(** Writes a payload with preamble to a file descriptor.
+    Returns the size of the marshalled payload.
+    [timeout] is the timeout for [Timeout.select] which selects ready file descriptors.
+    Unix write operations interrupted by signals are automatically restarted. *)
 val to_fd_with_preamble :
   ?timeout:Timeout.t ->
   ?flags:Marshal.extern_flags list ->
@@ -45,6 +49,9 @@ val to_fd_with_preamble :
   'a ->
   int
 
+(** Reads a payload with preamble from a file descriptor.
+    [timeout] is the timeout for [Timeout.select] which selects ready file descriptors.
+    Unix read operations interrupted by signals are automatically restarted. *)
 val from_fd_with_preamble : ?timeout:Timeout.t -> Unix.file_descr -> 'a
 
 module type WRITER_READER = sig

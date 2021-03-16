@@ -7,7 +7,7 @@
  *
  *)
 
-(* Helpers for handling timeout, in particular input timeout. *)
+(** Helpers for handling timeout, in particular input timeout. *)
 
 type timings = {
   start_time: float;
@@ -18,25 +18,24 @@ type timings = {
 
 type t
 
-(* The function `with_timeout` executes 'do_' for at most 'timeout'
-   seconds. If the `timeout` is reached, the `on_timeout` is executed
-   if available, otherwise the `Timeout` exception is raised.
+(** The function `with_timeout` executes 'do_' for at most 'timeout'
+    seconds. If the `timeout` is reached, the `on_timeout` is executed
+    if available, otherwise the `Timeout` exception is raised.
 
-   On Unix platform, this function is based on `SIGALRM`. On Windows
-   platform, this is based on the equivalent of `select`. Hence, this
-   module exports variant of basic input functions, adding them a
-   `timeout` parameter. It should correspond to the parameter of the
-   `do_` function.
+    On Unix platform, this function is based on interval timer ITIMER_REAL
+    which sends SIGALRM upon completion, and setting a signal handler for SIGALRM.
+    On Windows platform, this is based on the equivalent of `select`.
+    Hence, this module exports variant of basic input functions, adding
+    them a `timeout` parameter. It should correspond to the parameter of the
+    `do_` function.
 
-   For `do_` function based only on computation (and not I/O), you
-   should call the `check_timeout` function on a regular
-   basis. Otherwise, on Windows, the timeout will never be detected.
-   On Unix, the function `check_timeout` is no-op.
+    For `do_` function based only on computation (and not I/O), you
+    should call the `check_timeout` function on a regular
+    basis. Otherwise, on Windows, the timeout will never be detected.
+    On Unix, the function `check_timeout` is no-op.
 
-   On Unix, the type `in_channel` is in fact an alias for
-   `Stdlib.in_channel`.
-
-*)
+    On Unix, the type `in_channel` is in fact an alias for
+    `Stdlib.in_channel`. *)
 val with_timeout :
   timeout:int -> on_timeout:(timings -> 'a) -> do_:(t -> 'a) -> 'a
 
@@ -54,6 +53,11 @@ val in_channel_of_descr : Unix.file_descr -> in_channel
 
 val descr_of_in_channel : in_channel -> Unix.file_descr
 
+(** Selects ready file descriptor. Based on Unix.select in Unix.
+    [timeout] is only there to achieve a similar effect as Unix interval
+    timers on Windows, but is ignored on Unix. On Windows,
+    [select ~timeout read write exn select_timeout] runs with a timeout
+    that is the minimum of [timeout and select_timeout].*)
 val select :
   ?timeout:t ->
   Unix.file_descr list ->

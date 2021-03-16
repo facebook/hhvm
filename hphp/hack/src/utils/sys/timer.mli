@@ -22,8 +22,10 @@
 
 type t
 
-(* Will invoke callback () after interval seconds *)
+(** Will invoke [callback ()] after [interval] seconds.
+    Based on Unix interval timer ITIMER_REAL which sends SIGALRM upon completion,
+    and setting a signal handler for SIGALRM which invokes [callback]. *)
 val set_timer : interval:float -> callback:(unit -> unit) -> t
 
-(* Will prevent a future timer from firing *)
+(** Will prevent a future timer from firing *)
 val cancel_timer : t -> unit

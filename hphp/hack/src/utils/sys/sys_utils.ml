@@ -592,6 +592,7 @@ let rec select_non_intr read write exn timeout =
     (* Negative timeouts mean no timeout *)
     let timeout =
       if Float.(timeout < 0.0) then
+        (* A negative timeout means no timeout, i.e. unbounded wait. *)
         timeout
       else
         Float.(max 0.0 (timeout -. (Unix.gettimeofday () -. start_time)))

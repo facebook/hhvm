@@ -12,12 +12,12 @@
 #  if defined(__cplusplus)
 extern "C" {
 #  endif /*defined(__cplusplus)*/
-char const* parse_positioned_full_trivia_cpp_ffi(
+char const* hackc_parse_positioned_full_trivia_cpp_ffi(
     char const* filename
   , char const* source_text
-  , parse_positioned_full_trivia_environment const* env);
+  , hackc_parse_positioned_full_trivia_environment const* env);
 
-void parse_positioned_full_trivia_free_string_cpp_ffi(char const*);
+void hackc_parse_positioned_full_trivia_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
 
@@ -25,18 +25,18 @@ void parse_positioned_full_trivia_free_string_cpp_ffi(char const*);
 
 namespace HPHP {
 
-using parse_positioned_full_trivia_ptr =
+using hackc_parse_positioned_full_trivia_ptr =
   std::unique_ptr<char const, void(*)(char const*)>;
 
-inline parse_positioned_full_trivia_ptr
-  parse_positioned_full_trivia(
+inline hackc_parse_positioned_full_trivia_ptr
+  hackc_parse_positioned_full_trivia(
       char const* filename
     , char const* source_text
-    , parse_positioned_full_trivia_environment const* env
+    , hackc_parse_positioned_full_trivia_environment const* env
   ) {
-  return parse_positioned_full_trivia_ptr {
-      parse_positioned_full_trivia_cpp_ffi(filename, source_text, env)
-    , parse_positioned_full_trivia_free_string_cpp_ffi
+  return hackc_parse_positioned_full_trivia_ptr {
+      hackc_parse_positioned_full_trivia_cpp_ffi(filename, source_text, env)
+    , hackc_parse_positioned_full_trivia_free_string_cpp_ffi
   };
 }
 

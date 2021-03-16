@@ -1271,8 +1271,8 @@ ParseFactsResult extract_facts(
   } else {
     auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
       try {
-        extract_as_json_ptr facts{
-          extract_as_json(options.getFactsFlags(), filename.data(), source_text, false)
+        hackc_extract_as_json_ptr facts{
+          hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, false)
         };
         if (facts) {
           std::string facts_str{facts.get()};
@@ -1309,8 +1309,8 @@ FfpResult ffp_parse_file(
     return s_manager.get_hackc_pool().parse(file, contents, size, options);
   } else {    
     auto const env = options.getParserEnvironment();
-    parse_positioned_full_trivia_ptr parse_tree{
-      parse_positioned_full_trivia(file.c_str(), contents, &env)
+    hackc_parse_positioned_full_trivia_ptr parse_tree{
+      hackc_parse_positioned_full_trivia(file.c_str(), contents, &env)
     };
     if (parse_tree) {
       std::string ffp_str{parse_tree.get()};

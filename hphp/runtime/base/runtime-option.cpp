@@ -263,9 +263,9 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
 }
 
-parse_positioned_full_trivia_environment
+hackc_parse_positioned_full_trivia_environment
 RepoOptions::getParserEnvironment() const {
-  return parse_positioned_full_trivia_environment {
+  return hackc_parse_positioned_full_trivia_environment {
       true // codegen
     , true  // hhvm_compat_mode
     , true  // php5_compat_mode

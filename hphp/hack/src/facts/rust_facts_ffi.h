@@ -14,32 +14,32 @@
 extern "C" {
 #  endif /*defined(__cplusplus)*/
 
-char const* extract_as_json_cpp_ffi(
+char const* hackc_extract_as_json_cpp_ffi(
     int32_t flags
   , char const* filename
   , char const* source_text
   , bool mangle_xhp );
 
-void extract_as_json_free_string_cpp_ffi(char const*);
+void hackc_extract_as_json_free_string_cpp_ffi(char const*);
 #  if defined(__cplusplus)
 }
 
 #  include <memory>
 
 namespace HPHP {
-using extract_as_json_ptr =
+using hackc_extract_as_json_ptr =
   std::unique_ptr<char const  , void(*)(char const*)>;
 
-inline extract_as_json_ptr
-  extract_as_json(
+inline hackc_extract_as_json_ptr
+  hackc_extract_as_json(
       int32_t flags
     , char const* filename
     , char const* source_text
     , bool mangle_xhp
   ) {
-  return extract_as_json_ptr {
-      extract_as_json_cpp_ffi(flags, filename, source_text, mangle_xhp)
-    , extract_as_json_free_string_cpp_ffi
+  return hackc_extract_as_json_ptr {
+      hackc_extract_as_json_cpp_ffi(flags, filename, source_text, mangle_xhp)
+    , hackc_extract_as_json_free_string_cpp_ffi
   };
 }
 

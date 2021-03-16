@@ -15,7 +15,7 @@ use facts::facts_parser::*;
 
 #[cfg(unix)]
 #[no_mangle]
-unsafe extern "C" fn extract_as_json_cpp_ffi(
+unsafe extern "C" fn hackc_extract_as_json_cpp_ffi(
     flags: i32,
     filename: *const c_char,
     text_ptr: *const c_char,
@@ -62,7 +62,7 @@ unsafe extern "C" fn extract_as_json_cpp_ffi(
 
 // Return a result of `extract_as_json_cpp_ffi` to Rust.
 #[no_mangle]
-unsafe extern "C" fn extract_as_json_free_string_cpp_ffi(s: *mut c_char) {
+unsafe extern "C" fn hackc_extract_as_json_free_string_cpp_ffi(s: *mut c_char) {
     // Safety:
     //   - This should only ever be called on a pointer obtained by
     //     `CString::into_raw`.

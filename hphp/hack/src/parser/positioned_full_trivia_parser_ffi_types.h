@@ -5,7 +5,7 @@
  LICENSE file in the "hack" directory of this source tree.
 */
 
-struct parse_positioned_full_trivia_environment {
+struct hackc_parse_positioned_full_trivia_environment {
   bool codegen;
   bool hhvm_compat_mode;
   bool php5_compat_mode;

@@ -55,7 +55,7 @@ impl CParserEnv {
 
 /// Return result of `parse_positioned_full_trivia_cpp_ffi` to Rust.
 #[no_mangle]
-unsafe extern "C" fn parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut libc::c_char) {
+unsafe extern "C" fn hackc_parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut libc::c_char) {
     // Safety:
     //   - This should only ever be called on a pointer obtained by
     //     `CString::into_raw`.
@@ -67,7 +67,7 @@ unsafe extern "C" fn parse_positioned_full_trivia_free_string_cpp_ffi(s: *mut li
 /// Calculate a parse tree from source text and render it as json.
 #[cfg(unix)]
 #[no_mangle]
-unsafe extern "C" fn parse_positioned_full_trivia_cpp_ffi(
+unsafe extern "C" fn hackc_parse_positioned_full_trivia_cpp_ffi(
     filename: *const libc::c_char,
     source_text: *const libc::c_char,
     env: usize,

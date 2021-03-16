@@ -208,7 +208,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 // value.
                 let env = CNativeEnv::to_compile_env(env as *const CNativeEnv).unwrap();
                 eprintln!(
-                    "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
+                    "[hrust] warning: hackc_compile_from_text_ffi exceeded stack of {} KiB on: {}",
                     (stack_size_tried - stack_slack(stack_size_tried)) / KI,
                     env.filepath.path_str(),
                 );

@@ -126,7 +126,7 @@ struct RepoOptions {
   std::uint32_t getParserFlags() const;
   std::uint32_t getCompilerFlags() const;
   std::uint32_t getFactsFlags() const;
-  parse_positioned_full_trivia_environment getParserEnvironment() const;
+  hackc_parse_positioned_full_trivia_environment getParserEnvironment() const;
   std::string getAliasedNamespacesConfig() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }

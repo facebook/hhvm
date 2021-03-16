@@ -73,6 +73,7 @@ pub struct HhasCoeffects {
     cc_this: Vec<String>,
     is_any_rx: bool,
     is_pure: bool,
+    closure_inherit_from_parent: bool,
 }
 
 impl HhasCoeffects {
@@ -109,6 +110,9 @@ impl HhasCoeffects {
         if let Some(str) = HhasCoeffects::vec_to_string(coeffects.get_cc_this(), |c| c.to_string())
         {
             results.push(format!(".coeffects_cc_this {};", str));
+        }
+        if coeffects.is_closure_inherit_from_parent() {
+            results.push(".coeffects_closure_inherit_from_parent;".to_string());
         }
         results
     }
@@ -227,6 +231,19 @@ impl HhasCoeffects {
             cc_this,
             is_any_rx,
             is_pure,
+            closure_inherit_from_parent: false,
+        }
+    }
+
+    pub fn inherit_to_child_closure(&self) -> Self {
+        if self.has_coeffect_rules() {
+            Self {
+                static_coeffects: self.static_coeffects.clone(),
+                closure_inherit_from_parent: true,
+                ..HhasCoeffects::default()
+            }
+        } else {
+            self.clone()
         }
     }
 
@@ -256,6 +273,17 @@ impl HhasCoeffects {
 
     pub fn is_any_rx_or_pure(&self) -> bool {
         self.is_any_rx() || self.is_pure
+    }
+
+    pub fn has_coeffect_rules(&self) -> bool {
+        !self.fun_param.is_empty()
+            || !self.cc_param.is_empty()
+            || !self.cc_this.is_empty()
+            || self.closure_inherit_from_parent
+    }
+
+    pub fn is_closure_inherit_from_parent(&self) -> bool {
+        self.closure_inherit_from_parent
     }
 }
 

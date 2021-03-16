@@ -147,11 +147,11 @@ pub fn from_ast<'a>(
             .unwrap_or(&class.namespace),
     );
     let mut coeffects = HhasCoeffects::from_ast(&method.ctxs, &method.params);
-    if coeffects.get_static_coeffects().is_empty() && is_closure_body {
-        coeffects = emitter
+    if method.ctxs == None && is_closure_body {
+        let parent_coeffects = emitter
             .emit_global_state()
-            .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1)
-            .clone()
+            .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
+        coeffects = parent_coeffects.inherit_to_child_closure()
     }
     let (ast_body_block, is_rx_body, rx_disabled) = if !coeffects.is_any_rx() {
         (&method.body.ast, false, false)

@@ -1957,6 +1957,15 @@ void parse_coeffects_cc_this(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-coeffects_closure_inherit_from_parent ';'
+ */
+void parse_coeffects_closure_inherit_from_parent(AsmState& as) {
+  // TODO: Add this to coeffect rules once HHVM can handle closure ambient
+  // coeffects
+  as.in.expectWs(';');
+}
+
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
@@ -2242,6 +2251,10 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".coeffects_fun_param") { parse_coeffects_fun_param(as); continue; }
       if (word == ".coeffects_cc_param") { parse_coeffects_cc_param(as); continue; }
       if (word == ".coeffects_cc_this") { parse_coeffects_cc_this(as); continue; }
+      if (word == ".coeffects_closure_inherit_from_parent") {
+        parse_coeffects_closure_inherit_from_parent(as);
+        continue;
+      }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {

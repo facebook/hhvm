@@ -983,6 +983,11 @@ bool canProfilePropsInline(const Class* cls) {
   return true;
 }
 
+LoggingProfileData makeLoggingProfileData(bespoke::LoggingProfile* profile) {
+  auto const isStatic = profile->data && profile->data->staticLoggingArray;
+  return LoggingProfileData(profile, isStatic);
+}
+
 void emitProfileArrLikeProps(IRGS& env) {
   auto const obj = topC(env);
   auto const cls = obj->type().clsSpec().exactCls();
@@ -1005,7 +1010,7 @@ void emitProfileArrLikeProps(IRGS& env) {
     auto const arr = gen(
       env,
       NewLoggingArray,
-      LoggingProfileData(profile),
+      makeLoggingProfileData(profile),
       cns(env, tv.val().parr)
     );
     auto const data = IndexData(index);
@@ -1094,7 +1099,7 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
 
     auto const profile = bespoke::getLoggingProfile(sk);
     if (!profile) return;
-    auto const data = LoggingProfileData(profile);
+    auto const data = makeLoggingProfileData(profile);
     push(env, gen(env, NewLoggingArray, data, popC(env)));
   }
 }

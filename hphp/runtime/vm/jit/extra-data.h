@@ -2399,8 +2399,9 @@ struct MethCallerData : IRExtraData {
 };
 
 struct LoggingProfileData : IRExtraData {
-  explicit LoggingProfileData(bespoke::LoggingProfile* profile)
+  LoggingProfileData(bespoke::LoggingProfile* profile, bool isStatic)
     : profile(profile)
+    , isStatic(isStatic)
   {}
 
   std::string show() const {
@@ -2417,6 +2418,7 @@ struct LoggingProfileData : IRExtraData {
   }
 
   bespoke::LoggingProfile* profile;
+  bool isStatic; // Whether the output is guaranteed to be static
 };
 
 struct SinkProfileData : IRExtraData {

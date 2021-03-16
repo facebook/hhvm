@@ -519,10 +519,12 @@ Type ptrIterValReturn(const IRInstruction* inst) {
 Type loggingArrLikeReturn(const IRInstruction* inst) {
   assertx(inst->is(NewLoggingArray));
   auto const arr = inst->src(0)->type();
+  auto const isStatic = inst->extra<NewLoggingArray>()->isStatic;
 
   assertx(arr <= TArrLike);
   assertx(arr.isKnownDataType());
-  return arr.unspecialize();
+  assertx(IMPLIES(isStatic, arr.hasConstVal()));
+  return isStatic ? arr.unspecialize() : arr.unspecialize().modified();
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {

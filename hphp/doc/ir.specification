@@ -1234,7 +1234,7 @@ To string conversions:
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
   Uninit, unless S3 is true. An exception is thrown if S4 is true,
-  and the property is constant. An exception is also thrown if S5 is true, and the 
+  and the property is constant. An exception is also thrown if S5 is true, and the
   property is ReadOnly, or if S6 is true, and the property is not ReadOnly.
 
 | LdClsPropAddrOrRaise, D(PtrToSPropCell),
@@ -1247,7 +1247,7 @@ To string conversions:
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
   Uninit, unless S3 is true. An exception is thrown if S4 is true,
-  and the property is constant. An exception is also thrown if S5 is true, and the 
+  and the property is constant. An exception is also thrown if S5 is true, and the
   property is ReadOnly, or if S6 is true, and the property is not ReadOnly.
 
 | LookupSPropSlot, D(Int), S(Cls) S(Str), NF
@@ -1436,7 +1436,8 @@ To string conversions:
 
   Maybe create a LoggingArray wrapping the vanilla array-like S0. The decision
   may be based on flags or sampling. If we don't create an array, we return S0
-  unchanged. The result will match S0 in type and static-ness.
+  unchanged. The result will match S0 in type. For static array constructors
+  (including property initial values), the result will be static.
 
 | ProfileArrLikeProps, ND, S(Obj), NF
 

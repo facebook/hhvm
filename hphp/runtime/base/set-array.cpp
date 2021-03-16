@@ -294,6 +294,7 @@ void SetArray::Release(ArrayData* in) {
 
 void SetArray::ReleaseUncounted(ArrayData* in) {
   assertx(in->isUncounted());
+  if (!in->uncountedDecRef()) return;
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {

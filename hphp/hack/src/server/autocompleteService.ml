@@ -260,6 +260,8 @@ let autocomplete_xhp_attributes env class_ cid id =
 
 let autocomplete_xhp_enum_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
+    ac_env := Some env;
+    argument_global_type := Some Acprop;
     autocomplete_identifier := Some id_id;
 
     let get_class_name ty : string option =

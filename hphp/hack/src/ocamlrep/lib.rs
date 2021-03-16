@@ -315,7 +315,7 @@ pub use bumpalo::Bump;
 
 pub use arena::Arena;
 pub use block::{Block, BlockBuilder};
-pub use block::{CUSTOM_TAG, DOUBLE_TAG, NO_SCAN_TAG, STRING_TAG};
+pub use block::{CLOSURE_TAG, CUSTOM_TAG, DOUBLE_TAG, NO_SCAN_TAG, STRING_TAG};
 pub use cache::MemoizationCache;
 pub use error::{FromError, SlabIntegrityError};
 pub use impls::{

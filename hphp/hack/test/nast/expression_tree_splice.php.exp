@@ -10,10 +10,6 @@
              ([4:3-27],
               (ExpressionTree
                  { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
-                   et_src_expr =
-                   ([4:8-26],
-                    (Binop (Plus, ([4:8-14], (Binop (Plus, ([4:8-9], (Int "4")), ([4:12-14], (Int "10"))))),
-                       ([4:17-26], (ET_Splice ([4:19-25], (Binop (Plus, ([4:19-21], (Lvar ([4:19-21], $x))), ([4:24-25], (Int "2"))))))))));
                    et_desugared_expr =
                    ([4:8-26],
                     (Call (

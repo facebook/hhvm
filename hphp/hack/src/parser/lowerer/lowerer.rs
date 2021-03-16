@@ -2007,7 +2007,7 @@ where
 
                 let hint = Self::p_hint(&c.prefix, env)?;
 
-                let desugared_expr = match desugar(&hint, src_expr.clone(), env) {
+                let desugared_expr = match desugar(&hint, src_expr, env) {
                     Ok(desugared_expr) => desugared_expr,
                     Err((pos, msg)) => {
                         Self::raise_parsing_error_pos(&pos, env, &msg);
@@ -2019,7 +2019,6 @@ where
 
                 Ok(E_::mk_expression_tree(ast::ExpressionTree {
                     hint,
-                    src_expr,
                     desugared_expr,
                 }))
             }

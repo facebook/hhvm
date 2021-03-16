@@ -10,24 +10,6 @@
              ([4:3-27],
               (ExpressionTree
                  { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
-                   et_src_expr =
-                   ([4:8-26],
-                    (Lfun (
-                       { f_span = [4:8-26]; f_annotation = (); f_mode = Mstrict; 
-                         f_readonly_ret = None; f_ret = ((), None); f_name = ([4:8-26], ";anonymous"); 
-                         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-                         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                         f_body = { fb_ast = [([4:17-24], (Expr ([4:17-23], (Binop ((Eq None), ([4:17-19], (Lvar ([4:17-19], $x))), ([4:22-23], (Int "1")))))))]; fb_annotation = Named };
-                         f_fun_kind = FSync; f_user_attributes = []; 
-                         f_file_attributes = []; f_external = false;
-                         f_namespace =
-                         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                           ns_const_uses = <opaque>; ns_name = None; 
-                           ns_auto_ns_map = []; ns_is_codegen = false; 
-                           ns_disable_xhp_element_mangling = false };
-                         f_doc_comment = None; f_static = false },
-                       [])));
                    et_desugared_expr =
                    ([4:8-26],
                     (Call (

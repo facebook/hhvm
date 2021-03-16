@@ -10,32 +10,6 @@
              ([4:3-61],
               (ExpressionTree
                  { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
-                   et_src_expr =
-                   ([4:8-60],
-                    (Lfun (
-                       { f_span = [4:8-60]; f_annotation = (); f_mode = Mstrict; 
-                         f_readonly_ret = None; f_ret = ((), None); f_name = ([4:8-60], ";anonymous"); 
-                         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-                         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                         f_body =
-                         { fb_ast =
-                           [([4:17-58],
-                             (For ([([4:21-27], (Binop ((Eq None), ([4:21-23], (Lvar ([4:21-23], $i))), ([4:26-27], (Int "0")))))], (Some (
-                                [4:29-33], True)),
-                                [([4:35-46], (Binop ((Eq None), ([4:35-37], (Lvar ([4:35-37], $i))), ([4:40-46], (Binop (Plus, ([4:40-42], (Lvar ([4:40-42], $i))), ([4:45-46], (Int "1"))))))))],
-                                [([4:50-56], (Expr ([4:50-55], (Call (([4:50-53], (Id ([4:50-53], "\\foo"))), [], [], None)))))])))
-                             ];
-                           fb_annotation = Named };
-                         f_fun_kind = FSync; f_user_attributes = []; 
-                         f_file_attributes = []; f_external = false;
-                         f_namespace =
-                         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
-                           ns_const_uses = <opaque>; ns_name = None; 
-                           ns_auto_ns_map = []; ns_is_codegen = false; 
-                           ns_disable_xhp_element_mangling = false };
-                         f_doc_comment = None; f_static = false },
-                       [])));
                    et_desugared_expr =
                    ([4:8-60],
                     (Call (

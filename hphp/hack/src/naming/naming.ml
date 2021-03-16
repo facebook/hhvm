@@ -2059,7 +2059,6 @@ and expr_ env p (e : Nast.expr_) =
       N.
         {
           et_hint = hint env et.et_hint;
-          et_src_expr = expr env et.et_src_expr;
           et_desugared_expr = expr env et.et_desugared_expr;
         }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)

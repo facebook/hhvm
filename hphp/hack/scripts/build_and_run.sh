@@ -12,7 +12,7 @@ SCRIPT_DIR="$(dirname "$0")"
 FBCODE_ROOT="$(realpath "${SCRIPT_DIR}/../../../")"
 HPHP_ROOT="${FBCODE_ROOT}/hphp"
 HACK_ROOT="${FBCODE_ROOT}/hphp/hack"
-FB_DUNE_BUILD_DIR="${FBCODE_ROOT}/buck-out/dune_build"
+FB_DUNE_BUILD_DIR="${HACK_ROOT}/facebook/redirect/dune_build"
 
 HACK_SUBDIR="$1"
 TARGET="$2"

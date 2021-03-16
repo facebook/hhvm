@@ -1236,6 +1236,27 @@ void FrameStateMgr::setValue(Location l, SSATmp* value) {
 }
 
 template<LTag tag>
+static void forgetValueImpl(LocationState<tag>& state) {
+  state.value = nullptr;
+}
+
+void FrameStateMgr::forgetValue(Location l) {
+  switch (l.tag()) {
+    case LTag::Local:
+      return forgetValueImpl(localState(l));
+    case LTag::Stack:
+      return forgetValueImpl(stackState(l));
+    case LTag::MBase:
+      return forgetValueImpl(cur().mbase);
+  }
+  not_reached();
+}
+
+void FrameStateMgr::forgetValue(IRSPRelOffset o) {
+  forgetValue(stk(o));
+}
+
+template<LTag tag>
 static void setTypeImpl(Location l, LocationState<tag>& state, Type type) {
   FTRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
   state.value = nullptr;

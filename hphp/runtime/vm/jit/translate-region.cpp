@@ -193,8 +193,15 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   auto loc = func->numParams();
   if (func->hasReifiedGenerics()) {
     // First non parameter local will specially set
+    assertx(func->reifiedGenericsLocalId() == loc);
     auto const t = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
     irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
+    loc++;
+  }
+  if (func->hasCoeffectRules()) {
+    // First non parameter local will specially set
+    assertx(func->coeffectsLocalId() == loc);
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, TInt);
     loc++;
   }
   for (; loc < numLocs; ++loc) {

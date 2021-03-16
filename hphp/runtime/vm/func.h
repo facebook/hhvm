@@ -570,6 +570,13 @@ struct Func final {
   Id lookupVarId(const StringData* name) const;
 
   /*
+   * Returns the ID of coeffects and reified generics locals.
+   * Requires hasCoeffectRules() and hasReifiedGenerics() respectively
+   */
+  Id coeffectsLocalId() const;
+  Id reifiedGenericsLocalId() const;
+
+  /*
    * Find the name of the local with the given ID.
    */
   const StringData* localVarName(Id id) const;

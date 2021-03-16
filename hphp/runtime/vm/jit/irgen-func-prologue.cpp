@@ -260,7 +260,14 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   assertx(callee);
   assertx(callFlags);
 
-  if (!CoeffectsConfig::enabled()) return;
+  if (!CoeffectsConfig::enabled()) {
+    if (callee->hasCoeffectRules()) {
+      push(env, cns(env, RuntimeCoeffects::none().value()));
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+    }
+    return;
+  }
   auto const requiredCoeffects = [&] {
     auto result = cns(env, callee->staticCoeffects().toRequired().value());
     if (!callee->hasCoeffectRules()) return result;
@@ -269,6 +276,12 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
         result = gen(env, AndInt, result, coeffect);
       }
     }
+    // TODO: Update with real value
+    push(env, cns(env, RuntimeCoeffects::none().value()));
+    // This is a *gross* hack to reduce register pressure for prologues
+    env.irb->fs().forgetValue(offsetFromIRSP(env, BCSPRelOffset{0}));
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
     return result;
   }();
 
@@ -377,7 +390,11 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
 } // namespace
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
-  // Reified generics were initialized by emitCalleeGenericsChecks().
+  if (argc == callee->numParams()) return;
+
+  // Generics and coeffects are already initialized
+  auto const coeffects = callee->hasCoeffectRules()
+    ? popC(env, DataTypeGeneric) : nullptr;
   auto const generics = callee->hasReifiedGenerics()
     ? popC(env, DataTypeGeneric) : nullptr;
 
@@ -404,8 +421,9 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
   assertx(argc == callee->numParams());
 
-  // Place generics in the correct position.
+  // Place generics and coeffects in the correct position.
   if (generics != nullptr) push(env, generics);
+  if (coeffects != nullptr) push(env, coeffects);
 }
 
 namespace {
@@ -460,9 +478,20 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
    */
   constexpr auto kMaxLocalsInitUnroll = 9;
 
-  // Parameters, generics and closure use variables are already initialized.
+  // Parameters, generics and coeffects are already initialized.
   auto numInited = callee->numParams();
-  if (callee->hasReifiedGenerics()) ++numInited;
+  if (callee->hasReifiedGenerics()) {
+    // Currently does not work with closures
+    assertx(!callee->isClosureBody());
+    assertx(callee->reifiedGenericsLocalId() == numInited);
+    ++numInited;
+  }
+  if (callee->hasCoeffectRules()) {
+    // Currently does not work with closures
+    assertx(!callee->isClosureBody());
+    assertx(callee->coeffectsLocalId() == numInited);
+    ++numInited;
+  }
 
   // Push the closure's use variables (stored in closure object properties).
   if (callee->isClosureBody()) {

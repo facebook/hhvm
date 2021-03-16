@@ -288,7 +288,9 @@ void beginInlining(IRGS& env,
   }();
 
   auto const numTotalInputs =
-    target->numParams() + (target->hasReifiedGenerics() ? 1U : 0U);
+    target->numParams()
+    + (target->hasReifiedGenerics() ? 1U : 0U)
+    + (target->hasCoeffectRules() ? 1U : 0U);
   jit::vector<SSATmp*> inputs{numTotalInputs};
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popC(env);

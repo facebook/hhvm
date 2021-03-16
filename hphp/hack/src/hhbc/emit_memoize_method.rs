@@ -19,7 +19,7 @@ use hhas_pos_rust::Span;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_id_rust::{class, method, Id};
-use hhbc_string_utils_rust::reified;
+use hhbc_string_utils_rust::{coeffects, reified};
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use naming_special_names_rust::{members, user_attributes as ua};
 use ocamlrep::rc::RcOc;
@@ -142,6 +142,7 @@ fn make_memoize_wrapper_method<'a>(
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REFIED, is_reified);
+    arg_flags.set(Flags::HAS_COEFFECT_RULES, coeffects.has_coeffect_rules());
     let mut args = Args {
         info,
         method,
@@ -417,11 +418,13 @@ fn make_wrapper<'a>(
     return_type_info: HhasTypeInfo,
     args: &Args,
 ) -> Result<HhasBody<'a>> {
-    let decl_vars = if args.flags.contains(Flags::IS_REFIED) {
-        vec![reified::GENERICS_LOCAL_NAME.into()]
-    } else {
-        vec![]
-    };
+    let mut decl_vars = vec![];
+    if args.flags.contains(Flags::IS_REFIED) {
+        decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
+    }
+    if args.flags.contains(Flags::HAS_COEFFECT_RULES) {
+        decl_vars.push(coeffects::LOCAL_NAME.into());
+    }
     // TODO(hrust): Just clone env
     let env_copy = emit_body::make_env(
         RcOc::clone(&env.namespace),
@@ -475,6 +478,7 @@ struct Args<'a> {
 
 bitflags! {
     pub struct Flags: u8 {
+        const HAS_COEFFECT_RULES = 1 << 0;
         const IS_STATIC = 1 << 1;
         const IS_REFIED = 1 << 2;
         const WITH_LSB = 1 << 3;

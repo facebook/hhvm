@@ -41,7 +41,7 @@ namespace HPHP {
  * RAII wrapper for popping/pushing generics from/to the VM stack.
  */
 struct GenericsSaver {
-  GenericsSaver(bool hasGenerics) : m_generics(pop(hasGenerics)) {}
+  explicit GenericsSaver(bool hasGenerics) : m_generics(pop(hasGenerics)) {}
   ~GenericsSaver() { push(std::move(m_generics)); }
 
   static Array pop(bool hasGenerics) {
@@ -58,6 +58,29 @@ struct GenericsSaver {
 
 private:
   Array m_generics;
+};
+
+/*
+ * RAII wrapper for popping/pushing coeffects from/to the VM stack.
+ */
+struct CoeffectsSaver {
+  explicit CoeffectsSaver(bool hasCoeffects) : m_coeffects(pop(hasCoeffects)) {}
+  ~CoeffectsSaver() { push(m_coeffects); }
+
+  static folly::Optional<RuntimeCoeffects> pop(bool hasCoeffects) {
+    if (LIKELY(!hasCoeffects)) return folly::none;
+    assertx(tvIsInt(vmStack().topC()));
+    auto const coeffects = vmStack().topC()->m_data.num;
+    vmStack().discard();
+    return RuntimeCoeffects::fromValue(coeffects);
+  }
+  static void push(folly::Optional<RuntimeCoeffects> coeffects) {
+    if (LIKELY(!coeffects)) return;
+    vmStack().pushInt(coeffects->value());
+  }
+
+private:
+  folly::Optional<RuntimeCoeffects> m_coeffects;
 };
 
 inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
@@ -152,13 +175,20 @@ inline bool calleeCoeffectChecks(const Func* callee,
                                  RuntimeCoeffects providedCoeffects,
                                  uint32_t numArgsInclUnpack,
                                  void* prologueCtx) {
-  if (!CoeffectsConfig::enabled()) return true;
+  if (!CoeffectsConfig::enabled()) {
+    if (callee->hasCoeffectRules()) {
+      vmStack().pushInt(RuntimeCoeffects::none().value());
+    }
+    return true;
+  }
   auto const requiredCoeffects = [&] {
     auto required = callee->staticCoeffects().toRequired();
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
       required &= rule.emit(callee, numArgsInclUnpack, prologueCtx);
     }
+    // TODO: Update with real value
+    vmStack().pushInt(RuntimeCoeffects::none().value());
     return required;
   }();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
@@ -238,6 +268,7 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
   // by calleeArgumentArityChecks().
   if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
 
+  CoeffectsSaver cs{callee->hasCoeffectRules()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
   auto const numParams = callee->numNonVariadicParams();
   while (numArgsInclUnpack < numParams) {

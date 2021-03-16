@@ -17,7 +17,7 @@ use hhas_pos_rust::Span;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{FcallArgs, FcallFlags};
 use hhbc_id_rust::{function::Type as FunId, Id};
-use hhbc_string_utils_rust::reified;
+use hhbc_string_utils_rust::{coeffects, reified};
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
@@ -75,6 +75,7 @@ pub(crate) fn emit_wrapper_function<'a>(
         is_reified,
     )?;
     let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params);
+    let has_coeffect_rules = coeffects.has_coeffect_rules();
     env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = make_wrapper_body(
         emitter,
@@ -83,6 +84,7 @@ pub(crate) fn emit_wrapper_function<'a>(
         params,
         body_instrs,
         is_reified,
+        has_coeffect_rules,
     )?;
 
     let mut flags = HhasFunctionFlags::empty();
@@ -287,15 +289,19 @@ fn make_wrapper_body<'a>(
     params: Vec<HhasParam>,
     body_instrs: InstrSeq,
     is_reified: bool,
+    has_coeffect_rules: bool,
 ) -> Result<HhasBody<'a>> {
+    let mut decl_vars = vec![];
+    if is_reified {
+        decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
+    }
+    if has_coeffect_rules {
+        decl_vars.push(coeffects::LOCAL_NAME.into());
+    }
     emit_body::make_body(
         emitter,
         body_instrs,
-        if is_reified {
-            vec![reified::GENERICS_LOCAL_NAME.into()]
-        } else {
-            vec![]
-        },
+        decl_vars,
         true,   /* is_memoize_wrapper */
         false,  /* is_memoize_wrapper_lsb */
         vec![], /* upper_bounds */

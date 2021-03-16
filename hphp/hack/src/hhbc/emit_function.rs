@@ -126,6 +126,11 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
             EmitBodyFlags::SKIP_AWAITABLE,
             f.fun_kind == ast_defs::FunKind::FAsync,
         );
+        body_flags.set(
+            EmitBodyFlags::HAS_COEFFECT_RULES,
+            coeffects.has_coeffect_rules(),
+        );
+
         emit_body::emit_body(
             e,
             RcOc::clone(&f.namespace),

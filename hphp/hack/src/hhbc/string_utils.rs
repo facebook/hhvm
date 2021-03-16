@@ -392,6 +392,10 @@ pub mod reified {
     }
 }
 
+pub mod coeffects {
+    pub static LOCAL_NAME: &'static str = "$0Coeffects";
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;

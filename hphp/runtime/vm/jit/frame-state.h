@@ -377,6 +377,9 @@ struct FrameStateMgr final {
    */
   void refinePredictedType(Location l, Type type);
 
+  void forgetValue(Location l);
+  void forgetValue(IRSPRelOffset);
+
   /*
    * Debug stringification.
    */

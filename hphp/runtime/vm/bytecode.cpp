@@ -340,6 +340,7 @@ void createGlobalNVTable() {
 }
 
 const StaticString s_reified_generics_var("0ReifiedGenerics");
+const StaticString s_coeffects_var("0Coeffects");
 
 Array getDefinedVariables() {
   Array ret = Array::CreateDArray();
@@ -348,8 +349,9 @@ Array getDefinedVariables() {
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const val = iter.curVal();
-    // Reified functions have an internal 0ReifiedGenerics variable
-    if (s_reified_generics_var.equal(sd)) {
+    // Reified functions and functions with coeffects rules
+    // have an internal variables
+    if (s_reified_generics_var.equal(sd) || s_coeffects_var.equal(sd)) {
       continue;
     }
     ret.set(StrNR(sd).asString(), Variant{const_variant_ref{val}});
@@ -904,23 +906,42 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   assertx(!isResumed(ar));
   assertx(
     reinterpret_cast<TypedValue*>(ar) - vmStack().top() ==
-      ar->func()->numParams() + (ar->func()->hasReifiedGenerics() ? 1U : 0U)
+      ar->func()->numParams()
+      + (ar->func()->hasReifiedGenerics() ? 1U : 0U)
+      + (ar->func()->hasCoeffectRules() ? 1U : 0U)
   );
+
+  // +- Order Of Stack-------+
+  // | arguments             |
+  // | reified generics      |
+  // | coeffects             |
+  // | closure use variables |
+  // | all other locals      |
+  // +-----------------------+
 
   const Func* func = ar->func();
   int nlocals = func->numParams();
+
+  if (ar->func()->hasReifiedGenerics()) {
+    // Currently does not work with closures
+    assertx(!func->isClosureBody());
+    assertx(func->reifiedGenericsLocalId() == nlocals);
+    nlocals++;
+  }
+
+  if (ar->func()->hasCoeffectRules()) {
+    // Currently does not work with closures
+    assertx(!func->isClosureBody());
+    assertx(func->coeffectsLocalId() == nlocals);
+    nlocals++;
+  }
+
   if (UNLIKELY(func->isClosureBody())) {
     int nuse = c_Closure::initActRecFromClosure(ar, vmStack().top());
     // initActRecFromClosure doesn't move stack
     vmStack().nalloc(nuse);
     nlocals += nuse;
     func = ar->func();
-  }
-
-  if (ar->func()->hasReifiedGenerics()) {
-    // Currently does not work with closures
-    assertx(!func->isClosureBody());
-    nlocals++;
   }
 
   pushFrameSlots(func, nlocals);

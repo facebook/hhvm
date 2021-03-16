@@ -26,6 +26,7 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_reified_generics_var("0ReifiedGenerics");
+const StaticString s_coeffects_var("0Coeffects");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -39,6 +40,7 @@ bool is_volatile_local(const php::Func* func, LocalId lid) {
   if (!l.name) return false;
 
   return l.name->same(s_reified_generics_var.get()) ||
+         l.name->same(s_coeffects_var.get()) ||
          l.name->same(s_86metadata.get());
 }
 

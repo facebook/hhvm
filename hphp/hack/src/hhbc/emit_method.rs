@@ -202,6 +202,10 @@ pub fn from_ast<'a>(
         flags.set(emit_body::Flags::NATIVE, is_native);
         flags.set(emit_body::Flags::RX_BODY, is_rx_body);
         flags.set(emit_body::Flags::ASYNC, is_async);
+        flags.set(
+            emit_body::Flags::HAS_COEFFECT_RULES,
+            coeffects.has_coeffect_rules(),
+        );
         emit_body::emit_body(
             emitter,
             namespace,

@@ -305,6 +305,10 @@ Offset findSection(SectionMap& sections, Offset off) {
   return i->first;
 }
 
+const StaticString s_reified("__Reified");
+const StaticString s_reified_var("0ReifiedGenerics");
+const StaticString s_coeffects_var("0Coeffects");
+
 bool FuncChecker::checkInfo() {
   if (numLocals() > std::numeric_limits<uint16_t>::max()) {
     error("too many locals: %d", numLocals());
@@ -313,6 +317,26 @@ bool FuncChecker::checkInfo() {
   if (numIters() > std::numeric_limits<uint16_t>::max()) {
     error("too many iterators: %d", numIters());
     return false;
+  }
+
+  auto const it = m_func->userAttributes.find(s_reified.get());
+  auto const hasReifiedGenerics = it != m_func->userAttributes.end();
+
+  if (hasReifiedGenerics) {
+    auto const localId = m_func->lookupVarId(s_reified_var.get());
+    if (localId != m_func->params.size()) {
+      ferror("functions with reified generics must have the first non parameter"
+             " local to be reified generics local");
+      return false;
+    }
+  }
+  if (!m_func->coeffectRules.empty()) {
+    auto const localId = m_func->lookupVarId(s_coeffects_var.get());
+    if (localId != m_func->params.size() + (hasReifiedGenerics ? 1 : 0)) {
+      ferror("functions with coeffect rules must have the first non parameter"
+             " local (also after reified generics local) to be coeffects local");
+      return false;
+    }
   }
   return true;
 }

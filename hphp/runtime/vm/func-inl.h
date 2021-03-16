@@ -436,6 +436,16 @@ inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }
 
+inline Id Func::coeffectsLocalId() const {
+  assertx(hasCoeffectRules());
+  return numParams() + (hasReifiedGenerics() ? 1 : 0);
+}
+
+inline Id Func::reifiedGenericsLocalId() const {
+  assertx(hasReifiedGenerics());
+  return numParams();
+}
+
 inline const StringData* Func::localVarName(Id id) const {
   assertx(id >= 0);
   return id < numNamedLocals() ? shared()->m_localNames[id] : nullptr;

@@ -65,6 +65,7 @@ pub struct Args<'a> {
 
 bitflags! {
     pub struct Flags: u8 {
+        const HAS_COEFFECT_RULES = 1 << 0;
         const SKIP_AWAITABLE = 1 << 1;
         const MEMOIZE = 1 << 2;
         const CLOSURE_BODY = 1 << 3;
@@ -322,6 +323,10 @@ fn make_decl_vars(
         };
         decl_vars
     };
+
+    if arg_flags.contains(Flags::HAS_COEFFECT_RULES) {
+        decl_vars.insert(0, string_utils::coeffects::LOCAL_NAME.into());
+    }
 
     if !arg_flags.contains(Flags::CLOSURE_BODY)
         && immediate_tparams

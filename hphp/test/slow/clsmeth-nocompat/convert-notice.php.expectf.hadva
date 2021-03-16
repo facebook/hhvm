@@ -1,0 +1,132 @@
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr_dyn (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr_dyn (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL
+[TYPE VIOLATION] ARG 1 of args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_varr_dyn (wanted: HH\%rvarray|vec%r, got: clsmeth)
+[TYPE VIOLATION] RET ret_arr_dyn (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+[TYPE VIOLATION] ARG 1 of inout_args (wanted: HH\%rvarray_or_darray|vec_or_dict%r, got: clsmeth)
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+classMeth{
+  class(Foo)
+  function(bar)
+}
+[NOTICE] array_map(): Argument #2 should be an array or collection
+NULL

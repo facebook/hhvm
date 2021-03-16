@@ -431,6 +431,15 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
   double dval;
   auto const dt = sd->isNumericWithVal(ival, dval, false /* allow_errors */);
 
+  if (RuntimeOption::EvalNoticeOnCoerceForIncDec > 0 &&
+      (dt == KindOfInt64 || dt == KindOfDouble)) {
+    handleConvNoticeLevel(
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec),
+      "string",
+      dt == KindOfInt64 ? "int" : "double",
+      s_ConvNoticeReasonIncDec.get());
+  }
+
   if (dt == KindOfInt64) {
     decRefStr(sd);
     tvCopy(make_int(ival), cell);
@@ -545,7 +554,16 @@ const StaticString s_1("1");
 
 struct IncBase {
   void dblCase(tv_lval cell) const { ++val(cell).dbl; }
-  void nullCase(tv_lval cell) const { tvCopy(make_int(1), cell); }
+  void nullCase(tv_lval cell) const {
+    if (RuntimeOption::EvalNoticeOnCoerceForIncDec > 0) {
+      handleConvNoticeLevel(
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec),
+        "null",
+        "int",
+        s_ConvNoticeReasonIncDec.get());
+    }
+    tvCopy(make_int(1), cell);
+  }
 
   TypedValue emptyString() const {
     return make_tv<KindOfPersistentString>(s_1.get());
@@ -587,7 +605,16 @@ struct IncO : IncBase {
 
 struct DecBase {
   void dblCase(tv_lval cell) { --val(cell).dbl; }
-  TypedValue emptyString() const { return make_int(-1); }
+  TypedValue emptyString() const {
+    if (RuntimeOption::EvalNoticeOnCoerceForIncDec > 0) {
+      handleConvNoticeLevel(
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForIncDec),
+        "string",
+        "int",
+        s_ConvNoticeReasonIncDec.get());
+    }
+    return make_int(-1);
+  }
   void nullCase(tv_lval) const {}
   void nonNumericString(tv_lval cell) const {
     raise_notice("Decrement on string '%s'", val(cell).pstr->data());

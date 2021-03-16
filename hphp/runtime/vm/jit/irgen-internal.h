@@ -900,4 +900,16 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key);
  */
 void defineStack(IRGS& env, FPInvOffset bcSPOff);
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Determines correct course of action based on notice_data and acts upon it.
+ * Returns true if an exception throw is emitted.
+ */
+bool handleConvNoticeLevel(
+  IRGS& env,
+  const ConvNoticeData& notice_data,
+  const char* const from,
+  const char* const to);
+
 }}}

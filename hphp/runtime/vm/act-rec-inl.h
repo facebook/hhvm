@@ -151,8 +151,13 @@ inline void ActRec::trashThis() {
 /////////////////////////////////////////////////////////////////////////////
 
 inline RuntimeCoeffects ActRec::coeffects() const {
-  if (func()->hasCoeffectRules()) return RuntimeCoeffects::none();
-  return func()->staticCoeffects().toAmbient();
+  if (!func()->hasCoeffectRules()) return func()->staticCoeffects().toAmbient();
+  // Access 0Coeffects variable
+  auto const id = func()->coeffectsLocalId();
+  auto const tv = reinterpret_cast<const TypedValue*>(this) - (id + 1);
+  assertx(tvIsInt(tv));
+  return RuntimeCoeffects::fromValue(tv->m_data.num);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

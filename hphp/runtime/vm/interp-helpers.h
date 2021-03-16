@@ -184,11 +184,14 @@ inline bool calleeCoeffectChecks(const Func* callee,
   auto const requiredCoeffects = [&] {
     auto required = callee->staticCoeffects().toRequired();
     if (!callee->hasCoeffectRules()) return required;
+    auto rules = RuntimeCoeffects::full();
     for (auto const& rule : callee->getCoeffectRules()) {
-      required &= rule.emit(callee, numArgsInclUnpack, prologueCtx);
+      rules &= rule.emit(callee, numArgsInclUnpack, prologueCtx);
     }
-    // TODO: Update with real value
-    vmStack().pushInt(RuntimeCoeffects::none().value());
+    required &= rules;
+    auto ambient = callee->staticCoeffects().toAmbient();
+    ambient &= rules;
+    vmStack().pushInt(ambient.value());
     return required;
   }();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;

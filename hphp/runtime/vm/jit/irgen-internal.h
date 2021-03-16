@@ -89,9 +89,11 @@ inline SSATmp* curCoeffects(IRGS& env) {
   if (!func->hasCoeffectRules()) {
     return cns(env, func->staticCoeffects().toAmbient().value());
   }
-  // Pessimize enforcements in presence of coeffect rules,
-  // as it is not tracked yet
-  return cns(env, RuntimeCoeffects::none().value());
+  // Access 0Coeffects variable
+  // TODO: Figure out why TInt asserts here
+  auto const local =
+    gen(env, LdLoc, TCell, LocalId(func->coeffectsLocalId()), fp(env));
+  return gen(env, AssertType, TInt, local);
 }
 
 //////////////////////////////////////////////////////////////////////

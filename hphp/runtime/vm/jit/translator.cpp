@@ -647,6 +647,22 @@ size_t memberKeyImmIdx(Op op) {
 #undef FCA
 #undef O
 
+unsigned localRangeImmIdx(Op op) {
+  switch (op) {
+    case Op::AwaitAll:
+    case Op::MemoSet:
+    case Op::MemoSetEager:
+      return 0;
+    case Op::MemoGet:
+      return 1;
+    case Op::MemoGetEager:
+      return 2;
+    default:
+      always_assert_flog("op {} doesn't have LocalRange!\n", opcodeToName(op));
+      return -1;
+  }
+}
+
 /*
  * Get location metadata for the inputs of `ni'.
  */
@@ -765,7 +781,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
 
   if (flags & LocalRange) {
-    auto const& range = ni.imm[1].u_LAR;
+    auto const& range = ni.imm[localRangeImmIdx(ni.op())].u_LAR;
     SKTRACE(1, sk, "getInputs: localRange %d+%d\n",
             range.first, range.count);
     for (int i = 0; i < range.count; ++i) {

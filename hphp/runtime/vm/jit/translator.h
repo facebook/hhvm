@@ -308,7 +308,7 @@ enum Operands {
   StackI          = 1 << 15, // consume 1 cell at index imm[0].u_IVA
   MBase           = 1 << 16, // member operation base
   MKey            = 1 << 17, // member lookup key
-  LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
+  LocalRange      = 1 << 18, // read range of locals
   DontGuardBase   = 1 << 19, // Dont force a guard for the base
   StackI2         = 1 << 20, // Consume 1 cell at index imm_[1].u_IVA
   StackTop2 = Stack1 | Stack2,
@@ -380,4 +380,3 @@ void translateInstr(irgen::IRGS&, const NormalizedInstruction&);
 #define incl_HPHP_TRANSLATOR_INL_H_
 #include "hphp/runtime/vm/jit/translator-inl.h"
 #undef incl_HPHP_TRANSLATOR_INL_H_
-

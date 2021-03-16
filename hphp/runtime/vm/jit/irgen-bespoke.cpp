@@ -73,12 +73,12 @@ SSATmp* emitProfiledGet(
         });
       }();
 
-      gen(env, CheckType, TInitCell, taken, pval);
-      // TODO(mcolavita): this is here because we can lose constval information
-      // when unioning with TUninit.
-      auto resultType =
+      auto const ival = gen(env, CheckType, TInitCell, taken, pval);
+      // TODO(mcolavita): We need this assertion because we can lose const-val
+      // information when we union the output type with TUninit.
+      auto const resultType =
         arrLikeElemType(arr->type(), key->type(), curClass(env));
-      return gen(env, AssertType, resultType.first, pval);
+      return gen(env, AssertType, resultType.first, ival);
     }
   }();
   return result;
@@ -580,6 +580,141 @@ void emitBespokeClassGetTS(IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
+void emitBespokeShapesAt(IRGS& env, int32_t numArgs) {
+  assertx(numArgs == 2);
+  auto const arr = topC(env, BCSPRelOffset{1});
+  auto const key = topC(env, BCSPRelOffset{0});
+  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(key->type().subtypeOfAny(TInt, TStr));
+
+  auto const finish = [&](SSATmp* val) {
+    discard(env, 2 + kNumActRecCells);
+    pushIncRef(env, val);
+    decRef(env, arr);
+    decRef(env, key);
+  };
+
+  auto const exit = makeExitSlow(env);
+  finish(emitProfiledGet(env, arr, key, exit, finish));
+}
+
+void emitBespokeShapesIdx(IRGS& env, int32_t numArgs) {
+  assertx(numArgs == 2 || numArgs == 3);
+  auto const arr = topC(env, BCSPRelOffset{numArgs - 1});
+  auto const key = topC(env, BCSPRelOffset{numArgs - 2});
+  auto const def = numArgs == 3 ? topC(env) : cns(env, TInitNull);
+  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(key->type().subtypeOfAny(TInt, TStr));
+
+  auto const finish = [&](SSATmp* val) {
+    discard(env, numArgs + kNumActRecCells);
+    pushIncRef(env, val);
+    decRef(env, arr);
+    decRef(env, key);
+    decRef(env, def);
+  };
+
+  auto const val = cond(
+    env,
+    [&](Block* taken) { return emitGet(env, arr, key, taken); },
+    [&](SSATmp* val) { return val; },
+    [&] { return def; }
+  );
+  finish(profiledType(env, val, [&] { finish(val); }));
+}
+
+void emitBespokeShapesExists(IRGS& env, int32_t numArgs) {
+  assertx(numArgs == 2);
+  auto const arr = topC(env, BCSPRelOffset{1});
+  auto const key = topC(env, BCSPRelOffset{0});
+  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(key->type().subtypeOfAny(TInt, TStr));
+
+  auto const val = cond(
+    env,
+    [&](Block* taken) { emitGet(env, arr, key, taken); },
+    [&] { return cns(env, true); },
+    [&] { return cns(env, false); }
+  );
+
+  discard(env, 2 + kNumActRecCells);
+  push(env, val);
+  decRef(env, arr);
+  decRef(env, key);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+enum class LayoutSensitiveCall {
+  ShapesAt,
+  ShapesIdx,
+  ShapesExists,
+};
+
+const StaticString
+  s_HH_Shapes("HH\\Shapes"),
+  s_at("at"),
+  s_idx("idx"),
+  s_keyExists("keyExists");
+
+folly::Optional<LayoutSensitiveCall>
+getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
+  if (sk.op() != Op::FCallClsMethodD) return folly::none;
+
+  auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
+  auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+
+  if (!cls->isame(s_HH_Shapes.get())) return folly::none;
+
+  if (func->isame(s_at.get()))        return LayoutSensitiveCall::ShapesAt;
+  if (func->isame(s_idx.get()))       return LayoutSensitiveCall::ShapesIdx;
+  if (func->isame(s_keyExists.get())) return LayoutSensitiveCall::ShapesExists;
+
+  return folly::none;
+}
+
+bool canSpecializeCall(const IRGS& env, SrcKey sk, LayoutSensitiveCall call) {
+  auto const fca = getImm(sk.pc(), 0).u_FCA;
+  FTRACE_MOD(Trace::hhir, 3, "Analyzing layout-sensitive call:\n");
+
+  if (fca.numRets != 1) return false;
+  if (fca.hasGenerics() || fca.hasUnpack()) return false;
+
+  auto const hasInOut = [&]{
+    if (!fca.enforceInOut()) return false;
+    for (auto i = 0; i < fca.numArgs; i++) {
+      if (fca.isInOut(i)) return true;
+    }
+    return false;
+  }();
+
+  if (hasInOut) return false;
+
+  auto const numArgsOkay = [&]{
+    if (fca.numRets != 1) return false;
+    auto const is_shapes_idx = call == LayoutSensitiveCall::ShapesIdx;
+    return fca.numArgs == 2 || (fca.numArgs == 3 && is_shapes_idx);
+  }();
+
+  if (!numArgsOkay) return false;
+
+  auto const numArgs = safe_cast<int32_t>(fca.numArgs);
+  auto const al = Location::Stack{env.irb->fs().bcSPOff() - numArgs + 1};
+  auto const kl = Location::Stack{env.irb->fs().bcSPOff() - numArgs + 2};
+  auto const arr = env.irb->typeOf(al, DataTypeSpecific);
+  auto const key = env.irb->typeOf(kl, DataTypeSpecific);
+  FTRACE_MOD(Trace::hhir, 3, "Guarded arguments of layout-sensitive call:\n"
+             "  arr: {} @ {}\n  key: {} @ {}\n", arr, show(al), key, show(kl));
+
+  auto const darray = RO::EvalHackArrDVArrs ? TDict : TDArr;
+  auto const specialize = (arr <= darray) && key.subtypeOfAny(TInt, TStr);
+  FTRACE_MOD(Trace::hhir, 3, "Types {}pecializing call on layout.\n",
+             specialize ? "match. S" : "do not match. Not s");
+  return specialize;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
@@ -614,12 +749,19 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
     case Op::ClassGetTS:
       emitBespokeClassGetTS(env);
       return;
-    case Op::IterInit:
-    case Op::LIterInit:
-    case Op::LIterNext:
-      always_assert(false);
+    case Op::FCallClsMethodD: {
+      using LSC = LayoutSensitiveCall;
+      auto const call = getLayoutSensitiveCall(env, ni.source);
+      auto const numArgs = safe_cast<int32_t>(ni.imm[0].u_FCA.numArgs);
+      switch (*call) {
+        case LSC::ShapesAt:     return emitBespokeShapesAt(env, numArgs);
+        case LSC::ShapesIdx:    return emitBespokeShapesIdx(env, numArgs);
+        case LSC::ShapesExists: return emitBespokeShapesExists(env, numArgs);
+      }
+    }
     default:
-      not_reached();
+      SCOPE_ASSERT_DETAIL("Unhandled Bespoke op") { return ni.toString(); };
+      always_assert(false);
   }
 }
 
@@ -650,6 +792,13 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     case Op::LIterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
       return {Location::Local{safe_cast<uint32_t>(local)}};
+    }
+
+    case Op::FCallClsMethodD: {
+      auto const call = getLayoutSensitiveCall(env, sk);
+      if (!call || !canSpecializeCall(env, sk, *call)) return folly::none;
+      auto const numArgs = safe_cast<int32_t>(getImm(sk.pc(), 0).u_FCA.numArgs);
+      return {Location::Stack{soff - numArgs + 1}};
     }
 
     default:
@@ -906,6 +1055,8 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
 
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
+  } else if (isFCall(sk.op())) {
+    translateDispatchBespoke(env, ni);
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
     // array-likes on one side and bespoke array-likes on the other.

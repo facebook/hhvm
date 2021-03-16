@@ -258,12 +258,13 @@ let autocomplete_xhp_attributes env class_ cid id =
           (Some class_))
   )
 
-let autocomplete_xhp_enum_value
-    (attr_name : string) id_id env xhp_class_ xhp_cid =
+let autocomplete_xhp_enum_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
     autocomplete_identifier := Some id_id;
-    let get_class_name (ty : Typing_defs.decl_ty) : string option =
-      let get_name = function
+
+    let get_class_name ty : string option =
+      let get_name : type phase. phase Typing_defs.ty_ -> _ = function
+        | Tnewtype (name, _, _) -> Some name
         | Tapply ((_, name), _) -> Some name
         | _ -> None
       in
@@ -285,15 +286,7 @@ let autocomplete_xhp_enum_value
              is_correct_class (get_class_name class_const.cc_type))
     in
 
-    let attr_type =
-      get_class_elt_types env xhp_class_ xhp_cid (Cls.props xhp_class_)
-      |> List.find ~f:(fun (id, _) ->
-             String.equal (Utils.strip_xhp_ns id) attr_name)
-    in
-
-    let attr_type_name =
-      Option.bind attr_type ~f:(fun ty -> get_class_name (snd ty))
-    in
+    let attr_type_name = get_class_name attr_ty in
 
     attr_type_name
     |> Option.iter ~f:(fun class_name ->
@@ -537,13 +530,14 @@ let visitor =
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function
-                 | Tast.Xhp_simple { Aast.xs_name = id; xs_expr = value; _ } ->
+                 | Tast.Xhp_simple
+                     { Aast.xs_name = id; xs_expr = value; xs_type = ty } ->
                    (match value with
                    | (_, Tast.Id id_id) ->
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
                         *)
-                     autocomplete_xhp_enum_value (snd id) id_id env c (Some cid)
+                     autocomplete_xhp_enum_value ty id_id env
                    | _ -> ());
                    if Cls.is_xhp c then
                      autocomplete_xhp_attributes env c (Some cid) id

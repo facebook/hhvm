@@ -3698,10 +3698,10 @@ void Class::setInterfaces() {
 }
 
 void Class::setInterfaceVtables() {
-  // We only need to set interface vtables for classes that can be instantiated
-  // and implement more than 0 interfaces.
+  // We only need to set interface vtables for classes with callable methods
+  // that implement more than 0 interfaces.
   if (!RuntimeOption::RepoAuthoritative ||
-      !isNormalClass(this) || isAbstract(this) || m_interfaces.empty()) return;
+      !isNormalClass(this) || m_interfaces.empty()) return;
 
   size_t totalMethods = 0;
   Slot maxSlot = 0;
@@ -3752,7 +3752,22 @@ void Class::setInterfaceVtables() {
       auto ifunc = iface->getMethod(i);
       auto func = lookupMethod(ifunc->name());
       ITRACE(3, "{}:{} @ slot {}\n", ifunc->name()->data(), func, i);
-      always_assert(func || Func::isSpecial(ifunc->name()));
+
+      if (!func && isAbstract(this) && ifunc->isStatic() &&
+          !Func::isSpecial(ifunc->name())) {
+        // When iface vtable is present and used for a static method call, it is
+        // expected that the method to be called exists. This may not be true
+        // for abstract classes, in that case do not define the iface vtable.
+        //
+        // Instance methods do not have this issue, as iface vtable of object
+        // instance's class is used to invoke them, which is never abstract.
+        low_free(vtableVec);
+        m_vtableVecLen = 0;
+        m_vtableVec = nullptr;
+        return;
+      }
+
+      always_assert(func || isAbstract(this) || Func::isSpecial(ifunc->name()));
       vtable[i] = func;
     }
   }

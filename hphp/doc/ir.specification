@@ -1185,6 +1185,9 @@ To string conversions:
 
   Load the Func* at methodIdx from the vtable at vtableIdx in S0.
 
+  If methodIdx represents an instance method, S0 must be a non-abstract class.
+  This requirement is naturally satisfied if S0 comes from LdObjClass.
+
 | LdFuncVecLen, D(Int), S(Cls), NF
 
   Load the funcVecLen field from S0.

@@ -3053,7 +3053,7 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
       ifaces.emplace_back(cinfo->cls);
       continue;
     }
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum)) continue;
 
     classes.emplace_back(Cls{cinfo.get()});
     auto& vtable = classes.back().vtable;
@@ -3175,10 +3175,8 @@ void compute_iface_vtables(IndexData& index) {
       continue;
     }
 
-    // Only worry about classes that can be instantiated. If an abstract class
-    // has any concrete subclasses, those classes will make sure the right
-    // entries are in the conflict sets.
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+    // Only worry about classes with methods that can be called.
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum)) continue;
 
     for (auto& ipair : cinfo->implInterfaces) {
       ++iface_uses[ipair.second->cls];

@@ -138,6 +138,20 @@ impl HhasCoeffects {
         }
     }
 
+    pub fn local_to_shallow(coeffects: &[Ctx]) -> Vec<Ctx> {
+        use Ctx::*;
+        let mut result = vec![];
+        for c in coeffects.iter() {
+            result.push(match c {
+                RxLocal => RxShallow,
+                PoliciedOfLocal => PoliciedOfShallow,
+                PoliciedLocal => PoliciedShallow,
+                _ => *c,
+            })
+        }
+        result
+    }
+
     pub fn from_ctx_constant(hint: &Hint) -> Vec<Ctx> {
         let Hint(_, h) = hint;
         match &**h {
@@ -236,14 +250,18 @@ impl HhasCoeffects {
     }
 
     pub fn inherit_to_child_closure(&self) -> Self {
+        let static_coeffects = HhasCoeffects::local_to_shallow(self.get_static_coeffects());
         if self.has_coeffect_rules() {
             Self {
-                static_coeffects: self.static_coeffects.clone(),
+                static_coeffects,
                 closure_inherit_from_parent: true,
                 ..HhasCoeffects::default()
             }
         } else {
-            self.clone()
+            Self {
+                static_coeffects,
+                ..self.clone()
+            }
         }
     }
 

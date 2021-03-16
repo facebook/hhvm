@@ -809,7 +809,10 @@ pub mod instr {
         instr(alloc, Instruct::ILitConst(InstructLitConst::AddNewElemC))
     }
 
-    pub fn switch<'a>(alloc: &'a bumpalo::Bump, labels: &'a [Label<'a>]) -> InstrSeq<'a> {
+    pub fn switch<'a>(
+        alloc: &'a bumpalo::Bump,
+        labels: bumpalo::collections::Vec<'a, Label<'a>>,
+    ) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::Switch(
@@ -826,7 +829,7 @@ pub mod instr {
 
     pub fn sswitch<'a>(
         alloc: &'a bumpalo::Bump,
-        cases: &'a [(&'a str, Label<'a>)],
+        cases: bumpalo::collections::Vec<'a, (&'a str, Label<'a>)>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1831,6 +1834,32 @@ impl<'a> InstrSeq<'a> {
                 )
                 .into_bump_slice_mut(),
             ),
+        }
+    }
+
+    pub fn filter_map_mut<F>(&mut self, alloc: &'a bumpalo::Bump, f: &mut F)
+    where
+        F: FnMut(&mut Instruct<'a>) -> bool,
+    {
+        match self {
+            InstrSeq::List(&mut []) => {}
+            InstrSeq::List(&mut [ref mut x]) => {
+                if !f(x) {
+                    *self = instr::empty(alloc)
+                }
+            }
+            InstrSeq::List(ref mut instr_lst) => {
+                let mut new_lst = bumpalo::vec![in alloc;];
+                for mut i in instr_lst.iter_mut() {
+                    if f(&mut i) {
+                        new_lst.push(i.clone())
+                    }
+                }
+                *self = instr::instrs(alloc, new_lst.into_bump_slice_mut())
+            }
+            InstrSeq::Concat(instrseq_lst) => instrseq_lst
+                .iter_mut()
+                .for_each(|x| x.filter_map_mut(alloc, f)),
         }
     }
 

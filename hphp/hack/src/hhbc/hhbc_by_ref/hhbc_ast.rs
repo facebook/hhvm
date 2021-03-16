@@ -314,10 +314,10 @@ pub enum InstructControlFlow<'arena> {
     Switch(
         Switchkind,
         isize,
-        &'arena [hhbc_by_ref_label::Label<'arena>],
+        bumpalo::collections::Vec<'arena, hhbc_by_ref_label::Label<'arena>>,
     ),
     /// litstr id / offset vector
-    SSwitch(&'arena [(&'arena str, hhbc_by_ref_label::Label<'arena>)]),
+    SSwitch(bumpalo::collections::Vec<'arena, (&'arena str, hhbc_by_ref_label::Label<'arena>)>),
     RetC,
     RetCSuspended,
     RetM(NumParams),

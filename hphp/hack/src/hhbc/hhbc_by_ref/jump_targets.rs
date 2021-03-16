@@ -79,7 +79,11 @@ impl<'arena> JumpTargets<'arena> {
     }
 
     /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(&self, is_break: bool, mut level: usize) -> ResolvedJumpTarget {
+    pub fn get_target_for_level(
+        &self,
+        is_break: bool,
+        mut level: usize,
+    ) -> ResolvedJumpTarget<'arena> {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;

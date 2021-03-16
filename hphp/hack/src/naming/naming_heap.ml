@@ -219,7 +219,13 @@ module Types = struct
         end
       | Naming_types.TRecordDef ->
         begin
-          match Ast_provider.find_record_def_in_file ctx path id with
+          match
+            Ast_provider.find_record_def_in_file
+              ~case_insensitive:true
+              ctx
+              path
+              id
+          with
           | Some cls -> Some (snd cls.Aast.rd_name)
           | None ->
             Hh_logger.log

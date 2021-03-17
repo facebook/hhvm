@@ -75,31 +75,26 @@ LayoutIndex StructLayout::Index(uint8_t idx) {
   return LayoutIndex{uint16_t(base + idx)};
 }
 
-const StructLayout* StructLayout::getLayout(const KeyOrder& ko, bool create) {
+const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
   if (ko.empty() || !ko.valid()) return nullptr;
-
   {
     folly::SharedMutex::ReadHolder rlock{s_keySetLock};
     auto const it = s_keySetToIdx.find(ko);
-    if (it != s_keySetToIdx.end()) {
-      return StructLayout::As(Layout::FromIndex(it->second));
-    }
+    if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
   }
-
   if (!create) return nullptr;
 
   folly::SharedMutex::WriteHolder wlock{s_keySetLock};
   auto const it = s_keySetToIdx.find(ko);
-  if (it != s_keySetToIdx.end()) {
-    return StructLayout::As(Layout::FromIndex(it->second));
-  }
+  if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
 
   auto constexpr kMaxIndex = std::numeric_limits<uint8_t>::max();
   if (s_numStructLayouts == kMaxIndex) return nullptr;
-  auto const nextIdx = Index(s_numStructLayouts++);
-  auto const ret = new StructLayout(ko, nextIdx);
-  s_keySetToIdx.emplace(ko, nextIdx);
-  return ret;
+  auto const index = Index(s_numStructLayouts++);
+  auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
+  auto const result = new (malloc(bytes)) StructLayout(ko, index);
+  s_keySetToIdx.emplace(ko, index);
+  return result;
 }
 
 StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
@@ -107,27 +102,25 @@ StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
                    {AbstractLayout::GetBespokeTopIndex()},
                    structArrayVtable())
 {
-  FixedStringMapBuilder<Slot, Slot, true> builder;
   Slot i = 0;
+  m_key_to_slot.reserve(ko.size());
   for (auto const key : ko) {
-    builder.add(key, i);
-    m_slotToKey[i] = key;
+    assertx(key->isStatic());
+    m_key_to_slot.insert({StaticKey{key}, i});
+    m_fields[i].key = key;
     i++;
   }
-  builder.create(m_fields);
-  m_size_index = MemoryManager::size2Index(arraySize());
+  assertx(numFields() == ko.size());
+  auto const bytes = sizeof(StructArray) + numFields() * sizeof(TypedValue);
+  m_size_index = MemoryManager::size2Index(bytes);
 }
 
 uint8_t StructArray::sizeIndex() const {
   return m_aux16 >> 8;
 }
 
-size_t StructLayout::arraySize() const {
-  return sizeof(StructArray) + numFields() * sizeof(TypedValue);
-}
-
 size_t StructLayout::numFields() const {
-  return m_fields.size();
+  return m_key_to_slot.size();
 }
 
 size_t StructLayout::sizeIndex() const {
@@ -135,15 +128,15 @@ size_t StructLayout::sizeIndex() const {
 }
 
 Slot StructLayout::keySlot(const StringData* key) const {
-  // TODO(arnabde): Use separate heterogeneous lookups for static and
-  // non-static keys after converting m_fields to an F14Map.
-  auto const it = m_fields.find(key);
-  return it ? *it : kInvalidSlot;
+  auto const it = key->isStatic()
+    ? m_key_to_slot.find(StaticKey{key})
+    : m_key_to_slot.find(NonStaticKey{key});
+  return it == m_key_to_slot.end() ? kInvalidSlot : it->second;
 }
 
-LowStringPtr StructLayout::key(Slot slot) const {
-  assertx(slot < StructArray::kMaxKeyNum);
-  return m_slotToKey[slot];
+const StructLayout::Field& StructLayout::field(Slot slot) const {
+  assertx(slot < numFields());
+  return m_fields[slot];
 }
 
 template <bool Static>
@@ -243,7 +236,7 @@ ArrayData* StructArray::escalateWithCapacity(size_t capacity,
   auto const data = rawData();
   for (auto i = 0; i < m_size; i++) {
     auto const slot = getSlotInPos(i);
-    auto const k = layout->key(slot);
+    auto const k = layout->field(slot).key;
     auto const& v = data[slot];
     auto const res =
       MixedArray::SetStrMove(ad, const_cast<StringData*>(k.get()), v);
@@ -301,7 +294,7 @@ TypedValue StructArray::NvGetStr(const StructArray* sad, const StringData* k) {
 TypedValue StructArray::GetPosKey(const StructArray* sad, ssize_t pos) {
   auto const layout = sad->layout();
   auto const slot = sad->getSlotInPos(pos);
-  auto const k = layout->key(slot);
+  auto const k = layout->field(slot).key;
   return make_tv<KindOfPersistentString>(k);
 }
 

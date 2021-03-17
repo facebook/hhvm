@@ -21,13 +21,17 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/bespoke/layout.h"
-
-#include "hphp/runtime/vm/fixed-string-map.h"
+#include "hphp/runtime/base/string-data.h"
 
 namespace HPHP { namespace bespoke {
 
 struct StructLayout;
 
+/*
+ * Hidden-class style layout for a dict/darray. Static string keys are stored
+ * in the layout itself instead of in the array. The layout maps these keys to
+ * to physical slots. Each array has space for all of its layout's slots.
+ */
 struct StructArray : public BespokeArray {
   static StructArray* MakeFromVanilla(ArrayData* ad,
                                       const StructLayout* layout);
@@ -66,26 +70,61 @@ private:
   uint64_t m_order;
 };
 
+/*
+ * Layout data structure defining a hidden class. This data structure contains
+ * two main pieces of data: a map from static string keys to physical slots,
+ * and an array of field descriptors for each slot.
+ *
+ * Right now, the only data in the field descriptor is the field's string key.
+ * However, in the future, we'll place two further constraints on fields which
+ * will allow us to better-optimize JIT-ed code:
+ *
+ *  1. Type restrictions. Some fields will may only allow values of a certain
+ *     data type (modulo countedness), saving us type checks on lookups.
+ *
+ *  2. "optional" vs. "required". Right now, all fields are optional. If we
+ *     make some fields required, we can skip existence checks on lookup.
+ */
 struct StructLayout : public ConcreteLayout {
-  explicit StructLayout(const KeyOrder&, const LayoutIndex&);
+  struct Field { LowStringPtr key; };
 
   static LayoutIndex Index(uint8_t raw);
-  static const StructLayout* getLayout(const KeyOrder&, bool create);
+  static const StructLayout* GetLayout(const KeyOrder&, bool create);
   static const StructLayout* As(const Layout*);
 
   size_t numFields() const;
   size_t sizeIndex() const;
   Slot keySlot(const StringData* key) const;
-  LowStringPtr key(Slot slot) const;
+  const Field& field(Slot slot) const;
 
 private:
-  size_t arraySize() const;
+  // Callers must check whether the key is static before using one of these
+  // wrapper types. The wrappers dispatch to the right hash/equal function.
+  struct StaticKey { LowStringPtr key; };
+  struct NonStaticKey { const StringData* key; };
 
-  // TODO(arnabde): Use an F14Map here instead.
-  using FieldIndexMap = FixedStringMap<Slot,true>;
-  FieldIndexMap m_fields;
-  std::array<LowStringPtr, StructArray::kMaxKeyNum> m_slotToKey{};
+  // Use heterogeneous lookup to optimize the lookup for static keys.
+  struct Hash {
+    using is_transparent = void;
+    size_t operator()(const StaticKey& k) const { return k.key->hashStatic(); }
+    size_t operator()(const NonStaticKey& k) const { return k.key->hash(); }
+  };
+  struct Equal {
+    using is_transparent = void;
+    bool operator()(const StaticKey& k1, const StaticKey& k2) const {
+      return k1.key == k2.key;
+    }
+    bool operator()(const NonStaticKey& k1, const StaticKey& k2) const {
+      return k1.key->same(k2.key);
+    }
+  };
+
+  StructLayout(const KeyOrder&, const LayoutIndex&);
+
   size_t m_size_index;
+  folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
+  // Variable-size array field; must be last in this struct.
+  Field m_fields[1];
 };
 
 }}

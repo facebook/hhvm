@@ -138,6 +138,11 @@ bool KeyOrder::isTooLong() const {
   return m_keys->size() > kMaxLen;
 }
 
+size_t KeyOrder::size() const {
+  assertx(valid());
+  return m_keys->size();
+}
+
 bool KeyOrder::empty() const {
   return m_keys && m_keys->empty();
 }

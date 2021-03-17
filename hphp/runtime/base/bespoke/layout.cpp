@@ -629,7 +629,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile) {
 
   auto const ko = collectKeyOrder(koMap);
   auto const create = !s_hierarchyFinal.load(std::memory_order_acquire);
-  auto const layout = StructLayout::getLayout(ko, create);
+  auto const layout = StructLayout::GetLayout(ko, create);
   return layout ?  StructArray::MakeFromVanilla(ad, layout) : nullptr;
 }
 

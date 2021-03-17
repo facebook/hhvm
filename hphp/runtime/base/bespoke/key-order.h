@@ -23,6 +23,7 @@
 namespace HPHP {
 
 struct ArrayData;
+
 namespace bespoke {
 
 // KeyOrder represents insertion order of static string keys.
@@ -30,8 +31,7 @@ struct KeyOrder {
   using KeyOrderData = std::vector<LowStringPtr>;
   using const_iterator = KeyOrderData::const_iterator;
 
-  // All KeyOrders of length > kMaxLen that have the same prefix
-  // are grouped together.
+  // We group together KeyOrders of length > kMaxLen with the same prefix.
   constexpr static size_t kMaxLen = 16;
 
   KeyOrder insert(const StringData*) const;
@@ -39,6 +39,7 @@ struct KeyOrder {
   KeyOrder pop() const;
   const_iterator begin() const;
   const_iterator end() const;
+  size_t size() const;
 
   // A "valid" KeyOrder is one that can be used to make a struct layout, and
   // that can be merged with other valid layouts. An "empty" layout is valid,

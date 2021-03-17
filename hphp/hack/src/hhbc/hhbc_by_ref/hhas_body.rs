@@ -20,6 +20,4 @@ pub struct HhasBody<'a, 'arena> {
     pub return_type_info: Option<hhbc_by_ref_hhas_type::Info>,
     pub doc_comment: Option<DocComment>,
     pub env: Option<Env<'a, 'arena>>,
-    pub rx_cond_rx_of_arg: Vec<usize>,
-    pub rx_cond_arg_implements: Vec<(usize, String)>,
 }

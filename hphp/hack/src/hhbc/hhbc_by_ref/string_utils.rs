@@ -402,6 +402,11 @@ pub mod reified {
     }
 }
 
+pub mod coeffects {
+    #[allow(clippy::redundant_static_lifetimes)]
+    pub static LOCAL_NAME: &'static str = "$0Coeffects";
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;

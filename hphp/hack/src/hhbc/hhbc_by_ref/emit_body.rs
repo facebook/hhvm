@@ -1,8 +1,3 @@
-mod emit_statement;
-mod reified_generics_helpers;
-mod try_finally_rewriter;
-
-/*
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -11,41 +6,43 @@ mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 
+use emit_statement::emit_final_stmts;
+use reified_generics_helpers as RGH;
+
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
-use ast_body::AstBody;
-use ast_scope_rust::{Scope, ScopeItem};
-use decl_vars_rust as decl_vars;
-use emit_adata_rust as emit_adata;
-use emit_expression_rust as emit_expression;
-use emit_fatal_rust::{emit_fatal_runtime, raise_fatal_parse};
-use emit_param_rust as emit_param;
-use emit_pos_rust::emit_pos;
-use emit_statement::emit_final_stmts;
-use emit_type_hint_rust as emit_type_hint;
-use env::{emitter::Emitter, Env};
-use generator_rust as generator;
-use hhas_body_rust::HhasBody;
-use hhas_param_rust::HhasParam;
-use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{
+use hhbc_by_ref_ast_body::AstBody;
+use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
+use hhbc_by_ref_decl_vars as decl_vars;
+use hhbc_by_ref_emit_adata as emit_adata;
+use hhbc_by_ref_emit_expression as emit_expression;
+use hhbc_by_ref_emit_fatal::{emit_fatal_runtime, raise_fatal_parse};
+use hhbc_by_ref_emit_param as emit_param;
+use hhbc_by_ref_emit_pos::emit_pos;
+use hhbc_by_ref_emit_type_hint as emit_type_hint;
+use hhbc_by_ref_env::{emitter::Emitter, Env};
+use hhbc_by_ref_generator as generator;
+use hhbc_by_ref_hhas_body::HhasBody;
+use hhbc_by_ref_hhas_param::HhasParam;
+use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
+use hhbc_by_ref_hhbc_ast::{
     ClassKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
     QueryOp, ReadOnlyOp,
 };
-use hhbc_id_rust::function;
-use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
-use label_rewriter_rust as label_rewriter;
-use label_rust::Label;
+use hhbc_by_ref_hhbc_id::function;
+use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_by_ref_instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
+use hhbc_by_ref_label::Label;
+use hhbc_by_ref_label_rewriter as label_rewriter;
+use hhbc_by_ref_options::{CompilerFlags, LangFlags};
+use hhbc_by_ref_runtime::TypedValue;
+use hhbc_by_ref_statement_state::StatementState;
+use hhbc_by_ref_unique_id_builder::*;
+
 use ocamlrep::rc::RcOc;
-use options::{CompilerFlags, LangFlags};
 use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
-use reified_generics_helpers as RGH;
-use runtime::TypedValue;
-use statement_state::StatementState;
-use unique_id_builder::*;
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -55,15 +52,15 @@ use std::collections::HashSet;
 static THIS: &'static str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
-pub struct Args<'a> {
+pub struct Args<'a, 'arena> {
     pub immediate_tparams: &'a Vec<tast::Tparam>,
     pub class_tparam_names: &'a [&'a str],
     pub ast_params: &'a Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
     pub pos: &'a Pos,
-    pub deprecation_info: &'a Option<&'a [TypedValue]>,
+    pub deprecation_info: &'a Option<&'a [TypedValue<'arena>]>,
     pub doc_comment: Option<DocComment>,
-    pub default_dropthrough: Option<InstrSeq>,
+    pub default_dropthrough: Option<InstrSeq<'arena>>,
     pub call_context: Option<String>,
     pub flags: Flags,
 }
@@ -81,12 +78,13 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'a, 'b>(
-    emitter: &mut Emitter,
+pub fn emit_body_with_default_args<'a, 'b, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena>,
     namespace: RcOc<namespace_env::Env>,
     body: &'b tast::Program,
-    return_value: InstrSeq,
-) -> Result<HhasBody<'a>> {
+    return_value: InstrSeq<'arena>,
+) -> Result<HhasBody<'a, 'arena>> {
     let args = Args {
         immediate_tparams: &vec![],
         class_tparam_names: &vec![],
@@ -100,6 +98,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
         flags: Flags::empty(),
     };
     emit_body(
+        alloc,
         emitter,
         namespace,
         Either::Left(body),
@@ -110,14 +109,15 @@ pub fn emit_body_with_default_args<'a, 'b>(
     .map(|r| r.0)
 }
 
-pub fn emit_body<'a, 'b>(
-    emitter: &mut Emitter,
+pub fn emit_body<'a, 'b, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena>,
     namespace: RcOc<namespace_env::Env>,
     body: AstBody<'b>,
-    return_value: InstrSeq,
+    return_value: InstrSeq<'arena>,
     scope: Scope<'a>,
-    args: Args<'_>,
-) -> Result<(HhasBody<'a>, bool, bool)> {
+    args: Args<'_, 'arena>,
+) -> Result<(HhasBody<'a, 'arena>, bool, bool)> {
     let tparams = scope
         .get_tparams()
         .into_iter()
@@ -130,6 +130,7 @@ pub fn emit_body<'a, 'b>(
     emitter.iterator_mut().reset();
 
     let return_type_info = make_return_type_info(
+        alloc,
         args.flags.contains(Flags::SKIP_AWAITABLE),
         args.flags.contains(Flags::NATIVE),
         args.ret,
@@ -137,6 +138,7 @@ pub fn emit_body<'a, 'b>(
     )?;
 
     let params = make_params(
+        alloc,
         emitter,
         namespace.as_ref(),
         &mut tp_names,
@@ -146,6 +148,7 @@ pub fn emit_body<'a, 'b>(
     )?;
 
     let upper_bounds = emit_generics_upper_bounds(
+        alloc,
         args.immediate_tparams,
         args.class_tparam_names,
         args.flags.contains(Flags::SKIP_AWAITABLE),
@@ -160,6 +163,7 @@ pub fn emit_body<'a, 'b>(
         args.flags,
     )?;
     let mut env = make_env(
+        alloc,
         namespace,
         scope,
         args.call_context,
@@ -167,6 +171,7 @@ pub fn emit_body<'a, 'b>(
     );
 
     set_emit_statement_state(
+        alloc,
         emitter,
         return_value,
         &params,
@@ -200,6 +205,7 @@ pub fn emit_body<'a, 'b>(
     )?;
     Ok((
         make_body(
+            alloc,
             emitter,
             body_instrs,
             decl_vars,
@@ -217,21 +223,22 @@ pub fn emit_body<'a, 'b>(
     ))
 }
 
-fn make_body_instrs(
-    emitter: &mut Emitter,
-    env: &mut Env,
-    params: &[HhasParam],
+fn make_body_instrs<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    env: &mut Env<'a, 'arena>,
+    params: &[HhasParam<'arena>],
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     body: AstBody,
     is_generator: bool,
-    deprecation_info: Option<&[TypedValue]>,
+    deprecation_info: Option<&[TypedValue<'arena>]>,
     pos: &Pos,
     ast_params: &[tast::FunParam],
     flags: Flags,
-) -> Result {
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
-        instr::nativeimpl()
+        instr::nativeimpl(alloc)
     } else {
         env.do_function(emitter, &body, emit_ast_body)?
     };
@@ -256,57 +263,57 @@ fn make_body_instrs(
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entrynop()])
+        InstrSeq::gather(alloc, vec![begin_label, instr::entrynop(alloc)])
     } else {
-        InstrSeq::gather(vec![begin_label, header_content])
+        InstrSeq::gather(alloc, vec![begin_label, header_content])
     };
 
-    let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
+    let mut body_instrs = InstrSeq::gather(alloc, vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
         modify_prog_for_debugger_eval(&mut body_instrs);
     };
     Ok(body_instrs)
 }
 
-fn make_header_content(
-    emitter: &mut Emitter,
-    env: &mut Env,
-    params: &[HhasParam],
+fn make_header_content<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    env: &mut Env<'a, 'arena>,
+    params: &[HhasParam<'arena>],
     tparams: &[tast::Tparam],
     _decl_vars: &[String],
     is_generator: bool,
-    deprecation_info: Option<&[TypedValue]>,
+    deprecation_info: Option<&[TypedValue<'arena>]>,
     pos: &Pos,
     ast_params: &[tast::FunParam],
     flags: Flags,
-) -> Result {
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
     let method_prolog = if flags.contains(Flags::NATIVE) {
-        instr::empty()
+        instr::empty(alloc)
     } else {
         emit_method_prolog(emitter, env, pos, params, ast_params, tparams)?
     };
 
     let deprecation_warning =
-        emit_deprecation_info(&env.scope, deprecation_info, emitter.systemlib())?;
+        emit_deprecation_info(alloc, &env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
-        InstrSeq::gather(vec![instr::createcont(), instr::popc()])
+        InstrSeq::gather(alloc, vec![instr::createcont(alloc), instr::popc(alloc)])
     } else {
-        instr::empty()
+        instr::empty(alloc)
     };
 
-    Ok(InstrSeq::gather(vec![
-        method_prolog,
-        deprecation_warning,
-        generator_info,
-    ]))
+    Ok(InstrSeq::gather(
+        alloc,
+        vec![method_prolog, deprecation_warning, generator_info],
+    ))
 }
 
-fn make_decl_vars(
-    emitter: &mut Emitter,
-    scope: &Scope,
+fn make_decl_vars<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    scope: &Scope<'a>,
     immediate_tparams: &[tast::Tparam],
-    params: &[HhasParam],
+    params: &[HhasParam<'arena>],
     body: &AstBody,
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
@@ -343,7 +350,8 @@ fn make_decl_vars(
     Ok(decl_vars)
 }
 
-pub fn emit_return_type_info(
+pub fn emit_return_type_info<'arena>(
+    alloc: &'arena bumpalo::Bump,
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
@@ -351,9 +359,10 @@ pub fn emit_return_type_info(
     match ret {
         None => Ok(HhasTypeInfo::make(
             Some("".to_string()),
-            hhas_type::constraint::Type::default(),
+            hhbc_by_ref_hhas_type::constraint::Type::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
+            alloc,
             &emit_type_hint::Kind::Return,
             skip_awaitable,
             false, // nullable
@@ -363,13 +372,14 @@ pub fn emit_return_type_info(
     }
 }
 
-fn make_return_type_info(
+fn make_return_type_info<'arena>(
+    alloc: &'arena bumpalo::Bump,
     skip_awaitable: bool,
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
 ) -> Result<HhasTypeInfo> {
-    let return_type_info = emit_return_type_info(tp_names, skip_awaitable, ret);
+    let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
             emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)
@@ -378,29 +388,32 @@ fn make_return_type_info(
     return_type_info
 }
 
-pub fn make_env<'a>(
+pub fn make_env<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
     namespace: RcOc<namespace_env::Env>,
     scope: Scope<'a>,
     call_context: Option<String>,
     is_rx_body: bool,
-) -> Env<'a> {
-    let mut env = Env::default(namespace);
+) -> Env<'a, 'arena> {
+    let mut env = Env::default(alloc, namespace);
     env.call_context = call_context;
     env.scope = scope;
     env.with_rx_body(is_rx_body);
     env
 }
 
-fn make_params(
-    emitter: &mut Emitter,
+fn make_params<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena>,
     namespace: &namespace_env::Env,
     tp_names: &mut Vec<&str>,
     ast_params: &[tast::FunParam],
-    scope: &Scope,
+    scope: &Scope<'a>,
     flags: Flags,
-) -> Result<Vec<HhasParam>> {
+) -> Result<Vec<HhasParam<'arena>>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(
+        alloc,
         emitter,
         tp_names,
         namespace,
@@ -410,27 +423,28 @@ fn make_params(
     )
 }
 
-pub fn make_body<'a>(
-    emitter: &mut Emitter,
-    mut body_instrs: InstrSeq,
+pub fn make_body<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena>,
+    mut body_instrs: InstrSeq<'arena>,
     decl_vars: Vec<String>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<(String, Vec<HhasTypeInfo>)>,
     shadowed_tparams: Vec<String>,
-    mut params: Vec<HhasParam>,
+    mut params: Vec<HhasParam<'arena>>,
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
-    env: Option<Env<'a>>,
-) -> Result<HhasBody<'a>> {
-    body_instrs.rewrite_user_labels(emitter.label_gen_mut());
-    emit_adata::rewrite_typed_values(emitter, &mut body_instrs)?;
+    env: Option<Env<'a, 'arena>>,
+) -> Result<HhasBody<'a, 'arena>> {
+    body_instrs.rewrite_user_labels(alloc, emitter.label_gen_mut());
+    emit_adata::rewrite_typed_values(alloc, emitter, &mut body_instrs)?;
     if emitter
         .options()
         .hack_compiler_flags
         .contains(CompilerFlags::RELABEL)
     {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -452,23 +466,41 @@ pub fn make_body<'a>(
     })
 }
 
-fn emit_ast_body(env: &mut Env, e: &mut Emitter, body: &AstBody) -> Result {
+fn emit_ast_body<'a, 'arena>(
+    env: &mut Env<'a, 'arena>,
+    e: &mut Emitter<'arena>,
+    body: &AstBody,
+) -> Result<InstrSeq<'arena>> {
     match body {
         Either::Left(p) => emit_defs(env, e, p),
         Either::Right(b) => emit_final_stmts(e, env, b),
     }
 }
 
-fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result {
+fn emit_defs<'a, 'arena>(
+    env: &mut Env<'a, 'arena>,
+    emitter: &mut Emitter<'arena>,
+    prog: &[tast::Def],
+) -> Result<InstrSeq<'arena>> {
     use tast::Def;
-    fn emit_def(env: &mut Env, emitter: &mut Emitter, def: &tast::Def) -> Result {
+    fn emit_def<'a, 'arena>(
+        env: &mut Env<'a, 'arena>,
+        emitter: &mut Emitter<'arena>,
+        def: &tast::Def,
+    ) -> Result<InstrSeq<'arena>> {
+        let alloc = env.arena;
         match def {
             Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
-            _ => Ok(instr::empty()),
+            _ => Ok(instr::empty(alloc)),
         }
     }
-    fn aux(env: &mut Env, emitter: &mut Emitter, defs: &[tast::Def]) -> Result {
+    fn aux<'a, 'arena>(
+        env: &mut Env<'a, 'arena>,
+        emitter: &mut Emitter<'arena>,
+        defs: &[tast::Def],
+    ) -> Result<InstrSeq<'arena>> {
+        let alloc = env.arena;
         match defs {
             [Def::SetNamespaceEnv(ns), ..] => {
                 env.namespace = RcOc::clone(&ns);
@@ -481,36 +513,46 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
             }
             [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
                 Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, &s1),
-                _ => Ok(InstrSeq::gather(vec![
-                    emit_statement::emit_stmt(emitter, env, s1)?,
-                    emit_statement::emit_final_stmt(emitter, env, &s2)?,
-                ])),
+                _ => Ok(InstrSeq::gather(
+                    alloc,
+                    vec![
+                        emit_statement::emit_stmt(emitter, env, s1)?,
+                        emit_statement::emit_final_stmt(emitter, env, &s2)?,
+                    ],
+                )),
             },
-            [def, ..] => Ok(InstrSeq::gather(vec![
-                emit_def(env, emitter, def)?,
-                aux(env, emitter, &defs[1..])?,
-            ])),
+            [def, ..] => Ok(InstrSeq::gather(
+                alloc,
+                vec![emit_def(env, emitter, def)?, aux(env, emitter, &defs[1..])?],
+            )),
         }
     }
+    let alloc = env.arena;
     match prog {
-        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
-            emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
-            aux(env, emitter, &prog[1..])?,
-        ])),
+        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(
+            alloc,
+            vec![
+                emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
+                aux(env, emitter, &prog[1..])?,
+            ],
+        )),
         [] | [_] => aux(env, emitter, &prog[..]),
         [def, ..] => {
             let i1 = emit_def(env, emitter, def)?;
             if i1.is_empty() {
                 emit_defs(env, emitter, &prog[1..])
             } else {
-                Ok(InstrSeq::gather(vec![i1, aux(env, emitter, &prog[1..])?]))
+                Ok(InstrSeq::gather(
+                    alloc,
+                    vec![i1, aux(env, emitter, &prog[1..])?],
+                ))
             }
         }
     }
 }
 
-pub fn has_type_constraint(
-    env: &Env,
+pub fn has_type_constraint<'a, 'arena>(
+    env: &Env<'a, 'arena>,
     ti: Option<&HhasTypeInfo>,
     ast_param: &tast::FunParam,
 ) -> (RGH::ReificationLevel, Option<tast::Hint>) {
@@ -532,8 +574,8 @@ mod atom_helpers {
     use crate::*;
     use aast_defs::ReifyKind::Erased;
     use ast_defs::Id;
-    use instruction_sequence_rust::{instr, unrecoverable, InstrSeq, Result};
-    use local::Type::Named;
+    use hhbc_by_ref_instruction_sequence::{instr, unrecoverable, InstrSeq, Result};
+    use hhbc_by_ref_local::Type::Named;
     use tast::Tparam;
 
     fn strip_ns(name: &str) -> &str {
@@ -566,39 +608,45 @@ mod atom_helpers {
         }
     }
 
-    pub fn emit_clscnsl(
-        param: &HhasParam,
+    pub fn emit_clscnsl<'arena>(
+        alloc: &'arena bumpalo::Bump,
+        param: &HhasParam<'arena>,
         pos: &Pos,
-        cls_instrs: InstrSeq,
+        cls_instrs: InstrSeq<'arena>,
         msg: &str,
-        label_not_a_class: Label,
-        label_done: Label,
-    ) -> Result {
+        label_not_a_class: Label<'arena>,
+        label_done: Label<'arena>,
+    ) -> Result<InstrSeq<'arena>> {
         let param_name = &param.name;
-        let loc = Named(param_name.into());
-        Ok(InstrSeq::gather(vec![
-            cls_instrs,
-            instr::classgetc(),
-            instr::clscnsl(loc.clone()),
-            instr::popl(loc),
-            instr::jmp(label_done.clone()),
-            instr::label(label_not_a_class),
-            emit_fatal_runtime(&pos, msg),
-            instr::label(label_done),
-        ]))
+        let loc =
+            Named(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str());
+        Ok(InstrSeq::gather(
+            alloc,
+            vec![
+                cls_instrs,
+                instr::classgetc(alloc),
+                instr::clscnsl(alloc, loc.clone()),
+                instr::popl(alloc, loc),
+                instr::jmp(alloc, label_done.clone()),
+                instr::label(alloc, label_not_a_class),
+                emit_fatal_runtime(alloc, &pos, msg),
+                instr::label(alloc, label_done),
+            ],
+        ))
     }
 } //mod atom_helpers
 
 ////////////////////////////////////////////////////////////////////////////////
 // atom_instrs
 
-fn atom_instrs(
-    emitter: &mut Emitter,
-    env: &mut Env,
-    param: &HhasParam,
+fn atom_instrs<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    env: &mut Env<'a, 'arena>,
+    param: &HhasParam<'arena>,
     ast_param: &tast::FunParam,
     tparams: &[tast::Tparam],
-) -> Result<Option<InstrSeq>> {
+) -> Result<Option<InstrSeq<'arena>>> {
+    let alloc = env.arena;
     if !param
         .user_attributes
         .iter()
@@ -612,8 +660,8 @@ fn atom_instrs(
             "__Atom param type hint unavailable",
         )),
         TypeHint(_, Some(Hint(_, h))) => {
-            let label_done = emitter.label_gen_mut().next_regular();
-            let label_not_a_class = emitter.label_gen_mut().next_regular();
+            let label_done = emitter.label_gen_mut().next_regular(alloc);
+            let label_not_a_class = emitter.label_gen_mut().next_regular(alloc);
             match &**h {
                 Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\MemberOf" => {
                     match &vec[..] {
@@ -631,40 +679,54 @@ fn atom_instrs(
                                         if !atom_helpers::is_generic(tag, tparams) {
                                             //'tag' is just a name.
                                             Ok(Some(atom_helpers::emit_clscnsl(
+                                                alloc,
                                                 param,
                                                 &pos,
-                                                InstrSeq::gather(vec![
-                                                    emit_expression::emit_expr(
-                                                        emitter,
-                                                        env,
-                                                        &(tast::Expr(
-                                                            Pos::make_none(),
-                                                            aast::Expr_::String(
-                                                                bstr::BString::from(tag.to_owned()),
-                                                            ),
-                                                        )),
-                                                    )?,
-                                                    emit_expression::emit_expr(
-                                                        emitter,
-                                                        env,
-                                                        &(tast::Expr(
-                                                            Pos::make_none(),
-                                                            aast::Expr_::True,
-                                                        )),
-                                                    )?,
-                                                    instr::oodeclexists(ClassKind::Class),
-                                                    instr::jmpz(label_not_a_class.clone()),
-                                                    emit_expression::emit_expr(
-                                                        emitter,
-                                                        env,
-                                                        &(tast::Expr(
-                                                            Pos::make_none(),
-                                                            aast::Expr_::String(
-                                                                bstr::BString::from(tag.to_owned()),
-                                                            ),
-                                                        )),
-                                                    )?,
-                                                ]),
+                                                InstrSeq::gather(
+                                                    alloc,
+                                                    vec![
+                                                        emit_expression::emit_expr(
+                                                            emitter,
+                                                            env,
+                                                            &(tast::Expr(
+                                                                Pos::make_none(),
+                                                                aast::Expr_::String(
+                                                                    bstr::BString::from(
+                                                                        tag.to_owned(),
+                                                                    ),
+                                                                ),
+                                                            )),
+                                                        )?,
+                                                        emit_expression::emit_expr(
+                                                            emitter,
+                                                            env,
+                                                            &(tast::Expr(
+                                                                Pos::make_none(),
+                                                                aast::Expr_::True,
+                                                            )),
+                                                        )?,
+                                                        instr::oodeclexists(
+                                                            alloc,
+                                                            ClassKind::Class,
+                                                        ),
+                                                        instr::jmpz(
+                                                            alloc,
+                                                            label_not_a_class.clone(),
+                                                        ),
+                                                        emit_expression::emit_expr(
+                                                            emitter,
+                                                            env,
+                                                            &(tast::Expr(
+                                                                Pos::make_none(),
+                                                                aast::Expr_::String(
+                                                                    bstr::BString::from(
+                                                                        tag.to_owned(),
+                                                                    ),
+                                                                ),
+                                                            )),
+                                                        )?,
+                                                    ],
+                                                ),
                                                 "Type is not a class",
                                                 label_not_a_class,
                                                 label_done,
@@ -672,18 +734,23 @@ fn atom_instrs(
                                         } else {
                                             //'tag' is a reified generic.
                                             Ok(Some(atom_helpers::emit_clscnsl(
+                                                alloc,
                                                 param,
                                                 &pos,
-                                                InstrSeq::gather(vec![
+                                                InstrSeq::gather(
+                                                    alloc,
+                                                    vec![
                                                     emit_expression::emit_reified_generic_instrs(
+                                                        alloc,
                                                         &Pos::make_none(),
                                                         true,
                                                         atom_helpers::index_of_generic(
                                                             tparams, tag,
                                                         )?,
                                                     )?,
-                                                    instr::basec(0, MemberOpMode::ModeNone),
+                                                    instr::basec(alloc, 0, MemberOpMode::ModeNone),
                                                     instr::querym(
+                                                        alloc,
                                                         1,
                                                         QueryOp::CGetQuiet,
                                                         MemberKey::ET(
@@ -691,10 +758,11 @@ fn atom_instrs(
                                                             ReadOnlyOp::Mutable,
                                                         ),
                                                     ),
-                                                    instr::dup(),
-                                                    instr::istypec(IstypeOp::OpNull),
-                                                    instr::jmpnz(label_not_a_class.clone()),
-                                                ]),
+                                                    instr::dup(alloc),
+                                                    instr::istypec(alloc, IstypeOp::OpNull),
+                                                    instr::jmpnz(alloc, label_not_a_class.clone()),
+                                                ],
+                                                ),
                                                 "Generic type parameter does not resolve to a class",
                                                 label_not_a_class,
                                                 label_done,
@@ -714,10 +782,12 @@ fn atom_instrs(
                                             } else {
                                                 //'tag' is a type constant.
                                                 Ok(Some(atom_helpers::emit_clscnsl(
+                                                    alloc,
                                                     param,
                                                     &pos,
-                                                    InstrSeq::gather(vec![
+                                                    InstrSeq::gather(alloc, vec![
                                                         emit_expression::get_type_structure_for_hint(
+                                                            alloc,
                                                             emitter,
                                                             tparams
                                                                 .iter()
@@ -727,12 +797,12 @@ fn atom_instrs(
                                                             &IndexSet::new(),
                                                             hint,
                                                         )?,
-                                                        instr::combine_and_resolve_type_struct(1),
-                                                        instr::basec(0, MemberOpMode::ModeNone),
-                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into(), ReadOnlyOp::Mutable)),
-                                                        instr::dup(),
-                                                        instr::istypec(IstypeOp::OpNull),
-                                                        instr::jmpnz(label_not_a_class.clone()),
+                                                        instr::combine_and_resolve_type_struct(alloc, 1),
+                                                        instr::basec(alloc, 0, MemberOpMode::ModeNone),
+                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET("classname", ReadOnlyOp::Mutable)),
+                                                        instr::dup(alloc),
+                                                        instr::istypec(alloc, IstypeOp::OpNull),
+                                                        instr::jmpnz(alloc, label_not_a_class.clone()),
                                                     ]),
                                                     "Type constant does not resolve to a class",
                                                     label_not_a_class,
@@ -764,18 +834,19 @@ fn atom_instrs(
     }
 }
 
-pub fn emit_method_prolog(
-    emitter: &mut Emitter,
-    env: &mut Env,
+pub fn emit_method_prolog<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    params: &[HhasParam],
+    params: &[HhasParam<'arena>],
     ast_params: &[tast::FunParam],
     tparams: &[tast::Tparam],
-) -> Result {
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
     let mut make_param_instr =
-        |(param, ast_param): (&HhasParam, &tast::FunParam)| -> Result<Option<InstrSeq>> {
+        |(param, ast_param): (&HhasParam<'arena>, &tast::FunParam)| -> Result<Option<InstrSeq<'arena>>> {
             let param_name = &param.name;
-            let param_name = || ParamId::ParamNamed(param_name.into());
+            let param_name = || ParamId::ParamNamed(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str());
             if param.is_variadic {
                 Ok(None)
             } else {
@@ -783,9 +854,10 @@ pub fn emit_method_prolog(
                 let param_checks =
                     match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
                         (L::Unconstrained, _) => Ok(None),
-                        (L::Not, _) => Ok(Some(instr::verify_param_type(param_name()))),
-                        (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(vec![
+                        (L::Not, _) => Ok(Some(instr::verify_param_type(alloc, param_name()))),
+                        (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(alloc, vec![
                             emit_expression::get_type_structure_for_hint(
+                                alloc,
                                 emitter,
                                 tparams
                                     .iter()
@@ -795,14 +867,15 @@ pub fn emit_method_prolog(
                                 &IndexSet::new(),
                                 &h,
                             )?,
-                            instr::verify_param_type_ts(param_name()),
+                            instr::verify_param_type_ts(alloc, param_name()),
                         ]))),
                         (L::Definitely, Some(h)) => {
                             let check = instr::istypel(
-                                local::Type::Named((&param.name).into()),
+                                alloc,
+                                hhbc_by_ref_local::Type::Named(bumpalo::collections::String::from_str_in(param.name.as_str(), alloc).into_bump_str()),
                                 IstypeOp::OpNull,
                             );
-                            let verify_instr = instr::verify_param_type_ts(param_name());
+                            let verify_instr = instr::verify_param_type_ts(alloc, param_name());
                             RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
                                 .map(Some)
                         }
@@ -824,7 +897,7 @@ pub fn emit_method_prolog(
                 match (param_checks, atom_instrs) {
                     (None, None) => Ok(None),
                     (Some(is), None) => Ok(Some(is)),
-                    (Some(is), Some(js)) => Ok(Some(InstrSeq::gather(vec![is, js]))),
+                    (Some(is), Some(js)) => Ok(Some(InstrSeq::gather(alloc, vec![is, js]))),
                     (None, Some(js)) => Ok(Some(js)),
                 }
             }
@@ -843,35 +916,37 @@ pub fn emit_method_prolog(
         .zip(ast_params.into_iter())
         .filter_map(|p| make_param_instr(p).transpose())
         .collect::<Result<Vec<_>>>()?;
-
-    let mut instrs = vec![emit_pos(pos)];
-    instrs.extend_from_slice(param_instrs.as_slice());
-    Ok(InstrSeq::gather(instrs))
+    let mut instrs = vec![emit_pos(alloc, pos)];
+    for i in param_instrs.iter() {
+        instrs.push(InstrSeq::clone(alloc, i));
+    }
+    Ok(InstrSeq::gather(alloc, instrs))
 }
 
-pub fn emit_deprecation_info(
-    scope: &Scope,
-    deprecation_info: Option<&[TypedValue]>,
+pub fn emit_deprecation_info<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    scope: &Scope<'a>,
+    deprecation_info: Option<&[TypedValue<'arena>]>,
     is_systemlib: bool,
-) -> Result<InstrSeq> {
+) -> Result<InstrSeq<'arena>> {
     Ok(match deprecation_info {
-        None => instr::empty(),
+        None => instr::empty(alloc),
         Some(args) => {
             fn strip_id<'a>(id: &'a tast::Id) -> &'a str {
                 string_utils::strip_global_ns(id.1.as_str())
             }
             let (class_name, trait_instrs, concat_instruction): (String, _, _) =
                 match scope.get_class() {
-                    None => ("".into(), instr::empty(), instr::empty()),
+                    None => ("".into(), instr::empty(alloc), instr::empty(alloc)),
                     Some(c) if c.get_kind() == tast::ClassKind::Ctrait => (
                         "::".into(),
-                        InstrSeq::gather(vec![instr::self_(), instr::classname()]),
-                        instr::concat(),
+                        InstrSeq::gather(alloc, vec![instr::self_(alloc), instr::classname(alloc)]),
+                        instr::concat(alloc),
                     ),
                     Some(c) => (
                         strip_id(c.get_name()).to_string() + "::",
-                        instr::empty(),
-                        instr::empty(),
+                        instr::empty(alloc),
+                        instr::empty(alloc),
                     ),
                 };
 
@@ -890,7 +965,7 @@ pub fn emit_deprecation_info(
                 + (if args.is_empty() {
                     "deprecated function"
                 } else if let TypedValue::String(s) = &args[0] {
-                    s.as_str()
+                    s
                 } else {
                     return Err(Error::Unrecoverable(
                         "deprecated attribute first argument is not a string".into(),
@@ -914,35 +989,48 @@ pub fn emit_deprecation_info(
             };
 
             if sampling_rate <= 0 {
-                instr::empty()
+                instr::empty(alloc)
             } else {
-                InstrSeq::gather(vec![
-                    instr::nulluninit(),
-                    instr::nulluninit(),
-                    trait_instrs,
-                    instr::string(deprecation_string),
-                    concat_instruction,
-                    instr::int64(sampling_rate),
-                    instr::int(error_code),
-                    instr::fcallfuncd(
-                        FcallArgs::new(FcallFlags::default(), 1, vec![], None, 3, None),
-                        function::from_raw_string("trigger_sampled_error"),
-                    ),
-                    instr::popc(),
-                ])
+                InstrSeq::gather(
+                    alloc,
+                    vec![
+                        instr::nulluninit(alloc),
+                        instr::nulluninit(alloc),
+                        trait_instrs,
+                        instr::string(alloc, deprecation_string),
+                        concat_instruction,
+                        instr::int64(alloc, sampling_rate),
+                        instr::int(alloc, error_code),
+                        instr::fcallfuncd(
+                            alloc,
+                            FcallArgs::new(
+                                alloc,
+                                FcallFlags::default(),
+                                1,
+                                bumpalo::vec![in alloc;].into_bump_slice(),
+                                None,
+                                3,
+                                None,
+                            ),
+                            function::from_raw_string(alloc, "trigger_sampled_error"),
+                        ),
+                        instr::popc(alloc),
+                    ],
+                )
             }
         }
     })
 }
 
-fn set_emit_statement_state(
-    emitter: &mut Emitter,
-    default_return_value: InstrSeq,
-    params: &[HhasParam],
+fn set_emit_statement_state<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena>,
+    default_return_value: InstrSeq<'arena>,
+    params: &[HhasParam<'arena>],
     return_type_info: &HhasTypeInfo,
     return_type: Option<&tast::Hint>,
     pos: &Pos,
-    default_dropthrough: Option<InstrSeq>,
+    default_dropthrough: Option<InstrSeq<'arena>>,
     flags: Flags,
     is_generator: bool,
 ) {
@@ -956,17 +1044,21 @@ fn set_emit_statement_state(
     let default_dropthrough = if default_dropthrough.is_some() {
         default_dropthrough
     } else if flags.contains(Flags::ASYNC) && verify_return.is_some() {
-        Some(InstrSeq::gather(vec![
-            instr::null(),
-            instr::verify_ret_type_c(),
-            instr::retc(),
-        ]))
+        Some(InstrSeq::gather(
+            alloc,
+            vec![
+                instr::null(alloc),
+                instr::verify_ret_type_c(alloc),
+                instr::retc(alloc),
+            ],
+        ))
     } else {
         None
     };
-    let (num_out, verify_out) = emit_verify_out(params);
+    let (num_out, verify_out) = emit_verify_out(alloc, params);
 
     emit_statement::set_state(
+        alloc,
         emitter,
         StatementState {
             verify_return,
@@ -979,25 +1071,37 @@ fn set_emit_statement_state(
     )
 }
 
-fn emit_verify_out(params: &[HhasParam]) -> (usize, InstrSeq) {
-    let param_instrs: Vec<InstrSeq> = params
+fn emit_verify_out<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    params: &[HhasParam<'arena>],
+) -> (usize, InstrSeq<'arena>) {
+    let param_instrs: Vec<InstrSeq<'arena>> = params
         .iter()
         .enumerate()
         .filter_map(|(i, p)| {
             if p.is_inout {
-                Some(InstrSeq::gather(vec![
-                    instr::cgetl(local::Type::Named(p.name.clone())),
-                    match p.type_info.as_ref() {
-                        Some(HhasTypeInfo { user_type, .. })
-                            if user_type.as_ref().map_or(true, |t| {
-                                !(t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic"))
-                            }) =>
-                        {
-                            instr::verify_out_type(ParamId::ParamUnnamed(i as isize))
-                        }
-                        _ => instr::empty(),
-                    },
-                ]))
+                Some(InstrSeq::gather(
+                    alloc,
+                    vec![
+                        instr::cgetl(
+                            alloc,
+                            hhbc_by_ref_local::Type::Named(
+                                bumpalo::collections::String::from_str_in(p.name.as_str(), alloc)
+                                    .into_bump_str(),
+                            ),
+                        ),
+                        match p.type_info.as_ref() {
+                            Some(HhasTypeInfo { user_type, .. })
+                                if user_type.as_ref().map_or(true, |t| {
+                                    !(t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic"))
+                                }) =>
+                            {
+                                instr::verify_out_type(alloc, ParamId::ParamUnnamed(i as isize))
+                            }
+                            _ => instr::empty(alloc),
+                        },
+                    ],
+                ))
             } else {
                 None
             }
@@ -1005,11 +1109,12 @@ fn emit_verify_out(params: &[HhasParam]) -> (usize, InstrSeq) {
         .collect();
     (
         param_instrs.len(),
-        InstrSeq::gather(param_instrs.into_iter().rev().collect()),
+        InstrSeq::gather(alloc, param_instrs.into_iter().rev().collect()),
     )
 }
 
-pub fn emit_generics_upper_bounds(
+pub fn emit_generics_upper_bounds<'arena>(
+    alloc: &'arena bumpalo::Bump,
     immediate_tparams: &[tast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
@@ -1019,6 +1124,7 @@ pub fn emit_generics_upper_bounds(
             let mut tparam_names = get_tp_names(immediate_tparams);
             tparam_names.extend_from_slice(class_tparam_names);
             emit_type_hint::hint_to_type_info(
+                alloc,
                 &emit_type_hint::Kind::UpperBound,
                 skip_awaitable,
                 false, // nullable
@@ -1082,11 +1188,15 @@ pub fn get_tp_names_set(tparams: &[tast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 
-fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
-    unimplemented!()
+#[allow(clippy::needless_lifetimes)]
+fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
+    unimplemented!() // SF(2021-03-17): I found it like this.
 }
 
-fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
+fn set_function_jmp_targets<'a, 'arena>(
+    emitter: &mut Emitter<'arena>,
+    env: &mut Env<'a, 'arena>,
+) -> bool {
     use ScopeItem::*;
     let function_state_key = match env.scope.items.as_slice() {
         [] => get_unique_id_for_main(),
@@ -1110,4 +1220,3 @@ fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
         .functions_with_finally
         .contains(&function_state_key)
 }
-*/

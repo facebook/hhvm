@@ -1543,6 +1543,10 @@ pub mod instr {
         )
     }
 
+    pub fn nativeimpl<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
+        instr(alloc, Instruct::IMisc(InstructMisc::NativeImpl))
+    }
+
     pub fn srcloc<'a>(
         alloc: &'a bumpalo::Bump,
         line_begin: isize,

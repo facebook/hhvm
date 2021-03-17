@@ -92,7 +92,7 @@ let check_redundant_generics_fun env root ft =
     (mk (Reason.Rnone, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =
-  let root = (Typing_deps.Dep.Class class_name, Some class_type) in
+  let root = (Typing_deps.Dep.Type class_name, Some class_type) in
   let tparams = Cls.tparams class_type in
   let tpenv =
     List.fold_left tparams ~init:SMap.empty ~f:(fun env tp ->

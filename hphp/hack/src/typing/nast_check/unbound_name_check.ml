@@ -45,11 +45,11 @@ let handle_unbound_name env (pos, name) kind =
       let dep =
         match kind with
         | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
-        | Errors.TypeNamespace -> Typing_deps.Dep.Class name
+        | Errors.TypeNamespace -> Typing_deps.Dep.Type name
         | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
-        | Errors.TraitContext -> Typing_deps.Dep.Class name
-        | Errors.RecordContext -> Typing_deps.Dep.Class name
-        | Errors.ClassContext -> Typing_deps.Dep.Class name
+        | Errors.TraitContext -> Typing_deps.Dep.Type name
+        | Errors.RecordContext -> Typing_deps.Dep.Type name
+        | Errors.ClassContext -> Typing_deps.Dep.Type name
       in
       Typing_deps.add_idep
         (Provider_context.get_deps_mode env.ctx)
@@ -170,7 +170,7 @@ let handler ctx =
       let new_env =
         {
           env with
-          droot = Typing_deps.Dep.Class (snd c.Aast.c_name);
+          droot = Typing_deps.Dep.Type (snd c.Aast.c_name);
           mode = c.Aast.c_mode;
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
         }
@@ -181,7 +181,7 @@ let handler ctx =
       let new_env =
         {
           env with
-          droot = Typing_deps.Dep.Class (snd td.Aast.t_name);
+          droot = Typing_deps.Dep.Type (snd td.Aast.t_name);
           mode = FileInfo.Mstrict;
           type_params = extend_type_params SMap.empty td.Aast.t_tparams;
         }

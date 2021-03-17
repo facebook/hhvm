@@ -425,7 +425,7 @@ let get_dependent_classes_files (mode : Typing_deps_mode.t) (classes : SSet.t) :
     classes
     ~init:Typing_deps.(DepSet.make mode)
     ~f:(fun c acc ->
-      let source_class = Dep.make (hash_mode mode) (Dep.Class c) in
+      let source_class = Dep.make (hash_mode mode) (Dep.Type c) in
       Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
   |> Typing_deps.Files.get_files
 

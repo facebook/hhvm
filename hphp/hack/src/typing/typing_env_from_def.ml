@@ -36,7 +36,7 @@ let get_self_from_c c =
 
 let class_env ?origin ctx c =
   let file = Pos.filename (fst c.c_name) in
-  let droot = Some (Typing_deps.Dep.Class (snd c.c_name)) in
+  let droot = Some (Typing_deps.Dep.Type (snd c.c_name)) in
   let env = Env.empty ?origin ctx file ~mode:c.c_mode ~droot in
   (* Set up self identifier and type *)
   let self_id = snd c.c_name in
@@ -76,13 +76,13 @@ let class_env ?origin ctx c =
 
 let record_def_env ?origin ctx rd =
   let file = Pos.filename (fst rd.rd_name) in
-  let droot = Some (Typing_deps.Dep.Class (snd rd.rd_name)) in
+  let droot = Some (Typing_deps.Dep.Type (snd rd.rd_name)) in
   let env = Env.empty ?origin ctx file ~droot in
   env
 
 let typedef_env ?origin ctx t =
   let file = Pos.filename (fst t.t_kind) in
-  let droot = Some (Typing_deps.Dep.Class (snd t.t_name)) in
+  let droot = Some (Typing_deps.Dep.Type (snd t.t_name)) in
   let env = Env.empty ?origin ctx file ~mode:t.t_mode ~droot in
   env
 

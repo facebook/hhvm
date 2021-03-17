@@ -500,12 +500,12 @@ module TypesTable = struct
   let insert db stmt_cache ~name ~flags ~file_info_id :
       (unit, insertion_error) result =
     let hash =
-      Typing_deps.Dep.Class name
+      Typing_deps.Dep.Type name
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
     let canon_hash =
-      Typing_deps.Dep.Class (to_canon_name_key name)
+      Typing_deps.Dep.Type (to_canon_name_key name)
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
@@ -540,7 +540,7 @@ module TypesTable = struct
         name
     in
     let hash =
-      Typing_deps.Dep.Class name
+      Typing_deps.Dep.Type name
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in

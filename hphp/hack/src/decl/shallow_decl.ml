@@ -282,7 +282,7 @@ let class_ ctx c =
   let (errs, result) =
     Errors.do_ @@ fun () ->
     let (_, cls_name) = c.c_name in
-    let class_dep = Dep.Class cls_name in
+    let class_dep = Dep.Type cls_name in
     let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
     let hint = Decl_hint.hint env in
     let (req_extends, req_implements) = split_reqs c in

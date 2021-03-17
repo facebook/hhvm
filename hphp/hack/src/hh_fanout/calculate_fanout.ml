@@ -92,7 +92,7 @@ let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
       make_edges
         ~symbol_type:FileInfo.Class
         ~ids:file_info.FileInfo.classes
-        ~f:(fun name -> Typing_deps.Dep.Class name);
+        ~f:(fun name -> Typing_deps.Dep.Type name);
       make_edges
         ~symbol_type:FileInfo.Fun
         ~ids:file_info.FileInfo.funs
@@ -104,11 +104,11 @@ let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
       make_edges
         ~symbol_type:FileInfo.Typedef
         ~ids:file_info.FileInfo.typedefs
-        ~f:(fun name -> Typing_deps.Dep.Class name);
+        ~f:(fun name -> Typing_deps.Dep.Type name);
       make_edges
         ~symbol_type:FileInfo.RecordDef
         ~ids:file_info.FileInfo.record_defs
-        ~f:(fun name -> Typing_deps.Dep.Class name);
+        ~f:(fun name -> Typing_deps.Dep.Type name);
     ]
 
 let file_info_to_dep_set

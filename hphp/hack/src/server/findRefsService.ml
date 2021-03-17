@@ -161,7 +161,7 @@ let get_child_classes_files ctx class_name =
     let deps_mode = Provider_context.get_deps_mode ctx in
     (* Find the files that contain classes that extend class_ *)
     let cid_hash =
-      Typing_deps.(Dep.make (hash_mode deps_mode) (Dep.Class class_name))
+      Typing_deps.(Dep.make (hash_mode deps_mode) (Dep.Type class_name))
     in
     let extend_deps =
       Decl_compare.get_extend_deps
@@ -182,7 +182,7 @@ let get_deps_set ctx classes =
         match Naming_provider.get_type_path ctx class_name with
         | None -> acc
         | Some fn ->
-          let dep = Typing_deps.Dep.Class class_name in
+          let dep = Typing_deps.Dep.Type class_name in
           let ideps = Typing_deps.get_ideps deps_mode dep in
           let files = Typing_deps.Files.get_files ideps in
           let files = Relative_path.Set.add files fn in

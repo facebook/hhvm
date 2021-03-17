@@ -319,7 +319,7 @@ let class_big_diff class1 class2 =
 *)
 and get_all_dependencies
     ~mode ~conservative_redecl trace cid (changed, to_redecl, to_recheck) =
-  let dep = Dep.Class cid in
+  let dep = Dep.Type cid in
   let cid_hash = Typing_deps.(Dep.make (hash_mode mode) dep) in
   (* Why can't we just use `Typing_deps.get_ideps dep` here? See test case
      hphp/hack/test/integration_ml/saved_state/test_changed_type_in_base_class.ml
@@ -399,7 +399,7 @@ let get_type_deps ~mode old_types tid (changed, to_recheck) =
   match (SMap.find tid old_types, Decl_heap.Typedefs.get tid) with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Class tid in
+    let dep = Dep.Type tid in
     let where_typedef_was_used = Typing_deps.get_ideps mode dep in
     ( add_changed mode changed dep,
       DepSet.union where_typedef_was_used to_recheck )
@@ -410,7 +410,7 @@ let get_type_deps ~mode old_types tid (changed, to_recheck) =
     if is_same_signature then
       (changed, to_recheck)
     else
-      let dep = Dep.Class tid in
+      let dep = Dep.Type tid in
       let where_type_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_type_is_used to_recheck in
       (add_changed mode changed dep, to_recheck)
@@ -510,7 +510,7 @@ let get_class_deps
     let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
     let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
     let (deps, is_unchanged) = ClassDiff.compare mode cid nclass1 nclass2 in
-    let dep = Dep.Class cid in
+    let dep = Dep.Type cid in
     let cid_hash = Typing_deps.(Dep.make (hash_mode mode) dep) in
     let (changed, to_redecl, to_recheck) =
       if is_unchanged then
@@ -601,7 +601,7 @@ let get_record_def_deps
   match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Class rdid in
+    let dep = Dep.Type rdid in
     let where_record_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_record_is_used to_recheck in
     (add_changed mode changed dep, to_redecl, to_recheck)
@@ -609,7 +609,7 @@ let get_record_def_deps
     if Poly.( = ) rd1 rd2 then
       (changed, to_redecl, to_recheck)
     else
-      let dep = Dep.Class rdid in
+      let dep = Dep.Type rdid in
       let where_record_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_record_is_used to_recheck in
       (add_changed mode changed dep, to_redecl, to_recheck)

@@ -626,7 +626,7 @@ let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
 let make_depend_on_class env class_name =
-  let dep = Dep.Class class_name in
+  let dep = Dep.Type class_name in
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
   ()

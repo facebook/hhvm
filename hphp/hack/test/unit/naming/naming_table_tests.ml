@@ -455,7 +455,7 @@ let test_naming_table_hash () =
     (Int64.to_int_exn actual)
     "Expected to move dep hash to upper 31 bits";
 
-  let foo_dep = Typing_deps.Dep.Class "\\Foo" in
+  let foo_dep = Typing_deps.Dep.Type "\\Foo" in
   let foo_dep_hash = Typing_deps.ForTest.compute_dep_hash hash_mode foo_dep in
   Asserter.Int_asserter.assert_equals
     0b011_1101_0111_1011_0110_1111_1110_1011
@@ -505,7 +505,7 @@ let test_ensure_hashing_outputs_31_bits () =
   let dep_with_thirty_first_bit_set_to_1 =
     (* This name selected by trying a bunch of names and finding one that has
     the 31st bit set to 1. *)
-    Typing_deps.Dep.Class "\\Abcd"
+    Typing_deps.Dep.Type "\\Abcd"
     |> Typing_deps.ForTest.compute_dep_hash hash_mode
   in
   let thirty_first_bit = 0b01000000_00000000_00000000_00000000 in
@@ -555,14 +555,14 @@ let test_naming_table_query_by_dep_hash () =
 
       Asserter.Relative_path_asserter.assert_list_equals
         [Relative_path.from_root "foo.php"]
-        ( Typing_deps.Dep.Class "\\Foo"
+        ( Typing_deps.Dep.Type "\\Foo"
         |> Typing_deps.Dep.make hash_mode
         |> Naming_sqlite.get_type_paths_by_dep_hash db_path
         |> Relative_path.Set.elements )
         "Look up class by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_list_equals
         []
-        ( Typing_deps.Dep.Class "\\nonexistent"
+        ( Typing_deps.Dep.Type "\\nonexistent"
         |> Typing_deps.Dep.make hash_mode
         |> Naming_sqlite.get_type_paths_by_dep_hash db_path
         |> Relative_path.Set.elements )
@@ -570,14 +570,14 @@ let test_naming_table_query_by_dep_hash () =
 
       Asserter.Relative_path_asserter.assert_list_equals
         [Relative_path.from_root "baz.php"]
-        ( Typing_deps.Dep.Class "\\Baz"
+        ( Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
         |> Naming_sqlite.get_type_paths_by_dep_hash db_path
         |> Relative_path.Set.elements )
         "Look up class by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_list_equals
         []
-        ( Typing_deps.Dep.Class "\\nonexistent"
+        ( Typing_deps.Dep.Type "\\nonexistent"
         |> Typing_deps.Dep.make hash_mode
         |> Naming_sqlite.get_type_paths_by_dep_hash db_path
         |> Relative_path.Set.elements )
@@ -601,7 +601,7 @@ let test_naming_table_query_by_dep_hash () =
         "Bulk lookup for fun should be correct";
       Asserter.Relative_path_asserter.assert_list_equals
         [Relative_path.from_root "baz.php"]
-        ( Typing_deps.Dep.Class "\\Baz"
+        ( Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
         |> Typing_deps.DepSet.singleton deps_mode
         |> Naming_table.get_dep_set_files backed_naming_table deps_mode
@@ -624,7 +624,7 @@ let test_naming_table_query_by_dep_hash () =
              |> Typing_deps.Dep.make hash_mode
              |> Typing_deps.DepSet.singleton deps_mode )
         |> Typing_deps.DepSet.union
-             ( Typing_deps.Dep.Class "\\Baz"
+             ( Typing_deps.Dep.Type "\\Baz"
              |> Typing_deps.Dep.make hash_mode
              |> Typing_deps.DepSet.singleton deps_mode )
         |> Naming_table.get_dep_set_files backed_naming_table deps_mode
@@ -661,7 +661,7 @@ let test_naming_table_query_by_dep_hash () =
       in
       Asserter.Relative_path_asserter.assert_list_equals
         [Relative_path.from_root "bar.php"]
-        ( Typing_deps.Dep.Class "\\Baz"
+        ( Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
         |> Typing_deps.DepSet.singleton deps_mode
         |> Naming_table.get_dep_set_files new_naming_table deps_mode

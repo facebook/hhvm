@@ -547,7 +547,7 @@ let check_members
         if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
             (Env.get_deps_mode env)
-            (Dep.Class (Cls.name class_))
+            (Dep.Type (Cls.name class_))
             dep;
         check_override
           ~check_member_unique
@@ -657,7 +657,7 @@ let check_constructors env parent_class class_ psubst subst on_error =
         if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
             (Env.get_deps_mode env)
-            (Dep.Class (Cls.name class_))
+            (Dep.Type (Cls.name class_))
             (Dep.Cstr parent_cstr.ce_origin);
         check_override
           env

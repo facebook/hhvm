@@ -1,7 +1,7 @@
-Class Foo -> Class Bar
-Class M -> Class Bar, Class Foo, Class N
-Class N -> Class Bar
-Cstr Foo -> Class Bar
-Cstr M -> Class N
-Extends Foo -> Class Bar
-Extends M -> Class N
+Cstr Foo -> Type Bar
+Cstr M -> Type N
+Extends Foo -> Type Bar
+Extends M -> Type N
+Type Foo -> Type Bar
+Type M -> Type Bar, Type Foo, Type N
+Type N -> Type Bar

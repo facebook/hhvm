@@ -31,7 +31,7 @@ let go
         let open Typing_deps in
         let deps =
           DepSet.singleton deps_mode
-          @@ Dep.make (hash_mode deps_mode) (Dep.Class cid)
+          @@ Dep.make (hash_mode deps_mode) (Dep.Type cid)
         in
         let deps = Typing_deps.add_all_deps deps_mode deps in
         if DepSet.cardinal deps > threshold then

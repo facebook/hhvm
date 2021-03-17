@@ -100,7 +100,7 @@ let search_member ctx class_name member include_defs genv env =
     ctx
     genv
     env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
   @@ fun () ->
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files ctx class_name in
@@ -149,7 +149,7 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
     ctx
     genv
     env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files
@@ -167,7 +167,7 @@ let search_record ctx record_name include_defs genv env =
     ctx
     genv
     env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class record_name)))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type record_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files

@@ -360,7 +360,7 @@ and class_decl
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let (_p, cls_name) = c.sc_name in
-  let class_dep = Dep.Class cls_name in
+  let class_dep = Dep.Type cls_name in
   let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
   let inherited = Decl_inherit.make env c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
@@ -530,8 +530,8 @@ and class_decl
       fun x _ ->
       Typing_deps.add_idep
         (Provider_context.get_deps_mode ctx)
-        (Dep.Class cls_name)
-        (Dep.Class x)
+        (Dep.Type cls_name)
+        (Dep.Type x)
     end
     impl;
   (tc, member_heaps_values)

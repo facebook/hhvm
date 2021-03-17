@@ -1,11 +1,11 @@
 Fanout calculation on line 15
 {'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
  'debug': {'dependencies': [{'hash': '-1479753279978455693',
-                             'variant': 'Class Simple'}],
+                             'variant': 'Type Simple'}],
            'fanout_dependents': ['-2788332797461828242',
                                  '-1479753279978455693'],
            'relevant_dep_edges': [{'dependency': {'hash': '-1479753279978455693',
-                                                  'variant': 'Class Simple'},
+                                                  'variant': 'Type Simple'},
                                    'dependent': {'hash': '-2788332797461828242',
                                                  'variant': 'Fun '
                                                             'uses_simple'}}]},

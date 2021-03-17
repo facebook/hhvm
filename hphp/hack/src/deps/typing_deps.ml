@@ -30,7 +30,7 @@ module Dep = struct
   type _ variant =
     | GConst : string -> 'a variant
     | Fun : string -> 'a variant
-    | Class : string -> 'a variant
+    | Type : string -> 'a variant
     | Extends : string -> dependency variant
     | Const : string * string -> dependency variant
     | Cstr : string -> dependency variant
@@ -54,7 +54,7 @@ module Dep = struct
    fun lhs rhs ->
     match (lhs, rhs) with
     | (GConst lhs, GConst rhs) -> String.(lhs = rhs)
-    | (Class lhs, Class rhs) -> String.(lhs = rhs)
+    | (Type lhs, Type rhs) -> String.(lhs = rhs)
     | (Fun lhs, Fun rhs) -> String.(lhs = rhs)
     | (Const (lhs1, lhs2), Const (rhs1, rhs2)) ->
       String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
@@ -71,7 +71,7 @@ module Dep = struct
     | (AllMembers lhs, AllMembers rhs) -> String.(lhs = rhs)
     | (Extends lhs, Extends rhs) -> String.(lhs = rhs)
     | (GConst _, _) -> false
-    | (Class _, _) -> false
+    | (Type _, _) -> false
     | (Fun _, _) -> false
     | (Cstr _, _) -> false
     | (Const _, _) -> false
@@ -91,7 +91,7 @@ module Dep = struct
    fun mode -> function
     | GConst name1 -> hash1 mode 0 name1
     | Fun name1 -> hash1 mode 1 name1
-    | Class name1 -> hash1 mode 2 name1
+    | Type name1 -> hash1 mode 2 name1
     | Extends name1 -> hash1 mode 3 name1
     | Const (name1, name2) -> hash2 mode 5 name1 name2
     | Cstr name1 -> hash1 mode 6 name1
@@ -113,7 +113,7 @@ module Dep = struct
     | GConst s -> Utils.strip_ns s
     | GConstName s -> Utils.strip_ns s
     | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Class s -> Utils.strip_ns s
+    | Type s -> Utils.strip_ns s
     | Fun s -> Utils.strip_ns s
     | FunName s -> Utils.strip_ns s
     | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
@@ -125,15 +125,15 @@ module Dep = struct
     | Extends s -> Utils.strip_ns s
 
   let to_decl_reference : type a. a variant -> Decl_reference.t = function
-    | Class s -> Decl_reference.ClassInterfaceTrait s
-    | Const (s, _) -> Decl_reference.ClassInterfaceTrait s
-    | Extends s -> Decl_reference.ClassInterfaceTrait s
-    | AllMembers s -> Decl_reference.ClassInterfaceTrait s
-    | Cstr s -> Decl_reference.ClassInterfaceTrait s
-    | Prop (s, _) -> Decl_reference.ClassInterfaceTrait s
-    | SProp (s, _) -> Decl_reference.ClassInterfaceTrait s
-    | Method (s, _) -> Decl_reference.ClassInterfaceTrait s
-    | SMethod (s, _) -> Decl_reference.ClassInterfaceTrait s
+    | Type s -> Decl_reference.Type s
+    | Const (s, _) -> Decl_reference.Type s
+    | Extends s -> Decl_reference.Type s
+    | AllMembers s -> Decl_reference.Type s
+    | Cstr s -> Decl_reference.Type s
+    | Prop (s, _) -> Decl_reference.Type s
+    | SProp (s, _) -> Decl_reference.Type s
+    | Method (s, _) -> Decl_reference.Type s
+    | SMethod (s, _) -> Decl_reference.Type s
     | GConst s
     | GConstName s ->
       Decl_reference.GlobalConstant s
@@ -152,7 +152,7 @@ module Dep = struct
       | GConst _ -> "GConst"
       | GConstName _ -> "GConstName"
       | Const _ -> "Const"
-      | Class _ -> "Class"
+      | Type _ -> "Type"
       | Fun _ -> "Fun"
       | FunName _ -> "FunName"
       | Prop _ -> "Prop"
@@ -398,7 +398,7 @@ module NamingHash = struct
   let get_dep_variant_name : type a. a Dep.variant -> string =
     let open Dep in
     function
-    | Class name -> name
+    | Type name -> name
     | Fun name -> name
     | GConst name -> name
     | GConstName _ as variant -> unsupported variant
@@ -780,7 +780,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, class_id) ->
-            Dep.make hash_mode (Dep.Class class_id) :: acc
+            Dep.make hash_mode (Dep.Type class_id) :: acc
           end
         ~init:defs
     in
@@ -790,7 +790,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, type_id) ->
-            Dep.make hash_mode (Dep.Class type_id) :: acc
+            Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs
     in
@@ -800,7 +800,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, type_id) ->
-            Dep.make hash_mode (Dep.Class type_id) :: acc
+            Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs
     in

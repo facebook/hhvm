@@ -9,5 +9,5 @@
 type t =
   | GlobalConstant of string
   | Function of string
-  | ClassInterfaceTrait of string
+  | Type of string
 [@@deriving eq, show, ord]

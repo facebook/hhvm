@@ -124,7 +124,7 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
   let env =
     {
       Decl_env.mode = FileInfo.Mstrict;
-      droot = Some (Typing_deps.Dep.Class (Ast_defs.get_id rd_name));
+      droot = Some (Typing_deps.Dep.Type (Ast_defs.get_id rd_name));
       ctx;
     }
   in
@@ -176,7 +176,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   } =
     tdef
   in
-  let dep = Typing_deps.Dep.Class tid in
+  let dep = Typing_deps.Dep.Type tid in
   let env = { Decl_env.mode; droot = Some dep; ctx } in
   let td_tparams = List.map params (FunUtils.type_param env) in
   let td_type = Decl_hint.hint env concrete_type in

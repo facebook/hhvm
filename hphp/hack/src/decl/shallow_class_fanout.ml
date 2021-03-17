@@ -16,7 +16,7 @@ let class_names_from_deps ~mode ~get_classes_in_file deps =
   let filenames = Typing_deps.Files.get_files deps in
   Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
       SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
-          if DepSet.mem deps Dep.(make (hash_mode mode) (Class cid)) then
+          if DepSet.mem deps Dep.(make (hash_mode mode) (Type cid)) then
             SSet.add acc cid
           else
             acc))
@@ -27,7 +27,7 @@ let add_minor_change_fanout
     (acc : AffectedDeps.t)
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
-  let dep = Dep.make (hash_mode mode) (Dep.Class class_name) in
+  let dep = Dep.make (hash_mode mode) (Dep.Type class_name) in
   let changed = DepSet.singleton mode dep in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
@@ -131,7 +131,7 @@ let add_maximum_fanout
   AffectedDeps.add_maximum_fanout
     mode
     acc
-    (Dep.make (hash_mode mode) (Dep.Class class_name))
+    (Dep.make (hash_mode mode) (Dep.Type class_name))
 
 let add_fanout
     ~(mode : Typing_deps_mode.t)

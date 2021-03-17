@@ -37,7 +37,7 @@ let deps_mode env = Provider_context.get_deps_mode env.ctx
 let is_hhi cd = Pos_or_decl.is_hhi cd.dc_pos
 
 let add_wclass env x =
-  let dep = Dep.Class x in
+  let dep = Dep.Type x in
   Option.iter env.droot (fun root ->
       Typing_deps.add_idep (deps_mode env) root dep);
   ()
@@ -45,7 +45,7 @@ let add_wclass env x =
 let add_extends_dependency env x =
   let deps_mode = deps_mode env in
   Option.iter env.droot (fun root ->
-      let dep = Dep.Class x in
+      let dep = Dep.Type x in
       Typing_deps.add_idep deps_mode root (Dep.Extends x);
       Typing_deps.add_idep deps_mode root dep);
   ()

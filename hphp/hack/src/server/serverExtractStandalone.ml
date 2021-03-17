@@ -406,7 +406,7 @@ end = struct
       | SMethod (cls, _) -> Some cls
       | Prop (cls, _) -> Some cls
       | SProp (cls, _) -> Some cls
-      | Class cls -> Some cls
+      | Type cls -> Some cls
       | Cstr cls -> Some cls
       | AllMembers cls -> Some cls
       | Extends cls -> Some cls
@@ -422,7 +422,7 @@ end = struct
     | Fun name
     | FunName name ->
       Decl.get_fun_pos ctx name
-    | Class name
+    | Type name
     | Const (name, _)
     | Method (name, _)
     | SMethod (name, _)
@@ -463,7 +463,7 @@ end = struct
     | Fun name
     | FunName name ->
       get_fun_mode ctx name
-    | Class name
+    | Type name
     | Const (name, _)
     | Method (name, _)
     | SMethod (name, _)
@@ -584,7 +584,7 @@ end = struct
   let rec do_add_dep ctx env dep =
     let is_wildcard =
       match dep with
-      | Typing_deps.Dep.Class h -> String.equal h SN.Typehints.wildcard
+      | Typing_deps.Dep.Type h -> String.equal h SN.Typehints.wildcard
       | _ -> false
     in
     if
@@ -613,7 +613,7 @@ end = struct
           super#on_tfun () r ft
 
         method! on_tapply _ _ (_, name) tyl =
-          let dep = Typing_deps.Dep.Class name in
+          let dep = Typing_deps.Dep.Type name in
           do_add_dep ctx env dep;
 
           (* If we have a constant of a generic type, it can only be an
@@ -629,7 +629,7 @@ end = struct
               | Typing_defs.TSFlit_str _ ->
                 ()
               | Typing_defs.TSFclass_const ((_, c), (_, s)) ->
-                do_add_dep ctx env (Typing_deps.Dep.Class c);
+                do_add_dep ctx env (Typing_deps.Dep.Type c);
                 do_add_dep ctx env (Typing_deps.Dep.Const (c, s)));
               add_dep ctx env ~this sft_ty)
             fdm
@@ -700,7 +700,7 @@ end = struct
     let description = Typing_deps.Dep.variant_to_string obj in
     match Dep.get_class_name obj with
     | Some cls_name ->
-      do_add_dep ctx env (Typing_deps.Dep.Class cls_name);
+      do_add_dep ctx env (Typing_deps.Dep.Type cls_name);
       Option.iter ~f:(add_class_attr_deps ctx env)
       @@ Nast_helper.get_class ctx cls_name;
       (match Decl_provider.get_class ctx cls_name with
@@ -786,7 +786,7 @@ end = struct
               Option.iter ~f:(add_method_attr_deps ctx env)
               @@ Nast_helper.get_method ctx cls_name "__construct"
             | _ -> ())
-          | Class _ ->
+          | Type _ ->
             List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
             List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
             Option.iter
@@ -826,7 +826,7 @@ end = struct
   and add_user_attr_deps ctx env user_attrs =
     List.iter user_attrs ~f:(fun Aast.{ ua_name = (_, cls); _ } ->
         if not @@ String.is_prefix ~prefix:"__" cls then (
-          do_add_dep ctx env @@ Typing_deps.Dep.Class cls;
+          do_add_dep ctx env @@ Typing_deps.Dep.Type cls;
           do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
         ))
 
@@ -898,7 +898,7 @@ end = struct
           Typing_deps.Dep.Const (cc_origin, const_name) :: acc)
       @@ Class.get_const cls const_name
     in
-    if Dep.is_builtin ctx (Class ancestor_name) then
+    if Dep.is_builtin ctx (Type ancestor_name) then
       let with_smths =
         List.fold ~init:acc ~f:(fun acc (nm, _) -> add_smethod_impl acc nm)
         @@ Class.smethods ancestor
@@ -944,7 +944,7 @@ end = struct
     let f = add_impls ~ctx ~env ~cls in
     let init =
       Option.value_map ~default:[] ~f:(fun ss ->
-          List.map ~f:(fun nm -> Typing_deps.Dep.Class nm) @@ SSet.elements ss)
+          List.map ~f:(fun nm -> Typing_deps.Dep.Type nm) @@ SSet.elements ss)
       @@ Class.sealed_whitelist cls
     in
     let ancs = List.fold ~init ~f @@ Class.all_ancestor_names cls in
@@ -956,7 +956,7 @@ end = struct
     let size = HashSet.length env.dependencies in
     let add_class dep acc =
       match dep with
-      | Typing_deps.Dep.Class cls_name ->
+      | Typing_deps.Dep.Type cls_name ->
         Option.value_map ~default:acc ~f:(fun cls -> cls :: acc)
         @@ Decl_provider.get_class ctx cls_name
       | _ -> acc
@@ -2610,12 +2610,12 @@ end = struct
       | GConstName nm ->
         PartSingle (Single.mk_gconst ctx @@ Nast_helper.get_gconst_exn ctx nm)
       (* -- Type defs, Enums, Classes, RecordDefs -- *)
-      | Class nm when Nast_helper.is_tydef ctx nm ->
+      | Type nm when Nast_helper.is_tydef ctx nm ->
         PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_exn ctx nm)
-      | Class nm when Nast_helper.is_enum ctx nm ->
+      | Type nm when Nast_helper.is_enum ctx nm ->
         PartSingle (Single.mk_enum ctx @@ Nast_helper.get_class_exn ctx nm)
-      | Class nm when Nast_helper.is_class ctx nm -> PartCls nm
-      | Class _ -> raise Unsupported
+      | Type nm when Nast_helper.is_class ctx nm -> PartCls nm
+      | Type _ -> raise Unsupported
       (* -- Ignore -- *)
       | Const _
       | Method _

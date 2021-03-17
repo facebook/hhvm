@@ -128,7 +128,7 @@ let search_class
     ctx
     genv
     env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
   @@ fun () ->
   let child_classes = find_child_classes ctx class_name genv env in
   if List.length child_classes < parallel_limit then
@@ -153,7 +153,7 @@ let search_member
       ctx
       genv
       env
-      Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
+      Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
     @@ fun () ->
     (* Find all the classes that extend this one *)
     let child_classes = find_child_classes ctx class_name genv env in

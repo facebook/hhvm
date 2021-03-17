@@ -1,2 +1,2 @@
-Class :foo -> Class :bar
-Extends :foo -> Class :bar
+Extends :foo -> Type :bar
+Type :foo -> Type :bar

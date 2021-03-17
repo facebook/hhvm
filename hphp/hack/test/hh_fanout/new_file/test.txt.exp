@@ -12,7 +12,7 @@ Fanout calculation on line 7
 Fanout calculation on line 14
 {'cursor': 'cursor,2,integration-test,<hash-redacted-for-test>',
  'debug': {'dependencies': [{'hash': '2971371701340152247',
-                             'variant': 'Class NewSymbol'}],
+                             'variant': 'Type NewSymbol'}],
            'fanout_dependents': ['2971371701340152247'],
            'relevant_dep_edges': []},
  'explanations': {'new_file.php': {'added_symbols': [{'name': '\\NewSymbol',

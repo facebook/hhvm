@@ -80,11 +80,6 @@ struct Repo::GlobalData {
   bool PHP7_Substr = false;
 
   /*
-   * Should all functions be interceptable?
-   */
-  bool EnableRenameFunction = false;
-
-  /*
    * Are Hack array compatibility notices enabled? If so, certain optimizations
    * may be disabled.
    */
@@ -192,7 +187,6 @@ struct Repo::GlobalData {
       (PHP7_NoHexNumerics)
       (PHP7_Substr)
       (PHP7_Builtins)
-      (EnableRenameFunction)
       (HackArrCompatNotices)
       (HackArrCompatIsVecDictNotices)
       (HackArrCompatSerializeNotices)

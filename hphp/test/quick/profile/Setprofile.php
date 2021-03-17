@@ -1,9 +1,11 @@
 <?hh
 
+<<__NEVER_INLINE>>
 function pure_function($a) {
   return 7;
 }
 
+<<__NEVER_INLINE>>
 function pure_function_2($a, $b) {
   return pure_function($a) + pure_function($b);
 }

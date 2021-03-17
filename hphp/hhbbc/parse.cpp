@@ -671,6 +671,10 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   ret->attrs              = static_cast<Attr>((fe.attrs & ~AttrNoOverride) |
                                               AttrUnique | AttrPersistent);
+
+  // We do not support AttrInterceptable in hhbbc so make sure it is not set
+  always_assert((ret->attrs & AttrInterceptable) == 0);
+
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;

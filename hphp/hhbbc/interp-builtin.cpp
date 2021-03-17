@@ -450,7 +450,7 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (!will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
-      func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
+      func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||

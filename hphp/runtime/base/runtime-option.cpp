@@ -3002,6 +3002,11 @@ void RuntimeOption::Load(
 
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 
+  if (RO::EvalJitEnableRenameFunction && RO::RepoAuthoritative) {
+      throw std::runtime_error("Can't use Eval.JitEnableRenameFunction if "
+                               " RepoAuthoritative is turned on");
+  }
+
   // arrprov is only for dvarrays. It should be off if HADVAs is on.
   if (RO::EvalHackArrDVArrs) {
     RO::EvalArrayProvenance = false;

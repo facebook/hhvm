@@ -33,7 +33,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);
-  SHOW(EnableRenameFunction);
   SHOW(HackArrCompatNotices);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(HackArrDVArrs);

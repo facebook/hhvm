@@ -121,14 +121,14 @@ vec(3) {
       ["file":protected]=>
       string(%d) "%s/test/quick/profile/Setprofile.php"
       ["line":protected]=>
-      int(16)
+      int(18)
       ["trace":"Exception":private]=>
       varray(3) {
         darray(4) {
           ["file"]=>
           string(%d) "%s/test/quick/profile/Setprofile.php"
           ["line"]=>
-          int(37)
+          int(39)
           ["function"]=>
           string(14) "test_exception"
           ["args"]=>
@@ -139,7 +139,7 @@ vec(3) {
           ["file"]=>
           string(%d) "%s/test/quick/profile/Setprofile.php"
           ["line"]=>
-          int(47)
+          int(49)
           ["function"]=>
           string(4) "main"
           ["args"]=>

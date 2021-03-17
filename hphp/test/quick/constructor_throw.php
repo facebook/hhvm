@@ -1,6 +1,7 @@
 <?hh
 
 class X {
+  <<__NEVER_INLINE>>
   function __construct() {
   }
 }

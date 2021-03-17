@@ -279,7 +279,6 @@ std::vector<SString> load_input(F&& fun) {
   auto const& gd = Repo::get().global();
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
-  RO::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RO::EvalHackArrCompatNotices =
     RO::EvalHackArrCompatCheckCompare =
       gd.HackArrCompatNotices;
@@ -382,7 +381,6 @@ void write_global_data(
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
-  gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);

@@ -389,41 +389,27 @@ struct res::Func::FuncFamily {
   static_assert(sizeof(PFuncVec) == sizeof(uintptr_t),
                 "CompactVector must be layout compatible with a pointer");
 
-  struct Holder {
-    Holder(const Holder& o) : bits{o.bits} {}
-    explicit Holder(PFuncVec&& o) : v{std::move(o)} {}
-    explicit Holder(uintptr_t b) : bits{b & ~1} {}
-    Holder& operator=(const Holder&) = delete;
-    ~Holder() {}
-    const PFuncVec* operator->() const { return &v; }
-    uintptr_t val() const { return bits; }
-    friend auto begin(const Holder& h) { return h->begin(); }
-    friend auto end(const Holder& h) { return h->end(); }
-  private:
-    union {
-      uintptr_t bits;
-      PFuncVec  v;
-    };
-  };
-
-  FuncFamily(PFuncVec&& v, bool containsInterceptables)
-    : m_raw{Holder{std::move(v)}.val()} {
-    if (containsInterceptables) m_raw |= 1;
-  }
-  FuncFamily(FuncFamily&& o) noexcept : m_raw(o.m_raw) {
-    o.m_raw = 0;
+  explicit FuncFamily(PFuncVec&& v)
+    : m_v{std::move(v)} {}
+  FuncFamily(FuncFamily&& o) noexcept : m_v(o.m_v) {
+    o.m_bits = 0;
   }
   ~FuncFamily() {
-    Holder{m_raw & ~1}->~PFuncVec();
+    m_v.~PFuncVec();
   }
   FuncFamily& operator=(const FuncFamily&) = delete;
 
-  bool containsInterceptables() const { return m_raw & 1; };
-  const Holder possibleFuncs() const {
-    return Holder{m_raw & ~1};
+  const PFuncVec& possibleFuncs() const {
+    return m_v;
   };
+
+  friend auto begin(const FuncFamily& ff) { return ff.m_v.begin(); }
+  friend auto end(const FuncFamily& ff) { return ff.m_v.end(); }
 private:
-  uintptr_t m_raw;
+  union {
+    uintptr_t m_bits;
+    PFuncVec  m_v;
+  };
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -935,7 +921,7 @@ SString Func::name() const {
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (const MethTabEntryPair* mte) { return mte->first; },
     [&] (FuncFamily* fa) -> SString {
-      auto const name = fa->possibleFuncs()->front()->first;
+      auto const name = fa->possibleFuncs().front()->first;
       if (debug) {
         for (DEBUG_ONLY auto const f : fa->possibleFuncs()) {
           assertx(f->first->isame(name));
@@ -1138,7 +1124,6 @@ struct Index::IndexData {
 
   bool frozen{false};
   bool ever_frozen{false};
-  bool any_interceptable_functions{false};
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
@@ -2102,9 +2087,6 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
       index.methods.insert({m->name, m.get()});
-      if (m->attrs & AttrInterceptable) {
-        index.any_interceptable_functions = true;
-      }
 
       uint64_t refs = 0, cur = 1;
       bool anyInOut = false;
@@ -2147,7 +2129,6 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
       unit.funcs.erase(i);
       continue;
     }
-    if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     add_symbol(index.funcs, f.get(), "function");
     ++i;
   }
@@ -2845,7 +2826,6 @@ void compute_subclass_list(IndexData& index) {
 bool define_func_family(IndexData& index, ClassInfo* cinfo,
                         SString name, const php::Func* func = nullptr) {
   FuncFamily::PFuncVec funcs{};
-  auto containsInterceptables = false;
   for (auto const cleaf : cinfo->subclassList) {
     auto const leafFn = [&] () -> const MethTabEntryPair* {
       auto const leafFnIt = cleaf->methods.find(name);
@@ -2853,9 +2833,6 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
       return mteFromIt(leafFnIt);
     }();
     if (!leafFn) continue;
-    if (leafFn->second.func->attrs & AttrInterceptable) {
-      containsInterceptables = true;
-    }
     funcs.push_back(leafFn);
   }
 
@@ -2904,7 +2881,7 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
   cinfo->methodFamilies.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(name),
-    std::forward_as_tuple(std::move(funcs), containsInterceptables)
+    std::forward_as_tuple(std::move(funcs))
   );
 
   return true;
@@ -3453,8 +3430,8 @@ void check_invariants(const ClassInfo* cinfo) {
   // Every FuncFamily is non-empty and contain functions with the same
   // name (unless its a family of ctors).
   for (auto const& mfam: cinfo->methodFamilies) {
-    always_assert(!mfam.second.possibleFuncs()->empty());
-    auto const name = mfam.second.possibleFuncs()->front()->first;
+    always_assert(!mfam.second.possibleFuncs().empty());
+    auto const name = mfam.second.possibleFuncs().front()->first;
     for (auto const pf : mfam.second.possibleFuncs()) {
       always_assert(pf->first->isame(name));
     }
@@ -3575,14 +3552,11 @@ Type context_sensitive_return_type(IndexData& data,
 //////////////////////////////////////////////////////////////////////
 
 PrepKind func_param_prep_default() {
-  return RuntimeOption::EvalJitEnableRenameFunction
-    ? PrepKind::Unknown
-    : PrepKind::Val;
+  return PrepKind::Val;
 }
 
 PrepKind func_param_prep(const php::Func* func,
                          uint32_t paramId) {
-  if (func->attrs & AttrInterceptable) return PrepKind::Unknown;
   if (paramId >= func->params.size()) {
     return PrepKind::Val;
   }
@@ -3590,14 +3564,10 @@ PrepKind func_param_prep(const php::Func* func,
 }
 
 folly::Optional<uint32_t> func_num_inout_default() {
-  if (RuntimeOption::EvalJitEnableRenameFunction) {
-    return folly::none;
-  }
   return 0;
 }
 
 folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
-  if (func->attrs & AttrInterceptable) return folly::none;
   if (!func->hasInOutArgs) return 0;
   uint32_t count = 0;
   for (auto& p : func->params) count += p.inout;
@@ -4940,8 +4910,8 @@ res::Func Index::resolve_method(Context ctx,
   auto const find_extra_method = [&] {
     auto methIt = cinfo->methodFamilies.find(name);
     if (methIt == end(cinfo->methodFamilies)) return name_only();
-    if (methIt->second.possibleFuncs()->size() == 1) {
-      return res::Func { this, methIt->second.possibleFuncs()->front() };
+    if (methIt->second.possibleFuncs().size() == 1) {
+      return res::Func { this, methIt->second.possibleFuncs().front() };
     }
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
@@ -4982,7 +4952,6 @@ res::Func Index::resolve_method(Context ctx,
    */
   auto const methIt = cinfo->methods.find(name);
   if (methIt == end(cinfo->methods)) return find_extra_method();
-  if (methIt->second.attrs & AttrInterceptable) return name_only();
   auto const ftarget = methIt->second.func;
 
   // We need to revisit the hasPrivateAncestor code if we start being
@@ -5029,9 +4998,6 @@ res::Func Index::resolve_method(Context ctx,
       if (famIt == end(cinfo->methodFamilies)) {
         return name_only();
       }
-      if (famIt->second.containsInterceptables()) {
-        return name_only();
-      }
       return res::Func { this, &famIt->second };
     }
   }
@@ -5049,7 +5015,6 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
 
   auto const ctor = mteFromIt(cit);
   if (exact || ctor->second.attrs & AttrNoOverride) {
-    if (ctor->second.attrs & AttrInterceptable) return folly::none;
     create_func_info(*m_data, ctor->second.func);
     return res::Func { this, ctor };
   }
@@ -5058,7 +5023,6 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
 
   auto const famIt = cinfo->methodFamilies.find(s_construct.get());
   if (famIt == end(cinfo->methodFamilies)) return folly::none;
-  if (famIt->second.containsInterceptables()) return folly::none;
   return res::Func { this, &famIt->second };
 }
 
@@ -5070,8 +5034,6 @@ Index::resolve_func_helper(const php::Func* func, SString name) const {
 
   // no resolution
   if (func == nullptr) return name_only(false);
-
-  if (func->attrs & AttrInterceptable) return name_only(true);
 
   // single resolution, in whole-program mode, that's it
   assertx(func->attrs & AttrUnique);
@@ -5350,10 +5312,6 @@ bool Index::is_effect_free(res::Func rfunc) const {
     [&](FuncFamily* fam) {
       return false;
     });
-}
-
-bool Index::any_interceptable_functions() const {
-  return m_data->any_interceptable_functions;
 }
 
 const php::Const* Index::lookup_class_const_ptr(Context ctx,

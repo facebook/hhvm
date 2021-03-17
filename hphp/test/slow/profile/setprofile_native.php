@@ -3,9 +3,11 @@
 class SetProfileSimpleObject {
   public int $mine = 4;
 
+  <<__NEVER_INLINE>>
   public function test() {
   }
 
+  <<__NEVER_INLINE>>
   public static function testStatic() {
   }
 }

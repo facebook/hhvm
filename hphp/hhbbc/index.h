@@ -1155,11 +1155,6 @@ struct Index {
   bool is_effect_free(const php::Func* func) const;
 
   /*
-   * Return true if there are any interceptable functions
-   */
-  bool any_interceptable_functions() const;
-
-  /*
    * Do any necessary fixups to a return type.
    *
    * Note that eg for an async function it will map Type to

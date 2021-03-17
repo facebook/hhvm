@@ -517,10 +517,7 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
      * known to return things matching the property type hints for
      * some properties, or not to take their arguments by reference.
      */
-    auto const hniTy =
-      clsAnalysis.anyInterceptable
-        ? TCell
-        : from_hni_constraint(prop.userType);
+    auto const hniTy = from_hni_constraint(prop.userType);
     if (it->second.ty.subtypeOf(hniTy)) {
       it->second.ty = hniTy;
       return;
@@ -591,7 +588,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     FTRACE(2, "{:#^70}\n", "Class");
   }
 
-  ClassAnalysis clsAnalysis(ctx, index.any_interceptable_functions());
+  ClassAnalysis clsAnalysis(ctx);
   auto const associatedClosures = index.lookup_closures(ctx.cls);
   auto const associatedMethods  = index.lookup_extra_methods(ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;

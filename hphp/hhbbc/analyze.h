@@ -145,8 +145,8 @@ struct FuncAnalysis : FuncAnalysisResult {
  * The result of a class-at-a-time analysis.
  */
 struct ClassAnalysis {
-  ClassAnalysis(const Context& ctx, bool anyInterceptable) :
-      ctx(ctx), anyInterceptable(anyInterceptable) {}
+  explicit ClassAnalysis(const Context& ctx) :
+      ctx(ctx) {}
 
   ClassAnalysis(ClassAnalysis&&) = default;
   ClassAnalysis& operator=(ClassAnalysis&&) = default;
@@ -162,7 +162,6 @@ struct ClassAnalysis {
   // Inferred types for private instance and static properties.
   PropState privateProperties;
   PropState privateStatics;
-  bool anyInterceptable;
 
   // Whether this class might have a bad initial value for a property.
   bool badPropInitialValues{false};

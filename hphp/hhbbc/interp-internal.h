@@ -416,6 +416,7 @@ bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
                              callee->staticCoeffects.end());
 }
 
+const StaticString s___NEVER_INLINE("__NEVER_INLINE");
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
   if (!func ||
@@ -437,6 +438,10 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
       (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
        (func->attrs & AttrBuiltin)) ||
       (dyn_call_error_level(func) > 0))) {
+    return false;
+  }
+
+  if (func->userAttributes.count(s___NEVER_INLINE.get())) {
     return false;
   }
 

@@ -9,13 +9,12 @@
 
 open Hh_prelude
 open Ifc_types
-open Ifc
 module Decl = Ifc_decl
 
 let do_ opts files_info ctx =
-  ( if should_print ~user_mode:opts.opt_mode ~phase:Mlattice then
+  ( if Ifc.should_print ~user_mode:opts.opt_mode ~phase:Mlattice then
     let lattice = opts.opt_security_lattice in
-    Format.printf "@[Lattice:@. %a@]\n\n" Pp.security_lattice lattice );
+    Format.printf "@[Lattice:@. %a@]\n\n" Ifc_pretty.security_lattice lattice );
 
   let handle_file path info errors =
     match info.FileInfo.file_mode with
@@ -24,7 +23,7 @@ let do_ opts files_info ctx =
       let { Tast_provider.Compute_tast.tast; _ } =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
       in
-      let check () = check opts tast ctx in
+      let check () = Ifc.check opts tast ctx in
       let (new_errors, _) = Errors.do_with_context path Errors.Typing check in
       errors @ Errors.get_error_list new_errors
     | _ -> errors

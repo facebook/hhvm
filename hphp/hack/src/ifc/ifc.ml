@@ -22,7 +22,6 @@ module T = Typing_defs
 module L = Logic.Infix
 module K = Typing_cont_key
 module LSet = Local_id.Set
-module TClass = Decl_provider.Class
 
 let should_print ~user_mode ~phase =
   equal_mode user_mode Mdebug || equal_mode user_mode phase
@@ -223,20 +222,15 @@ let rec subtype ~pos t1 t2 acc =
     first_ok "mixed" tl ~f:(fun t1 -> subtype t1 t2 acc)
   | _ -> err "unhandled subtyping query"
 
-(* A constraint accumulator that registers that t1 = t2 *)
-let equivalent ~pos t1 t2 acc =
-  let subtype = subtype ~pos in
-  subtype t1 t2 (subtype t2 t1 acc)
-
 (* Overwrite subtype and equivalent catching the SubtypeFailure
    exception *)
-let (subtype, equivalent) =
+let subtype =
   let wrap f ~pos t1 t2 acc =
     try f ~pos t1 t2 acc
     with SubtypeFailure (msg, tsub, tsup) ->
       fail "subtype: %s (%a <: %a)" msg Pp.ptype tsub Pp.ptype tsup
   in
-  (wrap subtype, wrap equivalent)
+  wrap subtype
 
 (* Returns the list of free policy variables in a type *)
 let free_pvars pty =

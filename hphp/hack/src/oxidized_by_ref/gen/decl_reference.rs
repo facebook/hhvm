@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67f723b4c3d949c5da3dea5867b5c590>>
+// @generated SignedSource<<2af4eb3d6f1a7af325c9e114cef33e5a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,5 @@ pub enum DeclReference<'a> {
     GlobalConstant(&'a str),
     Function(&'a str),
     ClassInterfaceTrait(&'a str),
-    Record(&'a str),
 }
 impl<'a> TrivialDrop for DeclReference<'a> {}

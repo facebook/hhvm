@@ -32,7 +32,6 @@ module Dep = struct
     | Fun : string -> 'a variant
     | Class : string -> 'a variant
     | Extends : string -> dependency variant
-    | RecordDef : string -> 'a variant
     | Const : string * string -> dependency variant
     | Cstr : string -> dependency variant
     | Prop : string * string -> dependency variant
@@ -56,7 +55,6 @@ module Dep = struct
     match (lhs, rhs) with
     | (GConst lhs, GConst rhs) -> String.(lhs = rhs)
     | (Class lhs, Class rhs) -> String.(lhs = rhs)
-    | (RecordDef lhs, RecordDef rhs) -> String.(lhs = rhs)
     | (Fun lhs, Fun rhs) -> String.(lhs = rhs)
     | (Const (lhs1, lhs2), Const (rhs1, rhs2)) ->
       String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
@@ -74,7 +72,6 @@ module Dep = struct
     | (Extends lhs, Extends rhs) -> String.(lhs = rhs)
     | (GConst _, _) -> false
     | (Class _, _) -> false
-    | (RecordDef _, _) -> false
     | (Fun _, _) -> false
     | (Cstr _, _) -> false
     | (Const _, _) -> false
@@ -96,7 +93,6 @@ module Dep = struct
     | Fun name1 -> hash1 mode 1 name1
     | Class name1 -> hash1 mode 2 name1
     | Extends name1 -> hash1 mode 3 name1
-    | RecordDef name1 -> hash1 mode 4 name1
     | Const (name1, name2) -> hash2 mode 5 name1 name2
     | Cstr name1 -> hash1 mode 6 name1
     | Prop (name1, name2) -> hash2 mode 7 name1 name2
@@ -118,7 +114,6 @@ module Dep = struct
     | GConstName s -> Utils.strip_ns s
     | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | Class s -> Utils.strip_ns s
-    | RecordDef s -> Utils.strip_ns s
     | Fun s -> Utils.strip_ns s
     | FunName s -> Utils.strip_ns s
     | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
@@ -142,7 +137,6 @@ module Dep = struct
     | GConst s
     | GConstName s ->
       Decl_reference.GlobalConstant s
-    | RecordDef s -> Decl_reference.Record s
     | Fun s
     | FunName s ->
       Decl_reference.Function s
@@ -159,7 +153,6 @@ module Dep = struct
       | GConstName _ -> "GConstName"
       | Const _ -> "Const"
       | Class _ -> "Class"
-      | RecordDef _ -> "RecordDef"
       | Fun _ -> "Fun"
       | FunName _ -> "FunName"
       | Prop _ -> "Prop"
@@ -406,7 +399,6 @@ module NamingHash = struct
     let open Dep in
     function
     | Class name -> name
-    | RecordDef name -> name
     | Fun name -> name
     | GConst name -> name
     | GConstName _ as variant -> unsupported variant

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb8d5cd19652f486fb669b18bacdb5c8>>
+// @generated SignedSource<<2d55336d6a7f0134a1e5f97a456da3a9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,5 +35,4 @@ pub enum DeclReference {
     GlobalConstant(String),
     Function(String),
     ClassInterfaceTrait(String),
-    Record(String),
 }

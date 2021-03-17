@@ -10,5 +10,4 @@ type t =
   | GlobalConstant of string
   | Function of string
   | ClassInterfaceTrait of string
-  | Record of string
 [@@deriving eq, show, ord]

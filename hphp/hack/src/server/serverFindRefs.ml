@@ -167,7 +167,7 @@ let search_record ctx record_name include_defs genv env =
     ctx
     genv
     env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (RecordDef record_name)))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class record_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files

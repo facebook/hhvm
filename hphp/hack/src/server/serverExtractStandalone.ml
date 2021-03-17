@@ -255,6 +255,8 @@ module Nast_helper : sig
 
   val is_tydef : Provider_context.t -> string -> bool
 
+  val is_class : Provider_context.t -> string -> bool
+
   val is_enum : Provider_context.t -> string -> bool
 
   val is_interface : Provider_context.t -> string -> bool
@@ -348,6 +350,8 @@ end = struct
 
   let is_tydef ctx nm = Option.is_some @@ get_typedef ctx nm
 
+  let is_class ctx nm = Option.is_some @@ get_class ctx nm
+
   let is_enum ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
         match c_kind with
@@ -410,8 +414,7 @@ end = struct
       | FunName _
       | GConst _
       | GConstName _ ->
-        None
-      | RecordDef _ -> raise Unsupported)
+        None)
 
   let get_dep_pos ctx dep =
     let open Typing_deps.Dep in
@@ -432,7 +435,6 @@ end = struct
     | GConst name
     | GConstName name ->
       Decl.get_gconst_pos ctx name
-    | RecordDef _ -> raise Unsupported
 
   let get_relative_path ctx dep =
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
@@ -474,7 +476,6 @@ end = struct
     | GConst name
     | GConstName name ->
       get_gconst_mode ctx name
-    | RecordDef _ -> raise Unsupported
 
   let get_origin ctx cls (dep : 'a Typing_deps.Dep.variant) =
     let open Typing_deps.Dep in
@@ -2608,13 +2609,13 @@ end = struct
       | GConst nm
       | GConstName nm ->
         PartSingle (Single.mk_gconst ctx @@ Nast_helper.get_gconst_exn ctx nm)
-      (* -- Type defs and Enums -- *)
+      (* -- Type defs, Enums, Classes, RecordDefs -- *)
       | Class nm when Nast_helper.is_tydef ctx nm ->
         PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_exn ctx nm)
       | Class nm when Nast_helper.is_enum ctx nm ->
         PartSingle (Single.mk_enum ctx @@ Nast_helper.get_class_exn ctx nm)
-      (* -- Classes -- *)
-      | Class nm -> PartCls nm
+      | Class nm when Nast_helper.is_class ctx nm -> PartCls nm
+      | Class _ -> raise Unsupported
       (* -- Ignore -- *)
       | Const _
       | Method _
@@ -2624,8 +2625,7 @@ end = struct
       | SProp _
       | AllMembers _
       | Extends _ ->
-        PartIgnore
-      | RecordDef _ -> raise Unsupported)
+        PartIgnore)
 
   let of_deps ctx target_opt deps =
     let insert_elt (sgls, grps) (cls_nm, cls_elt) =

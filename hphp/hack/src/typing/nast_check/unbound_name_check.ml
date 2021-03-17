@@ -48,7 +48,7 @@ let handle_unbound_name env (pos, name) kind =
         | Errors.TypeNamespace -> Typing_deps.Dep.Class name
         | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
         | Errors.TraitContext -> Typing_deps.Dep.Class name
-        | Errors.RecordContext -> Typing_deps.Dep.RecordDef name
+        | Errors.RecordContext -> Typing_deps.Dep.Class name
         | Errors.ClassContext -> Typing_deps.Dep.Class name
       in
       Typing_deps.add_idep

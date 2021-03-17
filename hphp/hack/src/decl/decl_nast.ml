@@ -124,7 +124,7 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
   let env =
     {
       Decl_env.mode = FileInfo.Mstrict;
-      droot = Some (Typing_deps.Dep.RecordDef (Ast_defs.get_id rd_name));
+      droot = Some (Typing_deps.Dep.Class (Ast_defs.get_id rd_name));
       ctx;
     }
   in

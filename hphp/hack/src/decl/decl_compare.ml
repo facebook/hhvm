@@ -601,7 +601,7 @@ let get_record_def_deps
   match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.RecordDef rdid in
+    let dep = Dep.Class rdid in
     let where_record_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_record_is_used to_recheck in
     (add_changed mode changed dep, to_redecl, to_recheck)
@@ -609,7 +609,7 @@ let get_record_def_deps
     if Poly.( = ) rd1 rd2 then
       (changed, to_redecl, to_recheck)
     else
-      let dep = Dep.RecordDef rdid in
+      let dep = Dep.Class rdid in
       let where_record_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_record_is_used to_recheck in
       (add_changed mode changed dep, to_redecl, to_recheck)

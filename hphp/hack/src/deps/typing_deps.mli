@@ -40,9 +40,6 @@ module Dep : sig
         (** Represents another class depending on a class via an
         inheritance-like mechanism (`extends`, `implements`, `use`, `require
         extends`, `require implements`, etc.) *)
-    | RecordDef : string -> 'a variant
-        (** Represents either a record depending on something, or something
-        depending on a record. *)
     | Const : string * string -> dependency variant
         (** Represents something depending on a class constant. *)
     | Cstr : string -> dependency variant

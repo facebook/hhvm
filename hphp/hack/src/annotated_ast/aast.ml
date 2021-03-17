@@ -177,6 +177,8 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Noop
       (** No-op, the empty statement.
 
+          {}
+          while (true) ;
           if ($foo) {} // the else is Noop here *)
   | Block of ('ex, 'fb, 'en, 'hi) block
       (** Block, a list of statements in curly braces.

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3776e670142cf2ea43d587abe3a3b27f>>
+// @generated SignedSource<<ab14dfa31e5b67f82221719e0e147a8b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -195,6 +195,8 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     ),
     /// No-op, the empty statement.
     ///
+    /// {}
+    /// while (true) ;
     /// if ($foo) {} // the else is Noop here
     Noop,
     /// Block, a list of statements in curly braces.

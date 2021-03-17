@@ -30,7 +30,7 @@ macro_rules! impl_id {
         //Note: $type<'arena> is a newtype over a &'arena str. We
         //intend that these types borrow strings stored in `InstrSeq`
         //arenas.
-        #[derive(Clone)]
+        #[derive(Clone, Copy)]
         pub struct $type<'arena>(&'arena str);
 
         impl<'arena> crate::Id<'arena> for $type<'arena> {

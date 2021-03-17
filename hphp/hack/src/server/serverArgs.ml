@@ -21,6 +21,7 @@ type saved_state_target =
 type options = {
   ai_mode: Ai_options.t option;
   check_mode: bool;
+  concatenate_prefix: string option;
   config: (string * string) list;
   custom_telemetry_data: (string * string) list;
   dump_fanout: bool;
@@ -65,6 +66,8 @@ module Messages = struct
   let ai = " run ai with options"
 
   let check = " check and exit"
+
+  let concatenate_prefix = " combine multiple hack files"
 
   let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
 
@@ -148,6 +151,7 @@ let print_json_version () =
 let parse_options () : options =
   let ai_mode = ref None in
   let check_mode = ref false in
+  let concatenate_prefix = ref None in
   let config = ref [] in
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
@@ -195,6 +199,9 @@ let parse_options () : options =
       ("--ai", Arg.String set_ai, Messages.ai);
       ("--allow-non-opt-build", Arg.Set allow_non_opt_build, "");
       ("--check", Arg.Set check_mode, Messages.check);
+      ( "--concatenate-all",
+        Arg.String (fun s -> concatenate_prefix := Some s),
+        Messages.concatenate_prefix );
       ( "--config",
         Arg.String (fun s -> config := String_utils.split2_exn '=' s :: !config),
         Messages.config );
@@ -271,12 +278,13 @@ let parse_options () : options =
     exit 0
   );
 
-  (* --json, --save, and --write-symbol-info all imply check *)
+  (* --json, --save, --write-symbol-info, --concatenate-all all imply check *)
   let check_mode =
     Option.is_some !write_symbol_info
     || !check_mode
     || !json_mode
     || Option.is_some !save
+    || Option.is_some !concatenate_prefix
   in
   if check_mode && Option.is_some !waiting_client then (
     Printf.eprintf "--check is incompatible with wait modes!\n";
@@ -323,6 +331,7 @@ let parse_options () : options =
   {
     ai_mode = !ai_mode;
     check_mode;
+    concatenate_prefix = !concatenate_prefix;
     config = !config;
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
@@ -358,6 +367,7 @@ let default_options ~root =
   {
     ai_mode = None;
     check_mode = false;
+    concatenate_prefix = None;
     config = [];
     custom_telemetry_data = [];
     dump_fanout = false;
@@ -400,6 +410,8 @@ let default_options_with_check_mode ~root =
 let ai_mode options = options.ai_mode
 
 let check_mode options = options.check_mode
+
+let concatenate_prefix options = options.concatenate_prefix
 
 let config options = options.config
 
@@ -490,6 +502,7 @@ let to_string
     {
       ai_mode;
       check_mode;
+      concatenate_prefix;
       config;
       custom_telemetry_data;
       dump_fanout;
@@ -533,6 +546,11 @@ let to_string
     match waiting_client with
     | None -> "<>"
     | Some _ -> "WaitingClient(...)"
+  in
+  let concatenate_prefix_str =
+    match concatenate_prefix with
+    | None -> "<>"
+    | Some path -> path
   in
   let save_filename_str =
     match save_filename with
@@ -593,6 +611,9 @@ let to_string
     ", ";
     "check_mode: ";
     string_of_bool check_mode;
+    ", ";
+    "concatenate_prefix: ";
+    concatenate_prefix_str;
     ", ";
     "config: ";
     config_str;

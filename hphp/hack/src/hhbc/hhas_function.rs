@@ -18,7 +18,7 @@ use bitflags::bitflags;
 pub struct HhasFunction<'a> {
     pub attributes: Vec<HhasAttribute>,
     pub name: hhbc_id::function::Type<'a>,
-    pub body: HhasBody<'a>,
+    pub body: HhasBody,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,
     pub flags: Flags,
@@ -65,7 +65,7 @@ impl<'a> HhasFunction<'a> {
         self.flags.contains(Flags::RX_DISABLED)
     }
 
-    pub fn with_body<F, T>(&mut self, body: HhasBody<'a>, f: F) -> T
+    pub fn with_body<F, T>(&mut self, body: HhasBody, f: F) -> T
     where
         F: FnOnce() -> T,
     {

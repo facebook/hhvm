@@ -57,7 +57,7 @@ fn emit_constant_cinit<'a>(
                 vec![], /* params */
                 return_type_info,
                 None, /* doc_comment */
-                Some(env.clone()),
+                Some(&env),
             )?;
             Ok(HhasFunction {
                 attributes: vec![],

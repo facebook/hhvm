@@ -290,7 +290,7 @@ fn make_wrapper_body<'a>(
     body_instrs: InstrSeq,
     is_reified: bool,
     has_coeffect_rules: bool,
-) -> Result<HhasBody<'a>> {
+) -> Result<HhasBody> {
     let mut decl_vars = vec![];
     if is_reified {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
@@ -309,6 +309,6 @@ fn make_wrapper_body<'a>(
         params,
         Some(return_type_info),
         None, /* doc comment */
-        Some(env),
+        Some(&env),
     )
 }

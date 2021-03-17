@@ -24,12 +24,10 @@ impl ClassExpr {
         emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope,
+        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
     ) -> Option<String> {
-        if let Some(cd) = scope.get_class() {
-            let kind = cd.get_kind();
+        if let Some((kind, class_name)) = opt_class_info {
             if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
-                let class_name = cd.get_name_str();
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter
@@ -45,7 +43,7 @@ impl ClassExpr {
         None
     }
 
-    fn get_parent_class_name(class: &ast_scope::Class) -> Option<String> {
+    pub fn get_parent_class_name(class: &ast_scope::Class) -> Option<String> {
         if let [Hint(_, hint)] = class.get_extends() {
             if let Hint_::Happly(ast_defs::Id(_, parent_cid), _) = &**hint {
                 return Some(parent_cid.to_string());
@@ -58,17 +56,16 @@ impl ClassExpr {
         emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope,
+        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
+        opt_parent_name: Option<String>,
     ) -> Option<String> {
-        if let Some(cd) = scope.get_class() {
-            let kind = cd.get_kind();
+        if let Some((kind, class_name)) = opt_class_info {
             if kind == ast_defs::ClassKind::Cinterface {
                 return Some(classes::PARENT.to_string());
             };
             if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
-                let class_name = cd.get_name_str();
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
-                    return Self::get_parent_class_name(cd);
+                    return opt_parent_name;
                 } else if let Some(c) = emitter
                     .emit_global_state()
                     .get_closure_enclosing_class(class_name)
@@ -87,6 +84,28 @@ impl ClassExpr {
         scope: &Scope,
         expr: ast::Expr,
     ) -> Self {
+        if let Some(cd) = scope.get_class() {
+            Self::expr_to_class_expr_(
+                emitter,
+                check_traits,
+                resolve_self,
+                Some((cd.get_kind(), cd.get_name_str())),
+                Self::get_parent_class_name(cd),
+                expr,
+            )
+        } else {
+            Self::expr_to_class_expr_(emitter, check_traits, resolve_self, None, None, expr)
+        }
+    }
+
+    pub fn expr_to_class_expr_(
+        emitter: &Emitter,
+        check_traits: bool,
+        resolve_self: bool,
+        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
+        opt_parent_name: Option<String>,
+        expr: ast::Expr,
+    ) -> Self {
         match expr.1 {
             Expr_::Id(x) => {
                 let ast_defs::Id(pos, id) = *x;
@@ -97,14 +116,19 @@ impl ClassExpr {
                         emitter,
                         check_traits,
                         resolve_self,
-                        scope,
+                        opt_class_info,
+                        opt_parent_name,
                     ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::Parent),
                     }
                 } else if string_utils::is_self(&id) {
-                    match Self::get_original_class_name(emitter, check_traits, resolve_self, scope)
-                    {
+                    match Self::get_original_class_name(
+                        emitter,
+                        check_traits,
+                        resolve_self,
+                        opt_class_info,
+                    ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::Self_),
                     }

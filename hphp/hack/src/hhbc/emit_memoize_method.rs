@@ -177,7 +177,7 @@ fn emit_memoize_wrapper_body<'a>(
     emitter: &mut Emitter,
     env: &mut Env<'a>,
     args: &mut Args,
-) -> Result<HhasBody<'a>> {
+) -> Result<HhasBody> {
     let mut tparams: Vec<&str> = args
         .scope
         .get_tparams()
@@ -208,7 +208,7 @@ fn emit<'a>(
     hhas_params: Vec<HhasParam>,
     return_type_info: HhasTypeInfo,
     args: &Args,
-) -> Result<HhasBody<'a>> {
+) -> Result<HhasBody> {
     let pos = &args.method.span;
     let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
     let instrs = emit_pos_then(pos, instrs);
@@ -417,7 +417,7 @@ fn make_wrapper<'a>(
     params: Vec<HhasParam>,
     return_type_info: HhasTypeInfo,
     args: &Args,
-) -> Result<HhasBody<'a>> {
+) -> Result<HhasBody> {
     let mut decl_vars = vec![];
     if args.flags.contains(Flags::IS_REFIED) {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
@@ -443,7 +443,7 @@ fn make_wrapper<'a>(
         params,
         Some(return_type_info),
         None,
-        Some(env_copy),
+        Some(&env),
     )
 }
 

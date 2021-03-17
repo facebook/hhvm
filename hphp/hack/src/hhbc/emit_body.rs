@@ -9,6 +9,7 @@ mod try_finally_rewriter;
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
 use ast_body::AstBody;
+use ast_class_expr_rust::ClassExpr;
 use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
@@ -21,6 +22,7 @@ use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, Env};
 use generator_rust as generator;
 use hhas_body_rust::HhasBody;
+use hhas_body_rust::HhasBodyEnv;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{
@@ -76,12 +78,12 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'a, 'b>(
+pub fn emit_body_with_default_args<'b>(
     emitter: &mut Emitter,
     namespace: RcOc<namespace_env::Env>,
     body: &'b tast::Program,
     return_value: InstrSeq,
-) -> Result<HhasBody<'a>> {
+) -> Result<HhasBody> {
     let args = Args {
         immediate_tparams: &vec![],
         class_tparam_names: &vec![],
@@ -105,14 +107,14 @@ pub fn emit_body_with_default_args<'a, 'b>(
     .map(|r| r.0)
 }
 
-pub fn emit_body<'a, 'b>(
+pub fn emit_body<'b>(
     emitter: &mut Emitter,
     namespace: RcOc<namespace_env::Env>,
     body: AstBody<'b>,
     return_value: InstrSeq,
-    scope: Scope<'a>,
+    scope: Scope<'_>,
     args: Args<'_>,
-) -> Result<(HhasBody<'a>, bool, bool)> {
+) -> Result<(HhasBody, bool, bool)> {
     let tparams = scope
         .get_tparams()
         .into_iter()
@@ -205,7 +207,7 @@ pub fn emit_body<'a, 'b>(
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
-            Some(env),
+            Some(&env),
         )?,
         is_generator,
         is_pair_generator,
@@ -416,8 +418,8 @@ pub fn make_body<'a>(
     mut params: Vec<HhasParam>,
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
-    env: Option<Env<'a>>,
-) -> Result<HhasBody<'a>> {
+    opt_env: Option<&Env<'a>>,
+) -> Result<HhasBody> {
     body_instrs.rewrite_user_labels(emitter.label_gen_mut());
     emit_adata::rewrite_typed_values(emitter, &mut body_instrs)?;
     if emitter
@@ -432,6 +434,24 @@ pub fn make_body<'a>(
     } else {
         emitter.iterator().count()
     };
+    let body_env = if let Some(env) = opt_env {
+        let is_namespaced = env.namespace.name.is_none();
+        if let Some(cd) = env.scope.get_class() {
+            Some(HhasBodyEnv {
+                is_namespaced,
+                class_info: Some((cd.get_kind(), cd.get_name_str().to_string())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
+            })
+        } else {
+            Some(HhasBodyEnv {
+                is_namespaced,
+                class_info: None,
+                parent_name: None,
+            })
+        }
+    } else {
+        None
+    };
     Ok(HhasBody {
         body_instrs,
         decl_vars,
@@ -443,7 +463,7 @@ pub fn make_body<'a>(
         params,
         return_type_info,
         doc_comment,
-        env,
+        env: body_env,
     })
 }
 

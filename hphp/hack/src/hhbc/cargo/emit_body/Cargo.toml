@@ -9,6 +9,7 @@ path = "../../emit_body.rs"
 
 [dependencies]
 ast_body = { path = "../ast_body" }
+ast_class_expr_rust = { path = "../ast_class_expr" }
 ast_scope_rust = { path = "../ast_scope" }
 bitflags = "1.2"
 bstr = { version = "0.2", features = ["serde1"] }

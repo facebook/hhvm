@@ -654,6 +654,7 @@ name = "emit_body_rust"
 version = "0.0.0"
 dependencies = [
  "ast_body",
+ "ast_class_expr_rust",
  "ast_scope_rust",
  "bitflags",
  "bstr",
@@ -1394,7 +1395,6 @@ dependencies = [
 name = "hhas_body_rust"
 version = "0.0.0"
 dependencies = [
- "env",
  "hhas_param_rust",
  "hhas_type",
  "instruction_sequence_rust",

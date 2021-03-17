@@ -18,7 +18,7 @@ pub struct HhasMethod<'id> {
     pub attributes: Vec<HhasAttribute>,
     pub visibility: Visibility,
     pub name: method::Type<'id>,
-    pub body: HhasBody<'id>,
+    pub body: HhasBody,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,
     pub flags: HhasMethodFlags,

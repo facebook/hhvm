@@ -8,7 +8,6 @@ edition = "2018"
 path = "../../hhas_body.rs"
 
 [dependencies]
-env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
 instruction_sequence_rust = { path = "../instruction_sequence" }

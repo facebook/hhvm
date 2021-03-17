@@ -190,8 +190,8 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   in
   let changelist =
     [
-      (bar1path, Full bar1fileinfo, TypeChecker);
-      (foo3path, Full foo3fileinfo, TypeChecker);
+      (bar1path, bar1fileinfo, TypeChecker);
+      (foo3path, foo3fileinfo, TypeChecker);
     ]
   in
   let init_id = Random_id.short_string () in

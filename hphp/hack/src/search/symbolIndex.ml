@@ -219,7 +219,7 @@ let find_matching_symbols
 let update_files
     ~(ctx : Provider_context.t)
     ~(sienv : si_env)
-    ~(paths : (Relative_path.t * info * file_source) list) : si_env =
+    ~(paths : (Relative_path.t * FileInfo.t * file_source) list) : si_env =
   match sienv.sie_provider with
   | NoIndex -> sienv
   | CustomIndex

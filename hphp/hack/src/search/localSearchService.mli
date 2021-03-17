@@ -15,7 +15,7 @@ val update_file :
   ctx:Provider_context.t ->
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
-  info:SearchUtils.info ->
+  info:FileInfo.t ->
   SearchUtils.si_env
 
 (* FASTER: Uses the "facts" objects directly from a previous parse of the file. *)

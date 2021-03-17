@@ -33,7 +33,7 @@ let get_tombstone (path : Relative_path.t) : int64 =
 let convert_fileinfo_to_contents
     ~(ctx : Provider_context.t)
     ~(sienv : SearchUtils.si_env)
-    ~(info : SearchUtils.info)
+    ~(info : FileInfo.t)
     ~(filepath : string) : SearchUtils.si_capture =
   let append_item
       (kind : SearchUtils.si_kind)
@@ -83,32 +83,18 @@ let convert_fileinfo_to_contents
     List.fold list ~init:acc ~f:(fun inside_acc (_, name) ->
         append_item kind inside_acc name)
   in
-  let fold_fast
-      (kind : SearchUtils.si_kind)
-      (acc : SearchUtils.si_capture)
-      (sset : SSet.t) : SearchUtils.si_capture =
-    SSet.fold (fun name inside_acc -> append_item kind inside_acc name) sset acc
-  in
-  match info with
-  | Full f ->
-    let acc = fold_full SI_Function [] f.FileInfo.funs in
-    let acc = fold_full SI_Class acc f.FileInfo.classes in
-    let acc = fold_full SI_Typedef acc f.FileInfo.typedefs in
-    let acc = fold_full SI_GlobalConstant acc f.FileInfo.consts in
-    acc
-  | Fast f ->
-    let acc = fold_fast SI_Function [] f.FileInfo.n_funs in
-    let acc = fold_fast SI_Class acc f.FileInfo.n_classes in
-    let acc = fold_fast SI_Typedef acc f.FileInfo.n_types in
-    let acc = fold_fast SI_GlobalConstant acc f.FileInfo.n_consts in
-    acc
+  let acc = fold_full SI_Function [] info.FileInfo.funs in
+  let acc = fold_full SI_Class acc info.FileInfo.classes in
+  let acc = fold_full SI_Typedef acc info.FileInfo.typedefs in
+  let acc = fold_full SI_GlobalConstant acc info.FileInfo.consts in
+  acc
 
 (* Update files when they were discovered *)
 let update_file
     ~(ctx : Provider_context.t)
     ~(sienv : si_env)
     ~(path : Relative_path.t)
-    ~(info : SearchUtils.info) : si_env =
+    ~(info : FileInfo.t) : si_env =
   let tombstone = get_tombstone path in
   let filepath = Relative_path.suffix path in
   let contents =

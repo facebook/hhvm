@@ -45,7 +45,7 @@ val find_matching_symbols :
 val update_files :
   ctx:Provider_context.t ->
   sienv:SearchUtils.si_env ->
-  paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
+  paths:(Relative_path.t * FileInfo.t * SearchUtils.file_source) list ->
   SearchUtils.si_env
 
 (* FASTER: Update from facts directly *)

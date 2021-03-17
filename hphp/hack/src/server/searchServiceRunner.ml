@@ -11,7 +11,7 @@ open Hh_prelude
 open ServerEnv
 
 module SearchServiceRunner = struct
-  type t = Relative_path.t * SearchUtils.info
+  type t = Relative_path.t * FileInfo.t
 
   (* Chosen so that multiworker takes about ~2.5 seconds *)
   let chunk_size genv = genv.local_config.ServerLocalConfig.search_chunk_size
@@ -64,7 +64,7 @@ module SearchServiceRunner = struct
 
   let internal_ssr_update
       (fn : Relative_path.t)
-      (info : SearchUtils.info)
+      (info : FileInfo.t)
       ~(source : SearchUtils.file_source) =
     Queue.enqueue queue (fn, info, source)
 
@@ -78,6 +78,6 @@ module SearchServiceRunner = struct
       (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =
     let i = ref 0 in
     Naming_table.iter fast ~f:(fun fn info ->
-        internal_ssr_update fn (SearchUtils.Full info) source;
+        internal_ssr_update fn info source;
         i := !i + 1)
 end

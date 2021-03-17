@@ -63,15 +63,6 @@ type ('a, 'b) term = {
 
 let to_absolute t = { t with pos = Pos.to_absolute t.pos }
 
-(*
- * Needed to distinguish between two types of typechecker updates
- * to the local symbol table. When we no longer need to get local
- * symbols from the saved-state, this can be deleted.
- *)
-type info =
-  | Full of FileInfo.t
-  | Fast of FileInfo.names
-
 (* Flattened enum that contains one element for each type of symbol *)
 type si_kind =
   | SI_Class

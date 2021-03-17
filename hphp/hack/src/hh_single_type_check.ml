@@ -1419,7 +1419,7 @@ let scan_files_for_symbol_index
   let fileinfo_list = Relative_path.Map.values individual_file_info in
   let transformed_list =
     List.map fileinfo_list ~f:(fun fileinfo ->
-        (filename, SearchUtils.Full fileinfo, SearchUtils.TypeChecker))
+        (filename, fileinfo, SearchUtils.TypeChecker))
   in
   SymbolIndex.update_files ~ctx ~sienv ~paths:transformed_list
 

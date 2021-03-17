@@ -301,20 +301,26 @@ let filter_privates class_type =
     dc_smethods = SMap.filter is_not_private class_type.dc_smethods;
   }
 
-let chown_privates owner class_type =
-  let chown_private elt =
+let chown_private_and_protected owner class_type =
+  let chown elt =
     match elt.elt_visibility with
     | Vprivate _ -> { elt with elt_visibility = Vprivate owner }
+    (* Update protected member that's included via a `use` statement, unless
+     * it's synthesized, in which case its owner will be the one specified
+     * in `requires extends` or `requires implements`
+     *)
+    | Vprotected _ when not (get_elt_synthesized elt) ->
+      { elt with elt_visibility = Vprotected owner }
     | Vpublic
     | Vprotected _ ->
       elt
   in
   {
     class_type with
-    dc_props = SMap.map chown_private class_type.dc_props;
-    dc_sprops = SMap.map chown_private class_type.dc_sprops;
-    dc_methods = SMap.map chown_private class_type.dc_methods;
-    dc_smethods = SMap.map chown_private class_type.dc_smethods;
+    dc_props = SMap.map chown class_type.dc_props;
+    dc_sprops = SMap.map chown class_type.dc_sprops;
+    dc_methods = SMap.map chown class_type.dc_methods;
+    dc_smethods = SMap.map chown class_type.dc_smethods;
   }
 
 (*****************************************************************************)
@@ -340,8 +346,8 @@ let inherit_hack_class
   let parent =
     match parent.dc_kind with
     | Ast_defs.Ctrait ->
-      (* Change the private visibility to point to the inheriting class *)
-      chown_privates (snd child.sc_name) parent
+      (* Change the private/protected visibility to point to the inheriting class *)
+      chown_private_and_protected (snd child.sc_name) parent
     | Ast_defs.Cnormal
     | Ast_defs.Cabstract
     | Ast_defs.Cinterface ->
@@ -454,6 +460,9 @@ let heap_entries env class_name (classes : Decl_store.class_entries SMap.t) :
         Decl_env.add_extends_dependency env class_name;
       Some (class_, None))
 
+(* Include definitions inherited from a class (extends) or a trait (use)
+ * or requires extends
+ *)
 let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
     inherited =
   let (_, (_, parent_name), parent_class_params) =

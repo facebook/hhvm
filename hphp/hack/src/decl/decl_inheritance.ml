@@ -132,32 +132,45 @@ let is_private elt =
   match elt.ce_visibility with
   | Vprivate _ when get_ce_lsb elt -> false
   | Vprivate _ -> true
-  | Vpublic
-  | Vprotected _ ->
+  | Vprotected _
+  | Vpublic ->
     false
 
-let chown_private child_class_name ancestor_sig =
+let is_private_or_protected elt =
+  match elt.ce_visibility with
+  | Vprivate _
+  | Vprotected _
+    when get_ce_lsb elt ->
+    false
+  | Vprivate _
+  | Vprotected _ ->
+    true
+  | Vpublic -> false
+
+let chown_private_or_protected child_class_name ancestor_sig =
   let ce_visibility =
     match ancestor_sig.ce_visibility with
     | Vprivate _ -> Vprivate child_class_name
+    | Vprotected _ when not (get_ce_synthesized ancestor_sig) ->
+      Vprotected child_class_name
     | _ -> ancestor_sig.ce_visibility
   in
   { ancestor_sig with ce_visibility }
 
 (** Remove private members not visible to [child_class_name] from the sequence.
-    Mark private trait members as private to [child_class_name] instead. *)
+    Mark private/protected trait members as private/protected to [child_class_name] instead. *)
 let filter_or_chown_privates
     (child_class_name : string) (lin : DTT.tagged_elt Sequence.t) :
     (string * class_elt) Sequence.t =
   Sequence.filter_map lin (fun DTT.{ id; inherit_when_private; elt } ->
       let ancestor_name = elt.ce_origin in
-      let is_private_and_inherited =
-        String.( <> ) ancestor_name child_class_name && is_private elt
-      in
-      if is_private_and_inherited && not inherit_when_private then
+      let is_inherited = String.( <> ) ancestor_name child_class_name in
+      if is_private elt && is_inherited && not inherit_when_private then
         None
-      else if is_private_and_inherited && inherit_when_private then
-        Some (id, chown_private child_class_name elt)
+      else if
+        is_private_or_protected elt && is_inherited && inherit_when_private
+      then
+        Some (id, chown_private_or_protected child_class_name elt)
       else
         Some (id, elt))
 

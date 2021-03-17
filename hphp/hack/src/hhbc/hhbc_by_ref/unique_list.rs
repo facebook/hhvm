@@ -37,6 +37,7 @@ where
         self.set.iter()
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn into_iter(self) -> impl DoubleEndedIterator<Item = T> {
         self.set.into_iter()
     }

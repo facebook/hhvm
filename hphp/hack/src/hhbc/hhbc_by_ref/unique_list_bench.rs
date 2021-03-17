@@ -56,7 +56,7 @@ mod tests {
 
     #[bench]
     fn bench_new_and_add_eight_strings(b: &mut Bencher) {
-        b.iter(|| make_sample_unique_list());
+        b.iter(make_sample_unique_list);
     }
 
     #[bench]
@@ -112,7 +112,7 @@ mod tests {
 
     #[bench]
     fn bench_make_big_usize_ul(b: &mut Bencher) {
-        b.iter(|| make_big_usize_list());
+        b.iter(make_big_usize_list);
     }
 
     #[bench]

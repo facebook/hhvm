@@ -42,7 +42,6 @@ impl<'a> DeclvarVisitor<'a> {
             || special_idents::is_tmp_var(name_ref)
             || name_ref == special_idents::THIS
         {
-            ()
         } else {
             self.locals.add(name.into())
         }
@@ -153,8 +152,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 let has_use_list = self
                     .context
                     .explicit_use_set_opt
-                    .map(|s| s.contains(fn_name))
-                    .unwrap_or(false);
+                    .map_or(false, |s| s.contains(fn_name));
                 if has_use_list {
                     for id in use_list {
                         self.add_local(id.name())

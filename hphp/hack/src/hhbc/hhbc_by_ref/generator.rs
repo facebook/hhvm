@@ -8,6 +8,7 @@ use oxidized::{
     ast as tast,
 };
 
+#[allow(clippy::needless_lifetimes)]
 pub fn is_function_generator<'a>(body: &AstBody<'a>) -> (bool, bool) {
     struct S((bool, bool));
 

@@ -36,6 +36,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         is: &'a InstrSeq<'arena>,
         jt_gen: &mut jt::Gen<'arena>,
     ) -> JumpInstructions<'a, 'arena> {
+        #[allow(clippy::needless_lifetimes)]
         fn get_label_id<'arena>(
             jt_gen: &mut jt::Gen<'arena>,
             is_break: bool,
@@ -55,14 +56,14 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
                 use hhbc_ast::Instruct::*;
                 use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
                 use hhbc_ast::InstructSpecialFlow::{Break, Continue};
-                match i {
-                    &ISpecialFlow(Break(level)) => {
+                match *i {
+                    ISpecialFlow(Break(level)) => {
                         acc.insert(get_label_id(jt_gen, true, level as Level), i);
                     }
-                    &ISpecialFlow(Continue(level)) => {
+                    ISpecialFlow(Continue(level)) => {
                         acc.insert(get_label_id(jt_gen, false, level as Level), i);
                     }
-                    &IContFlow(ref cont_flow) => match cont_flow {
+                    IContFlow(ref cont_flow) => match cont_flow {
                         RetC | RetCSuspended | RetM(_) => {
                             acc.insert(jt_gen.get_id_for_return(), i);
                         }
@@ -84,9 +85,9 @@ pub(super) fn cleanup_try_body<'arena>(
 ) -> InstrSeq<'arena> {
     use hhbc_ast::Instruct::*;
     use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-    is.filter_map(alloc, &mut |i| match i {
-        &ISpecialFlow(_) => None,
-        &IContFlow(ref cont_flow) => match cont_flow {
+    is.filter_map(alloc, &mut |i| match *i {
+        ISpecialFlow(_) => None,
+        IContFlow(ref cont_flow) => match cont_flow {
             RetC | RetCSuspended | RetM(_) => None,
             _ => Some(i.clone()),
         },
@@ -154,7 +155,7 @@ pub(super) fn emit_return<'a, 'arena>(
                 || Ok(instr::empty(alloc)),
                 |h| {
                     use reified::ReificationLevel;
-                    let h = reified::convert_awaitable(env, h.clone());
+                    let h = reified::convert_awaitable(env, h);
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
                         ReificationLevel::Unconstrained => Ok(instr::empty(alloc)),
@@ -324,19 +325,19 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena>(
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
-        match i {
-            &IContFlow(ref cont_flow) => match cont_flow {
+        match *i {
+            IContFlow(ref cont_flow) => match cont_flow {
                 RetC | RetCSuspended | RetM(_) => emit_return(e, true, env),
                 _ => fail(),
             },
-            &ISpecialFlow(Break(level)) => Ok(emit_break_or_continue(
+            ISpecialFlow(Break(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
                 level as Level,
             )),
-            &ISpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
+            ISpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,

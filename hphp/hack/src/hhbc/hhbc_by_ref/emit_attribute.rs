@@ -45,10 +45,7 @@ pub fn from_ast<'arena>(
             ast_constant_folder::Error::UserDefinedConstant,
             "literals_from_expr should have panicked for an error other than UserDefinedConstant"
         );
-        emit_fatal::raise_fatal_parse(
-            &attr.name.0,
-            format!("Attribute arguments must be literals"),
-        )
+        emit_fatal::raise_fatal_parse(&attr.name.0, "Attribute arguments must be literals")
     })?;
     let fully_qualified_id = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes
@@ -100,7 +97,7 @@ pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<HhasAttrib
 
 pub fn add_reified_parent_attribute<'a, 'arena>(
     env: &Env<'a, 'arena>,
-    extends: &Vec<a::Hint>,
+    extends: &[a::Hint],
 ) -> Option<HhasAttribute<'arena>> {
     if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
         if emit_expression::has_non_tparam_generics(env, hl) {
@@ -110,5 +107,5 @@ pub fn add_reified_parent_attribute<'a, 'arena>(
             });
         }
     }
-    return None;
+    None
 }

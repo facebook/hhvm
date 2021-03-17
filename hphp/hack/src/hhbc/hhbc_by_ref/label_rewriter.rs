@@ -59,7 +59,7 @@ fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena La
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l), _), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l), _), _))
         | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _)) => vec![l],
-        IContFlow(Switch(_, _, ls)) => ls.iter().map(|x| x).collect::<Vec<_>>(),
+        IContFlow(Switch(_, _, ls)) => ls.iter().collect::<Vec<_>>(),
         IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| &x.1).collect::<Vec<_>>(),
         IMisc(MemoGetEager(l1, l2, _)) => vec![l1, l2],
         _ => vec![],
@@ -68,7 +68,7 @@ fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena La
 
 fn create_label_ref_map<'arena>(
     defs: &HashMap<Id, usize>,
-    params: &Vec<HhasParam<'arena>>,
+    params: &[HhasParam<'arena>],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Id>, HashMap<Id, usize>) {
     let process_ref =
@@ -160,7 +160,7 @@ fn rewrite_params_and_body<'arena>(
     };
     let relabel_define_label_id = |id: Id| {
         if used.contains(&id) {
-            refs.get(lookup_def(&id, defs)).map(|x| *x)
+            refs.get(lookup_def(&id, defs)).copied()
         } else {
             None
         }

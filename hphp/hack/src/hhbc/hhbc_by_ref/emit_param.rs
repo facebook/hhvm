@@ -59,6 +59,7 @@ pub fn from_asts<'a, 'arena>(
         .map(rename_params)
 }
 
+#[allow(clippy::needless_lifetimes)]
 fn rename_params<'arena>(mut params: Vec<HhasParam<'arena>>) -> Vec<HhasParam<'arena>> {
     fn rename<'arena>(
         names: &BTreeSet<String>,
@@ -288,15 +289,15 @@ fn default_type_check(
     // If matches, return None, otherwise return default_type
     let default_type = hint_type.and_then(|ht| match_default_and_hint(ht, param_expr));
     let param_true_name = strip_dollar(param_name);
-    default_type.and_then(|dt| hint_type.and_then(|ht| match ht {
-        "class" => Some(format!(
+    default_type.and_then(|dt| hint_type.map(|ht| match ht {
+        "class" => format!(
             "Default value for parameter {} with a class type hint can only be NULL",
-            param_true_name)),
-        _ => Some(format!(
+            param_true_name),
+        _ => format!(
             "Default value for parameter {} with type {} needs to have the same type as the type hint {}",
             param_true_name,
             dt,
-            ht))
+            ht)
     }))
 }
 

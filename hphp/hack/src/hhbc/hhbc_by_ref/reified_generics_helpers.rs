@@ -50,7 +50,7 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     fn is_all_erased<'a>(env: &'a Env, mut h_iter: impl Iterator<Item = &'a aast::Hint>) -> bool {
         let erased_tparams: HashSet<String> = get_erased_tparams(env).collect();
         h_iter.all(|h| {
-            if let &Hint_::Happly(Id(_, ref id), ref apply_hints) = &*h.1 {
+            if let Hint_::Happly(Id(_, ref id), ref apply_hints) = *h.1 {
                 if apply_hints.is_empty() {
                     return erased_tparams.contains(id);
                 }
@@ -139,6 +139,7 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
     }
 }
 
+#[allow(clippy::needless_lifetimes)]
 pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint) -> aast::Hint {
     if env.scope.is_in_async() {
         remove_awaitable(h)
@@ -179,12 +180,15 @@ pub(crate) fn simplify_verify_type<'a, 'arena>(
     }
 }
 
+#[allow(clippy::needless_lifetimes)]
 pub(crate) fn remove_erased_generics<'a, 'arena>(
     env: &Env<'a, 'arena>,
     h: aast::Hint,
 ) -> aast::Hint {
     use aast::*;
+    #[allow(clippy::needless_lifetimes)]
     fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): aast::Hint) -> aast::Hint {
+        #[allow(clippy::needless_lifetimes)]
         fn modify<'a, 'arena>(env: &Env<'a, 'arena>, id: String) -> String {
             if get_erased_tparams(env).any(|p| p == id) {
                 "_".into()

@@ -46,5 +46,4 @@ add_dependencies(hphp_runtime_ext hphp_runtime_static)
 object_library_ld_link_libraries(hphp_runtime_ext hphp_zend ${HRE_LINK_LIBRARIES})
 object_library_hphp_link(hphp_runtime_ext)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_ext)
-
 HHVM_PUBLIC_HEADERS(ext ${HEADER_SOURCES})

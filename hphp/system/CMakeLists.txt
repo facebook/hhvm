@@ -34,4 +34,7 @@ add_custom_command(
 
 add_custom_target(
   systemlib
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/systemlib.php)
+  DEPENDS
+  ${CMAKE_CURRENT_BINARY_DIR}/systemlib.php
+  generated_systemlib
+)

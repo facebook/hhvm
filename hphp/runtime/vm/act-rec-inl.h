@@ -156,7 +156,8 @@ inline RuntimeCoeffects ActRec::coeffects() const {
   auto const id = func()->coeffectsLocalId();
   auto const tv = reinterpret_cast<const TypedValue*>(this) - (id + 1);
   assertx(tvIsInt(tv));
-  return RuntimeCoeffects::fromValue(tv->m_data.num);
+  auto const shallows = func()->staticCoeffects().toShallowWithLocals();
+  return RuntimeCoeffects::fromValue(tv->m_data.num & (~shallows.value()));
 
 }
 

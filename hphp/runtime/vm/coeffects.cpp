@@ -48,23 +48,23 @@ const folly::Optional<std::string> StaticCoeffects::toString() const {
 }
 
 RuntimeCoeffects StaticCoeffects::toAmbient() const {
-  auto const locals =
-    (((~m_data) >> 1) & m_data) & CoeffectsConfig::escapeMask();
-  auto const val = m_data - locals;
+  auto const val = m_data - locals();
   FTRACE(5, "Converting {:016b} to ambient {:016b}\n", m_data, val);
   return RuntimeCoeffects::fromValue(val);
 }
 
 RuntimeCoeffects StaticCoeffects::toRequired() const {
-  auto const locals =
-    (((~m_data) >> 1) & m_data) & CoeffectsConfig::escapeMask();
   // This converts the 01 (local) pattern to 10 (shallow) pattern
   // (m_data | (locals << 1)) & (~locals)
   // => m_data - locals + 2 * locals
   // => m_data + locals
-  auto const val = m_data + locals;
+  auto const val = m_data + locals();
   FTRACE(5, "Converting {:016b} to required {:016b}\n", m_data, val);
   return RuntimeCoeffects::fromValue(val);
+}
+
+RuntimeCoeffects StaticCoeffects::toShallowWithLocals() const {
+  return RuntimeCoeffects::fromValue(locals() << 1);
 }
 
 RuntimeCoeffects& RuntimeCoeffects::operator&=(const RuntimeCoeffects o) {
@@ -74,6 +74,10 @@ RuntimeCoeffects& RuntimeCoeffects::operator&=(const RuntimeCoeffects o) {
 
 StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
   return (*this = CoeffectsConfig::combine(*this, o));
+}
+
+StaticCoeffects::storage_t StaticCoeffects::locals() const {
+  return (((~m_data) >> 1) & m_data) & CoeffectsConfig::escapeMask();
 }
 
 folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {

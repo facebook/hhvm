@@ -93,7 +93,10 @@ inline SSATmp* curCoeffects(IRGS& env) {
   // TODO: Figure out why TInt asserts here
   auto const local =
     gen(env, LdLoc, TCell, LocalId(func->coeffectsLocalId()), fp(env));
-  return gen(env, AssertType, TInt, local);
+  auto const value = gen(env, AssertType, TInt, local);
+  auto const shallows = func->staticCoeffects().toShallowWithLocals();
+  return gen(env, AndInt, value, cns(env, ~shallows.value()));
+
 }
 
 //////////////////////////////////////////////////////////////////////

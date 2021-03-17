@@ -271,18 +271,12 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   auto const requiredCoeffects = [&] {
     auto required = cns(env, callee->staticCoeffects().toRequired().value());
     if (!callee->hasCoeffectRules()) return required;
-    SSATmp* rules = nullptr;
     for (auto const& rule : callee->getCoeffectRules()) {
       if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx)) {
-        rules = rules ? gen(env, AndInt, rules, coeffect) : coeffect;
+        required = gen(env, AndInt, required, coeffect);
       }
     }
-    auto ambient = cns(env, callee->staticCoeffects().toAmbient().value());
-    if (rules) {
-      ambient = gen(env, AndInt, rules, ambient);
-      required = gen(env, AndInt, rules, required);
-    }
-    push(env, ambient);
+    push(env, required);
     // This is a *gross* hack to reduce register pressure for prologues
     env.irb->fs().forgetValue(offsetFromIRSP(env, BCSPRelOffset{0}));
     updateMarker(env);

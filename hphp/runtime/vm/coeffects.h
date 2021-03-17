@@ -74,6 +74,9 @@ struct StaticCoeffects {
   RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;
 
+  // Returns the corresponding shallow bits for coeffects that are local
+  RuntimeCoeffects toShallowWithLocals() const;
+
   static StaticCoeffects fromValue(uint16_t value) {
     return StaticCoeffects{value};
   }
@@ -91,6 +94,10 @@ struct StaticCoeffects {
   void serde(SerDe& sd) {
     sd(m_data);
   }
+
+private:
+  // Returns the local bits
+  storage_t locals() const;
 
 private:
   explicit StaticCoeffects(uint16_t data) : m_data(data) {}

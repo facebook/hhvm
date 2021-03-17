@@ -1107,7 +1107,7 @@ where
                 let constraint_token = S!(make_token, self, constraint_token);
                 let constraint_ctx = self.parse_contexts();
                 Some(S!(
-                    make_type_constraint,
+                    make_context_constraint,
                     self,
                     constraint_token,
                     constraint_ctx

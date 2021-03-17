@@ -187,8 +187,8 @@
                     "kind":"list",
                     "elements":[
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"super",
@@ -202,7 +202,7 @@
                             "line_number":3
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -260,8 +260,8 @@
                         }
                       },
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"as",
@@ -275,7 +275,7 @@
                             "line_number":3
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -1059,8 +1059,8 @@
                     "kind":"list",
                     "elements":[
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"super",
@@ -1074,7 +1074,7 @@
                             "line_number":13
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -1132,8 +1132,8 @@
                         }
                       },
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"as",
@@ -1147,7 +1147,7 @@
                             "line_number":13
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -1445,8 +1445,8 @@
                     "kind":"list",
                     "elements":[
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"super",
@@ -1460,7 +1460,7 @@
                             "line_number":17
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -1518,8 +1518,8 @@
                         }
                       },
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"as",
@@ -1533,7 +1533,7 @@
                             "line_number":17
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -1943,5 +1943,5 @@
     }
   },
   "program_text":"<?hh\nabstract class AtLeastRxShallowButImpureIterator {\n  abstract const ctx C super [rx_shallow] as [rx] = [rx];\n\n  public function call_into_rx()[this::C]: void {\n    require_rx(); // ok (rx_shallow <: C <: rx)\n  }\n}\n\nfunction require_rx()[rx]: void {}\n\nclass ExactlyRxIterator extends AtLeastRxShallowButImpureIterator {\n  const ctx C super [rx_shallow] as [rx] = [rx];\n}\n\nclass ExactlyRxShallowIterator extends AtLeastRxShallowButImpureIterator {\n  const ctx C super [rx_shallow] as [rx] = [rx_shallow];\n  public function call_into_rx_shallow()[this::C]: void {}\n}\n",
-  "version":"2021-01-05-0001"
+  "version":"2021-03-10-0001"
 }

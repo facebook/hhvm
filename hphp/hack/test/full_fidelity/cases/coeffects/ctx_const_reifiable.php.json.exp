@@ -187,8 +187,8 @@
                     "kind":"list",
                     "elements":[
                       {
-                        "kind":"type_constraint",
-                        "constraint_keyword":{
+                        "kind":"context_constraint",
+                        "ctx_constraint_keyword":{
                           "kind":"token",
                           "token":{
                             "kind":"super",
@@ -202,7 +202,7 @@
                             "line_number":3
                           }
                         },
-                        "constraint_type":{
+                        "ctx_constraint_ctx_list":{
                           "kind":"contexts",
                           "contexts_left_bracket":{
                             "kind":"token",
@@ -315,5 +315,5 @@
     }
   },
   "program_text":"<?hh\nabstract class Base {\n  <<__Reifiable>> abstract const ctx C super [output];\n}\n",
-  "version":"2021-01-05-0001"
+  "version":"2021-03-10-0001"
 }

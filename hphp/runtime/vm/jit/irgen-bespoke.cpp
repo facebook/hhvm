@@ -834,38 +834,36 @@ folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 // emitting a check if necessary to refine the array's type to that layout.
 ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
   auto const kind = env.context.kind;
-  assertx(env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
+  if (kind != TransKind::Optimize) return type.arrSpec().layout();
 
-  if (kind == TransKind::Optimize) {
-    auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
-    auto const target = TArrLike.narrowToLayout(layout);
-    if (!type.maybe(target)) {
-      // If the predicted type is incompatible with the known type, avoid
-      // generating an impossible CheckType followed by unreachable code.
-      assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
-      return type.arrSpec().layout();
-    }
-    if (RO::EvalBespokeEscalationSampleRate) {
-      ifThen(
-        env,
-        [&](Block* taken) {
-          env.irb->setGuardFailBlock(taken);
-          checkType(env, loc, target, bcOff(env));
-          env.irb->resetGuardFailBlock();
-        },
-        [&]{
-          auto const arr = loadLocation(env, loc);
-          gen(env, LogGuardFailure, target, arr);
-          gen(env, Jmp, makeExit(env, curSrcKey(env)));
-        }
-      );
-    } else {
-      checkType(env, loc, target, bcOff(env));
-    }
-    return layout;
+  auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
+  auto const target = TArrLike.narrowToLayout(layout);
+  if (!type.maybe(target)) {
+    // If the predicted type is incompatible with the known type, avoid
+    // generating an impossible CheckType followed by unreachable code.
+    assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
+    return type.arrSpec().layout();
   }
-  return type.arrSpec().layout();
+
+  if (RO::EvalBespokeEscalationSampleRate) {
+    ifThen(
+      env,
+      [&](Block* taken) {
+        env.irb->setGuardFailBlock(taken);
+        checkType(env, loc, target, bcOff(env));
+        env.irb->resetGuardFailBlock();
+      },
+      [&]{
+        auto const arr = loadLocation(env, loc);
+        gen(env, LogGuardFailure, target, arr);
+        gen(env, Jmp, makeExit(env, curSrcKey(env)));
+      }
+    );
+  } else {
+    checkType(env, loc, target, bcOff(env));
+  }
+  return layout;
 }
 
 void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
@@ -1061,6 +1059,7 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
   } else if (isFCall(sk.op())) {
+    guardToLayout(env, sk, *loc, type);
     translateDispatchBespoke(env, ni);
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla

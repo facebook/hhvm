@@ -1,0 +1,254 @@
+ret = 1
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(8) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+  [2]=>
+  int(10)
+  [3]=>
+  int(12)
+  [4]=>
+  string(8) "stdClass"
+  [5]=>
+  string(9) "Exception"
+  [6]=>
+  string(5) "mixed"
+  [7]=>
+  int(42)
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "object"
+bool(true)
+vec(3) {
+  bool(false)
+  vec(0) {
+  }
+  NULL
+}
+object(stdClass) (0) {
+}
+====================================================================
+ret = 
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(0) {
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "string"
+bool(true)
+vec(0) {
+}
+object(stdClass) (0) {
+}
+====================================================================
+ret = 1
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(8) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+  [2]=>
+  int(10)
+  [3]=>
+  int(12)
+  [4]=>
+  string(8) "stdClass"
+  [5]=>
+  string(9) "Exception"
+  [6]=>
+  string(5) "mixed"
+  [7]=>
+  int(42)
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "object"
+bool(true)
+vec(3) {
+  bool(false)
+  vec(0) {
+  }
+  NULL
+}
+object(stdClass) (0) {
+}
+====================================================================
+ret = 1
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(8) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+  [2]=>
+  int(10)
+  [3]=>
+  int(12)
+  [4]=>
+  string(8) "stdClass"
+  [5]=>
+  string(9) "Exception"
+  [6]=>
+  string(5) "mixed"
+  [7]=>
+  int(42)
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "object"
+bool(true)
+vec(3) {
+  bool(false)
+  vec(0) {
+  }
+  NULL
+}
+object(stdClass) (0) {
+}
+====================================================================
+ret = 
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(0) {
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "string"
+bool(true)
+vec(0) {
+}
+object(stdClass) (0) {
+}
+====================================================================
+ret = 1
+
+string(3) "one"
+string(3) "two"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(5) "hello"
+string(5) "world"
+int(10)
+int(12)
+dict(8) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+  [2]=>
+  int(10)
+  [3]=>
+  int(12)
+  [4]=>
+  string(8) "stdClass"
+  [5]=>
+  string(9) "Exception"
+  [6]=>
+  string(5) "mixed"
+  [7]=>
+  int(42)
+}
+string(5) "hello"
+string(19) "world;; IN ="hello""
+int(154)
+int(12)
+string(9) "Exception"
+string(9) "Exception"
+string(6) "string"
+string(6) "object"
+bool(true)
+vec(3) {
+  bool(false)
+  vec(0) {
+  }
+  NULL
+}
+object(stdClass) (0) {
+}
+====================================================================

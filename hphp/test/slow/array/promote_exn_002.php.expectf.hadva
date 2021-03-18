@@ -1,0 +1,16 @@
+----
+after a throw:
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
+object(bar) (1) {
+  ["x"]=>
+  dict(0) {
+  }
+}
+----
+after a throw:
+string(%d) "Invalid dict key: expected a key of type int or string, stdClass given"
+object(bar) (1) {
+  ["x"]=>
+  dict(0) {
+  }
+}

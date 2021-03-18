@@ -1,0 +1,121 @@
+*** Testing shuffle() : arrays with diff types of values ***
+
+*** Testing shuffle() with arrays having different types of values ***
+
+-- Iteration 1 --
+bool(true)
+
+The output array is:
+vec(4) {
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 2 --
+bool(true)
+
+The output array is:
+vec(3) {
+  int(-%d)
+  int(-%d)
+  int(-%d)
+}
+
+-- Iteration 3 --
+bool(true)
+
+The output array is:
+vec(7) {
+  float(%f)
+  float(%f)
+  float(%f)
+  float(%f)
+  float(%f)
+  float(%f)
+  float(%f)
+}
+
+-- Iteration 4 --
+bool(true)
+
+The output array is:
+vec(6) {
+  float(-%f)
+  float(-%f)
+  float(-%f)
+  float(-%f)
+  float(-%f)
+  float(-%f)
+}
+
+-- Iteration 5 --
+bool(true)
+
+The output array is:
+vec(5) {
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+}
+
+-- Iteration 6 --
+bool(true)
+
+The output array is:
+vec(4) {
+  bool(%s)
+  bool(%s)
+  bool(%s)
+  bool(%s)
+}
+
+-- Iteration 7 --
+bool(true)
+
+The output array is:
+vec(6) {
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 8 --
+bool(true)
+
+The output array is:
+vec(5) {
+  int(-%d)
+  int(-%d)
+  int(-%d)
+  int(-%d)
+  int(-%d)
+}
+
+-- Iteration 9 --
+bool(true)
+
+The output array is:
+vec(4) {
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- Iteration 10 --
+bool(true)
+
+The output array is:
+vec(3) {
+  int(-%d)
+  int(-%d)
+  int(-%d)
+}
+Done

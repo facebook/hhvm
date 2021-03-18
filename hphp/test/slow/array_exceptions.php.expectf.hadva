@@ -1,0 +1,65 @@
+vec:
+test
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+test
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+varray:
+test
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+test
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+OutOfBoundsException: Out of bounds vec access: invalid index 1
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+InvalidArgumentException: Invalid vec key: expected a key of type int, string given
+dict:
+test
+OutOfBoundsException: Out of bounds dict access: invalid index 1
+OutOfBoundsException: Out of bounds dict access: invalid index "abc"
+OutOfBoundsException: Out of bounds dict access: invalid index "def"
+test
+OutOfBoundsException: Out of bounds dict access: invalid index 1
+OutOfBoundsException: Out of bounds dict access: invalid index "abc"
+OutOfBoundsException: Out of bounds dict access: invalid index "def"
+darray:
+test
+OutOfBoundsException: Out of bounds dict access: invalid index 1
+OutOfBoundsException: Out of bounds dict access: invalid index "abc"
+OutOfBoundsException: Out of bounds dict access: invalid index "def"
+test
+OutOfBoundsException: Out of bounds dict access: invalid index 1
+OutOfBoundsException: Out of bounds dict access: invalid index "abc"
+OutOfBoundsException: Out of bounds dict access: invalid index "def"
+keyset:
+0
+OutOfBoundsException: Out of bounds keyset access: invalid index 1
+OutOfBoundsException: Out of bounds keyset access: invalid index "abc"
+OutOfBoundsException: Out of bounds keyset access: invalid index "def"
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset
+0
+OutOfBoundsException: Out of bounds keyset access: invalid index 1
+OutOfBoundsException: Out of bounds keyset access: invalid index "abc"
+OutOfBoundsException: Out of bounds keyset access: invalid index "def"
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset
+InvalidOperationException: Invalid operation on keyset

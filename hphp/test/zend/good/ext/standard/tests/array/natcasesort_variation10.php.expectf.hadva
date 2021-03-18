@@ -1,0 +1,15 @@
+*** Testing natcasesort() : usage variations ***
+
+-- Call natcasesort() --
+bool(true)
+dict(4) {
+  [3]=>
+  string(4) "img1"
+  [2]=>
+  string(4) "img2"
+  [0]=>
+  string(5) "img13"
+  [1]=>
+  string(5) "img20"
+}
+Done

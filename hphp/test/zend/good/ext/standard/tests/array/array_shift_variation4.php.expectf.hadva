@@ -1,0 +1,48 @@
+*** Testing array_shift() : usage variations ***
+
+-- Before shift: --
+---- $stack_first:
+vec(3) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  string(3) "one"
+  string(3) "two"
+}
+---- $stack_last:
+vec(3) {
+  string(4) "zero"
+  string(3) "one"
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+
+-- After shift: --
+---- Pop array from array:
+Returned value:	vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+New array:
+vec(2) {
+  string(3) "one"
+  string(3) "two"
+}
+---- Pop element from array within array:
+Returned value:	int(1)
+New array:
+vec(3) {
+  string(4) "zero"
+  string(3) "one"
+  vec(2) {
+    int(2)
+    int(3)
+  }
+}
+Done

@@ -1,0 +1,42 @@
+*** Testing shuffle() : with multi-dimensional array ***
+bool(true)
+
+The output array is:
+vec(7) {
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+  vec(3) {
+    int(%d)
+    int(%d)
+    int(%d)
+  }
+}
+Done

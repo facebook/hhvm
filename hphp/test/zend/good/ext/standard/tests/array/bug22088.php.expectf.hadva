@@ -1,0 +1,13 @@
+vec(3) {
+  string(1) "b"
+  string(1) "c"
+  string(1) "a"
+}
+dict(3) {
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+  [0]=>
+  string(1) "a"
+}

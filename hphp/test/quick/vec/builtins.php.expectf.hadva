@@ -1,0 +1,796 @@
+Testing: vec(0) {
+}
+array_pad (after): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (just one): vec(1) {
+  string(3) "pad"
+}
+array_pop: NULL
+vec(0) {
+}
+array_product: int(1)
+array_push: int(3)
+vec(3) {
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): bool(false)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): bool(false)
+array_shift: NULL
+vec(0) {
+}
+array_sum: int(0)
+array_unshift: int(2)
+vec(2) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+}
+array_values: vec(0) {
+}
+count: int(0)
+empty: bool(true)
+in_array (3): bool(false)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(false)
+sort: bool(true)
+vec(0) {
+}
+rsort: bool(true)
+vec(0) {
+}
+asort: bool(true)
+dict(0) {
+}
+arsort: bool(true)
+dict(0) {
+}
+ksort: bool(true)
+vec(0) {
+}
+krsort: bool(true)
+dict(0) {
+}
+array_slice (0): dict(0) {
+}
+array_slice (1): dict(0) {
+}
+Testing: vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_pad (after): vec(10) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_pad (just one): vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_pop: int(5)
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+array_product: int(120)
+array_push: int(8)
+vec(8) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): int(1)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): int(1)
+array_shift: int(1)
+vec(4) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_sum: int(15)
+array_unshift: int(7)
+vec(7) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_values: vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+count: int(5)
+empty: bool(false)
+in_array (3): bool(true)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(true)
+sort: bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+rsort: bool(true)
+vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+asort: bool(true)
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+arsort: bool(true)
+dict(5) {
+  [4]=>
+  int(5)
+  [3]=>
+  int(4)
+  [2]=>
+  int(3)
+  [1]=>
+  int(2)
+  [0]=>
+  int(1)
+}
+ksort: bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+krsort: bool(true)
+dict(5) {
+  [4]=>
+  int(5)
+  [3]=>
+  int(4)
+  [2]=>
+  int(3)
+  [1]=>
+  int(2)
+  [0]=>
+  int(1)
+}
+array_slice (0): vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+array_slice (1): vec(4) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+Testing: vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_pad (after): vec(10) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_pad (just one): vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_pop: int(1)
+vec(4) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+}
+array_product: int(120)
+array_push: int(8)
+vec(8) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): int(3)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): int(3)
+array_shift: int(5)
+vec(4) {
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_sum: int(15)
+array_unshift: int(7)
+vec(7) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_values: vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+count: int(5)
+empty: bool(false)
+in_array (3): bool(true)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(true)
+sort: bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+rsort: bool(true)
+vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+asort: bool(true)
+dict(5) {
+  [4]=>
+  int(1)
+  [3]=>
+  int(2)
+  [2]=>
+  int(3)
+  [1]=>
+  int(4)
+  [0]=>
+  int(5)
+}
+arsort: bool(true)
+dict(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(4)
+  [2]=>
+  int(3)
+  [3]=>
+  int(2)
+  [4]=>
+  int(1)
+}
+ksort: bool(true)
+vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+krsort: bool(true)
+dict(5) {
+  [4]=>
+  int(1)
+  [3]=>
+  int(2)
+  [2]=>
+  int(3)
+  [1]=>
+  int(4)
+  [0]=>
+  int(5)
+}
+array_slice (0): vec(5) {
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+array_slice (1): vec(4) {
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+}
+Testing: vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+array_pad (after): vec(10) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+array_pad (just one): vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+array_pop: string(1) "c"
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+array_product: float(0)
+array_push: int(6)
+vec(6) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): bool(false)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): bool(false)
+array_shift: string(1) "a"
+vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+array_sum: float(0)
+array_unshift: int(5)
+vec(5) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+array_values: vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+count: int(3)
+empty: bool(false)
+in_array (3): bool(false)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(false)
+sort: bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+rsort: bool(true)
+vec(3) {
+  string(1) "c"
+  string(1) "b"
+  string(1) "a"
+}
+asort: bool(true)
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+arsort: bool(true)
+dict(3) {
+  [2]=>
+  string(1) "c"
+  [1]=>
+  string(1) "b"
+  [0]=>
+  string(1) "a"
+}
+ksort: bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+krsort: bool(true)
+dict(3) {
+  [2]=>
+  string(1) "c"
+  [1]=>
+  string(1) "b"
+  [0]=>
+  string(1) "a"
+}
+array_slice (0): vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+array_slice (1): vec(2) {
+  string(1) "b"
+  string(1) "c"
+}
+Testing: vec(4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_pad (after): vec(10) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_pad (just one): vec(4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_pop: string(1) "b"
+vec(3) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+}
+array_product: float(0)
+array_push: int(7)
+vec(7) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): bool(false)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): bool(false)
+array_shift: string(1) "b"
+vec(3) {
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_sum: float(0)
+array_unshift: int(6)
+vec(6) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_values: vec(4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+count: int(4)
+empty: bool(false)
+in_array (3): bool(false)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(false)
+sort: bool(true)
+vec(4) {
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+  string(1) "b"
+}
+rsort: bool(true)
+vec(4) {
+  string(1) "b"
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+}
+asort: bool(true)
+dict(4) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "a"
+  [0]=>
+  string(1) "b"
+  [3]=>
+  string(1) "b"
+}
+arsort: bool(true)
+dict(4) {
+  [0]=>
+  string(1) "b"
+  [3]=>
+  string(1) "b"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "a"
+}
+ksort: bool(true)
+vec(4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+krsort: bool(true)
+dict(4) {
+  [3]=>
+  string(1) "b"
+  [2]=>
+  string(1) "a"
+  [1]=>
+  string(1) "a"
+  [0]=>
+  string(1) "b"
+}
+array_slice (0): vec(4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+array_slice (1): vec(3) {
+  string(1) "a"
+  string(1) "a"
+  string(1) "b"
+}
+Testing: vec(1) {
+  int(100)
+}
+array_pad (after): vec(10) {
+  int(100)
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+}
+array_pad (before): vec(10) {
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  string(3) "pad"
+  int(100)
+}
+array_pad (just one): vec(1) {
+  int(100)
+}
+array_pop: int(100)
+vec(0) {
+}
+array_product: int(100)
+array_push: int(4)
+vec(4) {
+  int(100)
+  string(7) "pushed1"
+  string(7) "pushed2"
+  string(7) "pushed3"
+}
+array_search (2): bool(false)
+array_search ("not-found"): bool(false)
+array_search (false): bool(false)
+array_search ("2"): bool(false)
+array_shift: int(100)
+vec(0) {
+}
+array_sum: int(100)
+array_unshift: int(3)
+vec(3) {
+  string(8) "prepend1"
+  string(8) "prepend2"
+  int(100)
+}
+array_values: vec(1) {
+  int(100)
+}
+count: int(1)
+empty: bool(false)
+in_array (3): bool(false)
+in_array ("not-found"): bool(false)
+in_array (false): bool(false)
+in_array ("3"): bool(false)
+sort: bool(true)
+vec(1) {
+  int(100)
+}
+rsort: bool(true)
+vec(1) {
+  int(100)
+}
+asort: bool(true)
+dict(1) {
+  [0]=>
+  int(100)
+}
+arsort: bool(true)
+dict(1) {
+  [0]=>
+  int(100)
+}
+ksort: bool(true)
+vec(1) {
+  int(100)
+}
+krsort: bool(true)
+dict(1) {
+  [0]=>
+  int(100)
+}
+array_slice (0): vec(1) {
+  int(100)
+}
+array_slice (1): dict(0) {
+}

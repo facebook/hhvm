@@ -1,0 +1,109 @@
+====================================================
+dict(1) {
+  ["checkme"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+====================================================
+dict(2) {
+  ["e"]=>
+  vec(4) {
+    int(5)
+    string(9) "Exception"
+    NULL
+    int(0)
+  }
+  ["checkme"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+====================================================
+dict(4) {
+  ["num"]=>
+  vec(4) {
+    int(3)
+    NULL
+    NULL
+    int(0)
+  }
+  ["checkme"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["beans"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["cheese"]=>
+  vec(4) {
+    int(1)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+====================================================
+dict(4) {
+  ["num"]=>
+  vec(4) {
+    int(3)
+    NULL
+    int(2)
+    int(0)
+  }
+  ["checkme"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["beans"]=>
+  vec(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["cheese"]=>
+  vec(4) {
+    int(1)
+    NULL
+    string(2) "hi"
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)

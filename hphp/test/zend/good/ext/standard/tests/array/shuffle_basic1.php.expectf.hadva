@@ -1,0 +1,60 @@
+*** Testing shuffle() : with arrays having default keys ***
+
+-- input array of integers before shuffle() function is applied --
+vec(9) {
+  int(0)
+  int(10)
+  int(20)
+  int(30)
+  int(40)
+  int(50)
+  int(60)
+  int(70)
+  int(80)
+}
+
+-- return value from shuffle() function --
+bool(true)
+
+-- resultant array after shuffle() function is applied --
+vec(9) {
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+  int(%d)
+}
+
+-- input array of strings before shuffle() function is applied --
+vec(9) {
+  string(3) "one"
+  string(3) "two"
+  string(5) "three"
+  string(4) "four"
+  string(4) "five"
+  string(1) " "
+  string(3) "six"
+  string(1) " "
+  string(5) "seven"
+}
+
+-- return value from shuffle() function --
+bool(true)
+
+-- resultant array after shuffle() function is applied --
+vec(9) {
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+  string(%d) "%s"
+}
+Done

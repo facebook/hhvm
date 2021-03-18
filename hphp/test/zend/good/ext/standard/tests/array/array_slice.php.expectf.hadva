@@ -1,0 +1,1169 @@
+*** Output for Zero Argument ***
+
+Warning: array_slice() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 22
+
+*** Output for Single array Argument ***
+
+Warning: array_slice() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 26
+
+*** Output for invalid number of Arguments ***
+
+Warning: array_slice() expects at most 4 parameters, 5 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 30
+
+*** Output for scalar Argument ***
+
+Warning: Invalid operand type was used: array_slice expects an array or collection as argument 1 in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 34
+
+*** Output for string Argument ***
+
+Warning: Invalid operand type was used: array_slice expects an array or collection as argument 1 in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 38
+
+*** Iteration 1 ***
+
+*** Variation with first two Arguments ***
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first three Arguments ***
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 2 ***
+
+*** Variation with first two Arguments ***
+vec(8) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+  int(8)
+  int(9)
+}
+vec(9) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+  int(8)
+  int(9)
+}
+vec(2) {
+  int(8)
+  int(9)
+}
+
+*** Variation with first three Arguments ***
+vec(3) {
+  int(2)
+  int(3)
+  int(4)
+}
+dict(0) {
+}
+vec(5) {
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(0) {
+}
+vec(6) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+}
+vec(2) {
+  int(8)
+  int(9)
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(0) {
+}
+dict(5) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(0) {
+}
+vec(6) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+}
+dict(2) {
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 3 ***
+
+*** Variation with first two Arguments ***
+vec(4) {
+  string(3) "Two"
+  string(5) "Three"
+  string(4) "Four"
+  string(4) "Five"
+}
+vec(5) {
+  string(3) "One"
+  string(3) "Two"
+  string(5) "Three"
+  string(4) "Four"
+  string(4) "Five"
+}
+vec(2) {
+  string(4) "Four"
+  string(4) "Five"
+}
+
+*** Variation with first three Arguments ***
+vec(3) {
+  string(3) "Two"
+  string(5) "Three"
+  string(4) "Four"
+}
+dict(0) {
+}
+vec(1) {
+  string(3) "Two"
+}
+vec(3) {
+  string(3) "One"
+  string(3) "Two"
+  string(5) "Three"
+}
+dict(0) {
+}
+vec(2) {
+  string(3) "One"
+  string(3) "Two"
+}
+vec(2) {
+  string(4) "Four"
+  string(4) "Five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  [1]=>
+  string(3) "Two"
+  [2]=>
+  string(5) "Three"
+  [3]=>
+  string(4) "Four"
+}
+dict(0) {
+}
+dict(1) {
+  [1]=>
+  string(3) "Two"
+}
+vec(3) {
+  string(3) "One"
+  string(3) "Two"
+  string(5) "Three"
+}
+dict(0) {
+}
+vec(2) {
+  string(3) "One"
+  string(3) "Two"
+}
+dict(2) {
+  [3]=>
+  string(4) "Four"
+  [4]=>
+  string(4) "Five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 4 ***
+
+*** Variation with first two Arguments ***
+vec(7) {
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+  string(5) "eight"
+  int(9)
+  string(4) "nine"
+}
+vec(8) {
+  int(6)
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+  string(5) "eight"
+  int(9)
+  string(4) "nine"
+}
+vec(2) {
+  int(9)
+  string(4) "nine"
+}
+
+*** Variation with first three Arguments ***
+vec(3) {
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+}
+dict(0) {
+}
+vec(4) {
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+}
+vec(3) {
+  int(6)
+  string(3) "six"
+  int(7)
+}
+dict(0) {
+}
+vec(5) {
+  int(6)
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+}
+vec(2) {
+  int(9)
+  string(4) "nine"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  [1]=>
+  string(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  string(5) "seven"
+}
+dict(0) {
+}
+dict(4) {
+  [1]=>
+  string(3) "six"
+  [2]=>
+  int(7)
+  [3]=>
+  string(5) "seven"
+  [4]=>
+  int(8)
+}
+vec(3) {
+  int(6)
+  string(3) "six"
+  int(7)
+}
+dict(0) {
+}
+vec(5) {
+  int(6)
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+}
+dict(2) {
+  [6]=>
+  int(9)
+  [7]=>
+  string(4) "nine"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 5 ***
+
+*** Variation with first two Arguments ***
+dict(4) {
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+  ["d"]=>
+  string(3) "ddd"
+  ["e"]=>
+  string(3) "eee"
+}
+dict(5) {
+  ["a"]=>
+  string(3) "aaa"
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+  ["d"]=>
+  string(3) "ddd"
+  ["e"]=>
+  string(3) "eee"
+}
+dict(2) {
+  ["d"]=>
+  string(3) "ddd"
+  ["e"]=>
+  string(3) "eee"
+}
+
+*** Variation with first three Arguments ***
+dict(3) {
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+  ["d"]=>
+  string(3) "ddd"
+}
+dict(0) {
+}
+dict(1) {
+  ["A"]=>
+  string(3) "AAA"
+}
+dict(3) {
+  ["a"]=>
+  string(3) "aaa"
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+}
+dict(0) {
+}
+dict(2) {
+  ["a"]=>
+  string(3) "aaa"
+  ["A"]=>
+  string(3) "AAA"
+}
+dict(2) {
+  ["d"]=>
+  string(3) "ddd"
+  ["e"]=>
+  string(3) "eee"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+  ["d"]=>
+  string(3) "ddd"
+}
+dict(0) {
+}
+dict(1) {
+  ["A"]=>
+  string(3) "AAA"
+}
+dict(3) {
+  ["a"]=>
+  string(3) "aaa"
+  ["A"]=>
+  string(3) "AAA"
+  ["c"]=>
+  string(3) "ccc"
+}
+dict(0) {
+}
+dict(2) {
+  ["a"]=>
+  string(3) "aaa"
+  ["A"]=>
+  string(3) "AAA"
+}
+dict(2) {
+  ["d"]=>
+  string(3) "ddd"
+  ["e"]=>
+  string(3) "eee"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 6 ***
+
+*** Variation with first two Arguments ***
+dict(4) {
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+  ["4"]=>
+  string(4) "four"
+  ["5"]=>
+  string(4) "five"
+}
+dict(5) {
+  ["1"]=>
+  string(3) "one"
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+  ["4"]=>
+  string(4) "four"
+  ["5"]=>
+  string(4) "five"
+}
+dict(2) {
+  ["4"]=>
+  string(4) "four"
+  ["5"]=>
+  string(4) "five"
+}
+
+*** Variation with first three Arguments ***
+dict(3) {
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+  ["4"]=>
+  string(4) "four"
+}
+dict(0) {
+}
+dict(1) {
+  ["2"]=>
+  string(3) "two"
+}
+dict(3) {
+  ["1"]=>
+  string(3) "one"
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+}
+dict(0) {
+}
+dict(2) {
+  ["1"]=>
+  string(3) "one"
+  ["2"]=>
+  string(3) "two"
+}
+dict(2) {
+  ["4"]=>
+  string(4) "four"
+  ["5"]=>
+  string(4) "five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+  ["4"]=>
+  string(4) "four"
+}
+dict(0) {
+}
+dict(1) {
+  ["2"]=>
+  string(3) "two"
+}
+dict(3) {
+  ["1"]=>
+  string(3) "one"
+  ["2"]=>
+  string(3) "two"
+  ["3"]=>
+  string(5) "three"
+}
+dict(0) {
+}
+dict(2) {
+  ["1"]=>
+  string(3) "one"
+  ["2"]=>
+  string(3) "two"
+}
+dict(2) {
+  ["4"]=>
+  string(4) "four"
+  ["5"]=>
+  string(4) "five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 7 ***
+
+*** Variation with first two Arguments ***
+dict(4) {
+  [0]=>
+  string(3) "two"
+  [1]=>
+  int(7)
+  [2]=>
+  string(4) "four"
+  [3]=>
+  string(4) "five"
+}
+dict(5) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  string(3) "two"
+  [2]=>
+  int(7)
+  [3]=>
+  string(4) "four"
+  [4]=>
+  string(4) "five"
+}
+dict(2) {
+  [0]=>
+  string(4) "four"
+  [1]=>
+  string(4) "five"
+}
+
+*** Variation with first three Arguments ***
+dict(3) {
+  [0]=>
+  string(3) "two"
+  [1]=>
+  int(7)
+  [2]=>
+  string(4) "four"
+}
+dict(0) {
+}
+dict(1) {
+  [0]=>
+  string(3) "two"
+}
+dict(3) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  string(3) "two"
+  [2]=>
+  int(7)
+}
+dict(0) {
+}
+dict(2) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  string(3) "two"
+}
+dict(2) {
+  [0]=>
+  string(4) "four"
+  [1]=>
+  string(4) "five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  [2]=>
+  string(3) "two"
+  [3]=>
+  int(7)
+  [4]=>
+  string(4) "four"
+}
+dict(0) {
+}
+dict(1) {
+  [2]=>
+  string(3) "two"
+}
+dict(3) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+  [3]=>
+  int(7)
+}
+dict(0) {
+}
+dict(2) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+}
+dict(2) {
+  [4]=>
+  string(4) "four"
+  [5]=>
+  string(4) "five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 8 ***
+
+*** Variation with first two Arguments ***
+dict(10) {
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+  [3]=>
+  int(7)
+  [4]=>
+  float(8.6)
+  ["5"]=>
+  string(4) "Five"
+}
+dict(11) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+  [3]=>
+  int(7)
+  [4]=>
+  float(8.6)
+  ["5"]=>
+  string(4) "Five"
+}
+dict(2) {
+  [0]=>
+  float(8.6)
+  ["5"]=>
+  string(4) "Five"
+}
+
+*** Variation with first three Arguments ***
+dict(3) {
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+}
+dict(0) {
+}
+dict(7) {
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+}
+dict(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+}
+dict(0) {
+}
+dict(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+}
+dict(2) {
+  [0]=>
+  float(8.6)
+  ["5"]=>
+  string(4) "Five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+}
+dict(0) {
+}
+dict(7) {
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [2]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [3]=>
+  float(3.7)
+}
+dict(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+}
+dict(0) {
+}
+dict(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [2]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [3]=>
+  float(3.7)
+}
+dict(2) {
+  [6]=>
+  float(8.6)
+  ["5"]=>
+  string(4) "Five"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 9 ***
+
+*** Variation with first two Arguments ***
+vec(3) {
+  string(4) "name"
+  string(3) "age"
+  string(2) "45"
+}
+vec(4) {
+  int(12)
+  string(4) "name"
+  string(3) "age"
+  string(2) "45"
+}
+vec(2) {
+  string(3) "age"
+  string(2) "45"
+}
+
+*** Variation with first three Arguments ***
+vec(3) {
+  string(4) "name"
+  string(3) "age"
+  string(2) "45"
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(3) {
+  int(12)
+  string(4) "name"
+  string(3) "age"
+}
+dict(0) {
+}
+vec(1) {
+  int(12)
+}
+vec(2) {
+  string(3) "age"
+  string(2) "45"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(3) {
+  [1]=>
+  string(4) "name"
+  [2]=>
+  string(3) "age"
+  [3]=>
+  string(2) "45"
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(3) {
+  int(12)
+  string(4) "name"
+  string(3) "age"
+}
+dict(0) {
+}
+vec(1) {
+  int(12)
+}
+dict(2) {
+  [2]=>
+  string(3) "age"
+  [3]=>
+  string(2) "45"
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Iteration 10 ***
+
+*** Variation with first two Arguments ***
+vec(2) {
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+vec(3) {
+  vec(3) {
+    string(3) "oNe"
+    string(3) "tWo"
+    int(4)
+  }
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+vec(2) {
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+
+*** Variation with first three Arguments ***
+vec(2) {
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(3) {
+  vec(3) {
+    string(3) "oNe"
+    string(3) "tWo"
+    int(4)
+  }
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(2) {
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Variation with first two arguments with preserve_key value TRUE ***
+dict(2) {
+  [1]=>
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  [2]=>
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(3) {
+  vec(3) {
+    string(3) "oNe"
+    string(3) "tWo"
+    int(4)
+  }
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(2) {
+  [1]=>
+  vec(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
+    int(50)
+  }
+  [2]=>
+  vec(0) {
+  }
+}
+dict(0) {
+}
+dict(0) {
+}
+
+*** Typical Variation of offset and length  Arguments ***
+dict(1) {
+  [1]=>
+  string(3) "Two"
+}
+vec(1) {
+  string(3) "Two"
+}
+dict(1) {
+  [2]=>
+  string(5) "Three"
+}
+vec(1) {
+  string(5) "Three"
+}

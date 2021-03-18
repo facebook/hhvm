@@ -1,0 +1,38 @@
+*** testing array_shuffle  
+bool(true)
+vec(0) {
+}
+bool(true)
+vec(1) {
+  int(1)
+}
+bool(true)
+dict(1) {
+  [0]=>
+  int(1)
+}
+bool(true)
+dict(1) {
+  [0]=>
+  int(1)
+}
+bool(true)
+vec(1) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+bool(true)
+vec(4) {
+  int(1)
+  int(1)
+  int(1)
+  int(1)
+}
+this should be 0->....0
+this should be 4->....4
+this should be 400->....400
+*** testing pass by reference  
+test passed

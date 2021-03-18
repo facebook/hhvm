@@ -21,8 +21,36 @@ let find_root =
     let workingdir = Sys.getcwd () in
     find_hphp_parent workingdir
 
+(* HSL HHI generation:
+  - the script generates a stamp file in the current build dir as dune will only
+    allow custom rules to reference or use files in the current directory
+  - the generated HHIs are not in *dune's* build directory, as dune will delete
+    any files it's not expecting; if you have a top-level cmake/buck build
+    directory, that should be used instead, but if you're building in source,
+    it'll dump in the source tree, so they're in .gitignore
+  - `-hsl-dir` is relative to `%{workspace_root}` - however, the workspace root
+    is itself a relative path, so it must be omitted
+*)
+
 let () =
   Printf.ksprintf Jbuild_plugin.V1.send "\
+(rule
+  (targets hsl_generated_hhis.stamp)
+  (deps
+    (file \"%s/hphp/hsl/src\")
+    (file \"%%{workspace_root}/scripts/generate_hhis.sh\")
+    ../hh_parse.exe)
+  (action (run
+    %%{workspace_root}/scripts/generate_hhis.sh
+    %%{exe:../hh_parse.exe}
+    \"%s/hphp/hsl/src\"
+    \"%%{workspace_root}/../../hsl/hhi\"
+    \"hsl_generated_hhis.stamp\")))
+
+(alias
+  (name generate_hhis)
+  (deps (file \"hsl_generated_hhis.stamp\")))
+
 (library
   (name hhi)
   (wrapped false)
@@ -30,6 +58,8 @@ let () =
     global_config
     relative_path
     sys_utils)
-  (preprocessor_deps (source_tree %%{workspace_root}/hhi))
-  (preprocess (pps ppx_gen_hhi -- -hhi-dir \"%s/hphp/hack/hhi\")))
-" find_root
+  (preprocessor_deps (source_tree %%{workspace_root}/hhi) (alias generate_hhis))
+  (preprocess (pps ppx_gen_hhi --
+    -hhi-dir \"%s/hphp/hack/hhi\"
+    -hsl-dir \"../../hsl/hhi/\")))
+" find_root find_root find_root

@@ -16,9 +16,9 @@ $invalid_files = varray[
   FALSE,
   NULL,
   " ",
-  @varray[],
+  varray[],
 ];
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is an executable file */
 foreach( $invalid_files as $invalid_file ) {
   try { var_dump( is_executable($invalid_file) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

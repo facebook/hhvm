@@ -18,9 +18,9 @@ $misc_files = varray[
   FALSE,
   NULL,
   " ",
-  @varray[],
+  varray[],
 ];
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is a writable file */
 foreach( $misc_files as $misc_file ) {
   try { var_dump( is_writable($misc_file) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -38,6 +38,8 @@ module type S = sig
 
   val check_mode : options -> bool
 
+  val concatenate_prefix : options -> string option
+
   val config : options -> (string * string) list
 
   val custom_telemetry_data : options -> (string * string) list

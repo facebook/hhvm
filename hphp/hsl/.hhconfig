@@ -1,0 +1,9 @@
+assume_php=false
+enable_experimental_tc_features = no_fallback_in_namespaces
+safe_array = true
+safe_vector_array = true
+unsafe_rx = false
+ignored_paths = [ "vendor/.+/tests/.+" ]
+user_attributes=
+allowed_decl_fixme_codes=2053,4045
+allowed_fixme_codes_strict=2011,2049,2050,2053,4027,4045,4106,4107,4108,4110,4128,4135,4188,4200,4240,4248,4259,4297,4323,4387,4390,4401

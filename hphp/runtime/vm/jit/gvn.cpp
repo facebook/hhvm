@@ -695,6 +695,16 @@ void tryReplaceInstruction(
         if (!v.size()) v.push_back(valueNumber);
         v.push_back(dst);
       }
+      if (inst->isBlockEnd()) {
+        // Because the output of an equivalent instruction is available, we
+        // know that this instruction must take its next branch.
+        FTRACE(1,
+               "eliminating throwing instruction {}\n",
+               inst->toString()
+              );
+        assertx(inst->next());
+        inst->block()->push_back(unit.gen(Jmp, inst->bcctx(), inst->next()));
+      }
       if (!(valueNumber->type() <= dst->type())) {
         FTRACE(1,
                "replacing {} with AssertType({})\n",
@@ -702,6 +712,13 @@ void tryReplaceInstruction(
                dst->type().toString()
               );
         unit.replace(inst, AssertType, dst->type(), valueNumber);
+      } else {
+        FTRACE(1,
+               "replacing {} with Mov({})\n",
+               inst->toString(),
+               *valueNumber
+              );
+        unit.replace(inst, Mov, valueNumber);
       }
     }
   }

@@ -1,0 +1,2 @@
+--allowed-decl-fixme-codes 4101
+--allowed-fixme-codes-strict 4101

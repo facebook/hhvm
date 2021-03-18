@@ -44,6 +44,18 @@ std::string NewStructData::show() const {
   return os.str();
 }
 
+std::string NewBespokeStructData::show() const {
+  std::ostringstream os;
+  os << layout.describe() << ',';
+  os << offset.offset << ",(";
+  auto delimiter = "";
+  for (auto i = 0; i < numSlots; i++) {
+    os << delimiter << slots[i];
+    delimiter = ",";
+  }
+  return os.str();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

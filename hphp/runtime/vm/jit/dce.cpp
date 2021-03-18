@@ -453,6 +453,8 @@ bool canDCE(IRInstruction* inst) {
   case NewRecord:
   case NewStructDArray:
   case NewStructDict:
+  case NewBespokeStructDArray:
+  case NewBespokeStructDict:
   case Clone:
   case InlineReturn:
   case InlineCall:

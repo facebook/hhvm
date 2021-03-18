@@ -39,6 +39,13 @@ struct StructArray : public BespokeArray {
   static StructArray* MakeReserve(
       HeaderKind kind, bool legacy, const StructLayout* layout);
 
+  static StructArray* MakeStructDArray(
+      const StructLayout* layout, uint32_t size,
+      const Slot* slots, const TypedValue* vals);
+  static StructArray* MakeStructDict(
+      const StructLayout* layout, uint32_t size,
+      const Slot* slots, const TypedValue* vals);
+
   uint8_t sizeIndex() const;
   static size_t sizeFromLayout(const StructLayout*);
 
@@ -52,6 +59,10 @@ struct StructArray : public BespokeArray {
 #undef X
 
 private:
+  static StructArray* MakeStructImpl(
+      const StructLayout* layout, uint32_t size,
+      const Slot* slots, const TypedValue* vals, HeaderKind hk);
+
   const StructLayout* layout() const;
   const TypedValue* rawData() const;
   TypedValue* rawData();

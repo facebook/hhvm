@@ -1497,7 +1497,7 @@ To string conversions:
   array.  Used to initialize an array allocated with AllocVArray or
   AllocVec that was too big to use a series of InitVecElem ops.
 
-| AllocStructDArray<keys...>, DDArr,          NA, PRc
+| AllocStructDArray<keys...>, DDArr,   NA, PRc
 
 | AllocStructDict<keys...>,   D(Dict), NA, PRc
 
@@ -1512,20 +1512,28 @@ To string conversions:
   S1 has already been inc-reffed. Used to initialize an array allocated by
   AllocStructArray / AllocStructDArray / AllocStructDict.
 
-| NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
-
-  Allocate a new record, given the type S0 and N immediate keys
-  and taking N elements off the stack given by S1, at `offset'.
-  This instruction assumes it can take the values from the stack
-  without increfing them.
-
-| NewStructDArray<offset,keys...>, DDArr,          S(StkPtr), PRc|CRc
+| NewStructDArray<offset,keys...>, DDArr,   S(StkPtr), PRc|CRc
 
 | NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PRc|CRc
 
   Allocate a new key/value dict or mixed-layout array, given N string literal
   immediates for keys and N stack elements at `offset` on stack S0 for values.
   This op assumes it can take values from the stack without inc-reffing them.
+
+| NewBespokeStructDArray<offset,layout,slots...>, DDArr,   S(StkPtr), PRc|CRc
+
+| NewBespokeStructDict<offset,layout,slots...>,   D(Dict), S(StkPtr), PRc|CRc
+
+  Allocate a new dict or darray with the bespoke StructLayout `layout`.
+  Then, initialize the N fields with the given `slots` with N stack elements
+  starting at `offset`. This op moves stack values with no refcounting.
+
+| NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
+
+  Allocate a new record, given the type S0 and N immediate keys
+  and taking N elements off the stack given by S1, at `offset'.
+  This instruction assumes it can take the values from the stack
+  without increfing them.
 
 | NewCol<type>, DCol, NA, PRc
 

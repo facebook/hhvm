@@ -1112,6 +1112,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case NewStructDArray:
   case NewStructDict:
+  case NewBespokeStructDArray:
+  case NewBespokeStructDict:
     {
       // NewStruct{Dict,DArray} is reading elements from the stack, but writes
       // to a completely new array, so we can treat the store set as empty.

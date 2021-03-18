@@ -861,6 +861,8 @@ bool opcodeMayRaise(Opcode opc) {
   case NewRFunc:
   case NewStructDArray:
   case NewStructDict:
+  case NewBespokeStructDArray:
+  case NewBespokeStructDict:
   case NInstanceOfBitmask:
   case Nop:
   case NSameObj:

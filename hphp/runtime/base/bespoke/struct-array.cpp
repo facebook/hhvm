@@ -212,6 +212,36 @@ StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
   return result;
 }
 
+StructArray* StructArray::MakeStructDArray(
+    const StructLayout* layout, uint32_t size,
+    const Slot* slots, const TypedValue* vals) {
+  return MakeStructImpl(layout, size, slots, vals, HeaderKind::Mixed);
+}
+
+StructArray* StructArray::MakeStructDict(
+    const StructLayout* layout, uint32_t size,
+    const Slot* slots, const TypedValue* vals) {
+  return MakeStructImpl(layout, size, slots, vals, HeaderKind::Dict);
+}
+
+StructArray* StructArray::MakeStructImpl(
+    const StructLayout* layout, uint32_t size,
+    const Slot* slots, const TypedValue* vals, HeaderKind hk) {
+
+  auto const result = MakeReserve<false>(hk, false, layout);
+  auto const data = result->rawData();
+  result->m_size = size;
+
+  for (auto i = 0; i < size; i++) {
+    assertx(slots[i] <= layout->numFields());
+    tvCopy(vals[i], &data[slots[i]]);
+  }
+
+  assertx(result->checkInvariants());
+  assertx(result->layout() == layout);
+  return result;
+}
+
 const StructLayout* StructArray::layout() const {
   return StructLayout::As(Layout::FromIndex(layoutIndex()));
 }

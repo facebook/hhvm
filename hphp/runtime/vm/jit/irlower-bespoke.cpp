@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/bespoke/struct-array.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -30,10 +31,12 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit { namespace irlower {
 
 //////////////////////////////////////////////////////////////////////////////
+// Generic BespokeArrays
 
 namespace {
 static void logGuardFailure(TypedValue tv, uint16_t layout, uint64_t sk) {
@@ -288,6 +291,7 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// MonotypeVec and MonotypeDict
 
 namespace {
 using MonotypeDict = bespoke::MonotypeDict<int64_t>;
@@ -375,6 +379,47 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 
   loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
          type, value);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// StructArray
+
+namespace {
+
+using bespoke::StructArray;
+using bespoke::StructLayout;
+
+void newStructImpl(
+  IRLS& env,
+  const IRInstruction* inst,
+  StructArray* (*f)(const StructLayout* layout, uint32_t size,
+                    const Slot* slots, const TypedValue* vals)
+) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<NewBespokeStructData>();
+  auto& v = vmain(env);
+
+  auto const table = v.allocData<Slot>(extra->numSlots);
+  memcpy(table, extra->slots, extra->numSlots * sizeof(*extra->slots));
+
+  auto const args = argGroup(env, inst)
+    .imm(StructLayout::As(extra->layout.bespokeLayout()))
+    .imm(extra->numSlots)
+    .dataPtr(table)
+    .addr(sp, cellsToBytes(extra->offset.offset));
+
+  cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst),
+               SyncOptions::None, args);
+}
+
+}
+
+void cgNewBespokeStructDArray(IRLS& env, const IRInstruction* inst) {
+  newStructImpl(env, inst, StructArray::MakeStructDArray);
+}
+
+void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
+  newStructImpl(env, inst, StructArray::MakeStructDict);
 }
 
 //////////////////////////////////////////////////////////////////////////////

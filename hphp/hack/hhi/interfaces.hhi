@@ -879,7 +879,6 @@ namespace {
   */
 <<__HipHopSpecific>>
 interface IDisposable {
-  abstract const ctx C = [defaults];
   /**
    * This method is invoked exactly once at the end of the scope of the
    * using statement, unless the program terminates with a fatal error.
@@ -892,7 +891,6 @@ interface IDisposable {
   */
 <<__HipHopSpecific>>
 interface IAsyncDisposable {
-  abstract const ctx C = [defaults];
   /**
    * This method is invoked exactly once at the end of the scope of the
    * await using statement, unless the program terminates with a fatal error.

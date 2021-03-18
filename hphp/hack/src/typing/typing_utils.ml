@@ -197,13 +197,7 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_with_self =
-  env ->
-  ?pos:Pos.t ->
-  ?quiet:bool ->
-  ?report_cycle:Pos.t * string ->
-  decl_ty ->
-  env * locl_ty
+type localize_with_self = env -> ignore_errors:bool -> decl_ty -> env * locl_ty
 
 let (localize_with_self_ref : localize_with_self ref) =
   ref (not_implemented "localize_with_self")
@@ -218,19 +212,16 @@ let (localize_ref : localize ref) =
 let localize x = !localize_ref x
 
 type env_with_self =
-  ?pos:Pos.t ->
-  ?quiet:bool ->
   ?report_cycle:Pos.t * string ->
-  ?on_error:Errors.typing_error_callback ->
   env ->
+  on_error:Errors.typing_error_callback ->
   expand_env
 
 let env_with_self_ref : env_with_self ref =
-  ref (fun ?pos:_ ?quiet:_ ?report_cycle:_ ?on_error:_ ->
-      not_implemented "env_with_self")
+  ref (fun ?report_cycle:_ _ ~on_error:_ ->
+      (not_implemented "env_with_self" () : _))
 
-let env_with_self ?pos ?quiet ?report_cycle x =
-  !env_with_self_ref ?pos ?quiet ?report_cycle x
+let env_with_self ?report_cycle x = !env_with_self_ref ?report_cycle x
 
 let rec strip_this ty =
   match get_node ty with

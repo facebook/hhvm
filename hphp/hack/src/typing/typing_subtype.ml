@@ -1098,8 +1098,7 @@ and simplify_subtype_i
                 substs =
                   TUtils.make_locl_subst_for_class_tparams class_ty tyl_super;
                 this_ty = Option.value this_ty ~default:ty_super;
-                on_error = subtype_env.on_error;
-                quiet = true;
+                on_error = Errors.ignore_error;
               }
             in
             let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
@@ -1610,8 +1609,7 @@ and simplify_subtype_i
                     TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
                   (* TODO: do we need this? *)
                   this_ty = Option.value this_ty ~default:ty_sub;
-                  quiet = true;
-                  on_error = subtype_env.on_error;
+                  on_error = Errors.ignore_error;
                 }
               in
               let up_obj = Cls.get_ancestor class_sub cid_super in
@@ -2031,7 +2029,7 @@ and simplify_subtype_has_member
               ~explicit_targs
               ~class_id
               ~member_id:name
-              ~on_error:subtype_env.on_error
+              ~on_error:Errors.unify_error
               env
               ty_sub)
       in
@@ -2039,7 +2037,8 @@ and simplify_subtype_has_member
         if Errors.is_empty errors then
           valid env
         else
-          invalid env ~fail:(fun () -> Errors.merge_into_current errors)
+          invalid env ~fail:(fun () ->
+              Errors.apply_callback_to_errors errors subtype_env.on_error)
       in
       prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty)
 

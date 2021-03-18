@@ -44,7 +44,9 @@ let print_error_ty = Typing_print.error
 let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
   match phase_ty with
   | Typing_defs.DeclTy ty ->
-    let (env, ty) = Typing_phase.localize_with_self env ty in
+    let (env, ty) =
+      Typing_phase.localize_with_self env ~ignore_errors:true ty
+    in
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
   | Typing_defs.LoclTy ty ->
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
@@ -176,7 +178,7 @@ let is_sub_type_for_union env ty_sub ty_super =
 
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
-  let ety_env = Typing_phase.env_with_self env in
+  let ety_env = Typing_phase.env_with_self env ~on_error:Errors.ignore_error in
   Typing_taccess.referenced_typeconsts env ety_env (root, ids)
 
 let empty ctx = Typing_env.empty ctx Relative_path.default ~droot:None

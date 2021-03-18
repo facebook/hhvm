@@ -7,5 +7,6 @@
  *
  *)
 
+(** Checks that all the requirements of the traits and interfaces a class uses are satisfied. *)
 val check_class :
   Typing_env_types.env -> Decl_provider.class_decl -> Typing_env_types.env

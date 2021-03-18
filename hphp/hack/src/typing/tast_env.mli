@@ -153,12 +153,7 @@ val localize :
     and/or are not appropriate at the time we call localize.
     *)
 val localize_with_self :
-  env ->
-  ?pos:Pos.t ->
-  ?quiet:bool ->
-  ?report_cycle:Pos.t * string ->
-  Typing_defs.decl_ty ->
-  env * Tast.ty
+  env -> ignore_errors:bool -> Typing_defs.decl_ty -> env * Tast.ty
 
 (** Get the upper bounds of the type parameter with the given name.
   FIXME: This function cannot return correct bounds at this time, because

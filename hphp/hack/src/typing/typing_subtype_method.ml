@@ -133,7 +133,7 @@ let subtype_method_decl
     (on_error : Errors.typing_error_callback) : env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let ety_env = Phase.env_with_self env ~quiet:true in
+  let ety_env = Phase.env_with_self env ~on_error:Errors.ignore_error in
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
@@ -143,7 +143,11 @@ let subtype_method_decl
    * with their bounds
    *)
   let env =
-    Phase.localize_and_add_generic_parameters p_super env ft_super.ft_tparams
+    Phase.localize_and_add_generic_parameters
+      p_super
+      ~ety_env
+      env
+      ft_super.ft_tparams
   in
   (* Localize the function type itself *)
   let (env, locl_ft_sub) =

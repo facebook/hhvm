@@ -134,8 +134,7 @@ class virtual type_validator =
                   Option.value
                     (Env.get_self_ty env)
                     ~default:(MakeType.nothing Reason.none);
-                quiet = true;
-                on_error = Errors.unify_error_at use_pos;
+                on_error = Errors.ignore_error;
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;

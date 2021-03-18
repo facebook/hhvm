@@ -195,7 +195,9 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
   in
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in
-    let (env, locl_ty) = TUtils.localize_with_self env decl_ty in
+    let (env, locl_ty) =
+      TUtils.localize_with_self env ~ignore_errors:true decl_ty
+    in
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->
       (match Env.get_class env (snd cls_name) with
@@ -203,7 +205,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           {
-            (TUtils.env_with_self env) with
+            (TUtils.env_with_self env ~on_error:Errors.ignore_error) with
             substs = Subst.make_locl tc_tparams tyl;
           }
         in

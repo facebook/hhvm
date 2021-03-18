@@ -1,7 +1,9 @@
-File "uninvalidated_fake_member3.php", line 21, characters 13-15:
-You are trying to access the property `foo` but this object can be null. (Typing[4064])
-File "uninvalidated_fake_member3.php", line 8, characters 10-11:
-This can be null
-File "uninvalidated_fake_member3.php", line 18, characters 5-9:
-All the local information about `$c1->d` has been invalidated during this call.
+File "uninvalidated_fake_member3.php", line 21, characters 5-10:
+Typing error (Typing[4064])
+  File "uninvalidated_fake_member3.php", line 21, characters 13-15:
+  You are trying to access the property `foo` but this object can be null.
+  File "uninvalidated_fake_member3.php", line 8, characters 10-11:
+  This can be null
+  File "uninvalidated_fake_member3.php", line 18, characters 5-9:
+  All the local information about `$c1->d` has been invalidated during this call.
 This is a limitation of the type-checker; use a local if that's the problem.

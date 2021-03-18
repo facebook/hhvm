@@ -15,11 +15,9 @@ type method_instantiation = {
 }
 
 val env_with_self :
-  ?pos:Pos.t ->
-  ?quiet:bool ->
   ?report_cycle:Pos.t * string ->
-  ?on_error:Errors.typing_error_callback ->
   env ->
+  on_error:Errors.typing_error_callback ->
   expand_env
 
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
@@ -30,21 +28,31 @@ val env_with_self :
 
     This is mostly provided as legacy support for {!AutocompleteService}, and
     should not be considered a general mechanism for transforming a {decl_ty} to
-    a {!Tast.ty}.
+    a {!Tast.ty}. In general you should always ask youself what type parameter
+    substitution to provide, as well as what substitution for [this].
 
-    {!quiet} silences certain errors because those errors have already fired
-    and/or are not appropriate at the time we call localize.
-    *)
-val localize_with_self :
-  env ->
-  ?pos:Pos.t ->
-  ?quiet:bool ->
-  ?report_cycle:Pos.t * string ->
-  decl_ty ->
-  env * locl_ty
+    {!ignore_errors} silences errors because those errors have already fired
+    and/or are not appropriate at the time we call localize. *)
+val localize_with_self : env -> ignore_errors:bool -> decl_ty -> env * locl_ty
 
+(** Transforms a possibly enforced declaration phase type ({!Typing_defs.decl_ty})
+    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
+    Performs no substitutions of generics and initializes the late static bound
+    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
+    {!get_self}).
+
+    This is mostly provided as legacy support for {!AutocompleteService}, and
+    should not be considered a general mechanism for transforming a {decl_ty} to
+    a {!Tast.ty}. In general you should always ask youself what type parameter
+    substitution to provide, as well as what substitution for [this].
+
+    {!ignore_errors} silences errors because those errors have already fired
+    and/or are not appropriate at the time we call localize. *)
 val localize_possibly_enforced_with_self :
-  env -> decl_possibly_enforced_ty -> env * locl_possibly_enforced_ty
+  env ->
+  ignore_errors:bool ->
+  decl_possibly_enforced_ty ->
+  env * locl_possibly_enforced_ty
 
 val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
 
@@ -56,15 +64,31 @@ val localize_ft :
   decl_fun_type ->
   env * locl_fun_type
 
-val localize_hint_with_self : env -> Aast.hint -> env * locl_ty
+(** Transforms a type hing ({!Aast.hint}) into a localized type
+    ({!Typing_defs.locl_ty} = {!Tast.ty}).
+    Performs no substitutions of generics and initializes the late static bound
+    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
+    {!get_self}).
 
-(* Declare and localize the type arguments to a constructor or function, given
- * information about the declared type parameters in `decl_tparam list`. If no
- * explicit type arguments are given, generate fresh type variables in their
- * place; do the same for any wildcard explicit type arguments.
- * Report arity errors using `def_pos` (for the declared parameters), `use_pos`
- * (for the use-site) and `use_name` (the name of the constructor or function).
- *)
+    This should not be considered a general mechanism for transforming a {decl_ty} to
+    a {!Tast.ty}. In general you should always ask youself what type parameter
+    substitution to provide, as well as what substitution for [this].
+
+    {!ignore_errors} silences errors because those errors have already fired
+    and/or are not appropriate at the time we call localize. *)
+val localize_hint_with_self :
+  env ->
+  ignore_errors:bool ->
+  ?report_cycle:Pos.t * string ->
+  Aast.hint ->
+  env * locl_ty
+
+(** Declare and localize the type arguments to a constructor or function, given
+    information about the declared type parameters in `decl_tparam list`. If no
+    explicit type arguments are given, generate fresh type variables in their
+    place; do the same for any wildcard explicit type arguments.
+    Report arity errors using `def_pos` (for the declared parameters), `use_pos`
+    (for the use-site) and `use_name` (the name of the constructor or function). *)
 val localize_targs :
   check_well_kinded:bool ->
   is_method:bool ->
@@ -91,7 +115,7 @@ val localize_targs_with_kinds :
   Aast.hint list ->
   env * Tast.targ list
 
-(* Declare and localize a single explicit type argument *)
+(** Declare and localize a single explicit type argument *)
 val localize_targ :
   check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ
 
@@ -129,15 +153,20 @@ val localize_targs_and_check_constraints :
   Aast.hint list ->
   env * locl_ty * Tast.targ list
 
-(* Add generic parameters to the environment, with localized bounds,
- * and also add any consequences of `where` constraints *)
+(** Add generic parameters to the environment, with localized bounds,
+    and also add any consequences of `where` constraints *)
 val localize_and_add_generic_parameters :
-  Pos.t -> env -> decl_tparam list -> env
+  Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
 
-(* As above but from AST of generic parameters *)
+(** Add generic parameters to the environment, with localized bounds,
+    and also add any consequences of `where` constraints.
+
+    {!ignore_errors} silences errors because those errors may have already fired
+    during another localization and/or are not appropriate at the time we call localize. *)
 val localize_and_add_ast_generic_parameters_and_where_constraints :
   Pos.t ->
   env ->
+  ignore_errors:bool ->
   (Pos.t, Nast.func_body_ann, unit, unit) Aast.tparam list ->
   (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
   env

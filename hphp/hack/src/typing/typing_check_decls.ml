@@ -90,6 +90,7 @@ let check_atom_on_param env pos dty lty =
     | _ -> Errors.atom_invalid_parameter_in_enum_class pos)
   | _ -> Errors.atom_invalid_parameter pos
 
+(** Mostly check constraints on type parameters. *)
 let check_happly ?(is_atom = false) unchecked_tparams env h =
   let pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
@@ -106,7 +107,9 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
   let decl_ty = Inst.instantiate subst decl_ty in
   match get_node decl_ty with
   | Tapply _ ->
-    let (env, locl_ty) = Phase.localize_with_self env decl_ty in
+    let (env, locl_ty) =
+      Phase.localize_with_self env ~ignore_errors:true decl_ty
+    in
     let () = if is_atom then check_atom_on_param env pos decl_ty locl_ty in
     begin
       match get_node (TUtils.get_base_type env locl_ty) with
@@ -122,7 +125,7 @@ let check_happly ?(is_atom = false) unchecked_tparams env h =
            *)
           let ety_env =
             {
-              (Phase.env_with_self env) with
+              (Phase.env_with_self env ~on_error:Errors.ignore_error) with
               substs = Subst.make_locl tc_tparams tyl;
             }
           in
@@ -160,6 +163,7 @@ let rec fun_ tenv f =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       p
       env.tenv
+      ~ignore_errors:true
       f.f_tparams
       f.f_where_constraints
   in
@@ -299,6 +303,7 @@ let method_ env m =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst m.m_name)
       env.tenv
+      ~ignore_errors:true
       m.m_tparams
       m.m_where_constraints
   in
@@ -318,6 +323,7 @@ let class_ tenv c =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst c.c_name)
       tenv
+      ~ignore_errors:true
       c.c_tparams
       c.c_where_constraints
   in
@@ -340,20 +346,38 @@ let class_ tenv c =
   maybe enum env c.c_enum
 
 let typedef tenv t =
+  let {
+    t_tparams;
+    t_annotation = _;
+    t_name = (name_pos, _);
+    t_constraint;
+    t_kind;
+    t_mode = _;
+    t_vis = _;
+    t_namespace = _;
+    t_user_attributes = _;
+    t_span = _;
+    t_emit_id = _;
+  } =
+    t
+  in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
-  let tparams =
-    List.map t.t_tparams (Decl_hint.aast_tparam_to_decl_tparam tenv.decl_env)
-  in
+  let where_constraints = [] in
   let tenv_with_typedef_tparams =
-    Phase.localize_and_add_generic_parameters (fst t.t_name) tenv tparams
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      name_pos
+      tenv
+      ~ignore_errors:true
+      t_tparams
+      where_constraints
   in
   (* For typdefs, we do want to do the simple kind checks on the body
      (e.g., arities match up), but no constraint checks. We need to check the
      kinds of typedefs separately, because check_happly replaces all the generic
      parameters of typedefs by Tany, which makes the kind check moot *)
-  maybe check_hint_wellkindedness tenv_with_typedef_tparams t.t_constraint;
-  check_hint_wellkindedness tenv_with_typedef_tparams t.t_kind;
+  maybe check_hint_wellkindedness tenv_with_typedef_tparams t_constraint;
+  check_hint_wellkindedness tenv_with_typedef_tparams t_kind;
   let env =
     {
       (* Since typedefs cannot have constraints we shouldn't check
@@ -366,4 +390,4 @@ let typedef tenv t =
   in
   (* We checked the kinds already above.  *)
   maybe hint_no_kind_check env t.t_constraint;
-  hint_no_kind_check env t.t_kind
+  hint_no_kind_check env t_kind

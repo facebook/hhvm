@@ -6,8 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-(* This module implements the typing for type_structure. *)
 open Hh_prelude
 open Common
 open Typing_defs
@@ -18,6 +16,8 @@ module Reason = Typing_reason
 module SN = Naming_special_names
 module Subst = Decl_subst
 module TUtils = Typing_utils
+
+(** This module implements the typing for type_structure. *)
 
 let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     =
@@ -40,7 +40,10 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     in
     let ety_env =
       {
-        (Phase.env_with_self env) with
+        (Phase.env_with_self
+           env
+           ~on_error:(Errors.invalid_type_hint (Reason.to_pos r)))
+        with
         substs = Subst.make_locl td_tparams [ty];
       }
     in

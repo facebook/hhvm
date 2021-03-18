@@ -127,8 +127,7 @@ and get_spread_attributes env pos onto_xhp cty =
         type_expansions = [];
         this_ty = xhp_ty;
         substs = TUtils.make_locl_subst_for_class_tparams xhp_info tparams;
-        quiet = false;
-        on_error = Errors.unify_error;
+        on_error = Errors.leave_unchanged_default_invalid_type_hint_code;
       }
     in
     List.map_env

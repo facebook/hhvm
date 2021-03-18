@@ -250,14 +250,7 @@ type expand_env = {
       (** The type that is substituted for `this` in signatures. It should be
        * set to an expression dependent type if appropraite
        *)
-  quiet: bool;
-      (** If set to true, do not report errors, just return Terr or equivalent *)
   on_error: Errors.typing_error_callback;
-      (** If what we are localizing or expanding comes from the decl heap for
-          example, then some errors must be silenced since they must have already been
-          raised when first typechecking whatever we have fetched from the heap.
-          Setting {!quiet} to true will silence those errors.
-          T54121530 aims at offering a better mechanism. *)
 }
 
 let get_var t =

@@ -180,6 +180,8 @@ val merge : t -> t -> t
 
 val merge_into_current : t -> unit
 
+val apply_callback_to_errors : t -> typing_error_callback -> unit
+
 val incremental_update_set :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
 
@@ -263,7 +265,8 @@ val explain_where_constraint :
 val explain_tconst_where_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> (Pos_or_decl.t * string) list -> unit
 
-val abstract_tconst_not_allowed : Pos.t -> Pos_or_decl.t * string -> unit
+val abstract_tconst_not_allowed :
+  Pos.t -> Pos_or_decl.t * string -> typing_error_callback -> unit
 
 val unexpected_arrow : Pos.t -> string -> unit
 
@@ -640,9 +643,19 @@ val fun_arity_mismatch : Pos.t -> Pos_or_decl.t -> typing_error_callback -> unit
 
 val discarded_awaitable : Pos.t -> Pos_or_decl.t -> unit
 
+(** Ignore and drops the error. *)
+val ignore_error : typing_error_callback
+
 val unify_error : typing_error_callback
 
+(** Error callback which leaves the error unchanged, unless no error code
+    is provided in which case this sets error code to the one for invalid
+    type hint error. *)
+val leave_unchanged_default_invalid_type_hint_code : typing_error_callback
+
 val unify_error_at : Pos.t -> typing_error_callback
+
+val invalid_type_hint : Pos.t -> typing_error_callback
 
 val index_type_mismatch : typing_error_callback
 

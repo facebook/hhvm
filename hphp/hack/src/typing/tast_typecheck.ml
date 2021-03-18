@@ -10,7 +10,6 @@
 open Hh_prelude
 open Delta
 open Typing_defs
-open Typing_env_types
 open Aast
 module ETast = Tast
 module Nast = Aast
@@ -218,9 +217,10 @@ let check_func_body env (body : ETast.func_body) gamma =
 let localize env hint =
   match hint with
   | None -> failwith "There should be a hint in strict mode."
-  | Some decl_ty ->
-    let ty = Decl_hint.hint env.decl_env decl_ty in
-    let (_env, ty) = Phase.localize ~ety_env:(Phase.env_with_self env) env ty in
+  | Some hint ->
+    let (_env, ty) =
+      Phase.localize_hint_with_self env ~ignore_errors:false hint
+    in
     ty
 
 let gamma_from_params env (params : ETast.fun_param list) =

@@ -98,14 +98,13 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     ( env,
       Missing
         (fun () ->
-          if not ctx.ety_env.quiet then
-            Errors.smember_not_found
-              `class_typeconst
-              id_pos
-              (Cls.pos class_, class_name)
-              id_name
-              `no_hint
-              ctx.ety_env.on_error) )
+          Errors.smember_not_found
+            `class_typeconst
+            id_pos
+            (Cls.pos class_, class_name)
+            id_name
+            `no_hint
+            ctx.ety_env.on_error) )
   | Some typeconst ->
     let name = tp_name class_name id in
     let type_expansions =
@@ -131,15 +130,18 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         { ctx.ety_env with type_expansions; this_ty }
       in
       let make_abstract env bnd =
-        ( if (not ctx.allow_abstract) && not ety_env.quiet then
+        ( if not ctx.allow_abstract then
           let tc_pos = fst typeconst.ttc_name in
-          Errors.abstract_tconst_not_allowed id_pos (tc_pos, id_name) );
+          Errors.abstract_tconst_not_allowed
+            id_pos
+            (tc_pos, id_name)
+            ctx.ety_env.on_error );
         (* TODO(T59448452): this treatment of abstract type constants is unsound *)
         make_abstract env id class_name [] bnd
       in
-      (* Quiet: don't report errors in expanded definition or constraint.
+      (* Don't report errors in expanded definition or constraint.
        * These will have been reported at the definition site already. *)
-      let ety_env = { ety_env with quiet = true } in
+      let ety_env = { ety_env with on_error = Errors.ignore_error } in
       (match typeconst with
       (* Concrete type constants *)
       | { ttc_type = Some ty; ttc_as_constraint = None; _ } ->
@@ -147,7 +149,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         let ty = map_reason ty ~f:(make_reason env id root) in
         (env, Exact ty)
       (* A type constant with default can be seen as abstract or exact, depending
-     on the root and base of the access. *)
+       * on the root and base of the access. *)
       | { ttc_type = Some ty; ttc_as_constraint = Some _; _ } ->
         let (env, ty) = Phase.localize ~ety_env env ty in
         let ty = map_reason ty ~f:(make_reason env id root) in
@@ -257,7 +259,7 @@ let rec type_of_result ~ignore_errors ctx env root res =
   | Abstract (name, [], bnd) ->
     type_with_bound env ctx.abstract_as_tyvar name bnd
   | Missing err ->
-    if (not ctx.ety_env.quiet) && not ignore_errors then err ();
+    if not ignore_errors then err ();
     let reason = make_reason env id root Reason.Rnone in
     (env, Typing_utils.terr env reason)
 

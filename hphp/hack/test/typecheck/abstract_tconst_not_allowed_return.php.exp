@@ -1,4 +1,6 @@
-File "abstract_tconst_not_allowed_return.php", line 9, characters 22-22:
-An abstract type constant is not allowed in this position. (Typing[4352])
-File "abstract_tconst_not_allowed_return.php", line 5, characters 23-23:
-`T` is abstract here.
+File "abstract_tconst_not_allowed_return.php", line 9, characters 19-22:
+Invalid type hint (Typing[4352])
+  File "abstract_tconst_not_allowed_return.php", line 9, characters 22-22:
+  An abstract type constant is not allowed in this position.
+  File "abstract_tconst_not_allowed_return.php", line 5, characters 23-23:
+  `T` is abstract here.

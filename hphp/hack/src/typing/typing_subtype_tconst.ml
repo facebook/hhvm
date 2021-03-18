@@ -12,7 +12,7 @@ let make_type_const_equal
   let rec make_equal env ty =
     match ty with
     | LoclType ty ->
-      let ety_env = Phase.env_with_self ~on_error env in
+      let ety_env = Phase.env_with_self env ~on_error:Errors.ignore_error in
       let (env, tytconst) =
         Utils.expand_typeconst
           ety_env

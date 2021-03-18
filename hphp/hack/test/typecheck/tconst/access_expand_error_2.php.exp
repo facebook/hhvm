@@ -1,4 +1,6 @@
-File "access_expand_error_2.php", line 4, characters 13-17:
-No type constant `ERROR` in `C` (Typing[4090])
-File "access_expand_error_2.php", line 3, characters 7-7:
-Declaration of `C` is here
+File "access_expand_error_2.php", line 4, characters 10-17:
+Invalid type hint (Typing[4090])
+  File "access_expand_error_2.php", line 4, characters 13-17:
+  No type constant `ERROR` in `C`
+  File "access_expand_error_2.php", line 3, characters 7-7:
+  Declaration of `C` is here

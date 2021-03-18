@@ -127,7 +127,6 @@ let check_param_has_hint env param ty is_code_error =
  * A similar line of reasoning is applied for the static method create.
  *)
 let make_param_local_ty env decl_hint param =
-  let ety_env = Phase.env_with_self env in
   let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
     match decl_hint with
@@ -139,7 +138,7 @@ let make_param_local_ty env decl_hint param =
           env
           ty
       in
-      Phase.localize ~ety_env env ty
+      Phase.localize_with_self env ~ignore_errors:false ty
   in
   let ty =
     match get_node ty with
@@ -262,6 +261,7 @@ let fun_def ctx f :
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
           pos
           env
+          ~ignore_errors:false
           f.f_tparams
           f.f_where_constraints
       in
@@ -279,7 +279,9 @@ let fun_def ctx f :
         | None ->
           (env, Typing_return.make_default_return ~is_method:false env f.f_name)
         | Some ty ->
-          let localize env ty = Phase.localize_with_self env ty in
+          let localize env ty =
+            Phase.localize_with_self env ~ignore_errors:false ty
+          in
           Typing_return.make_return_type localize env ty
       in
       let return =
@@ -417,6 +419,7 @@ let method_def env cls m =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
           pos
           env
+          ~ignore_errors:false
           m.m_tparams
           m.m_where_constraints
       in
@@ -454,7 +457,11 @@ let method_def env cls m =
           (* If a 'this' type appears it needs to be compatible with the
            * late static type
            *)
-          let ety_env = Phase.env_with_self env in
+          let ety_env =
+            Phase.env_with_self
+              env
+              ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code
+          in
           Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
       let return =
@@ -944,17 +951,23 @@ let typeconst_def
   if Ast_defs.is_c_enum cls.c_kind then
     Errors.cannot_declare_constant `enum pos cls.c_name;
   let (env, cstr) =
-    opt Phase.localize_hint_with_self env c_tconst_as_constraint
+    opt
+      (Phase.localize_hint_with_self ~ignore_errors:false ?report_cycle:None)
+      env
+      c_tconst_as_constraint
   in
   let (env, ty) =
     match hint with
     | None -> (env, None)
     | Some hint ->
-      let ty = Decl_hint.hint env.decl_env hint in
       (* We want to report cycles through the definition *)
       let name = snd cls.c_name ^ "::" ^ snd id in
       let (env, ty) =
-        Phase.localize_with_self env ~pos ~report_cycle:(pos, name) ty
+        Phase.localize_hint_with_self
+          env
+          ~ignore_errors:false
+          ~report_cycle:(pos, name)
+          hint
       in
       (env, Some ty)
   in
@@ -1030,7 +1043,9 @@ let class_const_def ~in_enum_class c env cc =
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
-      let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
+      let (env, ty) =
+        Phase.localize_possibly_enforced_with_self env ~ignore_errors:false ty
+      in
       (* Removing the HH\MemberOf wrapper in case of enum classes so the
        * following call to expr_* has the right expected type
        *)
@@ -1135,7 +1150,10 @@ let class_var_def ~is_static cls env cv =
     | Some decl_cty ->
       let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
       let (env, cty) =
-        Phase.localize_possibly_enforced_with_self env decl_cty
+        Phase.localize_possibly_enforced_with_self
+          env
+          ~ignore_errors:false
+          decl_cty
       in
       let expected =
         Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)
@@ -1330,6 +1348,7 @@ let class_def_ env c tc =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       pc
       env
+      ~ignore_errors:false
       c.c_tparams
       c.c_where_constraints
   in
@@ -1338,7 +1357,10 @@ let class_def_ env c tc =
       ~in_class:true
       ~use_pos:pc
       ~definition_pos:pc
-      ~ety_env:(Phase.env_with_self env)
+      ~ety_env:
+        (Phase.env_with_self
+           env
+           ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code)
       env
       (Cls.where_constraints tc)
   in
@@ -1346,7 +1368,7 @@ let class_def_ env c tc =
   check_no_generic_static_property tc;
   let check_where_constraints env ht =
     let (_, (p, _), _) = TUtils.unwrap_class_type ht in
-    let (env, locl_ty) = Phase.localize_with_self env ht in
+    let (env, locl_ty) = Phase.localize_with_self env ~ignore_errors:false ht in
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls, _, tyl) ->
       (match Env.get_class env (snd cls) with
@@ -1354,7 +1376,10 @@ let class_def_ env c tc =
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           {
-            (Phase.env_with_self env) with
+            (Phase.env_with_self
+               env
+               ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code)
+            with
             substs = Subst.make_locl tc_tparams tyl;
           }
         in
@@ -1588,7 +1613,9 @@ let gconst_def ctx cst =
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
-      let (env, dty) = Phase.localize_possibly_enforced_with_self env ty in
+      let (env, dty) =
+        Phase.localize_possibly_enforced_with_self env ~ignore_errors:false ty
+      in
       let (env, te, value_type) =
         let expected =
           ExpectedTy.make_and_allow_coercion (fst hint) Reason.URhint dty
@@ -1627,10 +1654,9 @@ let gconst_def ctx cst =
 
 let record_field env f =
   let (id, hint, e) = f in
-  let ((p, _) as cty) = hint in
+  let (p, _) = hint in
   let (env, cty) =
-    let cty = Decl_hint.hint env.decl_env cty in
-    Phase.localize_with_self env cty
+    Phase.localize_hint_with_self env ~ignore_errors:false hint
   in
   let expected = ExpectedTy.make p Reason.URhint cty in
   match e with

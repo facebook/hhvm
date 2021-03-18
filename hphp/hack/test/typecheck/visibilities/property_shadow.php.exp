@@ -1,6 +1,8 @@
-File "property_shadow.php", line 6, characters 16-16:
-This object access to `x` is ambiguous (Typing[4256])
-File "property_shadow.php", line 4, characters 39-41:
-You will access the private instance declared in `A`
-File "property_shadow.php", line 11, characters 38-43:
-Instead of the public instance declared in `B`
+File "property_shadow.php", line 6, characters 12-13:
+Typing error (Typing[4256])
+  File "property_shadow.php", line 6, characters 16-16:
+  This object access to `x` is ambiguous
+  File "property_shadow.php", line 4, characters 39-41:
+  You will access the private instance declared in `A`
+  File "property_shadow.php", line 11, characters 38-43:
+  Instead of the public instance declared in `B`

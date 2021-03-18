@@ -1,12 +1,14 @@
-File "type_constants_across.php", line 5, characters 22-23:
-An abstract type constant is not allowed in this position. (Typing[4352])
-File "type_constants_across.php", line 19, characters 23-24:
-`Tx` is abstract here.
+File "type_constants_across.php", line 5, characters 19-23:
+Invalid type hint (Typing[4352])
+  File "type_constants_across.php", line 5, characters 22-23:
+  An abstract type constant is not allowed in this position.
+  File "type_constants_across.php", line 19, characters 23-24:
+  `Tx` is abstract here.
 File "type_constants_across.php", line 11, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
-File "type_constants_across.php", line 19, characters 23-24:
-The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>`
+  File "type_constants_across.php", line 19, characters 23-24:
+  The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>`
 File "type_constants_across.php", line 14, characters 10-18:
 Invalid `as` expression hint (Typing[4195])
-File "type_constants_across.php", line 26, characters 20-26:
-The `as` operator cannot be used with a type with an erased generic type argument
+  File "type_constants_across.php", line 26, characters 20-26:
+  The `as` operator cannot be used with a type with an erased generic type argument

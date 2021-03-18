@@ -7,10 +7,10 @@
  *
  *)
 
-(**
- * Checks if a function/method can be memoized. If the function cannot be
- * memoized this will add an error to the gloabl error list
- *)
+(** Checks if a function can be memoized. If the function cannot be
+    memoized this will add an error to the global error list. *)
 val check_function : Typing_env_types.env -> Nast.fun_ -> unit
 
+(** Checks if a method can be memoized. If the method cannot be
+    memoized this will add an error to the global error list. *)
 val check_method : Typing_env_types.env -> Nast.method_ -> unit

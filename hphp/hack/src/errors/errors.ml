@@ -744,11 +744,6 @@ and merge (err', fixmes') (err, fixmes) =
   in
   (files_t_merge ~f:append err' err, files_t_merge ~f:append fixmes' fixmes)
 
-and merge_into_current errors =
-  let merged = merge errors (!error_map, !applied_fixmes) in
-  error_map := fst merged;
-  applied_fixmes := snd merged
-
 and incremental_update :
     type (* Need to write out the entire ugly type to convince OCaml it's polymorphic
           * and can update both error_map as well as applied_fixmes map *)
@@ -854,6 +849,17 @@ and get_error_list (err, _fixmes) = files_t_to_list err
 and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
+
+let merge_into_current errors =
+  let merged = merge errors (!error_map, !applied_fixmes) in
+  error_map := fst merged;
+  applied_fixmes := snd merged
+
+let apply_callback_to_errors : t -> typing_error_callback -> unit =
+ fun (errors, _fixmes) on_error ->
+  let on_error { code; claim; reasons } = on_error ~code claim reasons in
+  Relative_path.Map.iter errors ~f:(fun _ ->
+      PhaseMap.iter ~f:(fun _ -> List.iter ~f:on_error))
 
 (*****************************************************************************)
 (* Accessors. (All methods delegated to the parameterized module.) *)
@@ -2183,9 +2189,10 @@ let missing_constructor pos (on_error : typing_error_callback) =
 
 let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
-let abstract_tconst_not_allowed pos (p, tconst_name) =
-  add_list
-    (Typing.err_code Typing.AbstractTconstNotAllowed)
+let abstract_tconst_not_allowed
+    pos (p, tconst_name) (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.AbstractTconstNotAllowed)
     (pos, "An abstract type constant is not allowed in this position.")
     [
       ( p,
@@ -3302,12 +3309,26 @@ let discarded_awaitable pos1 pos2 =
       ^ "being awaited" )
     [(pos2, "This is why I think it is `Awaitable`")]
 
+let ignore_error : typing_error_callback = (fun ?code:_ _ _ -> ())
+
 let unify_error ?code err =
   add_list (Option.value code ~default:(Typing.err_code Typing.UnifyError)) err
+
+let leave_unchanged_default_invalid_type_hint_code ?code err =
+  add_list
+    (Option.value code ~default:(Typing.err_code Typing.InvalidTypeHint))
+    err
 
 let unify_error_at : Pos.t -> typing_error_callback =
  fun pos ?code claim reasons ->
   unify_error ?code (pos, "Typing error") (claim_as_reason claim :: reasons)
+
+let invalid_type_hint : Pos.t -> typing_error_callback =
+ fun pos ?code claim reasons ->
+  add_list
+    (Option.value code ~default:(Typing.err_code Typing.InvalidTypeHint))
+    (pos, "Invalid type hint")
+    (claim_as_reason claim :: reasons)
 
 let maybe_unify_error specific_code ?code errl =
   add_list (Option.value code ~default:(Typing.err_code specific_code)) errl

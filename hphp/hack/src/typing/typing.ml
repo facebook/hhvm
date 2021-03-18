@@ -312,7 +312,7 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
             (* Accessing statics for default arguments is allowed *)
             (param.param_pos, SN.Capabilities.accessStaticVariable)
             []
-          |> Phase.localize_with_self env
+          |> Phase.localize_with_self env ~ignore_errors:false
         in
         with_special_coeffects env cap pure @@ fun env ->
         expr ?expected env e ~allow_awaitable:(*?*) false |> triple_to_pair
@@ -1779,7 +1779,9 @@ and expr_
       make_result env cst_pos (Aast.Id id) ty
     | None -> make_result env p (Aast.Id id) (Typing_utils.mk_tany env cst_pos)
     | Some const ->
-      let (env, ty) = Phase.localize_with_self ~pos:p env const.cd_type in
+      let (env, ty) =
+        Phase.localize_with_self env ~ignore_errors:true const.cd_type
+      in
       make_result env p (Aast.Id id) ty)
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic
@@ -1836,7 +1838,7 @@ and expr_
       in
       let ety_env =
         {
-          (Phase.env_with_self env) with
+          (Phase.env_with_self env ~on_error:(Errors.invalid_type_hint pos)) with
           substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
         }
       in
@@ -1865,7 +1867,7 @@ and expr_
         let ety_env =
           {
             ety_env with
-            substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
+            on_error = Errors.leave_unchanged_default_invalid_type_hint_code;
           }
         in
         let env =
@@ -1875,7 +1877,6 @@ and expr_
             env
             (Cls.tparams class_)
         in
-        let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
         let local_obj_fp = TUtils.default_fun_param local_obj_ty in
         let fty = { ftype with ft_params = local_obj_fp :: ftype.ft_params } in
         let caller =
@@ -1986,8 +1987,7 @@ and expr_
             type_expansions = [];
             substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
-            quiet = true;
-            on_error = Errors.unify_error_at p;
+            on_error = Errors.ignore_error;
           }
         in
         let r = get_reason ty |> Typing_reason.localize in
@@ -2349,7 +2349,10 @@ and expr_
         in
         let ety_env =
           {
-            (Phase.env_with_self env) with
+            (Phase.env_with_self
+               env
+               ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code)
+            with
             substs = Subst.make_locl tparaml tparams;
           }
         in
@@ -2638,7 +2641,9 @@ and expr_
       else
         env
     in
-    let (env, ty) = Phase.localize_hint_with_self env hint in
+    let (env, ty) =
+      Phase.localize_hint_with_self env ~ignore_errors:false hint
+    in
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree { env with in_expr_tree = true } p et
   | Is (e, hint) ->
@@ -2655,8 +2660,9 @@ and expr_
     in
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
-    let ety_env = Phase.env_with_self env in
-    let (env, hint_ty) = Phase.localize_hint ~ety_env env hint in
+    let (env, hint_ty) =
+      Phase.localize_hint_with_self env ~ignore_errors:false hint
+    in
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
@@ -2728,7 +2734,11 @@ and expr_
     (* When creating a closure, the 'this' type will mean the late bound type
      * of the current enclosing class
      *)
-    let ety_env = Phase.env_with_self env in
+    let ety_env =
+      Phase.env_with_self
+        env
+        ~on_error:Errors.leave_unchanged_default_invalid_type_hint_code
+    in
     let (env, declared_ft) =
       Phase.(
         localize_ft
@@ -3211,13 +3221,11 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
     params := paraml;
     (match hint_of_type_hint param.param_type_hint with
     | Some h ->
-      let h = Decl_hint.hint env.decl_env h in
+      let (pos, _) = h in
       (* When creating a closure, the 'this' type will mean the
        * late bound type of the current enclosing class
        *)
-      let ety_env = Phase.env_with_self env in
-      let (env, h) = Phase.localize ~ety_env env h in
-      let pos = get_pos h in
+      let (env, h) = Phase.localize_hint_with_self env ~ignore_errors:false h in
       let env =
         Typing_coercion.coerce_type
           pos
@@ -3253,9 +3261,9 @@ and closure_bind_variadic env vparam variadic_ty =
       (* if the hint is missing, use the type we expect *)
       (env, variadic_ty, get_pos variadic_ty)
     | Some hint ->
-      let h = Decl_hint.hint env.decl_env hint in
-      let ety_env = Phase.env_with_self env in
-      let (env, h) = Phase.localize ~ety_env env h in
+      let (env, h) =
+        Phase.localize_hint_with_self env ~ignore_errors:false hint
+      in
       let pos = get_pos h in
       let env =
         Typing_coercion.coerce_type
@@ -3291,7 +3299,9 @@ and closure_check_param env param =
   match hint_of_type_hint param.param_type_hint with
   | None -> env
   | Some hty ->
-    let (env, hty) = Phase.localize_hint_with_self env hty in
+    let (env, hty) =
+      Phase.localize_hint_with_self env ~ignore_errors:false hty
+    in
     let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
     let hint_pos = get_pos hty in
     let env =
@@ -3483,7 +3493,12 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               (* If a 'this' type appears it needs to be compatible with the
                * late static type
                *)
-              let ety_env = Phase.env_with_self env in
+              let ety_env =
+                Phase.env_with_self
+                  env
+                  ~on_error:
+                    Errors.leave_unchanged_default_invalid_type_hint_code
+              in
               Typing_return.make_return_type (Phase.localize ~ety_env) env ret
           in
           let env =
@@ -3599,14 +3614,15 @@ and type_capability env ctxs unsafe_ctxs default_pos =
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, (env, cap_ty)) =
     match cc env.decl_env ctxs default_pos with
-    | CapTy ty -> (get_pos ty, Phase.localize_with_self env ty)
+    | CapTy ty ->
+      (get_pos ty, Phase.localize_with_self env ~ignore_errors:false ty)
     | CapDefaults p -> (p, (env, MakeType.default_capability p))
   in
   if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
     Typing_coeffects.validate_capability env decl_pos cap_ty;
   let (env, unsafe_cap_ty) =
     match cc env.decl_env unsafe_ctxs default_pos with
-    | CapTy ty -> Phase.localize_with_self env ty
+    | CapTy ty -> Phase.localize_with_self env ~ignore_errors:false ty
     | CapDefaults p ->
       (* default is no unsafe capabilities *)
       (env, MakeType.mixed (Reason.Rhint p))
@@ -3774,8 +3790,7 @@ and new_object
               substs =
                 TUtils.make_locl_subst_for_class_tparams class_info params;
               this_ty = obj_ty;
-              quiet = false;
-              on_error = Errors.unify_error_at p;
+              on_error = Errors.ignore_error;
             }
           in
           if get_ce_abstract ce then
@@ -4260,7 +4275,9 @@ and arraykey_value
 
 and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in
-  let (env, env_parent) = Phase.localize_with_self env env_parent in
+  let (env, env_parent) =
+    Phase.localize_with_self env ~ignore_errors:true env_parent
+  in
   let (env, _tcid, _tal, tel, typed_unpack_element, parent, fty) =
     new_object
       ~expected:None
@@ -5155,7 +5172,7 @@ and fun_type_of_id env x tal el =
       let ft =
         Typing_special_fun.transform_special_fun_ty ft x (List.length el)
       in
-      let ety_env = Phase.env_with_self env in
+      let ety_env = Phase.env_with_self env ~on_error:Errors.ignore_error in
       let (env, tal) =
         Phase.localize_targs
           ~check_well_kinded:true
@@ -5340,8 +5357,7 @@ and class_get_
           type_expansions = [];
           this_ty;
           substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
-          quiet = true;
-          on_error = Errors.unify_error_at p;
+          on_error = Errors.ignore_error;
         }
       in
       let get_smember_from_constraints env class_info =
@@ -5685,7 +5701,9 @@ and static_class_id
            * type of the most concrete class that the trait has
            * "require extend"-ed *)
           let r = Reason.Rwitness p in
-          let (env, parent_ty) = Phase.localize_with_self env parent_ty in
+          let (env, parent_ty) =
+            Phase.localize_with_self env ~ignore_errors:true parent_ty
+          in
           make_result env [] Aast.CIparent (mk (r, TUtils.this_of parent_ty)))
       | _ ->
         let parent =
@@ -5696,7 +5714,9 @@ and static_class_id
           | Some parent -> parent
         in
         let r = Reason.Rwitness p in
-        let (env, parent) = Phase.localize_with_self env parent in
+        let (env, parent) =
+          Phase.localize_with_self env ~ignore_errors:true parent
+        in
         (* parent is still technically the same object. *)
         make_result
           env
@@ -5712,7 +5732,9 @@ and static_class_id
         | Some parent -> parent
       in
       let r = Reason.Rwitness p in
-      let (env, parent) = Phase.localize_with_self env parent in
+      let (env, parent) =
+        Phase.localize_with_self env ~ignore_errors:true parent
+      in
       (* parent is still technically the same object. *)
       make_result
         env
@@ -5842,7 +5864,6 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       type_expansions = [];
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
-      quiet = true;
       on_error = Errors.unify_error_at p;
     }
   in
@@ -6180,7 +6201,9 @@ and call
           (match Env.get_const env cls atom_name with
           | Some const_def ->
             let dty = const_def.cc_type in
-            let (env, lty) = Phase.localize_with_self env dty in
+            let (env, lty) =
+              Phase.localize_with_self env ~ignore_errors:true dty
+            in
             let hi = (pos, lty) in
             let te = (hi, EnumAtom atom_name) in
             (env, Some (te, lty))
@@ -6807,8 +6830,9 @@ and condition
     key_exists env p shape field
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
-    let ety_env = Phase.env_with_self env in
-    let (env, hint_ty) = Phase.localize_hint ~ety_env env h in
+    let (env, hint_ty) =
+      Phase.localize_hint_with_self env ~ignore_errors:false h
+    in
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
       let (ivar_pos, ivar_ty) = fst ivar in
@@ -6828,7 +6852,7 @@ and condition
     refine_type env hint_ty
   | _ -> (env, Local_id.Set.empty)
 
-(** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinment of
+(** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinement of
 an instance variable. ivar_ty is the previous type of that instance variable. *)
 and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   let (env, hint_ty) = Env.expand_type env hint_ty in
@@ -6936,8 +6960,7 @@ and safely_refine_class_type
       type_expansions = [];
       substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
-      quiet = true;
-      on_error = Errors.unify_error_at p;
+      on_error = Errors.ignore_error;
     }
   in
   let add_bounds env (t, ty_fresh) =
@@ -7201,6 +7224,7 @@ and typedef_def ctx typedef =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst typedef.t_name)
       env
+      ~ignore_errors:false
       typedef.t_tparams
       []
   in
@@ -7221,16 +7245,19 @@ and typedef_def ctx typedef =
   } =
     typedef
   in
-  let ty = Decl_hint.hint env.decl_env hint in
-  (* We want to report cycles through the definition *)
   let (env, ty) =
-    Phase.localize_with_self env ~pos:t_pos ~report_cycle:(t_pos, t_name) ty
+    Phase.localize_hint_with_self
+      env
+      ~ignore_errors:false
+      ~report_cycle:(t_pos, t_name)
+      hint
   in
   let env =
     match tcstr with
     | Some tcstr ->
-      let cstr = Decl_hint.hint env.decl_env tcstr in
-      let (env, cstr) = Phase.localize_with_self ~pos:t_pos env cstr in
+      let (env, cstr) =
+        Phase.localize_hint_with_self env ~ignore_errors:false tcstr
+      in
       Typing_ops.sub_type
         t_pos
         Reason.URnewtype_cstr

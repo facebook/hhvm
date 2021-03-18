@@ -99,7 +99,7 @@ let member_not_found
       ()
     | (None, None) -> error `no_hint
 
-let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
+let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
   | (_, Tprim Tnull) ->
     if Option.is_some nullsafe then
@@ -131,8 +131,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_info tyl;
                   this_ty = ty;
-                  quiet = true;
-                  on_error;
+                  on_error = Errors.ignore_error;
                 }
               in
               let (env, basety) = Phase.localize ~ety_env env basety in
@@ -214,8 +213,7 @@ let rec obj_get_concrete_ty
       type_expansions = [];
       this_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
-      quiet = true;
-      on_error;
+      on_error = Errors.ignore_error;
     }
   in
   let read_context = Option.is_none coerce_from_ty in
@@ -406,8 +404,7 @@ let rec obj_get_concrete_ty
                           use_pos = id_pos;
                           explicit_targs;
                         }
-                      ~ety_env:
-                        { ety_env with on_error = Errors.unify_error_at id_pos }
+                      ~ety_env:{ ety_env with on_error = Errors.ignore_error }
                       ~def_pos:mem_pos
                       env
                       ft)
@@ -634,7 +631,7 @@ and obj_get_inner
       Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
-        (widen_class_for_obj_get ~is_method ~nullsafe ~on_error id_str)
+        (widen_class_for_obj_get ~is_method ~nullsafe id_str)
         obj_pos
         ty1
         Errors.unify_error

@@ -1,20 +1,12 @@
 File "tconst_on_generics5.php", line 39, characters 14-17:
 Some type constraint(s) here are violated (Typing[4323])
-File "tconst_on_generics5.php", line 25, characters 31-32:
-`T1` is a constrained type parameter
-File "tconst_on_generics5.php", line 25, characters 37-39:
-Some type constraint(s) are violated here
-File "tconst_on_generics5.php", line 25, characters 31-32:
-`T1` is a constrained type parameter
-File "tconst_on_generics5.php", line 25, characters 37-39:
-Expected `Box`
-File "tconst_on_generics5.php", line 25, characters 47-47:
-But got `B`
-File "tconst_on_generics5.php", line 39, characters 14-17:
-Some type constraint(s) here are violated (Typing[4323])
-File "tconst_on_generics5.php", line 25, characters 31-32:
-`T1` is a constrained type parameter
-File "tconst_on_generics5.php", line 25, characters 81-81:
-No type constant `T` in `B`
-File "tconst_on_generics5.php", line 4, characters 7-7:
-Declaration of `B` is here
+  File "tconst_on_generics5.php", line 25, characters 31-32:
+  `T1` is a constrained type parameter
+  File "tconst_on_generics5.php", line 25, characters 37-39:
+  Some type constraint(s) are violated here
+  File "tconst_on_generics5.php", line 25, characters 31-32:
+  `T1` is a constrained type parameter
+  File "tconst_on_generics5.php", line 25, characters 37-39:
+  Expected `Box`
+  File "tconst_on_generics5.php", line 25, characters 47-47:
+  But got `B`

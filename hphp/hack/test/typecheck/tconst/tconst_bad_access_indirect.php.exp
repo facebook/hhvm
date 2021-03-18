@@ -1,6 +1,6 @@
-File "tconst_bad_access_indirect.php", line 7, characters 14-14:
-Typing error (Typing[4090])
-File "tconst_bad_access_indirect.php", line 7, characters 21-22:
-No type constant `T3` in `E`
-File "tconst_bad_access_indirect.php", line 4, characters 7-7:
-Declaration of `E` is here
+File "tconst_bad_access_indirect.php", line 7, characters 18-22:
+Invalid type hint (Typing[4090])
+  File "tconst_bad_access_indirect.php", line 7, characters 21-22:
+  No type constant `T3` in `E`
+  File "tconst_bad_access_indirect.php", line 4, characters 7-7:
+  Declaration of `E` is here

@@ -1,8 +1,10 @@
 File "tconst5.php", line 16, characters 13-24:
 Invalid `is` expression hint (Typing[4195])
-File "tconst5.php", line 12, characters 23-23:
-The `is` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>`
-File "tconst5.php", line 16, characters 24-24:
-An abstract type constant is not allowed in this position. (Typing[4352])
-File "tconst5.php", line 12, characters 23-23:
-`T` is abstract here.
+  File "tconst5.php", line 12, characters 23-23:
+  The `is` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>`
+File "tconst5.php", line 16, characters 13-24:
+Invalid type hint (Typing[4352])
+  File "tconst5.php", line 16, characters 24-24:
+  An abstract type constant is not allowed in this position.
+  File "tconst5.php", line 12, characters 23-23:
+  `T` is abstract here.

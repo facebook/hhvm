@@ -623,6 +623,7 @@ module Typing = struct
     | InvalidMethCallerCallingConvention [@value 4416]
     | UnsafeCast [@value 4417]
     | ReadonlyException [@value 4418]
+    | InvalidTypeHint [@value 4419]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

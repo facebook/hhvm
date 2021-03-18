@@ -63,7 +63,7 @@ let bad_compare_prim_to_enum ty enum_bound =
   | _ -> false
 
 let rec assert_nontrivial p bop env ty1 ty2 =
-  let ety_env = Phase.env_with_self env in
+  let ety_env = Phase.env_with_self env ~on_error:Errors.ignore_error in
   let (_, ty1) = Env.expand_type env ty1 in
   let (_, ety1, trail1) = TDef.force_expand_typedef ~ety_env env ty1 in
   let (_, ty2) = Env.expand_type env ty2 in

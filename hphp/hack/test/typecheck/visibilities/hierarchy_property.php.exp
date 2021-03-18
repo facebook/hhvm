@@ -1,6 +1,8 @@
-File "hierarchy_property.php", line 7, characters 16-18:
-This object access to `val` is ambiguous (Typing[4256])
-File "hierarchy_property.php", line 4, characters 39-44:
-You will access the private instance declared in `A`
-File "hierarchy_property.php", line 17, characters 49-54:
-Instead of the public instance declared in `C`
+File "hierarchy_property.php", line 7, characters 12-13:
+Typing error (Typing[4256])
+  File "hierarchy_property.php", line 7, characters 16-18:
+  This object access to `val` is ambiguous
+  File "hierarchy_property.php", line 4, characters 39-44:
+  You will access the private instance declared in `A`
+  File "hierarchy_property.php", line 17, characters 49-54:
+  Instead of the public instance declared in `C`

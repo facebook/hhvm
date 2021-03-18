@@ -137,6 +137,8 @@ void DebugTransport::enqueueOutgoingMessageForClient(
   folly::dynamic& message,
   const char* messageType
 ) {
+  message["seq"] = m_responseSeqId++;
+
   if (!clientConnected()) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelWarning,

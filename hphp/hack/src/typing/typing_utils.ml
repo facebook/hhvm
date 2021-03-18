@@ -45,6 +45,18 @@ let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
 let sub_type x = !sub_type_ref x
 
+type sub_type_res =
+  env ->
+  ?coerce:Typing_logic.coercion_direction option ->
+  locl_ty ->
+  locl_ty ->
+  Errors.typing_error_callback ->
+  (env, env) result
+
+let (sub_type_res_ref : sub_type_res ref) = ref (not_implemented "sub_type_res")
+
+let sub_type_res x = !sub_type_res_ref x
+
 type sub_type_i =
   env -> internal_type -> internal_type -> Errors.typing_error_callback -> env
 
@@ -60,6 +72,16 @@ let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
   ref (not_implemented "sub_type_with_dynamic_as_bottom")
 
 let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
+
+type sub_type_with_dynamic_as_bottom_res =
+  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> (env, env) result
+
+let (sub_type_with_dynamic_as_bottom_res_ref :
+      sub_type_with_dynamic_as_bottom_res ref) =
+  ref (not_implemented "sub_type_with_dynamic_as_bottom_res")
+
+let sub_type_with_dynamic_as_bottom_res x =
+  !sub_type_with_dynamic_as_bottom_res_ref x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 

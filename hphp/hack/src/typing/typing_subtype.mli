@@ -54,8 +54,23 @@ val sub_type :
  *)
 val sub_type_or_fail : env -> locl_ty -> locl_ty -> (unit -> unit) -> env
 
+(**
+ * As above but only return the modified environment as [Ok] when the assertion
+ * is satisfiable and the original environment as [Err] otherwise.
+*)
+val sub_type_res :
+  env ->
+  ?coerce:Typing_logic.coercion_direction option ->
+  locl_ty ->
+  locl_ty ->
+  Errors.typing_error_callback ->
+  (env, env) result
+
 val sub_type_with_dynamic_as_bottom :
   env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+
+val sub_type_with_dynamic_as_bottom_res :
+  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> (env, env) result
 
 val sub_type_i :
   env -> internal_type -> internal_type -> Errors.typing_error_callback -> env

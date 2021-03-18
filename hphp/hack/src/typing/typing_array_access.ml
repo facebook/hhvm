@@ -648,7 +648,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
             ty_have
             { et_type = ty_expect; et_enforced = Enforced }
         with
-        | Some e -> e
+        | Some env -> env
         | None ->
           (* if subtype of dynamic, allow it to be used *)
           if

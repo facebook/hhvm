@@ -446,19 +446,17 @@ let rec obj_get_concrete_ty
                 (env, (member_ty, tal))
             in
             let env =
-              match coerce_from_ty with
-              | None -> env
-              | Some (p, ur, ty) ->
-                let env =
+              Option.value_map
+                coerce_from_ty
+                ~default:env
+                ~f:(fun (p, ur, ty) ->
                   Typing_coercion.coerce_type
                     p
                     ur
                     env
                     ty
                     { et_type = member_ty; et_enforced }
-                    Errors.unify_error
-                in
-                env
+                    Errors.unify_error)
             in
             (env, (member_ty, tal))
         end

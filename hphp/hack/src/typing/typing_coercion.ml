@@ -105,10 +105,10 @@ let coerce_type_impl
          with coercion to dynamic enabled.
          The computation of the enforcement takes case that a top-level dynamic or ?dynamic are not considered Enforced.
          *)
-      Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
+      Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
     | Unenforced
     | PartiallyEnforced ->
-      Typing_utils.sub_type
+      Typing_utils.sub_type_res
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ty_have
@@ -121,10 +121,10 @@ let coerce_type_impl
     let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
     let (env, ety_have) = Typing_env.expand_type env ty_have in
     match (get_node ety_have, get_node ety_expect) with
-    | (_, Tdynamic) -> env
-    | (Tdynamic, _) when is_expected_enforced -> env
+    | (_, Tdynamic) -> Ok env
+    | (Tdynamic, _) when is_expected_enforced -> Ok env
     | _ when is_expected_enforced ->
-      Typing_utils.sub_type_with_dynamic_as_bottom
+      Typing_utils.sub_type_with_dynamic_as_bottom_res
         env
         ty_have
         ty_expect.et_type
@@ -133,14 +133,25 @@ let coerce_type_impl
       when ( ((not is_expected_enforced) && env.Typing_env_types.pessimize)
            || Typing_utils.is_dynamic env ety_expect )
            && complex_coercion ->
-      Typing_utils.sub_type_with_dynamic_as_bottom
+      Typing_utils.sub_type_with_dynamic_as_bottom_res
         env
         ty_have
         ty_expect.et_type
         on_error
-    | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
+    | _ -> Typing_utils.sub_type_res env ty_have ty_expect.et_type on_error
+
+let result t ~on_ok ~on_err =
+  match t with
+  | Ok x -> on_ok x
+  | Error y -> on_err y
 
 let coerce_type
+    p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
+  result ~on_ok:Fn.id ~on_err:Fn.id
+  @@ coerce_type_impl env ty_have ty_expect (fun ?code claim reasons ->
+         on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
+
+let coerce_type_res
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
   coerce_type_impl env ty_have ty_expect (fun ?code claim reasons ->
       on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
@@ -153,7 +164,9 @@ let try_coerce env ty_have ty_expect =
   let result =
     Errors.try_
       (fun () ->
-        Some (coerce_type_impl env ty_have ty_expect Errors.unify_error))
+        Some
+          ( result ~on_ok:Fn.id ~on_err:Fn.id
+          @@ coerce_type_impl env ty_have ty_expect Errors.unify_error ))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

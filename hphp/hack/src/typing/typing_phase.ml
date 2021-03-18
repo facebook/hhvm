@@ -1075,8 +1075,7 @@ let localize_and_add_where_constraints ~ety_env (env : env) where_constraints =
 let sub_type_decl env ty1 ty2 on_error =
   let (env, ty1) = localize_with_self env ~ignore_errors:true ty1 in
   let (env, ty2) = localize_with_self env ~ignore_errors:true ty2 in
-  let env = TUtils.sub_type env ty1 ty2 on_error in
-  env
+  TUtils.sub_type env ty1 ty2 on_error
 
 let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =

@@ -2532,19 +2532,28 @@ and simplify_subtype_funs
 (* One of the main entry points to this module *)
 and sub_type_i
     ~subtype_env (env : env) (ty_sub : internal_type) (ty_super : internal_type)
-    : env =
-  Env.log_env_change "sub_type" env
-  @@
+    : (env, env) result =
   let old_env = env in
   let (env, success) =
     sub_type_inner ~subtype_env env ~this_ty:None ty_sub ty_super
   in
   if success then
-    env
+    Ok (Env.log_env_change "sub_type" old_env env)
   else
-    old_env
+    Error (Env.log_env_change "sub_type" old_env old_env)
 
 and sub_type
+    env ?(coerce = None) (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~coerce on_error)
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
+  |> function
+  | Ok env -> env
+  | Error env -> env
+
+and sub_type_res
     env ?(coerce = None) (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
   sub_type_i
     ~subtype_env:(make_subtype_env ~coerce on_error)
@@ -3197,11 +3206,11 @@ let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) = add_constraint p env ck ty1 ty2 in
   List.fold_left constraints ~f:add_constraint ~init:env
 
-let sub_type_with_dynamic_as_bottom
+let sub_type_with_dynamic_as_bottom_res
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.typing_error_callback) : env =
+    (on_error : Errors.typing_error_callback) : (env, env) result =
   let env_change_log = Env.log_env_change "coercion" env in
   log_subtype
     ~level:1
@@ -3223,13 +3232,19 @@ let sub_type_with_dynamic_as_bottom
   let (env, prop) = prop_to_env env prop on_error in
   let env = Env.add_subtype_prop env prop in
   let succeeded = process_simplify_subtype_result prop in
-  let env =
-    if succeeded then
-      env
-    else
-      old_env
-  in
-  env_change_log env
+  if succeeded then
+    Ok (env_change_log env)
+  else
+    Error (env_change_log old_env)
+
+let sub_type_with_dynamic_as_bottom
+    (env : env)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    (on_error : Errors.typing_error_callback) : env =
+  match sub_type_with_dynamic_as_bottom_res env ty_sub ty_super on_error with
+  | Ok env -> env
+  | Error env -> env
 
 let simplify_subtype_i env ty_sub ty_super ~on_error =
   simplify_subtype_i
@@ -3244,6 +3259,9 @@ let simplify_subtype_i env ty_sub ty_super ~on_error =
 
 let sub_type_i env ty1 ty2 on_error =
   sub_type_i ~subtype_env:(make_subtype_env ~coerce:None on_error) env ty1 ty2
+  |> function
+  | Ok env -> env
+  | Error env -> env
 
 let subtype_funs
     ~(check_return : bool)
@@ -3281,9 +3299,12 @@ let sub_type_or_fail env ty1 ty2 fail =
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;
+  Typing_utils.sub_type_res_ref := sub_type_res;
   Typing_utils.sub_type_i_ref := sub_type_i;
   Typing_utils.sub_type_with_dynamic_as_bottom_ref :=
     sub_type_with_dynamic_as_bottom;
+  Typing_utils.sub_type_with_dynamic_as_bottom_res_ref :=
+    sub_type_with_dynamic_as_bottom_res;
   Typing_utils.add_constraint_ref := add_constraint;
   Typing_utils.is_sub_type_ref := is_sub_type;
   Typing_utils.is_sub_type_for_coercion_ref := is_sub_type_for_coercion;

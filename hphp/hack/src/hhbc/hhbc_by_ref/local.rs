@@ -9,7 +9,7 @@ pub type Id = usize;
 /// those appearing in the .declvars declaration. These can also be
 /// referenced by number (0 to n-1), but we use Unnamed only for
 /// variables n and above not appearing in .declvars
-#[derive(Debug)]
+#[derive(Copy, Debug)]
 pub enum Type<'arena> {
     Unnamed(Id),
     /// Named local, necessarily starting with `$`

@@ -5,7 +5,7 @@
 
 pub type Id = usize;
 
-#[derive(Debug, Clone, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd)]
 pub enum Label<'arena> {
     Regular(Id),
     DefaultArg(Id),

@@ -122,7 +122,7 @@ class Code {
   public function forStatement(
     ?ExprPos $_,
     vec<Code::TAst> $_,
-    Code::TAst $_,
+    ?Code::TAst $_,
     vec<Code::TAst> $_,
     vec<Code::TAst> $_,
   ): Code::TAst {

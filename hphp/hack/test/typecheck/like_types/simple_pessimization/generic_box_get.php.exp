@@ -1,7 +1,5 @@
 File "generic_box_get.php", line 13, characters 3-13:
-  ~Contain<Tx>
-  where Tx as arraykey
+  ~Contain<Tx> where Tx as arraykey
 File "generic_box_get.php", line 15, characters 3-13:
-  ~Tx
-  where Tx as arraykey
+  ~Tx where Tx as arraykey
 No errors

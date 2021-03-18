@@ -1,4 +1,3 @@
 File "class5.php", line 7, characters 5-15:
-  I<Ta#1, Tb#1>
-  where Ta#1 super Tb#1, Tb#1 as Ta#1
+  I<Ta#1, Tb#1> where Ta#1 super Tb#1, Tb#1 as Ta#1
 No errors

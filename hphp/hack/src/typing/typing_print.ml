@@ -641,36 +641,44 @@ module Full = struct
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
+  (* Print a suffix for type parameters in typ that have constraints
+   * If the type itself is a type parameter with a single constraint, just
+   * represent this as `as t` or `super t`, otherwise use full `where` syntax
+   *)
   let constraints_for_type to_doc env typ =
     let tparams = SSet.elements (Env.get_tparams env typ) in
     let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
-    if List.is_empty constraints then
-      None
-    else
-      Some
-        (Concat
-           [
-             text "where";
-             Space;
-             WithRule
-               ( Rule.Parental,
-                 list_sep
-                   comma_sep
-                   begin
-                     fun (tparam, ck, typ) ->
-                     Concat
-                       [
-                         text tparam;
-                         tparam_constraint
-                           ~ty:locl_ty
-                           to_doc
-                           ISet.empty
-                           env
-                           (ck, typ);
-                       ]
-                   end
-                   constraints );
-           ])
+    let (_, typ) = Env.expand_type env typ in
+    match (get_node typ, constraints) with
+    | (_, []) -> Nothing
+    | (Tgeneric (tparam, []), [(tparam', ck, typ)])
+      when String.equal tparam tparam' ->
+      tparam_constraint ~ty:locl_ty to_doc ISet.empty env (ck, typ)
+    | _ ->
+      Concat
+        [
+          Newline;
+          text "where";
+          Space;
+          WithRule
+            ( Rule.Parental,
+              list_sep
+                comma_sep
+                begin
+                  fun (tparam, ck, typ) ->
+                  Concat
+                    [
+                      text tparam;
+                      tparam_constraint
+                        ~ty:locl_ty
+                        to_doc
+                        ISet.empty
+                        env
+                        (ck, typ);
+                    ]
+                end
+                constraints );
+        ]
 
   let to_string_rec env n x =
     locl_ty Doc.text (ISet.add n ISet.empty) env x
@@ -730,10 +738,7 @@ module Full = struct
           Concat [ty text_strip_ns ISet.empty env x; Space; text_strip_ns name]
         | _ -> ty text_strip_ns ISet.empty env x)
     in
-    let constraints =
-      constraints_for_type text_strip_ns env x
-      |> Option.value_map ~default:Nothing ~f:(fun x -> Concat [Newline; x])
-    in
+    let constraints = constraints_for_type text_strip_ns env x in
     Concat [prefix; body; constraints]
     |> Libhackfmt.format_doc format_env
     |> String.strip
@@ -1812,9 +1817,9 @@ let fun_type ctx f = Full.fun_to_string ctx f
 let typedef ctx td = PrintTypedef.typedef ctx td
 
 let constraints_for_type env ty =
-  Full.constraints_for_type Doc.text env ty
-  |> Option.map ~f:(Libhackfmt.format_doc_unbroken Full.format_env)
-  |> Option.map ~f:String.strip
+  Full.constraints_for_type Full.text_strip_ns env ty
+  |> Libhackfmt.format_doc_unbroken Full.format_env
+  |> String.strip
 
 let class_kind c_kind final = ErrorString.class_kind c_kind final
 

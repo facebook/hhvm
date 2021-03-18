@@ -1,19 +1,15 @@
 File "instanceof_interface.php", line 15, characters 5-15:
-  J<T#1>
-  where T#1 super \C
+  J<T#1> where T#1 super C
 File "instanceof_interface.php", line 16, characters 5-18:
-  I<C>
+  I<C> 
 File "instanceof_interface.php", line 19, characters 5-15:
-  K
+  K 
 File "instanceof_interface.php", line 20, characters 5-18:
-  I<Tt>
-  where Tt as \C
+  I<Tt> where Tt as C
 File "instanceof_interface.php", line 23, characters 5-15:
-  C
+  C 
 File "instanceof_interface.php", line 24, characters 5-18:
-  Base<Tt>
-  where Tt = string
+  Base<Tt> where Tt = string
 File "instanceof_interface.php", line 27, characters 5-15:
-  H<Tt>
-  where Tt as \K
+  H<Tt> where Tt as K
 No errors

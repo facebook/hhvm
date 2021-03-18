@@ -1,16 +1,12 @@
 File "new.php", line 18, characters 3-16:
-  T
-  where T as \I
+  T as I
 File "new.php", line 24, characters 3-16:
-  T
-  where T as \C
+  T as C
 File "new.php", line 30, characters 3-16:
-  Td
-  where Td as \D<\I>
+  Td as D<I>
 File "new.php", line 47, characters 5-18:
-  T
-  where T as \C
+  T as C
 File "new.php", line 17, characters 15-20:
 Can't use `new` on `classname<I>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-File "new.php", line 16, characters 25-25:
-This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+  File "new.php", line 16, characters 25-25:
+  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

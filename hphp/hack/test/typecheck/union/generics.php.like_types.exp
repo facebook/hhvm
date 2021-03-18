@@ -47,19 +47,15 @@ File "generics.php--file2.php", line 128, characters 3-13:
 File "generics.php--file2.php", line 131, characters 3-13:
   ~classname<C>
 File "generics.php--file2.php", line 134, characters 3-13:
-  ~Tu
-  where Tu super \C
+  ~Tu where Tu super C
 File "generics.php--file2.php", line 137, characters 3-13:
   ~C
 File "generics.php--file2.php", line 140, characters 3-13:
-  ~Tu
-  where Tu super \C
+  ~Tu where Tu super C
 File "generics.php--file2.php", line 143, characters 3-13:
-  ~(Tu | Tw)
-  where Tu super \C, Tw super \C
+  ~(Tu | Tw) where Tu super C, Tw super C
 File "generics.php--file2.php", line 146, characters 3-13:
-  ~(Tv | Ty)
-  where Tv as \C, Ty as \C
+  ~(Tv | Ty) where Tv as C, Ty as C
 File "generics.php--file2.php", line 22, characters 5-15:
   ~?int
 File "generics.php--file2.php", line 25, characters 5-15:

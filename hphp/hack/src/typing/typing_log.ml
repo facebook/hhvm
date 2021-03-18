@@ -572,15 +572,11 @@ let _ =
 (* Log the type of an expression *)
 let hh_show p env ty =
   let s1 = Pr.with_blank_tyvars (fun () -> Pr.debug env ty) in
-  let s2_opt = Typing_print.constraints_for_type env ty in
+  let s2 = Typing_print.constraints_for_type env ty in
   log_position p (fun () ->
       lprintf (Normal Green) "%s" s1;
-      lnewline ();
-      match s2_opt with
-      | None -> ()
-      | Some s2 ->
-        lprintf (Normal Green) "%s" s2;
-        lnewline ())
+      if String.( <> ) s2 "" then lprintf (Normal Green) " %s" s2;
+      lnewline ())
 
 (* Simple type of possible log data *)
 type log_structure =

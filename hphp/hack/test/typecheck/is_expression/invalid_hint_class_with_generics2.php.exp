@@ -1,7 +1,6 @@
 File "invalid_hint_class_with_generics2.php", line 9, characters 5-15:
-  C<int, Tb#1, Tc#1>
-  where Tc#1 as string
+  C<int, Tb#1, Tc#1> where Tc#1 as string
 File "invalid_hint_class_with_generics2.php", line 6, characters 13-24:
 Invalid `is` expression hint (Typing[4195])
-File "invalid_hint_class_with_generics2.php", line 6, characters 13-24:
-The `is` operator cannot be used with a type with an erased generic type argument
+  File "invalid_hint_class_with_generics2.php", line 6, characters 13-24:
+  The `is` operator cannot be used with a type with an erased generic type argument

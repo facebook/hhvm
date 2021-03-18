@@ -653,21 +653,9 @@ function bounded_generic_fun<T as Base>(T $x): void {
 let bounded_generic_fun_cases =
   [
     ( ("bounded_generic_fun.php", 5, 3),
-      [
-        {
-          snippet = "T\nwhere T as Base";
-          addendum = [];
-          pos = pos_at (5, 3) (5, 4);
-        };
-      ] );
+      [{ snippet = "T as Base"; addendum = []; pos = pos_at (5, 3) (5, 4) }] );
     ( ("bounded_generic_fun.php", 7, 7),
-      [
-        {
-          snippet = "T\nwhere T as Base";
-          addendum = [];
-          pos = pos_at (7, 7) (7, 8);
-        };
-      ] );
+      [{ snippet = "T as Base"; addendum = []; pos = pos_at (7, 7) (7, 8) }] );
     ( ("bounded_generic_fun.php", 9, 5),
       [
         {
@@ -677,13 +665,8 @@ let bounded_generic_fun_cases =
         };
       ] );
     ( ("bounded_generic_fun.php", 12, 3),
-      [
-        {
-          snippet = "T\nwhere T as Base";
-          addendum = [];
-          pos = pos_at (12, 3) (12, 4);
-        };
-      ] );
+      [{ snippet = "T as Base"; addendum = []; pos = pos_at (12, 3) (12, 4) }]
+    );
   ]
 
 let doc_block_fallback =

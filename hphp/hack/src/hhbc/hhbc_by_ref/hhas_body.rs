@@ -21,3 +21,19 @@ pub struct HhasBody<'a, 'arena> {
     pub doc_comment: Option<DocComment>,
     pub env: Option<Env<'a, 'arena>>,
 }
+
+pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'_, 'arena> {
+    HhasBody {
+        body_instrs,
+        decl_vars: Vec::<String>::default(),
+        num_iters: usize::default(),
+        is_memoize_wrapper: bool::default(),
+        is_memoize_wrapper_lsb: bool::default(),
+        upper_bounds: Vec::<(String, Vec<hhbc_by_ref_hhas_type::Info>)>::default(),
+        shadowed_tparams: Vec::<String>::default(),
+        params: Vec::<HhasParam<'arena>>::default(),
+        return_type_info: Option::<hhbc_by_ref_hhas_type::Info>::default(),
+        doc_comment: Option::<DocComment>::default(),
+        env: Option::<Env<'_, 'arena>>::default(),
+    }
+}

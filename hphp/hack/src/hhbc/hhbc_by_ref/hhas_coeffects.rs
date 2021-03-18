@@ -73,6 +73,7 @@ pub struct HhasCoeffects {
     cc_this: Vec<String>,
     is_any_rx: bool,
     is_pure: bool,
+    closure_inherit_from_parent: bool,
 }
 
 impl HhasCoeffects {
@@ -132,6 +133,20 @@ impl HhasCoeffects {
             },
             _ => None,
         }
+    }
+
+    pub fn local_to_shallow(coeffects: &[Ctx]) -> Vec<Ctx> {
+        use Ctx::*;
+        let mut result = vec![];
+        for c in coeffects.iter() {
+            result.push(match c {
+                RxLocal => RxShallow,
+                PoliciedOfLocal => PoliciedOfShallow,
+                PoliciedLocal => PoliciedShallow,
+                _ => *c,
+            })
+        }
+        result
     }
 
     pub fn from_ctx_constant(hint: &Hint) -> Vec<Ctx> {
@@ -227,6 +242,23 @@ impl HhasCoeffects {
             cc_this,
             is_any_rx,
             is_pure,
+            closure_inherit_from_parent: false,
+        }
+    }
+
+    pub fn inherit_to_child_closure(&self) -> Self {
+        let static_coeffects = HhasCoeffects::local_to_shallow(self.get_static_coeffects());
+        if self.has_coeffect_rules() {
+            Self {
+                static_coeffects,
+                closure_inherit_from_parent: true,
+                ..HhasCoeffects::default()
+            }
+        } else {
+            Self {
+                static_coeffects,
+                ..self.clone()
+            }
         }
     }
 
@@ -265,9 +297,9 @@ impl HhasCoeffects {
         //  || self.closure_inherit_from_parent
     }
 
-    /*     pub fn is_closure_inherit_from_parent(&self) -> bool {
+    pub fn is_closure_inherit_from_parent(&self) -> bool {
         self.closure_inherit_from_parent
-    } */
+    }
 }
 
 pub fn halves_of_is_enabled_body<Ex, Fb, En, Hi>(

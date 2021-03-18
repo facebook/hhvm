@@ -425,13 +425,6 @@ fn make_wrapper<'a>(
     if args.flags.contains(Flags::HAS_COEFFECT_RULES) {
         decl_vars.push(coeffects::LOCAL_NAME.into());
     }
-    // TODO(hrust): Just clone env
-    let env_copy = emit_body::make_env(
-        RcOc::clone(&env.namespace),
-        env.scope.clone(),
-        None,
-        env.flags.contains(env::Flags::IN_RX_BODY),
-    );
     emit_body::make_body(
         emitter,
         instrs,

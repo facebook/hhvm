@@ -629,6 +629,15 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           the toolchain.
 
           TODO: Remove. *)
+  | Hole of ('ex, 'fb, 'en, 'hi) expr * 'hi * 'hi * hole_source
+      (** Annotation used to record failure in subtyping or coercion of an
+          expression and calls to [unsafe_cast] or [enforced_cast].
+
+          The [hole_source] indicates whether this came from an
+          explicit call to [unsafe_cast] or [enforced_cast] or was
+          generated during typing.
+
+      *)
 
 and ('ex, 'fb, 'en, 'hi) class_get_expr =
   | CGstring of pstring
@@ -979,6 +988,11 @@ and ns_kind =
   | NSClassAndNamespace
   | NSFun
   | NSConst
+
+and hole_source =
+  | Typing
+  | UnsafeCast
+  | EnforcedCast
 
 and doc_comment = (Doc_comment.t[@visitors.opaque])
 

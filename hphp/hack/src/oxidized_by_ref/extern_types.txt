@@ -16,6 +16,7 @@ oxidized::aast::BreakContinueLevel
 oxidized::aast::CallType
 oxidized::aast::EmitId
 oxidized::aast::EnvAnnot
+oxidized::aast::HoleSource
 oxidized::aast::ImportFlavor
 oxidized::aast::IsExtends
 oxidized::aast::IsVariadic

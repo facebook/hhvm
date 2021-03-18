@@ -833,6 +833,7 @@ module Visitor_DEPRECATED = struct
         | ET_Splice e -> this#on_et_splice acc e
         | EnumAtom sid -> this#on_enum_atom acc sid
         | ReadonlyExpr e -> this#on_readonly_expr acc e
+        | Hole (e, _, _, _) -> this#on_expr acc e
 
       method on_collection acc tal afl =
         let acc =

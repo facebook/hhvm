@@ -631,6 +631,7 @@ and expr_ env acc p e =
   | FunctionPointer _ -> acc
   | ET_Splice e -> expr acc e
   | ReadonlyExpr e -> expr acc e
+  | Hole (e, _, _, _) -> expr acc e
 
 and case env acc = function
   | Default (_, b)

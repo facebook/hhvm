@@ -2179,7 +2179,8 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Method_caller _
   | Aast.Smethod_id _
   | Aast.Pair _
-  | Aast.Any ->
+  | Aast.Any
+  | Aast.Hole _ ->
     Errors.internal_error
       p
       "Malformed expr: Expr not found on legacy AST: T39599317";

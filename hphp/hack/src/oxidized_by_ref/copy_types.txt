@@ -16,6 +16,7 @@ aast::Def
 aast::Expr_
 aast::FunctionPtrId
 aast::FunVariadicity
+aast::HoleSource
 aast::ReifyKind
 aast::Sid
 aast::Stmt_

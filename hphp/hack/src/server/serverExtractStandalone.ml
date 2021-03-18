@@ -1620,6 +1620,7 @@ end = struct
              (braces @@ pair ~sep:comma pp_expr pp_expr))
         ppf
         (targs_opt, (fst, snd))
+    | Aast.Hole (expr, _, _, _) -> pp_expr ppf expr
     | Aast.EnumAtom name -> Fmt.(prefix (const string "#") string) ppf name
     | Aast.Efun _
     | Aast.Lfun _

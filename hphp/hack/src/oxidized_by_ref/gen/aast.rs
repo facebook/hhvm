@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<21e44185cca5003d233d34612af4c75e>>
+// @generated SignedSource<<d2383b62d444abab600139d9bd5112cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -868,6 +868,20 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ///
     /// TODO: Remove.
     Any,
+    /// Annotation used to record failure in subtyping or coercion of an
+    /// expression and calls to [unsafe_cast] or [enforced_cast].
+    ///
+    /// The [hole_source] indicates whether this came from an
+    /// explicit call to [unsafe_cast] or [enforced_cast] or was
+    /// generated during typing.
+    Hole(
+        &'a (
+            &'a Expr<'a, Ex, Fb, En, Hi>,
+            Hi,
+            Hi,
+            &'a oxidized::aast::HoleSource,
+        ),
+    ),
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for Expr_<'a, Ex, Fb, En, Hi>
@@ -1762,5 +1776,7 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 }
 
 pub use oxidized::aast::NsKind;
+
+pub use oxidized::aast::HoleSource;
 
 pub use oxidized::aast::BreakContinueLevel;

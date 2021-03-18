@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1c5bfd77e09b0fa34198750a53589087>>
+// @generated SignedSource<<6e78422d5b4c5388b94146812a126c08>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -929,6 +929,13 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 Ok(())
             }
             Expr_::Any => Ok(()),
+            Expr_::Hole(a) => {
+                a.0.accept(c, v)?;
+                v.visit_hi(c, &a.1)?;
+                v.visit_hi(c, &a.2)?;
+                a.3.accept(c, v)?;
+                Ok(())
+            }
         }
     }
 }
@@ -1320,6 +1327,26 @@ impl<P: Params> Node<P> for Hint_ {
                 a0.accept(c, v)?;
                 Ok(())
             }
+        }
+    }
+}
+impl<P: Params> Node<P> for HoleSource {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_hole_source(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            HoleSource::Typing => Ok(()),
+            HoleSource::UnsafeCast => Ok(()),
+            HoleSource::EnforcedCast => Ok(()),
         }
     }
 }

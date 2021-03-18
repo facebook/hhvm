@@ -1522,6 +1522,7 @@ and expr_
     (env, te, ty)
   in
   match e with
+  | Hole _
   | Import _
   | Collection _ ->
     failwith "AST should not contain these nodes"

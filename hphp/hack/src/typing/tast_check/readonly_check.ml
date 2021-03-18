@@ -160,6 +160,7 @@ let check =
         | _ -> Mut)
       | Eif (_, None, e2) -> self#ty_expr env e2
       | As (expr, _, _) -> self#ty_expr env expr
+      | Hole (expr, _, _, _) -> self#ty_expr env expr
       | Is _ -> Mut (* Booleans are value types *)
       | Pair (_, e1, e2) ->
         (match (self#ty_expr env e1, self#ty_expr env e2) with
@@ -645,7 +646,8 @@ let check =
       | (_, Collection (_, _, _))
       | (_, Class_const _)
       | (_, Float _)
-      | (_, PrefixedString _) ->
+      | (_, PrefixedString _)
+      | (_, Hole _) ->
         super#on_expr env e
 
     method! on_stmt_ env s =

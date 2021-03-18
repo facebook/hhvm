@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<331028c4c73771f98811dc80644fd993>>
+// @generated SignedSource<<59caa083c81456c6dc5b200a6865e540>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -812,6 +812,13 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///
     /// TODO: Remove.
     Any,
+    /// Annotation used to record failure in subtyping or coercion of an
+    /// expression and calls to [unsafe_cast] or [enforced_cast].
+    ///
+    /// The [hole_source] indicates whether this came from an
+    /// explicit call to [unsafe_cast] or [enforced_cast] or was
+    /// generated during typing.
+    Hole(Box<(Expr<Ex, Fb, En, Hi>, Hi, Hi, HoleSource)>),
 }
 
 #[derive(
@@ -1688,6 +1695,29 @@ pub enum NsKind {
     NSConst,
 }
 impl TrivialDrop for NsKind {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum HoleSource {
+    Typing,
+    UnsafeCast,
+    EnforcedCast,
+}
+impl TrivialDrop for HoleSource {}
 
 #[derive(
     Clone,

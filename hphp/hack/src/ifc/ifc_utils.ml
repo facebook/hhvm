@@ -117,3 +117,4 @@ let expr_name = function
   | A.EnumAtom _ -> "EnumAtom"
   | A.Any -> "Any"
   | A.ReadonlyExpr _ -> "Readonly"
+  | A.Hole _ -> "Hole"

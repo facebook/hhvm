@@ -525,6 +525,10 @@ struct SizeHintData : IRExtraData {
     not_reached();
   }
 
+  size_t hash() const {
+    return stableHash();
+  }
+
   size_t stableHash() const {
     return std::hash<SizeHint>()(hint);
   }

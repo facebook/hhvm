@@ -1067,7 +1067,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case BespokeGet: {
+  case DictGetK:
+  case KeysetGetK:
+  case BespokeGet:
+  case KeysetGetQuiet:
+  case DictGetQuiet: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
     assertx(key->type().subtypeOfAny(TInt, TStr));
@@ -1082,6 +1086,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
   }
 
+  case DictIsset:
+  case DictIdx:
+  case KeysetIsset:
+  case KeysetIdx:
+  case AKExistsDict:
+  case AKExistsKeyset:
   case BespokeGetThrow: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
@@ -1202,24 +1212,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(frame, AEmpty);
   }
 
-  case DictGetK:
-  case KeysetGetK: {
-    auto const base = inst.src(0);
-    auto const key  = inst.src(1);
-    always_assert(key->isA(TInt | TStr));
-    if (key->isA(TInt)) {
-      return PureLoad {
-        key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny
-      };
-    }
-    if (key->isA(TStr)) {
-      return PureLoad {
-        key->hasConstVal() ? AElemS { base, key->strVal() } : AElemSAny
-      };
-    }
-    return PureLoad { AElemAny };
-  }
-
   case BespokeIterGetKey:
   case LdPtrIterKey:
     // Array element keys are not tracked by memory effects right now.
@@ -1273,16 +1265,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileKeysetAccess:
   case CheckArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
-
-  case DictGetQuiet:
-  case DictIsset:
-  case DictIdx:
-  case KeysetGetQuiet:
-  case KeysetIsset:
-  case KeysetIdx:
-  case AKExistsDict:
-  case AKExistsKeyset:
-    return may_load_store(AElemAny, AEmpty);
 
   case SameArrLike:
   case NSameArrLike:

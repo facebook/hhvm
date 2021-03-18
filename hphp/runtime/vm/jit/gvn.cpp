@@ -308,6 +308,24 @@ bool supportsGVN(const IRInstruction* inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case LdUnitPerRequestFilepath:
   case DirFromFilepath:
+  case AKExistsDict:
+  case AKExistsKeyset:
+  case DictGet:
+  case DictGetK:
+  case DictGetQuiet:
+  case DictIdx:
+  case DictIsset:
+  case KeysetGet:
+  case KeysetGetK:
+  case KeysetGetQuiet:
+  case KeysetIdx:
+  case KeysetIsset:
+  case CheckDictOffset:
+  case CheckKeysetOffset:
+  case CheckMixedArrayOffset:
+  case CheckDictKeys:
+  case CheckArrayCOW:
+  case CheckMissingKeyInArrLike:
     return true;
 
   case EqArrLike:

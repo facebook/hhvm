@@ -64,8 +64,7 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
 
 template <typename... Ts>
 void logEvent(const LoggingArray* lad, EntryTypes newTypes,
-              const KeyOrder& keyOrder,
-              ArrayOp op, Ts&&... args) {
+              const KeyOrder& keyOrder, ArrayOp op, Ts&&... args) {
   lad->profile->logEntryTypes(lad->entryTypes, newTypes);
   lad->profile->logKeyOrders(keyOrder);
   lad->profile->logEvent(op, std::forward<Ts>(args)...);
@@ -159,17 +158,23 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 
   FTRACE(5, "Emit bespoke at {}\n", profile->key.toString());
   profile->data->loggingArraysEmitted++;
-  auto const cached = profile->data->staticLoggingArray;
-  if (cached) return cached;
 
-  // Non-static array constructors are basically a sequence of sets or appends.
-  // We already log these events at the correct granularity; re-use that logic.
-  IterateKVNoInc(ad, [&](auto k, auto v) {
-    tvIsString(k) ? profile->logEvent(ArrayOp::ConstructStr, val(k).pstr, v)
-                  : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
-  });
-  return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad),
-                            KeyOrder::ForArray(ad));
+  auto const lad = [&]{
+    auto const cached = profile->data->staticLoggingArray;
+    if (cached) return cached;
+    // Log non-static constructors as a sequence of sets or appends.
+    IterateKVNoInc(ad, [&](auto k, auto v) {
+      tvIsString(k) ? profile->logEvent(ArrayOp::ConstructStr, val(k).pstr, v)
+                    : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
+    });
+    return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad),
+                              KeyOrder::ForArray(ad));
+  }();
+
+  // Log the array's initial layout, but don't log a read or write event.
+  profile->logEntryTypes(lad->entryTypes, lad->entryTypes);
+  profile->logKeyOrders(lad->keyOrder);
+  return lad;
 }
 
 void profileArrLikeProps(ObjectData* obj) {

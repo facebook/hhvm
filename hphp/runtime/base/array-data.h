@@ -399,6 +399,12 @@ public:
   TypedValue get(const StringData* k) const;
 
   /*
+   * Get the value of the element at key `k'. Throws if `k` is missing.
+   */
+  TypedValue getThrow(int64_t k) const;
+  TypedValue getThrow(const StringData* k) const;
+
+  /*
    * Get the value of the element at key `k'.
    *
    * If `error` is false, get returns an Uninit TypedValue if `k` is missing.

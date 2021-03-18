@@ -294,6 +294,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
+  case BespokeGet:
+  case BespokeGetThrow:
   case BespokeIterEnd:
   case LdMonotypeDictTombstones:
   case LdMonotypeDictKey:

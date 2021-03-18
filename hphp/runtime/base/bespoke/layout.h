@@ -107,15 +107,21 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(ArrayData*, PostSort, T*, ArrayData* vad) \
   X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
 
+#define BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(T) \
+  X(TypedValue, NvGetIntThrow, const T*, int64_t) \
+  X(TypedValue, NvGetStrThrow, const T*, const StringData*)
+
 struct LayoutFunctions {
 #define X(Return, Name, Args...) Return (*fn##Name)(Args);
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+  BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 };
 
 struct LayoutFunctionsDispatch {
 #define X(Return, Name, Args...) Return (*fn##Name[kMaxLayoutByte + 1])(Args);
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+  BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 };
 
@@ -132,6 +138,8 @@ extern LayoutFunctionsDispatch g_layout_funcs;
  */
 template <typename Array>
 struct LayoutFunctionDispatcher {
+  using SynthFuncs = SynthesizedArrayFunctions<Array>;
+
   ALWAYS_INLINE static Array* Cast(ArrayData* ad, const char* fn) {
     logBespokeDispatch(BespokeArray::asBespoke(ad), fn);
     return Array::As(ad);
@@ -170,6 +178,12 @@ struct LayoutFunctionDispatcher {
   }
   static TypedValue NvGetStr(const ArrayData* ad, const StringData* k) {
     return Array::NvGetStr(Cast(ad, __func__), k);
+  }
+  static TypedValue NvGetIntThrow(const ArrayData* ad, int64_t k) {
+    return SynthFuncs::NvGetIntThrow(Cast(ad, __func__), k);
+  }
+  static TypedValue NvGetStrThrow(const ArrayData* ad, const StringData* k) {
+    return SynthFuncs::NvGetStrThrow(Cast(ad, __func__), k);
   }
   static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos) {
     return Array::GetPosKey(Cast(ad, __func__), pos);
@@ -246,13 +260,21 @@ constexpr LayoutFunctions fromArray() {
   LayoutFunctions result;
   if constexpr (debug) {
 #define X(Return, Name, Args...) \
-  result.fn##Name = LayoutFunctionDispatcher<Array>::Name;
-  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+    result.fn##Name = LayoutFunctionDispatcher<Array>::Name;
+    BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+    BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
   } else {
 #define X(Return, Name, Args...) \
-  result.fn##Name = reinterpret_cast<Return(*)(Args)>(Array::Name);
-  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+    result.fn##Name = reinterpret_cast<Return(*)(Args)>(Array::Name);
+    BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+#undef X
+#define X(Return, Name, Args...) \
+    { \
+      auto const fn = SynthesizedArrayFunctions<Array>::Name; \
+      result.fn##Name = reinterpret_cast<Return(*)(Args)>(fn); \
+    }
+    BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
   }
   return result;

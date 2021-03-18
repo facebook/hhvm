@@ -135,6 +135,12 @@ TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
 TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
   return g_layout_funcs.fnNvGetStr[getLayoutByte(ad)](ad, key);
 }
+TypedValue BespokeArray::NvGetIntThrow(const ArrayData* ad, int64_t key) {
+  return g_layout_funcs.fnNvGetIntThrow[getLayoutByte(ad)](ad, key);
+}
+TypedValue BespokeArray::NvGetStrThrow(const ArrayData* ad, const StringData* key) {
+  return g_layout_funcs.fnNvGetStrThrow[getLayoutByte(ad)](ad, key);
+}
 TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnGetPosKey[getLayoutByte(ad)](ad, pos);
 }

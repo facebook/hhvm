@@ -2487,6 +2487,10 @@ struct BespokeGetData : IRExtraData {
     always_assert(false);
   }
 
+  size_t hash() const {
+    return stableHash();
+  }
+
   size_t stableHash() const {
     return std::hash<KeyState>()(state);
   }

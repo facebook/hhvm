@@ -291,6 +291,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BaseG:
   case BespokeAppend:
   case BespokeElem:
+  case BespokeGetThrow:
   case BespokeSet:
   case Call:
   case CallBuiltin:

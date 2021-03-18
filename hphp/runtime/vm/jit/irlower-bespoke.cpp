@@ -113,6 +113,32 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
     return Generic;                                                       \
   }()
 
+#define CALL_TARGET_SYNTH(Type, Fn, Generic)                                 \
+  [&]{                                                                       \
+    auto const layout = Type.arrSpec().layout();                             \
+    if (layout.bespoke()) {                                                  \
+      auto const vtable = layout.bespokeLayout()->vtable();                  \
+      if (vtable->fn##Fn) {                                                  \
+        return CallSpec::direct(vtable->fn##Fn);                             \
+      } else {                                                               \
+        return CallSpec::direct(BespokeArray::Fn);                           \
+      }                                                                      \
+    }                                                                        \
+    if (layout.vanilla()) {                                                  \
+      if (arr <= (TVArr|TVec)) {                                             \
+        return CallSpec::direct(SynthesizedArrayFunctions<PackedArray>::Fn); \
+      }                                                                      \
+      if (arr <= (TDArr|TDict)) {                                            \
+        return CallSpec::direct(SynthesizedArrayFunctions<MixedArray>::Fn);  \
+      }                                                                      \
+      if (arr <= TKeyset) {                                                  \
+        return CallSpec::direct(SynthesizedArrayFunctions<SetArray>::Fn);    \
+      }                                                                      \
+    }                                                                        \
+    return Generic;                                                          \
+  }()
+
+
 CallSpec destructorForArrayLike(Type arr) {
   assertx(arr <= TArrLike);
   assertx(allowBespokeArrayLikes());
@@ -133,6 +159,26 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   auto const target = (key <= TInt)
     ? CALL_TARGET(arr, NvGetInt, getInt)
     : CALL_TARGET(arr, NvGetStr, getStr);
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+}
+
+void cgBespokeGetThrow(IRLS& env, const IRInstruction* inst) {
+  using GetInt = TypedValue (ArrayData::*)(int64_t) const;
+  using GetStr = TypedValue (ArrayData::*)(const StringData*) const;
+
+  auto const getInt =
+    CallSpec::method(static_cast<GetInt>(&ArrayData::getThrow));
+  auto const getStr =
+    CallSpec::method(static_cast<GetStr>(&ArrayData::getThrow));
+
+  auto const arr = inst->src(0)->type();
+  auto const key = inst->src(1)->type();
+  auto const target = (key <= TInt)
+    ? CALL_TARGET_SYNTH(arr, NvGetIntThrow, getInt)
+    : CALL_TARGET_SYNTH(arr, NvGetStrThrow, getStr);
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);

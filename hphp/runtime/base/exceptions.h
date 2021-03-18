@@ -171,6 +171,12 @@ struct PhpFileDoesNotExistException : ExtendedException {
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
 
+/*
+ * An exception meant to be caught immediately in the JIT.
+ */
+struct CppDummyException {};
+constexpr CppDummyException kDummyException;
+
 //////////////////////////////////////////////////////////////////////
 
 /*

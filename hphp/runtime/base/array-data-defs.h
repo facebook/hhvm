@@ -233,6 +233,18 @@ inline TypedValue ArrayData::get(const StringData* k) const {
   return g_array_funcs.nvGetStr[kind()](this, k);
 }
 
+inline TypedValue ArrayData::getThrow(int64_t k) const {
+  auto const res = get(k);
+  if (!res.is_init()) throw kDummyException;
+  return res;
+}
+
+inline TypedValue ArrayData::getThrow(const StringData* k) const {
+  auto const res = get(k);
+  if (!res.is_init()) throw kDummyException;
+  return res;
+}
+
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
   auto const result = get(k);
   if (error && !result.is_init()) getNotFound(k);

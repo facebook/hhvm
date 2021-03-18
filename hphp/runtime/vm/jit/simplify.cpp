@@ -3150,6 +3150,32 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  assertx(key->type().subtypeOfAny(TInt, TStr));
+
+  if (arr->hasConstVal()) {
+    auto const ad = arr->arrLikeVal();
+    if (ad->empty()) {
+      gen(env, ThrowOutOfBounds, inst->taken(), arr, key);
+      return cns(env, TBottom);
+    }
+    if (key->hasConstVal()) {
+      auto const tv = key->isA(TInt) ? ad->get(key->intVal())
+                                     : ad->get(key->strVal());
+      if (tv.is_init()) {
+        return cns(env, tv);
+      } else {
+        gen(env, ThrowOutOfBounds, inst->taken(), arr, key);
+        return cns(env, TBottom);
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyBespokeIterFirstPos(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
 
@@ -3718,6 +3744,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdClsMethod)
       X(LdStrLen)
       X(BespokeGet)
+      X(BespokeGetThrow)
       X(BespokeIterFirstPos)
       X(BespokeIterLastPos)
       X(BespokeIterEnd)

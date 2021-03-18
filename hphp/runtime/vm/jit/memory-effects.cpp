@@ -1082,6 +1082,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
   }
 
+  case BespokeGetThrow: {
+    auto const base = inst.src(0);
+    auto const key  = inst.src(1);
+    assertx(key->type().subtypeOfAny(TInt, TStr));
+    auto const elem = [&] {
+      if (key->isA(TInt)) {
+        return key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny;
+      } else {
+        return key->hasConstVal() ? AElemS { base, key->strVal() } : AElemSAny;
+      }
+    }();
+    return may_load_store(elem, AEmpty);
+  }
+
   case InitVecElemLoop:
     {
       auto const extra = inst.extra<InitVecElemLoop>();

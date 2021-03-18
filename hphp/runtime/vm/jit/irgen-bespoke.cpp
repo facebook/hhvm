@@ -84,6 +84,48 @@ SSATmp* emitProfiledGet(
   return result;
 }
 
+template <typename T>
+Block* makeCatchBlock(IRGS& env, T genBody) {
+  auto block = defBlock(env, Block::Hint::Unused);
+
+  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), block);
+  gen(env, BeginCatch);
+
+  genBody();
+
+  return block;
+}
+
+template <typename Finish>
+SSATmp* emitProfiledGetThrow(
+    IRGS& env, SSATmp* arr, SSATmp* key, Finish finish, bool profiled = true) {
+  if (arr->isA(TVArr|TVec)) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        gen(env, CheckVecBounds, taken, arr, key);
+      },
+      [&] {
+        auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+        auto const val = gen(env, BespokeGet, data, arr, key);
+        return profiled ? profiledType(env, val, [&] { finish(val); })
+                        : val;
+      },
+      [&] {
+        gen(env, ThrowOutOfBounds, arr, key);
+        return cns(env, TBottom);
+      }
+    );
+  } else {
+    auto const catchBlock = makeCatchBlock(env, [&] {
+      gen(env, ThrowOutOfBounds, arr, key);
+    });
+    auto const val = gen(env, BespokeGetThrow, catchBlock, arr, key);
+    if (!profiled) return val;
+    return profiledType(env, val, [&] { finish(val); });
+  }
+}
+
 SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
   return emitProfiledGet(env, arr, key, taken, [&](SSATmp*) {}, false);
 }
@@ -288,27 +330,30 @@ SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet, uint32_t nDiscard) {
     return cns(env, TBottom);
   }
 
-  return cond(
-    env,
-    [&](Block* taken) {
-      auto const finish = [&](SSATmp* val) {
-        gen(env, IncRef, val);
-        mFinalImpl(env, nDiscard, val);
-      };
-      return emitProfiledGet(env, base, key, taken, finish);
-    },
-    [&](SSATmp* val) {
-      gen(env, IncRef, val);
-      return val;
-    },
-    [&] {
-      if (quiet) return cns(env, TInitNull);
+  auto const finish = [&](SSATmp* val) {
+    gen(env, IncRef, val);
+    mFinalImpl(env, nDiscard, val);
+  };
 
-      hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowOutOfBounds, base, key);
-      return cns(env, TBottom);
-    }
-  );
+  if (quiet) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        return emitProfiledGet(env, base, key, taken, finish);
+      },
+      [&](SSATmp* val) {
+        gen(env, IncRef, val);
+        return val;
+      },
+      [&] {
+        return cns(env, TInitNull);
+      }
+    );
+  } else {
+    auto const val = emitProfiledGetThrow(env, base, key, finish);
+    gen(env, IncRef, val);
+    return val;
+  }
 }
 
 void emitBespokeQueryM(
@@ -448,6 +493,11 @@ SSATmp* bespokeElemImpl(
 
   if (needsLval) {
     return emitElem(env, baseLval, key, shouldThrow);
+  } else if (shouldThrow) {
+    auto const val =  emitProfiledGetThrow(env, base, key, [&](SSATmp* val) {
+      finish(baseValueToLval(env, val));
+    });
+    return baseValueToLval(env, val);
   } else {
     return cond(
       env,
@@ -456,13 +506,8 @@ SSATmp* bespokeElemImpl(
           finish(baseValueToLval(env, val));
         });
       },
-      [&](SSATmp* val) {
-        return baseValueToLval(env, val);
-      },
-      [&] {
-        if (shouldThrow) gen(env, ThrowOutOfBounds, base, key);
-        return ptrToInitNull(env);
-      }
+      [&](SSATmp* val) { return baseValueToLval(env, val); },
+      [&] { return ptrToInitNull(env); }
     );
   }
 }

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -143,6 +144,8 @@ public:
   // RO access
   static TypedValue NvGetInt(const ArrayData* ad, int64_t key);
   static TypedValue NvGetStr(const ArrayData* ad, const StringData* key);
+  static TypedValue NvGetIntThrow(const ArrayData* ad, int64_t key);
+  static TypedValue NvGetStrThrow(const ArrayData* ad, const StringData* key);
   static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t key);
@@ -208,6 +211,28 @@ public:
   static ArrayData* ToDVArray(ArrayData* ad, bool copy);
   static ArrayData* ToHackArr(ArrayData* ad, bool copy);
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy);
+};
+
+template <typename T>
+struct SynthesizedArrayFunctions {
+  SynthesizedArrayFunctions() = delete;
+
+  static TypedValue NvGetIntThrow(const ArrayData* ad, int64_t k) {
+    auto const fn =
+      reinterpret_cast<TypedValue(*)(const ArrayData*, int64_t)>(T::NvGetInt);
+    auto const res = fn(ad, k);
+    if (!res.is_init()) throw kDummyException;
+    return res;
+  }
+
+  static TypedValue NvGetStrThrow(
+      const ArrayData* ad, const StringData* k) {
+    auto const fn =
+      reinterpret_cast<TypedValue(*)(const ArrayData*, const StringData*)>(T::NvGetStr);
+    auto const res = fn(ad, k);
+    if (!res.is_init()) throw kDummyException;
+    return res;
+  }
 };
 
 } // namespace HPHP

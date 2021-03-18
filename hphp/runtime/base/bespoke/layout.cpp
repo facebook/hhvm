@@ -532,6 +532,7 @@ ConcreteLayout::ConcreteLayout(LayoutIndex index,
     entry = vtable->fn##Name;                               \
   }
   BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+  BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 }
 

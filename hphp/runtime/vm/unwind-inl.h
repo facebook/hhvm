@@ -57,6 +57,11 @@ inline bool exception_handler(Action action) {
     not_reached();
   }
 
+  catch (CppDummyException& e) {
+    always_assert_flog(false,
+                       "CppDummyException should not reach exception_handler");
+  }
+
   catch (...) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: unknown\n");

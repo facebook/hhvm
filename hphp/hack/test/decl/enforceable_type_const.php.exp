@@ -9,8 +9,9 @@
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
           stc_as_constraint = (Some (Rhint ([4:46-54]), (Tprim Tarraykey)));
-          stc_name = ([4:41-42], "T"); stc_type = None;
-          stc_enforceable = ([4:5-18], true); stc_reifiable = None }
+          stc_super_constraint = None; stc_name = ([4:41-42], "T");
+          stc_type = None; stc_enforceable = ([4:5-18], true);
+          stc_reifiable = None }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

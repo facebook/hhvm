@@ -4810,6 +4810,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::TypeConstant(self.alloc(ShallowTypeconst {
             abstract_,
             as_constraint,
+            super_constraint: None,
             name: name.into(),
             type_,
             enforceable: match attributes.enforceable {
@@ -4850,6 +4851,8 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             abstract_,
             name: name.into(),
             as_constraint: None,
+            // TODO(coeffects) properly handle super/as constraints
+            super_constraint: None,
             type_: context,
             enforceable: (Pos::none(), false),
             reifiable: None,

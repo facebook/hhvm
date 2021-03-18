@@ -203,6 +203,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   let {
     stc_abstract;
     stc_as_constraint;
+    stc_super_constraint;
     stc_name = ttc_name;
     stc_type;
     stc_enforceable = ttc_enforceable;
@@ -210,24 +211,27 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   } =
     stc
   in
-  let as_constraint =
-    if String.equal child_class mro.mro_name then
-      stc_as_constraint
+  let child_and_mro_same = String.equal child_class mro.mro_name in
+  let (as_constraint, super_constraint) =
+    if child_and_mro_same then
+      (stc_as_constraint, stc_super_constraint)
     else
-      Option.map stc_as_constraint (Decl_instantiate.instantiate subst)
+      ( Option.map stc_as_constraint (Decl_instantiate.instantiate subst),
+        Option.map stc_super_constraint (Decl_instantiate.instantiate subst) )
   in
   let ty =
-    if String.equal child_class mro.mro_name then
+    if child_and_mro_same then
       stc_type
     else
       Option.map stc_type (Decl_instantiate.instantiate subst)
   in
   let abstract =
     match stc_abstract with
-    | TCAbstract default_opt when String.( <> ) child_class mro.mro_name ->
+    | TCAbstract default_opt when not child_and_mro_same ->
       TCAbstract (Option.map default_opt (Decl_instantiate.instantiate subst))
     | _ -> stc_abstract
   in
+  let ttc_origin = mro.mro_name in
   let typeconst =
     match abstract with
     | TCAbstract (Some default)
@@ -237,8 +241,9 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
         ttc_name;
         ttc_as_constraint = None;
+        ttc_super_constraint = None;
         ttc_type = Some default;
-        ttc_origin = mro.mro_name;
+        ttc_origin;
         ttc_enforceable;
         ttc_reifiable;
         ttc_concretized = true;
@@ -249,8 +254,9 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
         ttc_name;
         ttc_as_constraint = as_constraint;
+        ttc_super_constraint = super_constraint;
         ttc_type = ty;
-        ttc_origin = mro.mro_name;
+        ttc_origin;
         ttc_enforceable;
         ttc_reifiable;
         ttc_concretized = false;

@@ -7,7 +7,8 @@
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = TCConcrete; c_tconst_name = ([4:13-15], "C5"); 
-         c_tconst_as_constraint = None; c_tconst_type = (Some ([4:35-39], (Hintersection [([4:36-38], (Happly (([4:36-38], "\\HH\\Contexts\\io"), [])))]))); 
+         c_tconst_as_constraint = None; c_tconst_super_constraint = None; 
+         c_tconst_type = (Some ([4:35-39], (Hintersection [([4:36-38], (Happly (([4:36-38], "\\HH\\Contexts\\io"), [])))]))); 
          c_tconst_user_attributes = []; c_tconst_span = [4:3-40]; c_tconst_doc_comment = None; 
          c_tconst_is_ctx = true }
         ];

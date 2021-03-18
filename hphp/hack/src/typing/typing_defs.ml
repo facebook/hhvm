@@ -193,6 +193,7 @@ and typeconst_type = {
   ttc_synthesized: bool;
   ttc_name: pos_id;
   ttc_as_constraint: decl_ty option;
+  ttc_super_constraint: decl_ty option;
   ttc_type: decl_ty option;
   ttc_origin: string;
   ttc_enforceable: Pos_or_decl.t * bool;

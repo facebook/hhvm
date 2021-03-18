@@ -1305,6 +1305,9 @@ and typeconst env t =
     | _ -> t.Aast.c_tconst_abstract
   in
   let as_constraint = Option.map t.Aast.c_tconst_as_constraint (hint env) in
+  let super_constraint =
+    Option.map t.Aast.c_tconst_super_constraint (hint env)
+  in
   let type_ = Option.map t.Aast.c_tconst_type (hint env) in
   let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
   N.
@@ -1312,6 +1315,7 @@ and typeconst env t =
       c_tconst_abstract = abstract;
       c_tconst_name = t.Aast.c_tconst_name;
       c_tconst_as_constraint = as_constraint;
+      c_tconst_super_constraint = super_constraint;
       c_tconst_type = type_;
       c_tconst_user_attributes = attrs;
       c_tconst_span = t.Aast.c_tconst_span;

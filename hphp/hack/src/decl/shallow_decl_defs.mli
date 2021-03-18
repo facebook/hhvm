@@ -80,6 +80,7 @@ type shallow_class_const = {
 type shallow_typeconst = {
   stc_abstract: typeconst_abstract_kind;
   stc_as_constraint: decl_ty option;
+  stc_super_constraint: decl_ty option;
   stc_name: Typing_defs.pos_id;
   stc_type: decl_ty option;
   stc_enforceable: Pos_or_decl.t * bool;

@@ -50,6 +50,9 @@ class virtual type_validator =
       let acc =
         Option.fold ~f:this#on_type ~init:acc typeconst.ttc_as_constraint
       in
+      let acc =
+        Option.fold ~f:this#on_type ~init:acc typeconst.ttc_super_constraint
+      in
       let acc = Option.fold ~f:this#on_type ~init:acc typeconst.ttc_type in
       acc
 

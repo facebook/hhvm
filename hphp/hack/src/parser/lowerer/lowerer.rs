@@ -4240,6 +4240,7 @@ where
                     abstract_: abstract_kind,
                     name,
                     as_constraint,
+                    super_constraint: None,
                     type_,
                     user_attributes,
                     span,
@@ -4306,7 +4307,9 @@ where
                 Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
+                    // TODO(coeffects) lowering both bounds
                     as_constraint: None,
+                    super_constraint: None,
                     type_: context,
                     user_attributes: vec![],
                     span,

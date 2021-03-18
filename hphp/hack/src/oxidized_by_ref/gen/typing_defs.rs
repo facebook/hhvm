@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5aff5252df581a8035af1eae01800826>>
+// @generated SignedSource<<e21ebe55dfc6976b5c1089f48da5adfe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -342,6 +342,7 @@ pub struct TypeconstType<'a> {
     pub synthesized: bool,
     pub name: PosId<'a>,
     pub as_constraint: Option<&'a Ty<'a>>,
+    pub super_constraint: Option<&'a Ty<'a>>,
     pub type_: Option<&'a Ty<'a>>,
     pub origin: &'a str,
     pub enforceable: (&'a pos_or_decl::PosOrDecl<'a>, bool),

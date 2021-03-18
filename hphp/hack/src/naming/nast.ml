@@ -1137,6 +1137,11 @@ module Visitor_DEPRECATED = struct
           | None -> acc
         in
         let acc =
+          match t.c_tconst_super_constraint with
+          | Some h -> this#on_hint acc h
+          | None -> acc
+        in
+        let acc =
           match t.c_tconst_type with
           | Some h -> this#on_hint acc h
           | None -> acc

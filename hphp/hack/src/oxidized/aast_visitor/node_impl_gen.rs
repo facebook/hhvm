@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac0543ff64c13c5760dbe8a9b7dae876>>
+// @generated SignedSource<<1c5bfd77e09b0fa34198750a53589087>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -366,6 +366,7 @@ impl<P: Params> Node<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {
         self.abstract_.accept(c, v)?;
         self.name.accept(c, v)?;
         self.as_constraint.accept(c, v)?;
+        self.super_constraint.accept(c, v)?;
         self.type_.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.span.accept(c, v)?;

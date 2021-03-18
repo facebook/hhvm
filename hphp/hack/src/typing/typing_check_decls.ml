@@ -287,7 +287,8 @@ let const env class_const = maybe hint env class_const.Aast.cc_type
 
 let typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
-  maybe hint env tconst.c_tconst_as_constraint
+  maybe hint env tconst.c_tconst_as_constraint;
+  maybe hint env tconst.c_tconst_super_constraint
 
 let class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
 

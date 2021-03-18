@@ -934,6 +934,7 @@ let typeconst_def
       c_tconst_abstract;
       c_tconst_name = (pos, _) as id;
       c_tconst_as_constraint;
+      c_tconst_super_constraint;
       c_tconst_type = hint;
       c_tconst_user_attributes;
       c_tconst_span;
@@ -985,6 +986,7 @@ let typeconst_def
       Aast.c_tconst_abstract;
       Aast.c_tconst_name = id;
       Aast.c_tconst_as_constraint;
+      Aast.c_tconst_super_constraint;
       Aast.c_tconst_type = hint;
       Aast.c_tconst_user_attributes = user_attributes;
       Aast.c_tconst_span;

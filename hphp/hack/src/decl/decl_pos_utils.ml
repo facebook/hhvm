@@ -218,6 +218,7 @@ struct
       ttc_synthesized = tc.ttc_synthesized;
       ttc_name = positioned_id tc.ttc_name;
       ttc_as_constraint = ty_opt tc.ttc_as_constraint;
+      ttc_super_constraint = ty_opt tc.ttc_super_constraint;
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos_or_decl tc.ttc_enforceable;
@@ -339,6 +340,7 @@ struct
     {
       stc_abstract = typeconst_abstract_kind stc.stc_abstract;
       stc_as_constraint = Option.map stc.stc_as_constraint ty;
+      stc_super_constraint = Option.map stc.stc_super_constraint ty;
       stc_name = positioned_id stc.stc_name;
       stc_type = Option.map stc.stc_type ty;
       stc_enforceable =

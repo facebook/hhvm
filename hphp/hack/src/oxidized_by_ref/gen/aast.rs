@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab14dfa31e5b67f82221719e0e147a8b>>
+// @generated SignedSource<<21e44185cca5003d233d34612af4c75e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1545,6 +1545,7 @@ pub struct ClassTypeconst<'a, Ex, Fb, En, Hi> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub name: Sid<'a>,
     pub as_constraint: Option<&'a Hint<'a>>,
+    pub super_constraint: Option<&'a Hint<'a>>,
     pub type_: Option<&'a Hint<'a>>,
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
     pub span: &'a Pos<'a>,

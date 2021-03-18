@@ -13,7 +13,8 @@
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-          stc_as_constraint = None; stc_name = ([6:14-24], "TClassType");
+          stc_as_constraint = None; stc_super_constraint = None;
+          stc_name = ([6:14-24], "TClassType");
           stc_type =
           (Some (Rhint ([6:27-8:4]),
                  (Tshape (Typing_defs_core.Closed_shape,

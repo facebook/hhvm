@@ -102,8 +102,9 @@ let typeconst env c tc =
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
   | Ast_defs.Cnormal ->
-    let as_constraint =
-      Option.map tc.c_tconst_as_constraint (Decl_hint.hint env)
+    let (as_constraint, super_constraint) =
+      ( Option.map tc.c_tconst_as_constraint (Decl_hint.hint env),
+        Option.map tc.c_tconst_super_constraint (Decl_hint.hint env) )
     in
     let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
     let attributes = tc.c_tconst_user_attributes in
@@ -122,6 +123,7 @@ let typeconst env c tc =
         stc_abstract = typeconst_abstract_kind env tc.c_tconst_abstract;
         stc_name = Decl_env.make_decl_posed env tc.c_tconst_name;
         stc_as_constraint = as_constraint;
+        stc_super_constraint = super_constraint;
         stc_type = ty;
         stc_enforceable = enforceable;
         stc_reifiable = Option.map ~f:(Decl_env.make_decl_pos env) reifiable;

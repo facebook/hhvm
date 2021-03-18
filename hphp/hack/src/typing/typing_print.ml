@@ -1561,6 +1561,7 @@ module PrintClass = struct
         ttc_synthesized = synthetic;
         ttc_name = tc_name;
         ttc_as_constraint = as_constraint;
+        ttc_super_constraint = super_constraint;
         ttc_type = tc_type;
         ttc_origin = origin;
         ttc_enforceable = (_, enforceable);
@@ -1574,6 +1575,11 @@ module PrintClass = struct
       | None -> ""
       | Some x -> " as " ^ ty x
     in
+    let super_constraint =
+      match super_constraint with
+      | None -> ""
+      | Some x -> " super " ^ ty x
+    in
     let type_ =
       match tc_type with
       | None -> ""
@@ -1581,6 +1587,7 @@ module PrintClass = struct
     in
     name
     ^ as_constraint
+    ^ super_constraint
     ^ type_
     ^ " (origin:"
     ^ origin

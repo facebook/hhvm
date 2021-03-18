@@ -665,23 +665,33 @@ end = struct
               do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
               let cls = Decl.get_class_exn ctx class_name in
               (match Decl_provider.Class.get_typeconst cls tconst with
-              | Some Typing_defs.{ ttc_type; ttc_as_constraint; _ } ->
+              | Some
+                  Typing_defs.
+                    { ttc_type; ttc_as_constraint; ttc_super_constraint; _ } ->
                 Option.iter
                   ttc_type
                   ~f:(add_dep ctx ~this:(Some class_name) env);
+                let add_cstr_dep tc_type =
+                  (* What does 'this' refer to inside of T? *)
+                  let this =
+                    match Typing_defs.get_node tc_type with
+                    | Typing_defs.Tapply ((_, name), _) -> Some name
+                    | _ -> this
+                  in
+                  let taccess = make_taccess r tc_type tconsts in
+                  add_dep ctx ~this env taccess
+                in
                 if not (List.is_empty tconsts) then (
-                  match (ttc_type, ttc_as_constraint) with
-                  | (Some tc_type, _)
-                  | (None, Some tc_type) ->
-                    (* What does 'this' refer to inside of T? *)
-                    let this =
-                      match Typing_defs.get_node tc_type with
-                      | Typing_defs.Tapply ((_, name), _) -> Some name
-                      | _ -> this
-                    in
-                    let taccess = make_taccess r tc_type tconsts in
-                    add_dep ctx ~this env taccess
-                  | (None, None) -> ()
+                  match (ttc_type, ttc_as_constraint, ttc_super_constraint) with
+                  | (None, Some as_tc_type, Some super_tc_type) ->
+                    add_cstr_dep as_tc_type;
+                    add_cstr_dep super_tc_type
+                  (* TODO(coeffects) double-check this *)
+                  | (Some tc_type, _, _)
+                  | (None, Some tc_type, _)
+                  | (None, _, Some tc_type) ->
+                    add_cstr_dep tc_type
+                  | (None, None, None) -> ()
                 )
               | None -> ())
           in

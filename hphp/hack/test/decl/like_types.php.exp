@@ -79,8 +79,9 @@
            stc_as_constraint =
            (Some (Rhint ([11:28-32]),
                   (Tlike (Rhint ([11:29-32]), (Tprim Tint)))));
-           stc_name = ([11:23-24], "T"); stc_type = None;
-           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           stc_super_constraint = None; stc_name = ([11:23-24], "T");
+           stc_type = None; stc_enforceable = ([Pos.none], false);
+           stc_reifiable = None }
           ];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];

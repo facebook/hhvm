@@ -9,7 +9,7 @@
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCPartiallyAbstract;
           stc_as_constraint = (Some (Rhint ([4:19-24]), Tmixed));
-          stc_name = ([4:14-15], "T");
+          stc_super_constraint = None; stc_name = ([4:14-15], "T");
           stc_type = (Some (Rhint ([4:27-30]), (Tprim Tnum)));
           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
          ];

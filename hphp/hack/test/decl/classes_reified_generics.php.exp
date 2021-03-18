@@ -24,12 +24,14 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-           stc_as_constraint = None; stc_name = ([7:14-18], "TFoo");
+           stc_as_constraint = None; stc_super_constraint = None;
+           stc_name = ([7:14-18], "TFoo");
            stc_type = (Some (Rhint ([7:21-24]), (Tprim Tint)));
            stc_enforceable = ([Pos.none], false);
            stc_reifiable = (Some [6:5-16]) };
           { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
-            stc_as_constraint = None; stc_name = ([9:14-16], "X2");
+            stc_as_constraint = None; stc_super_constraint = None;
+            stc_name = ([9:14-16], "X2");
             stc_type =
             (Some (Rhint ([9:19-32]),
                    (Tapply (([9:19-20], "\\C"),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<822636e4d3ecd614117e1a4d6f64f1d7>>
+// @generated SignedSource<<c733ba8a05a69a4b966c15ba157dcc80>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -704,10 +704,11 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
             ShallowTypeconst {
                 abstract_: ref __binding_0,
                 as_constraint: ref __binding_1,
-                name: ref __binding_2,
-                type_: ref __binding_3,
-                enforceable: ref __binding_4,
-                reifiable: ref __binding_5,
+                super_constraint: ref __binding_2,
+                name: ref __binding_3,
+                type_: ref __binding_4,
+                enforceable: ref __binding_5,
+                reifiable: ref __binding_6,
             } => {
                 {
                     __binding_0.accept(v)
@@ -724,7 +725,10 @@ impl<'a> Node<'a> for ShallowTypeconst<'a> {
                 {
                     __binding_4.accept(v)
                 }
-                { __binding_5.accept(v) }
+                {
+                    __binding_5.accept(v)
+                }
+                { __binding_6.accept(v) }
             }
         }
     }

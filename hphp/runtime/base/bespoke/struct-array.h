@@ -52,7 +52,8 @@ struct StructArray : public BespokeArray {
   static const StructArray* As(const ArrayData* ad);
   static StructArray* As(ArrayData* ad);
 
-  static constexpr size_t kMaxKeyNum = 16;
+  static constexpr size_t kMaxKeyNum = KeyOrder::kMaxLen;
+  static_assert(kMaxKeyNum <= std::numeric_limits<uint8_t>::max());
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(StructArray)
@@ -61,24 +62,31 @@ struct StructArray : public BespokeArray {
 private:
   static StructArray* MakeStructImpl(
       const StructLayout* layout, uint32_t size,
-      const Slot* slots, const TypedValue* vals, HeaderKind hk);
+      const Slot* slots, const TypedValue* tvs, HeaderKind hk);
 
   const StructLayout* layout() const;
-  const TypedValue* rawData() const;
-  TypedValue* rawData();
+
+  size_t numFields() const;
+  size_t typeOffset() const { return numFields(); }
+  size_t valueOffsetInValueSize() const;
+  const DataType* rawTypes() const;
+  DataType* rawTypes();
+  const Value* rawValues() const;
+  Value* rawValues();
+  const uint8_t* rawPositions() const;
+  uint8_t* rawPositions();
+  TypedValue typedValueUnchecked(Slot slot) const;
+
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   arr_lval elemImpl(StringData* k, bool throwOnMissing);
   StructArray* copy() const;
   void incRefValues();
   void decRefValues();
 
-  static constexpr size_t kSlotSize = 4;
   void addNextSlot(Slot slot);
   void removeSlot(Slot slot);
   Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
-
-  uint64_t m_order;
 };
 
 /*
@@ -108,6 +116,9 @@ struct StructLayout : public ConcreteLayout {
   Slot keySlot(const StringData* key) const;
   const Field& field(Slot slot) const;
 
+  size_t typeOffset() const { return m_typeOff; }
+  size_t valueOffset() const { return m_valueOff; }
+
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.
@@ -133,6 +144,12 @@ private:
   StructLayout(const KeyOrder&, const LayoutIndex&);
 
   size_t m_size_index;
+
+  // Offsets of datatypes and values in a StructArray
+  // from the end of the array header.
+  size_t m_typeOff;
+  size_t m_valueOff;
+
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
   // Variable-size array field; must be last in this struct.
   Field m_fields[1];

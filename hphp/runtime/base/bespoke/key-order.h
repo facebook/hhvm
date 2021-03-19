@@ -32,7 +32,7 @@ struct KeyOrder {
   using const_iterator = KeyOrderData::const_iterator;
 
   // We group together KeyOrders of length > kMaxLen with the same prefix.
-  constexpr static size_t kMaxLen = 16;
+  constexpr static size_t kMaxLen = 255;
 
   KeyOrder insert(const StringData*) const;
   KeyOrder remove(const StringData*) const;

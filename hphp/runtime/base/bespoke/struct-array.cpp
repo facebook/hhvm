@@ -64,8 +64,12 @@ const StructArray* StructArray::As(const ArrayData* ad) {
 }
 
 bool StructArray::checkInvariants() const {
+  static_assert(sizeof(StructArray) == 16);
   assertx(layout()->index() == layoutIndex());
   assertx(layout()->sizeIndex() == sizeIndex());
+  assertx(layout()->numFields() == numFields());
+  assertx(layout()->typeOffset() == typeOffset());
+  assertx(layout()->valueOffset() == valueOffsetInValueSize() * sizeof(Value));
   assertx(layoutIndex().byte() == kStructLayoutByte);
   return true;
 }
@@ -111,7 +115,11 @@ StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
     i++;
   }
   assertx(numFields() == ko.size());
-  auto const bytes = sizeof(StructArray) + numFields() * sizeof(TypedValue);
+  m_typeOff = numFields();
+  m_valueOff = (m_typeOff + numFields() + 7) & ~7;
+  auto const bytes = sizeof(StructArray) +
+                     m_valueOff +
+                     numFields() * sizeof(Value);
   m_size_index = MemoryManager::size2Index(bytes);
 }
 
@@ -156,12 +164,24 @@ StructArray* StructArray::MakeReserve(HeaderKind kind,
       sizeIdx, legacy ? ArrayData::kLegacyArray : 0);
   sad->initHeader_16(kind, OneReference, aux);
   sad->setLayoutIndex(layout->index());
-  sad->m_extra_lo16 = 0;
+  auto const numFields = layout->numFields();
+  assertx(numFields <= std::numeric_limits<uint8_t>::max());
+  auto const valueOffset = layout->valueOffset();
+  assertx(valueOffset % 8 == 0);
+  assertx((valueOffset / 8) <= std::numeric_limits<uint8_t>::max());
+  sad->m_extra_lo16 = numFields << 8 | (valueOffset / 8);
   sad->m_size = 0;
-  auto const dataSize = layout->numFields() * sizeof(TypedValue);
-  memset(sad->rawData(), static_cast<int>(KindOfUninit), dataSize);
+  memset(sad->rawTypes(), static_cast<int>(KindOfUninit), sad->numFields());
   assertx(sad->checkInvariants());
   return sad;
+}
+
+size_t StructArray::numFields() const {
+  return (m_extra_lo16 >> 8) & 0xff;
+}
+
+size_t StructArray::valueOffsetInValueSize() const {
+  return m_extra_lo16 & 0xff;
 }
 
 const StructLayout* StructLayout::As(const Layout* l) {
@@ -181,7 +201,8 @@ StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
     : MakeReserve<false>(kind, ad->isLegacyArray(), layout);
 
   auto fail = false;
-  auto const data = result->rawData();
+  auto const types = result->rawTypes();
+  auto const vals = result->rawValues();
   MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) -> bool {
     if (!tvIsString(k)) {
       fail = true;
@@ -193,7 +214,9 @@ StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
       return true;
     }
     result->addNextSlot(slot);
-    tvDup(v, data[slot]);
+    types[slot] = type(v);
+    vals[slot] = val(v);
+    tvIncRefGen(v);
     return false;
   });
 
@@ -226,15 +249,20 @@ StructArray* StructArray::MakeStructDict(
 
 StructArray* StructArray::MakeStructImpl(
     const StructLayout* layout, uint32_t size,
-    const Slot* slots, const TypedValue* vals, HeaderKind hk) {
+    const Slot* slots, const TypedValue* tvs, HeaderKind hk) {
 
   auto const result = MakeReserve<false>(hk, false, layout);
-  auto const data = result->rawData();
   result->m_size = size;
+
+  auto const types = result->rawTypes();
+  auto const vals = result->rawValues();
+  auto const positions = result->rawPositions();
 
   for (auto i = 0; i < size; i++) {
     assertx(slots[i] <= layout->numFields());
-    tvCopy(vals[i], &data[slots[i]]);
+    positions[i] = slots[i];
+    types[slots[i]] = type(tvs[i]);
+    vals[slots[i]] = val(tvs[i]);
   }
 
   assertx(result->checkInvariants());
@@ -246,12 +274,35 @@ const StructLayout* StructArray::layout() const {
   return StructLayout::As(Layout::FromIndex(layoutIndex()));
 }
 
-TypedValue* StructArray::rawData() {
-  return reinterpret_cast<TypedValue*>(this + 1);
+DataType* StructArray::rawTypes() {
+  assertx(typeOffset() == layout()->typeOffset());
+  return reinterpret_cast<DataType*>(
+      reinterpret_cast<char*>(this + 1) + typeOffset());
 }
 
-const TypedValue* StructArray::rawData() const {
-  return const_cast<StructArray*>(this)->rawData();
+const DataType* StructArray::rawTypes() const {
+  return const_cast<StructArray*>(this)->rawTypes();
+}
+
+Value* StructArray::rawValues() {
+  return reinterpret_cast<Value*>(
+      reinterpret_cast<Value*>(this + 1) + valueOffsetInValueSize());
+}
+
+const Value* StructArray::rawValues() const {
+  return const_cast<StructArray*>(this)->rawValues();
+}
+
+uint8_t* StructArray::rawPositions() {
+  return reinterpret_cast<uint8_t*>(this + 1);
+}
+
+const uint8_t* StructArray::rawPositions() const {
+  return const_cast<StructArray*>(this)->rawPositions();
+}
+
+TypedValue StructArray::typedValueUnchecked(Slot slot) const {
+  return make_tv_of_type(rawValues()[slot], rawTypes()[slot]);
 }
 
 ArrayData* StructArray::escalateWithCapacity(size_t capacity,
@@ -263,15 +314,14 @@ ArrayData* StructArray::escalateWithCapacity(size_t capacity,
                          : MixedArray::MakeReserveDArray(capacity);
   ad->setLegacyArrayInPlace(isLegacyArray());
   auto const layout = this->layout();
-  auto const data = rawData();
   for (auto i = 0; i < m_size; i++) {
     auto const slot = getSlotInPos(i);
     auto const k = layout->field(slot).key;
-    auto const& v = data[slot];
+    auto const tv = typedValueUnchecked(slot);
     auto const res =
-      MixedArray::SetStrMove(ad, const_cast<StringData*>(k.get()), v);
+      MixedArray::SetStrMove(ad, const_cast<StringData*>(k.get()), tv);
     assertx(ad == res);
-    tvIncRefGen(v);
+    tvIncRefGen(tv);
     ad = res;
   }
   assertx(ad->size() == size());
@@ -280,19 +330,15 @@ ArrayData* StructArray::escalateWithCapacity(size_t capacity,
 
 void StructArray::ConvertToUncounted(StructArray* sad,
                                      DataWalker::PointerMap* seen) {
-  auto const layout = sad->layout();
-  auto const numFields = layout->numFields();
-  for (Slot i = 0; i < numFields; i++) {
-    auto const lval = tv_lval(&sad->rawData()[i]);
+  for (Slot i = 0; i < sad->numFields(); i++) {
+    auto const lval = tv_lval(&sad->rawTypes()[i], &sad->rawValues()[i]);
     ConvertTvToUncounted(lval, seen);
   }
 }
 
 void StructArray::ReleaseUncounted(StructArray* sad) {
-  auto const layout = sad->layout();
-  auto const numFields = layout->numFields();
-  for (Slot i = 0; i < numFields; i++) {
-    auto& tv = sad->rawData()[i];
+  for (Slot i = 0; i < sad->numFields(); i++) {
+    auto tv = sad->typedValueUnchecked(i);
     ReleaseUncountedTv(&tv);
   }
 }
@@ -317,8 +363,7 @@ TypedValue StructArray::NvGetStr(const StructArray* sad, const StringData* k) {
   auto const layout = sad->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
-  auto const elems = sad->rawData();
-  return elems[slot];
+  return sad->typedValueUnchecked(slot);
 }
 
 TypedValue StructArray::GetPosKey(const StructArray* sad, ssize_t pos) {
@@ -330,8 +375,7 @@ TypedValue StructArray::GetPosKey(const StructArray* sad, ssize_t pos) {
 
 TypedValue StructArray::GetPosVal(const StructArray* sad, ssize_t pos) {
   auto const slot = sad->getSlotInPos(pos);
-  auto const data = sad->rawData();
-  return data[slot];
+  return sad->typedValueUnchecked(slot);
 }
 
 ssize_t StructArray::IterBegin(const StructArray*) {
@@ -362,12 +406,10 @@ arr_lval StructArray::LvalStr(StructArray* sad, StringData* key) {
   auto const layout = sad->layout();
   auto const slot = layout->keySlot(key);
   if (slot == kInvalidSlot) throwOOBArrayKeyException(key, sad);
-  auto const& curr = sad->rawData()[slot];
-  if (type(curr) == KindOfUninit) throwOOBArrayKeyException(key, sad);
+  auto const& currType = sad->rawTypes()[slot];
+  if (currType == KindOfUninit) throwOOBArrayKeyException(key, sad);
   auto const newad = sad->cowCheck() ? sad->copy() : sad;
-  auto const data = newad->rawData();
-  auto& v = data[slot];
-  return { newad, &v };
+  return { newad, &newad->rawTypes()[slot], &newad->rawValues()[slot] };
 }
 
 tv_lval StructArray::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
@@ -382,16 +424,16 @@ arr_lval StructArray::elemImpl(StringData* k, bool throwOnMissing) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  auto const& curr = rawData()[slot];
-  if (type(curr) == KindOfUninit) {
+  auto const& currType = rawTypes()[slot];
+  if (currType == KindOfUninit) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  if (type(curr) == KindOfClsMeth) return LvalStr(this, k);
+  if (currType == KindOfClsMeth) return LvalStr(this, k);
   auto const sad = cowCheck() ? this->copy() : this;
-  auto& v = sad->rawData()[slot];
-  v.m_type = dt_modulo_persistence(v.m_type);
-  return arr_lval{sad, &v};
+  auto& t = sad->rawTypes()[slot];
+  t = dt_modulo_persistence(t);
+  return arr_lval{sad, &t, &sad->rawValues()[slot]};
 }
 
 tv_lval StructArray::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing) {
@@ -427,12 +469,13 @@ ArrayData* StructArray::SetStrMove(StructArray* sadIn,
   }
   auto const cow = sadIn->cowCheck();
   auto const sad = cow ? sadIn->copy() : sadIn;
-  auto data = sad->rawData();
-  auto& old = data[slot];
-  if (type(old) == KindOfUninit) {
+  auto& oldType = sad->rawTypes()[slot];
+  auto& oldVal = sad->rawValues()[slot];
+  if (oldType == KindOfUninit) {
     sad->addNextSlot(slot);
   }
-  old = v;
+  oldType = type(v);
+  oldVal = val(v);
   if (cow) sadIn->decRefCount();
   return sad;
 }
@@ -450,16 +493,16 @@ StructArray* StructArray::copy() const {
 }
 
 void StructArray::incRefValues() {
-  auto const data = rawData();
-  for (auto i = 0; i < layout()->numFields(); i++) {
-    tvIncRefGen(data[i]);
+  for (auto pos = 0; pos < m_size; pos++) {
+    auto const tv = typedValueUnchecked(getSlotInPos(pos));
+    tvIncRefGen(tv);
   }
 }
 
 void StructArray::decRefValues() {
-  auto const data = rawData();
-  for (auto i = 0; i < layout()->numFields(); i++) {
-    tvDecRefGen(data[i]);
+  for (auto pos = 0; pos < m_size; pos++) {
+    auto const tv = typedValueUnchecked(getSlotInPos(pos));
+    tvDecRefGen(tv);
   }
 }
 
@@ -471,12 +514,12 @@ ArrayData* StructArray::RemoveStr(StructArray* sadIn, const StringData* k) {
   auto const layout = sadIn->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) return sadIn;
-  auto const& curr = sadIn->rawData()[slot];
-  if (type(curr) == KindOfUninit) return sadIn;
+  auto const& currType = sadIn->rawTypes()[slot];
+  if (currType == KindOfUninit) return sadIn;
   auto const sad = sadIn->cowCheck() ? sadIn->copy() : sadIn;
-  auto& v = sad->rawData()[slot];
-  tvDecRefGen(v);
-  v.m_type = KindOfUninit;
+  tvDecRefGen(sad->typedValueUnchecked(slot));
+  auto& t = sad->rawTypes()[slot];
+  t = KindOfUninit;
   sad->removeSlot(slot);
   return sad;
 }
@@ -498,9 +541,9 @@ ArrayData* StructArray::Pop(StructArray* sadIn, Variant& value) {
   auto const sad = sadIn->cowCheck() ? sadIn->copy() : sadIn;
   auto const pos = sad->size() - 1;
   auto const slot = sad->getSlotInPos(pos);
-  auto& v = sad->rawData()[slot];
-  value = Variant::attach(v);
-  v.m_type = KindOfUninit;
+  value = Variant::attach(sad->typedValueUnchecked(slot));
+  auto& t = sad->rawTypes()[slot];
+  t = KindOfUninit;
   sad->m_size--;
   return sad;
 }
@@ -547,8 +590,13 @@ size_t StructArray::HeapSize(const StructArray* sad) {
 }
 
 void StructArray::Scan(const StructArray* sad, type_scan::Scanner& scanner) {
-  auto fields = sad->rawData();
-  scanner.scan(*fields, sad->size() * sizeof(TypedValue));
+  auto const types = sad->rawTypes();
+  auto const vals = sad->rawValues();
+  for (Slot i = 0; i < sad->numFields(); i++) {
+    if (isRefcountedType(types[i])) {
+      scanner.scan(vals[i].pcnt);
+    }
+  }
 }
 
 ArrayData* StructArray::EscalateToVanilla(const StructArray* sad,
@@ -558,28 +606,24 @@ ArrayData* StructArray::EscalateToVanilla(const StructArray* sad,
 
 void StructArray::addNextSlot(Slot slot) {
   assertx(slot < kMaxKeyNum);
-  m_order = (m_order << kSlotSize) | slot;
-  m_size++;
+  rawPositions()[m_size++] = slot;
 }
 
 void StructArray::removeSlot(Slot slot) {
-  uint64_t mask = 0;
+  auto const pos = rawPositions();
+  auto idx = 0;
   for (size_t i = 0; i < m_size; i++) {
-    auto const curr = m_order >> (i * kSlotSize) & 0xF;
-    if (curr == slot) break;
-    mask = (mask << kSlotSize) | 0xF;
+    auto const curr = pos[i];
+    if (curr == slot) continue;
+    pos[idx++] = curr;
   }
-  auto const high = (m_order >> kSlotSize) & ~mask;
-  auto const low = m_order & mask;
-  m_order = high | low;
   m_size--;
 }
 
 Slot StructArray::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
-  auto const order = m_size - pos - 1;
   assertx(pos < kMaxKeyNum);
-  return (m_order >> (order * kSlotSize)) & 0xF;
+  return rawPositions()[pos];
 }
 
 //////////////////////////////////////////////////////////////////////////////

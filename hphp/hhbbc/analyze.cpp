@@ -77,6 +77,9 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   return RO::EvalHackArrDVArrs ? vec(types) : arr_packed_varray(types);
 }
 
+const StaticString s_reified_generics_var("0ReifiedGenerics");
+const StaticString s_coeffects_var("0Coeffects");
+
 State entry_state(const Index& index, const Context& ctx,
                   const KnownArgs* knownArgs) {
   auto ret = State{};
@@ -151,7 +154,21 @@ State entry_state(const Index& index, const Context& ctx,
     // Currently closures cannot be reified
     assertx(!ctx.func->isClosureBody);
     assertx(locId < ret.locals.size());
+    assertx(ctx.func->locals[locId].name->same(s_reified_generics_var.get()));
     ret.locals[locId++] = get_type_of_reified_list(ctx.func->userAttributes);
+  }
+
+  /*
+   * Functions with coeffect rules have a hidden local that's always the first
+   * (non-parameter) local (after reified generics, if exists),
+   * which stores the ambient coeffects.
+   */
+  if (!ctx.func->coeffectRules.empty()) {
+    // Currently closures cannot have coeffects rules
+    assertx(!ctx.func->isClosureBody);
+    assertx(locId < ret.locals.size());
+    assertx(ctx.func->locals[locId].name->same(s_coeffects_var.get()));
+    ret.locals[locId++] = TInt;
   }
 
   auto afterParamsLocId = uint32_t{0};

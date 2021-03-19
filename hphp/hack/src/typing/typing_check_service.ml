@@ -434,6 +434,19 @@ end
 
 let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
 
+external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
+
+(* At start of file processing or when the memory cap is exceeded, we
+ * clear all non-essential state (caches, logger) and force a GC.
+ * The call to `hh_malloc_trim` ensures that memory is returned to
+ * the system.
+ *)
+let clear_caches_and_force_gc () =
+  SharedMem.invalidate_caches ();
+  HackEventLogger.flush ();
+  Gc.compact ();
+  hh_malloc_trim ()
+
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -441,8 +454,9 @@ let process_files
       typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
+    ~(longlived_workers : bool)
     ~(check_info : check_info) : typing_result * computation_progress =
-  SharedMem.invalidate_caches ();
+  clear_caches_and_force_gc ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
@@ -454,7 +468,9 @@ let process_files
   let start_time = Unix.gettimeofday () in
 
   let rec process_or_exit errors progress tally max_heap_mb =
-    (* If the major heap has exceeded the bounds, we decline to typecheck the remaining files.
+    (* If the major heap has exceeded the bounds, we
+      (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
+      (2) if this fails, we decline to typecheck the remaining files.
     We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
     and we don't change the minor heap because it's small and fixed-size.
     The start-remaining test is to make sure we make at least one file of progress
@@ -467,7 +483,14 @@ let process_files
     in
     let (exit_now, tally, heap_mb) =
       if over_cap then
-        (true, ProcessFilesTally.incr_caps tally, heap_mb)
+        let new_heap_mb =
+          if longlived_workers then begin
+            clear_caches_and_force_gc ();
+            get_heap_size ()
+          end else
+            heap_mb
+        in
+        (new_heap_mb > cap, ProcessFilesTally.incr_caps tally, new_heap_mb)
       else
         (false, tally, heap_mb)
     in
@@ -610,6 +633,7 @@ let load_and_process_files
     (typing_result : typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
+    ~(longlived_workers : bool)
     ~(check_info : check_info) : typing_result * computation_progress =
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
@@ -622,6 +646,7 @@ let load_and_process_files
     typing_result
     progress
     ~memory_cap
+    ~longlived_workers
     ~check_info
 
 (*****************************************************************************)
@@ -832,6 +857,7 @@ let process_in_parallel
     (fnl : file_computation BigList.t)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
+    ~(longlived_workers : bool)
     ~(check_info : check_info) :
     typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
   let record = Measure.create () in
@@ -860,7 +886,12 @@ let process_in_parallel
          (Provider_context.get_tcopt ctx)
   in
   let job =
-    load_and_process_files ctx dynamic_view_files ~memory_cap ~check_info
+    load_and_process_files
+      ctx
+      dynamic_view_files
+      ~memory_cap
+      ~longlived_workers
+      ~check_info
   in
   let job (typing_result : typing_result) (progress : progress) =
     let (typing_result, computation_progress) =
@@ -979,6 +1010,7 @@ let go_with_interrupt
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
+    ~(longlived_workers : bool)
     ~(check_info : check_info)
     ~(profiling : CgroupProfiler.Profiling.t) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
@@ -1020,6 +1052,7 @@ let go_with_interrupt
           (neutral ())
           progress
           ~memory_cap:None
+          ~longlived_workers
           ~check_info
       in
       ( typing_result,
@@ -1047,6 +1080,7 @@ let go_with_interrupt
         fnl
         ~interrupt
         ~memory_cap
+        ~longlived_workers
         ~check_info
     end
   in
@@ -1097,6 +1131,7 @@ let go
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
+    ~(longlived_workers : bool)
     ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (res, delegate_state, telemetry, (), cancelled) =
@@ -1109,6 +1144,7 @@ let go
       fnl
       ~interrupt
       ~memory_cap
+      ~longlived_workers
       ~check_info
       ~profiling
   in

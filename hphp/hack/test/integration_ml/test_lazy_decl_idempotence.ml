@@ -77,6 +77,7 @@ let test () =
       empty
       [bar_path]
       ~memory_cap
+      ~longlived_workers:false
       ~check_info
   in
   Test.assert_errors errors "";
@@ -89,6 +90,7 @@ let test () =
       empty
       [bar_path]
       ~memory_cap
+      ~longlived_workers:false
       ~check_info
   in
   Test.assert_errors errors "";
@@ -102,6 +104,7 @@ let test () =
       empty
       [foo_path]
       ~memory_cap
+      ~longlived_workers:false
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -114,6 +117,7 @@ let test () =
       empty
       [foo_path]
       ~memory_cap
+      ~longlived_workers:false
       ~check_info
   in
   Test.assert_errors errors expected_errors;

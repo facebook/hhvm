@@ -54,6 +54,7 @@ val go :
   Relative_path.Set.t ->
   Relative_path.t list ->
   memory_cap:int option ->
+  longlived_workers:bool ->
   check_info:Typing_service_types.check_info ->
   Errors.t * Typing_service_delegate.state * Telemetry.t
 
@@ -66,6 +67,7 @@ val go_with_interrupt :
   Relative_path.t list ->
   interrupt:'a MultiWorker.interrupt_config ->
   memory_cap:int option ->
+  longlived_workers:bool ->
   check_info:Typing_service_types.check_info ->
   profiling:CgroupProfiler.Profiling.t ->
   (Errors.t, Typing_service_delegate.state, Telemetry.t, 'a) job_result

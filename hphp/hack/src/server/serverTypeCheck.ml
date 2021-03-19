@@ -992,6 +992,9 @@ functor
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
+      let longlived_workers =
+        genv.local_config.ServerLocalConfig.longlived_workers
+      in
       let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', delegate_state, telemetry, env', cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
@@ -1006,6 +1009,7 @@ functor
           fnl
           ~interrupt
           ~memory_cap
+          ~longlived_workers
           ~check_info:(get_check_info genv env)
           ~profiling
       in
@@ -1588,6 +1592,9 @@ functor
              ~value:
                genv.local_config
                  .ServerLocalConfig.enable_type_check_filter_files
+        |> Telemetry.bool_
+             ~key:"typecheck_longlived_workers"
+             ~value:genv.local_config.ServerLocalConfig.longlived_workers
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

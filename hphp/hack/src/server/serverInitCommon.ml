@@ -213,6 +213,9 @@ let type_check
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
+      let longlived_workers =
+        genv.local_config.ServerLocalConfig.longlived_workers
+      in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
       @@ fun () ->
@@ -224,6 +227,7 @@ let type_check
         Relative_path.Set.empty
         files_to_check
         ~memory_cap
+        ~longlived_workers
         ~check_info:(ServerCheckUtils.get_check_info genv env)
     in
     hh_log_heap ();

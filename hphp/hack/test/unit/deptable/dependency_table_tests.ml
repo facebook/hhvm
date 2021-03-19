@@ -158,8 +158,9 @@ let test_dep_graph_blob () =
             (Telemetry.create ())
             dynamic_view_files
             [Relative_path.from_root ~suffix:"baz.php"]
-            memory_cap
-            check_info
+            ~memory_cap
+            ~longlived_workers:false
+            ~check_info
         in
 
         Asserter.Bool_asserter.assert_equals

@@ -8,6 +8,13 @@
  */
 
 #include "hh_shared.h"
+/* For some reason this header file is not on path in OSS builds.
+ * But we only lose the ability to trim the OCaml heap after a GC
+ */
+#if __has_include("malloc.h")
+  #define MALLOC_TRIM
+  #include <malloc.h>
+#endif
 
 /*****************************************************************************/
 /* File Implementing the shared memory system for Hack.
@@ -1703,6 +1710,13 @@ CAMLprim value hh_collect(void) {
   *heap = dest;
   *wasted_heap_size = 0;
 
+  return Val_unit;
+}
+
+CAMLprim value hh_malloc_trim(void) {
+#ifdef MALLOC_TRIM
+  malloc_trim(0);
+#endif
   return Val_unit;
 }
 

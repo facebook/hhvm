@@ -11,6 +11,8 @@ type serialized_globals = Serialized_globals
 
 let serialize_globals () = Serialized_globals
 
+let flush () = ()
+
 let deserialize_globals _ = ()
 
 let set_use_watchman _ = ()

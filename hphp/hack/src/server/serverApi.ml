@@ -223,6 +223,7 @@ let make_remote_server_api
             Relative_path.Set.empty
             files_to_check
             ~memory_cap:None
+            ~longlived_workers:false
             ~check_info
         in
         HackEventLogger.remote_worker_type_check_end t;

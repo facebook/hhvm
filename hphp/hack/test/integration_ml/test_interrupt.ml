@@ -94,6 +94,7 @@ let test () =
       fnl
       ~interrupt
       ~memory_cap:None
+      ~longlived_workers:false
       ~check_info
       ~profiling:CgroupProfiler.Profiling.empty
   in

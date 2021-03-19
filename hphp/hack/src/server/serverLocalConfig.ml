@@ -447,7 +447,7 @@ type t = {
   predeclare_ide: bool;
   predeclare_ide_deps: bool;
   max_typechecker_worker_memory_mb: int option;
-  use_worker_clones: bool;
+  longlived_workers: bool;
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
@@ -594,7 +594,7 @@ let default =
     predeclare_ide = false;
     predeclare_ide_deps = false;
     max_typechecker_worker_memory_mb = None;
-    use_worker_clones = true;
+    longlived_workers = false;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
@@ -972,10 +972,10 @@ let load_ fn ~silent ~current_version overrides =
   let max_typechecker_worker_memory_mb =
     int_opt "max_typechecker_worker_memory_mb" config
   in
-  let use_worker_clones =
+  let longlived_workers =
     bool_if_min_version
-      "use_worker_clones"
-      ~default:default.use_worker_clones
+      "longlived_workers"
+      ~default:default.longlived_workers
       ~current_version
       config
   in
@@ -1252,7 +1252,7 @@ let load_ fn ~silent ~current_version overrides =
     enable_type_check_filter_files;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
-    use_worker_clones;
+    longlived_workers;
     hg_aware;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;

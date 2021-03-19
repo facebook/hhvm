@@ -192,9 +192,9 @@ let wrap_request w f x metadata_in =
 type 'a entry_state = 'a * Gc.control * SharedMem.handle * int
 
 (* The first bool parameter specifies whether to use worker clones
- * or not *)
+ * or not: for non-longlived-workers, we must clone. *)
 type 'a worker_params = {
-  use_worker_clones: bool;
+  longlived_workers: bool;
   entry_state: 'a entry_state;
   controller_fd: Unix.file_descr option;
 }
@@ -217,9 +217,9 @@ let register_entry_point ~restore =
       (fun p -> win32_worker_main restore (p.entry_state, p.controller_fd))
     | false ->
       (function
-      | { use_worker_clones = true; entry_state; controller_fd } ->
+      | { longlived_workers = false; entry_state; controller_fd } ->
         unix_worker_main restore (entry_state, controller_fd)
-      | { use_worker_clones = false; entry_state; controller_fd } ->
+      | { longlived_workers = true; entry_state; controller_fd } ->
         unix_worker_main_no_clone restore (entry_state, controller_fd))
   in
   Daemon.register_entry_point name worker_main
@@ -260,7 +260,7 @@ let make_one ?call_wrapper controller_fd spawn id =
  * the workload is wrapped in the calL_wrapper. *)
 let make
     ?call_wrapper
-    ~use_worker_clones
+    ~longlived_workers
     ~saved_state
     ~entry
     ~nbr_procs
@@ -292,7 +292,7 @@ let make
         ~name
         (Daemon.null_fd (), Unix.stdout, Unix.stderr)
         entry
-        { use_worker_clones; entry_state = state; controller_fd = child_fd }
+        { longlived_workers; entry_state = state; controller_fd = child_fd }
     in
     Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
 

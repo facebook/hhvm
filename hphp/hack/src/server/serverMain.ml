@@ -1450,7 +1450,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let workers =
     let gc_control = ServerConfig.gc_control config in
     ServerWorker.make
-      ~use_worker_clones:local_config.ServerLocalConfig.use_worker_clones
+      ~longlived_workers:local_config.ServerLocalConfig.longlived_workers
       ~nbr_procs:num_workers
       gc_control
       handle

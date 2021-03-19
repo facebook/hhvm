@@ -65,7 +65,7 @@ let init
   let workers =
     MultiWorker.make
       ~call_wrapper:{ WorkerController.wrap = catch_and_classify_exceptions }
-      ~use_worker_clones:true
+      ~longlived_workers:false
       ~saved_state:state
       ~entry
       ~nbr_procs

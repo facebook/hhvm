@@ -178,7 +178,7 @@ let init_workers () =
   let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
   MultiWorker.make
     ?call_wrapper:None
-    ~use_worker_clones:true
+    ~longlived_workers:false
     ~saved_state:()
     ~entry
     ~nbr_procs

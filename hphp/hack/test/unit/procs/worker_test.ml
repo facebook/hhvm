@@ -6,10 +6,10 @@ let entry =
 
 let num_workers = 2
 
-let make_worker ?call_wrapper use_worker_clones heap_handle =
+let make_worker ?call_wrapper ~longlived_workers heap_handle =
   WorkerController.make
     ?call_wrapper
-    ~use_worker_clones
+    ~longlived_workers
     ~saved_state:()
     ~entry
     ~nbr_procs:num_workers
@@ -44,7 +44,7 @@ let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
     make_worker
       ~call_wrapper:
         { WorkerController.wrap = catch_exception_and_custom_exit_wrapper }
-      use_clones
+      ~longlived_workers:(not use_clones)
       heap_handle
   in
   match workers with

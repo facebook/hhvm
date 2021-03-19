@@ -1,0 +1,44 @@
+
+===================================
+Testing tuple:
+
+Using empty tuple:
+varray: bool(false)
+darray: bool(false)
+vec:    bool(false)
+dict:   bool(false)
+keyset: bool(false)
+
+Using matching tuple:
+varray: bool(true)
+darray: bool(false)
+vec:    bool(true)
+dict:   bool(false)
+keyset: bool(false)
+
+===================================
+Testing shape:
+
+Using empty shape:
+varray: bool(false)
+darray: bool(false)
+vec:    bool(false)
+dict:   bool(false)
+keyset: bool(false)
+
+Using matching shape:
+varray: bool(false)
+darray: bool(true)
+vec:    bool(false)
+dict:   bool(true)
+keyset: bool(false)
+
+===================================
+Testing open shape:
+
+Using empty shape:
+varray: bool(false)
+darray: bool(true)
+vec:    bool(false)
+dict:   bool(true)
+keyset: bool(false)

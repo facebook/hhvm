@@ -1,0 +1,90 @@
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 9
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 10
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 11
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 12
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 13
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 19
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 20
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 21
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 22
+
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 23
+dict(1) {
+  ["0"]=>
+  int(1)
+}
+dict(4) {
+  ["0"]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  ["2"]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["3"]=>
+  int(4)
+}
+dict(1) {
+  ["10"]=>
+  int(10)
+}
+dict(3) {
+  ["10"]=>
+  int(10)
+  [20]=>
+  int(20)
+  [30]=>
+  int(30)
+}
+dict(3) {
+  [10]=>
+  int(10)
+  ["20"]=>
+  int(20)
+  [30]=>
+  int(30)
+}
+dict(3) {
+  [10]=>
+  int(10)
+  [20]=>
+  int(20)
+  ["30"]=>
+  int(30)
+}

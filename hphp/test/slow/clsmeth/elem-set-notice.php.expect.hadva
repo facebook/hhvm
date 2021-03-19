@@ -1,0 +1,520 @@
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(5) "Apple"
+  string(4) "list"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    object(stdClass) (0) {
+    }
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(5) "Apple"
+  string(4) "list"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    object(stdClass) (0) {
+    }
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(5) "Apple"
+  string(4) "list"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    object(stdClass) (0) {
+    }
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(5) "Apple"
+  string(4) "list"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    vec(3) {
+      int(1)
+      int(2)
+      int(3)
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    object(stdClass) (0) {
+    }
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(3) {
+  string(3) "Foo"
+  string(3) "bar"
+  string(3) "XYZ"
+}
+vec(1) {
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    vec(0) {
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(3) {
+  string(3) "Foo"
+  string(3) "bar"
+  string(3) "XYZ"
+}
+vec(1) {
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    vec(0) {
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(3) {
+  string(3) "Foo"
+  string(3) "bar"
+  string(3) "XYZ"
+}
+vec(1) {
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    vec(0) {
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(3) {
+  string(3) "Foo"
+  string(3) "bar"
+  string(3) "XYZ"
+}
+vec(1) {
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    vec(0) {
+    }
+  }
+}
+dict(1) {
+  [0]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    int(99)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(3) {
+    string(3) "Foo"
+    string(3) "bar"
+    bool(false)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(8) "Foo-ext1"
+  string(7) "bar-xyz"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    string(3) "=>-"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    int(0)
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(8) "Foo-ext1"
+  string(7) "bar-xyz"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    string(3) "=>-"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    int(0)
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(8) "Foo-ext1"
+  string(7) "bar-xyz"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    string(3) "=>-"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    int(0)
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(8) "Foo-ext1"
+  string(7) "bar-xyz"
+}
+vec(1) {
+  vec(2) {
+    NULL
+    string(3) "=>-"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    int(12)
+    float(1.2)
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    int(0)
+    int(0)
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+vec(2) {
+  string(3) "Fop"
+  string(3) "bas"
+}
+vec(1) {
+  vec(2) {
+    string(3) "Fop"
+    string(3) "bar"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+vec(2) {
+  string(3) "Fop"
+  string(3) "bas"
+}
+vec(1) {
+  vec(2) {
+    string(3) "Fop"
+    string(3) "bar"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+vec(2) {
+  string(3) "Fop"
+  string(3) "bas"
+}
+vec(1) {
+  vec(2) {
+    string(3) "Fop"
+    string(3) "bar"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bas"
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Increment on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Increment on string 'Foo'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Decrement on string 'Foo'
+[NOTICE] Decrement on string 'bar'
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Increment on string 'bar'
+[NOTICE] Decrement on string 'Foo'
+vec(2) {
+  string(3) "Fop"
+  string(3) "bas"
+}
+vec(1) {
+  vec(2) {
+    string(3) "Fop"
+    string(3) "bar"
+  }
+}
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bar"
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(2) {
+    string(3) "Foo"
+    string(3) "bas"
+  }
+}

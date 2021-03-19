@@ -14,7 +14,7 @@ function serde($v) {
 
   try {
     $ser = fb_serialize($v);
-    $unser = fb_unserialize($ser, $ret);
+    $unser = fb_unserialize($ser, inout $ret);
     var_dump($ret);
     var_dump($unser);
   } catch (Exception $e) {

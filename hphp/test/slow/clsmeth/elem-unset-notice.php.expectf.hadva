@@ -1,0 +1,87 @@
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
+}
+vec(1) {
+  vec(0) {
+  }
+}
+dict(1) {
+  [0]=>
+  vec(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
+}
+vec(1) {
+  vec(0) {
+  }
+}
+dict(1) {
+  [0]=>
+  vec(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
+}
+vec(1) {
+  vec(0) {
+  }
+}
+dict(1) {
+  [0]=>
+  vec(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+[NOTICE] Implicit clsmeth to vec conversion
+vec(0) {
+}
+vec(1) {
+  vec(0) {
+  }
+}
+dict(1) {
+  [0]=>
+  vec(0) {
+  }
+}
+object(P) (1) {
+  ["m"]=>
+  vec(0) {
+  }
+}
+[NOTICE] Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+
+Fatal error: Cannot unset string offsets in %s/elem-unset-notice.php on line 53

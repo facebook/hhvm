@@ -1,7 +1,8 @@
 <?hh
 
 function handle_error($_no, $str, ...) {
-  if ($str === 'Implicit clsmeth to varray conversion') {
+  if ($str === 'Implicit clsmeth to varray conversion' ||
+      $str === 'Implicit clsmeth to vec conversion') {
     echo "** CAST: clsmeth -> varray\n";
     return true;
   }

@@ -1,0 +1,107 @@
+bool(true)
+keyset(0) {
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  keyset(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  keyset(0) {
+  }
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  keyset(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  keyset(0) {
+  }
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  keyset(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["d"]=>
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  ["e"]=>
+  keyset(0) {
+  }
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  keyset(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["d"]=>
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  ["e"]=>
+  keyset(0) {
+  }
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"

@@ -1,0 +1,43 @@
+exit fb_setprofile: D:1:{s:6:"return";N;}
+
+  enter main: D:1:{s:4:"args";v:0:{}}
+
+    enter C::__construct: D:1:{s:4:"args";v:0:{}}
+
+C constructing
+
+    exit C::__construct: D:1:{s:6:"return";N;}
+
+    enter Exception::getMessage: D:1:{s:4:"args";v:0:{}}
+
+    exit Exception::getMessage: D:1:{s:6:"return";s:14:"C::__construct";}
+
+Caught C::__construct
+
+    enter C::__construct: D:1:{s:4:"args";v:0:{}}
+
+C constructing
+
+    exit C::__construct: D:1:{s:6:"return";N;}
+
+    enter C::method: D:1:{s:4:"args";v:0:{}}
+
+C method
+
+      enter A::__construct: D:1:{s:4:"args";v:0:{}}
+
+A constructing
+
+      exit A::__construct: D:1:{s:6:"return";N;}
+
+    exit C::method: D:1:{s:6:"return";O:1:"A":0:{}}
+
+    enter Exception::getMessage: D:1:{s:4:"args";v:0:{}}
+
+    exit Exception::getMessage: D:1:{s:6:"return";s:9:"C::method";}
+
+Caught C::method
+
+  exit main: D:1:{s:6:"return";N;}
+
+exit entrypoint_setprofilethis: D:1:{s:6:"return";N;}

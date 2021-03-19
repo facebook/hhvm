@@ -1,0 +1,44 @@
+
+=============================
+Testing: varray[]
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+
+=============================
+Testing: varray[new C()]
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+
+=============================
+Testing: darray[]
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+
+=============================
+Testing: darray[17 => new C()]
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+
+=============================
+Testing: static marked varray
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: static marked darray
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)

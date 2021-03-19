@@ -1,0 +1,30 @@
+dict(4) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(22) "vec [
+  1,
+  2,
+  3,
+]"
+  [3]=>
+  string(7) "vec [
+]"
+}
+dict(4) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(22) "vec [
+  1,
+  2,
+  3,
+]"
+  [3]=>
+  string(7) "vec [
+]"
+}

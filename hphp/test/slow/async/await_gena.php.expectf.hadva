@@ -1,0 +1,19 @@
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  NULL
+}
+oops
+
+Fatal error: Call to undefined function gena() in %s on line %d

@@ -56,7 +56,8 @@ function unset_inner() {
 }
 
 function handle_error($_no, $msg, ...) {
-  if ($msg === 'Implicit clsmeth to varray conversion') {
+  if ($msg === 'Implicit clsmeth to varray conversion' ||
+      $msg === 'Implicit clsmeth to vec conversion') {
     echo "[NOTICE] $msg\n";
     return true;
   }

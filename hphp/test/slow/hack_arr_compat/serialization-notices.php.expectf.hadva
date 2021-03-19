@@ -1,0 +1,100 @@
+
+============================================================
+Testing varray[]:
+gettype:              string(3) "vec"
+is_php_array:         bool(false)
+is_varray:            bool(true)
+is_darray:            bool(false)
+is_vec:               bool(true)
+is_vec_fn:            bool(true)
+is_dict:              bool(false)
+is_dict_fn:           bool(false)
+json_encode:          string(2) "[]"
+json_hack_arrays:     string(2) "[]"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "v:0:{}"
+fb_compact_serialize: string(4) "fafc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(8) "13020001"
+fb_serialize_4:       string(8) "13020001"
+fb_serialize_8:       string(8) "13020001"
+
+============================================================
+Testing darray[]:
+gettype:              string(4) "dict"
+is_php_array:         bool(false)
+is_varray:            bool(false)
+is_darray:            bool(true)
+is_vec:               bool(false)
+is_vec_fn:            bool(false)
+is_dict:              bool(true)
+is_dict_fn:           bool(true)
+json_encode:          string(2) "{}"
+json_hack_arrays:     string(2) "{}"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "D:0:{}"
+fb_compact_serialize: string(4) "fbfc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(4) "0a01"
+fb_serialize_4:       string(4) "0a01"
+fb_serialize_8:       string(4) "0a01"
+
+============================================================
+Testing vec[]:
+gettype:              string(3) "vec"
+is_php_array:         bool(false)
+is_varray:            bool(true)
+is_darray:            bool(false)
+is_vec:               bool(true)
+is_vec_fn:            bool(true)
+is_dict:              bool(false)
+is_dict_fn:           bool(false)
+json_encode:          string(2) "[]"
+json_hack_arrays:     string(2) "[]"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "v:0:{}"
+fb_compact_serialize: string(4) "fafc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(8) "13020001"
+fb_serialize_4:       string(8) "13020001"
+fb_serialize_8:       string(8) "13020001"
+
+============================================================
+Testing dict[]:
+gettype:              string(4) "dict"
+is_php_array:         bool(false)
+is_varray:            bool(false)
+is_darray:            bool(true)
+is_vec:               bool(false)
+is_vec_fn:            bool(false)
+is_dict:              bool(true)
+is_dict_fn:           bool(true)
+json_encode:          string(2) "{}"
+json_hack_arrays:     string(2) "{}"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "D:0:{}"
+fb_compact_serialize: string(4) "fbfc"
+fb_serialize_0:       string(4) "0a01"
+fb_serialize_2:       string(4) "0a01"
+fb_serialize_4:       string(4) "0a01"
+fb_serialize_8:       string(4) "0a01"
+
+============================================================
+Testing keyset[]:
+gettype:              string(6) "keyset"
+is_php_array:         bool(false)
+is_varray:            bool(false)
+is_darray:            bool(false)
+is_vec:               bool(false)
+is_vec_fn:            bool(false)
+is_dict:              bool(false)
+is_dict_fn:           bool(false)
+json_encode:          string(2) "[]"
+json_hack_arrays:     string(2) "[]"
+json_php_arrays:      string(2) "[]"
+serialize:            string(6) "k:0:{}"
+fb_compact_serialize: string(4) "fbfc"
+fb_serialize_0:       string(9) "<failure>"
+fb_serialize_2:       string(9) "<failure>"
+fb_serialize_4:       string(9) "<failure>"
+fb_serialize_8:       string(8) "14020001"

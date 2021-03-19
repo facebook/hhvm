@@ -67,15 +67,14 @@ function is_as_shuffle_static() {
   if (HH\is_php_array($m)) {
     $x = varray($m);
     echo '$m === varray($m): '.P($m === $x);
-
-    if ($m is Traversable) {
-      $x = $m as Traversable;
-      echo '$m === ($m as Traversable): '.P($m === $x);
-    } else {
-      echo "Failed \$m is Traversable!\n";
-    }
   } else {
     echo "Failed \$m is array!\n";
+  }
+  if ($m is Traversable) {
+    $x = $m as Traversable;
+    echo '$m === ($m as Traversable): '.P($m === $x);
+  } else {
+    echo "Failed \$m is Traversable!\n";
   }
 }
 
@@ -85,15 +84,14 @@ function is_as_shuffle_dynamic() {
   if (HH\is_php_array($m)) {
     $x = varray($m);
     echo '$m === varray($m): '.P($m === $x);
-
-    if ($m is AnyArray) {
-      $x = $m as Traversable;
-      echo '$m === ($m as AnyArray): '.P($m === $x);
-    } else {
-      echo "Failed \$m is AnyArray!\n";
-    }
   } else {
     echo "Failed \$m is array!\n";
+  }
+  if ($m is AnyArray) {
+    $x = $m as Traversable;
+    echo '$m === ($m as AnyArray): '.P($m === $x);
+  } else {
+    echo "Failed \$m is AnyArray!\n";
   }
 }
 

@@ -4,7 +4,7 @@ Tiers {
     ShardCount = 1
     overwrite {
       Eval {
-        ArrayProvenance = true
+        LogArrayAccessProfile = true
       }
     }
   }
@@ -19,7 +19,7 @@ Tiers {
     ShardCount = 1
     overwrite {
       Eval {
-        LogArrayProvenance = true
+        LogArrayIterProfile = true
       }
     }
   }

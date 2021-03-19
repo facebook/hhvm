@@ -1,0 +1,186 @@
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+handle_error(): [8]: is_any_array() called on clsmeth
+$m is AnyArray: True
+$m is shape(str,str): False
+$m is shape(...): False
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m is Traversable: True
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+$m is Container: True
+handle_error(): [8]: is_tuple() called on clsmeth
+$m is (string,string): True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[0] is string: True
+handle_error(): [8]: Implicit clsmeth to vec conversion
+$m[1] is string: True
+handle_error(): [8]: is_any_array() called on clsmeth
+shape!
+shape!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Container conversion
+handle_error(): [8]: is_tuple() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+handle_error(): [8]: Implicit clsmeth to vec conversion
+vec(2) {
+  string(3) "Foo"
+  string(3) "bar"
+}
+Failed $m is array!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as Traversable): True
+Failed $m is array!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as Traversable): True
+Failed $m is array!
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as Traversable): True
+Failed $m is array!
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as AnyArray): True
+Failed $m is array!
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as AnyArray): True
+Failed $m is array!
+handle_error(): [8]: is_any_array() called on clsmeth
+handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
+$m === ($m as AnyArray): True

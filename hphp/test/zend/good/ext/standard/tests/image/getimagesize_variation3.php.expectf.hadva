@@ -1,0 +1,34 @@
+*** Testing getimagesize() : variation ***
+
+-- File with text data (test.txt) --
+bool(false)
+bool(false)
+dict(0) {
+}
+
+-- File with corrupted BMP data (200x100_unknown.unknown) --
+bool(false)
+bool(false)
+dict(0) {
+}
+
+-- Non-existent file (nofile.ext) --
+
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/image/getimagesize_variation3.php on line 28
+bool(false)
+
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/image/getimagesize_variation3.php on line 29
+bool(false)
+dict(0) {
+}
+
+-- Empty File (blank_file.bmp) --
+
+Notice: Read error! in %s/test/zend/good/ext/standard/tests/image/getimagesize_variation3.php on line 28
+bool(false)
+
+Notice: Read error! in %s/test/zend/good/ext/standard/tests/image/getimagesize_variation3.php on line 29
+bool(false)
+dict(0) {
+}
+===DONE===

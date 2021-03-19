@@ -1,0 +1,276 @@
+bool(true)
+vec(0) {
+}
+bool(true)
+dict(0) {
+}
+bool(true)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+bool(true)
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+bool(true)
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+vec(4) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  int(100)
+  string(3) "abc"
+}
+bool(true)
+dict(4) {
+  [0]=>
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  [1]=>
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  [2]=>
+  int(100)
+  [3]=>
+  string(3) "abc"
+}
+bool(true)
+vec(4) {
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(3) "def"
+    [3]=>
+    string(3) "ghi"
+  }
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  int(100)
+  string(3) "abc"
+}
+bool(true)
+dict(4) {
+  [0]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(3) "def"
+    [3]=>
+    string(3) "ghi"
+  }
+  [1]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  [2]=>
+  int(100)
+  [3]=>
+  string(3) "abc"
+}
+bool(true)
+vec(4) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  int(100)
+  string(3) "abc"
+}
+bool(true)
+dict(4) {
+  [0]=>
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  [1]=>
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  [2]=>
+  int(100)
+  [3]=>
+  string(3) "abc"
+}
+bool(true)
+vec(1) {
+  dict(2) {
+    ["1"]=>
+    int(100)
+    [1]=>
+    int(200)
+  }
+}
+bool(true)
+dict(1) {
+  [0]=>
+  dict(1) {
+    [1]=>
+    int(200)
+  }
+}
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+string(91) "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS option to be provided"
+bool(true)
+vec(5) {
+  int(1)
+  int(2)
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  vec(0) {
+  }
+}
+bool(true)
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  [3]=>
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  [4]=>
+  dict(0) {
+  }
+}
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["d"]=>
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  ["e"]=>
+  vec(0) {
+  }
+}
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["d"]=>
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  ["e"]=>
+  dict(0) {
+  }
+}

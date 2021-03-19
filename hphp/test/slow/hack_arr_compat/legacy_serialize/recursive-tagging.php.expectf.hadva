@@ -1,0 +1,285 @@
+==============================================
+test_marking_nested_arrays($recursive=true):
+
+Printing marking for $x:
+vec(3) {
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(3) {
+    dict(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      vec(1) {
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+$x[1]: unmarked
+$x[1][0]: <not an array>
+$x[2]: unmarked
+$x[2][0]: unmarked
+$x[2][0][c]: <not an array>
+$x[2][0][v]: unmarked
+$x[2][0][v][0]: <not an array>
+$x[2][1]: unmarked
+$x[2][1][0]: <not an array>
+$x[2][2]: unmarked
+$x[2][2][0]: <not an array>
+
+Printing marking for $y:
+varray(3) {
+  varray(1) {
+    object(C) (0) {
+    }
+  }
+  varray(1) {
+    object(C) (0) {
+    }
+  }
+  varray(3) {
+    darray(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      varray(1) {
+        object(C) (0) {
+        }
+      }
+    }
+    varray(1) {
+      object(C) (0) {
+      }
+    }
+    varray(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: marked
+$y[0][0]: <not an array>
+$y[1]: marked
+$y[1][0]: <not an array>
+$y[2]: marked
+$y[2][0]: marked
+$y[2][0][c]: <not an array>
+$y[2][0][v]: marked
+$y[2][0][v][0]: <not an array>
+$y[2][1]: marked
+$y[2][1][0]: <not an array>
+$y[2][2]: marked
+$y[2][2][0]: <not an array>
+
+==============================================
+test_cow_optimizations($recursive=true):
+
+Printing marking for $x:
+varray(1) {
+  varray(1) {
+    object(C) (0) {
+    }
+  }
+}
+$x: marked
+$x[0]: marked
+$x[0][0]: <not an array>
+
+==============================================
+test_unable_to_cow($recursive=true):
+
+Printing marking for $x:
+dict(1) {
+  ["a"]=>
+  dict(1) {
+    ["b"]=>
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[a]: unmarked
+$x[a][b]: unmarked
+$x[a][b][0]: <not an array>
+
+Printing marking for $y:
+varray(1) {
+  darray(1) {
+    ["b"]=>
+    varray(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: marked
+$y[0][b]: marked
+$y[0][b][0]: <not an array>
+
+==============================================
+test_marking_nested_arrays($recursive=false):
+
+Printing marking for $x:
+vec(3) {
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(3) {
+    dict(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      vec(1) {
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+$x[1]: unmarked
+$x[1][0]: <not an array>
+$x[2]: unmarked
+$x[2][0]: unmarked
+$x[2][0][c]: <not an array>
+$x[2][0][v]: unmarked
+$x[2][0][v][0]: <not an array>
+$x[2][1]: unmarked
+$x[2][1][0]: <not an array>
+$x[2][2]: unmarked
+$x[2][2][0]: <not an array>
+
+Printing marking for $y:
+varray(3) {
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  vec(3) {
+    dict(2) {
+      ["c"]=>
+      object(C) (0) {
+      }
+      ["v"]=>
+      vec(1) {
+        object(C) (0) {
+        }
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: unmarked
+$y[0][0]: <not an array>
+$y[1]: unmarked
+$y[1][0]: <not an array>
+$y[2]: unmarked
+$y[2][0]: unmarked
+$y[2][0][c]: <not an array>
+$y[2][0][v]: unmarked
+$y[2][0][v][0]: <not an array>
+$y[2][1]: unmarked
+$y[2][1][0]: <not an array>
+$y[2][2]: unmarked
+$y[2][2][0]: <not an array>
+
+==============================================
+test_cow_optimizations($recursive=false):
+
+Printing marking for $x:
+varray(1) {
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+}
+$x: marked
+$x[0]: unmarked
+$x[0][0]: <not an array>
+
+==============================================
+test_unable_to_cow($recursive=false):
+
+Printing marking for $x:
+dict(1) {
+  ["a"]=>
+  dict(1) {
+    ["b"]=>
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$x: unmarked
+$x[a]: unmarked
+$x[a][b]: unmarked
+$x[a][b][0]: <not an array>
+
+Printing marking for $y:
+varray(1) {
+  dict(1) {
+    ["b"]=>
+    vec(1) {
+      object(C) (0) {
+      }
+    }
+  }
+}
+$y: marked
+$y[0]: unmarked
+$y[0][b]: unmarked
+$y[0][b][0]: <not an array>

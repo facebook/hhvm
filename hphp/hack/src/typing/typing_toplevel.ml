@@ -1274,8 +1274,7 @@ let class_def_ env c tc =
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let ctx = Env.get_ctx env in
   if
-    ( Ast_defs.(equal_class_kind c.c_kind Cnormal)
-    || Ast_defs.(equal_class_kind c.c_kind Cabstract) )
+    (not Ast_defs.(equal_class_kind c.c_kind Ctrait))
     && not (shallow_decl_enabled ctx)
   then (
     (* These checks are only for eager mode. The same checks are performed

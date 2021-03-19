@@ -515,7 +515,16 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }
         Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.desugared_expr),
-        _ => unimplemented!("TODO(hrust)"),
+        Expr_::ETSplice(_) => Err(unrecoverable(
+            "expression trees: splice should be erased during rewriting",
+        )),
+        Expr_::FunId(_)
+        | Expr_::MethodId(_)
+        | Expr_::MethodCaller(_)
+        | Expr_::SmethodId(_)
+        | Expr_::Hole(_) => {
+            unimplemented!("TODO(hrust)")
+        }
     }
 }
 

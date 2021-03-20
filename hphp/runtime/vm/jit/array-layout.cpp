@@ -200,7 +200,7 @@ std::string ArrayLayout::describe() const {
       case Sort::Bottom:  return "Bottom";
     }
   }
-  return folly::sformat("Bespoke({})", assertBespoke(*this).describe());
+  return assertBespoke(*this).describe();
 }
 
 ArrayData* ArrayLayout::apply(ArrayData* ad) const {

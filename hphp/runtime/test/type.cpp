@@ -159,11 +159,11 @@ TEST_F(TypeTest, ArrayLayout) {
     bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
 
-  EXPECT_EQ("Top",          top.describe());
-  EXPECT_EQ("Vanilla",      vanilla.describe());
-  EXPECT_EQ("Bespoke",      bespoke.describe());
-  EXPECT_EQ("Bottom",       bottom.describe());
-  EXPECT_EQ("Bespoke(foo)", foo.describe());
+  EXPECT_EQ("Top",     top.describe());
+  EXPECT_EQ("Vanilla", vanilla.describe());
+  EXPECT_EQ("Bespoke", bespoke.describe());
+  EXPECT_EQ("Bottom",  bottom.describe());
+  EXPECT_EQ("foo",     foo.describe());
 
   EXPECT_EQ(top, top);
   EXPECT_EQ(vanilla, vanilla);
@@ -1017,7 +1017,7 @@ TEST_F(TypeTest, BespokeVec) {
   };
 
   auto const vecFoo = TVec.narrowToLayout(foo_layout);
-  EXPECT_EQ("Vec=Bespoke(foo)", vecFoo.toString());
+  EXPECT_EQ("Vec=foo", vecFoo.toString());
   EXPECT_FALSE(TVec <= vecFoo);
   EXPECT_FALSE(TVanillaVec <= vecFoo);
   EXPECT_FALSE(vecFoo <= TVanillaVec);
@@ -1027,7 +1027,7 @@ TEST_F(TypeTest, BespokeVec) {
   EXPECT_EQ(vecFoo & TVec, vecFoo);
 
   auto const vecBar = TVec.narrowToLayout(bar_layout);
-  EXPECT_EQ("Vec=Bespoke(bar)", vecBar.toString());
+  EXPECT_EQ("Vec=bar", vecBar.toString());
 
   auto const vecVanillaBar = TVanillaVec.narrowToLayout(bar_layout);
   EXPECT_EQ(TBottom, vecVanillaBar);
@@ -1049,7 +1049,7 @@ TEST_F(TypeTest, BespokeVecRAT) {
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
   auto const vecRatBespoke = vecRat.narrowToLayout(foo_layout);
-  EXPECT_EQ("Vec=Bespoke(foo):N([Str])", vecRatBespoke.toString());
+  EXPECT_EQ("Vec=foo:N([Str])", vecRatBespoke.toString());
   auto const vecRatVanilla = vecRat.narrowToVanilla();
   EXPECT_EQ("Vec=Vanilla:N([Str])", vecRatVanilla.toString());
 

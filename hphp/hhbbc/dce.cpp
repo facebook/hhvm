@@ -1500,8 +1500,8 @@ void dce(Env& env, const bc::IncDecL& op) {
 }
 
 bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
-  auto const lhsOk = lhs.subtypeOf(BNull | BBool | BInt | BDbl | BStr);
-  auto const rhsOk = rhs.subtypeOf(BNull | BBool | BInt | BDbl | BStr);
+  auto const lhsOk = lhs.subtypeOf(BInt | BDbl | BStr);
+  auto const rhsOk = rhs.subtypeOf(BInt | BDbl | BStr);
   if (!lhsOk || !rhsOk) return true;
 
   switch (op.subop2) {

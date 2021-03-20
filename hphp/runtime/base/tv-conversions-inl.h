@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -71,7 +72,10 @@ inline bool tvToBool(TypedValue cell) {
 }
 
 inline int64_t tvToInt(
-  TypedValue cell, ConvNoticeLevel level, const StringData* notice_reason) {
+  TypedValue cell,
+  ConvNoticeLevel level,
+  const StringData* notice_reason,
+  bool notice_within_num) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -84,7 +88,7 @@ inline int64_t tvToInt(
       return cell.m_data.num;
     case KindOfInt64:         return cell.m_data.num;
     case KindOfDouble:
-      handleConvNoticeLevel(level, "double", "int", notice_reason);
+      if (notice_within_num) handleConvNoticeLevel(level, "double", "int", notice_reason);
       return double_to_int64(cell.m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:
@@ -131,6 +135,10 @@ inline int64_t tvToInt(
   not_reached();
 }
 
+
+inline int64_t tvToInt(TypedValue cell) {
+  return tvToInt(cell, ConvNoticeLevel::None, nullptr, true);
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 template <IntishCast IC>
@@ -152,10 +160,15 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline TypedNum stringToNumeric(const StringData* sd) {
-  int64_t ival;
+inline TypedNum stringToNumeric(
+  const StringData* sd,
+    ConvNoticeLevel level,
+    const StringData* notice_reason) {
+    int64_t ival;
   double dval;
   auto const dt = sd->isNumericWithVal(ival, dval, true /* allow_errors */);
+  handleConvNoticeLevel(
+    level, "string", dt == KindOfDouble ? "double" : "int", notice_reason);
   return dt == KindOfInt64 ? make_tv<KindOfInt64>(ival) :
          dt == KindOfDouble ? make_tv<KindOfDouble>(dval) :
          make_tv<KindOfInt64>(0);

@@ -33,6 +33,14 @@ ConvNoticeData getConvNoticeDataForBitOp() {
    };
 }
 
+ConvNoticeData getConvNoticeDataForMath() {
+   return ConvNoticeData {
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+      s_ConvNoticeReasonMath.get(),
+      false, // don't trigger notices from int <-> double
+   };
+}
+
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
     return ty.subtypeOfAny(TInt, TBool, TDbl);
@@ -112,12 +120,12 @@ bool isBitOp(Op op) {
 // booleans in arithmetic and bitwise operations get cast to ints
 SSATmp* promoteBool(IRGS& env, SSATmp* src, bool isBitOp) {
   if (!(src->type() <= TBool)) return src;
-  if (isBitOp) {
-    auto throws =
-      handleConvNoticeLevel(env, getConvNoticeDataForBitOp(), "bool", "int");
-    if (throws) return cns(env, false);
-  }
-  return gen(env, ConvBoolToInt, src);
+  auto throws =
+    handleConvNoticeLevel(env,
+      isBitOp ? getConvNoticeDataForBitOp() : getConvNoticeDataForMath(),
+      "bool",
+      "int");
+  return throws ? cns(env, false) : gen(env, ConvBoolToInt, src);
 }
 
 Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
@@ -1945,14 +1953,13 @@ void emitDiv(IRGS& env) {
   }
 
   auto toDbl = [&] (SSATmp* x) {
-    return
-      x->isA(TInt)  ? gen(env, ConvIntToDbl, x) :
-      x->isA(TBool) ? gen(env, ConvBoolToDbl, x) :
-      x;
-  };
-
-  auto toInt = [&] (SSATmp* x) {
-    return x->isA(TBool) ? gen(env, ConvBoolToInt, x) : x;
+    if (x->isA(TBool)) {
+       // say int to match interp due to just using the float version of the int
+      auto throws =
+        handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
+      return throws ? cns(env, false) : gen(env, ConvBoolToDbl, x);
+    }
+    return x->isA(TInt) ? gen(env, ConvIntToDbl, x) : x;
   };
 
   auto const divisor  = popC(env);
@@ -2009,10 +2016,20 @@ void emitDiv(IRGS& env) {
   auto const result = cond(
     env,
     [&] (Block* taken) {
+      // We don't want to trigger notices for conversions from here because
+      // they'd be duplicated in the result of the condition
+      auto toInt = [&] (SSATmp* x) {
+        return x->isA(TBool) ? gen(env, ConvBoolToInt, x) : x;
+      };
       auto const mod = gen(env, Mod, toInt(dividend), toInt(divisor));
       gen(env, JmpNZero, taken, mod);
     },
-    [&] { return gen(env, DivInt, toInt(dividend), toInt(divisor)); },
+    [&] {
+      return gen(env,
+                 DivInt,
+                 promoteBool(env, dividend, false),
+                 promoteBool(env, divisor, false));
+    },
     [&] { return gen(env, DivDbl, toDbl(dividend), toDbl(divisor)); }
   );
   push(env, result);
@@ -2021,8 +2038,8 @@ void emitDiv(IRGS& env) {
 void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
-  auto const tr = gen(env, ConvTVToInt, ConvNoticeData{}, btr);
-  auto const tl = gen(env, ConvTVToInt, ConvNoticeData{}, btl);
+  auto const tl = gen(env, ConvTVToInt, getConvNoticeDataForMath(), btl);
+  auto const tr = gen(env, ConvTVToInt, getConvNoticeDataForMath(), btr);
 
   // Generate an exit for the rare case that r is zero.
   ifThen(

@@ -2508,28 +2508,33 @@ struct BespokeGetData : IRExtraData {
 
 struct ConvNoticeData : IRExtraData {
   explicit ConvNoticeData(ConvNoticeLevel l = ConvNoticeLevel::None,
-                          const StringData* r = nullptr)
-                          : level(l), reason(r) {}
+                          const StringData* r = nullptr,
+                          bool noticeWithinNum_ = true)
+                          : level(l), reason(r), noticeWithinNum(noticeWithinNum_)  {}
   std::string show() const {
     assertx(level == ConvNoticeLevel::None || (reason != nullptr && reason->isStatic()));
-    if (reason == nullptr) return convOpToName(level);
-    return folly::format("{} for {}", convOpToName(level), reason).str();
+    const auto reason_str = reason ? folly::format(" for {}", reason).str() : "";
+    const auto num_str = !noticeWithinNum ? " with no intra-num notices": "";
+    return folly::format("{}{}{}", convOpToName(level), reason_str, num_str).str();
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<ConvNoticeLevel>()(level),
-      std::hash<const StringData*>()(reason)
+      std::hash<const StringData*>()(reason),
+      std::hash<bool>()(noticeWithinNum)
     );
   }
 
   bool equals(const ConvNoticeData& o) const {
     // can use pointer equality bc reason is always a StaticString
-    return level == o.level && reason == o.reason;
+    return level == o.level && reason == o.reason && noticeWithinNum == o.noticeWithinNum;
   }
 
   ConvNoticeLevel level;
   union { const StringData* reason; int64_t reasonIntVal; };
+  // whether to trigger notices for conversions between int and double
+  bool noticeWithinNum = true;
 };
 
 //////////////////////////////////////////////////////////////////////

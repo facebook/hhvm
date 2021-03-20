@@ -90,9 +90,12 @@ ObjectData* tvCastToObjectData(TypedValue tv);
  * Convert a cell to various raw data types, without changing the TypedValue.
  */
 bool tvToBool(TypedValue);
+int64_t tvToInt(TypedValue);
 int64_t tvToInt(TypedValue,
-                const ConvNoticeLevel = ConvNoticeLevel::None,
-                const StringData* = nullptr);
+                const ConvNoticeLevel,
+                const StringData*,
+                bool notice_within_num = true);
+
 double tvToDouble(TypedValue);
 
 /*
@@ -106,7 +109,10 @@ TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
  * that have only a partial number in them (i.e. the string may have junk after
  * the number).
  */
-TypedNum stringToNumeric(const StringData*);
+TypedNum stringToNumeric(
+    const StringData*,
+    ConvNoticeLevel level = ConvNoticeLevel::None,
+    const StringData* notice_reason = nullptr);
 
 TypedValue tvClassToString(TypedValue key);
 

@@ -244,13 +244,23 @@ Variant HHVM_FUNCTION(base_convert,
 
 static MaybeDataType convert_for_pow(const Variant& val,
                                      int64_t& ival, double& dval) {
+ auto handleConvNotice = [&](const char* from, const char* to = "int") {
+    handleConvNoticeLevel(
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+      from,
+      to,
+      s_ConvNoticeReasonMath.get());
+  };
+
   switch (val.getType()) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
-    case KindOfInt64:
     case KindOfResource:
     case KindOfObject:
+      handleConvNotice(getDataTypeString(val.getType()).c_str());
+      // FALLTHROUGH
+    case KindOfInt64:
       ival = val.toInt64();
       return KindOfInt64;
 
@@ -264,6 +274,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfPersistentString:
     case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
+      handleConvNotice("string", dt == KindOfDouble ? "double" : "int");
       if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
         ival = 0;
         return KindOfInt64;
@@ -297,9 +308,34 @@ static MaybeDataType convert_for_pow(const Variant& val,
 Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
-  if (base.isArray()) return 0LL;
+
+ auto handleConvNotice = [&](const char* from, const char* to) {
+    handleConvNoticeLevel(
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+      from,
+      to,
+      s_ConvNoticeReasonMath.get());
+  };
+
+  auto HandleArrayConvNotice = [&](const Variant& v) {
+    const auto type = v.getType();
+    const auto from = isDictOrDArrayType(type)
+                      ? "darray/dict"
+                      : isVecOrVArrayType(type)
+                          ? "varray/vec"
+                          : "keyset";
+    handleConvNotice(from, "int");
+  };
+
+  if (base.isArray()) {
+    HandleArrayConvNotice(base);
+    return 0LL;
+  }
   MaybeDataType bt = convert_for_pow(base, bint, bdbl);
-  if (exp.isArray()) return 1LL;
+  if (exp.isArray()) {
+    HandleArrayConvNotice(exp);
+    return 1LL;
+  }
   MaybeDataType et = convert_for_pow(exp,  eint, edbl);
   if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
     if (eint == 0) return 1LL;

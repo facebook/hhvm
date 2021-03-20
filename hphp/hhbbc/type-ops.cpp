@@ -87,8 +87,16 @@ Type typeToInt(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool okTypesForConstMath(Type t1, Type t2) {
+  // we're banning math on non-num types and they're gonna be rare on literals
+  // and immediately codemodded away anyway, so just kill the optimization now
+  return t1.subtypeOf(BNum) && t2.subtypeOf(BNum);
+}
+
 Type typeAdd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvAdd))             return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, tvAdd)) return *t;
+  }
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
     return union_of(TVArr,TDArr);
@@ -100,7 +108,9 @@ Type typeAdd(Type t1, Type t2) {
 }
 
 Type typeAddO(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvAddO))            return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, tvAddO))          return *t;
+  }
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
@@ -114,14 +124,18 @@ Type typeAddO(Type t1, Type t2) {
 
 template <class CellOp>
 Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
-  if (auto t = eval_const(t1, t2, op))          return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, op))        return *t;
+  }
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitPrim;
 }
 
 template <class CellOp>
 Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
-  if (auto t = eval_const(t1, t2, op))          return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, op))        return *t;
+  }
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitPrim;
@@ -134,17 +148,23 @@ Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvSubO); }
 Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvMulO); }
 
 Type typeDiv(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvDiv)) return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, tvDiv)) return *t;
+  }
   return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvMod)) return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, tvMod)) return *t;
+  }
   return TInitPrim;
 }
 
 Type typePow(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, tvPow)) return *t;
+  if (okTypesForConstMath(t1, t2)) {
+    if (auto t = eval_const(t1, t2, tvPow)) return *t;
+  }
   return TNum;
 }
 

@@ -1,0 +1,4866 @@
+$i int(0)
+$j int(0)
+plus<0>
+minus<0>
+mul<0>
+pow<1>
+$i int(0)
+$j int(-10)
+plus<-10>
+minus<10>
+mul<0>
+div<0>
+mod<0>
+pow<INF>
+$i int(0)
+$j float(1.234)
+plus<1.234>
+minus<-1.234>
+mul<0>
+div<0>
+mod<0>
+pow<0>
+$i int(0)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<NAN>
+div<0>
+pow<0>
+$i int(0)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i int(0)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i int(0)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i int(0)
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i int(0)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+0>
+$i int(0)
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i int(0)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i int(0)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+0>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+$i int(-10)
+$j int(0)
+plus<-10>
+minus<-10>
+mul<0>
+pow<1>
+$i int(-10)
+$j int(-10)
+plus<-20>
+minus<0>
+mul<100>
+div<1>
+mod<0>
+pow<1.0E-10>
+$i int(-10)
+$j float(1.234)
+plus<-8.766>
+minus<-11.234>
+mul<-12.34>
+div<-8.1037277147488>
+mod<0>
+pow<NAN>
+$i int(-10)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<-INF>
+div<0>
+pow<INF>
+$i int(-10)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<-10>
+pow<NAN>
+$i int(-10)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-11>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+-10>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+-10>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+-10>
+$i int(-10)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-10>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i int(-10)
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+-10>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i int(-10)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-11>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+-10>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+-10>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+-10>
+$i int(-10)
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+-10>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i int(-10)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i int(-10)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-11>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+-10>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+-10>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+-10>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+11>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+-10>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+-0.1>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+$i float(1.234)
+$j int(0)
+plus<1.234>
+minus<1.234>
+mul<0>
+pow<1>
+$i float(1.234)
+$j int(-10)
+plus<-8.766>
+minus<11.234>
+mul<-12.34>
+div<-0.1234>
+mod<1>
+pow<0.12213732471812>
+$i float(1.234)
+$j float(1.234)
+plus<2.468>
+minus<0>
+mul<1.522756>
+div<1>
+mod<0>
+pow<1.2962325026676>
+$i float(1.234)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<INF>
+div<0>
+pow<INF>
+$i float(1.234)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<1>
+pow<NAN>
+$i float(1.234)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0.234>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+1.234>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+1.234>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1.234>
+$i float(1.234)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+1.234>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i float(1.234)
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+1.234>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i float(1.234)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+0.234>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+1.234>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+1.234>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1.234>
+$i float(1.234)
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+1.234>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i float(1.234)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i float(1.234)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+0.234>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+1.234>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+1.234>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1.234>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-0.234>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+1.234>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0.81037277147488>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+$i float(INF)
+$j int(0)
+plus<INF>
+minus<INF>
+mul<NAN>
+pow<1>
+$i float(INF)
+$j int(-10)
+plus<INF>
+minus<INF>
+mul<-INF>
+div<-INF>
+mod<0>
+pow<0>
+$i float(INF)
+$j float(1.234)
+plus<INF>
+minus<INF>
+mul<INF>
+div<INF>
+mod<0>
+pow<INF>
+$i float(INF)
+$j float(INF)
+plus<INF>
+minus<NAN>
+mul<INF>
+div<NAN>
+pow<INF>
+$i float(INF)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(INF)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+INF>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+INF>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+INF>
+$i float(INF)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i float(INF)
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i float(INF)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+INF>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+INF>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+INF>
+$i float(INF)
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i float(INF)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i float(INF)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+INF>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+INF>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+INF>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+INF>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+INF>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+$i float(NAN)
+$j int(0)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+pow<1>
+$i float(NAN)
+$j int(-10)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<-8>
+pow<NAN>
+$i float(NAN)
+$j float(1.234)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(NAN)
+$j float(INF)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+pow<NAN>
+$i float(NAN)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(NAN)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+NAN>
+$i float(NAN)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i float(NAN)
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i float(NAN)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+NAN>
+$i float(NAN)
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+NAN>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i float(NAN)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i float(NAN)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+NAN>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+NAN>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+NAN>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+$i bool(true)
+$j int(0)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j int(-10)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+11>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+-10>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+-0.1>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j float(1.234)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-0.234>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+1.234>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0.81037277147488>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j float(INF)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+INF>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j float(NAN)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j NULL
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j string(6) "string"
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(true)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j int(0)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j int(-10)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+10>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+INF>
+$i bool(false)
+$j float(1.234)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-1.234>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i bool(false)
+$j float(INF)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i bool(false)
+$j float(NAN)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+NAN>
+$i bool(false)
+$j bool(true)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i bool(false)
+$j bool(false)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j NULL
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+0>
+$i bool(false)
+$j string(6) "string"
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i bool(false)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+0>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j int(0)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j int(-10)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+10>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+INF>
+$i NULL
+$j float(1.234)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+-1.234>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+0>
+$i NULL
+$j float(INF)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+0>
+$i NULL
+$j float(NAN)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+NAN>
+$i NULL
+$j bool(true)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i NULL
+$j bool(false)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j NULL
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+0>
+$i NULL
+$j string(6) "string"
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i NULL
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+0>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j int(0)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j int(-10)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+-9>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+11>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+-10>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+-0.1>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j float(1.234)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+2.234>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-0.234>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+1.234>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0.81037277147488>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j float(INF)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+INF>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j float(NAN)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j bool(true)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j bool(false)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j NULL
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j string(6) "string"
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i resource(1) of type (stream)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+1>
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+1>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j int(0)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j int(-10)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+-10>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+10>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+INF>
+$i string(6) "string"
+$j float(1.234)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+1.234>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+-1.234>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+0>
+$i string(6) "string"
+$j float(INF)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+INF>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+-INF>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+0>
+$i string(6) "string"
+$j float(NAN)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+NAN>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+NAN>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+NAN>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+NAN>
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+NAN>
+$i string(6) "string"
+$j bool(true)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+0>
+$i string(6) "string"
+$j bool(false)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit boolean to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j NULL
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit null to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j resource(1) of type (stream)
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 81
+0>
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 73
+0>
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 97
+0>
+$i string(6) "string"
+$j string(6) "string"
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+0>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i string(6) "string"
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on right and then left
+plus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+-1>
+mul<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+0>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+0>
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 57
+1>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 65
+1>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 81
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit string to int conversion for math in %s/basic.php on line 97
+1>
+$i vec(1) {
+  int(42)
+}
+$j int(0)
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j int(-10)
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j float(1.234)
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j float(INF)
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j float(NAN)
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j bool(true)
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j bool(false)
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j NULL
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j resource(1) of type (stream)
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j string(6) "string"
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+$i vec(1) {
+  int(42)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+Foo on right and then left
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+0>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 97
+1>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(0)
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(-10)
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(1.234)
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(INF)
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(NAN)
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+1>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(true)
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit bool to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(false)
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j NULL
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j resource(1) of type (stream)
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit resource to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j string(6) "string"
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j vec(1) {
+  int(42)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit varray/vec to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+Foo on right and then left
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+0>
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit darray/dict to int conversion for math in %s/basic.php on line 97
+1>
+Foo on both
+plus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 56
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 56
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 57
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 57
+2>
+minus<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 64
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 64
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 65
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 65
+0>
+mul<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 80
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 80
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 81
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 81
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 42
+div<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 72
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 72
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 73
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 73
+1>
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 47
+mod<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 88
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 88
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 89
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 89
+0>
+pow<
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 96
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 96
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+
+Notice: Implicit object to int conversion for math in %s/basic.php on line 97
+
+Notice: Object of class Foo could not be converted to int in %s/basic.php on line 97
+1>

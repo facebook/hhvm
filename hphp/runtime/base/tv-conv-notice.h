@@ -41,5 +41,6 @@ void handleConvNoticeLevel(
 extern const StaticString s_ConvNoticeReasonConcat;
 extern const StaticString s_ConvNoticeReasonBitOp;
 extern const StaticString s_ConvNoticeReasonIncDec;
+extern const StaticString s_ConvNoticeReasonMath;
 
 }

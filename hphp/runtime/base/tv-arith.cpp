@@ -97,12 +97,29 @@ TypedValue make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 TypedNum numericConvHelper(TypedValue cell) {
   assertx(tvIsPlausible(cell));
 
+
+  auto handleConvToIntNotice = [&](const char* from) {
+    handleConvNoticeLevel(
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+      from,
+      "int",
+      s_ConvNoticeReasonMath.get());
+  };
+
+  auto stringToNumeric_ = [](const StringData* str) {
+    return stringToNumeric(str,
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+      s_ConvNoticeReasonMath.get());
+  };
+
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvToIntNotice("null");
       return make_int(0);
 
     case KindOfBoolean:
+      handleConvToIntNotice("bool");
       return make_int(cell.m_data.num);
 
     case KindOfRFunc:
@@ -112,14 +129,14 @@ TypedNum numericConvHelper(TypedValue cell) {
       invalidFuncConversion("int");
 
     case KindOfClass:
-      return stringToNumeric(classToStringHelper(cell.m_data.pclass));
+      return stringToNumeric_(classToStringHelper(cell.m_data.pclass));
 
     case KindOfLazyClass:
-      return stringToNumeric(lazyClassToStringHelper(cell.m_data.plazyclass));
+      return stringToNumeric_(lazyClassToStringHelper(cell.m_data.plazyclass));
 
     case KindOfString:
     case KindOfPersistentString:
-      return stringToNumeric(cell.m_data.pstr);
+      return stringToNumeric_(cell.m_data.pstr);
 
     case KindOfPersistentDArray:
     case KindOfDArray:
@@ -142,9 +159,11 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfObject:
+      handleConvToIntNotice("object");
       return make_int(cell.m_data.pobj->toInt64());
 
     case KindOfResource:
+      handleConvToIntNotice("resource");
       return make_int(cell.m_data.pres->data()->o_toInt64());
 
     case KindOfInt64:
@@ -699,8 +718,15 @@ TypedValue tvPow(TypedValue c1, TypedValue c2) {
 }
 
 TypedValue tvMod(TypedValue c1, TypedValue c2) {
-  auto const i1 = tvToInt(c1);
-  auto const i2 = tvToInt(c2);
+  auto toIntWithNotice = [](TypedValue i) {
+    return tvToInt(
+          i,
+          flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
+          s_ConvNoticeReasonMath.get(),
+          false);
+  };
+  auto const i1 = toIntWithNotice(c1);
+  auto const i2 = toIntWithNotice(c2);
   if (UNLIKELY(i2 == 0)) {
     SystemLib::throwDivisionByZeroExceptionObject();
   }

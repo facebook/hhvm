@@ -2290,7 +2290,9 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   };
 
   if (srcType <= TBool) return genWithConvNoticePrim(ConvBoolToInt, "bool");
-  if (srcType <= TDbl)  return genWithConvNoticePrim(ConvDblToInt, "double");
+  if (srcType <= TDbl)  return notice_data->noticeWithinNum
+                          ? genWithConvNoticePrim(ConvDblToInt, "double")
+                          : gen(env, ConvDblToInt, src);
   if (srcType <= TStr)  return genWithConvNoticePrim(ConvStrToInt, "string");
   if (srcType <= TObj)  return gen(env, ConvObjToInt, *notice_data, catchTrace, src);
   if (srcType <= TRes)  return genWithConvNoticePrim(ConvResToInt, "resource");

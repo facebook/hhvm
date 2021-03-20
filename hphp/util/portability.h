@@ -101,6 +101,14 @@
 # define HHVM_ATTRIBUTE_WEAK
 #endif
 
+#ifdef __clang__
+#define NO_PROFILING
+#elif defined(__GNUC__)
+#define NO_PROFILING __attribute__((no_profile_instrument_function))
+#else
+#define NO_PROFILING
+#endif
+
 #ifndef NDEBUG
 # define DEBUG_ONLY /* nop */
 #else

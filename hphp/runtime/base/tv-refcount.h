@@ -86,6 +86,7 @@ ALWAYS_INLINE RawDestructor destructorForType(DataType dt) {
  *
  * @requires: isRefcountedType(type(tv))
  */
+NO_PROFILING
 ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   assertx(isRefcountedType(tv.m_type));
 
@@ -96,7 +97,8 @@ ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   }
 }
 
-template<typename T> ALWAYS_INLINE
+template<typename T>
+NO_PROFILING ALWAYS_INLINE
 enable_if_lval_t<T, void> tvDecRefCountable(T tv) {
   assertx(isRefcountedType(type(tv)));
 

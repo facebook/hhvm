@@ -347,6 +347,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
     auto const raise_type_error = [&]{
       auto const expected_type = [&]{
         if (tc.isVArrayOrDArray()) return "varray_or_darray";
+        if (tc.isVecOrDict()) return "vec_or_dict";
         return getDataTypeString(*targetType).data();
       }();
       auto const msg = param_type_error_message(
@@ -359,12 +360,14 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
 
     // Check the varray_or_darray and vec_or_dict union types.
     // Precondition: the DataType of the TypedValue is correct.
-    //
-    // TODO(arnabde,kshaunak): Also support vec_or_dict here.
     auto const check_dvarray = [&]{
       assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (tc.isVArrayOrDArray() && !tvIsHAMSafeDVArray(tv)) {
-        raise_type_error();
+      if (tc.isVArrayOrDArray()) {
+        assertx(!RO::EvalHackArrDVArrs);
+        if (!tvIsArray(tv)) raise_type_error();
+      } else if (tc.isVecOrDict()) {
+        assertx(RO::EvalHackArrDVArrs);
+        if (!tvIsVec(tv) && !tvIsDict(tv)) raise_type_error();
       }
     };
 

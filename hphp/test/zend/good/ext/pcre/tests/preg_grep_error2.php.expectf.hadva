@@ -2,8 +2,7 @@
 
 Arg value is: this is a string
 
-Warning: input to preg_grep must be an array or collection in %s/preg_grep_error2.php on line 15
-NULL
+Warning: preg_grep() expects parameter 2 to be vec_or_dict, string given in %s/preg_grep_error2.php on line 15
 
 Arg value is: Array
 dict(2) {
@@ -13,6 +12,5 @@ dict(2) {
   string(10) "a subarray"
 }
 
-Warning: input to preg_grep must be an array or collection in %s/preg_grep_error2.php on line 18
-NULL
+Warning: preg_grep() expects parameter 2 to be vec_or_dict, object given in %s/preg_grep_error2.php on line 18
 Done

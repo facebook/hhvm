@@ -1298,8 +1298,14 @@ Type param_target_type(const Func* callee, uint32_t paramIdx) {
     return TNull | Type(*dt);
   }
   if (!pi.builtinType) {
-    if (!tc.isVArrayOrDArray()) return TBottom;
-    return RO::EvalHackArrDVArrs ? TVec|TDict : TVArr|TDArr;
+    if (tc.isVArrayOrDArray()) {
+      assertx(!RO::EvalHackArrDVArrs);
+      return TVArr|TDArr;
+    } else if (tc.isVecOrDict()) {
+      assertx(RO::EvalHackArrDVArrs);
+      return TVec|TDict;
+    }
+    return TBottom;
   }
   if (pi.builtinType == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
@@ -1607,7 +1613,9 @@ SSATmp* maybeCoerceValue(
   return bail();
 }
 
-StaticString s_varray_or_darray("varray_or_darray");
+StaticString
+  s_varray_or_darray("varray_or_darray"),
+  s_vec_or_dict("vec_or_dict");
 
 /*
  * Prepare the actual arguments to the CallBuiltin instruction, by converting a
@@ -1629,6 +1637,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
       if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
+      if (tc.isVecOrDict()) return s_vec_or_dict.get();
       auto const dt = param_target_type(callee, param) - TNull;
       return getDataTypeString(dt.toDataType()).get();
     }();

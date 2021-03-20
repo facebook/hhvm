@@ -88,7 +88,7 @@ pub fn make_info<'arena>(
 pub fn emit_wrapper_methods<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
-    info: &'a MemoizeInfo<'arena>,
+    info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
     methods: &'a [T::Method_],
 ) -> Result<Vec<HhasMethod<'a, 'arena>>> {
@@ -110,7 +110,7 @@ pub fn emit_wrapper_methods<'a, 'arena>(
 fn make_memoize_wrapper_method<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
-    info: &'a MemoizeInfo<'arena>,
+    info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
     method: &'a T::Method_,
 ) -> Result<HhasMethod<'a, 'arena>> {

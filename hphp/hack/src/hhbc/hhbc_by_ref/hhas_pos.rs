@@ -6,7 +6,7 @@
 use oxidized::pos::Pos;
 
 /// Span, emitted as prefix to classes and functions
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Span(pub usize, pub usize);
 
 impl Span {

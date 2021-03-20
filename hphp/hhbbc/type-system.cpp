@@ -4181,7 +4181,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
           auto t = type_of_type_structure(
             index, ctx, tsElems->getValue(i).getArrayData());
           if (!t) return folly::none;
-          v.emplace_back(std::move(t.value()));
+          v.emplace_back(remove_uninit(std::move(t.value())));
         }
         if (v.empty()) return folly::none;
         return RO::EvalHackArrDVArrs ? vec(v) : arr_packed_varray(v);
@@ -4224,7 +4224,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
           if (!t) return folly::none;
           map.emplace_back(
             make_tv<KindOfPersistentString>(key),
-            MapElem::SStrKey(std::move(t.value()))
+            MapElem::SStrKey(remove_uninit(std::move(t.value())))
           );
         }
         if (map.empty()) return folly::none;

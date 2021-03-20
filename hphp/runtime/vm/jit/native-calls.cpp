@@ -185,8 +185,7 @@ static CallMap s_callMap {
                              TypedValue,
                              const ConvNoticeLevel,
                              const StringData*,
-                             bool)>(tvToInt),
-                           DSSA, SSync,
+                             bool)>(tvToInt), DSSA, SSync,
                            {{TV, 0}, extra(&ConvNoticeData::level),
                             extra(&ConvNoticeData::reasonIntVal),
                             extra(&ConvNoticeData::noticeWithinNum)}},
@@ -197,7 +196,10 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvObjToStr,       convObjToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvTVToStr,        tvCastToStringData, DSSA, SSync,
+    {ConvTVToStr,        static_cast<StringData* (*)(
+                             TypedValue,
+                             const ConvNoticeLevel,
+                             const StringData*)>(tvCastToStringData), DSSA, SSync,
                            {{TV, 0}, extra(&ConvNoticeData::level),
                             extra(&ConvNoticeData::reasonIntVal)}},
 

@@ -174,6 +174,11 @@ inline TypedNum stringToNumeric(
          make_tv<KindOfInt64>(0);
 }
 
+
+inline TypedNum stringToNumeric(const StringData* sd) {
+  return stringToNumeric(sd, ConvNoticeLevel::None, nullptr);
+}
+
 inline TypedValue tvClassToString(TypedValue key) {
   if (isClassType(type(key))) {
     auto const keyStr = classToStringHelper(val(key).pclass);

@@ -626,6 +626,10 @@ StringData* tvCastToStringData(
   not_reached();
 }
 
+StringData* tvCastToStringData(TypedValue tv) {
+  return tvCastToStringData(tv, ConvNoticeLevel::None, nullptr);
+}
+
 String tvCastToString(TypedValue tv) {
   return String::attach(tvCastToStringData(tv));
 }

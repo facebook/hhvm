@@ -432,6 +432,10 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_enable_strict_string_concat_interp:
         (bool_opt "enable_strict_string_concat_interp" config)
       ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
+      ?tco_allowed_expression_tree_visitors:
+        (Option.map
+           (string_list_opt "allowed_expression_tree_visitors" config)
+           ~f:(fun l -> List.map l ~f:Utils.add_ns))
       ()
   in
   Errors.allowed_fixme_codes_strict :=

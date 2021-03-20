@@ -5208,6 +5208,14 @@ let unsafe_cast pos =
     pos
     "This cast violates type safety and may lead to unexpected behavior at runtime."
 
+let experimental_expression_trees pos =
+  add
+    (Typing.err_code Typing.ExperimentalExpressionTrees)
+    pos
+    ( "To enable Expression Trees for local experimentation use the "
+    ^ "`<<file:__EnableUnstableFeatures('expression_trees')>>` file attribute."
+    )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -755,6 +755,8 @@ module UnstableFeatures = struct
   let ifc = "ifc"
 
   let readonly = "readonly"
+
+  let expression_trees = "expression_trees"
 end
 
 module Coeffects = struct

@@ -1489,3 +1489,5 @@ val unsafe_cast : Pos.t -> unit
 val invalid_constfun_attribute : Pos.t -> unit
 
 val readonly_exception : Pos.t -> unit
+
+val experimental_expression_trees : Pos.t -> unit

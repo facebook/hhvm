@@ -5310,8 +5310,6 @@ where
                 self.names.constants = constants;
             }
             PrefixedCodeExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::ExpressionTrees);
-
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_expression_tree = true;
 

@@ -180,3 +180,10 @@ let ignore_unsafe_cast = GlobalOptions.tco_ignore_unsafe_cast
 let set_readonly = GlobalOptions.set_tco_readonly
 
 let readonly = GlobalOptions.tco_readonly
+
+let set_tco_enable_expression_trees = GlobalOptions.set_tco_enable_expression_trees
+
+let expression_trees_enabled = GlobalOptions.expression_trees_enabled
+
+let allowed_expression_tree_visitors =
+  GlobalOptions.allowed_expression_tree_visitors

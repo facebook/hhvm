@@ -287,6 +287,10 @@ type t = {
   tco_ignore_unsafe_cast: bool;
   (* Enable Unstable feature readonly tast check *)
   tco_readonly: bool;
+  (* Enable expression trees via unstable features flag *)
+  tco_enable_expression_trees: bool;
+  (* Allowed expression tree visitors when not enabled via unstable features flag *)
+  tco_allowed_expression_tree_visitors: string list;
 }
 [@@deriving eq, show]
 
@@ -402,6 +406,8 @@ val make :
   ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_readonly:bool ->
+  ?tco_enable_expression_trees:bool ->
+  ?tco_allowed_expression_tree_visitors:string list ->
   unit ->
   t
 
@@ -658,3 +664,9 @@ val tco_ignore_unsafe_cast : t -> bool
 val tco_readonly : t -> bool
 
 val set_tco_readonly : t -> bool -> t
+
+val set_tco_enable_expression_trees : t -> bool -> t
+
+val expression_trees_enabled : t -> bool
+
+val allowed_expression_tree_visitors : t -> string list

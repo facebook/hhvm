@@ -624,6 +624,7 @@ module Typing = struct
     | UnsafeCast [@value 4417]
     | ReadonlyException [@value 4418]
     | InvalidTypeHint [@value 4419]
+    | ExperimentalExpressionTrees [@value 4420]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

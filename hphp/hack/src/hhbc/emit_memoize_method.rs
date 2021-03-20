@@ -22,7 +22,6 @@ use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust::{coeffects, reified};
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use naming_special_names_rust::{members, user_attributes as ua};
-use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;

@@ -871,7 +871,6 @@ dependencies = [
  "instruction_sequence_rust",
  "local",
  "naming_special_names_rust",
- "ocamlrep",
  "options",
  "oxidized",
  "runtime",

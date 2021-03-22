@@ -262,7 +262,7 @@ let go_docblock_for_symbol
     | None ->
       let msg =
         Printf.sprintf
-          "The symbol %s (%s) was not found.  If this symbol was added recently, you might consider rebasing."
+          "Could not find the symbol '%s' (expected to be a %s). This symbol may need namespace information (e.g. HH\\a\\b\\c) to resolve correctly. You can also consider rebasing."
           symbol
           (SearchUtils.show_si_kind kind)
       in

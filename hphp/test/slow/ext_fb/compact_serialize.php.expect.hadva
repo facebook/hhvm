@@ -200,39 +200,39 @@ fbcu success: true
 
 
 ====
-x = vec [
-]
-HH\is_php_array: false
+x = array (
+)
+HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
 string(7) "
-FA FC "
+FB FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
-])) === dict [
-]: false
-type(fb_cu(fb_s(vec))) === dict
+fb_cu(fb_s(array (
+))) === dict [
+]: true
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
 ====
-x = dict [
-]
-HH\is_php_array: false
+x = array (
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
@@ -241,21 +241,61 @@ string(7) "
 FB FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
-])) === dict [
+fb_cu(fb_s(array (
+))) === dict [
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = array (
+  0 => 12345,
+  1 => 'abc',
+  2 => 0.1234,
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(59) "
+FA F0 30 39 F9 03 61 62  63 F6 F3 8E 53 74 24 97
+BF 3F FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 12345,
+  1 => 'abc',
+  2 => 0.1234,
+))) === dict [
+  0 => 12345,
+  1 => 'abc',
+  2 => 0.1234,
+]: true
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -300,42 +340,35 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  12345,
-  'abc',
-  0.1234,
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
+x = array (
+  1 => 12345,
+)
+HH\is_php_array: true
+HH\is_darray: true
+HH\is_varray: false
 
 serialize output is string: true
-string(59) "
-FA F0 30 39 F9 03 61 62  63 F6 F3 8E 53 74 24 97
-BF 3F FC "
+string(19) "
+FA FD F0 30 39 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
-  12345,
-  'abc',
-  0.1234,
-])) === dict [
-  0 => 12345,
-  1 => 'abc',
-  2 => 0.1234,
-]: false
-type(fb_cu(fb_s(vec))) === dict
+fb_cu(fb_s(array (
+  1 => 12345,
+))) === dict [
+  1 => 12345,
+]: true
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -373,35 +406,42 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
+x = array (
   1 => 12345,
-]
-HH\is_php_array: false
+  'a' => 123124,
+  'sdf' => 0.1234,
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(19) "
-FB 01 F0 30 39 FC "
+string(78) "
+FB 01 F0 30 39 F8 61 E1  E0 F4 F9 03 73 64 66 F6
+F3 8E 53 74 24 97 BF 3F  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   1 => 12345,
-])) === dict [
+  'a' => 123124,
+  'sdf' => 0.1234,
+))) === dict [
   1 => 12345,
+  'a' => 123124,
+  'sdf' => 0.1234,
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -446,42 +486,126 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
-  1 => 12345,
-  'a' => 123124,
-  'sdf' => 0.1234,
-]
-HH\is_php_array: false
-HH\is_darray: true
-HH\is_varray: false
+x = array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
 
 serialize output is string: true
-string(78) "
-FB 01 F0 30 39 F8 61 E1  E0 F4 F9 03 73 64 66 F6
-F3 8E 53 74 24 97 BF 3F  FC "
+string(19) "
+FA FA F8 61 FC FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
-  1 => 12345,
-  'a' => 123124,
-  'sdf' => 0.1234,
-])) === dict [
-  1 => 12345,
-  'a' => 123124,
-  'sdf' => 0.1234,
+fb_cu(fb_s(array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = vec [
+  array (
+    0 => 'a',
+  ),
+]
+HH\is_php_array: false
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(19) "
+FA FA F8 61 FC FC "
+bool(true)
+int(1)
+fb_cu(fb_s(vec [
+  array (
+    0 => 'a',
+  ),
+])) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+]: false
+type(fb_cu(fb_s(vec))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:vec)) === false
+HH\is_darray: fb_cu(fb_s(type:vec)) === true
+HH\is_varray: fb_cu(fb_s(type:vec)) === false
+
+fb_u(fb_cs(x)) === x: false
+type(fb_u(fb_s(type:vec))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:vec)) === false
+HH\is_darray: fb_u(fb_cs(type:vec)) === true
+HH\is_varray: fb_u(fb_cs(type:vec)) === false
+
+
+
+====
+x = array (
+  0 => 
+  vec [
+    'a',
+  ],
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(19) "
+FA FA F8 61 FC FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  vec [
+    'a',
+  ],
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+]: false
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: false
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -526,26 +650,74 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  vec [
-    'a',
+x = array (
+  0 => 1,
+  1 => 
+  array (
+    0 => 'a',
+  ),
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(22) "
+FA 01 FA F8 61 FC FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 1,
+  1 => 
+  array (
+    0 => 'a',
+  ),
+))) === dict [
+  0 => 1,
+  1 => 
+  dict [
+    0 => 'a',
   ],
+]: true
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = vec [
+  1,
+  array (
+    0 => 'a',
+  ),
 ]
 HH\is_php_array: false
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(19) "
-FA FA F8 61 FC FC "
+string(22) "
+FA 01 FA F8 61 FC FC "
 bool(true)
 int(1)
 fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
+  1,
+  array (
+    0 => 'a',
+  ),
 ])) === dict [
-  0 => 
+  0 => 1,
+  1 => 
   dict [
     0 => 'a',
   ],
@@ -566,82 +738,47 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
+x = array (
+  0 => 1,
+  1 => 
   vec [
     'a',
   ],
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(19) "
-FA FA F8 61 FC FC "
+string(22) "
+FA 01 FA F8 61 FC FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
+fb_cu(fb_s(array (
+  0 => 1,
+  1 => 
   vec [
     'a',
   ],
-])) === dict [
-  0 => 
+))) === dict [
+  0 => 1,
+  1 => 
   dict [
     0 => 'a',
   ],
 ]: false
-type(fb_cu(fb_s(vec))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(19) "
-FA FA F8 61 FC FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-])) === dict [
-  0 => 
-  dict [
-    0 => 'a',
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -689,139 +826,94 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  1,
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
+x = array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+)
+HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(22) "
-FA 01 FA F8 61 FC FC "
+string(19) "
+FA FA F8 61 FC FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
-  1,
+fb_cu(fb_s(array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+]: true
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = array (
+  0 => 
   vec [
     'a',
   ],
-])) === dict [
-  0 => 1,
-  1 => 
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(19) "
+FA FA F8 61 FC FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  vec [
+    'a',
+  ],
+))) === dict [
+  0 => 
   dict [
     0 => 'a',
   ],
 ]: false
-type(fb_cu(fb_s(vec))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
 ====
 x = vec [
-  1,
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(22) "
-FA 01 FA F8 61 FC FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  1,
-  vec [
-    'a',
-  ],
-])) === dict [
-  0 => 1,
-  1 => 
-  dict [
+  array (
     0 => 'a',
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  1,
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(22) "
-FA 01 FA F8 61 FC FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  1,
-  vec [
-    'a',
-  ],
-])) === dict [
-  0 => 1,
-  1 => 
-  dict [
-    0 => 'a',
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
+  ),
 ]
 HH\is_php_array: false
 HH\is_darray: false
@@ -833,9 +925,9 @@ FA FA F8 61 FC FC "
 bool(true)
 int(1)
 fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
+  array (
+    0 => 'a',
+  ),
 ])) === dict [
   0 => 
   dict [
@@ -858,90 +950,100 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
+x = array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 1,
+)
+HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(19) "
-FA FA F8 61 FC FC "
+string(22) "
+FA FA F8 61 FC 01 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-])) === dict [
+fb_cu(fb_s(array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 1,
+))) === dict [
   0 => 
   dict [
     0 => 'a',
   ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
+  1 => 1,
+]: true
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = array (
+  0 => 
+  vec [
+    'a',
+  ],
+  1 => 1,
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(22) "
+FA FA F8 61 FC 01 FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  vec [
+    'a',
+  ],
+  1 => 1,
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+  1 => 1,
+]: false
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
 ====
 x = vec [
-  vec [
-    'a',
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(19) "
-FA FA F8 61 FC FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-])) === dict [
-  0 => 
-  dict [
+  array (
     0 => 'a',
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
+  ),
   1,
 ]
 HH\is_php_array: false
@@ -954,9 +1056,9 @@ FA FA F8 61 FC 01 FC "
 bool(true)
 int(1)
 fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
+  array (
+    0 => 'a',
+  ),
   1,
 ])) === dict [
   0 => 
@@ -1024,32 +1126,93 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  vec [
-    'a',
+x = array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 
+  array (
+    0 => 1,
+  ),
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(29) "
+FA FA F8 61 FC FA 01 FC  FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 
+  array (
+    0 => 1,
+  ),
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
   ],
-  1,
+  1 => 
+  dict [
+    0 => 1,
+  ],
+]: true
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = vec [
+  array (
+    0 => 'a',
+  ),
+  array (
+    0 => 1,
+  ),
 ]
 HH\is_php_array: false
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(22) "
-FA FA F8 61 FC 01 FC "
+string(29) "
+FA FA F8 61 FC FA 01 FC  FC "
 bool(true)
 int(1)
 fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  1,
+  array (
+    0 => 'a',
+  ),
+  array (
+    0 => 1,
+  ),
 ])) === dict [
   0 => 
   dict [
     0 => 'a',
   ],
-  1 => 1,
+  1 => 
+  dict [
+    0 => 1,
+  ],
 ]: false
 type(fb_cu(fb_s(vec))) === dict
 fbcu success: true
@@ -1067,32 +1230,93 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
+x = array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 
+  vec [
+    1,
+  ],
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(29) "
+FA FA F8 61 FC FA 01 FC  FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  array (
+    0 => 'a',
+  ),
+  1 => 
+  vec [
+    1,
+  ],
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+  1 => 
+  dict [
+    0 => 1,
+  ],
+]: false
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: false
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
 x = vec [
   vec [
     'a',
   ],
-  1,
+  array (
+    0 => 1,
+  ),
 ]
 HH\is_php_array: false
 HH\is_darray: false
 HH\is_varray: true
 
 serialize output is string: true
-string(22) "
-FA FA F8 61 FC 01 FC "
+string(29) "
+FA FA F8 61 FC FA 01 FC  FC "
 bool(true)
 int(1)
 fb_cu(fb_s(vec [
   vec [
     'a',
   ],
-  1,
+  array (
+    0 => 1,
+  ),
 ])) === dict [
   0 => 
   dict [
     0 => 'a',
   ],
-  1 => 1,
+  1 => 
+  dict [
+    0 => 1,
+  ],
 ]: false
 type(fb_cu(fb_s(vec))) === dict
 fbcu success: true
@@ -1106,6 +1330,60 @@ fbcu success: true
 HH\is_php_array: fb_u(fb_cs(type:vec)) === false
 HH\is_darray: fb_u(fb_cs(type:vec)) === true
 HH\is_varray: fb_u(fb_cs(type:vec)) === false
+
+
+
+====
+x = array (
+  0 => 
+  vec [
+    'a',
+  ],
+  1 => 
+  vec [
+    1,
+  ],
+)
+HH\is_php_array: true
+HH\is_darray: false
+HH\is_varray: true
+
+serialize output is string: true
+string(29) "
+FA FA F8 61 FC FA 01 FC  FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 
+  vec [
+    'a',
+  ],
+  1 => 
+  vec [
+    1,
+  ],
+))) === dict [
+  0 => 
+  dict [
+    0 => 'a',
+  ],
+  1 => 
+  dict [
+    0 => 1,
+  ],
+]: false
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: false
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -1160,263 +1438,15 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 
 
 ====
-x = vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(29) "
-FA FA F8 61 FC FA 01 FC  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-])) === dict [
+x = array (
   0 => 
-  dict [
-    0 => 'a',
-  ],
-  1 => 
-  dict [
-    0 => 1,
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(29) "
-FA FA F8 61 FC FA 01 FC  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-])) === dict [
-  0 => 
-  dict [
-    0 => 'a',
-  ],
-  1 => 
-  dict [
-    0 => 1,
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(29) "
-FA FA F8 61 FC FA 01 FC  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-])) === dict [
-  0 => 
-  dict [
-    0 => 'a',
-  ],
-  1 => 
-  dict [
-    0 => 1,
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(29) "
-FA FA F8 61 FC FA 01 FC  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-])) === dict [
-  0 => 
-  dict [
-    0 => 'a',
-  ],
-  1 => 
-  dict [
-    0 => 1,
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-]
-HH\is_php_array: false
-HH\is_darray: false
-HH\is_varray: true
-
-serialize output is string: true
-string(29) "
-FA FA F8 61 FC FA 01 FC  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(vec [
-  vec [
-    'a',
-  ],
-  vec [
-    1,
-  ],
-])) === dict [
-  0 => 
-  dict [
-    0 => 'a',
-  ],
-  1 => 
-  dict [
-    0 => 1,
-  ],
-]: false
-type(fb_cu(fb_s(vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
-
-
-
-====
-x = vec [
   stdClass::__set_state(darray[
   ]),
+  1 => 
   stdClass::__set_state(darray[
   ]),
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
@@ -1427,40 +1457,42 @@ string(13) "
 FA F3 F3 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(vec [
+fb_cu(fb_s(array (
+  0 => 
   stdClass::__set_state(darray[
   ]),
+  1 => 
   stdClass::__set_state(darray[
   ]),
-])) === dict [
+))) === dict [
   0 => NULL,
   1 => NULL,
 ]: false
-type(fb_cu(fb_s(vec))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:vec)) === false
-HH\is_darray: fb_cu(fb_s(type:vec)) === true
-HH\is_varray: fb_cu(fb_s(type:vec)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:vec))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:vec)) === false
-HH\is_darray: fb_u(fb_cs(type:vec)) === true
-HH\is_varray: fb_u(fb_cs(type:vec)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
 ====
-x = dict [
+x = array (
   42 => 
   stdClass::__set_state(darray[
   ]),
   47 => 
   stdClass::__set_state(darray[
   ]),
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
@@ -1471,29 +1503,65 @@ string(19) "
 FB 2A F3 2F F3 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   42 => 
   stdClass::__set_state(darray[
   ]),
   47 => 
   stdClass::__set_state(darray[
   ]),
-])) === dict [
+))) === dict [
   42 => NULL,
   47 => NULL,
 ]: false
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
+
+
+
+====
+x = array (
+  0 => 'a',
+  1 => 'b',
+)
+HH\is_php_array: true
+HH\is_darray: true
+HH\is_varray: false
+
+serialize output is string: true
+string(19) "
+FA F8 61 F8 62 FC "
+bool(true)
+int(1)
+fb_cu(fb_s(array (
+  0 => 'a',
+  1 => 'b',
+))) === dict [
+  0 => 'a',
+  1 => 'b',
+]: true
+type(fb_cu(fb_s(array))) === dict
+fbcu success: true
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
+
+fb_u(fb_cs(x)) === x: true
+type(fb_u(fb_s(type:array))) === dict
+fbcu success: true
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -1534,38 +1602,38 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
-  0 => 'a',
-  1 => 'b',
-]
-HH\is_php_array: false
+x = array (
+  '0' => 'a',
+  '1' => 'b',
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(26) "
-FB 00 F8 61 01 F8 62 FC  "
+string(32) "
+FB F8 30 F8 61 F8 31 F8  62 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
+  '0' => 'a',
+  '1' => 'b',
+))) === dict [
   0 => 'a',
   1 => 'b',
-])) === dict [
-  0 => 'a',
-  1 => 'b',
-]: true
-type(fb_cu(fb_s(dict))) === dict
+]: false
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
-fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+fb_u(fb_cs(x)) === x: false
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -1606,38 +1674,38 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
-  '0' => 'a',
+x = array (
+  0 => 'a',
   '1' => 'b',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(32) "
-FB F8 30 F8 61 F8 31 F8  62 FC "
+string(29) "
+FB 00 F8 61 F8 31 F8 62  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
-  '0' => 'a',
+fb_cu(fb_s(array (
+  0 => 'a',
   '1' => 'b',
-])) === dict [
+))) === dict [
   0 => 'a',
   1 => 'b',
 ]: false
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -1678,47 +1746,11 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
-  0 => 'a',
-  '1' => 'b',
-]
-HH\is_php_array: false
-HH\is_darray: true
-HH\is_varray: false
-
-serialize output is string: true
-string(29) "
-FB 00 F8 61 F8 31 F8 62  FC "
-bool(true)
-int(1)
-fb_cu(fb_s(dict [
-  0 => 'a',
-  '1' => 'b',
-])) === dict [
-  0 => 'a',
-  1 => 'b',
-]: false
-type(fb_cu(fb_s(dict))) === dict
-fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
-
-fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:dict))) === dict
-fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
-
-
-
-====
-x = dict [
+x = array (
   '0' => 'a',
   1 => 'b',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
@@ -1727,25 +1759,25 @@ string(29) "
 FB F8 30 F8 61 01 F8 62  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   '0' => 'a',
   1 => 'b',
-])) === dict [
+))) === dict [
   0 => 'a',
   1 => 'b',
 ]: false
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: false
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -2002,41 +2034,41 @@ HH\is_varray: fb_u(fb_cs(type:keyset)) === false
 
 
 ====
-x = dict [
+x = array (
   0 => 'a',
   1 => 'b',
   3 => 'c',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(35) "
-FB 00 F8 61 01 F8 62 03  F8 63 FC "
+string(29) "
+FA F8 61 F8 62 FD F8 63  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   0 => 'a',
   1 => 'b',
   3 => 'c',
-])) === dict [
+))) === dict [
   0 => 'a',
   1 => 'b',
   3 => 'c',
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -2158,41 +2190,41 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
+x = array (
   1 => 'a',
   2 => 'b',
   3 => 'c',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(35) "
-FB 01 F8 61 02 F8 62 03  F8 63 FC "
+string(29) "
+FA FD F8 61 F8 62 F8 63  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   1 => 'a',
   2 => 'b',
   3 => 'c',
-])) === dict [
+))) === dict [
   1 => 'a',
   2 => 'b',
   3 => 'c',
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -2236,41 +2268,41 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
+x = array (
   0 => 'a',
   2 => 'b',
   3 => 'c',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
 serialize output is string: true
-string(35) "
-FB 00 F8 61 02 F8 62 03  F8 63 FC "
+string(29) "
+FA F8 61 FD F8 62 F8 63  FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   0 => 'a',
   2 => 'b',
   3 => 'c',
-])) === dict [
+))) === dict [
   0 => 'a',
   2 => 'b',
   3 => 'c',
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -2353,10 +2385,10 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
+x = array (
   3 => 'a',
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
@@ -2365,23 +2397,23 @@ string(16) "
 FB 03 F8 61 FC "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   3 => 'a',
-])) === dict [
+))) === dict [
   3 => 'a',
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 
@@ -2419,12 +2451,12 @@ HH\is_varray: fb_u(fb_cs(type:dict)) === false
 
 
 ====
-x = dict [
+x = array (
   2 => 2,
   1 => 1,
   3 => 3,
-]
-HH\is_php_array: false
+)
+HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
@@ -2433,27 +2465,27 @@ string(26) "
 FB 02 02 01 01 03 03 FC  "
 bool(true)
 int(1)
-fb_cu(fb_s(dict [
+fb_cu(fb_s(array (
   2 => 2,
   1 => 1,
   3 => 3,
-])) === dict [
+))) === dict [
   2 => 2,
   1 => 1,
   3 => 3,
 ]: true
-type(fb_cu(fb_s(dict))) === dict
+type(fb_cu(fb_s(array))) === dict
 fbcu success: true
-HH\is_php_array: fb_cu(fb_s(type:dict)) === false
-HH\is_darray: fb_cu(fb_s(type:dict)) === true
-HH\is_varray: fb_cu(fb_s(type:dict)) === false
+HH\is_php_array: fb_cu(fb_s(type:array)) === false
+HH\is_darray: fb_cu(fb_s(type:array)) === true
+HH\is_varray: fb_cu(fb_s(type:array)) === false
 
 fb_u(fb_cs(x)) === x: true
-type(fb_u(fb_s(type:dict))) === dict
+type(fb_u(fb_s(type:array))) === dict
 fbcu success: true
-HH\is_php_array: fb_u(fb_cs(type:dict)) === false
-HH\is_darray: fb_u(fb_cs(type:dict)) === true
-HH\is_varray: fb_u(fb_cs(type:dict)) === false
+HH\is_php_array: fb_u(fb_cs(type:array)) === false
+HH\is_darray: fb_u(fb_cs(type:array)) === true
+HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 
 

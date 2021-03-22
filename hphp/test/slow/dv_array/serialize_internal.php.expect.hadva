@@ -1,0 +1,138 @@
+=========================
+vec(0) {
+}
+is_marked = 0
+v:0:{}
+v:0:{}
+vec(0) {
+}
+is_marked = 0
+=========================
+varray(0) {
+}
+is_marked = 1
+x:0:{}
+X:0:{}
+varray(0) {
+}
+is_marked = 1
+=========================
+vec(0) {
+}
+is_marked = 0
+v:0:{}
+v:0:{}
+vec(0) {
+}
+is_marked = 0
+=========================
+dict(0) {
+}
+is_marked = 0
+D:0:{}
+D:0:{}
+dict(0) {
+}
+is_marked = 0
+=========================
+darray(0) {
+}
+is_marked = 1
+X:0:{}
+X:0:{}
+darray(0) {
+}
+is_marked = 1
+=========================
+dict(0) {
+}
+is_marked = 0
+D:0:{}
+D:0:{}
+dict(0) {
+}
+is_marked = 0
+=========================
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 0
+v:3:{i:1;i:2;i:3;}
+v:3:{i:1;i:2;i:3;}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 0
+=========================
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 1
+x:3:{i:1;i:2;i:3;}
+X:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 1
+=========================
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 0
+v:3:{i:1;i:2;i:3;}
+v:3:{i:1;i:2;i:3;}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_marked = 0
+=========================
+dict(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 0
+D:1:{i:0;i:0;}
+D:1:{i:0;i:0;}
+dict(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 0
+=========================
+darray(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 1
+X:1:{i:0;i:0;}
+X:1:{i:0;i:0;}
+darray(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 1
+=========================
+dict(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 0
+D:1:{i:0;i:0;}
+D:1:{i:0;i:0;}
+dict(1) {
+  [0]=>
+  int(0)
+}
+is_marked = 0

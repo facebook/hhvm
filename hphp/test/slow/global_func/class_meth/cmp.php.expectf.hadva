@@ -347,17 +347,17 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsm
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare %s
 
 Test 9
 bool(false)

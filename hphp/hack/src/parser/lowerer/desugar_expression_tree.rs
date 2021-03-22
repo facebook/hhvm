@@ -26,8 +26,8 @@ use oxidized::{
 /// ```
 /// (() ==> {
 ///   // Splices are evaluated immediately.
-///   $0splice0 = MyDsl::symbol(foo<>);
-///   $0splice1 = MyDsl::intLiteral(1);
+///   $0splice0 = MyDsl::liftSymbol(foo<>);
+///   $0splice1 = MyDsl::liftInt(1);
 ///
 ///   return MyDsl::makeTree(
 ///     // At runtime, expression tree visitors know the position of the literal.
@@ -277,47 +277,47 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer<'_> {
                 // Ban: Foo` Foo`1` `;
                 return Err((e.0.clone(), "Expression trees may not be nested.".into()));
             }
-            // Convert `1` to `__splice__(Visitor::intLiteral(1))`.
+            // Convert `1` to `${ Visitor::liftInt(1) }`.
             Int(_) => {
                 *e = mk_splice(static_meth_call(
                     self.visitor_name,
-                    "intLiteral",
+                    "liftInt",
                     vec![e.clone()],
                     &pos,
                 ))
             }
-            // Convert `1.0` to `__splice__(Visitor::floatLiteral(1.0))`.
+            // Convert `1.0` to `${ Visitor::liftFloat(1.0) }`.
             Float(_) => {
                 *e = mk_splice(static_meth_call(
                     self.visitor_name,
-                    "floatLiteral",
+                    "liftFloat",
                     vec![e.clone()],
                     &pos,
                 ))
             }
-            // Convert `"foo"` to `__splice__(Visitor::stringLiteral("foo"))`
+            // Convert `"foo"` to `${ Visitor::liftString("foo") }`
             String(_) => {
                 *e = mk_splice(static_meth_call(
                     self.visitor_name,
-                    "stringLiteral",
+                    "liftString",
                     vec![e.clone()],
                     &pos,
                 ))
             }
-            // Convert `true` to `__splice__(Visitor::boolLiteral(true))`
+            // Convert `true` to `${ Visitor::liftBool(true) }`
             True | False => {
                 *e = mk_splice(static_meth_call(
                     self.visitor_name,
-                    "boolLiteral",
+                    "liftBool",
                     vec![e.clone()],
                     &pos,
                 ))
             }
-            // Convert `null` to `__splice__(Visitor::nullLiteral())`
+            // Convert `null` to `${ Visitor::liftNull() }`
             Null => {
                 *e = mk_splice(static_meth_call(
                     self.visitor_name,
-                    "nullLiteral",
+                    "liftNull",
                     vec![],
                     &pos,
                 ))
@@ -497,7 +497,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
         let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
 
         match &mut e.1 {
-            // Convert `foo(...)` to `__splice__(Visitor::symbol(foo<>))(...)`
+            // Convert `foo(...)` to `${ Visitor::liftSymbol(foo<>) }(...)`
             Call(ref mut call) => {
                 let (ref recv, ref targs, ref mut args, ref variadic) = **call;
 
@@ -525,7 +525,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
                         );
                         let callee = mk_splice(static_meth_call(
                             self.visitor_name,
-                            "symbol",
+                            "liftSymbol",
                             vec![fp],
                             &pos,
                         ));
@@ -534,7 +534,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
                         let args = std::mem::replace(args, vec![]);
                         e.1 = Call(Box::new((callee, vec![], args, None)))
                     }
-                    // Convert `Foo::bar(...)` to `${ Visitor::symbol(Foo::bar<>) }(...)`
+                    // Convert `Foo::bar(...)` to `${ Visitor::liftSymbol(Foo::bar<>) }(...)`
                     ClassConst(cc) => {
                         let (ref cid, ref s) = **cc;
                         if let ClassId_::CIexpr(Expr(_, Id(sid))) = &cid.1 {
@@ -563,7 +563,7 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer<'_> {
 
                         let callee = mk_splice(static_meth_call(
                             self.visitor_name,
-                            "symbol",
+                            "liftSymbol",
                             vec![fp],
                             &pos,
                         ));
@@ -692,7 +692,7 @@ impl<'ast> VisitorMut<'ast> for ReturnVirtualizer<'_> {
                         s.0.clone(),
                         Stmt_::Return(Box::new(Some(mk_splice(static_meth_call(
                             self.visitor_name,
-                            "voidLiteral",
+                            "liftVoid",
                             vec![],
                             &pos,
                         ))))),

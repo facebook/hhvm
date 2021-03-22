@@ -1,6 +1,6 @@
 File "boolean_operators.php", line 25, characters 5-316:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 41, characters 41-79:
+  File "expr_tree.hhi", line 41, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "boolean_operators.php", line 27, characters 7-21:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])

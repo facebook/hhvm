@@ -15,35 +15,35 @@ class Code {
   }
 
   // Lifting literals.
-  public static function intLiteral(
+  public static function liftInt(
     int $_,
   ): ExprTree<Code, Code::TAst, ExampleInt> {
     throw new Exception();
   }
-  public static function floatLiteral(
+  public static function liftFloat(
     float $_,
   ): ExprTree<Code, Code::TAst, ExampleFloat> {
     throw new Exception();
   }
-  public static function boolLiteral(bool $_):
+  public static function liftBool(bool $_):
     ExprTree<Code, Code::TAst, ExampleBool>
   {
     throw new Exception();
   }
-  public static function stringLiteral(string $_):
+  public static function liftString(string $_):
     ExprTree<Code, Code::TAst, ExampleString>
   {
     throw new Exception();
   }
-  public static function nullLiteral(): ExprTree<Code, Code::TAst, null> {
+  public static function liftNull(): ExprTree<Code, Code::TAst, null> {
     throw new Exception();
   }
-  public static function voidLiteral(): ExprTree<Code, Code::TAst, ExampleVoid> {
+  public static function liftVoid(): ExprTree<Code, Code::TAst, ExampleVoid> {
     throw new Exception();
   }
 
   // Symbols
-  public static function symbol<T>(
+  public static function liftSymbol<T>(
     (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();

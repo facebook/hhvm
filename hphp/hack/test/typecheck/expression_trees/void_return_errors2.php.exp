@@ -2,7 +2,7 @@ File "void_return_errors2.php", line 7, characters 23-29:
 Invalid return type (Typing[4110])
   File "void_return_errors2.php", line 7, characters 12-15:
   Expected `void`
-  File "expr_tree.hhi", line 41, characters 68-78:
+  File "expr_tree.hhi", line 41, characters 65-75:
   But got `ExampleVoid`
   File "expr_tree.hhi", line 153, characters 44-49:
     via this generic `TInfer`

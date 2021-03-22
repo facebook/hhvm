@@ -29,7 +29,7 @@ final class MyVisitor {
     return new ExprTree($pos, $cached_dict, $ast, $err);
   }
 
-  public static function intLiteral(
+  public static function liftInt(
     int $i,
   ): ExprTree<MyVisitor, mixed, int> {
     return new ExprTree(
@@ -40,7 +40,7 @@ final class MyVisitor {
     );
   }
 
-  public static function stringLiteral(
+  public static function liftString(
     string $s
   ): ExprTree<MyVisitor, mixed, string> {
     return new ExprTree(
@@ -88,7 +88,7 @@ final class MyVisitor {
     return $et->construct($this);
   }
 
-  public static function symbol<T>(
+  public static function liftSymbol<T>(
     (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
   ): ExprTree<this, this::TAst, T> {
     return new ExprTree(

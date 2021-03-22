@@ -1,6 +1,6 @@
 File "loop.php", line 17, characters 16-48:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 41, characters 41-79:
+  File "expr_tree.hhi", line 41, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "loop.php", line 17, characters 31-34:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
@@ -12,7 +12,7 @@ Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is 
   But got `dynamic` because it is an unenforceable type
 File "loop.php", line 18, characters 15-68:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "expr_tree.hhi", line 41, characters 41-79:
+  File "expr_tree.hhi", line 41, characters 38-76:
   But got `dynamic` because it is an unenforceable type
 File "loop.php", line 18, characters 33-33:
 Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])

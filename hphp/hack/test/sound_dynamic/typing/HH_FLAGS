@@ -1,1 +1,1 @@
---enable-sound-dynamic-type
+--enable-sound-dynamic-type --union-intersection-type-hints

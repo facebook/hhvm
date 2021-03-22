@@ -1227,7 +1227,6 @@ and simplify_subtype_i
           valid env
         | (_, Tprim Aast_defs.(Tresource | Tnoreturn))
         | (_, Tnonnull)
-        | (_, Tfun _)
         | (_, Tshape (Open_shape, _))
         | (_, Tvar _)
         | (_, Tunapplied_alias _)
@@ -1244,6 +1243,9 @@ and simplify_subtype_i
         | (_, Tvec_or_dict (_, ty))
         | (_, Tvarray_or_darray (_, ty)) ->
           simplify_subtype ~subtype_env ty ty_super env
+        (* Implement (function(dynamic, ..., dynamic): dynamic <: dynamic *)
+        | (r, Tfun ft) ->
+          simplify_subtype_fun_dynamic ~subtype_env r ft ty_super env
         | (_, Toption ty) ->
           (match deref ty with
           (* Special case mixed <: dynamic for better error message *)
@@ -2461,6 +2463,33 @@ and simplify_subtype_funs_attributes
 and simplify_subtype_possibly_enforced
     ~(subtype_env : subtype_env) et_sub et_super =
   simplify_subtype ~subtype_env et_sub.et_type et_super.et_type
+
+(* Special case of function type subtype dynamic.
+ *   (function(ty1,...,tyn):ty <: dynamic)
+ *   iff
+ *   dynamic <: ty1 & ... & dynamic <: tyn & ty <: dynamic
+ *)
+and simplify_subtype_fun_dynamic
+    ~(subtype_env : subtype_env)
+    (_r_sub : Reason.t)
+    (ft_sub : locl_fun_type)
+    ty_dyn
+    env : env * TL.subtype_prop =
+  let ty_dyn_enf = { et_enforced = Unenforced; et_type = ty_dyn } in
+  env
+  (* Contravariant subtyping on parameters *)
+  |> begin
+       match ft_sub.ft_arity with
+       | Fvariadic { fp_type; _ } ->
+         simplify_subtype ~subtype_env ty_dyn fp_type.et_type
+       | _ -> valid
+     end
+  &&& simplify_supertype_params_with_variadic
+        ~subtype_env
+        ft_sub.ft_params
+        ty_dyn_enf
+  &&& (* Finally do covariant subtryping on return type *)
+  simplify_subtype ~subtype_env ft_sub.ft_ret.et_type ty_dyn
 
 (* This implements basic subtyping on non-generic function types:
  *   (1) return type behaves covariantly

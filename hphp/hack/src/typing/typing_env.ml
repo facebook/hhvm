@@ -598,6 +598,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     allow_wildcards = false;
     big_envs = ref [];
     pessimize = false;
+    fun_tast_info = None;
   }
 
 let set_env_pessimize env =
@@ -610,6 +611,9 @@ let set_env_pessimize env =
   { env with pessimize }
 
 let set_env_function_pos env function_pos = { env with function_pos }
+
+let set_fun_tast_info env fun_tast_info =
+  { env with fun_tast_info = Some fun_tast_info }
 
 let set_condition_type env n ty =
   {
@@ -1372,6 +1376,7 @@ let save local_tpenv env =
     Tast.tpenv = TPEnv.union local_tpenv env.global_tpenv;
     Tast.condition_types = env.genv.condition_types;
     Tast.pessimize = env.pessimize;
+    Tast.fun_tast_info = env.fun_tast_info;
   }
 
 (* Compute the type variables appearing covariantly (positively)

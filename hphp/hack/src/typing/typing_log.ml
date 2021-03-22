@@ -506,6 +506,17 @@ let genv_as_value env genv =
       ]
     | None -> [] )
 
+let fun_tast_info_as_map = function
+  | None -> make_map []
+  | Some r ->
+    let open Tast in
+    let { has_implicit_return; named_body_is_unsafe } = r in
+    make_map
+      [
+        ("has_implicit_return", bool_as_value has_implicit_return);
+        ("named_body_is_unsafe", bool_as_value named_body_is_unsafe);
+      ]
+
 let env_as_value env =
   let {
     function_pos;
@@ -525,6 +536,7 @@ let env_as_value env =
     inference_env;
     big_envs = _;
     pessimize = _;
+    fun_tast_info;
   } =
     env
   in
@@ -543,6 +555,7 @@ let env_as_value env =
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",
         Typing_inference_env.Log.inference_env_as_value inference_env );
+      ("fun_tast_info", fun_tast_info_as_map fun_tast_info);
     ]
 
 let log_env_diff p ?function_name old_env new_env =

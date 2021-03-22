@@ -412,6 +412,8 @@ val fun_is_constructor : env -> bool
 
 val set_fun_is_constructor : env -> bool -> env
 
+val set_fun_tast_info : env -> Tast.fun_tast_info -> env
+
 val env_with_locals : env -> Typing_per_cont_env.t -> env
 
 val reinitialize_locals : env -> env

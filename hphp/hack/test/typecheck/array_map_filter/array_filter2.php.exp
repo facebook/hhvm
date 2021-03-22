@@ -8,12 +8,6 @@ Invalid argument (Typing[4110])
   `array_filter` converts `KeyedContainer<Tk, Tv>` to `array<Tk, Tv>`, and `Container<Tv>` to `array<arraykey, Tv>`. Single argument calls additionally remove nullability from `Tv`.
 File "array_filter2.php", line 11, characters 10-17:
 Invalid return type (Typing[4336])
-  File "array_filter2.php", line 11, characters 10-17:
-  Expected `void` because this function does not always return a value
-  File "array_filter2.php", line 11, characters 47-48:
-  But got `Tk`
-File "array_filter2.php", line 11, characters 10-17:
-Invalid return type (Typing[4336])
   File "array_filter2.php", line 11, characters 47-48:
   Expected `Tk`
   File "array_filter2.php", line 11, characters 10-17:

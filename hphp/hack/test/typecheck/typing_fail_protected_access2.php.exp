@@ -1,16 +1,10 @@
 File "typing_fail_protected_access2.php", line 17, characters 19-19:
 Invalid return type (Typing[4336])
-File "typing_fail_protected_access2.php", line 17, characters 19-19:
-Expected `void` because this function does not always return a value
-File "typing_fail_protected_access2.php", line 17, characters 24-27:
-But got `?int`
-File "typing_fail_protected_access2.php", line 17, characters 19-19:
-Invalid return type (Typing[4336])
-File "typing_fail_protected_access2.php", line 17, characters 24-27:
-Expected `?int`
-File "typing_fail_protected_access2.php", line 17, characters 19-19:
-But got `void` because this function does not always return a value
+  File "typing_fail_protected_access2.php", line 17, characters 24-27:
+  Expected `?int`
+  File "typing_fail_protected_access2.php", line 17, characters 19-19:
+  But got `void` because this function does not always return a value
 File "typing_fail_protected_access2.php", line 18, characters 10-10:
 Cannot access this protected member, you don't extend Foo (Typing[4112])
-File "typing_fail_protected_access2.php", line 13, characters 29-29:
-This member is protected
+  File "typing_fail_protected_access2.php", line 13, characters 29-29:
+  This member is protected

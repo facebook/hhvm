@@ -1,0 +1,12 @@
+File "return_with_and_without_expr3.php", line 4, characters 1-89:
+This function can exit with and without returning a value (Typing[4421])
+  File "return_with_and_without_expr3.php", line 6, characters 5-14:
+  Returning a value here.
+  File "return_with_and_without_expr3.php", line 8, characters 5-11:
+  Returning without a value here
+File "return_with_and_without_expr3.php", line 8, characters 5-11:
+Invalid return type (Typing[4336])
+  File "return_with_and_without_expr3.php", line 4, characters 25-31:
+  Expected `dynamic`
+  File "return_with_and_without_expr3.php", line 8, characters 5-11:
+  But got `void`

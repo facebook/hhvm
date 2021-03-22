@@ -1491,3 +1491,11 @@ val invalid_constfun_attribute : Pos.t -> unit
 val readonly_exception : Pos.t -> unit
 
 val experimental_expression_trees : Pos.t -> unit
+
+val non_void_annotation_on_return_void_function : bool -> Pos.t -> unit
+
+val returns_with_and_without_value :
+  fun_pos:Pos.t ->
+  with_value_pos:Pos.t ->
+  without_value_pos_opt:Pos.t option ->
+  unit

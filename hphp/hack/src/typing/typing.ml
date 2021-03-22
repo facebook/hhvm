@@ -274,7 +274,8 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
           Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_readonly t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
           Env.map_tcopt
-            ~f:(fun t -> TypecheckerOptions.set_tco_enable_expression_trees t true)
+            ~f:(fun t ->
+              TypecheckerOptions.set_tco_enable_expression_trees t true)
             env
         | _ -> env)
 
@@ -429,15 +430,18 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
       let { Typing_env_return_info.return_type = ret; _ } =
         Env.get_return env
       in
+      let has_implicit_return = LEnv.has_next env in
+      let named_body_is_unsafe = Nast.named_body_is_unsafe named_body in
       let env =
-        if
-          (not @@ LEnv.has_next env)
-          || abstract
-          || Nast.named_body_is_unsafe named_body
-        then
+        if (not has_implicit_return) || abstract || named_body_is_unsafe then
           env
         else
           fun_implicit_return env pos ret.et_type f_kind
+      in
+      let env =
+        Typing_env.set_fun_tast_info
+          env
+          { Tast.has_implicit_return; Tast.named_body_is_unsafe }
       in
       debug_last_pos := Pos.none;
       (env, tb))
@@ -3527,12 +3531,18 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
           in
           let (env, tb) = block env nb.fb_ast in
-          let implicit_return = LEnv.has_next env in
+          let has_implicit_return = LEnv.has_next env in
+          let named_body_is_unsafe = Nast.named_body_is_unsafe nb in
           let env =
-            if (not implicit_return) || Nast.named_body_is_unsafe nb then
+            if (not has_implicit_return) || Nast.named_body_is_unsafe nb then
               env
             else
               fun_implicit_return env lambda_pos hret f.f_fun_kind
+          in
+          let env =
+            Typing_env.set_fun_tast_info
+              env
+              { Tast.has_implicit_return; Tast.named_body_is_unsafe }
           in
           let (env, tparams) = List.map_env env f.f_tparams type_param in
           let (env, user_attributes) =

@@ -2,12 +2,6 @@ File "await_on_illegal_value.php", line 12, characters 21-24:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "await_on_illegal_value.php", line 12, characters 16-16:
 Invalid return type (Typing[4336])
-  File "await_on_illegal_value.php", line 12, characters 16-16:
-  Expected `Awaitable<void>` because this function does not always return a value
-  File "await_on_illegal_value.php", line 12, characters 21-24:
-  But got `void`
-File "await_on_illegal_value.php", line 12, characters 16-16:
-Invalid return type (Typing[4336])
   File "await_on_illegal_value.php", line 12, characters 21-24:
   Expected `void`
   File "await_on_illegal_value.php", line 12, characters 16-16:

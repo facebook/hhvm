@@ -12,6 +12,7 @@ prop_flags::PropFlags
 shallow_decl_defs::Visibility
 shallow_decl_defs::XhpAttr
 tany_sentinel::TanySentinel
+tast::FunTastInfo
 typing_cont_key::TypingContKey
 typing_defs_core::ConsistentKind
 typing_defs_core::DependentType

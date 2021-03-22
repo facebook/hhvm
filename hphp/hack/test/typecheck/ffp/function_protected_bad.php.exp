@@ -4,12 +4,6 @@ File "function_protected_bad.php", line 4, characters 33-36:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "function_protected_bad.php", line 4, characters 26-28:
 Invalid return type (Typing[4336])
-  File "function_protected_bad.php", line 4, characters 26-28:
-  Expected `Awaitable<void>` because this function does not always return a value
-  File "function_protected_bad.php", line 4, characters 33-36:
-  But got `void`
-File "function_protected_bad.php", line 4, characters 26-28:
-Invalid return type (Typing[4336])
   File "function_protected_bad.php", line 4, characters 33-36:
   Expected `void`
   File "function_protected_bad.php", line 4, characters 26-28:

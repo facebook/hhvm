@@ -136,14 +136,8 @@ let implicit_return env pos ~expected ~actual =
       pos
       Reason.URreturn
       env
-      expected
       actual
+      expected
       Errors.missing_return
   in
-  Typing_coercion.coerce_type
-    pos
-    Reason.URreturn
-    env
-    actual
-    { et_type = expected; et_enforced = Unenforced }
-    Errors.missing_return
+  env

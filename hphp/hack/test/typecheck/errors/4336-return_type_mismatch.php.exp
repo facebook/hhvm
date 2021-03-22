@@ -1,11 +1,5 @@
 File "4336-return_type_mismatch.php", line 5, characters 19-21:
 Invalid return type (Typing[4336])
-File "4336-return_type_mismatch.php", line 5, characters 19-21:
-Expected `void` because this function does not always return a value
-File "4336-return_type_mismatch.php", line 5, characters 27-29:
-But got `int`
-File "4336-return_type_mismatch.php", line 5, characters 19-21:
-Invalid return type (Typing[4336])
 File "4336-return_type_mismatch.php", line 5, characters 27-29:
 Expected `int`
 File "4336-return_type_mismatch.php", line 5, characters 19-21:

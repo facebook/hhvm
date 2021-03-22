@@ -4,13 +4,13 @@ File "dynamic_parameter.php", line 6, characters 31-41:
   dynamic
 File "dynamic_parameter.php", line 3, characters 10-12:
 Invalid return type (Typing[4336])
-File "dynamic_parameter.php", line 3, characters 10-12:
-Expected `void` because this function does not always return a value
-File "dynamic_parameter.php", line 3, characters 10-12:
-But got `dynamic`
+  File "dynamic_parameter.php", line 3, characters 10-12:
+  Expected `dynamic`
+  File "dynamic_parameter.php", line 3, characters 10-12:
+  But got `void` because this function does not always return a value
 File "dynamic_parameter.php", line 5, characters 13-14:
 Invalid argument (Typing[4110])
-File "dynamic_parameter.php", line 2, characters 20-29:
-Expected `(int, int)`
-File "dynamic_parameter.php", line 3, characters 14-15:
-But got `dynamic`
+  File "dynamic_parameter.php", line 2, characters 20-29:
+  Expected `(int, int)`
+  File "dynamic_parameter.php", line 3, characters 14-15:
+  But got `dynamic`

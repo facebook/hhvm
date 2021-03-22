@@ -2,12 +2,6 @@ File "async_function_implicit_return_wrong_type.php", line 12, characters 23-26:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "async_function_implicit_return_wrong_type.php", line 12, characters 16-18:
 Invalid return type (Typing[4336])
-  File "async_function_implicit_return_wrong_type.php", line 12, characters 16-18:
-  Expected `Awaitable<void>` because this function does not always return a value
-  File "async_function_implicit_return_wrong_type.php", line 12, characters 23-26:
-  But got `void`
-File "async_function_implicit_return_wrong_type.php", line 12, characters 16-18:
-Invalid return type (Typing[4336])
   File "async_function_implicit_return_wrong_type.php", line 12, characters 23-26:
   Expected `void`
   File "async_function_implicit_return_wrong_type.php", line 12, characters 16-18:

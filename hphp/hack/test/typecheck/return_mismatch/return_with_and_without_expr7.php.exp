@@ -1,0 +1,6 @@
+File "return_with_and_without_expr7.php", line 7, characters 10-75:
+This function can exit with and without returning a value (Typing[4421])
+  File "return_with_and_without_expr7.php", line 9, characters 7-27:
+  Returning a value here.
+  File "return_with_and_without_expr7.php", line 7, characters 10-75:
+  This function does not always return a value

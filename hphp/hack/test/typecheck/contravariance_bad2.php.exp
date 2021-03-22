@@ -1,18 +1,12 @@
 File "contravariance_bad2.php", line 10, characters 25-34:
 Invalid return type (Typing[4336])
-File "contravariance_bad2.php", line 10, characters 25-34:
-Expected `void` because this function does not always return a value
-File "contravariance_bad2.php", line 10, characters 60-60:
-But got `T`
-File "contravariance_bad2.php", line 10, characters 25-34:
-Invalid return type (Typing[4336])
-File "contravariance_bad2.php", line 10, characters 60-60:
-Expected `T`
-File "contravariance_bad2.php", line 10, characters 25-34:
-But got `void` because this function does not always return a value
+  File "contravariance_bad2.php", line 10, characters 60-60:
+  Expected `T`
+  File "contravariance_bad2.php", line 10, characters 25-34:
+  But got `void` because this function does not always return a value
 File "contravariance_bad2.php", line 19, characters 34-35:
 Invalid argument (Typing[4110])
-File "contravariance_bad2.php", line 12, characters 40-40:
-Expected `I`
-File "contravariance_bad2.php", line 12, characters 24-25:
-But got `null`
+  File "contravariance_bad2.php", line 12, characters 40-40:
+  Expected `I`
+  File "contravariance_bad2.php", line 12, characters 24-25:
+  But got `null`

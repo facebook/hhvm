@@ -1,16 +1,10 @@
 File "method_return.php", line 23, characters 17-22:
 Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-File "method_return.php", line 3, characters 7-7:
-This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+  File "method_return.php", line 3, characters 7-7:
+  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
 File "method_return.php", line 26, characters 26-35:
 Invalid return type (Typing[4336])
-File "method_return.php", line 26, characters 26-35:
-Expected `void` because this function does not always return a value
-File "method_return.php", line 26, characters 40-46:
-But got `this::T`
-File "method_return.php", line 26, characters 26-35:
-Invalid return type (Typing[4336])
-File "method_return.php", line 26, characters 40-46:
-Expected `this::T`
-File "method_return.php", line 26, characters 26-35:
-But got `void` because this function does not always return a value
+  File "method_return.php", line 26, characters 40-46:
+  Expected `this::T`
+  File "method_return.php", line 26, characters 26-35:
+  But got `void` because this function does not always return a value

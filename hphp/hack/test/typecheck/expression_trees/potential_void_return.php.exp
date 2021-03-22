@@ -1,8 +1,6 @@
 File "potential_void_return.php", line 15, characters 5-469:
-Invalid return type (Typing[4336])
+This function can exit with and without returning a value (Typing[4421])
+  File "potential_void_return.php", line 19, characters 9-41:
+  Returning a value here.
   File "potential_void_return.php", line 15, characters 5-469:
-  Expected `void` because this function does not always return a value
-  File "expr_tree.hhi", line 41, characters 68-78:
-  But got `ExampleVoid`
-  File "expr_tree.hhi", line 153, characters 44-49:
-    via this generic `TInfer`
+  This function does not always return a value

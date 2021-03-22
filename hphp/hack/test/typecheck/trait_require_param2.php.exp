@@ -1,20 +1,14 @@
 File "trait_require_param2.php", line 5, characters 22-24:
 Invalid return type (Typing[4336])
-File "trait_require_param2.php", line 5, characters 22-24:
-Expected `void` because this function does not always return a value
-File "trait_require_param2.php", line 5, characters 29-29:
-But got `T`
-File "trait_require_param2.php", line 5, characters 22-24:
-Invalid return type (Typing[4336])
-File "trait_require_param2.php", line 5, characters 29-29:
-Expected `T`
-File "trait_require_param2.php", line 5, characters 22-24:
-But got `void` because this function does not always return a value
+  File "trait_require_param2.php", line 5, characters 29-29:
+  Expected `T`
+  File "trait_require_param2.php", line 5, characters 22-24:
+  But got `void` because this function does not always return a value
 File "trait_require_param2.php", line 14, characters 17-20:
 Invalid argument (Typing[4110])
-File "trait_require_param2.php", line 18, characters 22-24:
-Expected `int`
-File "trait_require_param2.php", line 10, characters 23-27:
-But got `float`
-File "trait_require_param2.php", line 5, characters 29-29:
-  via this generic `T`
+  File "trait_require_param2.php", line 18, characters 22-24:
+  Expected `int`
+  File "trait_require_param2.php", line 10, characters 23-27:
+  But got `float`
+  File "trait_require_param2.php", line 5, characters 29-29:
+    via this generic `T`

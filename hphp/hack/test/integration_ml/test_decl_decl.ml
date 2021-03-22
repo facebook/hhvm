@@ -17,6 +17,7 @@ let a_contents =
 
 class A {
   /* HH_FIXME[4336] */
+  /* HH_FIXME[4422] */
   final public function f() : C {
   }
 }
@@ -34,7 +35,7 @@ class C {}
 
 let errors =
   {|
-File "/A.php", line 5, characters 31-31:
+File "/A.php", line 6, characters 31-31:
 Unbound name: `C` (Naming[2049])
 |}
 
@@ -44,8 +45,8 @@ let hhconfig_filename = Filename.concat root ".hhconfig"
 
 let hhconfig_contents =
   "
-allowed_fixme_codes_strict = 4336
-allowed_decl_fixme_codes = 4336
+allowed_fixme_codes_strict = 4336,4422
+allowed_decl_fixme_codes = 4336,4422
 "
 
 let test () =

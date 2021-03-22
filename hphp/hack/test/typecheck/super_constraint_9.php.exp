@@ -1,11 +1,5 @@
 File "super_constraint_9.php", line 7, characters 10-10:
 Invalid return type (Typing[4336])
-  File "super_constraint_9.php", line 7, characters 10-10:
-  Expected `void` because this function does not always return a value
-  File "super_constraint_9.php", line 7, characters 59-66:
-  But got `Foo<Tk2>`
-File "super_constraint_9.php", line 7, characters 10-10:
-Invalid return type (Typing[4336])
   File "super_constraint_9.php", line 7, characters 59-66:
   Expected `Foo<Tk2>`
   File "super_constraint_9.php", line 7, characters 10-10:
@@ -18,12 +12,6 @@ Invalid argument (Typing[4110])
   But got `mixed`
   File "super_constraint_9.php", line 10, characters 46-50:
   This type argument to `Foo` must match exactly (it is invariant)
-File "super_constraint_9.php", line 16, characters 10-12:
-Invalid return type (Typing[4336])
-  File "super_constraint_9.php", line 16, characters 10-12:
-  Expected `void` because this function does not always return a value
-  File "super_constraint_9.php", line 16, characters 17-24:
-  But got `Foo<int>`
 File "super_constraint_9.php", line 16, characters 10-12:
 Invalid return type (Typing[4336])
   File "super_constraint_9.php", line 16, characters 17-24:

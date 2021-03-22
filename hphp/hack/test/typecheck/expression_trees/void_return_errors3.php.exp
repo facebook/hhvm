@@ -1,12 +1,12 @@
 File "void_return_errors3.php", line 6, characters 8-81:
 Invalid return type (Typing[4336])
-  File "void_return_errors3.php", line 6, characters 8-81:
-  Expected `void` because this function does not always return a value
-  File "void_return_errors3.php", line 6, characters 26-35:
-  But got `ExampleInt`
-File "void_return_errors3.php", line 6, characters 8-81:
-Invalid return type (Typing[4336])
   File "void_return_errors3.php", line 6, characters 26-35:
   Expected `ExampleInt`
   File "void_return_errors3.php", line 6, characters 8-81:
   But got `void` because this function does not always return a value
+File "void_return_errors3.php", line 6, characters 8-81:
+This function can exit with and without returning a value (Typing[4421])
+  File "void_return_errors3.php", line 8, characters 7-15:
+  Returning a value here.
+  File "void_return_errors3.php", line 6, characters 8-81:
+  This function does not always return a value

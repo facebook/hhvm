@@ -1,21 +1,9 @@
 File "ternary6.php", line 6, characters 10-10:
 Invalid return type (Typing[4336])
-  File "ternary6.php", line 6, characters 10-10:
-  Expected `void` because this function does not always return a value
-  File "ternary6.php", line 6, characters 15-21:
-  But got `?string`
-File "ternary6.php", line 6, characters 10-10:
-Invalid return type (Typing[4336])
   File "ternary6.php", line 6, characters 15-21:
   Expected `?string`
   File "ternary6.php", line 6, characters 10-10:
   But got `void` because this function does not always return a value
-File "ternary6.php", line 12, characters 19-19:
-Invalid return type (Typing[4336])
-  File "ternary6.php", line 12, characters 19-19:
-  Expected `void` because this function does not always return a value
-  File "ternary6.php", line 12, characters 24-37:
-  But got `varray<string>`
 File "ternary6.php", line 12, characters 19-19:
 Invalid return type (Typing[4336])
   File "ternary6.php", line 12, characters 24-37:

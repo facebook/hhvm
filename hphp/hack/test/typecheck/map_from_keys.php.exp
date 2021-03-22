@@ -1,21 +1,9 @@
 File "map_from_keys.php--file1.php", line 3, characters 10-17:
 Invalid return type (Typing[4336])
-  File "map_from_keys.php--file1.php", line 3, characters 10-17:
-  Expected `void` because this function does not always return a value
-  File "map_from_keys.php--file1.php", line 3, characters 22-27:
-  But got `varray<_>`
-File "map_from_keys.php--file1.php", line 3, characters 10-17:
-Invalid return type (Typing[4336])
   File "map_from_keys.php--file1.php", line 3, characters 22-27:
   Expected `varray<_>`
   File "map_from_keys.php--file1.php", line 3, characters 10-17:
   But got `void` because this function does not always return a value
-File "map_from_keys.php--file1.php", line 7, characters 10-20:
-Invalid return type (Typing[4336])
-  File "map_from_keys.php--file1.php", line 7, characters 10-20:
-  Expected `void` because this function does not always return a value
-  File "map_from_keys.php--file1.php", line 10, characters 4-14:
-  But got `Map<Tk, Tv>`
 File "map_from_keys.php--file1.php", line 7, characters 10-20:
 Invalid return type (Typing[4336])
   File "map_from_keys.php--file1.php", line 10, characters 4-14:

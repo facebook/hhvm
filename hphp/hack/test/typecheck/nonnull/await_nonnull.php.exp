@@ -2,12 +2,6 @@ File "await_nonnull.php", line 3, characters 31-34:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "await_nonnull.php", line 3, characters 16-16:
 Invalid return type (Typing[4336])
-  File "await_nonnull.php", line 3, characters 16-16:
-  Expected `Awaitable<void>` because this function does not always return a value
-  File "await_nonnull.php", line 3, characters 31-34:
-  But got `void`
-File "await_nonnull.php", line 3, characters 16-16:
-Invalid return type (Typing[4336])
   File "await_nonnull.php", line 3, characters 31-34:
   Expected `void`
   File "await_nonnull.php", line 3, characters 16-16:

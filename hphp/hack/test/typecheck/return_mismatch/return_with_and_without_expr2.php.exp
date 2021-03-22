@@ -1,0 +1,16 @@
+File "return_with_and_without_expr2.php", line 5, characters 8-83:
+This function can exit with and without returning a value (Typing[4421])
+  File "return_with_and_without_expr2.php", line 7, characters 7-16:
+  Returning a value here.
+  File "return_with_and_without_expr2.php", line 9, characters 7-13:
+  Returning without a value here
+File "return_with_and_without_expr2.php", line 13, characters 3-16:
+You cannot return a value (Typing[4084])
+  File "return_with_and_without_expr2.php", line 4, characters 25-28:
+  This is a `void` function
+File "return_with_and_without_expr2.php", line 13, characters 13-14:
+Invalid argument (Typing[4110])
+  File "return_with_and_without_expr2.php", line 4, characters 25-28:
+  Expected `void`
+  File "return_with_and_without_expr2.php", line 13, characters 13-14:
+  But got `int`

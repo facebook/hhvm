@@ -1,11 +1,5 @@
 File "incompatible_interface.php", line 18, characters 19-21:
 Invalid return type (Typing[4336])
-  File "incompatible_interface.php", line 18, characters 19-21:
-  Expected `void` because this function does not always return a value
-  File "incompatible_interface.php", line 18, characters 26-26:
-  But got `T`
-File "incompatible_interface.php", line 18, characters 19-21:
-Invalid return type (Typing[4336])
   File "incompatible_interface.php", line 18, characters 26-26:
   Expected `T`
   File "incompatible_interface.php", line 18, characters 19-21:

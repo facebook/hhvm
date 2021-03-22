@@ -1,11 +1,5 @@
 File "super_constraint_10.php", line 8, characters 26-30:
 Invalid return type (Typing[4336])
-  File "super_constraint_10.php", line 8, characters 26-30:
-  Expected `void` because this function does not always return a value
-  File "super_constraint_10.php", line 11, characters 6-18:
-  But got `Map<Tk1, Tv1>`
-File "super_constraint_10.php", line 8, characters 26-30:
-Invalid return type (Typing[4336])
   File "super_constraint_10.php", line 11, characters 6-18:
   Expected `Map<Tk1, Tv1>`
   File "super_constraint_10.php", line 8, characters 26-30:

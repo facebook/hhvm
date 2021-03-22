@@ -2,12 +2,6 @@ File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
 Invalid return type (Typing[4336])
-  File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-  Expected `Awaitable<void>` because this function does not always return a value
-  File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
-  But got `void`
-File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-Invalid return type (Typing[4336])
   File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
   Expected `void`
   File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:

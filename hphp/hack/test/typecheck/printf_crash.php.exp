@@ -1,11 +1,5 @@
 File "printf_crash.php--printf.php", line 5, characters 10-19:
 Invalid return type (Typing[4336])
-  File "printf_crash.php--printf.php", line 5, characters 10-19:
-  Expected `void` because this function does not always return a value
-  File "printf_crash.php--printf.php", line 5, characters 64-69:
-  But got `string`
-File "printf_crash.php--printf.php", line 5, characters 10-19:
-Invalid return type (Typing[4336])
   File "printf_crash.php--printf.php", line 5, characters 64-69:
   Expected `string`
   File "printf_crash.php--printf.php", line 5, characters 10-19:

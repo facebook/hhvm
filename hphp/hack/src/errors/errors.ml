@@ -2605,6 +2605,19 @@ let return_in_void pos1 pos2 =
     (pos1, "You cannot return a value")
     [(pos2, "This is a `void` function")]
 
+let returns_with_and_without_value
+    ~fun_pos ~with_value_pos ~without_value_pos_opt =
+  let without_value_message =
+    match without_value_pos_opt with
+    | None -> (fun_pos, "This function does not always return a value")
+    | Some retun_without_val_pos ->
+      (retun_without_val_pos, "Returning without a value here")
+  in
+  add_list
+    (Typing.err_code Typing.ReturnsWithAndWithoutValue)
+    (fun_pos, "This function can exit with and without returning a value")
+    [(with_value_pos, "Returning a value here."); without_value_message]
+
 let this_var_outside_class p =
   add
     (Typing.err_code Typing.ThisVarOutsideClass)
@@ -5215,6 +5228,21 @@ let experimental_expression_trees pos =
     ( "To enable Expression Trees for local experimentation use the "
     ^ "`<<file:__EnableUnstableFeatures('expression_trees')>>` file attribute."
     )
+
+let non_void_annotation_on_return_void_function is_async p =
+  let (async_indicator, return_type) =
+    if is_async then
+      ("Async f", "Awaitable<void>")
+    else
+      ("F", "void")
+  in
+  let message =
+    Printf.sprintf
+      "%sunctions that do not return a value must have a type of %s"
+      async_indicator
+      return_type
+  in
+  add (Typing.err_code Typing.NonVoidAnnotationOnReturnVoidFun) p message
 
 (*****************************************************************************)
 (* Printing *)

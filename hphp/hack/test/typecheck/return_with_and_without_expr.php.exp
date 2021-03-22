@@ -1,6 +1,0 @@
-File "return_with_and_without_expr.php", line 12, characters 6-7:
-Invalid argument (Typing[4110])
-File "return_with_and_without_expr.php", line 9, characters 7-13:
-Expected `void`
-File "return_with_and_without_expr.php", line 12, characters 6-7:
-But got `int`

@@ -1,6 +1,6 @@
 File "void_isnt_dynamic.php", line 3, characters 10-12:
 Invalid return type (Typing[4336])
-File "void_isnt_dynamic.php", line 3, characters 10-12:
-Expected `void` because this function does not always return a value
-File "void_isnt_dynamic.php", line 3, characters 17-23:
-But got `dynamic`
+  File "void_isnt_dynamic.php", line 3, characters 17-23:
+  Expected `dynamic`
+  File "void_isnt_dynamic.php", line 3, characters 10-12:
+  But got `void` because this function does not always return a value

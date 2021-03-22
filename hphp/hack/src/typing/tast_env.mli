@@ -271,4 +271,10 @@ val set_allow_wildcards : env -> env
 
 val get_allow_wildcards : env -> bool
 
-val is_enum_class : env -> Decl_provider.type_key -> bool
+(*val is_enum_class : env -> Decl_provider.type_key -> bool*)
+
+val is_enum_class : env -> string -> bool
+
+val fun_has_implicit_return : env -> bool
+
+val named_fun_body_is_unsafe : env -> bool

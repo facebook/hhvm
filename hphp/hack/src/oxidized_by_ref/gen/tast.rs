@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f43293b45baa29fe2ecc50e073d743c>>
+// @generated SignedSource<<2e318772c018495cc81a6f4374d61cc4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,12 +37,34 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
     Serialize,
     ToOcamlRep
 )]
+pub struct FunTastInfo {
+    /// True if there are leaves of the function's imaginary CFG without a return statement
+    pub has_implicit_return: bool,
+    /// Result of {!Nast.named_body_is_unsafe}
+    pub named_body_is_unsafe: bool,
+}
+impl TrivialDrop for FunTastInfo {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct SavedEnv<'a> {
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,
     pub tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
     pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
     pub pessimize: bool,
+    pub fun_tast_info: Option<&'a FunTastInfo>,
 }
 impl<'a> TrivialDrop for SavedEnv<'a> {}
 

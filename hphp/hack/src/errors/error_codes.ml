@@ -625,6 +625,8 @@ module Typing = struct
     | ReadonlyException [@value 4418]
     | InvalidTypeHint [@value 4419]
     | ExperimentalExpressionTrees [@value 4420]
+    | ReturnsWithAndWithoutValue [@value 4421]
+    | NonVoidAnnotationOnReturnVoidFun [@value 4422]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

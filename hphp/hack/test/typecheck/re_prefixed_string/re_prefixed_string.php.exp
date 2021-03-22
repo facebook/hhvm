@@ -6,12 +6,6 @@ File "re_prefixed_string.php", line 20, characters 8-20:
 But got `string` because this is the result of a concatenation
 File "re_prefixed_string.php", line 26, characters 10-16:
 Invalid return type (Typing[4336])
-File "re_prefixed_string.php", line 26, characters 10-16:
-Expected `void` because this function does not always return a value
-File "re_prefixed_string.php", line 26, characters 78-78:
-But got `T`
-File "re_prefixed_string.php", line 26, characters 10-16:
-Invalid return type (Typing[4336])
 File "re_prefixed_string.php", line 26, characters 78-78:
 Expected `T`
 File "re_prefixed_string.php", line 26, characters 10-16:

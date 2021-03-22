@@ -2,9 +2,4 @@ File "list_destructuring_tvar.php", line 38, characters 7-18:
   (A1 | B1)
 File "list_destructuring_tvar.php", line 39, characters 7-18:
   (A2 | B2)
-File "list_destructuring_tvar.php", line 35, characters 5-128:
-Invalid return type (Typing[4336])
-File "list_destructuring_tvar.php", line 35, characters 5-128:
-Expected `void` because this function does not always return a value
-File "list_destructuring_tvar.php", line 27, characters 3-6:
-But got `mixed`
+No errors

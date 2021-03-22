@@ -1,6 +1,0 @@
-File "return_with_and_without_expr3.php", line 8, characters 5-11:
-Invalid return type (Typing[4336])
-File "return_with_and_without_expr3.php", line 8, characters 5-11:
-Expected `void`
-File "return_with_and_without_expr3.php", line 4, characters 25-31:
-But got `dynamic`

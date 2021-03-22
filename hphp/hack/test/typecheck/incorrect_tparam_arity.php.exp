@@ -1,16 +1,10 @@
 File "incorrect_tparam_arity.php", line 4, characters 21-27:
 Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-File "incorrect_tparam_arity.php", line 7, characters 7-7:
-Definition is here
+  File "incorrect_tparam_arity.php", line 7, characters 7-7:
+  Definition is here
 File "incorrect_tparam_arity.php", line 8, characters 19-19:
 Invalid return type (Typing[4336])
-File "incorrect_tparam_arity.php", line 8, characters 19-19:
-Expected `void` because this function does not always return a value
-File "incorrect_tparam_arity.php", line 8, characters 24-24:
-But got `T`
-File "incorrect_tparam_arity.php", line 8, characters 19-19:
-Invalid return type (Typing[4336])
-File "incorrect_tparam_arity.php", line 8, characters 24-24:
-Expected `T`
-File "incorrect_tparam_arity.php", line 8, characters 19-19:
-But got `void` because this function does not always return a value
+  File "incorrect_tparam_arity.php", line 8, characters 24-24:
+  Expected `T`
+  File "incorrect_tparam_arity.php", line 8, characters 19-19:
+  But got `void` because this function does not always return a value

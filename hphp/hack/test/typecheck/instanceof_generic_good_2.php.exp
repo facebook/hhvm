@@ -1,12 +1,6 @@
 File "instanceof_generic_good_2.php", line 14, characters 31-44:
 Invalid return type (Typing[4336])
-File "instanceof_generic_good_2.php", line 14, characters 31-44:
-Expected `void` because this function does not always return a value
-File "instanceof_generic_good_2.php", line 16, characters 16-25:
-But got `TvInternal`
-File "instanceof_generic_good_2.php", line 14, characters 31-44:
-Invalid return type (Typing[4336])
-File "instanceof_generic_good_2.php", line 16, characters 16-25:
-Expected `TvInternal`
-File "instanceof_generic_good_2.php", line 14, characters 31-44:
-But got `void` because this function does not always return a value
+  File "instanceof_generic_good_2.php", line 16, characters 16-25:
+  Expected `TvInternal`
+  File "instanceof_generic_good_2.php", line 14, characters 31-44:
+  But got `void` because this function does not always return a value

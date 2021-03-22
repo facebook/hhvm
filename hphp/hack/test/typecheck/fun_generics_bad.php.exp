@@ -1,11 +1,5 @@
 File "fun_generics_bad.php", line 9, characters 10-26:
 Invalid return type (Typing[4336])
-  File "fun_generics_bad.php", line 9, characters 10-26:
-  Expected `void` because this function does not always return a value
-  File "fun_generics_bad.php", line 12, characters 4-18:
-  But got `darray<int, T2>`
-File "fun_generics_bad.php", line 9, characters 10-26:
-Invalid return type (Typing[4336])
   File "fun_generics_bad.php", line 12, characters 4-18:
   Expected `darray<int, T2>`
   File "fun_generics_bad.php", line 9, characters 10-26:

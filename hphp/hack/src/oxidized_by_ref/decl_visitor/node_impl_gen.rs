@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c733ba8a05a69a4b966c15ba157dcc80>>
+// @generated SignedSource<<b065fbac78ffabac2b589d3d4f5f2f76>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -861,6 +861,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),
+            T_::RsoundDynamicCallable(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

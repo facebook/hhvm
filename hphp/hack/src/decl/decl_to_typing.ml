@@ -73,6 +73,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
         ~override:(sm_override meth)
         ~dynamicallycallable:(sm_dynamicallycallable meth)
         ~readonly_prop:false
+        ~sound_dynamic_callable:(sm_sound_dynamic_callable meth)
       (* The readonliness of the method is on the type *);
   }
 
@@ -126,7 +127,8 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
             ~override:false
             ~synthesized:false
             ~dynamicallycallable:false
-            ~readonly_prop:(sp_readonly prop);
+            ~readonly_prop:(sp_readonly prop)
+            ~sound_dynamic_callable:false;
       };
   }
 

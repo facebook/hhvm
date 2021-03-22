@@ -3,12 +3,10 @@
 
 class Box<T> {}
 
-class C implements dynamic {
-  use T;
-}
-
-trait T {
-  public function bar(Box<int> $x) : Box<int> {
+class Foo {
+  public function foo(Box<int> $x) : Box<int> {
     return $x;
   }
 }
+
+class Bar extends Foo implements dynamic {}

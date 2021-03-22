@@ -5045,9 +5045,9 @@ let parent_implements_dynamic
     | (_, Ast_defs.Cinterface) -> "implements "
     | (_, _) -> ""
   in
-  let child_name = strip_ns child_name in
+  let child_name = Markdown_lite.md_codify (strip_ns child_name) in
   let (child_kind_s, action) = kind_to_strings child_kind in
-  let parent_name = strip_ns parent_name in
+  let parent_name = Markdown_lite.md_codify (strip_ns parent_name) in
   let (parent_kind_s, _) = kind_to_strings parent_kind in
   add
     (Typing.err_code Typing.ImplementsDynamic)
@@ -5070,16 +5070,62 @@ let parent_implements_dynamic
     else
       "" )
 
-let method_is_not_dynamically_callable pos method_name class_name =
-  let class_name = strip_ns class_name in
-  add
-    (Typing.err_code Typing.ImplementsDynamic)
+let method_is_not_dynamically_callable
     pos
-    ( "Class "
-    ^ Markdown_lite.md_codify class_name
-    ^ " cannot implement dynamic because method "
-    ^ Markdown_lite.md_codify method_name
-    ^ " is not dynamically callable" )
+    method_name
+    class_name
+    sound_dynamic_callable_attribute
+    parent_class_opt
+    error_opt =
+  let method_name = Markdown_lite.md_codify (strip_ns method_name) in
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+
+  let nested_error_reason =
+    match error_opt with
+    | None -> []
+    | Some e -> e.claim :: e.reasons
+  in
+
+  let parent_class_reason =
+    match parent_class_opt with
+    | None -> []
+    | Some (parent_class_pos, parent_class_name) ->
+      let parent_class_name =
+        Markdown_lite.md_codify (strip_ns parent_class_name)
+      in
+      [
+        ( parent_class_pos,
+          "Method "
+          ^ method_name
+          ^ " is defined in the super class "
+          ^ parent_class_name
+          ^ " and is not overridden" );
+      ]
+  in
+
+  let attribute_reason =
+    match sound_dynamic_callable_attribute with
+    | true -> []
+    | false ->
+      [
+        ( pos,
+          "A parameter of "
+          ^ method_name
+          ^ " is not enforceable. "
+          ^ "Try adding the <<__SoundDynamicCallable>> attribute to "
+          ^ "the method to check if its code is safe for dynamic calling." );
+      ]
+  in
+
+  add_list
+    (Typing.err_code Typing.ImplementsDynamic)
+    ( pos,
+      "Method  "
+      ^ method_name
+      ^ " in class "
+      ^ class_name
+      ^ " is not dynamically callable." )
+    (parent_class_reason @ attribute_reason @ nested_error_reason)
 
 let property_is_not_enforceable pos prop_name class_name =
   let class_name = strip_ns class_name in

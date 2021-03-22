@@ -8,6 +8,11 @@ class C implements dynamic {
 }
 
 trait T {
+  public function foo(int $x) : int {
+    return $x;
+  }
+
+  <<__SoundDynamicCallable>>
   public function bar(Box<int> $x) : Box<int> {
     return $x;
   }

@@ -1443,7 +1443,14 @@ val parent_implements_dynamic :
   bool ->
   unit
 
-val method_is_not_dynamically_callable : Pos.t -> string -> string -> unit
+val method_is_not_dynamically_callable :
+  Pos.t ->
+  string ->
+  string ->
+  bool ->
+  (Pos.t * string) option ->
+  error option ->
+  unit
 
 val property_is_not_enforceable : Pos.t -> string -> string -> unit
 

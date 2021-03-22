@@ -271,6 +271,8 @@ pub mod user_attributes {
 
     pub const EXTERNAL: &str = "__External";
 
+    pub const SOUND_DYNAMIC_CALLABLE: &str = "__SoundDynamicCallable";
+
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -304,6 +306,7 @@ pub mod user_attributes {
             POLICIED,
             INFERFLOWS,
             EXTERNAL,
+            SOUND_DYNAMIC_CALLABLE,
         ]
         .into_iter()
         .collect();

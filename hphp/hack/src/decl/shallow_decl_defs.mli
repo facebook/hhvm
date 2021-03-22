@@ -47,17 +47,19 @@ module MethodFlags : sig
 
   val empty : t
 
-  val get_abstract            : t -> bool
-  val get_final               : t -> bool
-  val get_override            : t -> bool
-  val get_dynamicallycallable : t -> bool
-  val get_php_std_lib         : t -> bool
+  val get_abstract               : t -> bool
+  val get_final                  : t -> bool
+  val get_override               : t -> bool
+  val get_dynamicallycallable    : t -> bool
+  val get_php_std_lib            : t -> bool
+  val get_sound_dynamic_callable : t -> bool
 
-  val set_abstract            : bool -> t -> t
-  val set_final               : bool -> t -> t
-  val set_override            : bool -> t -> t
-  val set_dynamicallycallable : bool -> t -> t
-  val set_php_std_lib         : bool -> t -> t
+  val set_abstract               : bool -> t -> t
+  val set_final                  : bool -> t -> t
+  val set_override               : bool -> t -> t
+  val set_dynamicallycallable    : bool -> t -> t
+  val set_php_std_lib            : bool -> t -> t
+  val set_sound_dynamic_callable : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -65,6 +67,7 @@ module MethodFlags : sig
     override:bool ->
     dynamicallycallable:bool ->
     php_std_lib:bool ->
+    sound_dynamic_callable:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -157,6 +160,8 @@ val sm_override : shallow_method -> bool
 val sm_dynamicallycallable : shallow_method -> bool
 
 val sm_php_std_lib : shallow_method -> bool
+
+val sm_sound_dynamic_callable : shallow_method -> bool
 
 type fun_decl = fun_elt [@@deriving show]
 

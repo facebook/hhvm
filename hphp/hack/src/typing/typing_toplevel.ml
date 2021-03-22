@@ -383,6 +383,97 @@ let fun_def ctx f :
       let (_env, global_inference_env) = Env.extract_global_inference_env env in
       (fundef, (pos, global_inference_env)))
 
+let method_dynamically_callable
+    env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
+  let interface_check =
+    Typing_extends.sound_dynamic_interface_check
+      env
+      (variadicity_decl_ty :: params_decl_ty)
+      ret_locl_ty
+  in
+  let method_body_check () =
+    let make_dynamic pos =
+      Typing_make_type.dynamic (Reason.Rsound_dynamic_callable pos)
+    in
+    let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
+    let dynamic_return_info =
+      Typing_env_return_info.
+        {
+          return_type = MakeType.enforced dynamic_return_ty;
+          return_disposable = false;
+          return_explicit = true;
+          return_dynamically_callable = true;
+        }
+    in
+    let (env, param_tys) =
+      List.map_env env m.m_params ~f:(fun env param ->
+          make_param_local_ty env (Some (make_dynamic param.param_pos)) param)
+    in
+    let params_need_immutable = get_ctx_vars m.m_ctxs in
+    let (env, _) =
+      let bind_param_and_check env param =
+        let name = (snd param).param_name in
+        let immutable =
+          List.exists ~f:(String.equal name) params_need_immutable
+        in
+        let (env, fun_param) = Typing.bind_param ~immutable env param in
+        (env, fun_param)
+      in
+      List.map_env env (List.zip_exn param_tys m.m_params) bind_param_and_check
+    in
+
+    let variadic_pos =
+      match m.m_variadic with
+      | FVvariadicArg fp -> fp.param_pos
+      | FVellipsis p -> p
+      | FVnonVariadic -> Pos.none
+    in
+    let (env, t_variadic) =
+      get_callable_variadicity
+        ~partial_callback:(Partial.should_check_error (Env.get_mode env))
+        ~pos:variadic_pos
+        env
+        (Some (make_dynamic variadic_pos))
+        m.m_variadic
+    in
+    let env =
+      set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
+    in
+
+    let disable =
+      Naming_attributes.mem
+        SN.UserAttributes.uaDisableTypecheckerInternal
+        m.m_user_attributes
+    in
+    let pos = fst m.m_name in
+
+    Errors.try_
+      (fun () ->
+        let _ =
+          Typing.fun_
+            ~abstract:m.m_abstract
+            ~disable
+            env
+            dynamic_return_info
+            pos
+            m.m_body
+            m.m_fun_kind
+        in
+        ())
+      (fun error ->
+        Errors.method_is_not_dynamically_callable
+          pos
+          (snd m.m_name)
+          (Cls.name cls)
+          ( Naming_attributes.mem
+              SN.UserAttributes.uaSoundDynamicCallable
+              m.m_user_attributes
+          || Cls.get_implements_dynamic cls )
+          None
+          (Some error))
+  in
+  if not interface_check then method_body_check ()
+
 let method_def env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name ~do_:(fun env ->
@@ -473,6 +564,7 @@ let method_def env cls m =
           locl_ty
           ret_decl_ty
       in
+      let sound_dynamic_check_saved_env = env in
       let (env, param_tys) =
         List.zip_exn m.m_params params_decl_ty
         |> List.map_env env ~f:(fun env (param, hint) ->
@@ -545,37 +637,28 @@ let method_def env cls m =
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar
       in
-      (* if the class implements dynamic, then check that its methods are dynamically callable *)
+
+      (* if the enclosing class implements dynamic, or the method is annotated with
+       * <<__SoundDynamicCallable>>, check that the method is dynamically callable *)
+      let check_sound_dynamic_callable =
+        (not env.inside_constructor)
+        && ( Cls.get_implements_dynamic cls
+           || Naming_attributes.mem
+                SN.UserAttributes.uaSoundDynamicCallable
+                m.m_user_attributes )
+      in
       if
         TypecheckerOptions.enable_sound_dynamic
           (Provider_context.get_tcopt (Env.get_ctx env))
-        && Cls.get_implements_dynamic cls
-      then begin
-        (* 1. check if all the parameters of the method are enforceable *)
-        List.iter params_decl_ty ~f:(fun dtyopt ->
-            match dtyopt with
-            | Some dty ->
-              let te_check = Typing_enforceability.is_enforceable env dty in
-              if not te_check then
-                Errors.method_is_not_dynamically_callable
-                  (fst m.m_name)
-                  (snd m.m_name)
-                  (Cls.name cls)
-            | None -> ());
-        (* 2. check if the return type is coercible *)
-        if
-          not
-            (Typing_subtype.is_sub_type_for_union
-               ~coerce:(Some Typing_logic.CoerceToDynamic)
-               env
-               locl_ty
-               (mk (Reason.Rnone, Tdynamic)))
-        then
-          Errors.method_is_not_dynamically_callable
-            (fst m.m_name)
-            (snd m.m_name)
-            (Cls.name cls)
-      end;
+        && check_sound_dynamic_callable
+      then
+        method_dynamically_callable
+          sound_dynamic_check_saved_env
+          cls
+          m
+          params_decl_ty
+          variadicity_decl_ty
+          locl_ty;
       let method_def =
         {
           Aast.m_annotation = Env.save local_tpenv env;
@@ -1472,7 +1555,6 @@ let class_def_ env c tc =
   let env =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
-
   ( if TypecheckerOptions.enable_sound_dynamic (Provider_context.get_tcopt ctx)
   then
     let parent_names =
@@ -1496,21 +1578,15 @@ let class_def_ env c tc =
             match Cls.kind parent_type with
             | Ast_defs.Cnormal
             | Ast_defs.Cabstract ->
+              (* ensure that we implement dynamic if we are a subclass of a class that implements dynamic
+               * upward well-formedness checks are performed in Typing_extends *)
               if
-                not
-                  (Bool.equal
-                     (Cls.get_implements_dynamic parent_type)
-                     c.c_implements_dynamic)
+                Cls.get_implements_dynamic parent_type
+                && not c.c_implements_dynamic
               then
                 error_parent_implements_dynamic
                   parent_type
                   c.c_implements_dynamic
-            | Ast_defs.Ctrait ->
-              if
-                c.c_implements_dynamic
-                && not (Cls.get_implements_dynamic parent_type)
-              then
-                error_parent_implements_dynamic parent_type true
             | Ast_defs.Cinterface ->
               if
                 (not c.c_implements_dynamic)

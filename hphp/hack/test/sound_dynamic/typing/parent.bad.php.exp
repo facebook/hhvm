@@ -1,2 +1,0 @@
-File "parent.bad.php", line 6, characters 7-9:
-Class Bar cannot implement dynamic because it extends class Foo which does not (Typing[4402])

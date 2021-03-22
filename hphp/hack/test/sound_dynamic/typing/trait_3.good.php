@@ -1,14 +1,11 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class Box<T> {}
+// A trait that does not implement dynamic cannot be used by a class that
+// implements dynamic
 
 class C implements dynamic {
   use T;
 }
 
-trait T {
-  public function bar(Box<int> $x) : Box<int> {
-    return $x;
-  }
-}
+trait T {}

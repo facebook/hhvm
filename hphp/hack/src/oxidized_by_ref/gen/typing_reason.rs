@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<050c7742f2bf9fc67920bd2a6f6ef7a7>>
+// @generated SignedSource<<48fd17005ea503aff3350959d01cf7b7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -241,6 +241,7 @@ pub enum T_<'a> {
     RconcatOperand(&'a pos::Pos<'a>),
     RinterpOperand(&'a pos::Pos<'a>),
     RdynamicCoercion(&'a T_<'a>),
+    RsoundDynamicCallable(&'a pos::Pos<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 

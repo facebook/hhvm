@@ -127,6 +127,7 @@ struct
     | Rconcat_operand p -> Rconcat_operand (pos p)
     | Rinterp_operand p -> Rinterp_operand (pos p)
     | Rdynamic_coercion r -> Rdynamic_coercion (reason r)
+    | Rsound_dynamic_callable p -> Rsound_dynamic_callable (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

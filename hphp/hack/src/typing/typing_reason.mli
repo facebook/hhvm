@@ -144,6 +144,7 @@ type _ t_ =
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
+  | Rsound_dynamic_callable : Pos.t -> 'phase t_
 
 type t = locl_phase t_
 

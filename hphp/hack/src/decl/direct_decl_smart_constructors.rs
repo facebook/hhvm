@@ -884,6 +884,7 @@ struct Attributes<'a> {
     can_call: bool,
     atom: bool,
     soft: bool,
+    sound_dynamic_callable: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1180,6 +1181,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             can_call: false,
             atom: false,
             soft: false,
+            sound_dynamic_callable: false,
         };
 
         let nodes = match node {
@@ -1264,6 +1266,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Soft" => {
                         attributes.soft = true;
+                    }
+                    "__SoundDynamicCallable" => {
+                        attributes.sound_dynamic_callable = true;
                     }
                     _ => {}
                 }

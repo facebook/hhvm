@@ -139,6 +139,7 @@ type _ t_ =
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
+  | Rsound_dynamic_callable : Pos.t -> 'phase t_
 
 type t = locl_phase t_
 
@@ -169,6 +170,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rtconst_no_cstr id -> Rtconst_no_cstr id
   | Rdefault_capability p -> Rdefault_capability p
   | Rdynamic_coercion r -> Rdynamic_coercion r
+  | Rsound_dynamic_callable r -> Rsound_dynamic_callable r
 
 let arg_pos_str ap =
   match ap with
@@ -571,6 +573,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
   | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
   | Rdynamic_coercion r -> to_string prefix r
+  | Rsound_dynamic_callable p ->
+    [(p, prefix ^ " because method must be callable in a dynamic context")]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -658,7 +662,8 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ret_boolean p
   | Rhack_arr_dv_arrs p
   | Rconcat_operand p
-  | Rinterp_operand p ->
+  | Rinterp_operand p
+  | Rsound_dynamic_callable p ->
     Pos_or_decl.of_raw_pos p
   | Rinvariant_generic (r, _)
   | Rcontravariant_generic (r, _)
@@ -794,6 +799,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rconcat_operand _ -> "Rconcat_operand"
   | Rinterp_operand _ -> "Rinterp_operand"
   | Rdynamic_coercion _ -> "Rdynamic_coercion"
+  | Rsound_dynamic_callable _ -> "Rsound_dynamic_callable"
 
 let pp fmt r =
   let pos = to_raw_pos r in

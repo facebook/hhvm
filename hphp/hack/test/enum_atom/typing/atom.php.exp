@@ -1,6 +1,6 @@
 File "atom.php", line 10, characters 23-23:
 Attribute __Atom is only allowed on \HH\MemberOf (Typing[4395])
-File "atom.php", line 30, characters 3-8:
+File "atom.php", line 30, characters 6-7:
 Unknown constant C in EE (Typing[4394])
 File "atom.php", line 36, characters 16-34:
 When using __Atom, only type parameters bounded by enum classes and enum classes are allowed as the first parameters of \HH\MemberOf (Typing[4395])

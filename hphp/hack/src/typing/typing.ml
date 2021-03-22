@@ -6209,7 +6209,7 @@ and call
         | param :: paraml -> (false, Some param, paraml)
         | [] -> (true, var_param, paraml)
       in
-      let expand_atom_in_enum env enum_name atom_name =
+      let expand_atom_in_enum pos env enum_name atom_name =
         let cls = Env.get_class env enum_name in
         match cls with
         | Some cls ->
@@ -6245,7 +6245,7 @@ and call
                 (match get_node ty_enum with
                 | Tclass ((_, enum_name), _, _)
                   when Env.is_enum_class env enum_name ->
-                  expand_atom_in_enum env enum_name atom_name
+                  expand_atom_in_enum pos env enum_name atom_name
                 | Tgeneric (name, _) ->
                   let upper_bounds =
                     Typing_utils.collect_enum_class_upper_bounds env name
@@ -6258,7 +6258,7 @@ and call
                    *)
                   if SSet.cardinal upper_bounds = 1 then
                     let enum_name = SSet.choose upper_bounds in
-                    expand_atom_in_enum env enum_name atom_name
+                    expand_atom_in_enum pos env enum_name atom_name
                   else
                     (env, None)
                 | _ ->

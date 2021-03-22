@@ -810,6 +810,17 @@ struct Func final {
   // Coeffects.                                                        [const]
 
   /*
+   * Returns the runtime representation of coeffects
+   */
+  RuntimeCoeffects requiredCoeffects() const;
+  RuntimeCoeffects shallowCoeffectsWithLocals() const;
+
+  /*
+   * Sets static coeffects
+   */
+  void setStaticCoeffects(StaticCoeffects);
+
+  /*
    * Names of the static coeffects on the function
    * Used for reflection
    */
@@ -899,7 +910,6 @@ struct Func final {
    * Get the system and coeffect attributes of the function.
    */
   Attr attrs() const;
-  StaticCoeffects staticCoeffects() const;
 
   /*
    * Get the user-declared attributes of the function.
@@ -1085,7 +1095,6 @@ struct Func final {
    * Print function attributes to out.
    */
   static void print_attrs(std::ostream& out, Attr attrs);
-  static void print_attrs(std::ostream& out, StaticCoeffects attrs);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1115,7 +1124,6 @@ struct Func final {
   // Having public setters here should be avoided, so try not to add any.
 
   void setAttrs(Attr attrs);
-  void setStaticCoeffects(StaticCoeffects attrs);
   void setBaseCls(Class* baseCls);
   void setFuncHandle(rds::Link<LowPtr<Func>, rds::Mode::NonLocal> l);
   void setHasPrivateAncestor(bool b);

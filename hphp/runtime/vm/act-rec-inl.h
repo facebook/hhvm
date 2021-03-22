@@ -150,15 +150,19 @@ inline void ActRec::trashThis() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline RuntimeCoeffects ActRec::coeffects() const {
-  if (!func()->hasCoeffectRules()) return func()->staticCoeffects().toAmbient();
+inline RuntimeCoeffects ActRec::requiredCoeffects() const {
+  if (!func()->hasCoeffectRules()) return func()->requiredCoeffects();
   // Access 0Coeffects variable
   auto const id = func()->coeffectsLocalId();
   auto const tv = reinterpret_cast<const TypedValue*>(this) - (id + 1);
   assertx(tvIsInt(tv));
-  auto const shallows = func()->staticCoeffects().toShallowWithLocals();
-  return RuntimeCoeffects::fromValue(tv->m_data.num & (~shallows.value()));
+  return RuntimeCoeffects::fromValue(tv->m_data.num);
+}
 
+inline RuntimeCoeffects ActRec::coeffects() const {
+  auto const shallows = func()->shallowCoeffectsWithLocals();
+  return RuntimeCoeffects::fromValue(requiredCoeffects().value() &
+                                     (~shallows.value()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

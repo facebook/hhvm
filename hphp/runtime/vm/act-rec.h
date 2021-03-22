@@ -254,9 +254,10 @@ struct ActRec {
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Returns the ambient coeffects of the function
+   * Returns the ambient and required coeffects of the function respectively
    */
   RuntimeCoeffects coeffects() const;
+  RuntimeCoeffects requiredCoeffects() const;
 
   /*
    * address to teleport the return value after destroying this actrec.

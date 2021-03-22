@@ -269,7 +269,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     return;
   }
   auto const requiredCoeffects = [&] {
-    auto required = cns(env, callee->staticCoeffects().toRequired().value());
+    auto required = cns(env, callee->requiredCoeffects().value());
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
       if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx)) {

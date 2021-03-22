@@ -83,20 +83,23 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
-inline SSATmp* curCoeffects(IRGS& env) {
+inline SSATmp* curRequiredCoeffects(IRGS& env) {
   auto const func = curFunc(env);
   assertx(func);
   if (!func->hasCoeffectRules()) {
-    return cns(env, func->staticCoeffects().toAmbient().value());
+    return cns(env, func->requiredCoeffects().value());
   }
   // Access 0Coeffects variable
   // TODO: Figure out why TInt asserts here
   auto const local =
     gen(env, LdLoc, TCell, LocalId(func->coeffectsLocalId()), fp(env));
-  auto const value = gen(env, AssertType, TInt, local);
-  auto const shallows = func->staticCoeffects().toShallowWithLocals();
-  return gen(env, AndInt, value, cns(env, ~shallows.value()));
+  return gen(env, AssertType, TInt, local);
+}
 
+inline SSATmp* curCoeffects(IRGS& env) {
+  auto const coeffects = curRequiredCoeffects(env);
+  auto const shallows = curFunc(env)->shallowCoeffectsWithLocals();
+  return gen(env, AndInt, coeffects, cns(env, ~shallows.value()));
 }
 
 //////////////////////////////////////////////////////////////////////

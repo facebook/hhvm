@@ -182,7 +182,7 @@ inline bool calleeCoeffectChecks(const Func* callee,
     return true;
   }
   auto const requiredCoeffects = [&] {
-    auto required = callee->staticCoeffects().toRequired();
+    auto required = callee->requiredCoeffects();
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
       required &= rule.emit(callee, numArgsInclUnpack, prologueCtx);

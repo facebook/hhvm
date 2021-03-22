@@ -131,13 +131,16 @@ let make_default_return ~is_method env name =
     mk (r, Typing_utils.tany env)
 
 let implicit_return env pos ~expected ~actual =
-  let env =
-    Typing_ops.sub_type
+  let reason = Reason.URreturn in
+  let error = Errors.missing_return in
+  let open Typing_env_types in
+  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+    Typing_coercion.coerce_type
       pos
-      Reason.URreturn
+      reason
       env
       actual
-      expected
-      Errors.missing_return
-  in
-  env
+      { et_type = expected; et_enforced = Unenforced }
+      error
+  else
+    Typing_ops.sub_type pos reason env actual expected error

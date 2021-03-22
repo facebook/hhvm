@@ -25,16 +25,13 @@ type file_type =
 exception File_provider_stale
 
 module FileHeap =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
+  SharedMem.NoCache (SharedMem.ProfiledImmediate) (Relative_path.S)
     (struct
       type t = file_type
 
       let prefix = Prefix.make ()
 
       let description = "File"
-    end)
-    (struct
-      let capacity = 1000
     end)
 
 let read_file_contents_from_disk (fn : Relative_path.t) : string option =
@@ -108,7 +105,7 @@ let provide_file fn contents =
 let provide_file_hint fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.write_around fn contents
+  | Provider_backend.Shared_memory -> FileHeap.add fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith

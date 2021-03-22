@@ -6,47 +6,30 @@
  *
  *)
 
-open Hh_prelude
 open Reordered_argument_collections
 
-type key = string * Decl_defs.linearization_kind
-
-let key_to_local_key (key : key) :
-    Decl_defs.mro_element list Provider_backend.Linearization_cache_entry.t =
-  let (name, kind) = key in
-  match kind with
-  | Decl_defs.Member_resolution ->
-    Provider_backend.Linearization_cache_entry.Member_resolution_linearization
-      name
-  | Decl_defs.Ancestor_types ->
-    Provider_backend.Linearization_cache_entry.Ancestor_types_linearization name
-
-module CacheKey = struct
-  type t = string * Decl_defs.linearization_kind [@@deriving show, ord]
-
-  let to_string = show
-end
-
-module CacheKeySet = Reordered_argument_set (Caml.Set.Make (CacheKey))
+let key_to_local_key (key : string) :
+    Decl_defs.lin Provider_backend.Linearization_cache_entry.t =
+  Provider_backend.Linearization_cache_entry.Linearization key
 
 module Cache =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (CacheKey)
+  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
     (struct
-      type t = Decl_defs.mro_element list
+      type t = Decl_defs.lin
 
       let prefix = Prefix.make ()
 
       let description = "Decl_Linearization"
     end)
     (struct
-      let capacity = 1000
+      let capacity = 500
     end)
 
 module DeclServiceLocalCache =
   SharedMem.LocalCache
-    (CacheKey)
+    (StringKey)
     (struct
-      type t = Decl_defs.mro_element list
+      type t = Decl_defs.lin
 
       let prefix = Prefix.make ()
 
@@ -63,19 +46,10 @@ let local_changes_pop_sharedmem_stack () : unit =
   Cache.LocalChanges.pop_stack ()
 
 let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
-  let keys =
-    SSet.fold classes ~init:CacheKeySet.empty ~f:(fun class_name acc ->
-        let acc =
-          CacheKeySet.add acc (class_name, Decl_defs.Member_resolution)
-        in
-        let acc = CacheKeySet.add acc (class_name, Decl_defs.Ancestor_types) in
-        acc)
-  in
-  Cache.remove_batch keys
+  Cache.remove_batch classes
 
-let add
-    (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
-    : unit =
+let add (ctx : Provider_context.t) (key : string) (value : Decl_defs.lin) : unit
+    =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
@@ -88,8 +62,7 @@ let add
        instead of a global cache in the hh_worker process *)
     DeclServiceLocalCache.add key value
 
-let get (ctx : Provider_context.t) (key : key) :
-    Decl_defs.mro_element list option =
+let get (ctx : Provider_context.t) (key : string) : Decl_defs.lin option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->

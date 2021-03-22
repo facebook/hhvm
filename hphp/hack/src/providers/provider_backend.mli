@@ -46,9 +46,7 @@ module Shallow_decl_cache : sig
 end
 
 module Linearization_cache_entry : sig
-  type _ t =
-    | Member_resolution_linearization : string -> Decl_defs.mro_element list t
-    | Ancestor_types_linearization : string -> Decl_defs.mro_element list t
+  type _ t = Linearization : string -> Decl_defs.lin t
 
   type 'a key = 'a t
 

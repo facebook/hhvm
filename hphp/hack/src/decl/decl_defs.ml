@@ -152,6 +152,11 @@ type mro_element = {
 }
 [@@deriving eq, show]
 
+type lin = {
+  lin_member: mro_element list;
+  lin_ancestor: mro_element list;
+}
+
 type linearization = mro_element Sequence.t
 
 type linearization_kind =

@@ -60,10 +60,7 @@ let invalidate_local_decl_caches_for_file
   List.iter file_info.classes ~f:(fun (_, name) ->
       Linearization_cache.remove
         local_memory.linearization_cache
-        (Member_resolution_linearization name);
-      Linearization_cache.remove
-        local_memory.linearization_cache
-        (Ancestor_types_linearization name));
+        (Linearization name));
   ()
 
 let invalidate_local_decl_caches_for_entries

@@ -523,7 +523,7 @@ and next_state
   | Synthesized_elts { synths = [] } -> Sequence.Step.Done
 
 and get_linearization (env : env) (class_name : string) : mro_element list =
-  let { class_stack; linearization_kind; _ } = env in
+  let { class_stack; _ } = env in
   if SSet.mem class_stack class_name then
     [
       {
@@ -535,16 +535,26 @@ and get_linearization (env : env) (class_name : string) : mro_element list =
   else
     let class_stack = SSet.add class_stack class_name in
     let env = { env with class_stack } in
-    let key = (class_name, linearization_kind) in
-    match Linearization_provider.get (get_ctx env) key with
-    | Some lin -> lin
+    let result lin =
+      match env.linearization_kind with
+      | Member_resolution -> lin.lin_member
+      | Ancestor_types -> lin.lin_ancestor
+    in
+    match Linearization_provider.get (get_ctx env) class_name with
+    | Some lin -> result lin
     | None ->
       (match Shallow_classes_provider.get (get_ctx env) class_name with
       | Some c ->
-        let lin = linearize env c in
-        let key = (snd c.sc_name, env.linearization_kind) in
-        Linearization_provider.add (get_ctx env) key lin;
-        lin
+        let lin =
+          {
+            lin_member =
+              linearize { env with linearization_kind = Member_resolution } c;
+            lin_ancestor =
+              linearize { env with linearization_kind = Ancestor_types } c;
+          }
+        in
+        Linearization_provider.add (get_ctx env) (snd c.sc_name) lin;
+        result lin
       | None ->
         (* There is no known definition for the class with the given name. This
           is always an "Unbound name" error, and we will emit one wherever this

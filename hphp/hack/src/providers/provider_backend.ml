@@ -65,9 +65,7 @@ end
 module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)
 
 module Linearization_cache_entry = struct
-  type _ t =
-    | Member_resolution_linearization : string -> Decl_defs.mro_element list t
-    | Ancestor_types_linearization : string -> Decl_defs.mro_element list t
+  type _ t = Linearization : string -> Decl_defs.lin t
 
   type 'a key = 'a t
 
@@ -78,8 +76,7 @@ module Linearization_cache_entry = struct
   let key_to_log_string : type a. a key -> string =
    fun key ->
     match key with
-    | Member_resolution_linearization c -> "MemberResolution" ^ c
-    | Ancestor_types_linearization c -> "AncestorTypes" ^ c
+    | Linearization c -> "Linearization" ^ c
 end
 
 module Linearization_cache = Lru_cache.Cache (Linearization_cache_entry)

@@ -6,11 +6,9 @@
  *
  *)
 
-type key = string * Decl_defs.linearization_kind
+val get : Provider_context.t -> string -> Decl_defs.lin option
 
-val get : Provider_context.t -> key -> Decl_defs.mro_element list option
-
-val add : Provider_context.t -> key -> Decl_defs.mro_element list -> unit
+val add : Provider_context.t -> string -> Decl_defs.lin -> unit
 
 val local_changes_push_sharedmem_stack : unit -> unit
 

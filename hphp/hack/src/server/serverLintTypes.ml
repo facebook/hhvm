@@ -7,4 +7,4 @@
  *
  *)
 
-type result = string Lint.t list
+type result = Pos.absolute Lint.t list

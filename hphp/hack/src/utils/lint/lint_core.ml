@@ -23,10 +23,10 @@ let string_of_severity = function
   | Lint_warning -> "warning"
   | Lint_advice -> "advice"
 
-type 'a t = {
+type 'pos t = {
   code: int;
   severity: severity;
-  pos: 'a Pos.pos; [@opaque]
+  pos: 'pos; [@opaque]
   message: string;
   (* Normally, lint warnings and lint advice only get shown by arcanist if the
    * lines they are raised on overlap with lines changed in a diff. This
@@ -36,7 +36,7 @@ type 'a t = {
 }
 [@@deriving show]
 
-let (lint_list : Relative_path.t t list option ref) = ref None
+let (lint_list : Pos.t t list option ref) = ref None
 
 let get_code { code; _ } = code
 
@@ -74,7 +74,7 @@ let to_contextual_string lint =
   Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
   |> Contextual_error_formatter.to_string ~claim_color
 
-let to_highlighted_string (lint : string t) =
+let to_highlighted_string (lint : string Pos.pos t) =
   Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
   |> Highlighted_error_formatter.to_string
 

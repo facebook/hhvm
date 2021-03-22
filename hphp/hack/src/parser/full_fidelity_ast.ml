@@ -102,7 +102,7 @@ let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error errors
 
-let process_lint_errors (_ : env) (errors : Relative_path.t Lint.t list) =
+let process_lint_errors (_ : env) (errors : Pos.t Lint.t list) =
   List.iter ~f:Lint.add_lint errors
 
 external rust_from_text_ffi :

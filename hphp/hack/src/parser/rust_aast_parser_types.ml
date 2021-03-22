@@ -29,7 +29,7 @@ type 'aast result_ = {
   lowpri_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
-  lint_errors: Relative_path.t Lint.t list;
+  lint_errors: Pos.t Lint.t list;
 }
 
 type result = (Pos.t, unit, unit, unit) Aast.program result_

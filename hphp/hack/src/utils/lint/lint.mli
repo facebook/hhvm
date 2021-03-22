@@ -12,11 +12,11 @@ type severity =
   | Lint_warning
   | Lint_advice
 
-type 'a t [@@deriving show]
+type 'pos t [@@deriving show]
 
-val get_code : 'a t -> int
+val get_code : 'pos t -> int
 
-val get_pos : 'a t -> 'a Pos.pos
+val get_pos : 'pos t -> 'pos
 
 val add :
   ?bypass_changed_lines:bool ->
@@ -27,21 +27,21 @@ val add :
   string ->
   unit
 
-val to_absolute : Relative_path.t t -> string t
+val to_absolute : Pos.t t -> Pos.absolute t
 
-val to_string : string t -> string
+val to_string : Pos.absolute t -> string
 
-val to_contextual_string : string t -> string
+val to_contextual_string : Pos.absolute t -> string
 
-val to_highlighted_string : string t -> string
+val to_highlighted_string : Pos.absolute t -> string
 
-val to_json : string t -> Hh_json.json
+val to_json : Pos.absolute t -> Hh_json.json
 
 val internal_error : Pos.t -> string -> unit
 
 val lowercase_constant : Pos.t -> string -> unit
 
-val mk_lowercase_constant : Pos.t -> string -> Relative_path.t t
+val mk_lowercase_constant : Pos.t -> string -> Pos.t t
 
 val use_collection_literal : Pos.t -> string -> unit
 
@@ -49,6 +49,6 @@ val static_string : ?no_consts:bool -> Pos.t -> unit
 
 val shape_idx_access_required_field : Pos.t -> string -> unit
 
-val do_ : (unit -> 'a) -> Relative_path.t t list * 'a
+val do_ : (unit -> 'a) -> Pos.t t list * 'a
 
-val add_lint : Relative_path.t t -> unit
+val add_lint : Pos.t t -> unit

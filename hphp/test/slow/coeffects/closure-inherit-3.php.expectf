@@ -1,0 +1,19 @@
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [rx] in %s on line 10
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$foo() provided [rx] in %s on line 10
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$foo#2() provided [rx] in %s on line 11
+
+Warning: Call to Closure$foo#3() requires [rx] coeffects but pure() provided [] in %s on line 5
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$foo#3() provided [rx] in %s on line 12
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$bar() provided [rx_shallow] in %s on line 16
+
+Warning: Call to Closure$bar#2() requires [rx_shallow] coeffects but rx() provided [rx] in %s on line 4
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$bar#2() provided [rx_shallow] in %s on line 17
+
+Warning: Call to Closure$bar#3() requires [rx_shallow] coeffects but pure() provided [] in %s on line 5
+
+Warning: Call to defaults() requires [defaults] coeffects but Closure$bar#3() provided [rx_shallow] in %s on line 18

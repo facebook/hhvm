@@ -83,9 +83,17 @@ SSATmp* emitFunParam() {
   return nullptr;
 }
 
-SSATmp* emitClosureInheritFromParent() {
-  // TODO(oulgen): Implement this
-  return nullptr;
+SSATmp* emitClosureInheritFromParent(IRGS& env, const Func* f,
+                                     SSATmp* prologueCtx) {
+  assertx(prologueCtx);
+  assertx(f->isClosureBody());
+  auto const cls = f->implCls();
+  assertx(cls);
+  auto const slot = cls->getCoeffectsProp();
+  auto const addr = gen(env, LdPropAddr,
+                        IndexData { cls->propSlotToIndex(slot) },
+                        TInt.lval(Ptr::Prop), prologueCtx);
+  return gen(env, LdMem, TInt, addr);
 }
 
 } // namespace
@@ -105,7 +113,7 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
     case Type::FunParam:
       return emitFunParam();
     case Type::ClosureInheritFromParent:
-      return emitClosureInheritFromParent();
+      return emitClosureInheritFromParent(env, f, prologueCtx);
     case Type::Invalid:
       always_assert(false);
   }

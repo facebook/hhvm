@@ -18,6 +18,9 @@
 
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/blob-helper.h"
+
+#include "hphp/runtime/ext/std/ext_std_closure.h"
+
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(coeffects);
@@ -135,9 +138,12 @@ RuntimeCoeffects emitFunParam() {
   return RuntimeCoeffects::full();
 }
 
-RuntimeCoeffects emitClosureInheritFromParent() {
-  // TODO(oulgen): implement this
-  return RuntimeCoeffects::full();
+RuntimeCoeffects emitClosureInheritFromParent(const Func* f,
+                                              void* prologueCtx) {
+  assertx(prologueCtx);
+  assertx(f->isClosureBody());
+  auto const closure = reinterpret_cast<c_Closure*>(prologueCtx);
+  return closure->getCoeffects();
 }
 
 } // namespace
@@ -153,7 +159,7 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
     case Type::FunParam:
       return emitFunParam();
     case Type::ClosureInheritFromParent:
-      return emitClosureInheritFromParent();
+      return emitClosureInheritFromParent(f, prologueCtx);
     case Type::Invalid:
       always_assert(false);
   }

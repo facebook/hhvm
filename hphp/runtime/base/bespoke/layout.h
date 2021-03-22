@@ -70,8 +70,7 @@ void logBespokeDispatch(const BespokeArray* bad, const char* fn);
 // Return a monotype copy of a vanilla array, or nullptr if it's not monotype.
 BespokeArray* maybeMonoify(ArrayData*);
 
-// Return a struct copy of a vanilla array, or nullptr if
-// it cannot be constructed.
+// Return a struct copy of a vanilla array, or nullptr if it's not struct-like.
 BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
 
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \

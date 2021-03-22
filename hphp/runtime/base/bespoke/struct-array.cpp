@@ -46,7 +46,7 @@ bool isStructLayout(LayoutIndex index) {
 
 std::string describeStructLayout(const KeyOrder& ko) {
   auto const base = ko.toString();
-  return folly::sformat("StructLayout<{}>", base.substr(1, base.size() - 2));
+  return folly::sformat("StructArray<{}>", base.substr(1, base.size() - 2));
 }
 
 }
@@ -164,13 +164,15 @@ StructArray* StructArray::MakeReserve(HeaderKind kind,
       sizeIdx, legacy ? ArrayData::kLegacyArray : 0);
   sad->initHeader_16(kind, OneReference, aux);
   sad->setLayoutIndex(layout->index());
+  sad->m_size = 0;
+
   auto const numFields = layout->numFields();
   assertx(numFields <= std::numeric_limits<uint8_t>::max());
   auto const valueOffset = layout->valueOffset();
   assertx(valueOffset % 8 == 0);
   assertx((valueOffset / 8) <= std::numeric_limits<uint8_t>::max());
   sad->m_extra_lo16 = numFields << 8 | (valueOffset / 8);
-  sad->m_size = 0;
+
   memset(sad->rawTypes(), static_cast<int>(KindOfUninit), sad->numFields());
   assertx(sad->checkInvariants());
   return sad;
@@ -238,13 +240,13 @@ StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
 StructArray* StructArray::MakeStructDArray(
     const StructLayout* layout, uint32_t size,
     const Slot* slots, const TypedValue* vals) {
-  return MakeStructImpl(layout, size, slots, vals, HeaderKind::Mixed);
+  return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDArray);
 }
 
 StructArray* StructArray::MakeStructDict(
     const StructLayout* layout, uint32_t size,
     const Slot* slots, const TypedValue* vals) {
-  return MakeStructImpl(layout, size, slots, vals, HeaderKind::Dict);
+  return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDict);
 }
 
 StructArray* StructArray::MakeStructImpl(
@@ -260,13 +262,15 @@ StructArray* StructArray::MakeStructImpl(
 
   for (auto i = 0; i < size; i++) {
     assertx(slots[i] <= layout->numFields());
+    auto const& tv = tvs[size - i - 1];
+    types[slots[i]] = type(tv);
+    vals[slots[i]] = val(tv);
     positions[i] = slots[i];
-    types[slots[i]] = type(tvs[i]);
-    vals[slots[i]] = val(tvs[i]);
   }
 
   assertx(result->checkInvariants());
   assertx(result->layout() == layout);
+  assertx(result->size() == size);
   return result;
 }
 

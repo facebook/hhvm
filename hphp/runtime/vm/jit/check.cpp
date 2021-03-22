@@ -560,6 +560,7 @@ using TypeNames::TCA;
 #define DVArr
 #define DDArr
 #define DStaticDArr
+#define DStructArr
 #define DCol
 #define DMemoKey
 #define DLvalOfPtr
@@ -629,6 +630,7 @@ using TypeNames::TCA;
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr
+#undef DStructArr
 #undef DCol
 #undef DUnion
 #undef DMemoKey

@@ -1520,9 +1520,9 @@ To string conversions:
   immediates for keys and N stack elements at `offset` on stack S0 for values.
   This op assumes it can take values from the stack without inc-reffing them.
 
-| NewBespokeStructDArray<offset,layout,slots...>, DDArr,   S(StkPtr), PRc|CRc
+| NewBespokeStructDArray<offset,layout,slots...>, DStructArr, S(StkPtr), PRc|CRc
 
-| NewBespokeStructDict<offset,layout,slots...>,   D(Dict), S(StkPtr), PRc|CRc
+| NewBespokeStructDict<offset,layout,slots...>,   DStructArr, S(StkPtr), PRc|CRc
 
   Allocate a new dict or darray with the bespoke StructLayout `layout`.
   Then, initialize the N fields with the given `slots` with N stack elements

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/bespoke/struct-array.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -1062,22 +1063,51 @@ void emitProfileArrLikeProps(IRGS& env) {
   }
 }
 
+bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
+  auto const op = sk.op();
+  assertx(op == Op::NewDictArray || op == Op::NewStructDict ||
+          op == Op::NewDArray || op == Op::NewStructDArray);
+
+  auto const is_dict = op == Op::NewDictArray || op == Op::NewStructDict;
+  auto const is_struct = op == Op::NewStructDict || op == Op::NewStructDArray;
+  auto const ir_op = is_dict ? NewBespokeStructDict : NewBespokeStructDArray;
+  auto const imms = is_struct ? getImmVector(sk.pc()) : ImmVector{};
+
+  auto const data = [&]() -> NewBespokeStructData {
+    auto const numSlots = safe_cast<uint32_t>(imms.size());
+    auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+    auto const slots = new (env.unit.arena()) Slot[numSlots];
+    for (auto i = 0; i < imms.size(); i++) {
+      auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
+      slots[i] = slayout->keySlot(key);
+      assertx(slots[i] != kInvalidSlot);
+    }
+    return {layout, spOffBCFromIRSP(env), numSlots, slots};
+  }();
+
+  auto const arr = gen(env, ir_op, data, sp(env));
+  discard(env, imms.size());
+  push(env, arr);
+  return true;
+}
+
 bool specializeSource(IRGS& env, SrcKey sk) {
   auto const kind = env.context.kind;
   if (kind != TransKind::Live && kind != TransKind::Optimize) return false;
-
   auto const op = sk.op();
-  if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
-    auto const profile = bespoke::getLoggingProfile(sk);
-    if (profile == nullptr) return false;
-    if (auto const bad = profile->getStaticBespokeArray()) {
-      assertx(arrayTypeCouldBeBespoke(bad->toDataType()));
-      assertx(isArrLikeConstructorOp(op));
-      push(env, cns(env, bad));
-      return true;
-    }
+  if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return false;
+  auto const profile = bespoke::getLoggingProfile(sk);
+  if (profile == nullptr || !profile->layout.bespoke()) return false;
+
+  if (auto const bad = profile->getStaticBespokeArray()) {
+    assertx(arrayTypeCouldBeBespoke(bad->toDataType()));
+    assertx(isArrLikeConstructorOp(op));
+    push(env, cns(env, bad));
+    return true;
   }
-  return false;
+
+  assertx(profile->layout.is_struct());
+  return specializeStructSource(env, sk, profile->layout);
 }
 
 }

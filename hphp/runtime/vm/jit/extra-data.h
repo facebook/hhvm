@@ -1548,6 +1548,10 @@ struct NewStructData : IRExtraData {
 };
 
 struct NewBespokeStructData : IRExtraData {
+  NewBespokeStructData(ArrayLayout layout, IRSPRelOffset offset,
+                       uint32_t numSlots, Slot* slots)
+    : layout(layout), offset(offset), numSlots(numSlots), slots(slots) {}
+
   std::string show() const;
 
   size_t stableHash() const {

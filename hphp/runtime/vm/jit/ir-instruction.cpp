@@ -527,6 +527,13 @@ Type loggingArrLikeReturn(const IRInstruction* inst) {
   return isStatic ? arr.unspecialize() : arr.unspecialize().modified();
 }
 
+Type structArrReturn(const IRInstruction* inst) {
+  assertx(inst->is(NewBespokeStructDArray, NewBespokeStructDict));
+  auto const data = inst->extra<NewBespokeStructData>();
+  auto const base = inst->is(NewBespokeStructDArray) ? TDArr : TDict;
+  return base.narrowToLayout(data->layout);
+}
+
 Type arrLikeSetReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeSet));
   auto const arr = inst->src(0)->type();
@@ -633,6 +640,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
 #define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
 #define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();
+#define DStructArr      return structArrReturn(inst);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -680,6 +688,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr
+#undef DStructArr
 #undef DCol
 #undef DMulti
 #undef DSetElem

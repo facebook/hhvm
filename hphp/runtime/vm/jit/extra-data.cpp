@@ -53,6 +53,7 @@ std::string NewBespokeStructData::show() const {
     os << delimiter << slots[i];
     delimiter = ",";
   }
+  os << ')';
   return os.str();
 }
 

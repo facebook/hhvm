@@ -59,6 +59,7 @@ struct ArrayLayout {
   // Test for specific kinds of bespoke layouts.
   bool logging() const;
   bool monotype() const;
+  bool is_struct() const;
 
   // The result is non-null iff the layout is a bespoke layout.
   const bespoke::Layout* bespokeLayout() const;

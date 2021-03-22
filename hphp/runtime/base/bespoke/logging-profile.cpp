@@ -905,13 +905,9 @@ std::vector<SinkOutputData> sortSinkData() {
 
 void stopProfiling() {
   assertx(allowBespokeArrayLikes());
-  assertx(s_profiling.load(std::memory_order_relaxed));
-
-  {
-    auto expected = true;
-    folly::SharedMutex::WriteHolder lock{s_profilingLock};
-    if (!s_profiling.compare_exchange_strong(expected, false)) return;
-  }
+  assertx(s_profiling.load(std::memory_order_acquire));
+  folly::SharedMutex::WriteHolder lock{s_profilingLock};
+  s_profiling.store(false, std::memory_order_release);
 }
 
 namespace {

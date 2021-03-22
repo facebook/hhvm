@@ -1116,6 +1116,7 @@ struct RuntimeOption {
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, BespokeEscalationSampleRate, 0)                           \
   F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
+  F(bool, EmitBespokeStructArrays, false)                               \
   F(string, ExportLoggingArrayDataPath, "")                             \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \

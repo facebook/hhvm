@@ -31,7 +31,7 @@ use hhbc_ast_rust::{
 };
 use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
+use instruction_sequence_rust::{flatten, instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use label_rust::Label;
 use ocamlrep::rc::RcOc;
@@ -420,6 +420,7 @@ pub fn make_body<'a>(
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a>>,
 ) -> Result<HhasBody> {
+    body_instrs = flatten(body_instrs);
     body_instrs.rewrite_user_labels(emitter.label_gen_mut());
     emit_adata::rewrite_typed_values(emitter, &mut body_instrs)?;
     if emitter

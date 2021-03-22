@@ -102,6 +102,70 @@ where
 }
 
 #[derive(Debug)]
+pub struct InstrIterByValue {
+    stack: Vec<(InstrSeq, usize)>,
+}
+
+impl IntoIterator for InstrSeq {
+    type Item = Instruct;
+    type IntoIter = InstrIterByValue;
+
+    fn into_iter(self) -> Self::IntoIter {
+        InstrIterByValue {
+            stack: vec![(self, 0)],
+        }
+    }
+}
+
+impl Iterator for InstrIterByValue {
+    type Item = Instruct;
+
+    /// Iterate an `InstrSeq` as a flat iterable of `Instruct` values.
+    ///
+    /// Uses constant stack space by avoiding recursion. Avoids
+    /// copying and minimises pushing/popping, because this function
+    /// is hot in large Hack functions.
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some((ref mut instr_seq, ref mut idx)) = self.stack.last_mut() {
+            match instr_seq {
+                InstrSeq::Empty => {
+                    self.stack.pop();
+                }
+                InstrSeq::One(_) => {
+                    if let Some((InstrSeq::One(i), _)) = self.stack.pop() {
+                        return Some(*i);
+                    }
+                }
+                InstrSeq::List(ref mut instrs) => {
+                    if *idx < instrs.len() {
+                        let instr = std::mem::replace(
+                            &mut instrs[*idx],
+                            Instruct::IBasic(InstructBasic::Nop),
+                        );
+                        *idx += 1;
+                        return Some(instr);
+                    } else {
+                        self.stack.pop();
+                    }
+                }
+                InstrSeq::Concat(ref mut instr_seqs) => {
+                    if *idx < instr_seqs.len() {
+                        let next_instr_seq =
+                            std::mem::replace(&mut instr_seqs[*idx], InstrSeq::Empty);
+                        *idx += 1;
+
+                        self.stack.push((next_instr_seq, 0));
+                    } else {
+                        self.stack.pop();
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+#[derive(Debug)]
 pub struct InstrIter<'i> {
     instr_seq: &'i InstrSeq,
     index: usize,
@@ -116,6 +180,10 @@ impl<'i> InstrIter<'i> {
             concat_stack: vec![],
         }
     }
+}
+
+pub fn flatten(instrs: InstrSeq) -> InstrSeq {
+    InstrSeq::List(instrs.into_iter().collect())
 }
 
 impl<'i> Iterator for InstrIter<'i> {

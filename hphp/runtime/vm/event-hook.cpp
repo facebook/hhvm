@@ -679,7 +679,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Xenon
   if (flags & XenonSignalFlag) {
     if (Strobelight::active()) {
-      Strobelight::getInstance().log();
+      Strobelight::getInstance().log(Xenon::ExitSample);
     } else {
       Xenon::getInstance().log(Xenon::ExitSample, sourceType);
     }
@@ -763,7 +763,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
   // Xenon
   if (flags & XenonSignalFlag) {
     if (Strobelight::active()) {
-      Strobelight::getInstance().log();
+      Strobelight::getInstance().log(Xenon::EnterSample);
     } else {
       Xenon::getInstance().log(Xenon::EnterSample, sourceType);
     }
@@ -793,7 +793,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar,
   // Xenon
   if (flags & XenonSignalFlag) {
     if (Strobelight::active()) {
-      Strobelight::getInstance().log();
+      Strobelight::getInstance().log(Xenon::ResumeAwaitSample);
     } else {
       Xenon::getInstance().log(Xenon::ResumeAwaitSample, sourceType);
     }
@@ -822,7 +822,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar,
   // Xenon
   if (flags & XenonSignalFlag) {
     if (Strobelight::active()) {
-      Strobelight::getInstance().log();
+      Strobelight::getInstance().log(Xenon::EnterSample);
     } else {
       Xenon::getInstance().log(Xenon::EnterSample, sourceType);
     }

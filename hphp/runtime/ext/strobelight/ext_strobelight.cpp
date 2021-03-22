@@ -173,7 +173,8 @@ bool Strobelight::isXenonActive() {
   return false;
 }
 
-void Strobelight::log(c_WaitableWaitHandle* wh) const {
+void Strobelight::log(Xenon::SampleType t,
+                      c_WaitableWaitHandle* wh) const {
   if (RuntimeOption::XenonForceAlwaysOn) {
     // Disable strobelight if Xenon forced on
     // TODO remove this when strobelight has its own surpriseFlag
@@ -191,6 +192,8 @@ void Strobelight::log(c_WaitableWaitHandle* wh) const {
     // caused a PMU event to fire. This is doable by storing hhvm
     // request IDs in a bpf map and checking for an entry here.
     auto bt = createBacktrace(BacktraceArgs()
+                              .skipTop(t == Xenon::EnterSample)
+                              .skipInlined(t == Xenon::EnterSample)
                               .fromWaitHandle(wh)
                               // TODO
                               // .withMetadata()

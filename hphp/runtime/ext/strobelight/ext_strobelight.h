@@ -18,6 +18,7 @@
 #pragma once
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 /*
                         Strobelight
@@ -111,7 +112,9 @@ struct Strobelight final {
   void operator=(const Strobelight&&) = delete;
 
   void init();
-  void log(c_WaitableWaitHandle* wh = nullptr) const;
+  void log(
+      Xenon::SampleType t,
+      c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
   static void shutdown();
 

@@ -3405,7 +3405,7 @@ let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
               {
                 resolveProvider = true;
                 completion_triggerCharacters =
-                  ["$"; ">"; "\\"; ":"; "<"; "["; "'"; "\""; "{"];
+                  ["$"; ">"; "\\"; ":"; "<"; "["; "'"; "\""; "{"; "#"];
               };
           signatureHelpProvider =
             Some { sighelp_triggerCharacters = ["("; ","] };

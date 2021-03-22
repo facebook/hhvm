@@ -1,5 +1,5 @@
 <?hh //strict
-
+<<file: __EnableUnstableFeatures('enum_atom')>>
 function testing_area(): void {
 
 }
@@ -28,5 +28,10 @@ function call_lambda(int $n, (function(int): int) $param): void {
 }
 function testing_area_for_lambdas(): void {
   $mylambda = ($n) ==> $n * 5;
+
+}
+
+function call_atom<T>(<<__Atom>> HH\MemberOf<MyEnumClass, T> $m): void {}
+function testing_area_for_enum_atom(): void {
 
 }

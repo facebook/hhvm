@@ -46,6 +46,7 @@ lazy_decl = {use_saved_state}
 lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
+allow_unstable_features = true
 """.format(
                     use_saved_state=use_saved_state_str
                 )
@@ -1865,6 +1866,69 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .notification(
+                comment="Add 'call_atom#'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 35, "character": 0},
+                                "end": {"line": 35, "character": 0},
+                            },
+                            "text": "  call_atom#",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete results for 'call_atom#'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 35, "character": 12},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "First",
+                            "kind": 21,
+                            "detail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
+                            "inlineDetail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
+                            "sortText": "First",
+                            "insertText": "First",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "First",
+                                "filename": "${root_path}/definition.php",
+                                "line": 51,
+                                "char": 19,
+                                "base_class": "\\MyEnumClass",
+                            },
+                        },
+                        {
+                            "label": "Second",
+                            "kind": 21,
+                            "detail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
+                            "inlineDetail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
+                            "sortText": "Second",
+                            "insertText": "Second",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "Second",
+                                "filename": "${root_path}/definition.php",
+                                "line": 52,
+                                "char": 19,
+                                "base_class": "\\MyEnumClass",
+                            },
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
                 comment="Add '<xhp:enum-attribute enum-attribute={}'",
                 method="textDocument/didChange",
                 params={
@@ -3311,6 +3375,29 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={"textDocument": {"uri": "${php_file_uri}"}},
                 result=[
                     {
+                        "name": "First",
+                        "kind": 14,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 50, "character": 18},
+                                "end": {"line": 50, "character": 47},
+                            },
+                        },
+                        "containerName": "MyEnumClass",
+                    },
+                    {
+                        "name": "MyEnumClass",
+                        "kind": 10,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 49, "character": 0},
+                                "end": {"line": 52, "character": 1},
+                            },
+                        },
+                    },
+                    {
                         "name": "testClassMemberInsideConstructorInvocation",
                         "kind": 12,
                         "location": {
@@ -3479,6 +3566,29 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                     },
+                    {
+                        "name": "MyEnumClassKind",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 48, "character": 0},
+                                "end": {"line": 48, "character": 24},
+                            },
+                        },
+                    },
+                    {
+                        "name": "Second",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 51, "character": 18},
+                                "end": {"line": 51, "character": 48},
+                            },
+                        },
+                        "containerName": "MyEnumClass",
+                    },
                 ],
                 powered_by="serverless_ide",
             )
@@ -3548,6 +3658,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "'",
                             '"',
                             "{",
+                            "#",
                         ],
                     },
                     "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
@@ -5230,7 +5341,7 @@ class BaseClassIncremental {
 function a_hover(): int {
   return b_hover();
 }
-# A comment describing b_hover differently.
+// A comment describing b_hover differently.
 function b_hover(): string {
   return 42;
 }

@@ -25,7 +25,8 @@
             "[",
             "'",
             "\"",
-            "{"
+            "{",
+            "#"
           ]
         },
         "signatureHelpProvider": {

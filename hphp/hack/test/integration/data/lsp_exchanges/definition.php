@@ -45,3 +45,9 @@ class HasString {
 function testClassMemberInsideConstructorInvocation(): void {
   $x = new TakesString(HasString::MyString);
 }
+
+class MyEnumClassKind {}
+enum class MyEnumClass : MyEnumClassKind {
+  MyEnumClassKind First = new MyEnumClassKind();
+  MyEnumClassKind Second = new MyEnumClassKind();
+}

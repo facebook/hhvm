@@ -429,6 +429,42 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env ((_, ty), cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
+let autocomplete_enum_atom env f pos_atomname =
+  ac_env := Some env;
+  autocomplete_identifier := Some pos_atomname;
+  argument_global_type := Some Acclass_get;
+  let suggest_members cls =
+    match cls with
+    | Some cls ->
+      List.iter (Cls.consts cls) ~f:(fun (name, cc) ->
+          (* Filter out the constant used for ::class if present *)
+          if String.(name <> Naming_special_names.Members.mClass) then
+            add_partial_result
+              name
+              (Phase.decl cc.cc_type)
+              SearchUtils.SI_ClassConstant
+              (Some cls))
+    | _ -> ()
+  in
+  let suggest_members_from_ty env ty =
+    match get_node ty with
+    | Tclass ((_, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
+      suggest_members (Tast_env.get_class env enum_name)
+    | _ -> ()
+  in
+
+  let (_, ty) = fst f in
+  let open Typing_defs in
+  match get_node ty with
+  | Tfun { ft_params = { fp_type = { et_type = t; _ }; fp_flags; _ } :: _; _ }
+    when Typing_defs_flags.(is_set fp_flags_atom fp_flags) ->
+    (match get_node t with
+    | Tnewtype (memberOf, [enum_ty; _member_ty], _)
+      when String.equal Naming_special_names.Classes.cMemberOf memberOf ->
+      suggest_members_from_ty env enum_ty
+    | _ -> (* TODO: suggest on Label *) ())
+  | _ -> ()
+
 let visitor =
   object (self)
     inherit Tast_visitor.iter as super
@@ -436,6 +472,14 @@ let visitor =
     method! on_Id env id =
       autocomplete_id id env;
       super#on_Id env id
+
+    method! on_Call env f targs args unpack_arg =
+      (match args with
+      | ((p, _), Tast.EnumAtom n) :: _ when is_auto_complete n ->
+        autocomplete_enum_atom env f (p, n)
+      | _ -> ());
+
+      super#on_Call env f targs args unpack_arg
 
     method! on_Fun_id env id =
       autocomplete_id id env;

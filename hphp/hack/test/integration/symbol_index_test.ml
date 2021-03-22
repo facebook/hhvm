@@ -162,7 +162,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
     (FileInfo.File (FileInfo.Class, bar1path), "\\NoBigTrait")
   in
   let some_long_function_name_id =
-    (FileInfo.File (FileInfo.Class, foo3path), "\\some_long_function_name")
+    (FileInfo.File (FileInfo.Fun, foo3path), "\\some_long_function_name")
   in
   let bar1fileinfo =
     {

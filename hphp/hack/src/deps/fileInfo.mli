@@ -58,8 +58,13 @@ val pos_full : Pos.t * string -> id
 
 val get_pos_filename : pos -> Relative_path.t
 
+(** The hash value of a decl AST.
+  We use this to see if two versions of a file are "similar", i.e. their
+  declarations only differ by position information.  *)
+type hash_type = Int64.t option [@@deriving eq]
+
 type t = {
-  hash: Int64.t option;
+  hash: hash_type;
   file_mode: mode option;
   funs: id list;
   classes: id list;
@@ -68,7 +73,7 @@ type t = {
   consts: id list;
   comments: (Pos.t * comment) list option;
 }
-[@@deriving eq, show]
+[@@deriving show]
 
 val empty_t : t
 

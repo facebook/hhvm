@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4701d9ccab86648e4f4ce8cbc12fc84e>>
+// @generated SignedSource<<5cef38d70d8c59d5fcdfe1a5a5dae46a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,9 +68,6 @@ impl<'a> TrivialDrop for Pos<'a> {}
 pub struct Id<'a>(pub Pos<'a>, pub &'a str);
 impl<'a> TrivialDrop for Id<'a> {}
 
-/// The hash value of a decl AST.
-/// We use this to see if two versions of a file are "similar", i.e. their
-/// declarations only differ by position information.
 pub type HashType<'a> = Option<isize>;
 
 /// The record produced by the parsing phase.

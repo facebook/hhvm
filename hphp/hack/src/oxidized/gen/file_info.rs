@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f4e204c954fa80854c347f78bdab9f91>>
+// @generated SignedSource<<31a7d79885d9a9a76bcb2b6fbbd7fd8c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -111,9 +111,6 @@ pub enum Pos {
 )]
 pub struct Id(pub Pos, pub String);
 
-/// The hash value of a decl AST.
-/// We use this to see if two versions of a file are "similar", i.e. their
-/// declarations only differ by position information.
 pub type HashType = Option<isize>;
 
 /// The record produced by the parsing phase.

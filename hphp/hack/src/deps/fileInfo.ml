@@ -84,9 +84,6 @@ type id = pos * string [@@deriving eq, show]
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-(** The hash value of a decl AST.
-  We use this to see if two versions of a file are "similar", i.e. their
-  declarations only differ by position information.  *)
 type hash_type = Int64.t option [@@deriving eq]
 
 let pp_hash_type fmt hash =
@@ -106,7 +103,7 @@ type t = {
   comments: (Pos.t * comment) list option;
       (** None if loaded from saved state *)
 }
-[@@deriving eq, show]
+[@@deriving show]
 
 let empty_t =
   {

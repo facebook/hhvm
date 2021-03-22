@@ -261,7 +261,12 @@ let test_local_changes () =
       let a_file = Relative_path.from_root ~suffix:"a.php" in
       let a_pos = FileInfo.File (FileInfo.Const, a_file) in
       let a_file_info =
-        FileInfo.{ FileInfo.empty_t with consts = [(a_pos, a_name)] }
+        FileInfo.
+          {
+            FileInfo.empty_t with
+            consts = [(a_pos, a_name)];
+            hash = Some (Int64.of_int 1234567);
+          }
       in
       let backed_naming_table =
         Naming_table.update backed_naming_table a_file a_file_info
@@ -289,9 +294,10 @@ let test_local_changes () =
       in
       Asserter.Bool_asserter.assert_equals
         true
-        (FileInfo.equal a_file_info a_file_info')
+        (FileInfo.equal_hash_type
+           a_file_info.FileInfo.hash
+           a_file_info'.FileInfo.hash)
         "Expected file info to be found in the naming table";
-
       let a_pos' =
         Option.value_exn (Naming_provider.get_const_pos ctx a_name)
       in

@@ -237,6 +237,10 @@ let init
       (lazy_lev, init_approach)
   in
   let (init_method, init_method_name) =
+    Hh_logger.log "ServerInit: lazy_lev=%s" (show_lazy_level lazy_lev);
+    Hh_logger.log
+      "ServerInit: init_approach=%s"
+      (show_init_approach init_approach);
     match (lazy_lev, init_approach) with
     | (_, Remote_init { worker_key; nonce; check_id }) ->
       (remote_init genv env root worker_key nonce check_id, "remote_init")

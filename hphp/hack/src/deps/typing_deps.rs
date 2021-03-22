@@ -158,28 +158,6 @@ impl UnsafeDepGraph {
         Ok(depgraph.as_ref())
     }
 
-    /// Run the closure with the loaded dep graph or the provided graph.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the graph is not loaded, and custom mode is not enabled
-    /// or custom mode is enabled, but without a saved-state.
-    ///
-    /// Panics if the graph is not yet loaded, and opening
-    /// the graph results in an error.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    pub unsafe fn with<F, R>(mode: RawTypingDepsMode, f: F) -> R
-    where
-        for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
-    {
-        let g = Self::load(mode).unwrap();
-        f(g.expect("no saved-state dep graph available").depgraph())
-    }
-
     /// Run the closure with the loaded dep graph. If the custom dep graph
     /// mode was enabled without a saved-state, return the passed default
     /// value.
@@ -680,7 +658,7 @@ ocaml_ffi! {
         });
         // Safety: we don't call into OCaml again, so mode will remain valid.
         unsafe {
-            UnsafeDepGraph::with(mode, |g| {
+            UnsafeDepGraph::with_default(mode, (), |g| {
                 if let Some(hash_list) = g.hash_list_for(dep) {
                     deps.extend(g.hash_list_hashes(hash_list));
                 }
@@ -693,7 +671,10 @@ ocaml_ffi! {
     fn hh_custom_dep_graph_add_typing_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
         // Safety: we don't call into OCaml again, so mode will remain valid.
         let mut s = unsafe {
-            UnsafeDepGraph::with(mode, |g| g.query_typing_deps_multi(&query))
+            UnsafeDepGraph::with_option(mode, |g| match g {
+                Some(g) => g.query_typing_deps_multi(&query),
+                None => query.clone(),
+            })
         };
         DepGraphDelta::with(|delta| {
             for dep in query.iter() {
@@ -837,7 +818,7 @@ unsafe fn get_extend_deps_visit(
             delta_deps.iter().copied().for_each(&mut handle_extends_dep);
         }
     });
-    UnsafeDepGraph::with(mode, |g| {
+    UnsafeDepGraph::with_default(mode, (), |g| {
         if let Some(hash_list) = g.hash_list_for(extends_hash) {
             g.hash_list_hashes(hash_list)
                 .for_each(&mut handle_extends_dep);

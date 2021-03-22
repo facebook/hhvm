@@ -23,15 +23,18 @@ type load_state_error =
     }
 
 type load_state_approach =
-  | Precomputed of ServerArgs.saved_state_target_info
+  | Precomputed of (ServerArgs.saved_state_target_info[@opaque])
   | Load_state_natively
-  | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
+  | Load_state_natively_with_target of
+      (ServerMonitorUtils.target_saved_state[@opaque])
+[@@deriving show]
 
 type remote_init = {
   worker_key: string;
   nonce: Int64.t;
   check_id: string;
 }
+[@@deriving show]
 
 type init_approach =
   | Full_init
@@ -39,6 +42,7 @@ type init_approach =
   | Saved_state_init of load_state_approach
   | Remote_init of remote_init
   | Write_symbol_info
+[@@deriving show]
 
 (** Docs are in .mli *)
 type init_result =
@@ -124,3 +128,4 @@ type lazy_level =
   | Decl
   | Parse
   | Init
+[@@deriving show]

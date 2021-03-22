@@ -1,0 +1,16 @@
+File "ctx-const-bounds_multiple-conflicting.php", line 4, characters 26-44:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 4, characters 26-44:
+Multiple `as` constraints on a ctx constant are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 5, characters 26-50:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 5, characters 26-50:
+Multiple `super` constraints on a ctx constant are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 7, characters 27-56:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 7, characters 27-56:
+Multiple `as` constraints on a ctx constant are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 8, characters 27-59:
+Constraints on ctx constants are not allowed (Parsing[1002])
+File "ctx-const-bounds_multiple-conflicting.php", line 8, characters 27-59:
+Multiple `super` constraints on a ctx constant are not allowed (Parsing[1002])

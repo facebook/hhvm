@@ -9,7 +9,7 @@ use bstr::{BStr, BString, ByteSlice, B};
 use bumpalo::Bump;
 use escaper::*;
 use hh_autoimport_rust as hh_autoimport;
-use itertools::Either;
+use itertools::{Either, Itertools};
 use lint_rust::LintError;
 use naming_special_names_rust::{
     classes as special_classes, literal, special_functions, special_idents,
@@ -3648,6 +3648,51 @@ where
         }
     }
 
+    /// Lowers multiple constraints into a hint pair (lower_bound, upper_bound)
+    fn p_ctx_constraints(
+        node: S<'a, T, V>,
+        env: &mut Env<'a, TF>,
+    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+        let constraints = Self::could_map(
+            |node, env| {
+                if let ContextConstraint(c) = &node.children {
+                    if let Some(hint) = Self::p_context_list_to_intersection(&c.ctx_list, env)? {
+                        Ok(match Self::token_kind(&c.keyword) {
+                            Some(TK::Super) => Either::Left(hint),
+                            Some(TK::As) => Either::Right(hint),
+                            _ => Self::missing_syntax("constraint operator", &c.keyword, env)?,
+                        })
+                    } else {
+                        Self::missing_syntax("contexts", &c.keyword, env)?
+                    }
+                } else {
+                    Self::missing_syntax("context constraint", node, env)?
+                }
+            },
+            node,
+            env,
+        )?;
+        // TODO(coeffects) remove this check once typing of lower bounds works
+        if !constraints.is_empty() && env.is_typechecker() {
+            Self::raise_parsing_error(node, env, "Constraints on ctx constants are not allowed");
+        }
+        let (super_constraint, as_constraint) = constraints.into_iter().partition_map(|x| x);
+        let require_one = &mut |kind: &str, cs: Vec<_>| {
+            if cs.len() > 1 {
+                let msg = format!(
+                    "Multiple `{}` constraints on a ctx constant are not allowed",
+                    kind
+                );
+                Self::raise_parsing_error(node, env, &msg);
+            }
+            cs.into_iter().next()
+        };
+        Ok((
+            require_one("super", super_constraint),
+            require_one("as", as_constraint),
+        ))
+    }
+
     fn p_contexts(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
@@ -4254,13 +4299,6 @@ where
                 }
                 let name = Self::pos_name(&c.name, env)?;
                 let context = Self::p_context_list_to_intersection(&c.ctx_list, env)?;
-                if !c.constraint.is_missing() && env.is_typechecker() {
-                    Self::raise_parsing_error(
-                        &c.constraint,
-                        env,
-                        "Constraints on ctx constants are not allowed",
-                    );
-                }
                 if let Some(ref hint) = context {
                     use ast::Hint_::{Happly, Hintersection};
                     let ast::Hint(_, ref h) = hint;
@@ -4304,12 +4342,13 @@ where
                     ),
                     (true, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(context)),
                 };
+                let (super_constraint, as_constraint) =
+                    Self::p_ctx_constraints(&c.constraint, env)?;
                 Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
-                    // TODO(coeffects) lowering both bounds
-                    as_constraint: None,
-                    super_constraint: None,
+                    as_constraint,
+                    super_constraint,
                     type_: context,
                     user_attributes: vec![],
                     span,

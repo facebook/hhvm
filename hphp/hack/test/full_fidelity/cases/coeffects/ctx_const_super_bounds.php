@@ -4,7 +4,7 @@ interface PureIterator {
 }
 
 interface AtMostNonDetIterator {
-  abstract const ctx Tc super [non_det] = [non_det];
+  abstract const ctx Tc as [non_det] = [non_det];
 }
 
 class ImpureIterator extends Iterator {

@@ -1,6 +1,6 @@
 File "ctx_const_constraints.php", line 4, characters 24-28:
 Constraints on ctx constants are not allowed (Parsing[1002])
-File "ctx_const_constraints.php", line 5, characters 25-34:
+File "ctx_const_constraints.php", line 5, characters 25-40:
 Constraints on ctx constants are not allowed (Parsing[1002])
 File "ctx_const_constraints.php", line 6, characters 16-20:
 Constraints on ctx constants are not allowed (Parsing[1002])

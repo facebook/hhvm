@@ -1,23 +1,23 @@
-I:
+\I:
   I (PAT)
 
-A:
+\A:
   A
   I<T> (consts_only)
 
-T:
+\T:
   T (copy_private_members, PAT)
   A<mixed> (requirement)
   I<mixed> (synthesized, consts_only)
 
-B:
+\B:
   B
   T (copy_private_members)
   A<int>
   I<int> (consts_only)
   A<mixed> (requirement)
 
-C:
+\C:
   C
   B
   T

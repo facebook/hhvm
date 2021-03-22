@@ -1,23 +1,23 @@
-A:
+\A:
   A
 
-B:
+\B:
   B
 
-IA:
+\IA:
   IA (PAT)
 
-IB:
+\IB:
   IB (PAT)
 
-X:
+\X:
   X (copy_private_members, PAT)
   IA (requirement, consts_only, PAT)
   IB (requirement, consts_only, PAT)
   IB (PAT)
   IA (PAT)
 
-Y:
+\Y:
   Y (copy_private_members, PAT)
   IA (consts_only, PAT)
   X (copy_private_members, PAT)

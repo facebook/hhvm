@@ -1,17 +1,17 @@
-Ico:
+\Ico:
   Ico (PAT)
 
-I2:
+\I2:
   I2 (PAT)
   Ico<mixed> (PAT)
 
-I3:
+\I3:
   I3 (PAT)
   I2 (PAT)
   Ico<mixed> (PAT)
   Ico<num> (PAT)
 
-I4:
+\I4:
   I4 (PAT)
   I3 (PAT)
   I2 (PAT)

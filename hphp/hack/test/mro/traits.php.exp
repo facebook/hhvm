@@ -1,38 +1,38 @@
-T1:
+\T1:
   T1 (copy_private_members, PAT)
 
-T2:
+\T2:
   T2 (copy_private_members, PAT)
 
-T3:
+\T3:
   T3 (copy_private_members, PAT)
 
-C:
+\C:
   C
   T3 (copy_private_members)
   T2 (copy_private_members)
   T1 (copy_private_members)
 
-T:
+\T:
   T (copy_private_members, PAT)
   T3 (copy_private_members, PAT)
   T2 (copy_private_members, PAT)
 
-D:
+\D:
   D
   T3 (copy_private_members)
   T (copy_private_members)
   T3 (copy_private_members, trait reuse via \T)
   T2 (copy_private_members)
 
-E:
+\E:
   E
   C
   T3
   T2
   T1
 
-F:
+\F:
   F
   T3 (copy_private_members)
   E
@@ -41,18 +41,18 @@ F:
   T2
   T1
 
-I:
+\I:
   I (PAT)
 
-I2:
+\I2:
   I2 (PAT)
 
-Timplements:
+\Timplements:
   Timplements (copy_private_members, PAT)
   I (consts_only, PAT)
   I (PAT)
 
-A:
+\A:
   A
   I2 (consts_only)
   Timplements (copy_private_members)

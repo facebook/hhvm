@@ -1,18 +1,18 @@
-Foo:
+\Foo:
   Foo
 
-Bar:
+\Bar:
   Bar
   Foo
 
-I:
+\I:
   I (PAT)
 
-I2:
+\I2:
   I2 (PAT)
   I (PAT)
 
-I3:
+\I3:
   I3 (PAT)
   I (PAT)
   I2 (PAT)

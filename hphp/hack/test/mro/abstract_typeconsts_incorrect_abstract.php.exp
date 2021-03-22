@@ -1,16 +1,16 @@
-A:
+\A:
   A (PAT)
 
-B:
+\B:
   B
   A
 
-C:
+\C:
   C (PAT)
   B
   A
 
-D:
+\D:
   D
   C
   B

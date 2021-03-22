@@ -1,15 +1,15 @@
-A:
+\A:
   A (PAT)
 
-B:
+\B:
   B (PAT)
   A<bool, T1> (PAT)
 
-C:
+\C:
   C (PAT)
   A<string, T1> (PAT)
 
-D:
+\D:
   D (PAT)
   B<float> (PAT)
   A<bool, float> (PAT)

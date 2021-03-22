@@ -2185,7 +2185,7 @@ let handle_mode
                         Printf.sprintf " (%s)" modifiers )))
               |> Sequence.to_list
             in
-            Printf.printf "%s:\n" (Utils.strip_ns classname);
+            Printf.printf "%s:\n" classname;
             List.iter linearization ~f:(Printf.printf "  %s\n")))
 
 (*****************************************************************************)

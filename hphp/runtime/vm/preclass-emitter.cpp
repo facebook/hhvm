@@ -280,7 +280,9 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
 
 const StaticString
   s_nativedata("__nativedata"),
-  s_DynamicallyConstructible("__DynamicallyConstructible");
+  s_DynamicallyConstructible("__DynamicallyConstructible"),
+  s_invoke("__invoke"),
+  s_coeffectsProp("86coeffects");
 
 PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
   Attr attrs = m_attrs;
@@ -361,6 +363,27 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
   pc->m_methods.create(methodBuild);
 
   PreClass::PropMap::Builder propBuild;
+  auto const invoke = lookupMethod(s_invoke.get());
+  if (invoke && invoke->isClosureBody) {
+    if (!invoke->coeffectRules.empty()) {
+      assertx(invoke->coeffectRules.size() == 1);
+      assertx(invoke->coeffectRules[0].isClosureInheritFromParent());
+      TypedValue tvInit;
+      tvWriteUninit(tvInit);
+
+      propBuild.add(s_coeffectsProp.get(), PreClass::Prop(pc.get(),
+        s_coeffectsProp.get(),
+        AttrPrivate|AttrSystemInitialValue,
+        staticEmptyString(),
+        TypeConstraint(),
+        CompactVector<TypeConstraint>{},
+        staticEmptyString(),
+        tvInit,
+        RepoAuthType{},
+        UserAttributeMap{}
+      ));
+    }
+  }
   for (unsigned i = 0; i < m_propMap.size(); ++i) {
     const Prop& prop = m_propMap[i];
     propBuild.add(prop.name(), PreClass::Prop(pc.get(),

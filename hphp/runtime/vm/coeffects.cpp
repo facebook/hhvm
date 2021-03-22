@@ -92,6 +92,8 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
                                     m_name->toCppString());
     case Type::CCThis:
       return folly::to<std::string>("this::", m_name->toCppString());
+    case Type::ClosureInheritFromParent:
+      return folly::none;
     case Type::Invalid:
       always_assert(false);
   }
@@ -133,20 +135,33 @@ RuntimeCoeffects emitFunParam() {
   return RuntimeCoeffects::full();
 }
 
+RuntimeCoeffects emitClosureInheritFromParent() {
+  // TODO(oulgen): implement this
+  return RuntimeCoeffects::full();
+}
+
 } // namespace
 
 RuntimeCoeffects CoeffectRule::emit(const Func* f,
                                     uint32_t numArgsInclUnpack,
                                     void* prologueCtx) const {
   switch (m_type) {
-    case Type::CCParam:  return emitCCParam(f, numArgsInclUnpack,
-                                            m_index, m_name);
-    case Type::CCThis:   return emitCCThis(f, m_name, prologueCtx);
-    case Type::FunParam: return emitFunParam();
+    case Type::CCParam:
+      return emitCCParam(f, numArgsInclUnpack, m_index, m_name);
+    case Type::CCThis:
+      return emitCCThis(f, m_name, prologueCtx);
+    case Type::FunParam:
+      return emitFunParam();
+    case Type::ClosureInheritFromParent:
+      return emitClosureInheritFromParent();
     case Type::Invalid:
       always_assert(false);
   }
   not_reached();
+}
+
+bool CoeffectRule::isClosureInheritFromParent() const {
+  return m_type == Type::ClosureInheritFromParent;
 }
 
 std::string CoeffectRule::getDirectiveString() const {
@@ -161,6 +176,8 @@ std::string CoeffectRule::getDirectiveString() const {
       return folly::sformat(".coeffects_cc_this {};",
                             folly::cEscape<std::string>(
                               m_name->toCppString()));
+    case Type::ClosureInheritFromParent:
+      return ".coeffects_closure_inherit_from_parent;";
     case Type::Invalid:
       always_assert(false);
   }

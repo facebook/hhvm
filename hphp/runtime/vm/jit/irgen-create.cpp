@@ -367,13 +367,24 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
   auto const closure = gen(env, ConstructClosure, ClassData(cls), live_ctx);
 
+  auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
+  if (hasCoeffectsProp) numParams++;
+
+  assertx(cls->numDeclProperties() == numParams);
+
   SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {
-    args[numParams - i - 1] = popCU(env);
+    auto const slot = numParams - i - 1;
+    if (hasCoeffectsProp && slot == cls->getCoeffectsProp()) {
+      assertx(cls->getCoeffectsProp() == 0);
+      assertx(cls->propSlotToIndex(slot) == slot);
+      args[slot] = curRequiredCoeffects(env);
+    } else {
+      args[slot] = popCU(env);
+    }
   }
 
-  int32_t propId = 0;
-  for (; propId < numParams; ++propId) {
+  for (int32_t propId = 0; propId < numParams; ++propId) {
     gen(
       env,
       StClosureArg,
@@ -382,8 +393,6 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
       args[propId]
     );
   }
-
-  assertx(cls->numDeclProperties() == numParams);
 
   push(env, closure);
 }

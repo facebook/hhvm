@@ -930,8 +930,6 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   }
 
   if (ar->func()->hasCoeffectRules()) {
-    // Currently does not work with closures
-    assertx(!func->isClosureBody());
     assertx(func->coeffectsLocalId() == nlocals);
     nlocals++;
   }

@@ -1961,8 +1961,9 @@ void parse_coeffects_cc_this(AsmState& as) {
  * directive-coeffects_closure_inherit_from_parent ';'
  */
 void parse_coeffects_closure_inherit_from_parent(AsmState& as) {
-  // TODO: Add this to coeffect rules once HHVM can handle closure ambient
-  // coeffects
+  assertx(as.fe->isClosureBody);
+  as.fe->coeffectRules.emplace_back(
+    CoeffectRule(CoeffectRule::ClosureInheritFromParent{}));
   as.in.expectWs(';');
 }
 

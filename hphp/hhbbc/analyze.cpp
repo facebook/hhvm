@@ -164,8 +164,6 @@ State entry_state(const Index& index, const Context& ctx,
    * which stores the ambient coeffects.
    */
   if (!ctx.func->coeffectRules.empty()) {
-    // Currently closures cannot have coeffects rules
-    assertx(!ctx.func->isClosureBody);
     assertx(locId < ret.locals.size());
     assertx(ctx.func->locals[locId].name->same(s_coeffects_var.get()));
     ret.locals[locId++] = TInt;

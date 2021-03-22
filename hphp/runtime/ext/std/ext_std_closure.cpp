@@ -113,7 +113,9 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   /*
    * Copy the use vars to instance variables.
    */
-  assertx(cls->numDeclProperties() == numArgs);
+  auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
+  DEBUG_ONLY auto const numProps = cls->numDeclProperties();
+  assertx(numProps == numArgs + (hasCoeffectsProp ? 1 : 0));
 
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.
@@ -125,9 +127,11 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
 
   auto beforeCurUseVar = sp + numArgs;
 
-  assertx(props()->checkInvariants(numArgs));
-  props()->foreach(numArgs, [&](tv_lval lval) {
-    assert(beforeCurUseVar != sp);
+  assertx(props()->checkInvariants(numProps));
+  if (hasCoeffectsProp) setCoeffects(ar->requiredCoeffects());
+  assertx(IMPLIES(hasCoeffectsProp, coeffectsPropSlot() == 0));
+  props()->foreach(hasCoeffectsProp ? 1 : 0, numArgs, [&](tv_lval lval) {
+    assertx(beforeCurUseVar != sp);
     tvCopy(*--beforeCurUseVar, lval);
   });
 }
@@ -141,8 +145,8 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
   ar->setFunc(closure->getInvokeFunc());
 
   if (ar->func()->cls()) {
-    // Swap in the $this or late bound class or null if it is from a plain
-    // function or pseudomain
+    // Swap in the $this or late bound class or null if it is from a top level
+    // function
     ar->setThisOrClass(closure->getThisOrClass());
 
     if (ar->hasThis()) {
@@ -153,9 +157,13 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
   }
 
   // Copy in all the use vars
-  int n = closure->getNumUseVars();
-  assertx(closure->props()->checkInvariants(n));
-  closure->props()->foreach(n, [&](tv_rval rval) {
+  auto const cls = closure->getVMClass();
+  auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
+  auto const numProps = cls->numDeclProperties();
+  int n = numProps - (hasCoeffectsProp ? 1 : 0);
+  assertx(closure->props()->checkInvariants(numProps));
+  assertx(IMPLIES(hasCoeffectsProp, closure->coeffectsPropSlot() == 0));
+  closure->props()->foreach(hasCoeffectsProp ? 1 : 0, n, [&](tv_rval rval) {
     tvDup(*rval, *--sp);
   });
 
@@ -228,6 +236,22 @@ static void closuseInstanceReference(void) {
   // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
   (void)type_scan::getIndexForMalloc<c_Closure>();
   (void)type_scan::getIndexForMalloc<ClosureHdr>();
+}
+
+size_t c_Closure::coeffectsPropSlot() const {
+  assertx(getVMClass()->hasClosureCoeffectsProp());
+  return getVMClass()->getCoeffectsProp();
+}
+
+RuntimeCoeffects c_Closure::getCoeffects() const {
+  auto const tv = props()->at(coeffectsPropSlot());
+  assertx(tvIsInt(tv));
+  return RuntimeCoeffects::fromValue(tv.val().num);
+}
+
+void c_Closure::setCoeffects(RuntimeCoeffects coeffects) {
+  tvCopy(make_tv<KindOfInt64>(coeffects.value()),
+         props()->at(coeffectsPropSlot()));
 }
 
 ObjectData* c_Closure::clone() {

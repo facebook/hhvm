@@ -812,6 +812,19 @@ public:
   Slot lookupReifiedInitProp() const;
 
   /*
+   * Returns whether this closure class that uses coeffects prop
+   * to carry its coeffects
+   * Requires this to be a closure class
+   */
+  bool hasClosureCoeffectsProp() const;
+
+  /*
+   * Returns the coeffects prop's slot.
+   * @requires: hasClosureCoeffectsProp()
+   */
+  Slot getCoeffectsProp() const;
+
+  /*
    * The RepoAuthType of the declared instance property or static property at
    * `index' in the corresponding table.
    */

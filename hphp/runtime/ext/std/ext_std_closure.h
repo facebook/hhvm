@@ -114,10 +114,6 @@ struct c_Closure final : ObjectData {
    */
   Class* getScope() { return getInvokeFunc()->cls(); }
 
-  int32_t getNumUseVars() const {
-    return getVMClass()->numDeclProperties();
-  }
-
   /*
    * The bound context of the Closure---either a $this or a late bound class,
    * just like in the ActRec.
@@ -150,6 +146,10 @@ struct c_Closure final : ObjectData {
     return
       getInvokeFunc() && getInvokeFunc()->cls() && getInvokeFunc()->isStatic();
   }
+
+  size_t coeffectsPropSlot() const;
+  RuntimeCoeffects getCoeffects() const;
+  void setCoeffects(RuntimeCoeffects);
 
   ObjectData* clone();
 

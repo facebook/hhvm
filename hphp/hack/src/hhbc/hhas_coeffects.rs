@@ -294,9 +294,10 @@ impl HhasCoeffects {
     }
 
     pub fn has_coeffect_rules(&self) -> bool {
-        !self.fun_param.is_empty() || !self.cc_param.is_empty() || !self.cc_this.is_empty()
-        // TODO: Add the following line when we want to emit 0Coeffects for closures
-        //  || self.closure_inherit_from_parent
+        !self.fun_param.is_empty()
+            || !self.cc_param.is_empty()
+            || !self.cc_this.is_empty()
+            || self.closure_inherit_from_parent
     }
 
     pub fn is_closure_inherit_from_parent(&self) -> bool {

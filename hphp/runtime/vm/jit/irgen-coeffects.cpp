@@ -83,6 +83,11 @@ SSATmp* emitFunParam() {
   return nullptr;
 }
 
+SSATmp* emitClosureInheritFromParent() {
+  // TODO(oulgen): Implement this
+  return nullptr;
+}
+
 } // namespace
 } // irgen
 } // jit
@@ -93,10 +98,14 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
                                    jit::SSATmp* prologueCtx) const {
   using namespace jit::irgen;
   switch (m_type) {
-    case Type::CCParam:  return emitCCParam(env, f, numArgsInclUnpack,
-                                            m_index, m_name);
-    case Type::CCThis:   return emitCCThis(env, f, m_name, prologueCtx);
-    case Type::FunParam: return emitFunParam();
+    case Type::CCParam:
+      return emitCCParam(env, f, numArgsInclUnpack, m_index, m_name);
+    case Type::CCThis:
+      return emitCCThis(env, f, m_name, prologueCtx);
+    case Type::FunParam:
+      return emitFunParam();
+    case Type::ClosureInheritFromParent:
+      return emitClosureInheritFromParent();
     case Type::Invalid:
       always_assert(false);
   }

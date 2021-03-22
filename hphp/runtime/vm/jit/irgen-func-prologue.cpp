@@ -486,8 +486,6 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
     ++numInited;
   }
   if (callee->hasCoeffectRules()) {
-    // Currently does not work with closures
-    assertx(!callee->isClosureBody());
     assertx(callee->coeffectsLocalId() == numInited);
     ++numInited;
   }
@@ -495,13 +493,15 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
   // Push the closure's use variables (stored in closure object properties).
   if (callee->isClosureBody()) {
     auto const cls = callee->implCls();
-    auto const numUses = cls->numDeclProperties();
+    auto const numUses =
+      cls->numDeclProperties() - (cls->hasClosureCoeffectsProp() ? 1 : 0);
 
     for (auto i = 0; i < numUses; ++i) {
+      auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
       auto const ty =
-        typeFromRAT(cls->declPropRepoAuthType(i), callee->cls()) & TCell;
+        typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
       auto const addr = gen(env, LdPropAddr,
-                            IndexData { cls->propSlotToIndex(i) },
+                            IndexData { cls->propSlotToIndex(slot) },
                             ty.lval(Ptr::Prop), prologueCtx);
       auto const prop = gen(env, LdMem, ty, addr);
       gen(env, IncRef, prop);

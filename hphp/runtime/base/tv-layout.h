@@ -121,11 +121,27 @@ struct LayoutBase {
    */
   template <typename Iter>
   std::enable_if_t<is_invocable<Iter, tv_lval>::value>
-  foreach(index_t len, Iter&& iter) {
-    auto it = impl().iteratorAt(0);
-    auto end = impl().iteratorAt(len);
+  foreach(index_t start, index_t len, Iter&& iter) {
+    auto it = impl().iteratorAt(start);
+    auto end = impl().iteratorAt(start + len);
     while (it != end) {
       iter(tv_lval{it});
+      ++it;
+    }
+  }
+  template <typename Iter>
+  std::enable_if_t<is_invocable<Iter, tv_lval>::value>
+  foreach(index_t len, Iter&& iter) {
+    foreach(0, len, iter);
+  }
+
+  template <typename Iter>
+  std::enable_if_t<is_invocable<Iter, tv_rval>::value>
+  foreach(index_t start, index_t len, Iter&& iter) const {
+    auto it = impl().iteratorAt(start);
+    auto end = impl().iteratorAt(start + len);
+    while (it != end) {
+      iter(tv_rval{it});
       ++it;
     }
   }
@@ -133,12 +149,7 @@ struct LayoutBase {
   template <typename Iter>
   std::enable_if_t<is_invocable<Iter, tv_rval>::value>
   foreach(index_t len, Iter&& iter) const {
-    auto it = impl().iteratorAt(0);
-    auto end = impl().iteratorAt(len);
-    while (it != end) {
-      iter(tv_rval{it});
-      ++it;
-    }
+    foreach(0, len, iter);
   }
 
   template <typename T>

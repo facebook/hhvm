@@ -15,6 +15,12 @@ return it.
 Raises [Failure] if [shallow_class_decl] is not enabled. *)
 val get : Provider_context.t -> string -> shallow_class option
 
+(** Return the member filter of the class with the given name if it is
+present in the cache. Otherwise [None] is returned. This filter is a cheaper
+way to test if a a shallow class might contain a particular member
+(property, method, constructor, constant, or type constant). *)
+val get_member_filter : Provider_context.t -> string -> BloomFilter.t option
+
 val decl : Provider_context.t -> Nast.class_ -> shallow_class
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t

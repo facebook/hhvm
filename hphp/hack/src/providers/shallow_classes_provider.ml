@@ -47,8 +47,10 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl ctx class_ in
     if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
-    then
+    then (
       Shallow_classes_heap.Classes.add name decl;
+      Shallow_classes_heap.MemberFilters.add decl
+    );
     decl
   | Provider_backend.Local_memory _ -> class_naming_and_decl ctx class_
   | Provider_backend.Decl_service _ ->
@@ -76,8 +78,10 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
             | None -> err_not_found path name
             | Some class_ ->
               let decl = class_naming_and_decl ctx class_ in
-              if shallow_decl_enabled ctx then
+              if shallow_decl_enabled ctx then (
                 Shallow_classes_heap.Classes.add name decl;
+                Shallow_classes_heap.MemberFilters.add decl
+              );
               decl)))
   | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
     Provider_backend.Shallow_decl_cache.find_or_add
@@ -101,6 +105,16 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
               | Some class_ -> class_naming_and_decl ctx class_))
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_class decl name
+
+let get_member_filter (ctx : Provider_context.t) (name : string) :
+    BloomFilter.t option =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Shared_memory ->
+    Shallow_classes_heap.MemberFilters.get name
+  | Provider_backend.Analysis
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
+    None
 
 let get_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
@@ -128,7 +142,8 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.oldify_batch names
+    Shallow_classes_heap.Classes.oldify_batch names;
+    Shallow_classes_heap.MemberFilters.oldify_batch names
   | Provider_backend.Local_memory _ ->
     failwith "oldify_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
@@ -138,7 +153,8 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.remove_old_batch names
+    Shallow_classes_heap.Classes.remove_old_batch names;
+    Shallow_classes_heap.MemberFilters.remove_old_batch names
   | Provider_backend.Local_memory _ ->
     failwith "remove_old_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
@@ -148,14 +164,17 @@ let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.remove_batch names
+    Shallow_classes_heap.Classes.remove_batch names;
+    Shallow_classes_heap.MemberFilters.remove_batch names
   | Provider_backend.Local_memory _ ->
     failwith "remove_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
     failwith "remove_batch not implemented for Decl_service"
 
 let local_changes_push_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.push_stack ()
+  Shallow_classes_heap.Classes.LocalChanges.push_stack ();
+  Shallow_classes_heap.MemberFilters.LocalChanges.push_stack ()
 
 let local_changes_pop_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.pop_stack ()
+  Shallow_classes_heap.Classes.LocalChanges.pop_stack ();
+  Shallow_classes_heap.MemberFilters.LocalChanges.pop_stack ()

@@ -28,13 +28,32 @@ type inherited_members = {
   construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
+(** Are we targeting a particular member or all members. Different sequences
+ * will be generated depending on the [target] *)
+type target =
+  | SingleMember of string
+  | AllMembers
+
 (** Given a linearization, pair each MRO element with its shallow class and its
     type parameter substitutions. Drop MRO elements for which we cannot find a
     shallow class (this should only happen in partial-mode files when the
     assume_php setting is enabled). *)
 let get_shallow_classes_and_substs
-    (ctx : Provider_context.t) (lin : linearization) :
+    ~target (ctx : Provider_context.t) (lin : linearization) :
     (mro_element * shallow_class * decl_subst) Sequence.t =
+  let lin =
+    match target with
+    | AllMembers -> lin
+    | SingleMember member_name ->
+      (* If we are targeting a specific member we utilize the member filters to
+       * avoid loading [shallow_class_decl]s that do not contain a member with
+       * the given name. *)
+      let hash = BloomFilter.hash member_name in
+      Sequence.filter lin ~f:(fun mro ->
+          match Shallow_classes_provider.get_member_filter ctx mro.mro_name with
+          | None -> true
+          | Some filter -> BloomFilter.mem filter hash)
+  in
   Sequence.filter_map lin (fun mro ->
       match Shallow_classes_provider.get ctx mro.mro_name with
       | None -> None
@@ -46,7 +65,7 @@ let get_shallow_classes_and_substs
     included in the linearization only if the child class inherits their
     methods. *)
 let filter_for_method_lookup lin =
-  Sequence.filter lin ~f:(fun (mro, _, _) ->
+  Sequence.filter lin ~f:(fun mro ->
       (not (is_set mro_xhp_attrs_only mro.mro_flags))
       && not (is_set mro_consts_only mro.mro_flags))
 
@@ -54,14 +73,13 @@ let filter_for_method_lookup lin =
     included in the linearization only if the child class inherits their
     properties or XHP attributes. *)
 let filter_for_prop_lookup lin =
-  Sequence.filter lin ~f:(fun (mro, _, _) ->
-      not (is_set mro_consts_only mro.mro_flags))
+  Sequence.filter lin ~f:(fun mro -> not (is_set mro_consts_only mro.mro_flags))
 
 (** Return a linearization suitable for lookup of class constants and type
     constants, where ancestors are included in the linearization only if the
     child class inherits their constants. *)
 let filter_for_const_lookup lin =
-  Sequence.filter lin ~f:(fun (mro, _, _) ->
+  Sequence.filter lin ~f:(fun mro ->
       not (is_set mro_xhp_attrs_only mro.mro_flags))
 
 module SPairSet = Reordered_argument_set (Caml.Set.Make (struct
@@ -76,12 +94,18 @@ module SPairSet = Reordered_argument_set (Caml.Set.Make (struct
       String.compare a2 b2
 end))
 
+let filter_target ~target ~f list =
+  match target with
+  | AllMembers -> list
+  | SingleMember s ->
+    list |> List.find ~f:(fun x -> String.equal s (f x)) |> Option.to_list
+
 (** Given a linearization filtered for method lookup, return a [Sequence.t]
     containing each method (as an {!tagged_elt}) in linearization order, with
     method redeclarations already handled (that is, methods arising from a
     redeclaration appear in the sequence as regular methods, and trait methods
     which were redeclared do not appear in the sequence). *)
-let methods ~static child_class_name lin =
+let methods ~target ~static child_class_name lin =
   Sequence.unfold ~init:(SPairSet.empty, lin) ~f:(fun (removed, seq) ->
       match Sequence.next seq with
       | None -> None
@@ -94,7 +118,9 @@ let methods ~static child_class_name lin =
         in
         let cid = mro.mro_name in
         let methods_seq =
-          Sequence.of_list methods
+          methods
+          |> filter_target ~target ~f:(fun { sm_name = (_, n); _ } -> n)
+          |> Sequence.of_list
           |> Sequence.filter ~f:(fun sm ->
                  not (SPairSet.mem removed (cid, snd sm.sm_name)))
           |> Sequence.map
@@ -105,13 +131,14 @@ let methods ~static child_class_name lin =
 
 (** Given a linearization filtered for property lookup, return a [Sequence.t]
     emitting each property (as an {!tagged_elt}) in linearization order. *)
-let props ~static child_class_name lin =
+let props ~target ~static child_class_name lin =
   lin
   |> Sequence.map ~f:(fun (mro, cls, subst) ->
          ( if static then
            cls.sc_sprops
          else
            cls.sc_props )
+         |> filter_target ~target ~f:(fun { sp_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
               ~f:(DTT.shallow_prop_to_telt child_class_name mro subst))
@@ -216,19 +243,25 @@ let is_elt_canonical child_class_name elt =
 let make_inheritance_cache seq =
   let is_canonical _ = false in
   let merge ~earlier ~later = later @ earlier in
-  seq
-  |> Sequence.map ~f:(fun (id, x) -> (id, [x]))
-  |> LSTable.make ~is_canonical ~merge
+  let seq target = seq target |> Sequence.map ~f:(fun (id, x) -> (id, [x])) in
+  let get_single_seq target =
+    seq (SingleMember target) |> Sequence.map ~f:snd
+  in
+  LSTable.make (seq AllMembers) ~get_single_seq ~is_canonical ~merge
 
 let make_elt_cache class_name seq =
+  let get_single_seq target =
+    seq (SingleMember target) |> Sequence.map ~f:snd
+  in
   LSTable.make
-    seq
+    (seq AllMembers)
+    ~get_single_seq
     ~is_canonical:(is_elt_canonical class_name)
     ~merge:(merge_elts class_name)
 
 (** Given a linearization filtered for const lookup, return a [Sequence.t]
     emitting each constant in linearization order. *)
-let consts ctx child_class_name get_typeconst get_ancestor lin =
+let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
   (* If a class extends the legacy [Enum] class, we give all of the constants
      in the class the type of the Enum, as a convenience. Modern Hack enums
      should replace the legacy Enum class, but perhaps they cannot do so
@@ -259,6 +292,7 @@ let consts ctx child_class_name get_typeconst get_ancestor lin =
     |> Sequence.map ~f:(fun (mro, cls, subst) ->
            let consts =
              cls.sc_consts
+             |> filter_target ~target ~f:(fun { scc_name = (_, n); _ } -> n)
              |> Sequence.of_list
              |> Sequence.map
                   ~f:
@@ -271,6 +305,7 @@ let consts ctx child_class_name get_typeconst get_ancestor lin =
          same name with that type's TypeStructure. *)
            let typeconst_structures =
              cls.sc_typeconsts
+             |> filter_target ~target ~f:(fun { stc_name = (_, n); _ } -> n)
              |> Sequence.of_list
              |> Sequence.map ~f:(DTT.typeconst_structure mro (snd cls.sc_name))
            in
@@ -278,11 +313,20 @@ let consts ctx child_class_name get_typeconst get_ancestor lin =
     |> Sequence.concat
     |> Decl_enum.rewrite_class_consts enum_kind
   in
-  Sequence.append classname_const consts_and_typeconst_structures
+  match target with
+  | SingleMember const_name when String.equal const_name SN.Members.mClass ->
+    classname_const
+  | SingleMember _ -> consts_and_typeconst_structures
+  | AllMembers ->
+    Sequence.append classname_const consts_and_typeconst_structures
 
 let make_consts_cache class_name lin =
+  let get_single_seq target =
+    lin (SingleMember target) |> Sequence.map ~f:snd
+  in
   LSTable.make
-    lin
+    (lin AllMembers)
+    ~get_single_seq
     ~is_canonical:(fun cc ->
       String.equal cc.cc_origin class_name || not cc.cc_abstract)
     ~merge:
@@ -300,10 +344,11 @@ let make_consts_cache class_name lin =
 
 (** Given a linearization filtered for const lookup, return a [Sequence.t]
     emitting each type constant in linearization order. *)
-let typeconsts child_class_name lin =
+let typeconsts ~target child_class_name lin =
   lin
   |> Sequence.map ~f:(fun (mro, cls, subst) ->
          cls.sc_typeconsts
+         |> filter_target ~target ~f:(fun { stc_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
               ~f:
@@ -314,8 +359,12 @@ let typeconsts child_class_name lin =
   |> Sequence.concat
 
 let make_typeconst_cache class_name lin =
+  let get_single_seq target =
+    lin (SingleMember target) |> Sequence.map ~f:snd
+  in
   LSTable.make
-    lin
+    (lin AllMembers)
+    ~get_single_seq
     ~is_canonical:(fun t ->
       String.equal t.ttc_origin class_name
       || equal_typeconst_abstract_kind t.ttc_abstract TCConcrete
@@ -417,57 +466,63 @@ let fold_constructors child_class_name acc ancestor =
   in
   (cstr, Decl_utils.coalesce_consistent ancestor_consist descendant_consist)
 
-let get_all_methods ~static class_name lin =
+let get_all_methods ~static ctx class_name lin target =
   lin
   |> filter_for_method_lookup
-  |> methods ~static class_name
+  |> get_shallow_classes_and_substs ~target ctx
+  |> methods ~target ~static class_name
   |> filter_or_chown_privates class_name
-  |> Sequence.memoize
 
-let props_cache ~static class_name lin =
-  lin
-  |> filter_for_prop_lookup
-  |> props ~static class_name
-  |> filter_or_chown_privates class_name
+let props_cache ~static ctx class_name lin =
+  (fun target ->
+    lin
+    |> filter_for_prop_lookup
+    |> get_shallow_classes_and_substs ~target ctx
+    |> props ~target ~static class_name
+    |> filter_or_chown_privates class_name)
   |> make_elt_cache class_name
 
 let consts_cache ctx class_name get_typeconst get_ancestor lin =
-  lin
-  |> filter_for_const_lookup
-  |> consts ctx class_name get_typeconst get_ancestor
+  (fun target ->
+    lin
+    |> filter_for_const_lookup
+    |> get_shallow_classes_and_substs ~target ctx
+    |> consts ~target ctx class_name get_typeconst get_ancestor)
   |> make_consts_cache class_name
 
-let typeconsts_cache class_name lin =
-  lin
-  |> filter_for_const_lookup
-  |> typeconsts class_name
+let typeconsts_cache ctx class_name lin =
+  (fun target ->
+    lin
+    |> filter_for_const_lookup
+    |> get_shallow_classes_and_substs ~target ctx
+    |> typeconsts ~target class_name)
   |> make_typeconst_cache class_name
 
-let construct class_name lin =
+let construct ctx class_name lin =
   lazy
     ( lin
     |> filter_for_method_lookup
+    |> get_shallow_classes_and_substs
+         ~target:(SingleMember SN.Members.__construct)
+         ctx
     |> Sequence.map ~f:(constructor_elt class_name)
     |> Sequence.fold
          ~init:(None, Inconsistent)
          ~f:(fold_constructors class_name) )
 
-let make ctx class_name lin_members get_ancestor =
-  let lin =
-    lin_members |> get_shallow_classes_and_substs ctx |> Sequence.memoize
-  in
-  let all_methods = get_all_methods class_name lin ~static:false in
-  let all_smethods = get_all_methods class_name lin ~static:true in
-  let typeconsts = typeconsts_cache class_name lin in
+let make ctx class_name lin get_ancestor =
+  let all_methods = get_all_methods ctx class_name lin ~static:false in
+  let all_smethods = get_all_methods ctx class_name lin ~static:true in
+  let typeconsts = typeconsts_cache ctx class_name lin in
   {
     consts =
       consts_cache ctx class_name (LSTable.get typeconsts) get_ancestor lin;
     typeconsts;
-    props = props_cache class_name lin ~static:false;
-    sprops = props_cache class_name lin ~static:true;
+    props = props_cache ctx class_name lin ~static:false;
+    sprops = props_cache ctx class_name lin ~static:true;
     methods = make_elt_cache class_name all_methods;
     smethods = make_elt_cache class_name all_smethods;
     all_inherited_methods = make_inheritance_cache all_methods;
     all_inherited_smethods = make_inheritance_cache all_smethods;
-    construct = construct class_name lin;
+    construct = construct ctx class_name lin;
   }

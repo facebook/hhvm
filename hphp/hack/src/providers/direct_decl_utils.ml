@@ -15,7 +15,13 @@ let cache_decls ctx decls =
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     List.iter decls ~f:(function
-        | (name, Class decl) -> Shallow_classes_heap.Classes.add name decl
+        | (name, Class decl) ->
+          Shallow_classes_heap.Classes.add name decl;
+          if
+            TypecheckerOptions.shallow_class_decl
+              (Provider_context.get_tcopt ctx)
+          then
+            Shallow_classes_heap.MemberFilters.add decl
         | (name, Fun decl) -> Decl_store.((get ()).add_fun name decl)
         | (name, Record decl) -> Decl_store.((get ()).add_recorddef name decl)
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)

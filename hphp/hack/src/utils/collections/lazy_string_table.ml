@@ -11,14 +11,15 @@ open Core_kernel
 
 type 'a t = {
   tbl: ('a * bool) String.Table.t;
+  mutable get_single_seq: (string -> 'a Sequence.t) option;
   mutable seq: (string * 'a) Sequence.t;
   is_canonical: 'a -> bool;
   merge: earlier:'a -> later:'a -> 'a;
 }
 
-let make ~is_canonical ~merge seq =
+let make ~is_canonical ~merge ?get_single_seq seq =
   let tbl = String.Table.create () in
-  { tbl; seq; is_canonical; merge }
+  { tbl; get_single_seq; seq; is_canonical; merge }
 
 type 'a advance_result =
   | Complete
@@ -38,7 +39,9 @@ type 'a advance_result =
     value as necessary. *)
 let advance t =
   match Sequence.next t.seq with
-  | None -> Complete
+  | None ->
+    t.get_single_seq <- None;
+    Complete
   | Some ((id, v), rest) ->
     t.seq <- rest;
     let (extant_value, extant_value_is_canonical) =
@@ -66,27 +69,70 @@ let advance t =
         else
           replace_with v)
 
-let rec get t id =
+(** Advance the sequence until we have the final version of that element*)
+let rec get_from_single_seq t seq result =
+  match result with
+  | Some (v, true) -> Some v
+  | _ ->
+    (match Sequence.next seq with
+    | None -> Option.map result fst
+    | Some (v, rest) ->
+      let result =
+        match result with
+        | None -> (v, t.is_canonical v)
+        | Some ((extant_value, _) as extant_result) ->
+          let v = t.merge ~earlier:extant_value ~later:v in
+          if phys_equal v extant_value then
+            extant_result
+          else
+            (v, t.is_canonical v)
+      in
+      get_from_single_seq t rest (Some result))
+
+let get t id =
+  let rec go () =
+    match Hashtbl.find t.tbl id with
+    | Some (v, true) -> Some v
+    | (None | Some (_, false)) as result ->
+      (match advance t with
+      | Complete -> Option.map result fst
+      | Yield (id', v) when String.equal id' id -> Some v
+      | Skipped
+      | Yield _ ->
+        go ())
+  in
   match Hashtbl.find t.tbl id with
   | Some (v, true) -> Some v
-  | (None | Some (_, false)) as result ->
-    (match advance t with
-    | Complete -> Option.map result fst
-    | Yield (id', v) when String.equal id' id -> Some v
-    | Skipped
-    | Yield _ ->
-      get t id)
+  | None
+  | Some (_, false) ->
+    (match t.get_single_seq with
+    | None -> go ()
+    | Some f ->
+      let result = get_from_single_seq t (f id) None in
+      Option.iter result (fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
+      result)
 
-let rec mem t id =
+let mem t id =
+  let rec go () =
+    if Hashtbl.mem t.tbl id then
+      true
+    else
+      match advance t with
+      | Complete -> false
+      | Yield (id', _) when String.equal id' id -> true
+      | Skipped
+      | Yield _ ->
+        go ()
+  in
   if Hashtbl.mem t.tbl id then
     true
   else
-    match advance t with
-    | Complete -> false
-    | Yield (id', _) when String.equal id' id -> true
-    | Skipped
-    | Yield _ ->
-      mem t id
+    match t.get_single_seq with
+    | None -> go ()
+    | Some f ->
+      let result = get_from_single_seq t (f id) None in
+      Option.iter result (fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
+      Option.is_some result
 
 let rec to_list t =
   match advance t with

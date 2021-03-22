@@ -24,12 +24,12 @@ pub struct HhasConstant<'arena> {
 }
 
 pub fn from_ast<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     id: &'a tast::Id,
     expr: Option<&tast::Expr>,
 ) -> Result<HhasConstant<'arena>> {
+    let alloc = env.arena;
     let (value, initializer_instrs, is_abstract) = match expr {
         None => (None, None, true),
         Some(init) => {

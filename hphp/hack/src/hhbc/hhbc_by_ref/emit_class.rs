@@ -273,7 +273,6 @@ fn from_class_elt_classvars<'a, 'arena>(
 }
 
 fn from_class_elt_constants<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     class_: &'a tast::Class_,
@@ -281,7 +280,7 @@ fn from_class_elt_constants<'a, 'arena>(
     class_
         .consts
         .iter()
-        .map(|x| hhas_constant::from_ast(alloc, emitter, env, &x.id, x.expr.as_ref()))
+        .map(|x| hhas_constant::from_ast(emitter, env, &x.id, x.expr.as_ref()))
         .collect()
 }
 
@@ -355,11 +354,11 @@ fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::
 }
 
 fn emit_reified_extends_params<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     ast_class: &'a tast::Class_,
 ) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
     match &ast_class.extends[..] {
         [h, ..] => match h.1.as_happly() {
             Some((_, l)) if !l.is_empty() => {
@@ -389,7 +388,6 @@ fn emit_reified_extends_params<'a, 'arena>(
 }
 
 fn emit_reified_init_body<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     num_reified: usize,
@@ -397,6 +395,7 @@ fn emit_reified_init_body<'a, 'arena>(
 ) -> Result<InstrSeq<'arena>> {
     use string_utils::reified::{INIT_METH_NAME, INIT_METH_PARAM_NAME, PROP_NAME};
 
+    let alloc = env.arena;
     let check_length = InstrSeq::gather(
         alloc,
         vec![
@@ -428,7 +427,7 @@ fn emit_reified_init_body<'a, 'arena>(
     Ok(if ast_class.extends.is_empty() {
         InstrSeq::gather(alloc, vec![set_prop, return_instr])
     } else {
-        let generic_arr = emit_reified_extends_params(alloc, e, env, ast_class)?;
+        let generic_arr = emit_reified_extends_params(e, env, ast_class)?;
         let call_parent = InstrSeq::gather(
             alloc,
             vec![
@@ -449,13 +448,13 @@ fn emit_reified_init_body<'a, 'arena>(
 }
 
 fn emit_reified_init_method<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     ast_class: &'a tast::Class_,
 ) -> Result<Option<HhasMethod<'a, 'arena>>> {
     use hhbc_by_ref_hhas_type::{constraint::*, Info};
 
+    let alloc = env.arena;
     let num_reified = ast_class
         .tparams
         .iter()
@@ -478,7 +477,7 @@ fn emit_reified_init_method<'a, 'arena>(
             default_value: None,
         }];
 
-        let body_instrs = emit_reified_init_body(alloc, emitter, env, num_reified, ast_class)?;
+        let body_instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
         let instrs = emit_pos::emit_pos_then(alloc, &ast_class.span, body_instrs);
         Ok(Some(make_86method(
             alloc,
@@ -715,7 +714,7 @@ pub fn emit_class<'a, 'arena>(
     emitter.label_gen_mut().reset();
     let mut properties =
         from_class_elt_classvars(alloc, emitter, namespace, &ast_class, is_const, &tparams)?;
-    let constants = from_class_elt_constants(alloc, emitter, &env, ast_class)?;
+    let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
@@ -835,7 +834,7 @@ pub fn emit_class<'a, 'arena>(
 
     let should_emit_reified_init = !(emitter.systemlib() || is_closure || is_interface || is_trait);
     let reified_init_method = if should_emit_reified_init {
-        emit_reified_init_method(alloc, emitter, &env, ast_class)?
+        emit_reified_init_method(emitter, &env, ast_class)?
     } else {
         None
     };

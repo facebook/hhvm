@@ -2,9 +2,11 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
+class MyVisitorContext {}
+
 function foo(
-  ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(string): int)> {
+  MyVisitorContext $_,
+): ExprTree<MyVisitor, string, (function(string): MyVisitorInt)> {
   throw new Exception();
 }
 
@@ -14,7 +16,7 @@ function test(): void {
 
   $visitor = new MyVisitor();
 
-  $res = $et->construct($visitor);
+  $res = $et->visit($visitor);
 
   echo($res);
 }
@@ -23,15 +25,15 @@ final class MyVisitor {
   public static function makeTree<TInfer>(
     ?ExprPos $pos,
     dict<string, mixed> $cached_dict,
-    (function(MyVisitor): mixed) $ast,
+    (function(MyVisitor): string) $ast,
     ?(function(): TInfer) $err,
-  ): ExprTree<MyVisitor, mixed, TInfer> {
+  ): ExprTree<MyVisitor, string, TInfer> {
     return new ExprTree($pos, $cached_dict, $ast, $err);
   }
 
   public static function liftInt(
     int $i,
-  ): ExprTree<MyVisitor, mixed, int> {
+  ): ExprTree<MyVisitor, string, MyVisitorInt> {
     return new ExprTree(
       null,
       dict[],
@@ -42,7 +44,7 @@ final class MyVisitor {
 
   public static function liftString(
     string $s
-  ): ExprTree<MyVisitor, mixed, string> {
+  ): ExprTree<MyVisitor, string, string> {
     return new ExprTree(
       null,
       dict[],
@@ -53,9 +55,9 @@ final class MyVisitor {
 
   public function methCall(
     ExprPos $_,
-    mixed $lhs,
+    string $lhs,
     string $meth_name,
-    vec<mixed> $rhs,
+    vec<string> $rhs,
   ): string {
     $rhs = $rhs[0];
     if ($lhs is string && $rhs is string) {
@@ -66,9 +68,9 @@ final class MyVisitor {
 
   public function call<T>(
     ?ExprPos $_,
-    this::TAst $callee,
-    vec<this::TAst> $args,
-  ): this::TAst {
+    string $callee,
+    vec<string> $args,
+  ): string {
     $call = "$callee(";
     foreach ($args as $arg) {
       if ($arg is string) {
@@ -83,14 +85,14 @@ final class MyVisitor {
   public function splice(
     ExprPos $_,
     string $_key,
-    ExprTree<MyVisitor, mixed, mixed> $et,
-  ): mixed {
-    return $et->construct($this);
+    ExprTree<MyVisitor, string, mixed> $et,
+  ): string {
+    return $et->visit($this);
   }
 
   public static function liftSymbol<T>(
-    (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
-  ): ExprTree<this, this::TAst, T> {
+    (function(MyVisitorContext): ExprTree<MyVisitor, string, T>) $_,
+  ): ExprTree<MyVisitor, string, T> {
     return new ExprTree(
       null,
       dict[],
@@ -100,15 +102,20 @@ final class MyVisitor {
   }
 }
 
-final class ExprTree<TVisitor, TResult, TInfer>{
+interface Spliceable<TVisitor, TResult, +TInfer> {
+  public function visit(TVisitor $v): TResult;
+}
+
+
+final class ExprTree<TVisitor, TResult, +TInfer> implements Spliceable<TVisitor, TResult, TInfer> {
   public function __construct(
     private ?ExprPos $pos,
     private dict<string, mixed> $cached_dict,
     private (function(TVisitor): TResult) $ast,
-    private (function(): TInfer) $err,
+    private ?(function(): TInfer) $err,
   ) {}
 
-  public function construct(TVisitor $v): TResult {
+  public function visit(TVisitor $v): TResult {
     return ($this->ast)($v);
   }
 }
@@ -121,4 +128,8 @@ final class ExprPos {
     private int $end_line,
     private int $end_col,
   ) {}
+}
+
+abstract class MyVisitorInt {
+  abstract public function __plus(MyVisitorInt $_): MyVisitorInt;
 }

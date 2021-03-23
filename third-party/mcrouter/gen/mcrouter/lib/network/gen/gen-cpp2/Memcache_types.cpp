@@ -129,8 +129,8 @@ McGetReply::McGetReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McGetReply::~McGetReply() {}
 
@@ -377,8 +377,8 @@ McSetReply::McSetReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McSetReply::~McSetReply() {}
 
@@ -505,8 +505,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDeleteRequest::McDeleteRequest() :
       flags(0),
       exptime(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McDeleteRequest::~McDeleteRequest() {}
 
@@ -620,8 +620,8 @@ McDeleteReply::McDeleteReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McDeleteReply::~McDeleteReply() {}
 
@@ -839,8 +839,8 @@ McLeaseGetReply::McLeaseGetReply() :
       leaseToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McLeaseGetReply::~McLeaseGetReply() {}
 
@@ -988,8 +988,8 @@ McLeaseSetRequest::McLeaseSetRequest() :
       exptime(0),
       flags(0),
       leaseToken(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McLeaseSetRequest::~McLeaseSetRequest() {}
 
@@ -1722,8 +1722,8 @@ McGetsReply::McGetsReply() :
       casToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McGetsReply::~McGetsReply() {}
 
@@ -1871,8 +1871,8 @@ McCasRequest::McCasRequest() :
       exptime(0),
       flags(0),
       casToken(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McCasRequest::~McCasRequest() {}
 
@@ -2576,8 +2576,8 @@ McMetagetReply::McMetagetReply() :
       exptime(0),
       ipv(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McMetagetReply::~McMetagetReply() {}
 
@@ -3784,8 +3784,8 @@ McGatReply::McGatReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McGatReply::~McGatReply() {}
 
@@ -4013,8 +4013,8 @@ McGatsReply::McGatsReply() :
       casToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 McGatsReply::~McGatsReply() {}
 

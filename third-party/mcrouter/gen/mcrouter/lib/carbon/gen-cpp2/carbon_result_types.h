@@ -54,13 +54,10 @@ enum class Result {
 
 
 } // carbon
+
 namespace std {
-
-
-template<> struct hash<typename ::carbon::Result> : public apache::thrift::detail::enum_hash<typename ::carbon::Result> {};
-template<> struct equal_to<typename ::carbon::Result> : public apache::thrift::detail::enum_equal_to<typename ::carbon::Result> {};
-
-
+template<> struct hash<::carbon::Result> :
+  ::apache::thrift::detail::enum_hash<::carbon::Result> {};
 } // std
 
 namespace apache { namespace thrift {
@@ -104,3 +101,5 @@ extern const _Result_EnumMapFactory::NamesToValuesMapType _Result_NAMES_TO_VALUE
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+THRIFT_IGNORE_ISSET_USE_WARNING_END

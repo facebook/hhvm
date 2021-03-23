@@ -76,7 +76,10 @@ void MemcacheAsyncProcessor::process_mcAdd(apache::thrift::ResponseChannelReques
         ex, std::move(req), ctx, eb, "mcAdd");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>>(std::move(req), std::move(ctxStack), return_mcAdd<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAdd<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcAdd(std::move(callback), args.get<0>().ref());
 }
@@ -128,7 +131,10 @@ void MemcacheAsyncProcessor::process_mcAppend(apache::thrift::ResponseChannelReq
         ex, std::move(req), ctx, eb, "mcAppend");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>>(std::move(req), std::move(ctxStack), return_mcAppend<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAppend<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcAppend(std::move(callback), args.get<0>().ref());
 }
@@ -180,7 +186,10 @@ void MemcacheAsyncProcessor::process_mcCas(apache::thrift::ResponseChannelReques
         ex, std::move(req), ctx, eb, "mcCas");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>>(std::move(req), std::move(ctxStack), return_mcCas<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcCas<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcCas(std::move(callback), args.get<0>().ref());
 }
@@ -232,7 +241,10 @@ void MemcacheAsyncProcessor::process_mcDecr(apache::thrift::ResponseChannelReque
         ex, std::move(req), ctx, eb, "mcDecr");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>>(std::move(req), std::move(ctxStack), return_mcDecr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDecr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcDecr(std::move(callback), args.get<0>().ref());
 }
@@ -284,7 +296,10 @@ void MemcacheAsyncProcessor::process_mcDelete(apache::thrift::ResponseChannelReq
         ex, std::move(req), ctx, eb, "mcDelete");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>>(std::move(req), std::move(ctxStack), return_mcDelete<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDelete<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcDelete(std::move(callback), args.get<0>().ref());
 }
@@ -336,7 +351,10 @@ void MemcacheAsyncProcessor::process_mcFlushAll(apache::thrift::ResponseChannelR
         ex, std::move(req), ctx, eb, "mcFlushAll");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>>(std::move(req), std::move(ctxStack), return_mcFlushAll<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushAll<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcFlushAll(std::move(callback), args.get<0>().ref());
 }
@@ -388,7 +406,10 @@ void MemcacheAsyncProcessor::process_mcFlushRe(apache::thrift::ResponseChannelRe
         ex, std::move(req), ctx, eb, "mcFlushRe");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>>(std::move(req), std::move(ctxStack), return_mcFlushRe<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushRe<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcFlushRe(std::move(callback), args.get<0>().ref());
 }
@@ -440,7 +461,10 @@ void MemcacheAsyncProcessor::process_mcGat(apache::thrift::ResponseChannelReques
         ex, std::move(req), ctx, eb, "mcGat");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>>(std::move(req), std::move(ctxStack), return_mcGat<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGat<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcGat(std::move(callback), args.get<0>().ref());
 }
@@ -492,7 +516,10 @@ void MemcacheAsyncProcessor::process_mcGats(apache::thrift::ResponseChannelReque
         ex, std::move(req), ctx, eb, "mcGats");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>>(std::move(req), std::move(ctxStack), return_mcGats<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGats<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcGats(std::move(callback), args.get<0>().ref());
 }
@@ -544,7 +571,10 @@ void MemcacheAsyncProcessor::process_mcGet(apache::thrift::ResponseChannelReques
         ex, std::move(req), ctx, eb, "mcGet");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGetReply>>(std::move(req), std::move(ctxStack), return_mcGet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcGet(std::move(callback), args.get<0>().ref());
 }
@@ -596,7 +626,10 @@ void MemcacheAsyncProcessor::process_mcGets(apache::thrift::ResponseChannelReque
         ex, std::move(req), ctx, eb, "mcGets");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>>(std::move(req), std::move(ctxStack), return_mcGets<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGets<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcGets(std::move(callback), args.get<0>().ref());
 }
@@ -648,7 +681,10 @@ void MemcacheAsyncProcessor::process_mcIncr(apache::thrift::ResponseChannelReque
         ex, std::move(req), ctx, eb, "mcIncr");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>>(std::move(req), std::move(ctxStack), return_mcIncr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcIncr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcIncr(std::move(callback), args.get<0>().ref());
 }
@@ -700,7 +736,10 @@ void MemcacheAsyncProcessor::process_mcLeaseGet(apache::thrift::ResponseChannelR
         ex, std::move(req), ctx, eb, "mcLeaseGet");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>>(std::move(req), std::move(ctxStack), return_mcLeaseGet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcLeaseGet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcLeaseGet(std::move(callback), args.get<0>().ref());
 }
@@ -752,7 +791,10 @@ void MemcacheAsyncProcessor::process_mcLeaseSet(apache::thrift::ResponseChannelR
         ex, std::move(req), ctx, eb, "mcLeaseSet");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>>(std::move(req), std::move(ctxStack), return_mcLeaseSet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcLeaseSet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcLeaseSet(std::move(callback), args.get<0>().ref());
 }
@@ -804,7 +846,10 @@ void MemcacheAsyncProcessor::process_mcMetaget(apache::thrift::ResponseChannelRe
         ex, std::move(req), ctx, eb, "mcMetaget");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>>(std::move(req), std::move(ctxStack), return_mcMetaget<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcMetaget<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcMetaget(std::move(callback), args.get<0>().ref());
 }
@@ -856,7 +901,10 @@ void MemcacheAsyncProcessor::process_mcPrepend(apache::thrift::ResponseChannelRe
         ex, std::move(req), ctx, eb, "mcPrepend");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>>(std::move(req), std::move(ctxStack), return_mcPrepend<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcPrepend<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcPrepend(std::move(callback), args.get<0>().ref());
 }
@@ -908,7 +956,10 @@ void MemcacheAsyncProcessor::process_mcReplace(apache::thrift::ResponseChannelRe
         ex, std::move(req), ctx, eb, "mcReplace");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>>(std::move(req), std::move(ctxStack), return_mcReplace<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcReplace<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcReplace(std::move(callback), args.get<0>().ref());
 }
@@ -960,7 +1011,10 @@ void MemcacheAsyncProcessor::process_mcSet(apache::thrift::ResponseChannelReques
         ex, std::move(req), ctx, eb, "mcSet");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>>(std::move(req), std::move(ctxStack), return_mcSet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcSet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcSet(std::move(callback), args.get<0>().ref());
 }
@@ -1012,7 +1066,10 @@ void MemcacheAsyncProcessor::process_mcTouch(apache::thrift::ResponseChannelRequ
         ex, std::move(req), ctx, eb, "mcTouch");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>>(std::move(req), std::move(ctxStack), return_mcTouch<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcTouch<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcTouch(std::move(callback), args.get<0>().ref());
 }
@@ -1064,7 +1121,10 @@ void MemcacheAsyncProcessor::process_mcVersion(apache::thrift::ResponseChannelRe
         ex, std::move(req), ctx, eb, "mcVersion");
     return;
   }
-  req->setStartedProcessing();
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    return;
+  }
   auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>>(std::move(req), std::move(ctxStack), return_mcVersion<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcVersion<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_eb_mcVersion(std::move(callback), args.get<0>().ref());
 }

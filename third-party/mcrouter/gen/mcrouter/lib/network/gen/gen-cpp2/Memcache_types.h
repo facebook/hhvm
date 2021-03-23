@@ -748,6 +748,7 @@ class McGatsReply;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace facebook { namespace memcache { namespace thrift {
 class McGetRequest  {
  private:
@@ -766,7 +767,6 @@ class McGetRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetRequest() :
       flags(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -781,7 +781,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetRequest& operator=(McGetRequest&&) = default;
 
   McGetRequest& operator=(const McGetRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGetRequest() {}
@@ -816,7 +815,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -836,9 +834,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -858,7 +854,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -871,9 +866,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McGetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGetRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -883,9 +876,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -946,7 +937,6 @@ class McGetReply  {
  public:
 
   McGetReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -960,7 +950,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetReply& operator=(McGetReply&&) = default;
 
   McGetReply& operator=(const McGetReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGetReply();
@@ -1004,7 +993,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -1024,9 +1012,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -1046,9 +1032,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -1068,9 +1052,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -1090,9 +1072,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -1112,7 +1092,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -1120,9 +1099,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -1138,9 +1115,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McGetReply_value_struct_setter&& value_) {
     value = std::forward<T_McGetReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -1150,9 +1125,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -1167,9 +1140,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McGetReply_message_struct_setter&& message_) {
     message = std::forward<T_McGetReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -1179,9 +1150,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -1241,7 +1210,6 @@ class McSetRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McSetRequest() :
       exptime(0),
       flags(0) {}
@@ -1257,7 +1225,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McSetRequest& operator=(McSetRequest&&) = default;
 
   McSetRequest& operator=(const McSetRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McSetRequest() {}
@@ -1298,7 +1265,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -1318,9 +1284,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -1340,9 +1304,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -1362,9 +1324,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -1384,7 +1344,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -1397,9 +1356,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McSetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McSetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McSetRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -1409,9 +1366,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -1421,9 +1376,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -1438,9 +1391,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McSetRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McSetRequest_value_struct_setter&& value_) {
     value = std::forward<T_McSetRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -1501,7 +1452,6 @@ class McSetReply  {
  public:
 
   McSetReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1515,7 +1465,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McSetReply& operator=(McSetReply&&) = default;
 
   McSetReply& operator=(const McSetReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McSetReply();
@@ -1559,7 +1508,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -1579,9 +1527,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -1601,9 +1547,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -1623,9 +1567,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -1645,9 +1587,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -1667,7 +1607,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -1675,9 +1614,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -1687,9 +1624,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -1704,9 +1639,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McSetReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McSetReply_value_struct_setter&& value_) {
     value = std::forward<T_McSetReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -1721,9 +1654,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McSetReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McSetReply_message_struct_setter&& message_) {
     message = std::forward<T_McSetReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -1733,9 +1664,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -1796,7 +1725,6 @@ class McDeleteRequest  {
  public:
 
   McDeleteRequest();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1810,7 +1738,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDeleteRequest& operator=(McDeleteRequest&&) = default;
 
   McDeleteRequest& operator=(const McDeleteRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McDeleteRequest();
@@ -1854,7 +1781,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -1874,9 +1800,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -1896,9 +1820,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -1918,9 +1840,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -1940,9 +1860,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<std::string, uint64_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> attributes_ref() const& {
     return {this->attributes, __isset.attributes};
@@ -1962,7 +1880,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> attributes_ref() && {
     return {std::move(this->attributes), __isset.attributes};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -1975,9 +1892,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDeleteRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McDeleteRequest_key_struct_setter&& key_) {
     key = std::forward<T_McDeleteRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -1987,9 +1902,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -1999,9 +1912,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -2016,9 +1927,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDeleteRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McDeleteRequest_value_struct_setter&& value_) {
     value = std::forward<T_McDeleteRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
   const std::unordered_map<std::string, uint64_t>& get_attributes() const&;
@@ -2027,9 +1936,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDeleteRequest_attributes_struct_setter = std::unordered_map<std::string, uint64_t>>
   std::unordered_map<std::string, uint64_t>& set_attributes(T_McDeleteRequest_attributes_struct_setter&& attributes_) {
     attributes = std::forward<T_McDeleteRequest_attributes_struct_setter>(attributes_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.attributes = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return attributes;
   }
 
@@ -2090,7 +1997,6 @@ class McDeleteReply  {
  public:
 
   McDeleteReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2104,7 +2010,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDeleteReply& operator=(McDeleteReply&&) = default;
 
   McDeleteReply& operator=(const McDeleteReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McDeleteReply();
@@ -2148,7 +2053,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -2168,9 +2072,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -2190,9 +2092,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -2212,9 +2112,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -2234,9 +2132,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -2256,7 +2152,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -2264,9 +2159,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -2276,9 +2169,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -2293,9 +2184,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDeleteReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McDeleteReply_value_struct_setter&& value_) {
     value = std::forward<T_McDeleteReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -2310,9 +2199,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDeleteReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McDeleteReply_message_struct_setter&& message_) {
     message = std::forward<T_McDeleteReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -2322,9 +2209,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -2384,7 +2269,6 @@ class McLeaseGetRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseGetRequest() :
       flags(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -2399,7 +2283,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseGetRequest& operator=(McLeaseGetRequest&&) = default;
 
   McLeaseGetRequest& operator=(const McLeaseGetRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McLeaseGetRequest() {}
@@ -2434,7 +2317,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -2454,9 +2336,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -2476,7 +2356,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -2489,9 +2368,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseGetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McLeaseGetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McLeaseGetRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -2501,9 +2378,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -2564,7 +2439,6 @@ class McLeaseGetReply  {
  public:
 
   McLeaseGetReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2578,7 +2452,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseGetReply& operator=(McLeaseGetReply&&) = default;
 
   McLeaseGetReply& operator=(const McLeaseGetReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McLeaseGetReply();
@@ -2625,7 +2498,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -2645,9 +2517,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> leaseToken_ref() const& {
     return {this->leaseToken, __isset.leaseToken};
@@ -2667,9 +2537,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> leaseToken_ref() && {
     return {std::move(this->leaseToken), __isset.leaseToken};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -2689,9 +2557,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -2711,9 +2577,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -2733,9 +2597,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -2755,7 +2617,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -2763,9 +2624,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -2775,9 +2634,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_leaseToken(::std::int64_t leaseToken_) {
     leaseToken = leaseToken_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.leaseToken = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return leaseToken;
   }
 
@@ -2793,9 +2650,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseGetReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McLeaseGetReply_value_struct_setter&& value_) {
     value = std::forward<T_McLeaseGetReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -2805,9 +2660,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -2822,9 +2675,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseGetReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McLeaseGetReply_message_struct_setter&& message_) {
     message = std::forward<T_McLeaseGetReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -2834,9 +2685,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -2897,7 +2746,6 @@ class McLeaseSetRequest  {
  public:
 
   McLeaseSetRequest();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2911,7 +2759,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseSetRequest& operator=(McLeaseSetRequest&&) = default;
 
   McLeaseSetRequest& operator=(const McLeaseSetRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McLeaseSetRequest();
@@ -2955,7 +2802,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -2975,9 +2821,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -2997,9 +2841,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -3019,9 +2861,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -3041,9 +2881,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> leaseToken_ref() const& {
     return {this->leaseToken, __isset.leaseToken};
@@ -3063,7 +2901,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> leaseToken_ref() && {
     return {std::move(this->leaseToken), __isset.leaseToken};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -3076,9 +2913,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseSetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McLeaseSetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McLeaseSetRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -3088,9 +2923,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -3100,9 +2933,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -3117,9 +2948,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseSetRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McLeaseSetRequest_value_struct_setter&& value_) {
     value = std::forward<T_McLeaseSetRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -3129,9 +2958,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_leaseToken(::std::int64_t leaseToken_) {
     leaseToken = leaseToken_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.leaseToken = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return leaseToken;
   }
 
@@ -3191,7 +3018,6 @@ class McLeaseSetReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseSetReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -3207,7 +3033,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McLeaseSetReply& operator=(McLeaseSetReply&&) = default;
 
   McLeaseSetReply& operator=(const McLeaseSetReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McLeaseSetReply() {}
@@ -3245,7 +3070,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -3265,9 +3089,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -3287,9 +3109,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -3309,7 +3129,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -3317,9 +3136,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -3334,9 +3151,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McLeaseSetReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McLeaseSetReply_message_struct_setter&& message_) {
     message = std::forward<T_McLeaseSetReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -3346,9 +3161,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -3408,7 +3221,6 @@ class McAddRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAddRequest() :
       exptime(0),
       flags(0) {}
@@ -3424,7 +3236,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAddRequest& operator=(McAddRequest&&) = default;
 
   McAddRequest& operator=(const McAddRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McAddRequest() {}
@@ -3465,7 +3276,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -3485,9 +3295,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -3507,9 +3315,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -3529,9 +3335,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -3551,7 +3355,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -3564,9 +3367,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAddRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McAddRequest_key_struct_setter&& key_) {
     key = std::forward<T_McAddRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -3576,9 +3377,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -3588,9 +3387,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -3605,9 +3402,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAddRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McAddRequest_value_struct_setter&& value_) {
     value = std::forward<T_McAddRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -3667,7 +3462,6 @@ class McAddReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAddReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -3683,7 +3477,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAddReply& operator=(McAddReply&&) = default;
 
   McAddReply& operator=(const McAddReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McAddReply() {}
@@ -3721,7 +3514,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -3741,9 +3533,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -3763,9 +3553,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -3785,7 +3573,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -3793,9 +3580,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -3810,9 +3595,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAddReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McAddReply_message_struct_setter&& message_) {
     message = std::forward<T_McAddReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -3822,9 +3605,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -3884,7 +3665,6 @@ class McReplaceRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McReplaceRequest() :
       exptime(0),
       flags(0) {}
@@ -3900,7 +3680,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McReplaceRequest& operator=(McReplaceRequest&&) = default;
 
   McReplaceRequest& operator=(const McReplaceRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McReplaceRequest() {}
@@ -3941,7 +3720,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -3961,9 +3739,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -3983,9 +3759,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -4005,9 +3779,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -4027,7 +3799,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -4040,9 +3811,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McReplaceRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McReplaceRequest_key_struct_setter&& key_) {
     key = std::forward<T_McReplaceRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -4052,9 +3821,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -4064,9 +3831,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -4081,9 +3846,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McReplaceRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McReplaceRequest_value_struct_setter&& value_) {
     value = std::forward<T_McReplaceRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -4143,7 +3906,6 @@ class McReplaceReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McReplaceReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -4159,7 +3921,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McReplaceReply& operator=(McReplaceReply&&) = default;
 
   McReplaceReply& operator=(const McReplaceReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McReplaceReply() {}
@@ -4197,7 +3958,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -4217,9 +3977,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -4239,9 +3997,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -4261,7 +4017,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -4269,9 +4024,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -4286,9 +4039,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McReplaceReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McReplaceReply_message_struct_setter&& message_) {
     message = std::forward<T_McReplaceReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -4298,9 +4049,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -4360,7 +4109,6 @@ class McGetsRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetsRequest() :
       flags(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -4375,7 +4123,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetsRequest& operator=(McGetsRequest&&) = default;
 
   McGetsRequest& operator=(const McGetsRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGetsRequest() {}
@@ -4410,7 +4157,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -4430,9 +4176,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -4452,7 +4196,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -4465,9 +4208,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetsRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McGetsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGetsRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -4477,9 +4218,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -4540,7 +4279,6 @@ class McGetsReply  {
  public:
 
   McGetsReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4554,7 +4292,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGetsReply& operator=(McGetsReply&&) = default;
 
   McGetsReply& operator=(const McGetsReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGetsReply();
@@ -4601,7 +4338,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -4621,9 +4357,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> casToken_ref() const& {
     return {this->casToken, __isset.casToken};
@@ -4643,9 +4377,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> casToken_ref() && {
     return {std::move(this->casToken), __isset.casToken};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -4665,9 +4397,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -4687,9 +4417,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -4709,9 +4437,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -4731,7 +4457,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -4739,9 +4464,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -4751,9 +4474,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.casToken = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return casToken;
   }
 
@@ -4769,9 +4490,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetsReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McGetsReply_value_struct_setter&& value_) {
     value = std::forward<T_McGetsReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -4781,9 +4500,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -4798,9 +4515,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGetsReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McGetsReply_message_struct_setter&& message_) {
     message = std::forward<T_McGetsReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -4810,9 +4525,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -4873,7 +4586,6 @@ class McCasRequest  {
  public:
 
   McCasRequest();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4887,7 +4599,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McCasRequest& operator=(McCasRequest&&) = default;
 
   McCasRequest& operator=(const McCasRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McCasRequest();
@@ -4931,7 +4642,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -4951,9 +4661,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -4973,9 +4681,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -4995,9 +4701,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -5017,9 +4721,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> casToken_ref() const& {
     return {this->casToken, __isset.casToken};
@@ -5039,7 +4741,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> casToken_ref() && {
     return {std::move(this->casToken), __isset.casToken};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -5052,9 +4753,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McCasRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McCasRequest_key_struct_setter&& key_) {
     key = std::forward<T_McCasRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -5064,9 +4763,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -5076,9 +4773,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -5093,9 +4788,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McCasRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McCasRequest_value_struct_setter&& value_) {
     value = std::forward<T_McCasRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -5105,9 +4798,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.casToken = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return casToken;
   }
 
@@ -5167,7 +4858,6 @@ class McCasReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McCasReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -5183,7 +4873,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McCasReply& operator=(McCasReply&&) = default;
 
   McCasReply& operator=(const McCasReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McCasReply() {}
@@ -5221,7 +4910,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -5241,9 +4929,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -5263,9 +4949,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -5285,7 +4969,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -5293,9 +4976,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -5310,9 +4991,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McCasReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McCasReply_message_struct_setter&& message_) {
     message = std::forward<T_McCasReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -5322,9 +5001,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -5384,7 +5061,6 @@ class McIncrRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McIncrRequest() :
       delta(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -5399,7 +5075,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McIncrRequest& operator=(McIncrRequest&&) = default;
 
   McIncrRequest& operator=(const McIncrRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McIncrRequest() {}
@@ -5434,7 +5109,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -5454,9 +5128,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> delta_ref() const& {
     return {this->delta, __isset.delta};
@@ -5476,7 +5148,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> delta_ref() && {
     return {std::move(this->delta), __isset.delta};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -5489,9 +5160,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McIncrRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McIncrRequest_key_struct_setter&& key_) {
     key = std::forward<T_McIncrRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -5501,9 +5170,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.delta = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return delta;
   }
 
@@ -5563,7 +5230,6 @@ class McIncrReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McIncrReply() :
       result( ::carbon::Result::UNKNOWN),
       delta(0),
@@ -5580,7 +5246,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McIncrReply& operator=(McIncrReply&&) = default;
 
   McIncrReply& operator=(const McIncrReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McIncrReply() {}
@@ -5621,7 +5286,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -5641,9 +5305,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> delta_ref() const& {
     return {this->delta, __isset.delta};
@@ -5663,9 +5325,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> delta_ref() && {
     return {std::move(this->delta), __isset.delta};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -5685,9 +5345,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -5707,7 +5365,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -5715,9 +5372,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -5727,9 +5382,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.delta = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return delta;
   }
 
@@ -5744,9 +5397,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McIncrReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McIncrReply_message_struct_setter&& message_) {
     message = std::forward<T_McIncrReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -5756,9 +5407,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -5818,7 +5467,6 @@ class McDecrRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDecrRequest() :
       delta(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -5833,7 +5481,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDecrRequest& operator=(McDecrRequest&&) = default;
 
   McDecrRequest& operator=(const McDecrRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McDecrRequest() {}
@@ -5868,7 +5515,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -5888,9 +5534,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> delta_ref() const& {
     return {this->delta, __isset.delta};
@@ -5910,7 +5554,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> delta_ref() && {
     return {std::move(this->delta), __isset.delta};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -5923,9 +5566,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDecrRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McDecrRequest_key_struct_setter&& key_) {
     key = std::forward<T_McDecrRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -5935,9 +5576,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.delta = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return delta;
   }
 
@@ -5997,7 +5636,6 @@ class McDecrReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDecrReply() :
       result( ::carbon::Result::UNKNOWN),
       delta(0),
@@ -6014,7 +5652,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McDecrReply& operator=(McDecrReply&&) = default;
 
   McDecrReply& operator=(const McDecrReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McDecrReply() {}
@@ -6055,7 +5692,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -6075,9 +5711,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> delta_ref() const& {
     return {this->delta, __isset.delta};
@@ -6097,9 +5731,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> delta_ref() && {
     return {std::move(this->delta), __isset.delta};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -6119,9 +5751,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -6141,7 +5771,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -6149,9 +5778,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -6161,9 +5788,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.delta = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return delta;
   }
 
@@ -6178,9 +5803,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McDecrReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McDecrReply_message_struct_setter&& message_) {
     message = std::forward<T_McDecrReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -6190,9 +5813,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -6252,7 +5873,6 @@ class McMetagetRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McMetagetRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -6266,7 +5886,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McMetagetRequest& operator=(McMetagetRequest&&) = default;
 
   McMetagetRequest& operator=(const McMetagetRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McMetagetRequest() {}
@@ -6298,7 +5917,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -6318,7 +5936,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -6331,9 +5948,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McMetagetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McMetagetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McMetagetRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -6394,7 +6009,6 @@ class McMetagetReply  {
  public:
 
   McMetagetReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -6408,7 +6022,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McMetagetReply& operator=(McMetagetReply&&) = default;
 
   McMetagetReply& operator=(const McMetagetReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McMetagetReply();
@@ -6458,7 +6071,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -6478,9 +6090,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> age_ref() const& {
     return {this->age, __isset.age};
@@ -6500,9 +6110,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> age_ref() && {
     return {std::move(this->age), __isset.age};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -6522,9 +6130,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ipv_ref() const& {
     return {this->ipv, __isset.ipv};
@@ -6544,9 +6150,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ipv_ref() && {
     return {std::move(this->ipv), __isset.ipv};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ipAddress_ref() const& {
     return {this->ipAddress, __isset.ipAddress};
@@ -6566,9 +6170,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ipAddress_ref() && {
     return {std::move(this->ipAddress), __isset.ipAddress};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -6588,9 +6190,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -6610,7 +6210,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -6618,9 +6217,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -6630,9 +6227,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_age(::std::int32_t age_) {
     age = age_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.age = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return age;
   }
 
@@ -6642,9 +6237,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -6654,9 +6247,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_ipv(::std::int16_t ipv_) {
     ipv = ipv_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.ipv = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return ipv;
   }
 
@@ -6671,9 +6262,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McMetagetReply_ipAddress_struct_setter = ::std::string>
   ::std::string& set_ipAddress(T_McMetagetReply_ipAddress_struct_setter&& ipAddress_) {
     ipAddress = std::forward<T_McMetagetReply_ipAddress_struct_setter>(ipAddress_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.ipAddress = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return ipAddress;
   }
 
@@ -6688,9 +6277,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McMetagetReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McMetagetReply_message_struct_setter&& message_) {
     message = std::forward<T_McMetagetReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -6700,9 +6287,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -6762,7 +6347,6 @@ class McAppendRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAppendRequest() :
       exptime(0),
       flags(0) {}
@@ -6778,7 +6362,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAppendRequest& operator=(McAppendRequest&&) = default;
 
   McAppendRequest& operator=(const McAppendRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McAppendRequest() {}
@@ -6819,7 +6402,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -6839,9 +6421,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -6861,9 +6441,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -6883,9 +6461,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -6905,7 +6481,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -6918,9 +6493,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAppendRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McAppendRequest_key_struct_setter&& key_) {
     key = std::forward<T_McAppendRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -6930,9 +6503,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -6942,9 +6513,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -6959,9 +6528,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAppendRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McAppendRequest_value_struct_setter&& value_) {
     value = std::forward<T_McAppendRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -7021,7 +6588,6 @@ class McAppendReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAppendReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -7037,7 +6603,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McAppendReply& operator=(McAppendReply&&) = default;
 
   McAppendReply& operator=(const McAppendReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McAppendReply() {}
@@ -7075,7 +6640,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -7095,9 +6659,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -7117,9 +6679,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -7139,7 +6699,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -7147,9 +6706,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -7164,9 +6721,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McAppendReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McAppendReply_message_struct_setter&& message_) {
     message = std::forward<T_McAppendReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -7176,9 +6731,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -7238,7 +6791,6 @@ class McPrependRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McPrependRequest() :
       exptime(0),
       flags(0) {}
@@ -7254,7 +6806,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McPrependRequest& operator=(McPrependRequest&&) = default;
 
   McPrependRequest& operator=(const McPrependRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McPrependRequest() {}
@@ -7295,7 +6846,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -7315,9 +6865,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -7337,9 +6885,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -7359,9 +6905,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -7381,7 +6925,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -7394,9 +6937,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McPrependRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McPrependRequest_key_struct_setter&& key_) {
     key = std::forward<T_McPrependRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -7406,9 +6947,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -7418,9 +6957,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -7435,9 +6972,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McPrependRequest_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McPrependRequest_value_struct_setter&& value_) {
     value = std::forward<T_McPrependRequest_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -7497,7 +7032,6 @@ class McPrependReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McPrependReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -7513,7 +7047,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McPrependReply& operator=(McPrependReply&&) = default;
 
   McPrependReply& operator=(const McPrependReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McPrependReply() {}
@@ -7551,7 +7084,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -7571,9 +7103,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -7593,9 +7123,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -7615,7 +7143,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -7623,9 +7150,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -7640,9 +7165,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McPrependReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McPrependReply_message_struct_setter&& message_) {
     message = std::forward<T_McPrependReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -7652,9 +7175,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -7714,7 +7235,6 @@ class McTouchRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McTouchRequest() :
       exptime(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -7729,7 +7249,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McTouchRequest& operator=(McTouchRequest&&) = default;
 
   McTouchRequest& operator=(const McTouchRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McTouchRequest() {}
@@ -7764,7 +7283,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -7784,9 +7302,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -7806,7 +7322,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -7819,9 +7334,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McTouchRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McTouchRequest_key_struct_setter&& key_) {
     key = std::forward<T_McTouchRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -7831,9 +7344,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -7893,7 +7404,6 @@ class McTouchReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McTouchReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -7909,7 +7419,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McTouchReply& operator=(McTouchReply&&) = default;
 
   McTouchReply& operator=(const McTouchReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McTouchReply() {}
@@ -7947,7 +7456,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -7967,9 +7475,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -7989,9 +7495,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -8011,7 +7515,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -8019,9 +7522,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -8036,9 +7537,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McTouchReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McTouchReply_message_struct_setter&& message_) {
     message = std::forward<T_McTouchReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -8048,9 +7547,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -8110,7 +7607,6 @@ class McFlushReRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushReRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -8124,7 +7620,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushReRequest& operator=(McFlushReRequest&&) = default;
 
   McFlushReRequest& operator=(const McFlushReRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McFlushReRequest() {}
@@ -8156,7 +7651,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -8176,7 +7670,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -8189,9 +7682,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McFlushReRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McFlushReRequest_key_struct_setter&& key_) {
     key = std::forward<T_McFlushReRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -8251,7 +7742,6 @@ class McFlushReReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushReReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -8267,7 +7757,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushReReply& operator=(McFlushReReply&&) = default;
 
   McFlushReReply& operator=(const McFlushReReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McFlushReReply() {}
@@ -8305,7 +7794,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -8325,9 +7813,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -8347,9 +7833,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -8369,7 +7853,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -8377,9 +7860,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -8394,9 +7875,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McFlushReReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McFlushReReply_message_struct_setter&& message_) {
     message = std::forward<T_McFlushReReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -8406,9 +7885,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -8468,7 +7945,6 @@ class McFlushAllRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushAllRequest() :
       delay(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -8483,7 +7959,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushAllRequest& operator=(McFlushAllRequest&&) = default;
 
   McFlushAllRequest& operator=(const McFlushAllRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McFlushAllRequest() {}
@@ -8518,7 +7993,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -8538,9 +8012,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> delay_ref() const& {
     return {this->delay, __isset.delay};
@@ -8560,7 +8032,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> delay_ref() && {
     return {std::move(this->delay), __isset.delay};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -8573,9 +8044,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McFlushAllRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McFlushAllRequest_key_struct_setter&& key_) {
     key = std::forward<T_McFlushAllRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -8585,9 +8054,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_delay(::std::int32_t delay_) {
     delay = delay_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.delay = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return delay;
   }
 
@@ -8647,7 +8114,6 @@ class McFlushAllReply  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushAllReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -8663,7 +8129,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McFlushAllReply& operator=(McFlushAllReply&&) = default;
 
   McFlushAllReply& operator=(const McFlushAllReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McFlushAllReply() {}
@@ -8701,7 +8166,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -8721,9 +8185,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -8743,9 +8205,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -8765,7 +8225,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -8773,9 +8232,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -8790,9 +8247,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McFlushAllReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McFlushAllReply_message_struct_setter&& message_) {
     message = std::forward<T_McFlushAllReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -8802,9 +8257,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -8864,7 +8317,6 @@ class McGatRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatRequest() :
       exptime(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -8879,7 +8331,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatRequest& operator=(McGatRequest&&) = default;
 
   McGatRequest& operator=(const McGatRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGatRequest() {}
@@ -8914,7 +8365,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -8934,9 +8384,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -8956,7 +8404,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t get_exptime() const {
     return exptime;
@@ -8964,9 +8411,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -8981,9 +8426,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McGatRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGatRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -9044,7 +8487,6 @@ class McGatReply  {
  public:
 
   McGatReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -9058,7 +8500,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatReply& operator=(McGatReply&&) = default;
 
   McGatReply& operator=(const McGatReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGatReply();
@@ -9102,7 +8543,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -9122,9 +8562,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -9144,9 +8582,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -9166,9 +8602,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -9188,9 +8622,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -9210,7 +8642,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -9218,9 +8649,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -9236,9 +8665,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McGatReply_value_struct_setter&& value_) {
     value = std::forward<T_McGatReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -9248,9 +8675,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -9265,9 +8690,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McGatReply_message_struct_setter&& message_) {
     message = std::forward<T_McGatReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -9277,9 +8700,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -9339,7 +8760,6 @@ class McGatsRequest  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatsRequest() :
       exptime(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -9354,7 +8774,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatsRequest& operator=(McGatsRequest&&) = default;
 
   McGatsRequest& operator=(const McGatsRequest&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGatsRequest() {}
@@ -9389,7 +8808,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
     return {this->exptime, __isset.exptime};
@@ -9409,9 +8827,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exptime_ref() && {
     return {std::move(this->exptime), __isset.exptime};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -9431,7 +8847,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t get_exptime() const {
     return exptime;
@@ -9439,9 +8854,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exptime = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exptime;
   }
 
@@ -9456,9 +8869,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatsRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
   ::carbon::thrift::IOBufKey& set_key(T_McGatsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGatsRequest_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -9519,7 +8930,6 @@ class McGatsReply  {
  public:
 
   McGatsReply();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -9533,7 +8943,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McGatsReply& operator=(McGatsReply&&) = default;
 
   McGatsReply& operator=(const McGatsReply&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   virtual ~McGatsReply();
@@ -9580,7 +8989,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -9600,9 +9008,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> casToken_ref() const& {
     return {this->casToken, __isset.casToken};
@@ -9622,9 +9028,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> casToken_ref() && {
     return {std::move(this->casToken), __isset.casToken};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -9644,9 +9048,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = uint64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> flags_ref() const& {
     return {this->flags, __isset.flags};
@@ -9666,9 +9068,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> flags_ref() && {
     return {std::move(this->flags), __isset.flags};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -9688,9 +9088,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -9710,7 +9108,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result get_result() const {
     return result;
@@ -9718,9 +9115,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -9730,9 +9125,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.casToken = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return casToken;
   }
 
@@ -9748,9 +9141,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatsReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McGatsReply_value_struct_setter&& value_) {
     value = std::forward<T_McGatsReply_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -9760,9 +9151,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
@@ -9777,9 +9166,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_McGatsReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McGatsReply_message_struct_setter&& message_) {
     message = std::forward<T_McGatsReply_message_struct_setter>(message_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -9789,9 +9176,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -9833,3 +9218,4 @@ uint32_t McGatsReply::read(Protocol_* iprot) {
 }
 
 }}} // facebook::memcache::thrift
+THRIFT_IGNORE_ISSET_USE_WARNING_END

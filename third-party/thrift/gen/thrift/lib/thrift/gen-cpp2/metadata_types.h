@@ -384,13 +384,10 @@ enum class ThriftPrimitiveType {
 
 
 }}} // apache::thrift::metadata
+
 namespace std {
-
-
-template<> struct hash<typename ::apache::thrift::metadata::ThriftPrimitiveType> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::metadata::ThriftPrimitiveType> {};
-template<> struct equal_to<typename ::apache::thrift::metadata::ThriftPrimitiveType> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::metadata::ThriftPrimitiveType> {};
-
-
+template<> struct hash<::apache::thrift::metadata::ThriftPrimitiveType> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::metadata::ThriftPrimitiveType> {};
 } // std
 
 namespace apache { namespace thrift {
@@ -458,6 +455,7 @@ class ThriftServiceMetadataResponse;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift { namespace metadata {
 class ThriftStructType final  {
  private:
@@ -476,7 +474,6 @@ class ThriftStructType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStructType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -490,7 +487,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStructType& operator=(ThriftStructType&&) = default;
 
   ThriftStructType& operator=(const ThriftStructType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -519,7 +515,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -539,7 +534,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -552,9 +546,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftStructType_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftStructType_name_struct_setter&& name_) {
     name = std::forward<T_ThriftStructType_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -601,7 +593,6 @@ class ThriftConstStruct final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftConstStruct() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -615,7 +606,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftConstStruct& operator=(ThriftConstStruct&&) = default;
 
   ThriftConstStruct& operator=(const ThriftConstStruct&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::metadata::ThriftStructType type;
@@ -647,7 +637,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftStructType>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> type_ref() const& {
     return {this->type, __isset.type};
@@ -667,9 +656,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> type_ref() && {
     return {std::move(this->type), __isset.type};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::apache::thrift::metadata::ThriftConstValue>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fields_ref() const& {
     return {this->fields, __isset.fields};
@@ -689,16 +676,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fields_ref() && {
     return {std::move(this->fields), __isset.fields};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::apache::thrift::metadata::ThriftStructType& get_type() const&;
   ::apache::thrift::metadata::ThriftStructType get_type() &&;
 
   template <typename T_ThriftConstStruct_type_struct_setter = ::apache::thrift::metadata::ThriftStructType>
   ::apache::thrift::metadata::ThriftStructType& set_type(T_ThriftConstStruct_type_struct_setter&& type_) {
     type = std::forward<T_ThriftConstStruct_type_struct_setter>(type_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.type = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return type;
   }
   const ::std::map<::std::string, ::apache::thrift::metadata::ThriftConstValue>& get_fields() const&;
@@ -707,9 +691,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftConstStruct_fields_struct_setter = ::std::map<::std::string, ::apache::thrift::metadata::ThriftConstValue>>
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftConstValue>& set_fields(T_ThriftConstStruct_fields_struct_setter&& fields_) {
     fields = std::forward<T_ThriftConstStruct_fields_struct_setter>(fields_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fields = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fields;
   }
 
@@ -1396,7 +1378,6 @@ class ThriftConstValuePair final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftConstValuePair() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1410,7 +1391,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftConstValuePair& operator=(ThriftConstValuePair&&) = default;
 
   ThriftConstValuePair& operator=(const ThriftConstValuePair&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::metadata::ThriftConstValue key;
@@ -1442,7 +1422,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftConstValue>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -1462,9 +1441,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftConstValue>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -1484,16 +1461,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::apache::thrift::metadata::ThriftConstValue& get_key() const&;
   ::apache::thrift::metadata::ThriftConstValue get_key() &&;
 
   template <typename T_ThriftConstValuePair_key_struct_setter = ::apache::thrift::metadata::ThriftConstValue>
   ::apache::thrift::metadata::ThriftConstValue& set_key(T_ThriftConstValuePair_key_struct_setter&& key_) {
     key = std::forward<T_ThriftConstValuePair_key_struct_setter>(key_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
   const ::apache::thrift::metadata::ThriftConstValue& get_value() const&;
@@ -1502,9 +1476,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftConstValuePair_value_struct_setter = ::apache::thrift::metadata::ThriftConstValue>
   ::apache::thrift::metadata::ThriftConstValue& set_value(T_ThriftConstValuePair_value_struct_setter&& value_) {
     value = std::forward<T_ThriftConstValuePair_value_struct_setter>(value_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -1551,7 +1523,6 @@ class ThriftListType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftListType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1563,7 +1534,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftListType& operator=(ThriftListType&&) = default;
   ThriftListType& operator=(const ThriftListType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   std::unique_ptr<::apache::thrift::metadata::ThriftType> valueType;
@@ -1642,7 +1612,6 @@ class ThriftSetType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftSetType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1654,7 +1623,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftSetType& operator=(ThriftSetType&&) = default;
   ThriftSetType& operator=(const ThriftSetType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   std::unique_ptr<::apache::thrift::metadata::ThriftType> valueType;
@@ -1733,7 +1701,6 @@ class ThriftMapType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMapType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1745,7 +1712,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftMapType& operator=(ThriftMapType&&) = default;
   ThriftMapType& operator=(const ThriftMapType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   std::unique_ptr<::apache::thrift::metadata::ThriftType> keyType;
@@ -1837,7 +1803,6 @@ class ThriftEnumType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnumType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1851,7 +1816,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnumType& operator=(ThriftEnumType&&) = default;
 
   ThriftEnumType& operator=(const ThriftEnumType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -1880,7 +1844,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -1900,7 +1863,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -1913,9 +1875,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftEnumType_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftEnumType_name_struct_setter&& name_) {
     name = std::forward<T_ThriftEnumType_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -1962,7 +1922,6 @@ class ThriftUnionType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftUnionType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1976,7 +1935,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftUnionType& operator=(ThriftUnionType&&) = default;
 
   ThriftUnionType& operator=(const ThriftUnionType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -2005,7 +1963,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -2025,7 +1982,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -2038,9 +1994,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftUnionType_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftUnionType_name_struct_setter&& name_) {
     name = std::forward<T_ThriftUnionType_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -2087,7 +2041,6 @@ class ThriftTypedefType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftTypedefType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2099,7 +2052,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftTypedefType& operator=(ThriftTypedefType&&) = default;
   ThriftTypedefType& operator=(const ThriftTypedefType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -2130,7 +2082,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -2150,7 +2101,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename ..., typename T = std::unique_ptr<::apache::thrift::metadata::ThriftType>>
   FOLLY_ERASE T& underlyingType_ref() & { return underlyingType; }
 
@@ -2174,9 +2124,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftTypedefType_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftTypedefType_name_struct_setter&& name_) {
     name = std::forward<T_ThriftTypedefType_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -2223,7 +2171,6 @@ class ThriftStreamType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStreamType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2235,7 +2182,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftStreamType& operator=(ThriftStreamType&&) = default;
   ThriftStreamType& operator=(const ThriftStreamType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   std::unique_ptr<::apache::thrift::metadata::ThriftType> elemType;
@@ -2327,7 +2273,6 @@ class ThriftSinkType final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftSinkType() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2339,7 +2284,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftSinkType& operator=(ThriftSinkType&&) = default;
   ThriftSinkType& operator=(const ThriftSinkType& src);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   std::unique_ptr<::apache::thrift::metadata::ThriftType> elemType;
@@ -3343,7 +3287,6 @@ class ThriftEnum final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnum() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -3357,7 +3300,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnum& operator=(ThriftEnum&&) = default;
 
   ThriftEnum& operator=(const ThriftEnum&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -3392,7 +3334,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -3412,9 +3353,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> elements_ref() const& {
     return {this->elements, __isset.elements};
@@ -3434,9 +3373,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> elements_ref() && {
     return {std::move(this->elements), __isset.elements};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -3456,7 +3393,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -3469,9 +3405,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftEnum_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftEnum_name_struct_setter&& name_) {
     name = std::forward<T_ThriftEnum_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const ::std::map<::std::int32_t, ::std::string>& get_elements() const&;
@@ -3480,9 +3414,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftEnum_elements_struct_setter = ::std::map<::std::int32_t, ::std::string>>
   ::std::map<::std::int32_t, ::std::string>& set_elements(T_ThriftEnum_elements_struct_setter&& elements_) {
     elements = std::forward<T_ThriftEnum_elements_struct_setter>(elements_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.elements = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return elements;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -3491,9 +3423,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftEnum_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftEnum_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftEnum_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -3541,7 +3471,6 @@ class ThriftField final  {
  public:
 
   ThriftField();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -3555,7 +3484,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftField& operator=(ThriftField&&) = default;
 
   ThriftField& operator=(const ThriftField&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~ThriftField();
@@ -3599,7 +3527,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> id_ref() const& {
     return {this->id, __isset.id};
@@ -3619,9 +3546,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> id_ref() && {
     return {std::move(this->id), __isset.id};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftType>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> type_ref() const& {
     return {this->type, __isset.type};
@@ -3641,9 +3566,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> type_ref() && {
     return {std::move(this->type), __isset.type};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -3663,9 +3586,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> is_optional_ref() const& {
     return {this->is_optional, __isset.is_optional};
@@ -3685,9 +3606,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> is_optional_ref() && {
     return {std::move(this->is_optional), __isset.is_optional};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -3707,7 +3626,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t get_id() const {
     return id;
@@ -3715,9 +3633,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_id(::std::int32_t id_) {
     id = id_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.id = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return id;
   }
   const ::apache::thrift::metadata::ThriftType& get_type() const&;
@@ -3726,9 +3642,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftField_type_struct_setter = ::apache::thrift::metadata::ThriftType>
   ::apache::thrift::metadata::ThriftType& set_type(T_ThriftField_type_struct_setter&& type_) {
     type = std::forward<T_ThriftField_type_struct_setter>(type_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.type = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return type;
   }
 
@@ -3743,9 +3657,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftField_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftField_name_struct_setter&& name_) {
     name = std::forward<T_ThriftField_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -3755,9 +3667,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool& set_is_optional(bool is_optional_) {
     is_optional = is_optional_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.is_optional = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return is_optional;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -3766,9 +3676,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftField_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftField_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftField_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -3815,7 +3723,6 @@ class ThriftStruct final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStruct() :
       is_union(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -3830,7 +3737,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStruct& operator=(ThriftStruct&&) = default;
 
   ThriftStruct& operator=(const ThriftStruct&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -3868,7 +3774,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -3888,9 +3793,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftField>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fields_ref() const& {
     return {this->fields, __isset.fields};
@@ -3910,9 +3813,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fields_ref() && {
     return {std::move(this->fields), __isset.fields};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> is_union_ref() const& {
     return {this->is_union, __isset.is_union};
@@ -3932,9 +3833,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> is_union_ref() && {
     return {std::move(this->is_union), __isset.is_union};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -3954,7 +3853,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -3967,9 +3865,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftStruct_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftStruct_name_struct_setter&& name_) {
     name = std::forward<T_ThriftStruct_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftField>& get_fields() const&;
@@ -3978,9 +3874,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftStruct_fields_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftField>>
   ::std::vector<::apache::thrift::metadata::ThriftField>& set_fields(T_ThriftStruct_fields_struct_setter&& fields_) {
     fields = std::forward<T_ThriftStruct_fields_struct_setter>(fields_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fields = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fields;
   }
 
@@ -3990,9 +3884,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool& set_is_union(bool is_union_) {
     is_union = is_union_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.is_union = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return is_union;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -4001,9 +3893,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftStruct_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftStruct_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftStruct_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -4050,7 +3940,6 @@ class ThriftException final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftException() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4064,7 +3953,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftException& operator=(ThriftException&&) = default;
 
   ThriftException& operator=(const ThriftException&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -4099,7 +3987,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -4119,9 +4006,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftField>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fields_ref() const& {
     return {this->fields, __isset.fields};
@@ -4141,9 +4026,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fields_ref() && {
     return {std::move(this->fields), __isset.fields};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -4163,7 +4046,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -4176,9 +4058,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftException_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftException_name_struct_setter&& name_) {
     name = std::forward<T_ThriftException_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftField>& get_fields() const&;
@@ -4187,9 +4067,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftException_fields_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftField>>
   ::std::vector<::apache::thrift::metadata::ThriftField>& set_fields(T_ThriftException_fields_struct_setter&& fields_) {
     fields = std::forward<T_ThriftException_fields_struct_setter>(fields_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fields = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fields;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -4198,9 +4076,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftException_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftException_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftException_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -4248,7 +4124,6 @@ class ThriftFunction final  {
  public:
 
   ThriftFunction();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4262,7 +4137,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftFunction& operator=(ThriftFunction&&) = default;
 
   ThriftFunction& operator=(const ThriftFunction&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~ThriftFunction();
@@ -4309,7 +4183,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -4329,9 +4202,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftType>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> return_type_ref() const& {
     return {this->return_type, __isset.return_type};
@@ -4351,9 +4222,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> return_type_ref() && {
     return {std::move(this->return_type), __isset.return_type};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftField>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> arguments_ref() const& {
     return {this->arguments, __isset.arguments};
@@ -4373,9 +4242,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> arguments_ref() && {
     return {std::move(this->arguments), __isset.arguments};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftField>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exceptions_ref() const& {
     return {this->exceptions, __isset.exceptions};
@@ -4395,9 +4262,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exceptions_ref() && {
     return {std::move(this->exceptions), __isset.exceptions};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> is_oneway_ref() const& {
     return {this->is_oneway, __isset.is_oneway};
@@ -4417,9 +4282,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> is_oneway_ref() && {
     return {std::move(this->is_oneway), __isset.is_oneway};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -4439,7 +4302,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -4452,9 +4314,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftFunction_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftFunction_name_struct_setter&& name_) {
     name = std::forward<T_ThriftFunction_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const ::apache::thrift::metadata::ThriftType& get_return_type() const&;
@@ -4463,9 +4323,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftFunction_return_type_struct_setter = ::apache::thrift::metadata::ThriftType>
   ::apache::thrift::metadata::ThriftType& set_return_type(T_ThriftFunction_return_type_struct_setter&& return_type_) {
     return_type = std::forward<T_ThriftFunction_return_type_struct_setter>(return_type_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.return_type = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return return_type;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftField>& get_arguments() const&;
@@ -4474,9 +4332,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftFunction_arguments_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftField>>
   ::std::vector<::apache::thrift::metadata::ThriftField>& set_arguments(T_ThriftFunction_arguments_struct_setter&& arguments_) {
     arguments = std::forward<T_ThriftFunction_arguments_struct_setter>(arguments_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.arguments = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return arguments;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftField>& get_exceptions() const&;
@@ -4485,9 +4341,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftFunction_exceptions_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftField>>
   ::std::vector<::apache::thrift::metadata::ThriftField>& set_exceptions(T_ThriftFunction_exceptions_struct_setter&& exceptions_) {
     exceptions = std::forward<T_ThriftFunction_exceptions_struct_setter>(exceptions_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exceptions = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exceptions;
   }
 
@@ -4497,9 +4351,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool& set_is_oneway(bool is_oneway_) {
     is_oneway = is_oneway_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.is_oneway = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return is_oneway;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -4508,9 +4360,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftFunction_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftFunction_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftFunction_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -4557,7 +4407,6 @@ class ThriftService final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftService() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4571,7 +4420,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftService& operator=(ThriftService&&) = default;
 
   ThriftService& operator=(const ThriftService&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -4609,7 +4457,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -4629,9 +4476,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftFunction>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> functions_ref() const& {
     return {this->functions, __isset.functions};
@@ -4651,9 +4496,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> functions_ref() && {
     return {std::move(this->functions), __isset.functions};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> parent_ref() const& {
     return {this->parent, __isset.parent};
@@ -4673,9 +4516,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> parent_ref() && {
     return {std::move(this->parent), __isset.parent};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structured_annotations_ref() const& {
     return {this->structured_annotations, __isset.structured_annotations};
@@ -4695,7 +4536,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structured_annotations_ref() && {
     return {std::move(this->structured_annotations), __isset.structured_annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -4708,9 +4548,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftService_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftService_name_struct_setter&& name_) {
     name = std::forward<T_ThriftService_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftFunction>& get_functions() const&;
@@ -4719,9 +4557,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftService_functions_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftFunction>>
   ::std::vector<::apache::thrift::metadata::ThriftFunction>& set_functions(T_ThriftService_functions_struct_setter&& functions_) {
     functions = std::forward<T_ThriftService_functions_struct_setter>(functions_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.functions = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return functions;
   }
 
@@ -4737,9 +4573,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftService_parent_struct_setter = ::std::string>
   ::std::string& set_parent(T_ThriftService_parent_struct_setter&& parent_) {
     parent = std::forward<T_ThriftService_parent_struct_setter>(parent_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.parent = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return parent;
   }
   const ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& get_structured_annotations() const&;
@@ -4748,9 +4582,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftService_structured_annotations_struct_setter = ::std::vector<::apache::thrift::metadata::ThriftConstStruct>>
   ::std::vector<::apache::thrift::metadata::ThriftConstStruct>& set_structured_annotations(T_ThriftService_structured_annotations_struct_setter&& structured_annotations_) {
     structured_annotations = std::forward<T_ThriftService_structured_annotations_struct_setter>(structured_annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structured_annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structured_annotations;
   }
 
@@ -4797,7 +4629,6 @@ class ThriftModuleContext final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftModuleContext() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4811,7 +4642,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftModuleContext& operator=(ThriftModuleContext&&) = default;
 
   ThriftModuleContext& operator=(const ThriftModuleContext&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name;
@@ -4840,7 +4670,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -4860,7 +4689,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -4873,9 +4701,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftModuleContext_name_struct_setter = ::std::string>
   ::std::string& set_name(T_ThriftModuleContext_name_struct_setter&& name_) {
     name = std::forward<T_ThriftModuleContext_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -4922,7 +4748,6 @@ class ThriftServiceContext final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceContext() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4936,7 +4761,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceContext& operator=(ThriftServiceContext&&) = default;
 
   ThriftServiceContext& operator=(const ThriftServiceContext&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::metadata::ThriftService service_info;
@@ -4968,7 +4792,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftService>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> service_info_ref() const& {
     return {this->service_info, __isset.service_info};
@@ -4988,9 +4811,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> service_info_ref() && {
     return {std::move(this->service_info), __isset.service_info};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftModuleContext>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> module_ref() const& {
     return {this->module, __isset.module};
@@ -5010,16 +4831,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> module_ref() && {
     return {std::move(this->module), __isset.module};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::apache::thrift::metadata::ThriftService& get_service_info() const&;
   ::apache::thrift::metadata::ThriftService get_service_info() &&;
 
   template <typename T_ThriftServiceContext_service_info_struct_setter = ::apache::thrift::metadata::ThriftService>
   ::apache::thrift::metadata::ThriftService& set_service_info(T_ThriftServiceContext_service_info_struct_setter&& service_info_) {
     service_info = std::forward<T_ThriftServiceContext_service_info_struct_setter>(service_info_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.service_info = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return service_info;
   }
   const ::apache::thrift::metadata::ThriftModuleContext& get_module() const&;
@@ -5028,9 +4846,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftServiceContext_module_struct_setter = ::apache::thrift::metadata::ThriftModuleContext>
   ::apache::thrift::metadata::ThriftModuleContext& set_module(T_ThriftServiceContext_module_struct_setter&& module_) {
     module = std::forward<T_ThriftServiceContext_module_struct_setter>(module_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.module = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return module;
   }
 
@@ -5077,7 +4893,6 @@ class ThriftMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -5091,7 +4906,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMetadata& operator=(ThriftMetadata&&) = default;
 
   ThriftMetadata& operator=(const ThriftMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum> enums;
@@ -5129,7 +4943,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> enums_ref() const& {
     return {this->enums, __isset.enums};
@@ -5149,9 +4962,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> enums_ref() && {
     return {std::move(this->enums), __isset.enums};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::apache::thrift::metadata::ThriftStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structs_ref() const& {
     return {this->structs, __isset.structs};
@@ -5171,9 +4982,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structs_ref() && {
     return {std::move(this->structs), __isset.structs};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::apache::thrift::metadata::ThriftException>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exceptions_ref() const& {
     return {this->exceptions, __isset.exceptions};
@@ -5193,9 +5002,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> exceptions_ref() && {
     return {std::move(this->exceptions), __isset.exceptions};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::apache::thrift::metadata::ThriftService>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> services_ref() const& {
     return {this->services, __isset.services};
@@ -5215,16 +5022,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> services_ref() && {
     return {std::move(this->services), __isset.services};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum>& get_enums() const&;
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum> get_enums() &&;
 
   template <typename T_ThriftMetadata_enums_struct_setter = ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum>>
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum>& set_enums(T_ThriftMetadata_enums_struct_setter&& enums_) {
     enums = std::forward<T_ThriftMetadata_enums_struct_setter>(enums_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.enums = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return enums;
   }
   const ::std::map<::std::string, ::apache::thrift::metadata::ThriftStruct>& get_structs() const&;
@@ -5233,9 +5037,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftMetadata_structs_struct_setter = ::std::map<::std::string, ::apache::thrift::metadata::ThriftStruct>>
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftStruct>& set_structs(T_ThriftMetadata_structs_struct_setter&& structs_) {
     structs = std::forward<T_ThriftMetadata_structs_struct_setter>(structs_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.structs = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return structs;
   }
   const ::std::map<::std::string, ::apache::thrift::metadata::ThriftException>& get_exceptions() const&;
@@ -5244,9 +5046,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftMetadata_exceptions_struct_setter = ::std::map<::std::string, ::apache::thrift::metadata::ThriftException>>
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftException>& set_exceptions(T_ThriftMetadata_exceptions_struct_setter&& exceptions_) {
     exceptions = std::forward<T_ThriftMetadata_exceptions_struct_setter>(exceptions_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.exceptions = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return exceptions;
   }
   const ::std::map<::std::string, ::apache::thrift::metadata::ThriftService>& get_services() const&;
@@ -5255,9 +5055,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftMetadata_services_struct_setter = ::std::map<::std::string, ::apache::thrift::metadata::ThriftService>>
   ::std::map<::std::string, ::apache::thrift::metadata::ThriftService>& set_services(T_ThriftMetadata_services_struct_setter&& services_) {
     services = std::forward<T_ThriftMetadata_services_struct_setter>(services_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.services = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return services;
   }
 
@@ -5304,7 +5102,6 @@ class ThriftServiceMetadataResponse final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceMetadataResponse() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -5318,7 +5115,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceMetadataResponse& operator=(ThriftServiceMetadataResponse&&) = default;
 
   ThriftServiceMetadataResponse& operator=(const ThriftServiceMetadataResponse&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::metadata::ThriftServiceContext context;
@@ -5350,7 +5146,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftServiceContext>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> context_ref() const& {
     return {this->context, __isset.context};
@@ -5370,9 +5165,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> context_ref() && {
     return {std::move(this->context), __isset.context};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::metadata::ThriftMetadata>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> metadata_ref() const& {
     return {this->metadata, __isset.metadata};
@@ -5392,16 +5185,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> metadata_ref() && {
     return {std::move(this->metadata), __isset.metadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::apache::thrift::metadata::ThriftServiceContext& get_context() const&;
   ::apache::thrift::metadata::ThriftServiceContext get_context() &&;
 
   template <typename T_ThriftServiceMetadataResponse_context_struct_setter = ::apache::thrift::metadata::ThriftServiceContext>
   ::apache::thrift::metadata::ThriftServiceContext& set_context(T_ThriftServiceMetadataResponse_context_struct_setter&& context_) {
     context = std::forward<T_ThriftServiceMetadataResponse_context_struct_setter>(context_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.context = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return context;
   }
   const ::apache::thrift::metadata::ThriftMetadata& get_metadata() const&;
@@ -5410,9 +5200,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ThriftServiceMetadataResponse_metadata_struct_setter = ::apache::thrift::metadata::ThriftMetadata>
   ::apache::thrift::metadata::ThriftMetadata& set_metadata(T_ThriftServiceMetadataResponse_metadata_struct_setter&& metadata_) {
     metadata = std::forward<T_ThriftServiceMetadataResponse_metadata_struct_setter>(metadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.metadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return metadata;
   }
 
@@ -5441,6 +5229,7 @@ uint32_t ThriftServiceMetadataResponse::read(Protocol_* iprot) {
 }
 
 }}} // apache::thrift::metadata
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 namespace apache { namespace thrift {
 

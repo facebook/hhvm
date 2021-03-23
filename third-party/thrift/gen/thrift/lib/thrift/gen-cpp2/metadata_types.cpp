@@ -1904,8 +1904,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftField::ThriftField() :
       id(0),
       is_optional(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ThriftField::~ThriftField() {}
 
@@ -2359,8 +2359,8 @@ namespace apache { namespace thrift { namespace metadata {
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftFunction::ThriftFunction() :
       is_oneway(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ThriftFunction::~ThriftFunction() {}
 

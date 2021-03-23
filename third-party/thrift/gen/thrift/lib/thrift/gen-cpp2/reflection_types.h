@@ -106,13 +106,10 @@ enum class Type {
 
 
 }}} // apache::thrift::reflection
+
 namespace std {
-
-
-template<> struct hash<typename ::apache::thrift::reflection::Type> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::reflection::Type> {};
-template<> struct equal_to<typename ::apache::thrift::reflection::Type> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::reflection::Type> {};
-
-
+template<> struct hash<::apache::thrift::reflection::Type> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::reflection::Type> {};
 } // std
 
 namespace apache { namespace thrift {
@@ -160,6 +157,7 @@ class Schema;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift { namespace reflection {
 class StructField final  {
  private:
@@ -179,7 +177,6 @@ class StructField final  {
  public:
 
   StructField();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -193,7 +190,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   StructField& operator=(StructField&&) = default;
 
   StructField& operator=(const StructField&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~StructField();
@@ -237,7 +233,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> isRequired_ref() const& {
     return {this->isRequired, __isset.isRequired};
@@ -257,9 +252,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> isRequired_ref() && {
     return {std::move(this->isRequired), __isset.isRequired};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> type_ref() const& {
     return {this->type, __isset.type};
@@ -279,9 +272,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> type_ref() && {
     return {std::move(this->type), __isset.type};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -301,9 +292,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> annotations_ref() const& {
     return {this->annotations, __isset.annotations};
@@ -323,9 +312,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> annotations_ref() && {
     return {std::move(this->annotations), __isset.annotations};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> order_ref() const& {
     return {this->order, __isset.order};
@@ -345,7 +332,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> order_ref() && {
     return {std::move(this->order), __isset.order};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool get_isRequired() const {
     return isRequired;
@@ -353,9 +339,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool& set_isRequired(bool isRequired_) {
     isRequired = isRequired_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.isRequired = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return isRequired;
   }
 
@@ -365,9 +349,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_type(::std::int64_t type_) {
     type = type_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.type = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return type;
   }
 
@@ -382,9 +364,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_StructField_name_struct_setter = ::std::string>
   ::std::string& set_name(T_StructField_name_struct_setter&& name_) {
     name = std::forward<T_StructField_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const std::unordered_map<::std::string, ::std::string>* get_annotations() const&;
@@ -394,9 +374,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_StructField_annotations_struct_setter = std::unordered_map<::std::string, ::std::string>>
   std::unordered_map<::std::string, ::std::string>& set_annotations(T_StructField_annotations_struct_setter&& annotations_) {
     annotations = std::forward<T_StructField_annotations_struct_setter>(annotations_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.annotations = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return annotations;
   }
 
@@ -406,9 +384,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int16_t& set_order(::std::int16_t order_) {
     order = order_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.order = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return order;
   }
 
@@ -456,7 +432,6 @@ class DataType final  {
  public:
 
   DataType();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -470,7 +445,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   DataType& operator=(DataType&&) = default;
 
   DataType& operator=(const DataType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~DataType();
@@ -514,7 +488,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -534,9 +507,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> fields_ref() const& {
     return {this->fields, __isset.fields};
@@ -556,9 +527,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> fields_ref() && {
     return {std::move(this->fields), __isset.fields};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> mapKeyType_ref() const& {
     return {this->mapKeyType, __isset.mapKeyType};
@@ -578,9 +547,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> mapKeyType_ref() && {
     return {std::move(this->mapKeyType), __isset.mapKeyType};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> valueType_ref() const& {
     return {this->valueType, __isset.valueType};
@@ -600,9 +567,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> valueType_ref() && {
     return {std::move(this->valueType), __isset.valueType};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<::std::string, ::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> enumValues_ref() const& {
     return {this->enumValues, __isset.enumValues};
@@ -622,7 +587,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> enumValues_ref() && {
     return {std::move(this->enumValues), __isset.enumValues};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string& get_name() const& {
     return name;
@@ -635,9 +599,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_DataType_name_struct_setter = ::std::string>
   ::std::string& set_name(T_DataType_name_struct_setter&& name_) {
     name = std::forward<T_DataType_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
   const std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>* get_fields() const&;
@@ -647,9 +609,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_DataType_fields_struct_setter = std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>>
   std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField>& set_fields(T_DataType_fields_struct_setter&& fields_) {
     fields = std::forward<T_DataType_fields_struct_setter>(fields_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fields = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fields;
   }
 
@@ -664,9 +624,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_mapKeyType(::std::int64_t mapKeyType_) {
     mapKeyType = mapKeyType_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.mapKeyType = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return mapKeyType;
   }
 
@@ -681,9 +639,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_valueType(::std::int64_t valueType_) {
     valueType = valueType_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.valueType = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return valueType;
   }
   const std::unordered_map<::std::string, ::std::int32_t>* get_enumValues() const&;
@@ -693,9 +649,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_DataType_enumValues_struct_setter = std::unordered_map<::std::string, ::std::int32_t>>
   std::unordered_map<::std::string, ::std::int32_t>& set_enumValues(T_DataType_enumValues_struct_setter&& enumValues_) {
     enumValues = std::forward<T_DataType_enumValues_struct_setter>(enumValues_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.enumValues = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return enumValues;
   }
 
@@ -742,7 +696,6 @@ class Schema final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -756,7 +709,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema& operator=(Schema&&) = default;
 
   Schema& operator=(const Schema&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType> dataTypes;
@@ -788,7 +740,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> dataTypes_ref() const& {
     return {this->dataTypes, __isset.dataTypes};
@@ -808,9 +759,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> dataTypes_ref() && {
     return {std::move(this->dataTypes), __isset.dataTypes};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::unordered_map<::std::string, ::std::int64_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> names_ref() const& {
     return {this->names, __isset.names};
@@ -830,16 +779,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> names_ref() && {
     return {std::move(this->names), __isset.names};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>& get_dataTypes() const&;
   std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType> get_dataTypes() &&;
 
   template <typename T_Schema_dataTypes_struct_setter = std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>>
   std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType>& set_dataTypes(T_Schema_dataTypes_struct_setter&& dataTypes_) {
     dataTypes = std::forward<T_Schema_dataTypes_struct_setter>(dataTypes_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.dataTypes = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return dataTypes;
   }
   const std::unordered_map<::std::string, ::std::int64_t>& get_names() const&;
@@ -848,9 +794,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_Schema_names_struct_setter = std::unordered_map<::std::string, ::std::int64_t>>
   std::unordered_map<::std::string, ::std::int64_t>& set_names(T_Schema_names_struct_setter&& names_) {
     names = std::forward<T_Schema_names_struct_setter>(names_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.names = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return names;
   }
 
@@ -879,3 +823,4 @@ uint32_t Schema::read(Protocol_* iprot) {
 }
 
 }}} // apache::thrift::reflection
+THRIFT_IGNORE_ISSET_USE_WARNING_END

@@ -73,8 +73,8 @@ StructField::StructField() :
       isRequired(0),
       type(0),
       order(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 StructField::~StructField() {}
 
@@ -187,8 +187,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType() :
       mapKeyType(0),
       valueType(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 DataType::~DataType() {}
 

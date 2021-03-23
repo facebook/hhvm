@@ -933,8 +933,8 @@ RequestRpcMetadata::RequestRpcMetadata() :
       crc32c(0),
       compression( ::apache::thrift::CompressionAlgorithm::NONE),
       interactionId(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestRpcMetadata::~RequestRpcMetadata() {}
 
@@ -2158,8 +2158,8 @@ ResponseRpcMetadata::ResponseRpcMetadata() :
       load(0),
       crc32c(0),
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
@@ -2368,8 +2368,8 @@ ResponseRpcError::ResponseRpcError() :
       category( ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR),
       code( ::apache::thrift::ResponseRpcErrorCode::UNKNOWN),
       load(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcError::~ResponseRpcError() {}
 
@@ -2715,8 +2715,8 @@ RequestSetupMetadata::RequestSetupMetadata() :
       maxVersion(0),
       dscpToReflect(0),
       markToReflect(0) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestSetupMetadata::~RequestSetupMetadata() {}
 

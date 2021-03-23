@@ -38,11 +38,11 @@ void ThriftMetadataServiceAsyncProcessor::process_getThriftServiceMetadata(apach
         ex, std::move(req), ctx, eb, "getThriftServiceMetadata");
     return;
   }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>>>(std::move(req), std::move(ctxStack), return_getThriftServiceMetadata<ProtocolIn_,ProtocolOut_>, throw_wrapped_getThriftServiceMetadata<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  if (!callback->isRequestActive()) {
+  if (!req->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb);
     return;
   }
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::metadata::ThriftServiceMetadataResponse>>>(std::move(req), std::move(ctxStack), return_getThriftServiceMetadata<ProtocolIn_,ProtocolOut_>, throw_wrapped_getThriftServiceMetadata<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
   iface_->async_tm_getThriftServiceMetadata(std::move(callback));
 }
 

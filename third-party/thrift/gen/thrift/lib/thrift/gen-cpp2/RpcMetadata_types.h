@@ -429,37 +429,22 @@ enum class InterfaceKind {
 
 
 }} // apache::thrift
+
 namespace std {
-
-
-template<> struct hash<typename ::apache::thrift::ProtocolId> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::ProtocolId> {};
-template<> struct equal_to<typename ::apache::thrift::ProtocolId> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::ProtocolId> {};
-
-
-template<> struct hash<typename ::apache::thrift::RpcKind> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::RpcKind> {};
-template<> struct equal_to<typename ::apache::thrift::RpcKind> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::RpcKind> {};
-
-
-template<> struct hash<typename ::apache::thrift::RpcPriority> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::RpcPriority> {};
-template<> struct equal_to<typename ::apache::thrift::RpcPriority> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::RpcPriority> {};
-
-
-template<> struct hash<typename ::apache::thrift::CompressionAlgorithm> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::CompressionAlgorithm> {};
-template<> struct equal_to<typename ::apache::thrift::CompressionAlgorithm> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::CompressionAlgorithm> {};
-
-
-template<> struct hash<typename ::apache::thrift::ResponseRpcErrorCategory> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::ResponseRpcErrorCategory> {};
-template<> struct equal_to<typename ::apache::thrift::ResponseRpcErrorCategory> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::ResponseRpcErrorCategory> {};
-
-
-template<> struct hash<typename ::apache::thrift::ResponseRpcErrorCode> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::ResponseRpcErrorCode> {};
-template<> struct equal_to<typename ::apache::thrift::ResponseRpcErrorCode> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::ResponseRpcErrorCode> {};
-
-
-template<> struct hash<typename ::apache::thrift::InterfaceKind> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::InterfaceKind> {};
-template<> struct equal_to<typename ::apache::thrift::InterfaceKind> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::InterfaceKind> {};
-
-
+template<> struct hash<::apache::thrift::ProtocolId> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::ProtocolId> {};
+template<> struct hash<::apache::thrift::RpcKind> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::RpcKind> {};
+template<> struct hash<::apache::thrift::RpcPriority> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::RpcPriority> {};
+template<> struct hash<::apache::thrift::CompressionAlgorithm> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::CompressionAlgorithm> {};
+template<> struct hash<::apache::thrift::ResponseRpcErrorCategory> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::ResponseRpcErrorCategory> {};
+template<> struct hash<::apache::thrift::ResponseRpcErrorCode> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::ResponseRpcErrorCode> {};
+template<> struct hash<::apache::thrift::InterfaceKind> :
+  ::apache::thrift::detail::enum_hash<::apache::thrift::InterfaceKind> {};
 } // std
 
 namespace apache { namespace thrift {
@@ -672,6 +657,7 @@ typedef ManagedStringViewWithConversions ManagedStringViewField;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift {
 class ZlibCompressionCodecConfig final  {
  private:
@@ -690,7 +676,6 @@ class ZlibCompressionCodecConfig final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ZlibCompressionCodecConfig() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -704,7 +689,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ZlibCompressionCodecConfig& operator=(ZlibCompressionCodecConfig&&) = default;
 
   ZlibCompressionCodecConfig& operator=(const ZlibCompressionCodecConfig&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const ZlibCompressionCodecConfig& rhs) const;
 #ifndef SWIG
@@ -768,7 +752,6 @@ class ZstdCompressionCodecConfig final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ZstdCompressionCodecConfig() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -782,7 +765,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ZstdCompressionCodecConfig& operator=(ZstdCompressionCodecConfig&&) = default;
 
   ZstdCompressionCodecConfig& operator=(const ZstdCompressionCodecConfig&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const ZstdCompressionCodecConfig& rhs) const;
 #ifndef SWIG
@@ -1143,7 +1125,6 @@ class CompressionConfig final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   CompressionConfig() :
       compressionSizeLimit(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -1158,7 +1139,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   CompressionConfig& operator=(CompressionConfig&&) = default;
 
   CompressionConfig& operator=(const CompressionConfig&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::CodecConfig codecConfig;
@@ -1190,7 +1170,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CodecConfig>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> codecConfig_ref() const& {
     return {this->codecConfig, __isset.codecConfig};
@@ -1210,9 +1189,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> codecConfig_ref() && {
     return {std::move(this->codecConfig), __isset.codecConfig};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compressionSizeLimit_ref() const& {
     return {this->compressionSizeLimit, __isset.compressionSizeLimit};
@@ -1232,7 +1209,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compressionSizeLimit_ref() && {
     return {std::move(this->compressionSizeLimit), __isset.compressionSizeLimit};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::apache::thrift::CodecConfig* get_codecConfig() const&;
   ::apache::thrift::CodecConfig* get_codecConfig() &;
   ::apache::thrift::CodecConfig* get_codecConfig() && = delete;
@@ -1240,9 +1216,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_CompressionConfig_codecConfig_struct_setter = ::apache::thrift::CodecConfig>
   ::apache::thrift::CodecConfig& set_codecConfig(T_CompressionConfig_codecConfig_struct_setter&& codecConfig_) {
     codecConfig = std::forward<T_CompressionConfig_codecConfig_struct_setter>(codecConfig_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.codecConfig = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return codecConfig;
   }
 
@@ -1257,9 +1231,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_compressionSizeLimit(::std::int64_t compressionSizeLimit_) {
     compressionSizeLimit = compressionSizeLimit_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compressionSizeLimit = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compressionSizeLimit;
   }
 
@@ -1306,7 +1278,6 @@ class NegotiationParameters final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   NegotiationParameters() :
       compressionAlgos(0),
       useStopTLS(0) {}
@@ -1322,7 +1293,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   NegotiationParameters& operator=(NegotiationParameters&&) = default;
 
   NegotiationParameters& operator=(const NegotiationParameters&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   std::uint64_t compressionAlgos;
@@ -1354,7 +1324,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::uint64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compressionAlgos_ref() const& {
     return {this->compressionAlgos, __isset.compressionAlgos};
@@ -1374,9 +1343,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compressionAlgos_ref() && {
     return {std::move(this->compressionAlgos), __isset.compressionAlgos};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> useStopTLS_ref() const& {
     return {this->useStopTLS, __isset.useStopTLS};
@@ -1396,7 +1363,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> useStopTLS_ref() && {
     return {std::move(this->useStopTLS), __isset.useStopTLS};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const std::uint64_t* get_compressionAlgos() const& {
     return compressionAlgos_ref() ? std::addressof(compressionAlgos) : nullptr;
@@ -1409,9 +1375,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   std::uint64_t& set_compressionAlgos(std::uint64_t compressionAlgos_) {
     compressionAlgos = compressionAlgos_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compressionAlgos = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compressionAlgos;
   }
 
@@ -1426,9 +1390,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   bool& set_useStopTLS(bool useStopTLS_) {
     useStopTLS = useStopTLS_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.useStopTLS = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return useStopTLS;
   }
 
@@ -1475,7 +1437,6 @@ class InteractionCreate final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionCreate() :
       interactionId(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -1490,7 +1451,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionCreate& operator=(InteractionCreate&&) = default;
 
   InteractionCreate& operator=(const InteractionCreate&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::int64_t interactionId;
@@ -1522,7 +1482,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> interactionId_ref() const& {
     return {this->interactionId, __isset.interactionId};
@@ -1542,9 +1501,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> interactionId_ref() && {
     return {std::move(this->interactionId), __isset.interactionId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ManagedStringViewField>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> interactionName_ref() const& {
     return {this->interactionName, __isset.interactionName};
@@ -1564,7 +1521,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> interactionName_ref() && {
     return {std::move(this->interactionName), __isset.interactionName};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t get_interactionId() const {
     return interactionId;
@@ -1572,9 +1528,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_interactionId(::std::int64_t interactionId_) {
     interactionId = interactionId_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interactionId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interactionId;
   }
 
@@ -1589,9 +1543,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_InteractionCreate_interactionName_struct_setter = ::apache::thrift::ManagedStringViewField>
   ::apache::thrift::ManagedStringViewField& set_interactionName(T_InteractionCreate_interactionName_struct_setter&& interactionName_) {
     interactionName = std::forward<T_InteractionCreate_interactionName_struct_setter>(interactionName_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interactionName = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interactionName;
   }
 
@@ -1638,7 +1590,6 @@ class InteractionTerminate final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionTerminate() :
       interactionId(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -1653,7 +1604,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionTerminate& operator=(InteractionTerminate&&) = default;
 
   InteractionTerminate& operator=(const InteractionTerminate&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::int64_t interactionId;
@@ -1682,7 +1632,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> interactionId_ref() const& {
     return {this->interactionId, __isset.interactionId};
@@ -1702,7 +1651,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> interactionId_ref() && {
     return {std::move(this->interactionId), __isset.interactionId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t get_interactionId() const {
     return interactionId;
@@ -1710,9 +1658,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_interactionId(::std::int64_t interactionId_) {
     interactionId = interactionId_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interactionId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interactionId;
   }
 
@@ -1760,7 +1706,6 @@ class RequestRpcMetadata final  {
  public:
 
   RequestRpcMetadata();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1774,7 +1719,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   RequestRpcMetadata& operator=(RequestRpcMetadata&&) = default;
 
   RequestRpcMetadata& operator=(const RequestRpcMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~RequestRpcMetadata();
@@ -1851,7 +1795,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ProtocolId>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> protocol_ref() const& {
     return {this->protocol, __isset.protocol};
@@ -1871,9 +1814,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> protocol_ref() && {
     return {std::move(this->protocol), __isset.protocol};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ManagedStringViewField>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> name_ref() const& {
     return {this->name, __isset.name};
@@ -1893,9 +1834,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> name_ref() && {
     return {std::move(this->name), __isset.name};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::RpcKind>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> kind_ref() const& {
     return {this->kind, __isset.kind};
@@ -1915,9 +1854,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> kind_ref() && {
     return {std::move(this->kind), __isset.kind};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> seqId_ref() const& {
     return {this->seqId, __isset.seqId};
@@ -1937,9 +1874,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> seqId_ref() && {
     return {std::move(this->seqId), __isset.seqId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> clientTimeoutMs_ref() const& {
     return {this->clientTimeoutMs, __isset.clientTimeoutMs};
@@ -1959,9 +1894,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> clientTimeoutMs_ref() && {
     return {std::move(this->clientTimeoutMs), __isset.clientTimeoutMs};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> queueTimeoutMs_ref() const& {
     return {this->queueTimeoutMs, __isset.queueTimeoutMs};
@@ -1981,9 +1914,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> queueTimeoutMs_ref() && {
     return {std::move(this->queueTimeoutMs), __isset.queueTimeoutMs};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::RpcPriority>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> priority_ref() const& {
     return {this->priority, __isset.priority};
@@ -2003,9 +1934,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> priority_ref() && {
     return {std::move(this->priority), __isset.priority};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> otherMetadata_ref() const& {
     return {this->otherMetadata, __isset.otherMetadata};
@@ -2025,9 +1954,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> otherMetadata_ref() && {
     return {std::move(this->otherMetadata), __isset.otherMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::uint32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> crc32c_ref() const& {
     return {this->crc32c, __isset.crc32c};
@@ -2047,9 +1974,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> crc32c_ref() && {
     return {std::move(this->crc32c), __isset.crc32c};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> loadMetric_ref() const& {
     return {this->loadMetric, __isset.loadMetric};
@@ -2069,9 +1994,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> loadMetric_ref() && {
     return {std::move(this->loadMetric), __isset.loadMetric};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CompressionAlgorithm>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compression_ref() const& {
     return {this->compression, __isset.compression};
@@ -2091,9 +2014,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compression_ref() && {
     return {std::move(this->compression), __isset.compression};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CompressionConfig>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compressionConfig_ref() const& {
     return {this->compressionConfig, __isset.compressionConfig};
@@ -2113,9 +2034,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compressionConfig_ref() && {
     return {std::move(this->compressionConfig), __isset.compressionConfig};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> interactionId_ref() const& {
     return {this->interactionId, __isset.interactionId};
@@ -2135,9 +2054,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> interactionId_ref() && {
     return {std::move(this->interactionId), __isset.interactionId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::InteractionCreate>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> interactionCreate_ref() const& {
     return {this->interactionCreate, __isset.interactionCreate};
@@ -2157,9 +2074,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> interactionCreate_ref() && {
     return {std::move(this->interactionCreate), __isset.interactionCreate};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> clientId_ref() const& {
     return {this->clientId, __isset.clientId};
@@ -2179,9 +2094,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> clientId_ref() && {
     return {std::move(this->clientId), __isset.clientId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> serviceTraceMeta_ref() const& {
     return {this->serviceTraceMeta, __isset.serviceTraceMeta};
@@ -2201,7 +2114,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> serviceTraceMeta_ref() && {
     return {std::move(this->serviceTraceMeta), __isset.serviceTraceMeta};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::apache::thrift::ProtocolId* get_protocol() const& {
     return protocol_ref() ? std::addressof(protocol) : nullptr;
@@ -2214,9 +2126,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::ProtocolId& set_protocol(::apache::thrift::ProtocolId protocol_) {
     protocol = protocol_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.protocol = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return protocol;
   }
 
@@ -2232,9 +2142,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_name_struct_setter = ::apache::thrift::ManagedStringViewField>
   ::apache::thrift::ManagedStringViewField& set_name(T_RequestRpcMetadata_name_struct_setter&& name_) {
     name = std::forward<T_RequestRpcMetadata_name_struct_setter>(name_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
@@ -2249,9 +2157,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::RpcKind& set_kind(::apache::thrift::RpcKind kind_) {
     kind = kind_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.kind = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return kind;
   }
 
@@ -2266,9 +2172,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_seqId(::std::int32_t seqId_) {
     seqId = seqId_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.seqId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return seqId;
   }
 
@@ -2283,9 +2187,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_clientTimeoutMs(::std::int32_t clientTimeoutMs_) {
     clientTimeoutMs = clientTimeoutMs_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.clientTimeoutMs = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return clientTimeoutMs;
   }
 
@@ -2300,9 +2202,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_queueTimeoutMs(::std::int32_t queueTimeoutMs_) {
     queueTimeoutMs = queueTimeoutMs_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.queueTimeoutMs = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return queueTimeoutMs;
   }
 
@@ -2317,9 +2217,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::RpcPriority& set_priority(::apache::thrift::RpcPriority priority_) {
     priority = priority_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.priority = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return priority;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -2329,9 +2227,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_RequestRpcMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_RequestRpcMetadata_otherMetadata_struct_setter>(otherMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -2346,9 +2242,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   std::uint32_t& set_crc32c(std::uint32_t crc32c_) {
     crc32c = crc32c_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.crc32c = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return crc32c;
   }
 
@@ -2364,9 +2258,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_loadMetric_struct_setter = ::std::string>
   ::std::string& set_loadMetric(T_RequestRpcMetadata_loadMetric_struct_setter&& loadMetric_) {
     loadMetric = std::forward<T_RequestRpcMetadata_loadMetric_struct_setter>(loadMetric_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.loadMetric = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return loadMetric;
   }
 
@@ -2381,9 +2273,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::CompressionAlgorithm& set_compression(::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
   const ::apache::thrift::CompressionConfig* get_compressionConfig() const&;
@@ -2393,9 +2283,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_compressionConfig_struct_setter = ::apache::thrift::CompressionConfig>
   ::apache::thrift::CompressionConfig& set_compressionConfig(T_RequestRpcMetadata_compressionConfig_struct_setter&& compressionConfig_) {
     compressionConfig = std::forward<T_RequestRpcMetadata_compressionConfig_struct_setter>(compressionConfig_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compressionConfig = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compressionConfig;
   }
 
@@ -2410,9 +2298,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_interactionId(::std::int64_t interactionId_) {
     interactionId = interactionId_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interactionId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interactionId;
   }
   const ::apache::thrift::InteractionCreate* get_interactionCreate() const&;
@@ -2422,9 +2308,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_interactionCreate_struct_setter = ::apache::thrift::InteractionCreate>
   ::apache::thrift::InteractionCreate& set_interactionCreate(T_RequestRpcMetadata_interactionCreate_struct_setter&& interactionCreate_) {
     interactionCreate = std::forward<T_RequestRpcMetadata_interactionCreate_struct_setter>(interactionCreate_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interactionCreate = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interactionCreate;
   }
 
@@ -2440,9 +2324,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_clientId_struct_setter = ::std::string>
   ::std::string& set_clientId(T_RequestRpcMetadata_clientId_struct_setter&& clientId_) {
     clientId = std::forward<T_RequestRpcMetadata_clientId_struct_setter>(clientId_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.clientId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return clientId;
   }
 
@@ -2458,9 +2340,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestRpcMetadata_serviceTraceMeta_struct_setter = ::std::string>
   ::std::string& set_serviceTraceMeta(T_RequestRpcMetadata_serviceTraceMeta_struct_setter&& serviceTraceMeta_) {
     serviceTraceMeta = std::forward<T_RequestRpcMetadata_serviceTraceMeta_struct_setter>(serviceTraceMeta_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.serviceTraceMeta = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return serviceTraceMeta;
   }
 
@@ -2507,7 +2387,6 @@ class PayloadResponseMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadResponseMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2521,7 +2400,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadResponseMetadata& operator=(PayloadResponseMetadata&&) = default;
 
   PayloadResponseMetadata& operator=(const PayloadResponseMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadResponseMetadata& rhs) const;
 #ifndef SWIG
@@ -2585,7 +2463,6 @@ class PayloadDeclaredExceptionMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadDeclaredExceptionMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2599,7 +2476,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadDeclaredExceptionMetadata& operator=(PayloadDeclaredExceptionMetadata&&) = default;
 
   PayloadDeclaredExceptionMetadata& operator=(const PayloadDeclaredExceptionMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadDeclaredExceptionMetadata& rhs) const;
 #ifndef SWIG
@@ -2663,7 +2539,6 @@ class PayloadProxyExceptionMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadProxyExceptionMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2677,7 +2552,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadProxyExceptionMetadata& operator=(PayloadProxyExceptionMetadata&&) = default;
 
   PayloadProxyExceptionMetadata& operator=(const PayloadProxyExceptionMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadProxyExceptionMetadata& rhs) const;
 #ifndef SWIG
@@ -2741,7 +2615,6 @@ class PayloadProxiedExceptionMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadProxiedExceptionMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2755,7 +2628,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadProxiedExceptionMetadata& operator=(PayloadProxiedExceptionMetadata&&) = default;
 
   PayloadProxiedExceptionMetadata& operator=(const PayloadProxiedExceptionMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadProxiedExceptionMetadata& rhs) const;
 #ifndef SWIG
@@ -2819,7 +2691,6 @@ class PayloadAppClientExceptionMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadAppClientExceptionMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2833,7 +2704,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadAppClientExceptionMetadata& operator=(PayloadAppClientExceptionMetadata&&) = default;
 
   PayloadAppClientExceptionMetadata& operator=(const PayloadAppClientExceptionMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadAppClientExceptionMetadata& rhs) const;
 #ifndef SWIG
@@ -2897,7 +2767,6 @@ class PayloadAppServerExceptionMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadAppServerExceptionMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2911,7 +2780,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadAppServerExceptionMetadata& operator=(PayloadAppServerExceptionMetadata&&) = default;
 
   PayloadAppServerExceptionMetadata& operator=(const PayloadAppServerExceptionMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const PayloadAppServerExceptionMetadata& rhs) const;
 #ifndef SWIG
@@ -3503,7 +3371,6 @@ class PayloadExceptionMetadataBase final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadExceptionMetadataBase() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -3517,7 +3384,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   PayloadExceptionMetadataBase& operator=(PayloadExceptionMetadataBase&&) = default;
 
   PayloadExceptionMetadataBase& operator=(const PayloadExceptionMetadataBase&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string name_utf8;
@@ -3552,7 +3418,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> name_utf8_ref() const& {
     return {this->name_utf8, __isset.name_utf8};
@@ -3572,9 +3437,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> name_utf8_ref() && {
     return {std::move(this->name_utf8), __isset.name_utf8};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> what_utf8_ref() const& {
     return {this->what_utf8, __isset.what_utf8};
@@ -3594,9 +3457,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> what_utf8_ref() && {
     return {std::move(this->what_utf8), __isset.what_utf8};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::PayloadExceptionMetadata>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> metadata_ref() const& {
     return {this->metadata, __isset.metadata};
@@ -3616,7 +3477,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> metadata_ref() && {
     return {std::move(this->metadata), __isset.metadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string* get_name_utf8() const& {
     return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
@@ -3630,9 +3490,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_PayloadExceptionMetadataBase_name_utf8_struct_setter = ::std::string>
   ::std::string& set_name_utf8(T_PayloadExceptionMetadataBase_name_utf8_struct_setter&& name_utf8_) {
     name_utf8 = std::forward<T_PayloadExceptionMetadataBase_name_utf8_struct_setter>(name_utf8_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name_utf8 = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name_utf8;
   }
 
@@ -3648,9 +3506,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_PayloadExceptionMetadataBase_what_utf8_struct_setter = ::std::string>
   ::std::string& set_what_utf8(T_PayloadExceptionMetadataBase_what_utf8_struct_setter&& what_utf8_) {
     what_utf8 = std::forward<T_PayloadExceptionMetadataBase_what_utf8_struct_setter>(what_utf8_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.what_utf8 = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return what_utf8;
   }
   const ::apache::thrift::PayloadExceptionMetadata* get_metadata() const&;
@@ -3660,9 +3516,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_PayloadExceptionMetadataBase_metadata_struct_setter = ::apache::thrift::PayloadExceptionMetadata>
   ::apache::thrift::PayloadExceptionMetadata& set_metadata(T_PayloadExceptionMetadataBase_metadata_struct_setter&& metadata_) {
     metadata = std::forward<T_PayloadExceptionMetadataBase_metadata_struct_setter>(metadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.metadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return metadata;
   }
 
@@ -4006,7 +3860,6 @@ class ProxiedPayloadMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ProxiedPayloadMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4020,7 +3873,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ProxiedPayloadMetadata& operator=(ProxiedPayloadMetadata&&) = default;
 
   ProxiedPayloadMetadata& operator=(const ProxiedPayloadMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const ProxiedPayloadMetadata& rhs) const;
 #ifndef SWIG
@@ -4085,7 +3937,6 @@ class ResponseRpcMetadata final  {
  public:
 
   ResponseRpcMetadata();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4099,7 +3950,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ResponseRpcMetadata& operator=(ResponseRpcMetadata&&) = default;
 
   ResponseRpcMetadata& operator=(const ResponseRpcMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~ResponseRpcMetadata();
@@ -4152,7 +4002,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ProtocolId>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> protocol_ref() const& {
     return {this->protocol, __isset.protocol};
@@ -4172,9 +4021,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> protocol_ref() && {
     return {std::move(this->protocol), __isset.protocol};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> seqId_ref() const& {
     return {this->seqId, __isset.seqId};
@@ -4194,9 +4041,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> seqId_ref() && {
     return {std::move(this->seqId), __isset.seqId};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> otherMetadata_ref() const& {
     return {this->otherMetadata, __isset.otherMetadata};
@@ -4216,9 +4061,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> otherMetadata_ref() && {
     return {std::move(this->otherMetadata), __isset.otherMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> load_ref() const& {
     return {this->load, __isset.load};
@@ -4238,9 +4081,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> load_ref() && {
     return {std::move(this->load), __isset.load};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = std::uint32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> crc32c_ref() const& {
     return {this->crc32c, __isset.crc32c};
@@ -4260,9 +4101,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> crc32c_ref() && {
     return {std::move(this->crc32c), __isset.crc32c};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CompressionAlgorithm>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compression_ref() const& {
     return {this->compression, __isset.compression};
@@ -4282,9 +4121,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compression_ref() && {
     return {std::move(this->compression), __isset.compression};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::PayloadMetadata>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> payloadMetadata_ref() const& {
     return {this->payloadMetadata, __isset.payloadMetadata};
@@ -4304,9 +4141,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> payloadMetadata_ref() && {
     return {std::move(this->payloadMetadata), __isset.payloadMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ProxiedPayloadMetadata>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> proxiedPayloadMetadata_ref() const& {
     return {this->proxiedPayloadMetadata, __isset.proxiedPayloadMetadata};
@@ -4326,7 +4161,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> proxiedPayloadMetadata_ref() && {
     return {std::move(this->proxiedPayloadMetadata), __isset.proxiedPayloadMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::apache::thrift::ProtocolId* get_protocol() const& {
     return protocol_ref() ? std::addressof(protocol) : nullptr;
@@ -4339,9 +4173,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::ProtocolId& set_protocol(::apache::thrift::ProtocolId protocol_) {
     protocol = protocol_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.protocol = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return protocol;
   }
 
@@ -4356,9 +4188,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_seqId(::std::int32_t seqId_) {
     seqId = seqId_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.seqId = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return seqId;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -4368,9 +4198,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ResponseRpcMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_ResponseRpcMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_ResponseRpcMetadata_otherMetadata_struct_setter>(otherMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -4385,9 +4213,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_load(::std::int64_t load_) {
     load = load_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.load = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return load;
   }
 
@@ -4402,9 +4228,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   std::uint32_t& set_crc32c(std::uint32_t crc32c_) {
     crc32c = crc32c_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.crc32c = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return crc32c;
   }
 
@@ -4419,9 +4243,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::CompressionAlgorithm& set_compression(::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
   const ::apache::thrift::PayloadMetadata* get_payloadMetadata() const&;
@@ -4431,9 +4253,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ResponseRpcMetadata_payloadMetadata_struct_setter = ::apache::thrift::PayloadMetadata>
   ::apache::thrift::PayloadMetadata& set_payloadMetadata(T_ResponseRpcMetadata_payloadMetadata_struct_setter&& payloadMetadata_) {
     payloadMetadata = std::forward<T_ResponseRpcMetadata_payloadMetadata_struct_setter>(payloadMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.payloadMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return payloadMetadata;
   }
   const ::apache::thrift::ProxiedPayloadMetadata* get_proxiedPayloadMetadata() const&;
@@ -4443,9 +4263,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ResponseRpcMetadata_proxiedPayloadMetadata_struct_setter = ::apache::thrift::ProxiedPayloadMetadata>
   ::apache::thrift::ProxiedPayloadMetadata& set_proxiedPayloadMetadata(T_ResponseRpcMetadata_proxiedPayloadMetadata_struct_setter&& proxiedPayloadMetadata_) {
     proxiedPayloadMetadata = std::forward<T_ResponseRpcMetadata_proxiedPayloadMetadata_struct_setter>(proxiedPayloadMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.proxiedPayloadMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return proxiedPayloadMetadata;
   }
 
@@ -4493,7 +4311,6 @@ class ResponseRpcError final  {
  public:
 
   ResponseRpcError();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4507,7 +4324,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ResponseRpcError& operator=(ResponseRpcError&&) = default;
 
   ResponseRpcError& operator=(const ResponseRpcError&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~ResponseRpcError();
@@ -4551,7 +4367,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> name_utf8_ref() const& {
     return {this->name_utf8, __isset.name_utf8};
@@ -4571,9 +4386,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> name_utf8_ref() && {
     return {std::move(this->name_utf8), __isset.name_utf8};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> what_utf8_ref() const& {
     return {this->what_utf8, __isset.what_utf8};
@@ -4593,9 +4406,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> what_utf8_ref() && {
     return {std::move(this->what_utf8), __isset.what_utf8};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ResponseRpcErrorCategory>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> category_ref() const& {
     return {this->category, __isset.category};
@@ -4615,9 +4426,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> category_ref() && {
     return {std::move(this->category), __isset.category};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ResponseRpcErrorCode>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> code_ref() const& {
     return {this->code, __isset.code};
@@ -4637,9 +4446,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> code_ref() && {
     return {std::move(this->code), __isset.code};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> load_ref() const& {
     return {this->load, __isset.load};
@@ -4659,7 +4466,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> load_ref() && {
     return {std::move(this->load), __isset.load};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string* get_name_utf8() const& {
     return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
@@ -4673,9 +4479,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ResponseRpcError_name_utf8_struct_setter = ::std::string>
   ::std::string& set_name_utf8(T_ResponseRpcError_name_utf8_struct_setter&& name_utf8_) {
     name_utf8 = std::forward<T_ResponseRpcError_name_utf8_struct_setter>(name_utf8_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name_utf8 = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name_utf8;
   }
 
@@ -4691,9 +4495,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ResponseRpcError_what_utf8_struct_setter = ::std::string>
   ::std::string& set_what_utf8(T_ResponseRpcError_what_utf8_struct_setter&& what_utf8_) {
     what_utf8 = std::forward<T_ResponseRpcError_what_utf8_struct_setter>(what_utf8_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.what_utf8 = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return what_utf8;
   }
 
@@ -4708,9 +4510,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::ResponseRpcErrorCategory& set_category(::apache::thrift::ResponseRpcErrorCategory category_) {
     category = category_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.category = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return category;
   }
 
@@ -4725,9 +4525,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::ResponseRpcErrorCode& set_code(::apache::thrift::ResponseRpcErrorCode code_) {
     code = code_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.code = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return code;
   }
 
@@ -4742,9 +4540,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int64_t& set_load(::std::int64_t load_) {
     load = load_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.load = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return load;
   }
 
@@ -4791,7 +4587,6 @@ class StreamPayloadMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   StreamPayloadMetadata() :
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
@@ -4806,7 +4601,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   StreamPayloadMetadata& operator=(StreamPayloadMetadata&&) = default;
 
   StreamPayloadMetadata& operator=(const StreamPayloadMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::CompressionAlgorithm compression;
@@ -4838,7 +4632,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CompressionAlgorithm>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compression_ref() const& {
     return {this->compression, __isset.compression};
@@ -4858,9 +4651,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compression_ref() && {
     return {std::move(this->compression), __isset.compression};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> otherMetadata_ref() const& {
     return {this->otherMetadata, __isset.otherMetadata};
@@ -4880,7 +4671,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> otherMetadata_ref() && {
     return {std::move(this->otherMetadata), __isset.otherMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::apache::thrift::CompressionAlgorithm* get_compression() const& {
     return compression_ref() ? std::addressof(compression) : nullptr;
@@ -4893,9 +4683,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::CompressionAlgorithm& set_compression(::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -4905,9 +4693,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_StreamPayloadMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_StreamPayloadMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_StreamPayloadMetadata_otherMetadata_struct_setter>(otherMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -4954,7 +4740,6 @@ class ClientMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ClientMetadata() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -4968,7 +4753,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ClientMetadata& operator=(ClientMetadata&&) = default;
 
   ClientMetadata& operator=(const ClientMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::string agent;
@@ -5003,7 +4787,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> agent_ref() const& {
     return {this->agent, __isset.agent};
@@ -5023,9 +4806,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> agent_ref() && {
     return {std::move(this->agent), __isset.agent};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> hostname_ref() const& {
     return {this->hostname, __isset.hostname};
@@ -5045,9 +4826,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> hostname_ref() && {
     return {std::move(this->hostname), __isset.hostname};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> otherMetadata_ref() const& {
     return {this->otherMetadata, __isset.otherMetadata};
@@ -5067,7 +4846,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> otherMetadata_ref() && {
     return {std::move(this->otherMetadata), __isset.otherMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::string* get_agent() const& {
     return agent_ref() ? std::addressof(agent) : nullptr;
@@ -5081,9 +4859,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ClientMetadata_agent_struct_setter = ::std::string>
   ::std::string& set_agent(T_ClientMetadata_agent_struct_setter&& agent_) {
     agent = std::forward<T_ClientMetadata_agent_struct_setter>(agent_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.agent = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return agent;
   }
 
@@ -5099,9 +4875,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ClientMetadata_hostname_struct_setter = ::std::string>
   ::std::string& set_hostname(T_ClientMetadata_hostname_struct_setter&& hostname_) {
     hostname = std::forward<T_ClientMetadata_hostname_struct_setter>(hostname_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.hostname = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return hostname;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -5111,9 +4885,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_ClientMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_ClientMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_ClientMetadata_otherMetadata_struct_setter>(otherMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -5161,7 +4933,6 @@ class RequestSetupMetadata final  {
  public:
 
   RequestSetupMetadata();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -5175,7 +4946,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   RequestSetupMetadata& operator=(RequestSetupMetadata&&) = default;
 
   RequestSetupMetadata& operator=(const RequestSetupMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~RequestSetupMetadata();
@@ -5225,7 +4995,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> opaque_ref() const& {
     return {this->opaque, __isset.opaque};
@@ -5245,9 +5014,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> opaque_ref() && {
     return {std::move(this->opaque), __isset.opaque};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::InterfaceKind>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> interfaceKind_ref() const& {
     return {this->interfaceKind, __isset.interfaceKind};
@@ -5267,9 +5034,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> interfaceKind_ref() && {
     return {std::move(this->interfaceKind), __isset.interfaceKind};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> minVersion_ref() const& {
     return {this->minVersion, __isset.minVersion};
@@ -5289,9 +5054,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> minVersion_ref() && {
     return {std::move(this->minVersion), __isset.minVersion};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> maxVersion_ref() const& {
     return {this->maxVersion, __isset.maxVersion};
@@ -5311,9 +5074,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> maxVersion_ref() && {
     return {std::move(this->maxVersion), __isset.maxVersion};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> dscpToReflect_ref() const& {
     return {this->dscpToReflect, __isset.dscpToReflect};
@@ -5333,9 +5094,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> dscpToReflect_ref() && {
     return {std::move(this->dscpToReflect), __isset.dscpToReflect};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> markToReflect_ref() const& {
     return {this->markToReflect, __isset.markToReflect};
@@ -5355,9 +5114,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> markToReflect_ref() && {
     return {std::move(this->markToReflect), __isset.markToReflect};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::ClientMetadata>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> clientMetadata_ref() const& {
     return {this->clientMetadata, __isset.clientMetadata};
@@ -5377,7 +5134,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> clientMetadata_ref() && {
     return {std::move(this->clientMetadata), __isset.clientMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() const&;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() &;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() && = delete;
@@ -5385,9 +5141,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestSetupMetadata_opaque_struct_setter = apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>& set_opaque(T_RequestSetupMetadata_opaque_struct_setter&& opaque_) {
     opaque = std::forward<T_RequestSetupMetadata_opaque_struct_setter>(opaque_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.opaque = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return opaque;
   }
 
@@ -5402,9 +5156,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::InterfaceKind& set_interfaceKind(::apache::thrift::InterfaceKind interfaceKind_) {
     interfaceKind = interfaceKind_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interfaceKind = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interfaceKind;
   }
 
@@ -5419,9 +5171,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_minVersion(::std::int32_t minVersion_) {
     minVersion = minVersion_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.minVersion = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return minVersion;
   }
 
@@ -5436,9 +5186,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_maxVersion(::std::int32_t maxVersion_) {
     maxVersion = maxVersion_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.maxVersion = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return maxVersion;
   }
 
@@ -5453,9 +5201,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_dscpToReflect(::std::int32_t dscpToReflect_) {
     dscpToReflect = dscpToReflect_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.dscpToReflect = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return dscpToReflect;
   }
 
@@ -5470,9 +5216,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_markToReflect(::std::int32_t markToReflect_) {
     markToReflect = markToReflect_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.markToReflect = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return markToReflect;
   }
   const ::apache::thrift::ClientMetadata* get_clientMetadata() const&;
@@ -5482,9 +5226,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_RequestSetupMetadata_clientMetadata_struct_setter = ::apache::thrift::ClientMetadata>
   ::apache::thrift::ClientMetadata& set_clientMetadata(T_RequestSetupMetadata_clientMetadata_struct_setter&& clientMetadata_) {
     clientMetadata = std::forward<T_RequestSetupMetadata_clientMetadata_struct_setter>(clientMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.clientMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return clientMetadata;
   }
 
@@ -5531,7 +5273,6 @@ class SetupResponse final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   SetupResponse() :
       version(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -5546,7 +5287,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   SetupResponse& operator=(SetupResponse&&) = default;
 
   SetupResponse& operator=(const SetupResponse&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::int32_t version;
@@ -5575,7 +5315,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> version_ref() const& {
     return {this->version, __isset.version};
@@ -5595,7 +5334,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> version_ref() && {
     return {std::move(this->version), __isset.version};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::std::int32_t* get_version() const& {
     return version_ref() ? std::addressof(version) : nullptr;
@@ -5608,9 +5346,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::std::int32_t& set_version(::std::int32_t version_) {
     version = version_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.version = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return version;
   }
 
@@ -5877,7 +5613,6 @@ class HeadersPayloadContent final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadContent() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -5891,7 +5626,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadContent& operator=(HeadersPayloadContent&&) = default;
 
   HeadersPayloadContent& operator=(const HeadersPayloadContent&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::map<::std::string, ::std::string> otherMetadata;
@@ -5920,7 +5654,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> otherMetadata_ref() const& {
     return {this->otherMetadata, __isset.otherMetadata};
@@ -5940,7 +5673,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> otherMetadata_ref() && {
     return {std::move(this->otherMetadata), __isset.otherMetadata};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
   ::std::map<::std::string, ::std::string>* get_otherMetadata() &;
   ::std::map<::std::string, ::std::string>* get_otherMetadata() && = delete;
@@ -5948,9 +5680,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   template <typename T_HeadersPayloadContent_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_HeadersPayloadContent_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_HeadersPayloadContent_otherMetadata_struct_setter>(otherMetadata_);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -5997,7 +5727,6 @@ class HeadersPayloadMetadata final  {
 
  public:
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadMetadata() :
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
@@ -6012,7 +5741,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadMetadata& operator=(HeadersPayloadMetadata&&) = default;
 
   HeadersPayloadMetadata& operator=(const HeadersPayloadMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::apache::thrift::CompressionAlgorithm compression;
@@ -6041,7 +5769,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 #endif
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::apache::thrift::CompressionAlgorithm>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> compression_ref() const& {
     return {this->compression, __isset.compression};
@@ -6061,7 +5788,6 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> compression_ref() && {
     return {std::move(this->compression), __isset.compression};
   }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const ::apache::thrift::CompressionAlgorithm* get_compression() const& {
     return compression_ref() ? std::addressof(compression) : nullptr;
@@ -6074,9 +5800,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ::apache::thrift::CompressionAlgorithm& set_compression(::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
 
@@ -6105,6 +5829,7 @@ uint32_t HeadersPayloadMetadata::read(Protocol_* iprot) {
 }
 
 }} // apache::thrift
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 namespace apache { namespace thrift {
 

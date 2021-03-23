@@ -181,7 +181,7 @@ class SplFileObject extends SplFileInfo
         $enclosure,
         $escape,
       );
-    } while($this->getFlags() & (self::SKIP_EMPTY | self::DROP_NEW_LINE) &&
+    } while((int)$this->getFlags() & (self::SKIP_EMPTY | self::DROP_NEW_LINE) &&
             $ret !== false && $ret[0] === null);
     return $ret !== false
       ? varray($ret)
@@ -563,7 +563,7 @@ class SplFileObject extends SplFileInfo
    */
   public function current() {
     if ($this->currentLine === false) {
-      if (($this->flags & SplFileObject::READ_CSV) == SplFileObject::READ_CSV) {
+      if (((int)$this->flags & SplFileObject::READ_CSV) == SplFileObject::READ_CSV) {
         $this->currentLine = $this->fgetcsv(
           $this->delimiter,
           $this->enclosure,
@@ -617,7 +617,7 @@ class SplFileObject extends SplFileInfo
     rewind($this->rsrc);
     $this->currentLineNum = 0;
     $this->currentLine = false;
-    if ($this->flags & self::READ_AHEAD) {
+    if ((int)$this->flags & self::READ_AHEAD) {
       $this->current();
     }
   }
@@ -658,7 +658,7 @@ class SplFileObject extends SplFileInfo
    * @return     mixed   Returns TRUE if not reached EOF, FALSE otherwise.
    */
   public function valid() {
-    if ($this->flags & self::READ_AHEAD) {
+    if ((int)$this->flags & self::READ_AHEAD) {
       return $this->current() !== false;
     }
     return !$this->eof();
@@ -686,9 +686,9 @@ class SplFileObject extends SplFileInfo
   {
     do {
       $line = fgets($this->rsrc, $this->maxLineLen);
-    } while($this->getFlags() & (self::SKIP_EMPTY | self::DROP_NEW_LINE) &&
+    } while((int)$this->getFlags() & (self::SKIP_EMPTY | self::DROP_NEW_LINE) &&
             $line !== false && rtrim($line, "\r\n") === "");
-    if ($line !== false && $this->flags & self::DROP_NEW_LINE) {
+    if ($line !== false && (int)$this->flags & self::DROP_NEW_LINE) {
       $line = rtrim($line, "\r\n");
     }
 

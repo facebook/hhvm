@@ -38,6 +38,7 @@ TEST(HardwareCounterTest, InstructionCount) {
   const bool excludeKernel = true;
   HardwareCounter::Init(true, "", false, excludeKernel, false, -1);
   HardwareCounter::s_counter.getCheck();
+  HardwareCounter::Reset();
   auto begin = HardwareCounter::GetInstructionCount();
   const int64_t reps = 100000000;
   int64_t res = hash_alot(42, reps);
@@ -49,7 +50,7 @@ TEST(HardwareCounterTest, InstructionCount) {
   EXPECT_GE(d1, reps);  // Sanity check.
   auto dd = llabs(d1 - d0);
   double relativeError = static_cast<double>(dd) / d0;
-  EXPECT_LE(relativeError, 1e-6);
+  EXPECT_LE(relativeError, 1e-2);
   EXPECT_NE(0, res);  // Use 'res'.
 }
 

@@ -642,6 +642,7 @@ let method_def env cls m =
       let check_sound_dynamic_callable =
         (not env.inside_constructor)
         && ( Cls.get_implements_dynamic cls
+             && not (Aast.equal_visibility m.m_visibility Private)
            || Naming_attributes.mem
                 SN.UserAttributes.uaSoundDynamicCallable
                 m.m_user_attributes )
@@ -1301,6 +1302,7 @@ let class_var_def ~is_static cls env cv =
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Cls.get_implements_dynamic cls
+    && not (Aast.equal_visibility cv.cv_visibility Private)
   then begin
     Option.iter decl_cty (fun ty ->
         let te_check = Typing_enforceability.is_enforceable env ty in

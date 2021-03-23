@@ -63,6 +63,9 @@ val get_pos_filename : pos -> Relative_path.t
   declarations only differ by position information.  *)
 type hash_type = Int64.t option [@@deriving eq]
 
+(** [FileInfo.t] is (1) what we get out of the parser, with Full positions;
+(2) the API for putting stuff into and taking stuff out of saved-state naming table (with File positions)
+*)
 type t = {
   hash: hash_type;
   file_mode: mode option;
@@ -80,6 +83,9 @@ val empty_t : t
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
+
+(** [FileInfo.names] is a cut-down version of [FileInfo.t], one that we use internally
+for decl-diffing and other fanout calculations. *)
 type names = {
   n_funs: SSet.t;
   n_classes: SSet.t;
@@ -91,6 +97,10 @@ type names = {
 (*****************************************************************************)
 (* The record used in our saved state. *)
 (*****************************************************************************)
+
+(** Although [FileInfo.t] is the public API for storing/retrieving entries in the naming-table,
+we actually store the naming-table on disk as [FileInfo.saved] - it's basically the same but
+has a slightly more compact representation in order to save space. *)
 type saved
 
 val empty_names : names

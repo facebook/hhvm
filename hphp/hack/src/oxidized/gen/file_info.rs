@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<31a7d79885d9a9a76bcb2b6fbbd7fd8c>>
+// @generated SignedSource<<98aad8177efd1c1b7f6d7c7117157ad4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -163,6 +163,29 @@ pub struct Names {
     pub consts: s_set::SSet,
 }
 
+/// The simplified record stored in saved-state.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct SavedNames {
+    pub funs: s_set::SSet,
+    pub classes: s_set::SSet,
+    pub record_defs: s_set::SSet,
+    pub types: s_set::SSet,
+    pub consts: s_set::SSet,
+}
+
 /// Data structure stored in the saved state
 #[derive(
     Clone,
@@ -179,7 +202,7 @@ pub struct Names {
     ToOcamlRep
 )]
 pub struct Saved {
-    pub names: Names,
+    pub names: SavedNames,
     pub hash: Option<isize>,
     pub mode: Option<Mode>,
 }

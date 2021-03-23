@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5cef38d70d8c59d5fcdfe1a5a5dae46a>>
+// @generated SignedSource<<e401af120ff60ba2fce97ec5072d79b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -98,6 +98,29 @@ pub struct FileInfo<'a> {
 impl<'a> TrivialDrop for FileInfo<'a> {}
 
 pub use oxidized::file_info::Names;
+
+/// The simplified record stored in saved-state.
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct SavedNames<'a> {
+    pub funs: s_set::SSet<'a>,
+    pub classes: s_set::SSet<'a>,
+    pub record_defs: s_set::SSet<'a>,
+    pub types: s_set::SSet<'a>,
+    pub consts: s_set::SSet<'a>,
+}
+impl<'a> TrivialDrop for SavedNames<'a> {}
 
 pub use oxidized::file_info::Saved;
 

@@ -32,35 +32,35 @@ struct StructLayout;
  * in the layout itself instead of in the array. The layout maps these keys to
  * to physical slots. Each array has space for all of its layout's slots.
  */
-struct StructArray : public BespokeArray {
-  static StructArray* MakeFromVanilla(ArrayData* ad,
-                                      const StructLayout* layout);
+struct StructDict : public BespokeArray {
+  static StructDict* MakeFromVanilla(ArrayData* ad,
+                                     const StructLayout* layout);
   template<bool Static>
-  static StructArray* MakeReserve(
+  static StructDict* MakeReserve(
       HeaderKind kind, bool legacy, const StructLayout* layout);
 
-  static StructArray* MakeStructDArray(
+  static StructDict* MakeStructDArray(
       const StructLayout* layout, uint32_t size,
       const Slot* slots, const TypedValue* vals);
-  static StructArray* MakeStructDict(
+  static StructDict* MakeStructDict(
       const StructLayout* layout, uint32_t size,
       const Slot* slots, const TypedValue* vals);
 
   uint8_t sizeIndex() const;
   static size_t sizeFromLayout(const StructLayout*);
 
-  static const StructArray* As(const ArrayData* ad);
-  static StructArray* As(ArrayData* ad);
+  static const StructDict* As(const ArrayData* ad);
+  static StructDict* As(ArrayData* ad);
 
   static constexpr size_t kMaxKeyNum = KeyOrder::kMaxLen;
   static_assert(kMaxKeyNum <= std::numeric_limits<uint8_t>::max());
 
 #define X(Return, Name, Args...) static Return Name(Args);
-  BESPOKE_LAYOUT_FUNCTIONS(StructArray)
+  BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X
 
 private:
-  static StructArray* MakeStructImpl(
+  static StructDict* MakeStructImpl(
       const StructLayout* layout, uint32_t size,
       const Slot* slots, const TypedValue* tvs, HeaderKind hk);
 
@@ -79,7 +79,7 @@ private:
 
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   arr_lval elemImpl(StringData* k, bool throwOnMissing);
-  StructArray* copy() const;
+  StructDict* copy() const;
   void incRefValues();
   void decRefValues();
 
@@ -145,7 +145,7 @@ private:
 
   size_t m_size_index;
 
-  // Offsets of datatypes and values in a StructArray
+  // Offsets of datatypes and values in a StructDict
   // from the end of the array header.
   size_t m_typeOff;
   size_t m_valueOff;

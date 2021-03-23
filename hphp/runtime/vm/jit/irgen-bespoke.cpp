@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"

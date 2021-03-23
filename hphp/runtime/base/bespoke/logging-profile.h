@@ -173,7 +173,7 @@ struct LoggingProfile {
     std::atomic<uint64_t> loggingArraysEmitted = 0;
     LoggingArray* staticLoggingArray = nullptr;
     std::atomic<ArrayData*> staticMonotypeArray{nullptr};
-    std::atomic<ArrayData*> staticStructArray{nullptr};
+    std::atomic<ArrayData*> staticStructDict{nullptr};
     ArrayData* staticSampledArray = nullptr;
     EventMap events;
     EntryTypesMap entryTypes;

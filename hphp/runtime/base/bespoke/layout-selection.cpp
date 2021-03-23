@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/union-find.h"
 
@@ -279,7 +279,7 @@ ArrayLayout selectSourceLayout(
   if (it != sar.sources.end()) {
     auto const vad = profile.data->staticSampledArray;
     if (vad != nullptr) {
-      auto const sad = StructArray::MakeFromVanilla(vad, it->second);
+      auto const sad = StructDict::MakeFromVanilla(vad, it->second);
       profile.setStaticBespokeArray(sad);
     }
     return ArrayLayout(it->second);
@@ -416,7 +416,7 @@ ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
 void selectBespokeLayouts() {
   setLoggingEnabled(false);
   auto const sar = []{
-    if (!RO::EvalEmitBespokeStructArrays) return StructAnalysisResult();
+    if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
     eachSource([&](auto const& x) { initStructAnalysis(x, sa); });
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });

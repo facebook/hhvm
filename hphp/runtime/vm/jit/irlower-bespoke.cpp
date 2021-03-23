@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -428,17 +428,17 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// StructArray
+// StructDict
 
 namespace {
 
-using bespoke::StructArray;
+using bespoke::StructDict;
 using bespoke::StructLayout;
 
 void newStructImpl(
   IRLS& env,
   const IRInstruction* inst,
-  StructArray* (*f)(const StructLayout* layout, uint32_t size,
+  StructDict* (*f)(const StructLayout* layout, uint32_t size,
                     const Slot* slots, const TypedValue* vals)
 ) {
   auto const sp = srcLoc(env, inst, 0).reg();
@@ -461,11 +461,11 @@ void newStructImpl(
 }
 
 void cgNewBespokeStructDArray(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, StructArray::MakeStructDArray);
+  newStructImpl(env, inst, StructDict::MakeStructDArray);
 }
 
 void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, StructArray::MakeStructDict);
+  newStructImpl(env, inst, StructDict::MakeStructDict);
 }
 
 //////////////////////////////////////////////////////////////////////////////

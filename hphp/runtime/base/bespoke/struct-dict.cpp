@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
@@ -32,7 +32,7 @@ folly::SharedMutex s_keySetLock;
 std::unordered_map<KeyOrder, LayoutIndex, KeyOrderHash> s_keySetToIdx;
 
 const LayoutFunctions* structArrayVtable() {
-  static auto const result = fromArray<StructArray>();
+  static auto const result = fromArray<StructDict>();
   return &result;
 }
 
@@ -46,25 +46,25 @@ bool isStructLayout(LayoutIndex index) {
 
 std::string describeStructLayout(const KeyOrder& ko) {
   auto const base = ko.toString();
-  return folly::sformat("StructArray<{}>", base.substr(1, base.size() - 2));
+  return folly::sformat("StructDict<{}>", base.substr(1, base.size() - 2));
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-StructArray* StructArray::As(ArrayData* ad) {
-  auto const result = reinterpret_cast<StructArray*>(ad);
+StructDict* StructDict::As(ArrayData* ad) {
+  auto const result = reinterpret_cast<StructDict*>(ad);
   assertx(result->checkInvariants());
   return result;
 }
 
-const StructArray* StructArray::As(const ArrayData* ad) {
+const StructDict* StructDict::As(const ArrayData* ad) {
   return As(const_cast<ArrayData*>(ad));
 }
 
-bool StructArray::checkInvariants() const {
-  static_assert(sizeof(StructArray) == 16);
+bool StructDict::checkInvariants() const {
+  static_assert(sizeof(StructDict) == 16);
   assertx(layout()->index() == layoutIndex());
   assertx(layout()->sizeIndex() == sizeIndex());
   assertx(layout()->numFields() == numFields());
@@ -117,13 +117,13 @@ StructLayout::StructLayout(const KeyOrder& ko, const LayoutIndex& idx)
   assertx(numFields() == ko.size());
   m_typeOff = numFields();
   m_valueOff = (m_typeOff + numFields() + 7) & ~7;
-  auto const bytes = sizeof(StructArray) +
+  auto const bytes = sizeof(StructDict) +
                      m_valueOff +
                      numFields() * sizeof(Value);
   m_size_index = MemoryManager::size2Index(bytes);
 }
 
-uint8_t StructArray::sizeIndex() const {
+uint8_t StructDict::sizeIndex() const {
   return m_aux16 >> 8;
 }
 
@@ -148,9 +148,9 @@ const StructLayout::Field& StructLayout::field(Slot slot) const {
 }
 
 template <bool Static>
-StructArray* StructArray::MakeReserve(HeaderKind kind,
-                                      bool legacy,
-                                      const StructLayout* layout) {
+StructDict* StructDict::MakeReserve(HeaderKind kind,
+                                    bool legacy,
+                                    const StructLayout* layout) {
   assertx(layout);
   auto const sizeIdx = layout->sizeIndex();
   auto const alloc = [&] {
@@ -159,7 +159,7 @@ StructArray* StructArray::MakeReserve(HeaderKind kind,
     return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
   }();
 
-  auto const sad = static_cast<StructArray*>(alloc);
+  auto const sad = static_cast<StructDict*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
       sizeIdx, legacy ? ArrayData::kLegacyArray : 0);
   sad->initHeader_16(kind, OneReference, aux);
@@ -178,11 +178,11 @@ StructArray* StructArray::MakeReserve(HeaderKind kind,
   return sad;
 }
 
-size_t StructArray::numFields() const {
+size_t StructDict::numFields() const {
   return (m_extra_lo16 >> 8) & 0xff;
 }
 
-size_t StructArray::valueOffsetInValueSize() const {
+size_t StructDict::valueOffsetInValueSize() const {
   return m_extra_lo16 & 0xff;
 }
 
@@ -191,8 +191,8 @@ const StructLayout* StructLayout::As(const Layout* l) {
   return reinterpret_cast<const StructLayout*>(l);
 }
 
-StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
-                                          const StructLayout* layout) {
+StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
+                                        const StructLayout* layout) {
   if (!ad->hasVanillaMixedLayout()) return nullptr;;
 
   assertx(layout);
@@ -237,19 +237,19 @@ StructArray* StructArray::MakeFromVanilla(ArrayData* ad,
   return result;
 }
 
-StructArray* StructArray::MakeStructDArray(
+StructDict* StructDict::MakeStructDArray(
     const StructLayout* layout, uint32_t size,
     const Slot* slots, const TypedValue* vals) {
   return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDArray);
 }
 
-StructArray* StructArray::MakeStructDict(
+StructDict* StructDict::MakeStructDict(
     const StructLayout* layout, uint32_t size,
     const Slot* slots, const TypedValue* vals) {
   return MakeStructImpl(layout, size, slots, vals, HeaderKind::BespokeDict);
 }
 
-StructArray* StructArray::MakeStructImpl(
+StructDict* StructDict::MakeStructImpl(
     const StructLayout* layout, uint32_t size,
     const Slot* slots, const TypedValue* tvs, HeaderKind hk) {
 
@@ -274,42 +274,42 @@ StructArray* StructArray::MakeStructImpl(
   return result;
 }
 
-const StructLayout* StructArray::layout() const {
+const StructLayout* StructDict::layout() const {
   return StructLayout::As(Layout::FromIndex(layoutIndex()));
 }
 
-DataType* StructArray::rawTypes() {
+DataType* StructDict::rawTypes() {
   assertx(typeOffset() == layout()->typeOffset());
   return reinterpret_cast<DataType*>(
       reinterpret_cast<char*>(this + 1) + typeOffset());
 }
 
-const DataType* StructArray::rawTypes() const {
-  return const_cast<StructArray*>(this)->rawTypes();
+const DataType* StructDict::rawTypes() const {
+  return const_cast<StructDict*>(this)->rawTypes();
 }
 
-Value* StructArray::rawValues() {
+Value* StructDict::rawValues() {
   return reinterpret_cast<Value*>(
       reinterpret_cast<Value*>(this + 1) + valueOffsetInValueSize());
 }
 
-const Value* StructArray::rawValues() const {
-  return const_cast<StructArray*>(this)->rawValues();
+const Value* StructDict::rawValues() const {
+  return const_cast<StructDict*>(this)->rawValues();
 }
 
-uint8_t* StructArray::rawPositions() {
+uint8_t* StructDict::rawPositions() {
   return reinterpret_cast<uint8_t*>(this + 1);
 }
 
-const uint8_t* StructArray::rawPositions() const {
-  return const_cast<StructArray*>(this)->rawPositions();
+const uint8_t* StructDict::rawPositions() const {
+  return const_cast<StructDict*>(this)->rawPositions();
 }
 
-TypedValue StructArray::typedValueUnchecked(Slot slot) const {
+TypedValue StructDict::typedValueUnchecked(Slot slot) const {
   return make_tv_of_type(rawValues()[slot], rawTypes()[slot]);
 }
 
-ArrayData* StructArray::escalateWithCapacity(size_t capacity,
+ArrayData* StructDict::escalateWithCapacity(size_t capacity,
                                              const char* reason) const {
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
@@ -332,22 +332,22 @@ ArrayData* StructArray::escalateWithCapacity(size_t capacity,
   return ad;
 }
 
-void StructArray::ConvertToUncounted(StructArray* sad,
-                                     DataWalker::PointerMap* seen) {
+void StructDict::ConvertToUncounted(StructDict* sad,
+                                    DataWalker::PointerMap* seen) {
   for (Slot i = 0; i < sad->numFields(); i++) {
     auto const lval = tv_lval(&sad->rawTypes()[i], &sad->rawValues()[i]);
     ConvertTvToUncounted(lval, seen);
   }
 }
 
-void StructArray::ReleaseUncounted(StructArray* sad) {
+void StructDict::ReleaseUncounted(StructDict* sad) {
   for (Slot i = 0; i < sad->numFields(); i++) {
     auto tv = sad->typedValueUnchecked(i);
     ReleaseUncountedTv(&tv);
   }
 }
 
-void StructArray::Release(StructArray* sad) {
+void StructDict::Release(StructDict* sad) {
   sad->fixCountForRelease();
   assertx(sad->isRefCounted());
   assertx(sad->hasExactlyOneRef());
@@ -355,58 +355,58 @@ void StructArray::Release(StructArray* sad) {
   tl_heap->objFreeIndex(sad, sad->sizeIndex());
 }
 
-bool StructArray::IsVectorData(const StructArray* sad) {
+bool StructDict::IsVectorData(const StructDict* sad) {
   return sad->empty();
 }
 
-TypedValue StructArray::NvGetInt(const StructArray*, int64_t) {
+TypedValue StructDict::NvGetInt(const StructDict*, int64_t) {
   return make_tv<KindOfUninit>();
 }
 
-TypedValue StructArray::NvGetStr(const StructArray* sad, const StringData* k) {
+TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
   auto const layout = sad->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
   return sad->typedValueUnchecked(slot);
 }
 
-TypedValue StructArray::GetPosKey(const StructArray* sad, ssize_t pos) {
+TypedValue StructDict::GetPosKey(const StructDict* sad, ssize_t pos) {
   auto const layout = sad->layout();
   auto const slot = sad->getSlotInPos(pos);
   auto const k = layout->field(slot).key;
   return make_tv<KindOfPersistentString>(k);
 }
 
-TypedValue StructArray::GetPosVal(const StructArray* sad, ssize_t pos) {
+TypedValue StructDict::GetPosVal(const StructDict* sad, ssize_t pos) {
   auto const slot = sad->getSlotInPos(pos);
   return sad->typedValueUnchecked(slot);
 }
 
-ssize_t StructArray::IterBegin(const StructArray*) {
+ssize_t StructDict::IterBegin(const StructDict*) {
   return 0;
 }
 
-ssize_t StructArray::IterLast(const StructArray* sad) {
+ssize_t StructDict::IterLast(const StructDict* sad) {
   return sad->empty() ? 0 : sad->size() - 1;
 }
 
-ssize_t StructArray::IterEnd(const StructArray* sad) {
+ssize_t StructDict::IterEnd(const StructDict* sad) {
   return sad->size();
 }
 
-ssize_t StructArray::IterAdvance(const StructArray* sad, ssize_t pos) {
+ssize_t StructDict::IterAdvance(const StructDict* sad, ssize_t pos) {
   return pos < sad->size() ? pos + 1 : pos;
 }
 
-ssize_t StructArray::IterRewind(const StructArray* sad, ssize_t pos) {
+ssize_t StructDict::IterRewind(const StructDict* sad, ssize_t pos) {
   return pos > 0 ? pos - 1 : sad->size();
 }
 
-arr_lval StructArray::LvalInt(StructArray* sad, int64_t k) {
+arr_lval StructDict::LvalInt(StructDict* sad, int64_t k) {
   throwOOBArrayKeyException(k, sad);
 }
 
-arr_lval StructArray::LvalStr(StructArray* sad, StringData* key) {
+arr_lval StructDict::LvalStr(StructDict* sad, StringData* key) {
   auto const layout = sad->layout();
   auto const slot = layout->keySlot(key);
   if (slot == kInvalidSlot) throwOOBArrayKeyException(key, sad);
@@ -416,12 +416,12 @@ arr_lval StructArray::LvalStr(StructArray* sad, StringData* key) {
   return { newad, &newad->rawTypes()[slot], &newad->rawValues()[slot] };
 }
 
-tv_lval StructArray::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
+tv_lval StructDict::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
   if (throwOnMissing) throwOOBArrayKeyException(k, lval.val().parr);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-arr_lval StructArray::elemImpl(StringData* k, bool throwOnMissing) {
+arr_lval StructDict::elemImpl(StringData* k, bool throwOnMissing) {
   auto const layout = this->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) {
@@ -440,7 +440,7 @@ arr_lval StructArray::elemImpl(StringData* k, bool throwOnMissing) {
   return arr_lval{sad, &t, &sad->rawValues()[slot]};
 }
 
-tv_lval StructArray::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing) {
+tv_lval StructDict::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing) {
   auto sadIn = As(lvalIn.val().parr);
   auto const lval = sadIn->elemImpl(k, throwOnMissing);
   if (lval.arr != sadIn) {
@@ -451,7 +451,7 @@ tv_lval StructArray::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing)
   return lval;
 }
 
-ArrayData* StructArray::SetIntMove(StructArray* sad, int64_t k, TypedValue v) {
+ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
   auto const res = MixedArray::SetIntMove(vad, k, v);
   assertx(vad == res);
@@ -459,7 +459,7 @@ ArrayData* StructArray::SetIntMove(StructArray* sad, int64_t k, TypedValue v) {
   return res;
 }
 
-ArrayData* StructArray::SetStrMove(StructArray* sadIn,
+ArrayData* StructDict::SetStrMove(StructDict* sadIn,
                                    StringData* k,
                                    TypedValue v) {
   auto const layout = sadIn->layout();
@@ -484,9 +484,9 @@ ArrayData* StructArray::SetStrMove(StructArray* sadIn,
   return sad;
 }
 
-StructArray* StructArray::copy() const {
+StructDict* StructDict::copy() const {
   auto const sizeIdx = sizeIndex();
-  auto const sad = static_cast<StructArray*>(tl_heap->objMallocIndex(sizeIdx));
+  auto const sad = static_cast<StructDict*>(tl_heap->objMallocIndex(sizeIdx));
   auto const heapSize = MemoryManager::sizeIndex2Size(sizeIdx);
   assertx(heapSize % 16 == 0);
   memcpy16_inline(sad, this, heapSize);
@@ -496,25 +496,25 @@ StructArray* StructArray::copy() const {
   return sad;
 }
 
-void StructArray::incRefValues() {
+void StructDict::incRefValues() {
   for (auto pos = 0; pos < m_size; pos++) {
     auto const tv = typedValueUnchecked(getSlotInPos(pos));
     tvIncRefGen(tv);
   }
 }
 
-void StructArray::decRefValues() {
+void StructDict::decRefValues() {
   for (auto pos = 0; pos < m_size; pos++) {
     auto const tv = typedValueUnchecked(getSlotInPos(pos));
     tvDecRefGen(tv);
   }
 }
 
-ArrayData* StructArray::RemoveInt(StructArray* sad, int64_t) {
+ArrayData* StructDict::RemoveInt(StructDict* sad, int64_t) {
   return sad;
 }
 
-ArrayData* StructArray::RemoveStr(StructArray* sadIn, const StringData* k) {
+ArrayData* StructDict::RemoveStr(StructDict* sadIn, const StringData* k) {
   auto const layout = sadIn->layout();
   auto const slot = layout->keySlot(k);
   if (slot == kInvalidSlot) return sadIn;
@@ -528,7 +528,7 @@ ArrayData* StructArray::RemoveStr(StructArray* sadIn, const StringData* k) {
   return sad;
 }
 
-ArrayData* StructArray::AppendMove(StructArray* sad, TypedValue v) {
+ArrayData* StructDict::AppendMove(StructDict* sad, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
   auto const res = vad->appendMove(v);
   assertx(vad == res);
@@ -536,7 +536,7 @@ ArrayData* StructArray::AppendMove(StructArray* sad, TypedValue v) {
   return res;
 }
 
-ArrayData* StructArray::Pop(StructArray* sadIn, Variant& value) {
+ArrayData* StructDict::Pop(StructDict* sadIn, Variant& value) {
   if (UNLIKELY(sadIn->size() == 0)) {
     value = uninit_null();
     return sadIn;
@@ -552,7 +552,7 @@ ArrayData* StructArray::Pop(StructArray* sadIn, Variant& value) {
   return sad;
 }
 
-ArrayData* StructArray::ToDVArray(StructArray* sadIn, bool copy) {
+ArrayData* StructDict::ToDVArray(StructDict* sadIn, bool copy) {
   if (sadIn->isDArray()) return sadIn;
   auto const sad = copy ? sadIn->copy() : sadIn;
   sad->m_kind = HeaderKind::BespokeDArray;
@@ -560,7 +560,7 @@ ArrayData* StructArray::ToDVArray(StructArray* sadIn, bool copy) {
   return sad;
 }
 
-ArrayData* StructArray::ToHackArr(StructArray* sadIn, bool copy) {
+ArrayData* StructDict::ToHackArr(StructDict* sadIn, bool copy) {
   if (sadIn->isDictType()) return sadIn;
   auto const sad = copy ? sadIn->copy() : sadIn;
   sad->m_kind = HeaderKind::BespokeDict;
@@ -569,18 +569,18 @@ ArrayData* StructArray::ToHackArr(StructArray* sadIn, bool copy) {
   return sad;
 }
 
-ArrayData* StructArray::PreSort(StructArray* sad, SortFunction sf) {
+ArrayData* StructDict::PreSort(StructDict* sad, SortFunction sf) {
   return sad->escalateWithCapacity(sad->size(), sortFunctionName(sf));
 }
 
-ArrayData* StructArray::PostSort(StructArray* sad, ArrayData* vad) {
+ArrayData* StructDict::PostSort(StructDict* sad, ArrayData* vad) {
   auto const result = MakeFromVanilla(vad, sad->layout());
   if (!result) return vad;
   MixedArray::Release(vad);
   return result;
 }
 
-ArrayData* StructArray::SetLegacyArray(StructArray* sadIn,
+ArrayData* StructDict::SetLegacyArray(StructDict* sadIn,
                                        bool copy, bool legacy) {
   auto const sad = copy ? sadIn->copy() : sadIn;
   sad->setLegacyArrayInPlace(legacy);
@@ -589,11 +589,11 @@ ArrayData* StructArray::SetLegacyArray(StructArray* sadIn,
 
 ////////////////////////////////////////////////////////////////////////////
 
-size_t StructArray::HeapSize(const StructArray* sad) {
+size_t StructDict::HeapSize(const StructDict* sad) {
   return MemoryManager::sizeIndex2Size(sad->sizeIndex());
 }
 
-void StructArray::Scan(const StructArray* sad, type_scan::Scanner& scanner) {
+void StructDict::Scan(const StructDict* sad, type_scan::Scanner& scanner) {
   auto const types = sad->rawTypes();
   auto const vals = sad->rawValues();
   for (Slot i = 0; i < sad->numFields(); i++) {
@@ -603,17 +603,17 @@ void StructArray::Scan(const StructArray* sad, type_scan::Scanner& scanner) {
   }
 }
 
-ArrayData* StructArray::EscalateToVanilla(const StructArray* sad,
+ArrayData* StructDict::EscalateToVanilla(const StructDict* sad,
                                           const char* reason) {
   return sad->escalateWithCapacity(sad->size(), reason);
 }
 
-void StructArray::addNextSlot(Slot slot) {
+void StructDict::addNextSlot(Slot slot) {
   assertx(slot < kMaxKeyNum);
   rawPositions()[m_size++] = slot;
 }
 
-void StructArray::removeSlot(Slot slot) {
+void StructDict::removeSlot(Slot slot) {
   auto const pos = rawPositions();
   auto idx = 0;
   for (size_t i = 0; i < m_size; i++) {
@@ -624,7 +624,7 @@ void StructArray::removeSlot(Slot slot) {
   m_size--;
 }
 
-Slot StructArray::getSlotInPos(size_t pos) const {
+Slot StructDict::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
   assertx(pos < kMaxKeyNum);
   return rawPositions()[pos];

@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -631,7 +631,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile) {
   auto const ko = collectKeyOrder(koMap);
   auto const create = !s_hierarchyFinal.load(std::memory_order_acquire);
   auto const layout = StructLayout::GetLayout(ko, create);
-  return layout ? StructArray::MakeFromVanilla(ad, layout) : nullptr;
+  return layout ? StructDict::MakeFromVanilla(ad, layout) : nullptr;
 }
 
 ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
@@ -648,7 +648,7 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   }
   if (mod == 3) {
     return bespoke::maybeBespokifyForTesting(
-      ad, profile, profile->data->staticStructArray,
+      ad, profile, profile->data->staticStructDict,
       [](auto ad, auto profile) { return maybeStructify(ad, profile); }
     );
   }

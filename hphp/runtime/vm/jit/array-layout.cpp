@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
-#include "hphp/runtime/base/bespoke/struct-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -218,7 +218,7 @@ ArrayData* ArrayLayout::apply(ArrayData* ad) const {
     if (monotype()) return bespoke::maybeMonoify(ad);
     if (is_struct()) {
       auto const layout = bespoke::StructLayout::As(bespokeLayout());
-      return bespoke::StructArray::MakeFromVanilla(ad, layout);
+      return bespoke::StructDict::MakeFromVanilla(ad, layout);
     }
     return nullptr;
   }();

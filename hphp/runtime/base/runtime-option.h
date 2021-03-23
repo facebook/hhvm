@@ -1282,6 +1282,7 @@ struct RuntimeOption {
    * e.g. {'pure' => 2, 'rx' => 1}                                      \
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
+  F(uint32_t, CoeffectViolationWarningSampleRate, 1)                    \
   /*                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \

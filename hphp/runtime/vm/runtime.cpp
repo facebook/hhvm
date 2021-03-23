@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include <folly/tracing/StaticTracepoint.h>
+#include <folly/Random.h>
 
 namespace HPHP {
 
@@ -299,6 +300,11 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
+    auto const coinflip = []{
+      auto const rate = RO::EvalCoeffectViolationWarningSampleRate;
+      return rate > 0 && folly::Random::rand32(rate) == 0;
+    }();
+    if (!coinflip) return;
     raise_warning(errMsg);
   } else {
     SystemLib::throwBadMethodCallExceptionObject(errMsg);

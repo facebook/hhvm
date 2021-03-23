@@ -96,7 +96,6 @@ pub fn emit_constants_from_program<'a, 'arena>(
     env: &mut Env<'a, 'arena>,
     defs: &'a [tast::Def],
 ) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'a, 'arena>>)> {
-    let alloc = env.arena;
     let const_tuples = defs
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))

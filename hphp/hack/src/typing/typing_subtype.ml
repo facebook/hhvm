@@ -3099,7 +3099,6 @@ let decompose_subtype_add_bound
  * hold in order for t <: u.
  *)
 let rec decompose_subtype
-    p
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
@@ -3119,14 +3118,14 @@ let rec decompose_subtype
       ty_super
       env
   in
-  decompose_subtype_add_prop p env prop
+  decompose_subtype_add_prop env prop
 
-and decompose_subtype_add_prop p env prop =
+and decompose_subtype_add_prop env prop =
   match prop with
   | TL.Conj props ->
-    List.fold_left ~f:(decompose_subtype_add_prop p) ~init:env props
+    List.fold_left ~f:decompose_subtype_add_prop ~init:env props
   | TL.Disj (_, []) -> Env.mark_inconsistent env
-  | TL.Disj (_, [prop']) -> decompose_subtype_add_prop p env prop'
+  | TL.Disj (_, [prop']) -> decompose_subtype_add_prop env prop'
   | TL.Disj _ ->
     Typing_log.log_prop 2 env.function_pos "decompose_subtype_add_prop" env prop;
     env
@@ -3147,14 +3146,12 @@ and decompose_constraint
   (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
   | Ast_defs.Constraint_as ->
-    decompose_subtype p env ty_sub ty_super (Errors.unify_error_at p)
+    decompose_subtype env ty_sub ty_super (Errors.unify_error_at p)
   | Ast_defs.Constraint_super ->
-    decompose_subtype p env ty_super ty_sub (Errors.unify_error_at p)
+    decompose_subtype env ty_super ty_sub (Errors.unify_error_at p)
   | Ast_defs.Constraint_eq ->
-    let env =
-      decompose_subtype p env ty_sub ty_super (Errors.unify_error_at p)
-    in
-    decompose_subtype p env ty_super ty_sub (Errors.unify_error_at p)
+    let env = decompose_subtype env ty_sub ty_super (Errors.unify_error_at p) in
+    decompose_subtype env ty_super ty_sub (Errors.unify_error_at p)
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -3218,7 +3215,6 @@ let add_constraint
                     ~init:env
                     ~f:(fun env ty_super' ->
                       decompose_subtype
-                        p
                         env
                         ty_sub'
                         ty_super'

@@ -1589,7 +1589,6 @@ where
                     external,
                     namespace: Self::mk_empty_ns_env(env),
                     doc_comment: None,
-                    static_: false,
                 };
                 Ok(E_::mk_lfun(fun, vec![]))
             }
@@ -2121,9 +2120,7 @@ where
                 true,
             )),
             AnonymousFunction(c) => {
-                if env.parser_options.po_disable_static_closures
-                    && Self::token_kind(&c.static_keyword) == Some(TK::Static)
-                {
+                if Self::token_kind(&c.static_keyword) == Some(TK::Static) {
                     Self::raise_parsing_error(
                         node,
                         env,
@@ -2173,7 +2170,6 @@ where
                     external,
                     namespace: Self::mk_empty_ns_env(env),
                     doc_comment,
-                    static_: !c.static_keyword.is_missing(),
                 };
                 let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
                 Ok(E_::mk_efun(fun, uses))
@@ -2213,7 +2209,6 @@ where
                     external,
                     namespace: Self::mk_empty_ns_env(env),
                     doc_comment: None,
-                    static_: false,
                 };
                 Ok(E_::mk_call(
                     E::new(pos, E_::mk_lfun(body, vec![])),
@@ -4929,7 +4924,6 @@ where
                     external: is_external,
                     namespace: Self::mk_empty_ns_env(env),
                     doc_comment: doc_comment_opt,
-                    static_: false,
                 })])
             }
             ClassishDeclaration(c) if Self::contains_class_body(c) => {

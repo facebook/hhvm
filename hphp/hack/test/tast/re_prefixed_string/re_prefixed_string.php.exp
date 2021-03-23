@@ -48,7 +48,7 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false });
+      f_doc_comment = None });
   (Fun
      { f_span = [18:1-20:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((T), (Some ([18:78-79], (Habstr ("T", []))))); f_name = ([18:10-17], "\\goodbye");
@@ -81,7 +81,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [24:1-42:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid)))); f_name = ([24:10-21], "\\bad_pattern"); 
@@ -186,7 +186,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [46:1-59:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid)))); f_name = ([46:10-27], "\\missing_delimiter"); 
@@ -234,7 +234,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [61:1-65:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid)))); f_name = ([61:10-31], "\\parentheses_are_weird"); 
@@ -258,4 +258,4 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false })
+       f_doc_comment = None })

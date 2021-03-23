@@ -1500,7 +1500,6 @@ and fun_ ctx f =
       f_external = f.Aast.f_external;
       f_namespace = f.Aast.f_namespace;
       f_doc_comment = f.Aast.f_doc_comment;
-      f_static = f.Aast.f_static;
     }
   in
   named_fun
@@ -2219,7 +2218,6 @@ and expr_lambda env f =
     f_external = f.Aast.f_external;
     f_namespace = f.Aast.f_namespace;
     f_doc_comment = f.Aast.f_doc_comment;
-    f_static = f.Aast.f_static;
   }
 
 and f_body env f_body =

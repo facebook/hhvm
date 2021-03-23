@@ -284,11 +284,10 @@ prefixed_flags!(
     PhpismFlags,
     "hhvm.hack.lang.phpism.",
     DISABLE_NONTOPLEVEL_DECLARATIONS,
-    DISABLE_STATIC_CLOSURES,
 );
 impl Default for PhpismFlags {
     fn default() -> PhpismFlags {
-        PhpismFlags::DISABLE_STATIC_CLOSURES
+        PhpismFlags::empty()
     }
 }
 
@@ -1145,8 +1144,7 @@ bitflags! {
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
         // No longer using bits 16-21.
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
-        const DISABLE_STATIC_CLOSURES = 1 << 23;
-        // No longer using bits 24-25.
+        // No longer using bits 23-25.
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         const EMIT_INST_METH_POINTERS = 1 << 27;
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;

@@ -281,7 +281,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   let global_opts =
     GlobalOptions.make
       ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
-      ?po_disable_static_closures:(bool_opt "disable_static_closures" config)
       ?po_disable_array_typehint:
         (bool_opt "disable_parse_array_typehint" config)
       ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)

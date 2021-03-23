@@ -717,7 +717,6 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
                          external function declaration (e.g. from an HHI file)*)
   f_namespace: nsenv;
   f_doc_comment: doc_comment option;
-  f_static: bool;
 }
 
 (**

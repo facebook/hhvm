@@ -123,7 +123,7 @@ impl<'ast> Visitor<'ast> for Checker {
         f.recurse(
             &mut Context {
                 in_methodish: true,
-                in_static_methodish: f.static_ || c.in_static_methodish,
+                in_static_methodish: c.in_static_methodish,
                 ..*c
             },
             self,

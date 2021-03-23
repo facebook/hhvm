@@ -11,8 +11,8 @@
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment =
       (Some ([2:1-10:4],
-             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
-      f_static = false });
+             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+      });
   (Fun
      { f_span = [13:1-31:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
        f_ret = ((int), (Some ([13:44-47], (Hprim Tint)))); f_name = ([13:10-40], "\\terminal_catch_can_do_whatever"); 
@@ -40,7 +40,7 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Class
      { c_span = [33:1-41]; c_annotation = (); c_mode = Mpartial; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 

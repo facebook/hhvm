@@ -357,8 +357,7 @@
                                                          ns_auto_ns_map = []; 
                                                          ns_is_codegen = false; 
                                                          ns_disable_xhp_element_mangling = false };
-                                                       f_doc_comment = None; 
-                                                       f_static = false },
+                                                       f_doc_comment = None },
                                                      [([4:8-60], $0splice4); ([4:50-55], $0splice3); ([4:45-46], $0splice2); ([4:29-33], $0splice1); ([4:26-27], $0splice0)])));
                                                  ([4:8-60],
                                                   (Efun (
@@ -435,8 +434,7 @@
                                                                     ns_auto_ns_map = []; 
                                                                     ns_is_codegen = false; 
                                                                     ns_disable_xhp_element_mangling = false };
-                                                                   f_doc_comment = None; 
-                                                                   f_static = false },
+                                                                   f_doc_comment = None },
                                                                  [([4:8-60], $0splice4); ([4:45-46], $0splice2); ([4:50-55], $0splice3); ([4:29-33], $0splice1); ([4:26-27], $0splice0)]))))))
                                                            ];
                                                          fb_annotation = Named };
@@ -454,8 +452,7 @@
                                                          ns_auto_ns_map = []; 
                                                          ns_is_codegen = false; 
                                                          ns_disable_xhp_element_mangling = false };
-                                                       f_doc_comment = None; 
-                                                       f_static = false },
+                                                       f_doc_comment = None },
                                                      [([Pos.none], $0splice0); ([Pos.none], $0splice1); ([Pos.none], $0splice2); ([Pos.none], $0splice3); ([Pos.none], $0splice4)])))
                                                  ],
                                                None))))))
@@ -469,7 +466,7 @@
                                ns_const_uses = <opaque>; ns_name = None; 
                                ns_auto_ns_map = []; ns_is_codegen = false; 
                                ns_disable_xhp_element_mangling = false };
-                             f_doc_comment = None; f_static = false },
+                             f_doc_comment = None },
                            []))),
                        [], [], None)))
                    }))))
@@ -481,4 +478,4 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })
+      f_doc_comment = None })

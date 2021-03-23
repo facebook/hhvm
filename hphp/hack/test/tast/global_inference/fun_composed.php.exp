@@ -15,7 +15,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })[(Fun
+      f_doc_comment = None })[(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
       f_ret = ((int), None); f_name = ([3:10-12], "\\g2"); f_tparams = []; 
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -32,7 +32,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })[(Fun
+      f_doc_comment = None })[(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
       f_ret = ((int), None); f_name = ([3:10-12], "\\g3"); f_tparams = []; 
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -49,7 +49,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })[(Fun
+      f_doc_comment = None })[(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial; f_readonly_ret = None; 
       f_ret = ((int), None); f_name = ([3:10-11], "\\f"); f_tparams = []; 
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
@@ -74,4 +74,4 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })
+      f_doc_comment = None })

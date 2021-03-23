@@ -10,7 +10,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false });
+      f_doc_comment = None });
   (Fun
      { f_span = [7:1-9:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None;
        f_ret = ((Awaitable<string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))]))))); 
@@ -24,7 +24,7 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [11:1-17:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None;
        f_ret = ((Awaitable<void>), (Some ([11:21-36], (Happly (([11:21-30], "\\HH\\Awaitable"), [([11:31-35], (Hprim Tvoid))]))))); 
@@ -50,4 +50,4 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false })
+       f_doc_comment = None })

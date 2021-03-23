@@ -29,7 +29,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [10:1-12:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((void), (Some ([10:15-19], (Hprim Tvoid)))); f_name = ([10:10-11], "\\g"); 
@@ -43,4 +43,4 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false })
+       f_doc_comment = None })

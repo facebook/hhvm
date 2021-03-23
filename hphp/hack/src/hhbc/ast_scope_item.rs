@@ -11,7 +11,6 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug)]
 pub struct LongLambda {
-    pub is_static: bool,
     pub is_async: bool,
     pub coeffects: HhasCoeffects,
 }

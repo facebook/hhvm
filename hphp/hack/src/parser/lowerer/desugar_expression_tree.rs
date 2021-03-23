@@ -190,7 +190,6 @@ fn wrap_fun_<TF>(
         external: false,
         doc_comment: None,
         namespace: RcOc::clone(&env.empty_ns_env),
-        static_: false,
     }
 }
 

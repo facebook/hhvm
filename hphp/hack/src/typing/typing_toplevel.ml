@@ -377,7 +377,6 @@ let fun_def ctx f :
           Aast.f_external = f.f_external;
           Aast.f_namespace = f.f_namespace;
           Aast.f_doc_comment = f.f_doc_comment;
-          Aast.f_static = f.f_static;
         }
       in
       let (_env, global_inference_env) = Env.extract_global_inference_env env in

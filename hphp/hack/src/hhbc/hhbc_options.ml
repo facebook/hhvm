@@ -30,7 +30,6 @@ type t = {
   option_log_extern_compiler_perf: bool;
   option_enable_intrinsics_extension: bool;
   option_phpism_disable_nontoplevel_declarations: bool;
-  option_phpism_disable_static_closures: bool;
   option_emit_cls_meth_pointers: bool;
   option_emit_inst_meth_pointers: bool;
   option_emit_meth_caller_func_pointers: bool;
@@ -85,7 +84,6 @@ let default =
     option_log_extern_compiler_perf = false;
     option_enable_intrinsics_extension = false;
     option_phpism_disable_nontoplevel_declarations = false;
-    option_phpism_disable_static_closures = true;
     option_emit_cls_meth_pointers = true;
     option_emit_inst_meth_pointers = true;
     option_emit_meth_caller_func_pointers = true;
@@ -153,8 +151,6 @@ let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 
 let phpism_disable_nontoplevel_declarations o =
   o.option_phpism_disable_nontoplevel_declarations
-
-let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
 
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 
@@ -257,8 +253,6 @@ let to_string o =
       @@ enable_intrinsics_extension o;
       Printf.sprintf "phpism_disable_nontoplevel_declarations: %B"
       @@ phpism_disable_nontoplevel_declarations o;
-      Printf.sprintf "phpism_disable_static_closures: %B"
-      @@ phpism_disable_static_closures o;
       Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o;
       Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o;
       Printf.sprintf "emit_meth_caller_func_pointers: %B"
@@ -344,8 +338,6 @@ let set_option options name value =
       options with
       option_phpism_disable_nontoplevel_declarations = as_bool value;
     }
-  | "hack.lang.phpism.disablestaticclosures" ->
-    { options with option_phpism_disable_static_closures = as_bool value }
   | "hhvm.emit_cls_meth_pointers" ->
     { options with option_emit_cls_meth_pointers = int_of_string value > 0 }
   | "hhvm.emit_inst_meth_pointers" ->
@@ -529,11 +521,6 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
       { opts with option_phpism_disable_nontoplevel_declarations = v = 1 } );
-    ( set_value
-        "hhvm.hack.lang.phpism.disable_static_closures"
-        get_value_from_config_int
-    @@ fun opts v -> { opts with option_phpism_disable_static_closures = v = 1 }
-    );
     ( set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int
     @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v = 1 } );
     ( set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int

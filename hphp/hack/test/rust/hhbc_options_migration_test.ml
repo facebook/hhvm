@@ -55,9 +55,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(phpism_disable_nontoplevel_declarations caml)
     Hhbc_options.(phpism_disable_nontoplevel_declarations rust);
   assert_equal
-    Hhbc_options.(phpism_disable_static_closures caml)
-    Hhbc_options.(phpism_disable_static_closures rust);
-  assert_equal
     Hhbc_options.(emit_cls_meth_pointers caml)
     Hhbc_options.(emit_cls_meth_pointers rust);
   assert_equal
@@ -368,9 +365,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.phpism.disable_nontoplevel_declarations\": {
     \"global_value\": true
   },
-  \"hhvm.hack.lang.phpism.disable_static_closures\": {
-    \"global_value\": true
-  },
   \"hhvm.hack_arr_compat_notices\": {
     \"global_value\": true
   },
@@ -489,9 +483,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'phpism'disable_nontoplevel_declarations =
     "-vhack.lang.phpism.disablenontopleveldeclarations=true"
 
-  let hhvm'hack'lang'phpism'disable_static_closures =
-    "-vhack.lang.phpism.disablestaticclosures=true"
-
   let hhvm'hack_arr_compat_notices = "-veval.hackarrcompatnotices=true"
 
   let hhvm'hack_arr_dv_arrs = "-veval.hackarrdvarrs=true"
@@ -556,7 +547,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'enable_coroutines;
       hhvm'hack'lang'enable_xhp_class_modifier;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;
-      hhvm'hack'lang'phpism'disable_static_closures;
       hhvm'hack_arr_compat_notices;
       hhvm'hack_arr_dv_arrs;
       (* hhvm'include_roots; *)

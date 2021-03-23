@@ -10,7 +10,7 @@
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = (Some "Foo\\Bar"); ns_auto_ns_map = []; ns_is_codegen = false; 
         ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false });
+      f_doc_comment = None });
   (Fun
      { f_span = [7:1-14:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((), (Some ([7:17-21], (Hprim Tvoid)))); f_name = ([7:10-13], "\\Foo\\Bar\\baz"); 
@@ -29,4 +29,4 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = (Some "Foo\\Bar"); ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false })
+       f_doc_comment = None })

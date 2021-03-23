@@ -27,7 +27,7 @@ varray(1) {
         }
       }
       ["defaultText"]=>
-      string(31) "static async function ($x) {
+      string(24) "async function ($x) {
 }
 "
       ["attributes"]=>

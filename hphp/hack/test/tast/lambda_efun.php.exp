@@ -36,7 +36,7 @@ Errors:
                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                           ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None; f_static = false },
+                        f_doc_comment = None },
                       [([15:15-17], $y)])))
                   )))));
           ([16:3-14],
@@ -72,7 +72,7 @@ Errors:
                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                           ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None; f_static = false },
+                        f_doc_comment = None },
                       [([18:26-28], $y)])))
                   )))));
           ([21:3-14],
@@ -113,7 +113,7 @@ Errors:
                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                           ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None; f_static = false },
+                        f_doc_comment = None },
                       [])))
                   )))));
           ([24:3-17],
@@ -133,5 +133,5 @@ Errors:
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment =
       (Some ([2:1-10:4],
-             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
-      f_static = false })
+             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
+      })

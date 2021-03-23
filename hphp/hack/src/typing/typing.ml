@@ -3570,7 +3570,6 @@ and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_external = f.f_external;
               Aast.f_namespace = f.f_namespace;
               Aast.f_doc_comment = f.f_doc_comment;
-              Aast.f_static = f.f_static;
             }
           in
           let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in

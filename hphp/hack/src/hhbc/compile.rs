@@ -79,7 +79,6 @@ bitflags! {
         const LOG_EXTERN_COMPILER_PERF=1 << 6;
         const ENABLE_INTRINSICS_EXTENSION=1 << 7;
         const DISABLE_NONTOPLEVEL_DECLARATIONS=1 << 8;
-        const DISABLE_STATIC_CLOSURES=1 << 9;
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
         const RX_IS_ENABLED=1 << 12;
@@ -174,9 +173,6 @@ impl HHBCFlags {
         let mut f = PhpismFlags::empty();
         if self.contains(HHBCFlags::DISABLE_NONTOPLEVEL_DECLARATIONS) {
             f |= PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS;
-        }
-        if self.contains(HHBCFlags::DISABLE_STATIC_CLOSURES) {
-            f |= PhpismFlags::DISABLE_STATIC_CLOSURES;
         }
         f
     }
@@ -487,7 +483,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_disallow_silence = false;
     popt.po_disable_nontoplevel_declarations =
         phpism_flags(PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS);
-    popt.po_disable_static_closures = phpism_flags(PhpismFlags::DISABLE_STATIC_CLOSURES);
     popt.po_disable_lval_as_an_expression =
         hack_lang_flags(LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION);
     popt.po_enable_class_level_where_clauses =

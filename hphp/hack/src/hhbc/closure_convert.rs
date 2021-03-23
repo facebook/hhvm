@@ -163,12 +163,11 @@ impl<'a> Env<'a> {
         self.with_function_like(ScopeItem::Lambda(lambda), true, fd)
     }
 
-    fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) -> Result<()> {
+    fn with_longlambda(&mut self, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
         let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params);
 
         let long_lambda = LongLambda {
-            is_static,
             is_async,
             coeffects,
         };
@@ -531,7 +530,6 @@ fn make_closure(
 
     // TODO(hrust): can we reconstruct fd here from the scratch?
     fd.name = Id(p.clone(), class_num.to_string());
-    fd.static_ = is_static;
     (fd, cd)
 }
 
@@ -647,7 +645,7 @@ fn convert_lambda<'a>(
     let lambda_env = &mut env.clone();
 
     if use_vars_opt.is_some() {
-        lambda_env.with_longlambda(false, &fd)?
+        lambda_env.with_longlambda(&fd)?
     } else {
         lambda_env.with_lambda(&fd)?
     };
@@ -721,11 +719,11 @@ fn convert_lambda<'a>(
     let class_num = total_class_count(lambda_env, st);
 
     let is_static = if is_long_lambda {
-        // long lambdas are static if they are annotated as such
-        fd.static_
+        // long lambdas are never static
+        false
     } else {
         // short lambdas can be made static if they don't capture this in
-        // any form (including any nested non-static lambdas )
+        // any form (including any nested lambdas)
         !st.captured_this
     };
 
@@ -927,7 +925,6 @@ fn convert_meth_caller_to_func_ptr<'a>(
         external: false,
         namespace: RcOc::clone(&st.state.empty_namespace),
         doc_comment: None,
-        static_: false,
     };
     st.state.named_hoisted_functions.insert(mangle_name, fd);
     return fun_handle;
@@ -1014,7 +1011,6 @@ fn make_dyn_meth_caller_lambda(
         external: false,
         namespace: RcOc::clone(&st.state.empty_namespace),
         doc_comment: None,
-        static_: false,
     };
     let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
     let force_val = if force { Expr_::True } else { Expr_::False };
@@ -1689,7 +1685,6 @@ fn extract_debugger_main(
         external: false,
         namespace: RcOc::clone(empty_namespace),
         doc_comment: None,
-        static_: false,
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

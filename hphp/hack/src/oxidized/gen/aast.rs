@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<59caa083c81456c6dc5b200a6865e540>>
+// @generated SignedSource<<04562ad9f4b335a0917460598ff61417>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1042,7 +1042,6 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub external: bool,
     pub namespace: Nsenv,
     pub doc_comment: Option<DocComment>,
-    pub static_: bool,
 }
 
 /// Naming has two phases and the annotation helps to indicate the phase.

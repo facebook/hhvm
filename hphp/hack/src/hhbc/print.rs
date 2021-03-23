@@ -3092,7 +3092,6 @@ fn print_efun<W: Write>(
     f: &ast::Fun_,
     use_list: &[ast::Lid],
 ) -> Result<(), W::Error> {
-    w.write_if(f.static_, "static ")?;
     w.write_if(
         f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator(),
         "async ",

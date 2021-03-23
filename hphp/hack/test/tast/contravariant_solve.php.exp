@@ -60,7 +60,7 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [12:1-14:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((E<T>), (Some ([12:22-26], (Happly (([12:22-23], "\\E"), [([12:24-25], (Habstr ("T", [])))]))))); 
@@ -88,7 +88,7 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false });
+       f_doc_comment = None });
   (Fun
      { f_span = [16:1-18:2]; f_annotation = (); f_mode = Mstrict; f_readonly_ret = None; 
        f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid)))); f_name = ([16:10-14], "\\test"); 
@@ -123,4 +123,4 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       f_doc_comment = None; f_static = false })
+       f_doc_comment = None })

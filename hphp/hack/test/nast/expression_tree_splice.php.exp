@@ -183,8 +183,7 @@
                                                          ns_auto_ns_map = []; 
                                                          ns_is_codegen = false; 
                                                          ns_disable_xhp_element_mangling = false };
-                                                       f_doc_comment = None; 
-                                                       f_static = false },
+                                                       f_doc_comment = None },
                                                      [([4:19-25], $0splice2); ([4:12-14], $0splice1); ([4:8-9], $0splice0)])));
                                                  ([4:8-26],
                                                   (Efun (
@@ -236,8 +235,7 @@
                                                          ns_auto_ns_map = []; 
                                                          ns_is_codegen = false; 
                                                          ns_disable_xhp_element_mangling = false };
-                                                       f_doc_comment = None; 
-                                                       f_static = false },
+                                                       f_doc_comment = None },
                                                      [([Pos.none], $0splice0); ([Pos.none], $0splice1); ([Pos.none], $0splice2)])))
                                                  ],
                                                None))))))
@@ -251,7 +249,7 @@
                                ns_const_uses = <opaque>; ns_name = None; 
                                ns_auto_ns_map = []; ns_is_codegen = false; 
                                ns_disable_xhp_element_mangling = false };
-                             f_doc_comment = None; f_static = false },
+                             f_doc_comment = None },
                            [([4:19-21], $x)]))),
                        [], [], None)))
                    }))))
@@ -263,4 +261,4 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })
+      f_doc_comment = None })

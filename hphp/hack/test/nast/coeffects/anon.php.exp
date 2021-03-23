@@ -25,7 +25,7 @@
                          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                       f_doc_comment = None; f_static = false },
+                       f_doc_comment = None },
                      [])))
                  )))));
           ([5:3-10], (Expr ([5:3-9], (Binop ((Eq None), ([5:3-5], (Lvar ([5:3-5], $x))), ([5:8-9], (Int "1")))))));
@@ -48,7 +48,7 @@
                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                           ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None; f_static = false },
+                        f_doc_comment = None },
                       [([6:43-47], $ret)])))
                   )))));
           ([7:3-57],
@@ -71,7 +71,7 @@
                           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; 
                           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = []; 
                           ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-                        f_doc_comment = None; f_static = false },
+                        f_doc_comment = None },
                       [([7:36-40], $ret)])))
                   )))))
           ];
@@ -82,4 +82,4 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      f_doc_comment = None; f_static = false })
+      f_doc_comment = None })

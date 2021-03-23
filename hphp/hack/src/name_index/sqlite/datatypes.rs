@@ -65,14 +65,6 @@ impl FromSql for SqliteKindOfType {
 pub(crate) mod convert {
     use super::*;
 
-    pub fn ids_to_string(ids: &[Id]) -> String {
-        let ids = ids
-            .into_iter()
-            .map(|id| id.1.clone())
-            .collect::<Vec<String>>();
-        ids.join("|")
-    }
-
     pub fn mode_to_i64(mode: Option<Mode>) -> Option<i64> {
         match mode {
             Some(mode) => Some(match mode {

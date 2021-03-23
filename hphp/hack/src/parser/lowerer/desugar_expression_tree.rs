@@ -42,8 +42,8 @@ use oxidized::{
 ///     // SQL query.
 ///     function (MyDsl $v) {
 ///       // (ignoring ExprPos arguments for brevity)
-///       return $v->methCall(
-///         $v->call(
+///       return $v->visitMethCall(
+///         $v->visitCall(
 ///           $v->splice('$0splice0', $0splice0),
 ///           vec[]),
 ///         "__plus",
@@ -712,12 +712,12 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
 
     let pos = exprpos(&e.0);
     let e = match &e.1 {
-        // Convert `$x` to `$v->localVar(new ExprPos(...), "$x")` (note the quoting).
-        Lvar(lid) => v_meth_call("localVar", vec![pos, string_literal(&((lid.1).1))], &e.0),
-        // Convert `... = ...` to `$v->assign(new ExprPos(...), $v->..., $v->...)`.
+        // Convert `$x` to `$v->visitLocal(new ExprPos(...), "$x")` (note the quoting).
+        Lvar(lid) => v_meth_call("visitLocal", vec![pos, string_literal(&((lid.1).1))], &e.0),
+        // Convert `... = ...` to `$v->visitAssign(new ExprPos(...), $v->..., $v->...)`.
         Binop(bop) => match &**bop {
             (Bop::Eq(None), lhs, rhs) => v_meth_call(
-                "assign",
+                "visitAssign",
                 vec![pos, rewrite_expr(env, &lhs)?, rewrite_expr(env, &rhs)?],
                 &e.0,
             ),
@@ -728,7 +728,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                 ));
             }
         },
-        // Convert ... ? ... : ... to `$v->ternary(new ExprPos(...), $v->..., $v->..., $v->...)`
+        // Convert ... ? ... : ... to `$v->visitTernary(new ExprPos(...), $v->..., $v->..., $v->...)`
         Eif(eif) => {
             let (e1, e2o, e3) = &**eif;
             let e2 = if let Some(e2) = e2o {
@@ -737,7 +737,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                 null_literal()
             };
             v_meth_call(
-                "ternary",
+                "visitTernary",
                 vec![pos, rewrite_expr(env, &e1)?, e2, rewrite_expr(env, &e3)?],
                 &e.0,
             )
@@ -746,7 +746,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
             let (recv, _, args, _) = &**call;
             match &recv.1 {
                 // Convert `$foo->bar(args)` to
-                // `$v->methCall(new ExprPos(...), $foo, 'bar', vec[args])`
+                // `$v->visitMethCall(new ExprPos(...), $foo, 'bar', vec[args])`
                 // Parenthesized expressions e.g. `($foo->bar)(args)` unsupported.
                 ObjGet(objget) if !objget.as_ref().3 => {
                     let (receiver, meth, _, _) = &**objget;
@@ -759,7 +759,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                                 fn_name,
                                 vec_literal(rewrite_exprs(env, args)?),
                             ];
-                            v_meth_call("methCall", desugared_args, &e.0)
+                            v_meth_call("visitMethCall", desugared_args, &e.0)
                         }
                         _ => {
                             return Err((
@@ -769,18 +769,18 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
                         }
                     }
                 }
-                // Convert expr( ... )(args) to `$v->call(new ExprPos(..), rewrite_expr(expr), vec[args])`
+                // Convert expr( ... )(args) to `$v->visitCall(new ExprPos(..), rewrite_expr(expr), vec[args])`
                 _ => {
                     let args = vec![
                         pos,
                         rewrite_expr(env, recv)?,
                         vec_literal(rewrite_exprs(env, args)?),
                     ];
-                    v_meth_call("call", args, &e.0)
+                    v_meth_call("visitCall", args, &e.0)
                 }
             }
         }
-        // Convert `($x) ==> { ... }` to `$v->lambdaLiteral(new ExprPos(...), vec["$x"], vec[...])`.
+        // Convert `($x) ==> { ... }` to `$v->visitLambda(new ExprPos(...), vec["$x"], vec[...])`.
         Lfun(lf) => {
             let fun_ = &lf.0;
 
@@ -797,7 +797,7 @@ fn rewrite_expr<TF>(env: &Env<TF>, e: &Expr) -> Result<Expr, (Pos, String)> {
 
             let body_stmts = rewrite_stmts(env, &fun_.body.ast)?;
             v_meth_call(
-                "lambdaLiteral",
+                "visitLambda",
                 vec![pos, vec_literal(param_names), vec_literal(body_stmts)],
                 &e.0,
             )
@@ -855,28 +855,24 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
     let e = match &s.1 {
         Expr(e) => Some(rewrite_expr(env, &e)?),
         Return(e) => match &**e {
-            // Convert `return ...;` to `$v->returnStatement(new ExprPos(...), $v->...)`.
+            // Convert `return ...;` to `$v->visitReturn(new ExprPos(...), $v->...)`.
             Some(e) => Some(v_meth_call(
-                "returnStatement",
+                "visitReturn",
                 vec![pos, rewrite_expr(env, &e)?],
                 &s.0,
             )),
-            // Convert `return;` to `$v->returnStatement(new ExprPos(...), null)`.
-            None => Some(v_meth_call(
-                "returnStatement",
-                vec![pos, null_literal()],
-                &s.0,
-            )),
+            // Convert `return;` to `$v->visitReturn(new ExprPos(...), null)`.
+            None => Some(v_meth_call("visitReturn", vec![pos, null_literal()], &s.0)),
         },
         // Convert `if (...) {...} else {...}` to
-        // `$v->ifStatement(new ExprPos(...), $v->..., vec[...], vec[...])`.
+        // `$v->visitIf(new ExprPos(...), $v->..., vec[...], vec[...])`.
         If(if_stmt) => {
             let (e, then_block, else_block) = &**if_stmt;
             let then_stmts = rewrite_stmts(env, then_block)?;
             let else_stmts = rewrite_stmts(env, else_block)?;
 
             Some(v_meth_call(
-                "ifStatement",
+                "visitIf",
                 vec![
                     pos,
                     rewrite_expr(env, &e)?,
@@ -887,19 +883,19 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             ))
         }
         // Convert `while (...) {...}` to
-        // `$v->whileStatement(new ExprPos(...), $v->..., vec[...])`.
+        // `$v->visitWhile(new ExprPos(...), $v->..., vec[...])`.
         While(w) => {
             let (e, body) = &**w;
             let body_stmts = rewrite_stmts(env, body)?;
 
             Some(v_meth_call(
-                "whileStatement",
+                "visitWhile",
                 vec![pos, rewrite_expr(env, &e)?, vec_literal(body_stmts)],
                 &s.0,
             ))
         }
         // Convert `for (...; ...; ...) {...}` to
-        // `$v->forStatement(new ExprPos(...), vec[...], ..., vec[...], vec[...])`.
+        // `$v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])`.
         For(w) => {
             let (init, cond, incr, body) = &**w;
             let init_exprs = rewrite_exprs(env, init)?;
@@ -912,7 +908,7 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
             let body_stmts = rewrite_stmts(env, body)?;
 
             Some(v_meth_call(
-                "forStatement",
+                "visitFor",
                 vec![
                     pos,
                     vec_literal(init_exprs),
@@ -923,10 +919,10 @@ fn rewrite_stmt<TF>(env: &Env<TF>, s: &Stmt) -> Result<Option<Expr>, (Pos, Strin
                 &s.0,
             ))
         }
-        // Convert `break;` to `$v->breakStatement(new ExprPos(...))`
-        Break => Some(v_meth_call("breakStatement", vec![pos], &s.0)),
-        // Convert `continue;` to `$v->continueStatement(new ExprPos(...))`
-        Continue => Some(v_meth_call("continueStatement", vec![pos], &s.0)),
+        // Convert `break;` to `$v->visitBreak(new ExprPos(...))`
+        Break => Some(v_meth_call("visitBreak", vec![pos], &s.0)),
+        // Convert `continue;` to `$v->visitContinue(new ExprPos(...))`
+        Continue => Some(v_meth_call("visitContinue", vec![pos], &s.0)),
         Noop => None,
         _ => {
             return Err((

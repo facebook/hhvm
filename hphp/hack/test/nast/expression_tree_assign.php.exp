@@ -83,7 +83,7 @@
                                                               (Some (
                                                               [4:8-26],
                                                               (Call ((
-                                                                 [4:8-26], (Obj_get (([4:8-26], (Lvar ([4:8-26], $v))), ([4:8-26], (Id ([4:8-26], "lambdaLiteral"))), OG_nullthrows, false))), 
+                                                                 [4:8-26], (Obj_get (([4:8-26], (Lvar ([4:8-26], $v))), ([4:8-26], (Id ([4:8-26], "visitLambda"))), OG_nullthrows, false))), 
                                                                  [],
                                                                  [([4:8-26],
                                                                    (New ((
@@ -99,8 +99,8 @@
                                                                     (
                                                                     ValCollection (Vec, None,
                                                                     [([4:17-23],
-                                                                    (Call ((
-                                                                    [4:17-23], (Obj_get (([4:17-23], (Lvar ([4:17-23], $v))), ([4:17-23], (Id ([4:17-23], "assign"))), OG_nullthrows, false))), 
+                                                                    (Call (
+                                                                    ([4:17-23], (Obj_get (([4:17-23], (Lvar ([4:17-23], $v))), ([4:17-23], (Id ([4:17-23], "visitAssign"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [([4:17-23],
                                                                     (New ((
@@ -113,7 +113,7 @@
                                                                     [Pos.none], (Int "22"))], None, [4:17-23])));
                                                                     ([4:17-19],
                                                                     (Call (
-                                                                    ([4:17-19], (Obj_get (([4:17-19], (Lvar ([4:17-19], $v))), ([4:17-19], (Id ([4:17-19], "localVar"))), OG_nullthrows, false))), 
+                                                                    ([4:17-19], (Obj_get (([4:17-19], (Lvar ([4:17-19], $v))), ([4:17-19], (Id ([4:17-19], "visitLocal"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [([4:17-19],
                                                                     (New ((
@@ -141,8 +141,8 @@
                                                                     [Pos.none], (String "$0splice0")); (
                                                                     [4:22-23], (Lvar ([4:22-23], $0splice0)))], None)))], None)));
                                                                     ([4:8-26],
-                                                                    (Call (
-                                                                    ([4:8-26], (Obj_get (([4:8-26], (Lvar ([4:8-26], $v))), ([4:8-26], (Id ([4:8-26], "returnStatement"))), OG_nullthrows, false))),
+                                                                    (Call ((
+                                                                    [4:8-26], (Obj_get (([4:8-26], (Lvar ([4:8-26], $v))), ([4:8-26], (Id ([4:8-26], "visitReturn"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [([4:8-26],
                                                                     (New ((

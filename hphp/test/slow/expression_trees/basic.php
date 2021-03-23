@@ -53,7 +53,7 @@ final class MyVisitor {
     );
   }
 
-  public function methCall(
+  public function visitMethCall(
     ExprPos $_,
     string $lhs,
     string $meth_name,
@@ -66,7 +66,7 @@ final class MyVisitor {
     return "lhs $meth_name rhs";
   }
 
-  public function call<T>(
+  public function visitCall<T>(
     ?ExprPos $_,
     string $callee,
     vec<string> $args,

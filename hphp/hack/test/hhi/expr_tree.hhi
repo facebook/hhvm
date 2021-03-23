@@ -50,10 +50,10 @@ class Code {
   }
 
   // Expressions
-  public function localVar(?ExprPos $_, string $_): Code::TAst {
+  public function visitLocal(?ExprPos $_, string $_): Code::TAst {
     throw new Exception();
   }
-  public function lambdaLiteral(
+  public function visitLambda(
     ?ExprPos $_,
     vec<string> $_args,
     vec<Code::TAst> $_body,
@@ -62,7 +62,7 @@ class Code {
   }
 
   // Operators
-  public function methCall(
+  public function visitMethCall(
     ?ExprPos $_,
     Code::TAst $_,
     string $_,
@@ -72,7 +72,7 @@ class Code {
   }
 
   // Old style operators
-  public function call<T>(
+  public function visitCall<T>(
     ?ExprPos $_,
     Code::TAst $_callee,
     vec<Code::TAst> $_args,
@@ -80,7 +80,7 @@ class Code {
     throw new Exception();
   }
 
-  public function assign(
+  public function visitAssign(
     ?ExprPos $_,
     Code::TAst $_,
     Code::TAst $_,
@@ -88,7 +88,7 @@ class Code {
     throw new Exception();
   }
 
-  public function ternary(
+  public function visitTernary(
     ?ExprPos $_,
     Code::TAst $_condition,
     ?Code::TAst $_truthy,
@@ -98,7 +98,7 @@ class Code {
   }
 
   // Statements.
-  public function ifStatement(
+  public function visitIf(
     ?ExprPos $_,
     Code::TAst $_cond,
     vec<Code::TAst> $_then_body,
@@ -106,20 +106,20 @@ class Code {
   ): Code::TAst {
     throw new Exception();
   }
-  public function whileStatement(
+  public function visitWhile(
     ?ExprPos $_,
     Code::TAst $_cond,
     vec<Code::TAst> $_body,
   ): Code::TAst {
     throw new Exception();
   }
-  public function returnStatement(
+  public function visitReturn(
     ?ExprPos $_,
     ?Code::TAst $_,
   ): Code::TAst {
     throw new Exception();
   }
-  public function forStatement(
+  public function visitFor(
     ?ExprPos $_,
     vec<Code::TAst> $_,
     ?Code::TAst $_,
@@ -128,10 +128,10 @@ class Code {
   ): Code::TAst {
     throw new Exception();
   }
-  public function breakStatement(?ExprPos $_): Code::TAst {
+  public function visitBreak(?ExprPos $_): Code::TAst {
     throw new Exception();
   }
-  public function continueStatement(?ExprPos $_,): Code::TAst {
+  public function visitContinue(?ExprPos $_,): Code::TAst {
     throw new Exception();
   }
 

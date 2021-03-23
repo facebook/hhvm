@@ -51,7 +51,6 @@ module GEnv = struct
     Naming_provider.get_type_canon_name ctx (canon_key name)
 
   let type_pos ctx name =
-    let name = Option.value (type_canon_name ctx name) ~default:name in
     match Naming_provider.get_type_pos ctx name with
     | Some pos ->
       let (p, _) = get_full_pos ctx (pos, name) in

@@ -627,6 +627,7 @@ module Typing = struct
     | ExperimentalExpressionTrees [@value 4420]
     | ReturnsWithAndWithoutValue [@value 4421]
     | NonVoidAnnotationOnReturnVoidFun [@value 4422]
+    | BitwiseMathInvalidArgument [@value 4423]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

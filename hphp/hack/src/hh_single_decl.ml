@@ -242,6 +242,7 @@ let () =
       ignored_arg "--extra-builtin";
       ignored_flag "--disallow-inst-meth";
       ignored_flag "--ignore-unsafe-cast";
+      ignored_flag "--bitwise-math-new-code";
     ]
     set_file
     usage;

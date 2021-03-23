@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ef1357ab54b2533b2e602c50b88a6eb5>>
+// @generated SignedSource<<31c9b4e78e09d2af682049daca789b6e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -529,6 +529,7 @@ pub enum Typing {
     ExperimentalExpressionTrees = 4420,
     ReturnsWithAndWithoutValue = 4421,
     NonVoidAnnotationOnReturnVoidFun = 4422,
+    BitwiseMathInvalidArgument = 4423,
 }
 impl TrivialDrop for Typing {}
 

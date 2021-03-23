@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<70f34070ddbfa4ebcdc934431c91e456>>
+// @generated SignedSource<<546c5071c7ce46b7e9eb5caeb7f93618>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -140,5 +140,6 @@ pub struct GlobalOptions<'a> {
     pub tco_readonly: bool,
     pub tco_enable_expression_trees: bool,
     pub tco_allowed_expression_tree_visitors: &'a [&'a str],
+    pub tco_bitwise_math_new_code: bool,
 }
 impl<'a> TrivialDrop for GlobalOptions<'a> {}

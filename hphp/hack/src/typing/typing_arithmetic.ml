@@ -91,7 +91,7 @@ let check_dynamic_or_enforce_num env p t r =
  *   (1) Enforce that it coerce to int
  *   (2) Check if it's dynamic
  *)
-let check_dynamic_or_enforce_int env p t r =
+let check_dynamic_or_enforce_int env p t r err =
   let env =
     Typing_coercion.coerce_type
       p
@@ -99,7 +99,7 @@ let check_dynamic_or_enforce_int env p t r =
       env
       t
       { et_type = MakeType.int r; et_enforced = Enforced }
-      Errors.unify_error
+      err
   in
   (env, Typing_utils.is_dynamic env t)
 
@@ -276,8 +276,21 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Ltlt
   | Ast_defs.Gtgt
     when not contains_any ->
-    let (env, _) = check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) in
-    let (env, _) = check_dynamic_or_enforce_int env p ty2 (Reason.Rarith p2) in
+    let err =
+      match bop with
+      | Ast_defs.Percent -> Errors.unify_error
+      | _ ->
+        if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
+          Errors.bitwise_math_invalid_argument
+        else
+          Errors.unify_error
+    in
+    let (env, _) =
+      check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) err
+    in
+    let (env, _) =
+      check_dynamic_or_enforce_int env p ty2 (Reason.Rarith p2) err
+    in
     let r =
       match bop with
       | Ast_defs.Percent -> Reason.Rarith_ret_int p
@@ -288,11 +301,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Amp
   | Ast_defs.Bar
     when not contains_any ->
+    let err =
+      if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
+        Errors.bitwise_math_invalid_argument
+      else
+        Errors.unify_error
+    in
     let (env, is_dynamic1) =
-      check_dynamic_or_enforce_int env p ty1 (Reason.Rbitwise p1)
+      check_dynamic_or_enforce_int env p ty1 (Reason.Rbitwise p1) err
     in
     let (env, is_dynamic2) =
-      check_dynamic_or_enforce_int env p ty2 (Reason.Rbitwise p2)
+      check_dynamic_or_enforce_int env p ty2 (Reason.Rbitwise p2) err
     in
     let result_ty =
       if is_dynamic1 && is_dynamic2 then
@@ -425,9 +444,15 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te ty
     else
+      let err =
+        if TypecheckerOptions.bitwise_math_new_code (Env.get_tcopt env) then
+          Errors.bitwise_math_invalid_argument
+        else
+          Errors.unify_error
+      in
       (* args isn't any or a variant thereof so can actually do stuff *)
       let (env, is_dynamic) =
-        check_dynamic_or_enforce_int env p ty (Reason.Rbitwise p)
+        check_dynamic_or_enforce_int env p ty (Reason.Rbitwise p) err
       in
       let result_ty =
         if is_dynamic then

@@ -3411,6 +3411,9 @@ let strict_str_concat_type_mismatch =
 let strict_str_interp_type_mismatch =
   maybe_unify_error Typing.StrictStrInterpTypeMismatch
 
+let bitwise_math_invalid_argument =
+  maybe_unify_error Typing.BitwiseMathInvalidArgument
+
 let using_error pos has_await ?code:_ msg _list =
   let (note, cls) =
     if has_await then

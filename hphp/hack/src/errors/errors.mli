@@ -700,6 +700,8 @@ val strict_str_concat_type_mismatch : typing_error_callback
 
 val strict_str_interp_type_mismatch : typing_error_callback
 
+val bitwise_math_invalid_argument : typing_error_callback
+
 val using_error : Pos_or_decl.t -> bool -> typing_error_callback
 
 val static_redeclared_as_dynamic :

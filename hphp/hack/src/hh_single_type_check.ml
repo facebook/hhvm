@@ -283,6 +283,7 @@ let parse_options () =
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
+  let bitwise_math_new_code = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -667,6 +668,9 @@ let parse_options () =
       ( "--ignore-unsafe-cast",
         Arg.Set ignore_unsafe_cast,
         "Ignore unsafe_cast and retain the original type of the expression" );
+      ( "--bitwise-math-new-code",
+        Arg.Set bitwise_math_new_code,
+        "Use new error code in bitwise math operations." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -806,6 +810,7 @@ let parse_options () =
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
+      ~tco_bitwise_math_new_code:!bitwise_math_new_code
       ()
   in
   Errors.allowed_fixme_codes_strict :=

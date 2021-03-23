@@ -328,7 +328,6 @@ char const* getSessionKindName(SessionKind value) {
   switch(value) {
     case SessionKind::None: return "None";
     case SessionKind::DebuggerClient: return "DebuggerClient";
-    case SessionKind::APCPrime: return "APCPrime";
     case SessionKind::PreloadRepo: return "PreloadRepo";
     case SessionKind::Watchman: return "Watchman";
     case SessionKind::Vsdebug: return "VSDebug";

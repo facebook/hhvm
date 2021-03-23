@@ -596,7 +596,6 @@ void HttpServer::EvictFileCache() {
   // about to start.
   advise_out(RuntimeOption::RepoLocalPath);
   advise_out(RuntimeOption::FileCache);
-  apc_advise_out();
 }
 
 void HttpServer::PrepareToStop() {

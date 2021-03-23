@@ -1,11 +1,5 @@
 {
   extern "C++" {
-    HPHP::apc_load_impl*;
-    HPHP::apc_load_impl_compressed*;
-    "HPHP::const_load()";
-    HPHP::const_load_impl*;
-    HPHP::const_load_impl_compressed*;
-
     HPHP::type_scan::detail::Indexer*;
     *::_type_scan_custom_*;
   };

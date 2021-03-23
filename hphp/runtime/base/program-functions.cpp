@@ -2489,31 +2489,6 @@ void hphp_process_init() {
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
 
-  std::unique_ptr<std::thread> apcLoadingThread;
-  if (!apcExtension::PrimeLibrary.empty()) {
-    apcLoadingThread = std::make_unique<std::thread>([&] {
-        hphp_thread_init();
-        SCOPE_EXIT {
-          hphp_thread_exit();
-        };
-        ProfileNonVMThread nonVM;
-        hphp_session_init(Treadmill::SessionKind::APCPrime);
-        SCOPE_EXIT {
-          hphp_context_exit();
-          hphp_session_exit();
-        };
-        UnlimitSerializationScope unlimit;
-        // TODO(9755792): Add real execution mode for snapshot generation.
-        if (apcExtension::PrimeLibraryUpgradeDest != "") {
-          Timer timer(Timer::WallTime, "optimizeApcPrime");
-          apc_load(apcExtension::LoadThread);
-        } else {
-          apc_load(apcExtension::LoadThread);
-        }
-      }
-    );
-  }
-
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
@@ -2596,16 +2571,6 @@ void hphp_process_init() {
   context->~ExecutionContext();
   new (context) ExecutionContext();
   BootStats::mark("ExecutionContext");
-
-  if (apcLoadingThread) {
-    apcLoadingThread->join();
-  }
-  // TODO(9755792): Add real execution mode for snapshot generation.
-  if (apcExtension::PrimeLibraryUpgradeDest != "") {
-    Logger::Info("APC PrimeLibrary upgrade mode completed; exiting.");
-    hphp_process_exit();
-    exit(0);
-  }
 }
 
 static void handle_exception(bool& ret, ExecutionContext* context,

@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
-#include "hphp/runtime/base/apc-file-storage.h"
 
 namespace HPHP {
 
@@ -31,68 +30,12 @@ namespace HPHP {
 namespace {
 
 using Store = ConcurrentTableSharedStore;
-using PrimePair = Store::KeyValuePair;
-
-char* alloc_leaked_string(const char* source) {
-  return strdup(source);
-}
-
-template<class Create>
-std::vector<PrimePair> primable_n(Store& store,
-                                  const char* prefix,
-                                  Create create) {
-  std::vector<PrimePair> pairs(10);
-  auto counter = int64_t{0};
-  for (auto& pair : pairs) {
-    auto key = folly::sformat("{}_{}", prefix, counter);
-    pair.key = alloc_leaked_string(key.c_str());
-
-    Variant v(create(counter));
-    store.constructPrime(v, pair);
-
-    ++counter;
-  }
-  return pairs;
-}
-
-/*
- * Sets int_n -> KindOfInt64 n
- *
- * Note that ints are never file-backed in apc right now.
- */
-std::vector<PrimePair> primable_ints(Store& store) {
-  return primable_n(store, "int", [&] (int64_t n) {
-    return n;
-  });
-}
-
-/*
- * Sets obj_n -> a stdClass
- */
-std::vector<PrimePair> primable_objs(Store& store) {
-  return primable_n(store, "obj", [&](int64_t /*n*/) {
-    return Variant::attach(SystemLib::AllocStdClassObject().detach());
-  });
-}
 
 /*
  * Just an empty table.
  */
 std::unique_ptr<Store> new_store() {
   return std::make_unique<Store>();
-}
-
-/*
- * Make an APC table with some things primed for tests to use.
- */
-std::unique_ptr<Store> new_primed_store() {
-  s_apc_file_storage.enable("/tmp/apc_unit_test", 1ul << 20);
-
-  auto ret = std::make_unique<Store>();
-  ret->prime(primable_ints(*ret));
-  ret->prime(primable_objs(*ret));
-  ret->primeDone();
-  return ret;
 }
 
 const StaticString s_key("key");
@@ -192,24 +135,6 @@ TEST(APC, IncCas) {
   EXPECT_EQ(store->inc(s_key, 1, found), 0);
   EXPECT_FALSE(found);
   EXPECT_FALSE(store->cas(s_key, 1, 2));
-}
-
-TEST(APC, BasicPrimeStuff) {
-  auto store = new_primed_store();
-  Variant val;
-
-  EXPECT_TRUE(store->get("int_2", val));
-  EXPECT_TRUE(tvSame(*val.asTypedValue(), make_tv<KindOfInt64>(2)));
-
-  bool found = false;
-  EXPECT_EQ(store->inc("int_3", 1, found), 4);
-  EXPECT_TRUE(found);
-  EXPECT_FALSE(store->get("int_200", val));
-
-  EXPECT_EQ(store->cas("obj_1", 1, 2), false); // cannot cas an object
-  EXPECT_EQ(store->cas("obj_2", 4, 5), false);
-  EXPECT_EQ(store->cas("int_4", 4, 5), true);
-  EXPECT_EQ(store->cas("int_5", 4, 5), false);
 }
 
 TEST(APC, SampleEntries) {

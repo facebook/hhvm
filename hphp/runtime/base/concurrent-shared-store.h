@@ -32,7 +32,6 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -316,18 +315,6 @@ struct ConcurrentTableSharedStore {
   bool clear();
 
   /*
-   * The API for priming APC.  Poorly documented.
-   */
-  void prime(std::vector<KeyValuePair>&& vars);
-  bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
-  bool constructPrime(const Variant& v, KeyValuePair& item);
-  void primeDone();
-  // Returns false on failure (in particular, for the old file format).
-  bool primeFromSnapshot(const char* filename);
-  // Evict any file-backed APC values from OS page cache.
-  void adviseOut();
-
-  /*
    * Init
    */
   void init();
@@ -484,7 +471,6 @@ private:
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
   std::atomic<time_t> m_lastPurgeTime{0};
-  std::unique_ptr<SnapshotLoader> m_snapshotLoader;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -16,14 +16,12 @@
 
 #include "hphp/runtime/base/concurrent-shared-store.h"
 
-#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/apc/snapshot.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/logger.h"
@@ -569,13 +567,6 @@ void ConcurrentTableSharedStore::purgeExpired() {
       m_expQueue.push(tmp);
       break;
     }
-    if (UNLIKELY(tmp.first ==
-                 intptr_t(apcExtension::FileStorageFlagKey.c_str()))) {
-      adviseOut();
-      tmp.second = time(nullptr) + apcExtension::FileStorageAdviseOutPeriod;
-      m_expQueue.push(tmp);
-      continue;
-    }
     ExpMap::accessor acc;
     if (m_expMap.find(acc, tmp.first)) {
       FTRACE(3, "Expiring {}...", (char*)tmp.first);
@@ -1113,147 +1104,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   }
 
   return true;
-}
-
-void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
-  SharedMutex::ReadHolder l(m_lock);
-  // we are priming, so we are not checking existence or expiration
-  for (unsigned int i = 0; i < vars.size(); i++) {
-    const KeyValuePair &item = vars[i];
-    Map::accessor acc;
-    auto const keyLen = strlen(item.key);
-    auto const copy = strdup(item.key);
-    if (m_vars.insert(acc, copy)) {
-      APCStats::getAPCStats().addPrimedKey(keyLen);
-    } else {
-      free(copy);
-
-      // We're going to overwrite what was there.
-      auto& sval = acc->second;
-      sval.data().match(
-        [&] (APCHandle* handle) {
-          handle->unreferenceRoot(sval.dataSize);
-        },
-        [&] (char*) {}
-      );
-      sval.clearData();
-      sval.dataSize = 0;
-      sval.expireTime.store(0, std::memory_order_release);
-    }
-
-    acc->second.readOnly = apcExtension::EnableConstLoad && item.readOnly;
-    if (item.inMem()) {
-      APCStats::getAPCStats().addAPCValue(item.value, item.sSize, true);
-      acc->second.set(item.value, 0, 0, 0);
-      acc->second.dataSize = item.sSize;
-    } else {
-      acc->second.tagged_data.store(item.sAddr, std::memory_order_release);
-      acc->second.dataSize = item.sSize;
-      APCStats::getAPCStats().addInFileValue(std::abs(acc->second.dataSize));
-    }
-    FTRACE(2, "Primed key {} {}\n", acc->first, show(acc->second));
-  }
-}
-
-bool ConcurrentTableSharedStore::constructPrime(const String& v,
-                                                KeyValuePair& item,
-                                                bool serialized) {
-  if (s_apc_file_storage.getState() !=
-      APCFileStorage::StorageState::Invalid &&
-      (!v.get()->isStatic() || serialized)) {
-    // StaticString for non-object should consume limited amount of space,
-    // not worth going through the file storage
-
-    // TODO: currently we double serialize string for uniform handling later,
-    // hopefully the unserialize won't be called often. We could further
-    // optimize by storing more type info.
-    String s = apc_serialize(VarNR{v}, APCSerializeMode::Prime);
-    char *sAddr = s_apc_file_storage.put(s.data(), s.size());
-    if (sAddr) {
-      item.sAddr = sAddr;
-      item.sSize = serialized ? 0 - s.size() : s.size();
-      return false;
-    }
-  }
-  auto pair = APCHandle::Create(VarNR{v}, serialized,
-                                APCHandleLevel::Outer, false);
-  item.value = pair.handle;
-  item.sSize = pair.size;
-  return true;
-}
-
-bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
-                                                KeyValuePair& item) {
-  if (s_apc_file_storage.getState() !=
-      APCFileStorage::StorageState::Invalid &&
-      (isRefcountedType(v.getType()))) {
-    // Only do the storage for ref-counted type
-    String s = apc_serialize(v, APCSerializeMode::Prime);
-    char *sAddr = s_apc_file_storage.put(s.data(), s.size());
-    if (sAddr) {
-      item.sAddr = sAddr;
-      item.sSize = s.size();
-      return false;
-    }
-  }
-  auto pair = APCHandle::Create(v, false, APCHandleLevel::Outer, false);
-  item.value = pair.handle;
-  item.sSize = pair.size;
-  return true;
-}
-
-void ConcurrentTableSharedStore::primeDone() {
-  if (s_apc_file_storage.getState() !=
-      APCFileStorage::StorageState::Invalid) {
-    s_apc_file_storage.seal();
-    s_apc_file_storage.hashCheck();
-  }
-  // Schedule the adviseOut instead of doing it immediately, so that the
-  // initial accesses to the primed keys are not too bad. Still, for
-  // the keys in file, a deserialization from memory is required on first
-  // access.
-  ExpirationPair p(intptr_t(apcExtension::FileStorageFlagKey.c_str()),
-                   time(nullptr) + apcExtension::FileStorageAdviseOutPeriod);
-  m_expQueue.push(p);
-
-  for (auto iter = apcExtension::CompletionKeys.begin();
-       iter != apcExtension::CompletionKeys.end(); ++iter) {
-    Map::accessor acc;
-    auto const copy = strdup(iter->c_str());
-    if (!m_vars.insert(acc, copy)) {
-      free(copy);
-      return;
-    }
-    auto const pair =
-      APCHandle::Create(Variant(1), false, APCHandleLevel::Outer, false);
-    acc->second.set(pair.handle, 0, 0, 0);
-    acc->second.dataSize = pair.size;
-    APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
-  }
-}
-
-bool ConcurrentTableSharedStore::primeFromSnapshot(const char* filename) {
-  m_snapshotLoader = std::make_unique<SnapshotLoader>();
-  if (!m_snapshotLoader->tryInitializeFromFile(filename)) {
-    m_snapshotLoader.reset();
-    return false;
-  }
-  // TODO(9755815): APCFileStorage is redundant when using snapshot;
-  // disable it at module loading time in this case.
-  Logger::Info("Loading from snapshot file %s", filename);
-  m_snapshotLoader->load(*this);
-  primeDone();
-  return true;
-}
-
-void ConcurrentTableSharedStore::adviseOut() {
-  if (s_apc_file_storage.getState() !=
-      APCFileStorage::StorageState::Invalid) {
-    s_apc_file_storage.adviseOut();
-  }
-  if (m_snapshotLoader.get()) {
-    m_snapshotLoader->adviseOut();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

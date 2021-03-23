@@ -29,7 +29,6 @@ namespace HPHP { namespace Treadmill {
 enum class SessionKind {
   None,
   DebuggerClient,
-  APCPrime,
   PreloadRepo,
   Watchman,
   Vsdebug,

@@ -29,11 +29,6 @@ struct apcExtension final : Extension {
   apcExtension() : Extension("apc", "4.0.2") {}
 
   static bool Enable;
-  static bool EnableConstLoad;
-  static bool ForceConstLoadToAPC;
-  static std::string PrimeLibrary;
-  static int LoadThread;
-  static std::set<std::string> CompletionKeys;
   static bool EnableApcSerialize;
   static bool ExpireOnSets;
   static bool AllowObj;
@@ -46,13 +41,6 @@ struct apcExtension final : Extension {
   static double HotLoadFactor;
   static bool HotKeyAllocLow;
   static bool HotMapAllocLow;
-  static std::string PrimeLibraryUpgradeDest;
-  static bool UseFileStorage;
-  static int64_t FileStorageChunkSize;
-  static std::string FileStoragePrefix;
-  static int FileStorageAdviseOutPeriod;
-  static std::string FileStorageFlagKey;
-  static bool FileStorageKeepFileLinked;
   static bool UseUncounted;
   static bool ShareUncounted;
   static bool Stat;
@@ -121,26 +109,6 @@ Array HHVM_FUNCTION(apc_cache_info,
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files
-
-void apc_load(int thread);
-
-// Evict any file-backed APC values from OS page cache.
-void apc_advise_out();
-
-// needed by generated apc archive .cpp files
-void apc_load_impl(struct cache_info *info,
-                   const char **int_keys, long long *int_values,
-                   const char **char_keys, char *char_values,
-                   const char **strings, const char **objects,
-                   const char **thrifts, const char **others);
-void apc_load_impl_compressed(
-  struct cache_info *info,
-  int *int_lens, const char *int_keys, long long *int_values,
-  int *char_lens, const char *char_keys, char *char_values,
-  int *string_lens, const char *strings,
-  int *object_lens, const char *objects,
-  int *thrift_lens, const char *thrifts,
-  int *other_lens, const char *others);
 
 struct apc_rfc1867_data {
   std::string tracking_key;

@@ -18,8 +18,6 @@ var_dump(ini_get("hhvm.server.port"));
 var_dump(ini_get("hhvm.log.use_log_file"));
 var_dump(ini_get("hhvm.log.file"));
 var_dump(ini_get("hhvm.mysql.connect_timeout"));
-var_dump(ini_get("hhvm.server.apc.load_thread"));
-var_dump(ini_get("hhvm.server.apc.file_storage.prefix"));
 
 // Throw some bad apples in there. They should
 // all return false

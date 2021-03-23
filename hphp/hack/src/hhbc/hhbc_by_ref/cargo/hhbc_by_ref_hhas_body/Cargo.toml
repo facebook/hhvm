@@ -8,7 +8,6 @@ edition = "2018"
 path = "../../hhas_body.rs"
 
 [dependencies]
-hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

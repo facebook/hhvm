@@ -44,7 +44,7 @@ pub struct HhasClass<'a, 'arena> {
         Vec<class::Type<'arena>>,
     )>,
     pub enum_type: Option<hhbc_by_ref_hhas_type::Info>,
-    pub methods: Vec<HhasMethod<'a, 'arena>>,
+    pub methods: Vec<HhasMethod<'arena>>,
     pub properties: Vec<HhasProperty<'arena>>,
     pub constants: Vec<HhasConstant<'arena>>,
     pub type_constants: Vec<HhasTypeConstant<'arena>>,

@@ -13,15 +13,13 @@ use context::Context;
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
 use hhbc_by_ref_ast_class_expr::ClassExpr;
-use hhbc_by_ref_ast_scope as ast_scope;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
-use hhbc_by_ref_env::Env as BodyEnv;
 use hhbc_by_ref_hhas_adata::{
     HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, LEGACY_DICT_PREFIX, LEGACY_VEC_PREFIX,
     VARRAY_PREFIX, VEC_PREFIX,
 };
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
-use hhbc_by_ref_hhas_body::HhasBody;
+use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
 use hhbc_by_ref_hhas_class::{self as hhas_class, HhasClass};
 use hhbc_by_ref_hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhbc_by_ref_hhas_constant::HhasConstant;
@@ -162,7 +160,7 @@ pub mod context {
 }
 
 struct ExprEnv<'e> {
-    pub codegen_env: Option<&'e BodyEnv<'e, 'e>>,
+    pub codegen_env: Option<&'e HhasBodyEnv>,
     pub is_xhp: bool,
 }
 
@@ -2293,7 +2291,7 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
 fn print_params<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    body_env: Option<&BodyEnv<'_, '_>>,
+    body_env: Option<&HhasBodyEnv>,
     params: &[HhasParam],
 ) -> Result<(), W::Error> {
     paren(w, |w| {
@@ -2304,7 +2302,7 @@ fn print_params<W: Write>(
 fn print_param<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    body_env: Option<&BodyEnv>,
+    body_env: Option<&HhasBodyEnv>,
     param: &HhasParam,
 ) -> Result<(), W::Error> {
     print_param_user_attributes(ctx, w, param)?;
@@ -2330,7 +2328,7 @@ fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId) -> Result<(), W::Erro
 fn print_param_default_value<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    body_env: Option<&BodyEnv>,
+    body_env: Option<&HhasBodyEnv>,
     default_val: &(Label, ast::Expr),
 ) -> Result<(), W::Error> {
     let expr_env = ExprEnv {
@@ -2554,7 +2552,7 @@ fn print_expr<W: Write>(
     fn adjust_id<'a>(env: &ExprEnv, id: &'a str) -> Cow<'a, str> {
         let s: Cow<'a, str> = match env.codegen_env {
             Some(env) => {
-                if env.namespace.name.is_none()
+                if env.is_namespaced
                     && id
                         .as_bytes()
                         .iter()
@@ -2589,7 +2587,7 @@ fn print_expr<W: Write>(
     }
     fn get_class_name_from_id<'e>(
         ctx: &mut Context,
-        env: Option<&'e BodyEnv<'e, 'e>>,
+        env: Option<&'e HhasBodyEnv>,
         should_format: bool,
         is_class_constant: bool,
         id: &'e str,
@@ -2618,26 +2616,31 @@ fn print_expr<W: Write>(
     }
     fn get_special_class_name<'e>(
         ctx: &mut Context,
-        env: Option<&'e BodyEnv<'e, 'e>>,
+        env: Option<&'e HhasBodyEnv>,
         is_class_constant: bool,
         id: &'e str,
     ) -> Cow<'e, str> {
         let class_expr = match env {
-            None => ClassExpr::expr_to_class_expr(
+            None => ClassExpr::expr_to_class_expr_(
                 ctx.emitter,
                 true,
                 true,
-                &ast_scope::Scope::toplevel(),
+                None,
+                None,
                 ast::Expr(
                     Pos::make_none(),
                     ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
                 ),
             ),
-            Some(body_env) => ClassExpr::expr_to_class_expr(
+            Some(body_env) => ClassExpr::expr_to_class_expr_(
                 ctx.emitter,
                 true,
                 true,
-                &body_env.scope,
+                body_env
+                    .class_info
+                    .as_ref()
+                    .map(|(k, s)| (k.clone(), s.as_str())),
+                body_env.parent_name.clone(),
                 ast::Expr(
                     Pos::make_none(),
                     ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),

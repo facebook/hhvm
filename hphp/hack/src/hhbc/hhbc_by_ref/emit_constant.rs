@@ -21,7 +21,7 @@ fn emit_constant_cinit<'a, 'arena>(
     env: &mut Env<'a, 'arena>,
     constant: &'a tast::Gconst,
     c: &HhasConstant<'arena>,
-) -> Result<Option<HhasFunction<'a, 'arena>>> {
+) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
     let const_id = r#const::Type::from_ast_name(alloc, &constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_id.to_raw_string());
@@ -67,7 +67,7 @@ fn emit_constant_cinit<'a, 'arena>(
                 vec![], /* params */
                 return_type_info,
                 None, /* doc_comment */
-                Some(env.clone()),
+                Some(env),
             )?;
             Ok(HhasFunction {
                 attributes: vec![],
@@ -85,7 +85,7 @@ fn emit_constant<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
     constant: &'a tast::Gconst,
-) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'a, 'arena>>)> {
+) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
     let c = hhas_constant::from_ast(e, env, &constant.name, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, &c)?;
     Ok((c, f))
@@ -95,7 +95,7 @@ pub fn emit_constants_from_program<'a, 'arena>(
     e: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
     defs: &'a [tast::Def],
-) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'a, 'arena>>)> {
+) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'arena>>)> {
     let const_tuples = defs
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))

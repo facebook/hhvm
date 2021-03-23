@@ -74,7 +74,7 @@ fn make_86method<'a, 'arena>(
     is_abstract: bool,
     span: Span,
     instrs: InstrSeq<'arena>,
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
 
@@ -451,7 +451,7 @@ fn emit_reified_init_method<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     ast_class: &'a tast::Class_,
-) -> Result<Option<HhasMethod<'a, 'arena>>> {
+) -> Result<Option<HhasMethod<'arena>>> {
     use hhbc_by_ref_hhas_type::{constraint::*, Info};
 
     let alloc = env.arena;
@@ -500,7 +500,7 @@ fn make_init_method<'a, 'arena, F>(
     filter: F,
     name: &'static str,
     span: Span,
-) -> Result<Option<HhasMethod<'a, 'arena>>>
+) -> Result<Option<HhasMethod<'arena>>>
 where
     F: Fn(&HhasProperty<'arena>) -> bool,
 {
@@ -690,7 +690,7 @@ pub fn emit_class<'a, 'arena>(
         vec![]
     };
     let span = Span::from_pos(&ast_class.span);
-    let mut additional_methods: Vec<HhasMethod<'a, 'arena>> = vec![];
+    let mut additional_methods: Vec<HhasMethod<'arena>> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.push(emit_xhp::from_category_declaration(
             alloc, emitter, ast_class, &cats,

@@ -29,7 +29,7 @@ pub fn from_asts<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     class: &'a T::Class_,
     methods: &'a [T::Method_],
-) -> Result<Vec<HhasMethod<'a, 'arena>>> {
+) -> Result<Vec<HhasMethod<'arena>>> {
     methods
         .iter()
         .map(|m| from_ast(alloc, emitter, class, m))
@@ -41,7 +41,7 @@ pub fn from_ast<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     class: &'a T::Class_,
     method_: impl Into<Cow<'a, T::Method_>>,
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let method_: Cow<'a, T::Method_> = method_.into();
     let method = method_.as_ref();
     let is_memoize = method

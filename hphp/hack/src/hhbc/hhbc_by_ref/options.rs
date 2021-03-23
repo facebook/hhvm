@@ -163,7 +163,6 @@ prefixed_flags!(
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
     HACK_ARR_COMPAT_NOTICES,
-    HACK_ARR_DV_ARR_MARK,
     HACK_ARR_DV_ARRS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
@@ -285,11 +284,10 @@ prefixed_flags!(
     PhpismFlags,
     "hhvm.hack.lang.phpism.",
     DISABLE_NONTOPLEVEL_DECLARATIONS,
-    DISABLE_STATIC_CLOSURES,
 );
 impl Default for PhpismFlags {
     fn default() -> PhpismFlags {
-        PhpismFlags::DISABLE_STATIC_CLOSURES
+        PhpismFlags::empty()
     }
 }
 
@@ -765,9 +763,6 @@ mod tests {
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
-  "hhvm.hack_arr_dv_arr_mark": {
-    "global_value": false
-  },
   "hhvm.hack_arr_dv_arrs": {
     "global_value": false
   },
@@ -1148,8 +1143,7 @@ bitflags! {
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
         // No longer using bits 16-21.
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
-        const DISABLE_STATIC_CLOSURES = 1 << 23;
-        // No longer using bits 24-25.
+        // No longer using bits 23-25.
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         const EMIT_INST_METH_POINTERS = 1 << 27;
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
@@ -1177,7 +1171,7 @@ bitflags! {
         const RUST_EMITTER = 1 << 51;
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
-        const HACK_ARR_DV_ARR_MARK = 1 << 54;
+        // No longer using bit 54
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;

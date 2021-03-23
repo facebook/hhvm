@@ -38,7 +38,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena>(
     renamed_id: &function::Type<'arena>,
     deprecation_info: &Option<&[TypedValue<'arena>]>,
     f: &'a T::Fun_,
-) -> Result<HhasFunction<'a, 'arena>> {
+) -> Result<HhasFunction<'arena>> {
     emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
     let scope = Scope {
         items: vec![ScopeItem::Function(ast_scope::Fun::new_ref(f))],
@@ -331,7 +331,7 @@ fn make_wrapper_body<'a, 'arena>(
     body_instrs: InstrSeq<'arena>,
     is_reified: bool,
     has_coeffect_rules: bool,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let mut decl_vars = vec![];
     if is_reified {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
@@ -351,6 +351,6 @@ fn make_wrapper_body<'a, 'arena>(
         params,
         Some(return_type_info),
         None, /* doc comment */
-        Some(env.clone()),
+        Some(&env),
     )
 }

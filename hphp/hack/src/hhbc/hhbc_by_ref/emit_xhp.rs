@@ -50,7 +50,7 @@ pub fn from_attribute_declaration<'a, 'arena>(
     class: &'a Class_,
     xal: &[HhasXhpAttribute],
     xual: &[Hint],
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let id_from_str = |s: &str| Expr_::mk_id(ast_defs::Id(Pos::make_none(), s.into()));
 
     let mk_var_r = || {
@@ -160,7 +160,7 @@ pub fn from_children_declaration<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
     let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
     from_xhp_attribute_declaration_method(
@@ -182,7 +182,7 @@ pub fn from_category_declaration<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let category_arr = mk_expr(get_category_array(categories));
     let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
     from_xhp_attribute_declaration_method(
@@ -446,7 +446,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena>(
     static_: bool,
     visibility: Visibility,
     ast: Block,
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let meth = Method_ {
         span: pos.unwrap_or_else(Pos::make_none),
         annotation: (),

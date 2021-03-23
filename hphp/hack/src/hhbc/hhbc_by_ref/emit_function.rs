@@ -27,7 +27,7 @@ pub fn emit_function<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
     f: &'a tast::Fun_,
-) -> Result<Vec<HhasFunction<'a, 'arena>>> {
+) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
     let mut original_id = hhbc_id::function::Type::from_ast_name(alloc, &f.name.1);
@@ -167,7 +167,6 @@ pub fn emit_function<'a, 'arena>(
     } else {
         None
     };
-    //let name: String = renamed_id.into();
     let normal_function = HhasFunction {
         attributes: attrs,
         name: (alloc, renamed_id.to_raw_string()).into(),
@@ -188,7 +187,7 @@ pub fn emit_functions_from_program<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
     tast: &'a [tast::Def],
-) -> Result<Vec<HhasFunction<'a, 'arena>>> {
+) -> Result<Vec<HhasFunction<'arena>>> {
     Ok(tast
         .iter()
         .filter_map(|d| d.as_fun().map(|f| emit_function(alloc, e, f)))

@@ -21,7 +21,7 @@ pub fn emit_body<'a, 'arena>(
     name: &tast::Sid,
     params: &[tast::FunParam],
     ret: Option<&aast::Hint>,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let body_instrs = emit_native_opcode_impl(alloc, &name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()

@@ -21,13 +21,9 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
-fn hack_arr_dv_arr_mark(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
-}
-
 fn vec_or_varray<'arena>(opts: &Options, l: &'arena [TypedValue<'arena>]) -> TypedValue<'arena> {
     if hack_arr_dv_arrs(opts) {
-        TypedValue::Vec((l, None, hack_arr_dv_arr_mark(opts)))
+        TypedValue::Vec((l, None, false))
     } else {
         TypedValue::VArray((l, None))
     }
@@ -38,7 +34,7 @@ fn dict_or_darray<'arena>(
     kv: &'arena [(TypedValue<'arena>, TypedValue<'arena>)],
 ) -> TypedValue<'arena> {
     if hack_arr_dv_arrs(opts) {
-        TypedValue::Dict((kv, None, hack_arr_dv_arr_mark(opts)))
+        TypedValue::Dict((kv, None, false))
     } else {
         TypedValue::DArray((kv, None))
     }

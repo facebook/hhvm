@@ -14,10 +14,10 @@ use hhbc_by_ref_hhbc_id as hhbc_id;
 use bitflags::bitflags;
 
 #[derive(Debug)]
-pub struct HhasFunction<'a, 'arena> {
+pub struct HhasFunction<'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
-    pub name: hhbc_id::function::Type<'a>,
-    pub body: HhasBody<'a, 'arena>,
+    pub name: hhbc_id::function::Type<'arena>,
+    pub body: HhasBody<'arena>,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,
     pub flags: Flags,
@@ -35,7 +35,7 @@ bitflags! {
     }
 }
 
-impl<'a, 'arena> HhasFunction<'a, 'arena> {
+impl<'arena> HhasFunction<'arena> {
     pub fn is_async(&self) -> bool {
         self.flags.contains(Flags::ASYNC)
     }
@@ -64,7 +64,7 @@ impl<'a, 'arena> HhasFunction<'a, 'arena> {
         self.flags.contains(Flags::RX_DISABLED)
     }
 
-    pub fn with_body<F, T>(&mut self, body: HhasBody<'a, 'arena>, f: F) -> T
+    pub fn with_body<F, T>(&mut self, body: HhasBody<'arena>, f: F) -> T
     where
         F: FnOnce() -> T,
     {

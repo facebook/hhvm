@@ -166,11 +166,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Method(md) => {
                     return md.is_static();
                 }
-                ScopeItem::LongLambda(ll) => {
-                    if ll.is_static {
-                        return false;
-                    }
-                }
+                ScopeItem::LongLambda(_) => {}
                 ScopeItem::Lambda(_) => {}
                 _ => return false,
             }
@@ -225,14 +221,9 @@ impl<'a> Scope<'a> {
     pub fn is_static(&self) -> bool {
         for x in self.iter() {
             match x {
-                ScopeItem::LongLambda(x) => {
-                    if x.is_static {
-                        return true;
-                    }
-                }
                 ScopeItem::Function(_) => return true,
                 ScopeItem::Method(md) => return md.is_static(),
-                ScopeItem::Lambda(_) => continue,
+                ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => continue,
                 _ => return true,
             }
         }

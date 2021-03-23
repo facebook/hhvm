@@ -2,13 +2,19 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use hhbc_by_ref_env::Env;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
-use oxidized::doc_comment::DocComment;
+use oxidized::{ast_defs, doc_comment::DocComment};
+
+#[derive(Default, Debug)]
+pub struct HhasBodyEnv {
+    pub is_namespaced: bool,
+    pub class_info: Option<(ast_defs::ClassKind, String)>,
+    pub parent_name: Option<String>,
+}
 
 #[derive(Debug)] //Cannot be Default...
-pub struct HhasBody<'a, 'arena> {
+pub struct HhasBody<'arena> {
     pub body_instrs: InstrSeq<'arena>, //... because InstrSeq not Default.
     pub decl_vars: Vec<String>,
     pub num_iters: usize,
@@ -19,10 +25,10 @@ pub struct HhasBody<'a, 'arena> {
     pub params: Vec<HhasParam<'arena>>,
     pub return_type_info: Option<hhbc_by_ref_hhas_type::Info>,
     pub doc_comment: Option<DocComment>,
-    pub env: Option<Env<'a, 'arena>>,
+    pub env: Option<HhasBodyEnv>,
 }
 
-pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'_, 'arena> {
+pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'arena> {
     HhasBody {
         body_instrs,
         decl_vars: Vec::<String>::default(),
@@ -34,6 +40,6 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         params: Vec::<HhasParam<'arena>>::default(),
         return_type_info: Option::<hhbc_by_ref_hhas_type::Info>::default(),
         doc_comment: Option::<DocComment>::default(),
-        env: Option::<Env<'_, 'arena>>::default(),
+        env: Option::<HhasBodyEnv>::default(),
     }
 }

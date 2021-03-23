@@ -12,6 +12,7 @@ bitflags = "1.2"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
+hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref_ast_class_expr" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_decl_vars = { path = "../decl_vars" }
 hhbc_by_ref_emit_adata = { path = "../hhbc_by_ref_emit_adata" }

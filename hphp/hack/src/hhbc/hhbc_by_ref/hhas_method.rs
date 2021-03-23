@@ -13,11 +13,11 @@ use oxidized::aast_defs::Visibility;
 use bitflags::bitflags;
 
 #[derive(Debug)]
-pub struct HhasMethod<'a, 'arena> {
+pub struct HhasMethod<'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
     pub visibility: Visibility,
     pub name: method::Type<'arena>,
-    pub body: HhasBody<'a, 'arena>,
+    pub body: HhasBody<'arena>,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,
     pub flags: HhasMethodFlags,
@@ -39,7 +39,7 @@ bitflags! {
     }
 }
 
-impl<'a, 'arena> HhasMethod<'a, 'arena> {
+impl<'a, 'arena> HhasMethod<'arena> {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
     }

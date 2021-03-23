@@ -91,7 +91,7 @@ pub fn emit_wrapper_methods<'a, 'arena>(
     info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
     methods: &'a [T::Method_],
-) -> Result<Vec<HhasMethod<'a, 'arena>>> {
+) -> Result<Vec<HhasMethod<'arena>>> {
     // Wrapper methods may not have iterators
     emitter.iterator_mut().reset();
 
@@ -113,7 +113,7 @@ fn make_memoize_wrapper_method<'a, 'arena>(
     info: &MemoizeInfo<'arena>,
     class: &'a T::Class_,
     method: &'a T::Method_,
-) -> Result<HhasMethod<'a, 'arena>> {
+) -> Result<HhasMethod<'arena>> {
     let alloc = env.arena;
     let ret = if method.name.1 == members::__CONSTRUCT {
         None
@@ -178,7 +178,7 @@ fn emit_memoize_wrapper_body<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &mut Env<'a, 'arena>,
     args: &mut Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;
     let mut tparams: Vec<&str> = args
         .scope
@@ -212,7 +212,7 @@ fn emit<'a, 'arena>(
     hhas_params: Vec<HhasParam<'arena>>,
     return_type_info: HhasTypeInfo,
     args: &Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;
     let pos = &args.method.span;
     let instrs = make_memoize_method_code(emitter, env, pos, &hhas_params[..], args)?;
@@ -473,7 +473,7 @@ fn make_wrapper<'a, 'arena>(
     params: Vec<HhasParam<'arena>>,
     return_type_info: HhasTypeInfo,
     args: &Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;
     let mut decl_vars = vec![];
     if args.flags.contains(Flags::IS_REFIED) {
@@ -482,14 +482,6 @@ fn make_wrapper<'a, 'arena>(
     if args.flags.contains(Flags::HAS_COEFFECT_RULES) {
         decl_vars.push(coeffects::LOCAL_NAME.into());
     }
-    // TODO(hrust): Just clone env
-    let env_copy = emit_body::make_env(
-        alloc,
-        RcOc::clone(&env.namespace),
-        env.scope.clone(),
-        None,
-        env.flags.contains(hhbc_by_ref_env::Flags::IN_RX_BODY),
-    );
     emit_body::make_body(
         alloc,
         emitter,
@@ -502,7 +494,7 @@ fn make_wrapper<'a, 'arena>(
         params,
         Some(return_type_info),
         None,
-        Some(env_copy),
+        Some(env),
     )
 }
 

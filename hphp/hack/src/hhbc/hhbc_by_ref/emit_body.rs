@@ -12,6 +12,7 @@ use reified_generics_helpers as RGH;
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
 use hhbc_by_ref_ast_body::AstBody;
+use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
 use hhbc_by_ref_decl_vars as decl_vars;
 use hhbc_by_ref_emit_adata as emit_adata;
@@ -22,7 +23,7 @@ use hhbc_by_ref_emit_pos::emit_pos;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_generator as generator;
-use hhbc_by_ref_hhas_body::HhasBody;
+use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{
@@ -78,13 +79,13 @@ bitflags! {
     }
 }
 
-pub fn emit_body_with_default_args<'a, 'b, 'arena>(
+pub fn emit_body_with_default_args<'b, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     namespace: RcOc<namespace_env::Env>,
     body: &'b tast::Program,
     return_value: InstrSeq<'arena>,
-) -> Result<HhasBody<'a, 'arena>> {
+) -> Result<HhasBody<'arena>> {
     let args = Args {
         immediate_tparams: &vec![],
         class_tparam_names: &vec![],
@@ -109,15 +110,15 @@ pub fn emit_body_with_default_args<'a, 'b, 'arena>(
     .map(|r| r.0)
 }
 
-pub fn emit_body<'a, 'b, 'arena>(
+pub fn emit_body<'b, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,
     namespace: RcOc<namespace_env::Env>,
     body: AstBody<'b>,
     return_value: InstrSeq<'arena>,
-    scope: Scope<'a>,
+    scope: Scope<'_>,
     args: Args<'_, 'arena>,
-) -> Result<(HhasBody<'a, 'arena>, bool, bool)> {
+) -> Result<(HhasBody<'arena>, bool, bool)> {
     let tparams = scope
         .get_tparams()
         .into_iter()
@@ -216,7 +217,7 @@ pub fn emit_body<'a, 'b, 'arena>(
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
-            Some(env),
+            Some(&env),
         )?,
         is_generator,
         is_pair_generator,
@@ -435,8 +436,8 @@ pub fn make_body<'a, 'arena>(
     mut params: Vec<HhasParam<'arena>>,
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
-    env: Option<Env<'a, 'arena>>,
-) -> Result<HhasBody<'a, 'arena>> {
+    opt_env: Option<&Env<'a, 'arena>>,
+) -> Result<HhasBody<'arena>> {
     body_instrs.rewrite_user_labels(alloc, emitter.label_gen_mut());
     emit_adata::rewrite_typed_values(alloc, emitter, &mut body_instrs)?;
     if emitter
@@ -451,6 +452,24 @@ pub fn make_body<'a, 'arena>(
     } else {
         emitter.iterator().count()
     };
+    let body_env = if let Some(env) = opt_env {
+        let is_namespaced = env.namespace.name.is_none();
+        if let Some(cd) = env.scope.get_class() {
+            Some(HhasBodyEnv {
+                is_namespaced,
+                class_info: Some((cd.get_kind(), cd.get_name_str().to_string())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
+            })
+        } else {
+            Some(HhasBodyEnv {
+                is_namespaced,
+                class_info: None,
+                parent_name: None,
+            })
+        }
+    } else {
+        None
+    };
     Ok(HhasBody {
         body_instrs,
         decl_vars,
@@ -462,7 +481,7 @@ pub fn make_body<'a, 'arena>(
         params,
         return_type_info,
         doc_comment,
-        env,
+        env: body_env,
     })
 }
 

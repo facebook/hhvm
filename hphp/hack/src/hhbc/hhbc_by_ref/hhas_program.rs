@@ -17,7 +17,7 @@ use oxidized::pos::Pos;
 #[derive(Default, Debug)]
 pub struct HhasProgram<'a, 'arena> {
     pub adata: Vec<HhasAdata<'arena>>,
-    pub functions: Vec<HhasFunction<'a, 'arena>>,
+    pub functions: Vec<HhasFunction<'arena>>,
     pub classes: Vec<HhasClass<'a, 'arena>>,
     pub record_defs: Vec<HhasRecord<'a, 'arena>>,
     pub typedefs: Vec<Typedef<'arena>>,

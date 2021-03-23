@@ -289,44 +289,6 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub fn wrap_array_mark_legacy<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    e: &Emitter<'arena>,
-    ins: InstrSeq<'arena>,
-) -> InstrSeq<'arena> {
-    if mark_as_legacy(e.options()) {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                ins,
-                instr::false_(alloc),
-                instr::instr(alloc, Instruct::IMisc(InstructMisc::ArrayMarkLegacy)),
-            ],
-        )
-    } else {
-        ins
-    }
-}
-
-pub fn wrap_array_unmark_legacy<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    e: &Emitter<'arena>,
-    ins: InstrSeq<'arena>,
-) -> InstrSeq<'arena> {
-    if mark_as_legacy(e.options()) {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                ins,
-                instr::false_(alloc),
-                instr::instr(alloc, Instruct::IMisc(InstructMisc::ArrayUnmarkLegacy)),
-            ],
-        )
-    } else {
-        ins
-    }
-}
-
 pub fn get_type_structure_for_hint<'arena>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena>,
@@ -601,7 +563,16 @@ pub fn emit_expr<'a, 'arena>(
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }
         Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.desugared_expr),
-        _ => unimplemented!("TODO(hrust)"),
+        Expr_::ETSplice(_) => Err(unrecoverable(
+            "expression trees: splice should be erased during rewriting",
+        )),
+        Expr_::FunId(_)
+        | Expr_::MethodId(_)
+        | Expr_::MethodCaller(_)
+        | Expr_::SmethodId(_)
+        | Expr_::Hole(_) => {
+            unimplemented!("TODO(hrust)")
+        }
     }
 }
 
@@ -968,11 +939,6 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
-fn mark_as_legacy(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-        && opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
-}
-
 fn inline_gena_call<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
@@ -1038,7 +1004,11 @@ fn inline_gena_call<'a, 'arena>(
                                 instr::cgetl(alloc, val_local),
                                 instr::whresult(alloc),
                                 instr::basel(alloc, arr_local.clone(), MemberOpMode::Define),
-                                instr::setm(alloc, 0, MemberKey::EL(key_local, ReadOnlyOp::Any)),
+                                instr::setm(
+                                    alloc,
+                                    0,
+                                    MemberKey::EL(key_local, ReadOnlyOp::Mutable),
+                                ),
                                 instr::popc(alloc),
                             ],
                         )
@@ -1660,7 +1630,7 @@ fn emit_dynamic_collection<'a, 'arena>(
                     InstructLitConst::NewVArray(n)
                 }
             });
-            Ok(wrap_array_mark_legacy(alloc, e, instrs?))
+            Ok(instrs?)
         }
         E_::Darray(_) => {
             if is_struct_init(e, env, fields, false /* allow_numerics */)? {
@@ -1673,7 +1643,7 @@ fn emit_dynamic_collection<'a, 'arena>(
                     };
                     Ok(emit_pos_then(alloc, pos, instr))
                 });
-                Ok(wrap_array_mark_legacy(alloc, e, instrs?))
+                Ok(instrs?)
             } else {
                 let constr = if hack_arr_dv_arrs(e.options()) {
                     InstructLitConst::NewDictArray(count as isize)
@@ -1682,7 +1652,7 @@ fn emit_dynamic_collection<'a, 'arena>(
                 };
                 let instrs =
                     emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
-                Ok(wrap_array_mark_legacy(alloc, e, instrs?))
+                Ok(instrs?)
             }
         }
         _ => Err(unrecoverable("plain PHP arrays cannot be constructed")),
@@ -2076,13 +2046,13 @@ pub fn emit_reified_targs<'a, 'arena>(
                     QueryOp::CGet,
                     MemberKey::PT(
                         prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                        ReadOnlyOp::Any,
+                        ReadOnlyOp::Mutable,
                     ),
                 ),
             ],
         )
     } else {
-        let instrs = InstrSeq::gather(
+        InstrSeq::gather(
             alloc,
             vec![
                 InstrSeq::gather(
@@ -2098,8 +2068,7 @@ pub fn emit_reified_targs<'a, 'arena>(
                     instr::new_varray(alloc, targs.len() as isize)
                 },
             ],
-        );
-        wrap_array_mark_legacy(alloc, e, instrs)
+        )
     })
 }
 
@@ -2673,7 +2642,7 @@ fn get_reified_var_cexpr<'a, 'arena>(
                     alloc,
                     1,
                     QueryOp::CGet,
-                    MemberKey::ET("classname", ReadOnlyOp::Any),
+                    MemberKey::ET("classname", ReadOnlyOp::Mutable),
                 ),
             ],
         ))
@@ -3234,23 +3203,14 @@ fn emit_special_function<'a, 'arena>(
                     ],
                 )),
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
-                    Some((nargs, i)) if nargs == args.len() => {
-                        let inner = emit_exprs(e, env, args)?;
-                        let unmarked_inner = match lower_fq_name {
-                            "HH\\dict" | "HH\\vec" => wrap_array_unmark_legacy(alloc, e, inner),
-                            _ => inner,
-                        };
-                        let instrs = InstrSeq::gather(
-                            alloc,
-                            vec![unmarked_inner, emit_pos(alloc, pos), instr::instr(alloc, i)],
-                        );
-                        match lower_fq_name {
-                            "HH\\varray" | "HH\\darray" => {
-                                Some(wrap_array_mark_legacy(alloc, e, instrs))
-                            }
-                            _ => Some(instrs),
-                        }
-                    }
+                    Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(
+                        alloc,
+                        vec![
+                            emit_exprs(e, env, args)?,
+                            emit_pos(alloc, pos),
+                            instr::instr(alloc, i),
+                        ],
+                    )),
                     _ => None,
                 },
             },
@@ -3283,15 +3243,7 @@ fn emit_inst_meth<'a, 'arena>(
             },
         ],
     );
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
-    {
-        Ok(instrs)
-    } else {
-        Ok(wrap_array_mark_legacy(alloc, e, instrs))
-    }
+    Ok(instrs)
 }
 
 fn emit_class_meth<'a, 'arena>(
@@ -3363,7 +3315,7 @@ fn emit_class_meth<'a, 'arena>(
                 },
             ],
         );
-        Ok(wrap_array_mark_legacy(alloc, e, instrs))
+        Ok(instrs)
     }
 }
 
@@ -3779,7 +3731,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                 instr::dim_warn_pt(
                     alloc,
                     prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                    ReadOnlyOp::Any,
+                    ReadOnlyOp::Mutable,
                 ),
             ],
         )
@@ -3795,7 +3747,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                     alloc,
                     0,
                     QueryOp::CGet,
-                    MemberKey::EI(index.try_into().unwrap(), ReadOnlyOp::Any),
+                    MemberKey::EI(index.try_into().unwrap(), ReadOnlyOp::Mutable),
                 ),
             ],
         ),
@@ -4153,7 +4105,7 @@ fn emit_prop_expr<'a, 'arena>(
         tast::Expr_::Id(id) => {
             let ast_defs::Id(pos, name) = &**id;
             if name.starts_with('$') {
-                MemberKey::PL(get_local(e, env, pos, name)?, ReadOnlyOp::Any)
+                MemberKey::PL(get_local(e, env, pos, name)?, ReadOnlyOp::Mutable)
             } else {
                 // Special case for known property name
                 let pid: prop::Type<'arena> = prop::Type::<'arena>::from_ast_name(
@@ -4161,8 +4113,8 @@ fn emit_prop_expr<'a, 'arena>(
                     string_utils::strip_global_ns(&name),
                 );
                 match nullflavor {
-                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Any),
-                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Any),
+                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Mutable),
+                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Mutable),
                 }
             }
         }
@@ -4177,17 +4129,17 @@ fn emit_prop_expr<'a, 'arena>(
                 ),
             );
             match nullflavor {
-                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Any),
-                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Any),
+                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Mutable),
+                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Mutable),
             }
         }
         tast::Expr_::Lvar(lid) if !(is_local_this(env, &lid.1)) => MemberKey::PL(
             get_local(e, env, &lid.0, local_id::get_name(&lid.1))?,
-            ReadOnlyOp::Any,
+            ReadOnlyOp::Mutable,
         ),
         _ => {
             // General case
-            MemberKey::PC(stack_index, ReadOnlyOp::Any)
+            MemberKey::PC(stack_index, ReadOnlyOp::Mutable)
         }
     };
     // For nullsafe access, insist that property is known
@@ -4201,8 +4153,8 @@ fn emit_prop_expr<'a, 'arena>(
             ));
         }
         MemberKey::PC(_, _) => (mk, emit_expr(e, env, prop)?, 1),
-        MemberKey::PL(local, ReadOnlyOp::Any) if null_coalesce_assignment => (
-            MemberKey::PC(stack_index, ReadOnlyOp::Any),
+        MemberKey::PL(local, ReadOnlyOp::Mutable) if null_coalesce_assignment => (
+            MemberKey::PC(stack_index, ReadOnlyOp::Mutable),
             instr::cgetl(alloc, local),
             1,
         ),
@@ -4477,7 +4429,7 @@ fn emit_array_get_<'a, 'arena>(
                         alloc,
                         vec![
                             store,
-                            instr::setm(alloc, 0, MemberKey::EL(local, ReadOnlyOp::Any)),
+                            instr::setm(alloc, 0, MemberKey::EL(local, ReadOnlyOp::Mutable)),
                             instr::popc(alloc),
                         ],
                     );
@@ -4563,11 +4515,11 @@ fn get_elem_member_key<'a, 'arena>(
             E_::Lvar(x) if !is_local_this(env, &x.1) => Ok((
                 {
                     if null_coalesce_assignment {
-                        MemberKey::EC(stack_index, ReadOnlyOp::Any)
+                        MemberKey::EC(stack_index, ReadOnlyOp::Mutable)
                     } else {
                         MemberKey::EL(
                             get_local(e, env, &x.0, local_id::get_name(&x.1))?,
-                            ReadOnlyOp::Any,
+                            ReadOnlyOp::Mutable,
                         )
                     }
                 },
@@ -4578,7 +4530,7 @@ fn get_elem_member_key<'a, 'arena>(
                 match ast_constant_folder::expr_to_typed_value(alloc, e, &env.namespace, elem_expr)
                 {
                     Ok(TypedValue::Int(i)) => {
-                        Ok((MemberKey::EI(i, ReadOnlyOp::Any), instr::empty(alloc)))
+                        Ok((MemberKey::EI(i, ReadOnlyOp::Mutable), instr::empty(alloc)))
                     }
                     _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
                 }
@@ -4589,7 +4541,7 @@ fn get_elem_member_key<'a, 'arena>(
                 // There's no guarantee that they're valid UTF-8.
                 let s = unsafe { std::str::from_utf8_unchecked(s.as_slice()) };
                 let s = bumpalo::collections::String::from_str_in(s, alloc).into_bump_str();
-                Ok((MemberKey::ET(s, ReadOnlyOp::Any), instr::empty(alloc)))
+                Ok((MemberKey::ET(s, ReadOnlyOp::Mutable), instr::empty(alloc)))
             }
             // Special case for class name
             E_::ClassConst(x)
@@ -4608,17 +4560,20 @@ fn get_elem_member_key<'a, 'arena>(
                 let fq_id = class::Type::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
-                        MemberKey::ET(fq_id, ReadOnlyOp::Any),
+                        MemberKey::ET(fq_id, ReadOnlyOp::Mutable),
                         instr::raise_class_string_conversion_warning(alloc),
                     ))
                 } else {
-                    Ok((MemberKey::ET(fq_id, ReadOnlyOp::Any), instr::empty(alloc)))
+                    Ok((
+                        MemberKey::ET(fq_id, ReadOnlyOp::Mutable),
+                        instr::empty(alloc),
+                    ))
                 }
             }
             _ => {
                 // General case
                 Ok((
-                    MemberKey::EC(stack_index, ReadOnlyOp::Any),
+                    MemberKey::EC(stack_index, ReadOnlyOp::Mutable),
                     instr::empty(alloc),
                 ))
             }
@@ -4647,7 +4602,7 @@ fn emit_store_for_simple_base<'a, 'arena>(
         elem_stack_size,
         0,
     )?;
-    let memberkey = MemberKey::EL(local, ReadOnlyOp::Any);
+    let memberkey = MemberKey::EL(local, ReadOnlyOp::Mutable);
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -4686,7 +4641,7 @@ fn emit_class_get<'a, 'arena>(
         vec![
             InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
             match query_op {
-                QueryOp::CGet => instr::cgets(alloc, ReadOnlyOp::Any),
+                QueryOp::CGet => instr::cgets(alloc, ReadOnlyOp::Mutable),
                 QueryOp::Isset => instr::issets(alloc),
                 QueryOp::CGetQuiet => {
                     return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
@@ -5509,7 +5464,7 @@ pub fn emit_set_range_expr<'a, 'arena>(
                         .expect("StackIndex overflow"),
                     kind.size.try_into().expect("Setrange size overflow"),
                     kind.op,
-                    ReadOnlyOp::Any,
+                    ReadOnlyOp::Mutable,
                 )),
             ),
         ],
@@ -5930,7 +5885,7 @@ fn emit_base_<'a, 'arena>(
                                     instr::dim(
                                         alloc,
                                         MemberOpMode::Define,
-                                        MemberKey::EL(local, ReadOnlyOp::Any),
+                                        MemberKey::EL(local, ReadOnlyOp::Mutable),
                                     ),
                                 ],
                             ),
@@ -6022,7 +5977,7 @@ fn emit_base_<'a, 'arena>(
                         base_offset + 1,
                         rhs_stack_size,
                         base_mode,
-                        ReadOnlyOp::Any,
+                        ReadOnlyOp::Mutable,
                     ),
                     1,
                     1,
@@ -6210,7 +6165,7 @@ fn emit_array_get_fixed<'arena>(
             .enumerate()
             .rev()
             .map(|(i, ix)| {
-                let mk = MemberKey::EI(*ix as i64, ReadOnlyOp::Any);
+                let mk = MemberKey::EI(*ix as i64, ReadOnlyOp::Mutable);
                 if i == 0 {
                     instr::querym(alloc, stack_count, QueryOp::CGet, mk)
                 } else {
@@ -6421,9 +6376,9 @@ fn emit_final_static_op<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     use LValOp as L;
     Ok(match op {
-        L::Set => instr::sets(alloc, ReadOnlyOp::Any),
-        L::SetOp(op) => instr::setops(alloc, op, ReadOnlyOp::Any),
-        L::IncDec(op) => instr::incdecs(alloc, op, ReadOnlyOp::Any),
+        L::Set => instr::sets(alloc, ReadOnlyOp::Mutable),
+        L::SetOp(op) => instr::setops(alloc, op, ReadOnlyOp::Mutable),
+        L::IncDec(op) => instr::incdecs(alloc, op, ReadOnlyOp::Mutable),
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))

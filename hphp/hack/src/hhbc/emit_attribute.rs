@@ -9,7 +9,7 @@ use emit_fatal_rust as emit_fatal;
 use env::{emitter::Emitter, Env};
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::Result;
+use instruction_sequence::Result;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::{ast as a, namespace_env::Env as Namespace};

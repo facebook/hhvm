@@ -15,7 +15,7 @@ use hhas_symbol_refs_rust::IncludePath;
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{class, r#const, function, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{
+use instruction_sequence::{
     instr, unrecoverable,
     Error::{self, Unrecoverable},
     InstrSeq, Result,

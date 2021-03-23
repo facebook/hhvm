@@ -10,7 +10,7 @@ use emit_pos_rust::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use label_rust::Label;
 use lazy_static::lazy_static;

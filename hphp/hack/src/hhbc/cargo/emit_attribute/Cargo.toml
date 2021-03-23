@@ -15,7 +15,7 @@ env = { path = "../env" }
 escaper = { path = "../../../utils/escaper" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 hhbc_id_rust = { path = "../hhbc_id" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }

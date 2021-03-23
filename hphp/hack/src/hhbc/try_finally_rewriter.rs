@@ -11,7 +11,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use label_rust as label;
 use oxidized::pos::Pos;

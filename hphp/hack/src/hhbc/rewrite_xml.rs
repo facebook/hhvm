@@ -1,7 +1,7 @@
 use emit_symbol_refs_rust as emit_symbol_refs;
 use env::emitter::Emitter;
 use hhbc_id_rust::{class, Id};
-use instruction_sequence_rust::Result;
+use instruction_sequence::Result;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -12,7 +12,7 @@ use oxidized::{
 struct RewriteXmlVisitor {}
 
 impl<'ast> VisitorMut<'ast> for RewriteXmlVisitor {
-    type P = AstParams<Emitter, instruction_sequence_rust::Error>;
+    type P = AstParams<Emitter, instruction_sequence::Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self

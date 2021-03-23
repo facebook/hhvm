@@ -29,7 +29,7 @@ use hhas_function_rust::HhasFunction;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
-use hhas_program_rust::HhasProgram;
+use hhas_program::HhasProgram;
 use hhas_property_rust::HhasProperty;
 use hhas_record_def_rust::{Field, HhasRecord};
 use hhas_symbol_refs_rust::{HhasSymbolRefs, IncludePath};
@@ -42,7 +42,7 @@ use hhbc_string_utils_rust::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
-use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq};
+use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;
 use label_rust::Label;
 use lazy_static::lazy_static;

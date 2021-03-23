@@ -10,5 +10,5 @@ path = "../../emit_fatal.rs"
 [dependencies]
 emit_pos_rust = { path = "../emit_pos" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../oxidized" }

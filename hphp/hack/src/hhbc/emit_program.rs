@@ -12,9 +12,9 @@ use emit_record_def_rust::emit_record_defs_from_program;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_typedef_rust::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
-use hhas_program_rust::HhasProgram;
+use hhas_program::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{Error, Result};
+use instruction_sequence::{Error, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
 

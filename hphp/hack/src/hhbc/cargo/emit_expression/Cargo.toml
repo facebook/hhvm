@@ -22,7 +22,7 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.8"
 label_rust = { path = "../label" }
 lazy_static = "1.0"

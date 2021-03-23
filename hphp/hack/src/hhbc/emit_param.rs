@@ -13,7 +13,7 @@ use env::{emitter::Emitter, Env};
 use hhas_param_rust::HhasParam;
 use hhas_type::Info;
 use hhbc_string_utils_rust::locals::strip_dollar;
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use options::LangFlags;
 use oxidized::{
     aast_defs::{Hint, Hint_},

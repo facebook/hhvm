@@ -11,7 +11,7 @@ use hhas_property_rust::HhasProperty;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{unrecoverable, Result};
+use instruction_sequence::{unrecoverable, Result};
 use oxidized::{ast::*, ast_defs, local_id, namespace_env, pos::Pos};
 
 pub fn properties_for_cache<'a>(

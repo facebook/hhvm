@@ -11,6 +11,6 @@ path = "../../emit_file_attributes.rs"
 emit_attribute_rust = { path = "../emit_attribute" }
 env = { path = "../env" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.8"
 oxidized = { path = "../../../oxidized" }

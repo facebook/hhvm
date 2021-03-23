@@ -17,5 +17,5 @@ hhas_record_def_rust = { path = "../hhas_record_def" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../oxidized" }

@@ -361,7 +361,7 @@ let print_output
   );
   write bytecode
 
-let do_compile_rust
+let do_compile
     ~is_systemlib
     ~config_jsons
     (compiler_options : options)
@@ -488,7 +488,7 @@ let process_single_source_unit
         config_jsons
         compiler_options.config_list
     else
-      do_compile_rust
+      do_compile
         ~is_systemlib
         ~config_jsons
         compiler_options

@@ -30,7 +30,7 @@ use hhbc_ast_rust::{FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef};
 use hhbc_id_rust::r#const;
 use hhbc_id_rust::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use label_rust as label;
 use naming_special_names_rust as special_names;
 use options::HhvmFlags;

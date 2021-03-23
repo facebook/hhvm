@@ -5,7 +5,7 @@
 use emit_attribute_rust::from_asts;
 use env::emitter::Emitter;
 use hhas_attribute_rust::HhasAttribute;
-use instruction_sequence_rust::Result;
+use instruction_sequence::Result;
 use oxidized::ast as tast;
 
 extern crate itertools;

@@ -6,7 +6,7 @@
 use closure_convert_rust as closure_convert;
 use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
-use instruction_sequence_rust::{unrecoverable, Result};
+use instruction_sequence::{unrecoverable, Result};
 use oxidized::ast as Tast;
 use rewrite_xml::rewrite_xml;
 

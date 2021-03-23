@@ -14,6 +14,6 @@ emit_fatal_rust = { path = "../emit_fatal" }
 emit_param_rust = { path = "../emit_param" }
 env = { path = "../env" }
 hhas_body_rust = { path = "../hhas_body" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 local = { path = "../local" }
 oxidized = { path = "../../../oxidized" }

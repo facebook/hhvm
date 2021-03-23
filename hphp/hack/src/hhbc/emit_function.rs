@@ -15,7 +15,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{instr, Result};
+use instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
 use options::HhvmFlags;

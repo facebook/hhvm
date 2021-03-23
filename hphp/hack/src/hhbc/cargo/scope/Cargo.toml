@@ -9,7 +9,7 @@ path = "../../scope.rs"
 
 [dependencies]
 env = { path = "../env" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 iterator = { path = "../iterator" }
 label_rust = { path = "../label" }
 local = { path = "../local" }

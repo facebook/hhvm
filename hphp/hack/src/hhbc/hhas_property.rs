@@ -5,7 +5,7 @@
 
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust as hhbc_id;
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence::InstrSeq;
 use oxidized::{aast_defs::Visibility, doc_comment::DocComment};
 
 extern crate bitflags;

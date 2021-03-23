@@ -11,7 +11,7 @@ use ast_constant_folder_rust as ast_constant_folder;
 use emit_expression_rust as emit_expr;
 use env::{emitter::Emitter, Env};
 use hhbc_id_rust::{self as hhbc_id, Id};
-use instruction_sequence_rust::{InstrSeq, Result};
+use instruction_sequence::{InstrSeq, Result};
 use oxidized::ast as tast;
 use runtime::TypedValue;
 

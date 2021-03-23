@@ -10,6 +10,6 @@ path = "../../emit_memoize_helpers.rs"
 [dependencies]
 emit_fatal_rust = { path = "../emit_fatal" }
 hhas_param_rust = { path = "../hhas_param" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 local = { path = "../local" }
 oxidized = { path = "../../../oxidized" }

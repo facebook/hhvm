@@ -14,7 +14,7 @@ use hhas_type::{constraint, Info as TypeInfo};
 use hhbc_ast_rust::{InitpropOp, ReadOnlyOp};
 use hhbc_id_rust::{prop, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast as tast, ast_defs, doc_comment, namespace_env};
 use runtime::TypedValue;

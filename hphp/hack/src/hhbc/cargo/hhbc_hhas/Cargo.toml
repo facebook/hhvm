@@ -26,7 +26,7 @@ hhas_function_rust = { path = "../hhas_function" }
 hhas_method_rust = { path = "../hhas_method" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_pos_rust = { path = "../hhas_pos" }
-hhas_program_rust = { path = "../hhas_program" }
+hhas_program = { path = "../hhas_program" }
 hhas_property_rust = { path = "../hhas_property" }
 hhas_record_def_rust = { path = "../hhas_record_def" }
 hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
@@ -37,7 +37,7 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 iterator = { path = "../iterator" }
 itertools = "0.8"
 label_rust = { path = "../label" }

@@ -8,7 +8,7 @@ use hhas_param_rust::HhasParam;
 use hhbc_ast_rust::{
     FcallArgs, Instruct, InstructCall, InstructControlFlow, InstructIterator, InstructMisc,
 };
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence::InstrSeq;
 use label_rust::{Id, Label};
 
 use std::collections::{HashMap, HashSet};

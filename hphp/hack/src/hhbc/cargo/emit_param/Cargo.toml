@@ -18,7 +18,7 @@ env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
 hhbc_string_utils_rust = { path = "../string_utils" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 local = { path = "../local" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }

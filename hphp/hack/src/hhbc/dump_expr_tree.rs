@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{expr_to_string_lossy, parse_file, Env};
-// use crate::compile_rust as compile;
 use itertools::Either::*;
 use ocamlrep::rc::RcOc;
 use options::Options;

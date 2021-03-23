@@ -5,7 +5,7 @@
 
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{unrecoverable, Result};
+use instruction_sequence::{unrecoverable, Result};
 use naming_special_names_rust::classes;
 use options::{HhvmFlags, Options};
 use oxidized::{

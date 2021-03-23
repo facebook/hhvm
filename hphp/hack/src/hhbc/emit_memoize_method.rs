@@ -20,7 +20,7 @@ use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust::{coeffects, reified};
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};

@@ -10,7 +10,7 @@ use hhas_adata_rust::{
 };
 use hhbc_ast_rust::*;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{Error, InstrSeq, Result};
+use instruction_sequence::{Error, InstrSeq, Result};
 use options::HhvmFlags;
 use runtime::TypedValue as TV;
 

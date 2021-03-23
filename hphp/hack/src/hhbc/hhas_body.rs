@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use hhas_param_rust::HhasParam;
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence::InstrSeq;
 use oxidized::ast_defs;
 use oxidized::doc_comment::DocComment;
 

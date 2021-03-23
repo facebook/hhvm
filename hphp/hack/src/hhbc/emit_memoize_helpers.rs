@@ -5,7 +5,7 @@
 
 use emit_fatal_rust as emit_fatal;
 use hhas_param_rust::HhasParam;
-use instruction_sequence_rust::{instr, InstrSeq, Result};
+use instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";

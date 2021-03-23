@@ -8,7 +8,7 @@ use emit_fatal_rust as emit_fatal;
 use emit_param_rust as emit_param;
 use env::emitter::Emitter;
 use hhas_body_rust::HhasBody;
-use instruction_sequence_rust::{instr, Error::Unrecoverable, InstrSeq, Result};
+use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use oxidized::{aast, ast as tast, namespace_env, pos::Pos};
 
 pub fn emit_body<'a>(

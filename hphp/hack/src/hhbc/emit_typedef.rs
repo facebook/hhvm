@@ -11,7 +11,7 @@ use hhas_pos_rust::Span;
 use hhas_type::Info as TypeInfo;
 use hhas_typedef_rust::Typedef;
 use hhbc_id_rust::{class, Id};
-use instruction_sequence_rust::Result;
+use instruction_sequence::Result;
 use oxidized::{aast_defs::Hint, ast as tast};
 use runtime::TypedValue;
 

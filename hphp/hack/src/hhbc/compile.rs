@@ -11,12 +11,12 @@ use aast_parser::{
 };
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
-use emit_program_rust::{self as emit_program, emit_program, FromAstFlags};
+use emit_program::FromAstFlags;
 use env::emitter::Emitter;
-use hhas_program_rust::HhasProgram;
+use hhas_program::HhasProgram;
 use hhbc_ast_rust::FatalOp;
 use hhbc_hhas_rust::{context::Context, print_program, Write};
-use instruction_sequence_rust::Error;
+use instruction_sequence::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
@@ -458,7 +458,7 @@ fn emit<'p, S: AsRef<str>>(
     if env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
-    emit_program(emitter, flags, namespace, ast)
+    emit_program::emit_program(emitter, flags, namespace, ast)
 }
 
 fn emit_fatal<'a>(

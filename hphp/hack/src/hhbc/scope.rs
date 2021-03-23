@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
     use env::emitter::Emitter;
-    use instruction_sequence_rust::{instr, InstrSeq, Result};
+    use instruction_sequence::{instr, InstrSeq, Result};
     use label_rust as label;
 
     /// Run emit () in a new unnamed local scope, which produces three instruction

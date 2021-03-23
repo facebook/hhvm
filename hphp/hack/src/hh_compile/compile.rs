@@ -5,8 +5,7 @@
 
 use crate::utils;
 use ::anyhow::anyhow;
-use compile_lib::{Env, EnvFlags, Profile};
-use compile_rust as compile_lib;
+use compile::{Env, EnvFlags, Profile};
 use multifile_rust as multifile;
 use options::Options;
 use oxidized::relative_path::{self, RelativePath};
@@ -136,7 +135,7 @@ fn process_single_file_impl(
         flags,
     };
     let mut output = String::new();
-    let profile = compile_lib::from_text(&env, stack_limit, &mut output, content)?;
+    let profile = compile::from_text(&env, stack_limit, &mut output, content)?;
     Ok((output, profile))
 }
 

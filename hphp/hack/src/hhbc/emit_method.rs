@@ -15,7 +15,7 @@ use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::method;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{instr, Result};
+use instruction_sequence::{instr, Result};
 use naming_special_names_rust::{special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};

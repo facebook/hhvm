@@ -11,5 +11,5 @@ path = "../../label_rewriter.rs"
 env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 label_rust = { path = "../label" }

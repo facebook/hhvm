@@ -31,7 +31,7 @@ use hhbc_ast_rust::{
 };
 use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{flatten, instr, unrecoverable, Error, InstrSeq, Result};
+use instruction_sequence::{flatten, instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use label_rust::Label;
 use ocamlrep::rc::RcOc;
@@ -548,7 +548,7 @@ mod atom_helpers {
     use crate::*;
     use aast_defs::ReifyKind::Erased;
     use ast_defs::Id;
-    use instruction_sequence_rust::{instr, unrecoverable, InstrSeq, Result};
+    use instruction_sequence::{instr, unrecoverable, InstrSeq, Result};
     use local::Type::Named;
     use tast::Tparam;
 

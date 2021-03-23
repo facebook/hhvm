@@ -19,7 +19,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhbc_id::class;
 use hhbc_id_rust as hhbc_id;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{unrecoverable, Error, Result};
+use instruction_sequence::{unrecoverable, Error, Result};
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
 use ocamlrep::rc::RcOc;
 use options::{CompilerFlags, HhvmFlags, LangFlags, Options};

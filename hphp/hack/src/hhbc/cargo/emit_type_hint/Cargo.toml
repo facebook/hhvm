@@ -12,6 +12,6 @@ emit_fatal_rust = { path = "../emit_fatal" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }
-instruction_sequence_rust = { path = "../instruction_sequence" }
+instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }

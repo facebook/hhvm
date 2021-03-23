@@ -13,7 +13,7 @@ aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0"
 atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
-compile_rust = { path = "../hhbc/cargo/compile" }
+compile = { path = "../hhbc/cargo/compile" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 multifile_rust = { path = "../utils/multifile" }
 ocamlrep = { path = "../ocamlrep" }

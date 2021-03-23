@@ -10,7 +10,7 @@ use hhas_pos_rust::Span;
 use hhas_record_def_rust::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
 use hhbc_id_rust::record;
-use instruction_sequence_rust::Result;
+use instruction_sequence::Result;
 use oxidized::namespace_env::Env as Namespace;
 
 use hhbc_string_utils_rust as string_utils;

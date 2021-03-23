@@ -278,3 +278,9 @@ val is_enum_class : env -> string -> bool
 val fun_has_implicit_return : env -> bool
 
 val named_fun_body_is_unsafe : env -> bool
+
+val get_const :
+  env -> Decl_provider.class_decl -> string -> Typing_defs.class_const option
+
+val consts :
+  env -> Decl_provider.class_decl -> (string * Typing_defs.class_const) list

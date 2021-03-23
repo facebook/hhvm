@@ -11,6 +11,14 @@ class WithConst {
 
   const type WITH_CONSTRAINT = \A0;
 
+  const CWITHOUT_HINT = "";
+
+  const \SomeEnum CENUM = \SomeEnum::FIRST;
+
+  const string CSTRING = "";
+
+  const float CFLOAT = 0.0;
+
   public function with_type_constants(
     this::TYPECONST $arg1,
     this::WITH_CONSTRAINT $arg2,

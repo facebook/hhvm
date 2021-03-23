@@ -1508,3 +1508,5 @@ val returns_with_and_without_value :
   with_value_pos:Pos.t ->
   without_value_pos_opt:Pos.t option ->
   unit
+
+val cyclic_class_constant : Pos.t -> string -> string -> unit

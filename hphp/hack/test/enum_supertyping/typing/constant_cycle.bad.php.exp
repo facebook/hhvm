@@ -1,0 +1,6 @@
+File "constant_cycle.bad.php", line 4, characters 3-3:
+Cannot declare self-referencing constant X in B (Typing[4424])
+File "constant_cycle.bad.php", line 5, characters 3-3:
+Cannot declare self-referencing constant Y in B (Typing[4424])
+File "constant_cycle.bad.php", line 14, characters 3-3:
+Cannot declare self-referencing constant X in E (Typing[4424])

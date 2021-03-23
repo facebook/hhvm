@@ -58,6 +58,7 @@ let visitor ctx =
         Readonly_check.handler;
         Meth_caller_check.handler;
         Expression_tree_check.handler;
+        Class_const_origin_check.handler;
       ] )
 
 let program ctx = (visitor ctx)#go ctx

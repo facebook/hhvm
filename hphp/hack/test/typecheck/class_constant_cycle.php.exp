@@ -1,0 +1,26 @@
+File "class_constant_cycle.php", line 5, characters 13-13:
+Cannot declare self-referencing constant A in C0 (Typing[4424])
+File "class_constant_cycle.php", line 6, characters 13-13:
+Cannot declare self-referencing constant B in C0 (Typing[4424])
+File "class_constant_cycle.php", line 10, characters 13-13:
+Cannot declare self-referencing constant A in D0 (Typing[4424])
+File "class_constant_cycle.php", line 11, characters 13-13:
+Cannot declare self-referencing constant B in D0 (Typing[4424])
+File "class_constant_cycle.php", line 12, characters 13-13:
+Cannot declare self-referencing constant C in D0 (Typing[4424])
+File "class_constant_cycle.php", line 16, characters 13-13:
+Cannot declare self-referencing constant A in C (Typing[4424])
+File "class_constant_cycle.php", line 17, characters 13-13:
+Cannot declare self-referencing constant B in C (Typing[4424])
+File "class_constant_cycle.php", line 22, characters 13-18:
+Cannot declare self-referencing constant C_SELF in C (Typing[4424])
+File "class_constant_cycle.php", line 23, characters 13-19:
+Cannot declare self-referencing constant C_SELF2 in C (Typing[4424])
+File "class_constant_cycle.php", line 32, characters 13-13:
+Cannot declare self-referencing constant X in D (Typing[4424])
+File "class_constant_cycle.php", line 37, characters 13-13:
+Cannot declare self-referencing constant X in CE (Typing[4424])
+File "class_constant_cycle.php", line 48, characters 15-15:
+Cannot declare self-referencing constant A in E_KO (Typing[4424])
+File "class_constant_cycle.php", line 49, characters 15-15:
+Cannot declare self-referencing constant B in E_KO (Typing[4424])

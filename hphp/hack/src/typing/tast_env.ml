@@ -310,3 +310,7 @@ let fun_has_implicit_return (env : t) =
 
 let named_fun_body_is_unsafe (env : t) =
   extract_from_fun_tast_info env (fun info -> info.named_body_is_unsafe) false
+
+let get_const env cls name = Typing_env.get_const env cls name
+
+let consts env cls = Typing_env.consts env cls

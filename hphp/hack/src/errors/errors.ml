@@ -5293,6 +5293,16 @@ let non_void_annotation_on_return_void_function is_async p =
   in
   add (Typing.err_code Typing.NonVoidAnnotationOnReturnVoidFun) p message
 
+let cyclic_class_constant pos class_name constant_name =
+  add_list
+    (Typing.err_code Typing.CyclicClassConstant)
+    ( pos,
+      "Cannot declare self-referencing constant "
+      ^ constant_name
+      ^ " in "
+      ^ strip_ns class_name )
+    []
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -22,6 +22,7 @@
 // several times faster. See https://github.com/facebook/hhvm/issues/7133
 #include <ctype.h>
 
+#include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/string/ext_string.h" // nolint - see above
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
@@ -2605,6 +2606,17 @@ String HHVM_FUNCTION(hebrevc,
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, true);
 }
 
+Variant HHVM_FUNCTION(HH_str_to_numeric,
+                      const String& str) {
+  int64_t ival;
+  double dval;
+  auto dt = str.get()->toNumeric(ival, dval);
+  if (dt == KindOfInt64) return ival;
+  if (dt == KindOfDouble) return dval;
+  assertx(dt == KindOfString);
+  return init_null();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StringExtension final : Extension {
@@ -2701,6 +2713,7 @@ struct StringExtension final : Extension {
     HHVM_FE(similar_text);
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
+    HHVM_FE(HH_str_to_numeric);
 
     HHVM_RC_INT(ENT_COMPAT, k_ENT_HTML_QUOTE_DOUBLE);
     HHVM_RC_INT(ENT_NOQUOTES, k_ENT_HTML_QUOTE_NONE);
@@ -2796,6 +2809,8 @@ struct StringExtension final : Extension {
     HHVM_RC_INT(CRYPT_STD_DES, 1);
 
     HHVM_RC_INT(CRYPT_SALT_LENGTH, 12);
+
+    HHVM_FALIAS(HH\\str_to_numeric, HH_str_to_numeric);
 
     loadSystemlib();
   }

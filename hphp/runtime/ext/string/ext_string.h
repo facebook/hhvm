@@ -356,8 +356,9 @@ Variant HHVM_FUNCTION(soundex,
 Variant HHVM_FUNCTION(metaphone,
                       const String& str,
                       int phones = 0);
+Variant HHVM_FUNCTION(HH_str_to_numeric,
+                      const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

@@ -1,0 +1,39 @@
+successfully converted 1
+successfully converted -1
+successfully converted 1e2
+successfully converted  1
+successfully converted 2974394749328742328432
+successfully converted -1e-2
+successfully converted 1
+successfully converted -1
+successfully converted 1e2
+successfully converted  1
+successfully converted 2974394749328742328432
+successfully converted -1e-2
+successfully converted 0xff
+successfully converted 0xff
+successfully converted 0123
+successfully converted 0123
+successfully converted -0123
+successfully converted +0123
+successfully converted -0123
+successfully converted +0123
+successfully failed to convert -0x80001
+successfully failed to convert +0x80001
+successfully failed to convert -0x80001.5
+successfully failed to convert 0x80001.5
+successfully failed to convert 
+successfully failed to convert 1 
+successfully failed to convert - 1
+successfully failed to convert 1.2.4
+successfully failed to convert 1e7.6
+successfully failed to convert 3FF
+successfully failed to convert 20 test
+successfully failed to convert 3.6test
+successfully failed to convert 1,000
+successfully failed to convert NULL
+successfully failed to convert true
+successfully failed to convert 12345xxx
+successfully failed to convert 12345 xxx
+successfully failed to convert 12345.6xxx
+successfully failed to convert 12345.6 xxx

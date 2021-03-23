@@ -1730,4 +1730,18 @@ function soundex(string $str): mixed;
  */
 <<__IsFoldable, __Native, __Pure>>
 function metaphone(string $str, int $phones = 0): mixed;
+
+}
+
+namespace HH {
+/**
+ *
+ * @param string $str - The input string
+ *
+ * @return ?num - If $str is not "numeric" as per the definition of `is_numeric`
+ * null is returned. Otherwise, return the value of the string coerced to a number
+ *
+ */
+<<__IsFoldable, __Native, __Pure>>
+function str_to_numeric(string $str): ?num;
 }

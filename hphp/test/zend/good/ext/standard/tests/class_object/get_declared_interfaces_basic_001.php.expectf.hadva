@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(72) {
+vec(73) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(24) "HH\Rx\AsyncKeyedIterator"
@@ -31,6 +31,7 @@ vec(72) {
   string(9) "SetAccess"
   string(9) "MapAccess"
   string(8) "ConstSet"
+  string(21) "HH\EnumClassAttribute"
   string(9) "Reflector"
   string(12) "Serializable"
   string(19) "HH\KeyedTraversable"

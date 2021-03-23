@@ -4225,16 +4225,16 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let includes = &extends[1..];
 
         let mut user_attributes = Vec::with_capacity_in(attributes.len() + 1, self.arena);
-        user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
-            name: PosId(name.0, "__EnumClass"),
-            classname_params: &[],
-        }));
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
                 _ => {}
             }
         }
+        user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
+            name: PosId(name.0, "__EnumClass"),
+            classname_params: &[],
+        }));
         // Match ordering of attributes produced by the OCaml decl parser (even
         // though it's the reverse of the syntactic ordering).
         user_attributes.reverse();

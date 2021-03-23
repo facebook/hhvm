@@ -11,9 +11,16 @@ class SProp implements HH\StaticPropertyAttribute {}
 class P implements HH\ParameterAttribute {}
 class T implements HH\TypeAliasAttribute {}
 class Fi implements HH\FileAttribute {}
+class Ec implements HH\EnumClassAttribute {}
+class TParam implements HH\TypeParameterAttribute {}
+class Tc implements HH\TypeConstantAttribute {}
+class L implements HH\LambdaAttribute {}
 
 <<F>>
-function ff(<<P>>int $i): void {}
+function ff(<<P>>int $i): void {
+  <<L>>
+  () ==> {};
+}
 
 <<C>>
 class CC {
@@ -21,12 +28,19 @@ class CC {
   private int $mem = 4;
   <<SProp>>
   private static int $smem = 42;
+  <<Tc>>
+  const type Tu = string;
   <<Met>>
   private function met(): void {}
 }
+
+class CT<<<TParam>> reify T1> { }
 
 <<E>>
 enum EE: int {}
 
 <<T>>
 type tt = int;
+
+<<Ec>>
+enum class Ecc : EE {}

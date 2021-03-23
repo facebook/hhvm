@@ -1488,7 +1488,9 @@ RuntimeCoeffects Class::clsCtxCnsGet(const StringData* name) const {
   auto const slot = m_constants.findIndex(name);
 
   if (slot == kInvalidSlot) {
-    raise_error("Context constant %s does not exist", name->data());
+    // TODO: Once coeffect migration is done, convert this back to raise_error
+    raise_warning("Context constant %s does not exist", name->data());
+    return RuntimeCoeffects::full();
   }
   auto const& cns = m_constants[slot];
   if (cns.kind() != ConstModifiers::Kind::Context) {
@@ -1496,7 +1498,9 @@ RuntimeCoeffects Class::clsCtxCnsGet(const StringData* name) const {
                 name->data(), ConstModifiers::show(cns.kind()));
   }
   if (cns.isAbstract()) {
-    raise_error("Context constant %s is abstract", name->data());
+    // TODO: Once coeffect migration is done, convert this back to raise_error
+    raise_warning("Context constant %s is abstract", name->data());
+    return RuntimeCoeffects::full();
   }
 
   return cns.val.constModifiers().getCoeffects().toRequired();

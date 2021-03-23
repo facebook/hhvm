@@ -68,9 +68,12 @@ let fold f tpenv accu =
 
 let merge_env env tpenv1 tpenv2 ~combine =
   let (env, tparams) =
-    SMap.merge_env env tpenv1.tparams tpenv2.tparams ~combine
+    match (tpenv1.consistent, tpenv2.consistent) with
+    | (false, true) -> (env, tpenv2.tparams)
+    | (true, false) -> (env, tpenv1.tparams)
+    | _ -> SMap.merge_env env tpenv1.tparams tpenv2.tparams ~combine
   in
-  (env, { tparams; consistent = tpenv1.consistent && tpenv2.consistent })
+  (env, { tparams; consistent = tpenv1.consistent || tpenv2.consistent })
 
 let get_lower_bounds tpenv name tyargs =
   (* TODO(T70068435) For now, anything with tyargs cannot have bounds.

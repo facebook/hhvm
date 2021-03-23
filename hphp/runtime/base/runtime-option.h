@@ -1153,7 +1153,7 @@ struct RuntimeOption {
   F(bool, HackArrDVArrVarExport, false)                                 \
   /* This is the flag for "unification", meaning that darrays are       \
    * replaced by dicts and varrays by vecs. */                          \
-  F(bool, HackArrDVArrs, false)                                         \
+  F(bool, HackArrDVArrs, true)                                          \
   /* Raise a notice for `$dict is shape` and `$vec is tuple`. */        \
   F(bool, HackArrIsShapeTupleNotices, false)                            \
   /* Notice on array serialization behavior, even if array provenance   \

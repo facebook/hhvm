@@ -1,272 +1,268 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
-                "line_number":1
-              }
-            }
-          }
-        },
-        {
-          "kind":"classish_declaration",
-          "classish_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":5,
-              "leading_width":445,
-              "width":5,
-              "trailing_width":1,
-              "leading":[
-                {"kind":"end_of_line","text":"\n","offset":5,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// This test simply exists to demonstrate a suboptimal case of error recovery",
-                  "offset":6,
-                  "width":77
-                },
-                {"kind":"end_of_line","text":"\n","offset":83,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// in the FFP. If you break this test, it doesn't necessarily mean you've done",
-                  "offset":84,
-                  "width":78
-                },
-                {"kind":"end_of_line","text":"\n","offset":162,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// anything wrong, since the FFP never behaved ideally on this code.",
-                  "offset":163,
-                  "width":68
-                },
-                {"kind":"end_of_line","text":"\n","offset":231,"width":1},
-                {"kind":"end_of_line","text":"\n","offset":232,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// Ideally, this code would produce an error indicating that nested classes are",
-                  "offset":233,
-                  "width":79
-                },
-                {"kind":"end_of_line","text":"\n","offset":312,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// forbidden. But right now, the FFP assumes the programmer did *not* intend",
-                  "offset":313,
-                  "width":76
-                },
-                {"kind":"end_of_line","text":"\n","offset":389,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// to nest classes, and throws the errors commented below.",
-                  "offset":390,
-                  "width":58
-                },
-                {"kind":"end_of_line","text":"\n","offset":448,"width":1},
-                {"kind":"end_of_line","text":"\n","offset":449,"width":1}
-              ],
-              "trailing":[{"kind":"whitespace","text":" ","offset":455,"width":1}],
-              "line_number":11
-            }
-          },
-          "classish_name":{
+          "markup_suffix_name":{
             "kind":"token",
             "token":{
               "kind":"name",
-              "text":"C1",
-              "offset":456,
+              "text":"hh",
+              "offset":2,
               "leading_width":0,
               "width":2,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":458,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
+              "line_number":1
+            }
+          }
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":5,
+            "leading_width":445,
+            "width":5,
+            "trailing_width":1,
+            "leading":[
+              {"kind":"end_of_line","text":"\n","offset":5,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// This test simply exists to demonstrate a suboptimal case of error recovery",
+                "offset":6,
+                "width":77
+              },
+              {"kind":"end_of_line","text":"\n","offset":83,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// in the FFP. If you break this test, it doesn't necessarily mean you've done",
+                "offset":84,
+                "width":78
+              },
+              {"kind":"end_of_line","text":"\n","offset":162,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// anything wrong, since the FFP never behaved ideally on this code.",
+                "offset":163,
+                "width":68
+              },
+              {"kind":"end_of_line","text":"\n","offset":231,"width":1},
+              {"kind":"end_of_line","text":"\n","offset":232,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// Ideally, this code would produce an error indicating that nested classes are",
+                "offset":233,
+                "width":79
+              },
+              {"kind":"end_of_line","text":"\n","offset":312,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// forbidden. But right now, the FFP assumes the programmer did *not* intend",
+                "offset":313,
+                "width":76
+              },
+              {"kind":"end_of_line","text":"\n","offset":389,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// to nest classes, and throws the errors commented below.",
+                "offset":390,
+                "width":58
+              },
+              {"kind":"end_of_line","text":"\n","offset":448,"width":1},
+              {"kind":"end_of_line","text":"\n","offset":449,"width":1}
+            ],
+            "trailing":[{"kind":"whitespace","text":" ","offset":455,"width":1}],
+            "line_number":11
+          }
+        },
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"C1",
+            "offset":456,
+            "leading_width":0,
+            "width":2,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":458,"width":1}],
+            "line_number":11
+          }
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":459,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":24,
+              "leading":[],
+              "trailing":[
+                {"kind":"whitespace","text":" ","offset":460,"width":1},
+                {
+                  "kind":"single_line_comment",
+                  "text":"// missing right brace",
+                  "offset":461,
+                  "width":22
+                },
+                {"kind":"end_of_line","text":"\n","offset":483,"width":1}
+              ],
               "line_number":11
             }
           },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":459,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":24,
-                "leading":[],
-                "trailing":[
-                  {"kind":"whitespace","text":" ","offset":460,"width":1},
-                  {
-                    "kind":"single_line_comment",
-                    "text":"// missing right brace",
-                    "offset":461,
-                    "width":22
-                  },
-                  {"kind":"end_of_line","text":"\n","offset":483,"width":1}
-                ],
-                "line_number":11
-              }
-            },
-            "classish_body_elements":{"kind":"list","elements":[]}
+          "classish_body_elements":{"kind":"list","elements":[]}
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":484,
+            "leading_width":3,
+            "width":5,
+            "trailing_width":1,
+            "leading":[
+              {"kind":"end_of_line","text":"\n","offset":484,"width":1},
+              {"kind":"whitespace","text":"  ","offset":485,"width":2}
+            ],
+            "trailing":[{"kind":"whitespace","text":" ","offset":492,"width":1}],
+            "line_number":13
           }
         },
-        {
-          "kind":"classish_declaration",
-          "classish_keyword":{
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"C2",
+            "offset":493,
+            "leading_width":0,
+            "width":2,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":495,"width":1}],
+            "line_number":13
+          }
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
             "kind":"token",
             "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":484,
-              "leading_width":3,
-              "width":5,
-              "trailing_width":1,
-              "leading":[
-                {"kind":"end_of_line","text":"\n","offset":484,"width":1},
-                {"kind":"whitespace","text":"  ","offset":485,"width":2}
-              ],
-              "trailing":[{"kind":"whitespace","text":" ","offset":492,"width":1}],
-              "line_number":13
-            }
-          },
-          "classish_name":{
-            "kind":"token",
-            "token":{
-              "kind":"name",
-              "text":"C2",
-              "offset":493,
+              "kind":"{",
+              "text":"{",
+              "offset":496,
               "leading_width":0,
-              "width":2,
+              "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":495,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":497,"width":1}],
               "line_number":13
             }
           },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":496,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":497,"width":1}],
-                "line_number":13
-              }
-            },
-            "classish_body_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":498,
-                "leading_width":2,
-                "width":1,
-                "trailing_width":1,
-                "leading":[{"kind":"whitespace","text":"  ","offset":498,"width":2}],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":501,"width":1}],
-                "line_number":14
-              }
-            }
-          }
-        },
-        {
-          "kind":"expression_statement",
-          "expression_statement_expression":{
+          "classish_body_right_brace":{
             "kind":"token",
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":502,
-              "leading_width":1,
+              "offset":498,
+              "leading_width":2,
               "width":1,
-              "trailing_width":42,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":502,"width":1}],
-              "trailing":[
-                {"kind":"whitespace","text":" ","offset":504,"width":1},
-                {
-                  "kind":"single_line_comment",
-                  "text":"// missing expression, missing semicolon",
-                  "offset":505,
-                  "width":40
-                },
-                {"kind":"end_of_line","text":"\n","offset":545,"width":1}
-              ],
-              "line_number":16
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
-            "kind":"token",
-            "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":546,
-              "leading_width":0,
-              "width":0,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":17
+              "trailing_width":1,
+              "leading":[{"kind":"whitespace","text":"  ","offset":498,"width":2}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":501,"width":1}],
+              "line_number":14
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh\n\n// This test simply exists to demonstrate a suboptimal case of error recovery\n// in the FFP. If you break this test, it doesn't necessarily mean you've done\n// anything wrong, since the FFP never behaved ideally on this code.\n\n// Ideally, this code would produce an error indicating that nested classes are\n// forbidden. But right now, the FFP assumes the programmer did *not* intend\n// to nest classes, and throws the errors commented below.\n\nclass C1 { // missing right brace\n\n  class C2 {\n  }\n\n} // missing expression, missing semicolon\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"expression_statement",
+        "expression_statement_expression":{
+          "kind":"token",
+          "token":{
+            "kind":"}",
+            "text":"}",
+            "offset":502,
+            "leading_width":1,
+            "width":1,
+            "trailing_width":42,
+            "leading":[{"kind":"end_of_line","text":"\n","offset":502,"width":1}],
+            "trailing":[
+              {"kind":"whitespace","text":" ","offset":504,"width":1},
+              {
+                "kind":"single_line_comment",
+                "text":"// missing expression, missing semicolon",
+                "offset":505,
+                "width":40
+              },
+              {"kind":"end_of_line","text":"\n","offset":545,"width":1}
+            ],
+            "line_number":16
+          }
+        }
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":546,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":17
+          }
+        }
+      }
+    ]
+  }
 }

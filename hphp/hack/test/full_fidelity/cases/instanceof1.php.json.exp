@@ -1,145 +1,141 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
-                "line_number":1
-              }
-            }
-          }
-        },
-        {
-          "kind":"expression_statement",
-          "expression_statement_expression":{
-            "kind":"binary_expression",
-            "binary_left_operand":{
-              "kind":"variable",
-              "variable_expression":{
-                "kind":"token",
-                "token":{
-                  "kind":"variable",
-                  "text":"$_",
-                  "offset":5,
-                  "leading_width":1,
-                  "width":2,
-                  "trailing_width":1,
-                  "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
-                  "trailing":[{"kind":"whitespace","text":" ","offset":8,"width":1}],
-                  "line_number":3
-                }
-              }
-            },
-            "binary_operator":{
-              "kind":"token",
-              "token":{
-                "kind":"=",
-                "text":"=",
-                "offset":9,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":10,"width":1}],
-                "line_number":3
-              }
-            },
-            "binary_right_operand":{
-              "kind":"variable",
-              "variable_expression":{
-                "kind":"token",
-                "token":{
-                  "kind":"variable",
-                  "text":"$x",
-                  "offset":11,
-                  "leading_width":0,
-                  "width":2,
-                  "trailing_width":1,
-                  "leading":[],
-                  "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
-                  "line_number":3
-                }
-              }
-            }
-          },
-          "expression_statement_semicolon":{
+          "markup_suffix_name":{
             "kind":"token",
             "token":{
-              "kind":";",
-              "text":";",
-              "offset":25,
-              "leading_width":3,
-              "width":1,
-              "trailing_width":1,
-              "leading":[{"kind":"extra_token_error","text":"Foo","offset":25,"width":3}],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":29,"width":1}],
-              "line_number":3
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
-            "kind":"token",
-            "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":30,
+              "kind":"name",
+              "text":"hh",
+              "offset":2,
               "leading_width":0,
-              "width":0,
-              "trailing_width":0,
+              "width":2,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
-              "line_number":4
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
+              "line_number":1
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh\n\n$_ = $x instanceof Foo;\n",
-  "version":"2020-10-15-0001"
+      },
+      {
+        "kind":"expression_statement",
+        "expression_statement_expression":{
+          "kind":"binary_expression",
+          "binary_left_operand":{
+            "kind":"variable",
+            "variable_expression":{
+              "kind":"token",
+              "token":{
+                "kind":"variable",
+                "text":"$_",
+                "offset":5,
+                "leading_width":1,
+                "width":2,
+                "trailing_width":1,
+                "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":8,"width":1}],
+                "line_number":3
+              }
+            }
+          },
+          "binary_operator":{
+            "kind":"token",
+            "token":{
+              "kind":"=",
+              "text":"=",
+              "offset":9,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":10,"width":1}],
+              "line_number":3
+            }
+          },
+          "binary_right_operand":{
+            "kind":"variable",
+            "variable_expression":{
+              "kind":"token",
+              "token":{
+                "kind":"variable",
+                "text":"$x",
+                "offset":11,
+                "leading_width":0,
+                "width":2,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
+                "line_number":3
+              }
+            }
+          }
+        },
+        "expression_statement_semicolon":{
+          "kind":"token",
+          "token":{
+            "kind":";",
+            "text":";",
+            "offset":25,
+            "leading_width":3,
+            "width":1,
+            "trailing_width":1,
+            "leading":[{"kind":"extra_token_error","text":"Foo","offset":25,"width":3}],
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":29,"width":1}],
+            "line_number":3
+          }
+        }
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":30,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":4
+          }
+        }
+      }
+    ]
+  }
 }

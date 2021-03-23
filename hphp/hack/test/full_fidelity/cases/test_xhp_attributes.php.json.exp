@@ -1,345 +1,341 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":11,
-                "leading":[],
-                "trailing":[
-                  {"kind":"whitespace","text":" ","offset":4,"width":1},
-                  {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
-                  {"kind":"end_of_line","text":"\n","offset":14,"width":1}
-                ],
-                "line_number":1
-              }
-            }
-          }
-        },
-        {
-          "kind":"classish_declaration",
-          "classish_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":15,
-              "leading_width":58,
-              "width":5,
-              "trailing_width":1,
-              "leading":[
-                {
-                  "kind":"single_line_comment",
-                  "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
-                  "offset":15,
-                  "width":56
-                },
-                {"kind":"end_of_line","text":"\n","offset":71,"width":1},
-                {"kind":"end_of_line","text":"\n","offset":72,"width":1}
-              ],
-              "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
-              "line_number":4
-            }
-          },
-          "classish_name":{
+          "markup_suffix_name":{
             "kind":"token",
             "token":{
               "kind":"name",
-              "text":"C",
-              "offset":79,
+              "text":"hh",
+              "offset":2,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":11,
+              "leading":[],
+              "trailing":[
+                {"kind":"whitespace","text":" ","offset":4,"width":1},
+                {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
+                {"kind":"end_of_line","text":"\n","offset":14,"width":1}
+              ],
+              "line_number":1
+            }
+          }
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":15,
+            "leading_width":58,
+            "width":5,
+            "trailing_width":1,
+            "leading":[
+              {
+                "kind":"single_line_comment",
+                "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
+                "offset":15,
+                "width":56
+              },
+              {"kind":"end_of_line","text":"\n","offset":71,"width":1},
+              {"kind":"end_of_line","text":"\n","offset":72,"width":1}
+            ],
+            "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
+            "line_number":4
+          }
+        },
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"C",
+            "offset":79,
+            "leading_width":0,
+            "width":1,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
+            "line_number":4
+          }
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":81,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":82,"width":1}],
               "line_number":4
             }
           },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":81,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":82,"width":1}],
-                "line_number":4
-              }
-            },
-            "classish_body_elements":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"xhp_class_attribute_declaration",
-                  "xhp_attribute_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"attribute",
-                      "text":"attribute",
-                      "offset":83,
-                      "leading_width":2,
-                      "width":9,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":83,"width":2}],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":94,"width":1}],
-                      "line_number":5
-                    }
-                  },
-                  "xhp_attribute_attributes":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"xhp_class_attribute",
-                          "xhp_attribute_decl_type":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"SomeAttributeType",
-                                "offset":95,
-                                "leading_width":4,
-                                "width":17,
-                                "trailing_width":1,
-                                "leading":[{"kind":"whitespace","text":"    ","offset":95,"width":4}],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":116,"width":1}],
-                                "line_number":6
-                              }
-                            }
-                          },
-                          "xhp_attribute_decl_name":{
+          "classish_body_elements":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"xhp_class_attribute_declaration",
+                "xhp_attribute_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"attribute",
+                    "text":"attribute",
+                    "offset":83,
+                    "leading_width":2,
+                    "width":9,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":83,"width":2}],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":94,"width":1}],
+                    "line_number":5
+                  }
+                },
+                "xhp_attribute_attributes":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"xhp_class_attribute",
+                        "xhp_attribute_decl_type":{
+                          "kind":"simple_type_specifier",
+                          "simple_type_specifier":{
                             "kind":"token",
                             "token":{
-                              "kind":"XHP_element_name",
-                              "text":"attr_name",
-                              "offset":117,
-                              "leading_width":0,
-                              "width":9,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
+                              "kind":"name",
+                              "text":"SomeAttributeType",
+                              "offset":95,
+                              "leading_width":4,
+                              "width":17,
+                              "trailing_width":1,
+                              "leading":[{"kind":"whitespace","text":"    ","offset":95,"width":4}],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":116,"width":1}],
                               "line_number":6
                             }
                           }
                         },
-                        "list_separator":{
+                        "xhp_attribute_decl_name":{
                           "kind":"token",
                           "token":{
-                            "kind":",",
-                            "text":",",
-                            "offset":126,
+                            "kind":"XHP_element_name",
+                            "text":"attr_name",
+                            "offset":117,
                             "leading_width":0,
-                            "width":1,
-                            "trailing_width":1,
+                            "width":9,
+                            "trailing_width":0,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":127,"width":1}],
+                            "trailing":[],
                             "line_number":6
                           }
                         }
                       },
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"xhp_class_attribute",
-                          "xhp_attribute_decl_type":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"SomeAttributeType",
-                                "offset":128,
-                                "leading_width":4,
-                                "width":17,
-                                "trailing_width":1,
-                                "leading":[{"kind":"whitespace","text":"    ","offset":128,"width":4}],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":149,"width":1}],
-                                "line_number":7
-                              }
-                            }
-                          },
-                          "xhp_attribute_decl_name":{
+                      "list_separator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":",",
+                          "text":",",
+                          "offset":126,
+                          "leading_width":0,
+                          "width":1,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"end_of_line","text":"\n","offset":127,"width":1}],
+                          "line_number":6
+                        }
+                      }
+                    },
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"xhp_class_attribute",
+                        "xhp_attribute_decl_type":{
+                          "kind":"simple_type_specifier",
+                          "simple_type_specifier":{
                             "kind":"token",
                             "token":{
-                              "kind":"XHP_element_name",
-                              "text":"parent",
-                              "offset":150,
-                              "leading_width":0,
-                              "width":6,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
+                              "kind":"name",
+                              "text":"SomeAttributeType",
+                              "offset":128,
+                              "leading_width":4,
+                              "width":17,
+                              "trailing_width":1,
+                              "leading":[{"kind":"whitespace","text":"    ","offset":128,"width":4}],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":149,"width":1}],
                               "line_number":7
                             }
                           }
                         },
-                        "list_separator":{
+                        "xhp_attribute_decl_name":{
                           "kind":"token",
                           "token":{
-                            "kind":",",
-                            "text":",",
-                            "offset":156,
+                            "kind":"XHP_element_name",
+                            "text":"parent",
+                            "offset":150,
                             "leading_width":0,
-                            "width":1,
-                            "trailing_width":37,
+                            "width":6,
+                            "trailing_width":0,
                             "leading":[],
-                            "trailing":[
-                              {"kind":"whitespace","text":"  ","offset":157,"width":2},
-                              {
-                                "kind":"single_line_comment",
-                                "text":"// allow using a keyword as a name",
-                                "offset":159,
-                                "width":34
-                              },
-                              {"kind":"end_of_line","text":"\n","offset":193,"width":1}
-                            ],
+                            "trailing":[],
                             "line_number":7
                           }
                         }
                       },
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"xhp_class_attribute",
-                          "xhp_attribute_decl_type":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"OtherAttributeType",
-                                "offset":194,
-                                "leading_width":4,
-                                "width":18,
-                                "trailing_width":1,
-                                "leading":[{"kind":"whitespace","text":"    ","offset":194,"width":4}],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":216,"width":1}],
-                                "line_number":8
-                              }
-                            }
-                          },
-                          "xhp_attribute_decl_name":{
+                      "list_separator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":",",
+                          "text":",",
+                          "offset":156,
+                          "leading_width":0,
+                          "width":1,
+                          "trailing_width":37,
+                          "leading":[],
+                          "trailing":[
+                            {"kind":"whitespace","text":"  ","offset":157,"width":2},
+                            {
+                              "kind":"single_line_comment",
+                              "text":"// allow using a keyword as a name",
+                              "offset":159,
+                              "width":34
+                            },
+                            {"kind":"end_of_line","text":"\n","offset":193,"width":1}
+                          ],
+                          "line_number":7
+                        }
+                      }
+                    },
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"xhp_class_attribute",
+                        "xhp_attribute_decl_type":{
+                          "kind":"simple_type_specifier",
+                          "simple_type_specifier":{
                             "kind":"token",
                             "token":{
-                              "kind":"XHP_element_name",
-                              "text":"self",
-                              "offset":217,
-                              "leading_width":0,
-                              "width":4,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
+                              "kind":"name",
+                              "text":"OtherAttributeType",
+                              "offset":194,
+                              "leading_width":4,
+                              "width":18,
+                              "trailing_width":1,
+                              "leading":[{"kind":"whitespace","text":"    ","offset":194,"width":4}],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":216,"width":1}],
                               "line_number":8
                             }
                           }
+                        },
+                        "xhp_attribute_decl_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"XHP_element_name",
+                            "text":"self",
+                            "offset":217,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":8
+                          }
                         }
                       }
-                    ]
-                  },
-                  "xhp_attribute_semicolon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":221,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":16,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":222,"width":1},
-                        {"kind":"single_line_comment","text":"// and another","offset":223,"width":14},
-                        {"kind":"end_of_line","text":"\n","offset":237,"width":1}
-                      ],
-                      "line_number":8
                     }
+                  ]
+                },
+                "xhp_attribute_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":221,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":16,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":222,"width":1},
+                      {"kind":"single_line_comment","text":"// and another","offset":223,"width":14},
+                      {"kind":"end_of_line","text":"\n","offset":237,"width":1}
+                    ],
+                    "line_number":8
                   }
                 }
-              ]
-            },
-            "classish_body_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":238,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":239,"width":1}],
-                "line_number":9
               }
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
+            ]
+          },
+          "classish_body_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":240,
+              "kind":"}",
+              "text":"}",
+              "offset":238,
               "leading_width":0,
-              "width":0,
-              "trailing_width":0,
+              "width":1,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
-              "line_number":10
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":239,"width":1}],
+              "line_number":9
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass C {\n  attribute\n    SomeAttributeType attr_name,\n    SomeAttributeType parent,  // allow using a keyword as a name\n    OtherAttributeType self; // and another\n}\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":240,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":10
+          }
+        }
+      }
+    ]
+  }
 }

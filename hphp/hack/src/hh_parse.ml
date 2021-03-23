@@ -12,6 +12,7 @@
   * Usage: hh_parse [OPTIONS] [FILES]
   *
   * --full-fidelity-json
+  * --full-fidelity-json-parse-tree
   * --full-fidelity-errors
   * --full-fidelity-errors-all
   * --full-fidelity-ast-s-expression
@@ -35,6 +36,7 @@ module ParserErrors =
 module FullFidelityParseArgs = struct
   type t = {
     (* Output options *)
+    full_fidelity_json_parse_tree: bool;
     full_fidelity_json: bool;
     full_fidelity_text_json: bool;
     full_fidelity_dot: bool;
@@ -80,6 +82,7 @@ module FullFidelityParseArgs = struct
   }
 
   let make
+      full_fidelity_json_parse_tree
       full_fidelity_json
       full_fidelity_text_json
       full_fidelity_dot
@@ -121,6 +124,7 @@ module FullFidelityParseArgs = struct
       disallow_inst_meth
       ignore_missing_json =
     {
+      full_fidelity_json_parse_tree;
       full_fidelity_json;
       full_fidelity_dot;
       full_fidelity_dot_edges;
@@ -165,6 +169,10 @@ module FullFidelityParseArgs = struct
 
   let parse_args () =
     let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
+    let full_fidelity_json_parse_tree = ref false in
+    let set_full_fidelity_json_parse_tree () =
+      full_fidelity_json_parse_tree := true
+    in
     let full_fidelity_json = ref false in
     let set_full_fidelity_json () = full_fidelity_json := true in
     let full_fidelity_text_json = ref false in
@@ -223,12 +231,16 @@ module FullFidelityParseArgs = struct
     let options =
       [
         (* modes *)
+        ( "--full-fidelity-json-parse-tree",
+          Arg.Unit set_full_fidelity_json_parse_tree,
+          "Displays the full-fidelity parse tree in JSON format." );
         ( "--full-fidelity-json",
           Arg.Unit set_full_fidelity_json,
-          "Displays the full-fidelity parse tree in JSON format." );
+          "Displays the source text, FFP schema version, and parse tree in JSON format."
+        );
         ( "--full-fidelity-text-json",
           Arg.Unit set_full_fidelity_text_json,
-          "Displays the full-fidelity parse tree in JSON format with token text."
+          "Displays the source text, FFP schema version, and parse tree (with trivia) in JSON format."
         );
         ( "--full-fidelity-dot",
           Arg.Unit set_full_fidelity_dot,
@@ -379,6 +391,7 @@ No errors are filtered out."
     Arg.parse options push_file usage;
     let modes =
       [
+        !full_fidelity_json_parse_tree;
         !full_fidelity_json;
         !full_fidelity_text_json;
         !full_fidelity_dot;
@@ -394,6 +407,7 @@ No errors are filtered out."
     if not (List.exists (fun x -> x) modes) then
       full_fidelity_errors_all := true;
     make
+      !full_fidelity_json_parse_tree
       !full_fidelity_json
       !full_fidelity_text_json
       !full_fidelity_dot
@@ -626,6 +640,14 @@ let handle_existing_file args filename =
         Printf.printf "%s\n" str
     | None -> ()
   end;
+  ( if args.full_fidelity_json_parse_tree then
+    let json =
+      SyntaxTree.parse_tree_to_json
+        ~ignore_missing:args.ignore_missing_json
+        syntax_tree
+    in
+    let str = Hh_json.json_to_string json ~pretty:args.pretty_print_json in
+    Printf.printf "%s\n" str );
   ( if args.full_fidelity_json then
     let json =
       SyntaxTree.to_json ~ignore_missing:args.ignore_missing_json syntax_tree

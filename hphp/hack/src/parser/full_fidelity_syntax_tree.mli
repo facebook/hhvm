@@ -54,6 +54,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
     val is_hhi : t -> bool
 
     val to_json : ?with_value:bool -> ?ignore_missing:bool -> t -> Hh_json.json
+
+    val parse_tree_to_json :
+      ?with_value:bool -> ?ignore_missing:bool -> t -> Hh_json.json
   end
 
   include module type of

@@ -1,88 +1,123 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
-                "line_number":1
-              }
+          "markup_suffix_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"hh",
+              "offset":2,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
+              "line_number":1
             }
           }
-        },
-        {
-          "kind":"classish_declaration",
-          "classish_attribute":{
-            "kind":"old_attribute_specification",
-            "old_attribute_specification_left_double_angle":{
-              "kind":"token",
-              "token":{
-                "kind":"<<",
-                "text":"<<",
-                "offset":5,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":2
-              }
-            },
-            "old_attribute_specification_attributes":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"list_item",
-                  "list_item":{
-                    "kind":"constructor_call",
-                    "constructor_call_type":{
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_attribute":{
+          "kind":"old_attribute_specification",
+          "old_attribute_specification_left_double_angle":{
+            "kind":"token",
+            "token":{
+              "kind":"<<",
+              "text":"<<",
+              "offset":5,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "old_attribute_specification_attributes":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"constructor_call",
+                  "constructor_call_type":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"name",
+                      "text":"a",
+                      "offset":7,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":2
+                    }
+                  }
+                },
+                "list_separator":{
+                  "kind":"token",
+                  "token":{
+                    "kind":",",
+                    "text":",",
+                    "offset":8,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":9,"width":1}],
+                    "line_number":2
+                  }
+                }
+              },
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"constructor_call",
+                  "constructor_call_type":{
+                    "kind":"simple_type_specifier",
+                    "simple_type_specifier":{
                       "kind":"token",
                       "token":{
                         "kind":"name",
-                        "text":"a",
-                        "offset":7,
+                        "text":"b",
+                        "offset":10,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -92,247 +127,208 @@
                       }
                     }
                   },
-                  "list_separator":{
+                  "constructor_call_left_paren":{
                     "kind":"token",
                     "token":{
-                      "kind":",",
-                      "text":",",
-                      "offset":8,
+                      "kind":"(",
+                      "text":"(",
+                      "offset":11,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":2
+                    }
+                  },
+                  "constructor_call_right_paren":{
+                    "kind":"token",
+                    "token":{
+                      "kind":")",
+                      "text":")",
+                      "offset":12,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":9,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
                       "line_number":2
                     }
                   }
-                },
-                {
-                  "kind":"list_item",
-                  "list_item":{
-                    "kind":"constructor_call",
-                    "constructor_call_type":{
-                      "kind":"simple_type_specifier",
-                      "simple_type_specifier":{
-                        "kind":"token",
-                        "token":{
-                          "kind":"name",
-                          "text":"b",
-                          "offset":10,
-                          "leading_width":0,
-                          "width":1,
-                          "trailing_width":0,
-                          "leading":[],
-                          "trailing":[],
-                          "line_number":2
-                        }
-                      }
-                    },
-                    "constructor_call_left_paren":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"(",
-                        "text":"(",
-                        "offset":11,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":2
-                      }
-                    },
-                    "constructor_call_right_paren":{
-                      "kind":"token",
-                      "token":{
-                        "kind":")",
-                        "text":")",
-                        "offset":12,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
-                        "line_number":2
-                      }
-                    }
-                  }
                 }
-              ]
-            },
-            "old_attribute_specification_right_double_angle":{
-              "kind":"token",
-              "token":{
-                "kind":">>",
-                "text":">>",
-                "offset":14,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":16,"width":1}],
-                "line_number":2
               }
-            }
+            ]
           },
-          "classish_keyword":{
+          "old_attribute_specification_right_double_angle":{
             "kind":"token",
             "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":17,
+              "kind":">>",
+              "text":">>",
+              "offset":14,
               "leading_width":0,
-              "width":5,
+              "width":2,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":22,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":16,"width":1}],
+              "line_number":2
+            }
+          }
+        },
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":17,
+            "leading_width":0,
+            "width":5,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":22,"width":1}],
+            "line_number":2
+          }
+        },
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"C",
+            "offset":23,
+            "leading_width":0,
+            "width":1,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":24,"width":1}],
+            "line_number":2
+          }
+        },
+        "classish_extends_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"extends",
+            "text":"extends",
+            "offset":25,
+            "leading_width":0,
+            "width":7,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
+            "line_number":2
+          }
+        },
+        "classish_extends_list":{
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"list_item",
+              "list_item":{
+                "kind":"simple_type_specifier",
+                "simple_type_specifier":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"B",
+                    "offset":33,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":34,"width":1}],
+                    "line_number":2
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "classish_implements_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"implements",
+            "text":"implements",
+            "offset":35,
+            "leading_width":0,
+            "width":10,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":45,"width":1}],
+            "line_number":2
+          }
+        },
+        "classish_implements_list":{
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"list_item",
+              "list_item":{
+                "kind":"simple_type_specifier",
+                "simple_type_specifier":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"I",
+                    "offset":46,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":47,"width":1}],
+                    "line_number":2
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":48,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
               "line_number":2
             }
           },
-          "classish_name":{
+          "classish_body_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"name",
-              "text":"C",
-              "offset":23,
+              "kind":"}",
+              "text":"}",
+              "offset":49,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":24,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
               "line_number":2
-            }
-          },
-          "classish_extends_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"extends",
-              "text":"extends",
-              "offset":25,
-              "leading_width":0,
-              "width":7,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
-              "line_number":2
-            }
-          },
-          "classish_extends_list":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"B",
-                      "offset":33,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":34,"width":1}],
-                      "line_number":2
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          "classish_implements_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"implements",
-              "text":"implements",
-              "offset":35,
-              "leading_width":0,
-              "width":10,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":45,"width":1}],
-              "line_number":2
-            }
-          },
-          "classish_implements_list":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"I",
-                      "offset":46,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":47,"width":1}],
-                      "line_number":2
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":48,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":2
-              }
-            },
-            "classish_body_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":49,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
-                "line_number":2
-              }
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
-            "kind":"token",
-            "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":51,
-              "leading_width":0,
-              "width":0,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":3
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh\n<<a, b() >> class C extends B implements I {}\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":51,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":3
+          }
+        }
+      }
+    ]
+  }
 }

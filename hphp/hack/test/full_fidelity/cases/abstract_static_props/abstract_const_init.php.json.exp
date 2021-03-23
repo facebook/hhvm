@@ -1,650 +1,559 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":11,
-                "leading":[],
-                "trailing":[
-                  {"kind":"whitespace","text":" ","offset":4,"width":1},
-                  {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
-                  {"kind":"end_of_line","text":"\n","offset":14,"width":1}
-                ],
-                "line_number":1
-              }
-            }
-          }
-        },
-        {
-          "kind":"classish_declaration",
-          "classish_modifiers":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"token",
-                "token":{
-                  "kind":"abstract",
-                  "text":"abstract",
-                  "offset":15,
-                  "leading_width":58,
-                  "width":8,
-                  "trailing_width":1,
-                  "leading":[
-                    {
-                      "kind":"single_line_comment",
-                      "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
-                      "offset":15,
-                      "width":56
-                    },
-                    {"kind":"end_of_line","text":"\n","offset":71,"width":1},
-                    {"kind":"end_of_line","text":"\n","offset":72,"width":1}
-                  ],
-                  "trailing":[{"kind":"whitespace","text":" ","offset":81,"width":1}],
-                  "line_number":4
-                }
-              }
-            ]
-          },
-          "classish_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":82,
-              "leading_width":0,
-              "width":5,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":87,"width":1}],
-              "line_number":4
-            }
-          },
-          "classish_name":{
+          "markup_suffix_name":{
             "kind":"token",
             "token":{
               "kind":"name",
-              "text":"A",
-              "offset":88,
+              "text":"hh",
+              "offset":2,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":11,
+              "leading":[],
+              "trailing":[
+                {"kind":"whitespace","text":" ","offset":4,"width":1},
+                {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
+                {"kind":"end_of_line","text":"\n","offset":14,"width":1}
+              ],
+              "line_number":1
+            }
+          }
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_modifiers":{
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"token",
+              "token":{
+                "kind":"abstract",
+                "text":"abstract",
+                "offset":15,
+                "leading_width":58,
+                "width":8,
+                "trailing_width":1,
+                "leading":[
+                  {
+                    "kind":"single_line_comment",
+                    "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
+                    "offset":15,
+                    "width":56
+                  },
+                  {"kind":"end_of_line","text":"\n","offset":71,"width":1},
+                  {"kind":"end_of_line","text":"\n","offset":72,"width":1}
+                ],
+                "trailing":[{"kind":"whitespace","text":" ","offset":81,"width":1}],
+                "line_number":4
+              }
+            }
+          ]
+        },
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":82,
+            "leading_width":0,
+            "width":5,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":87,"width":1}],
+            "line_number":4
+          }
+        },
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"A",
+            "offset":88,
+            "leading_width":0,
+            "width":1,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":89,"width":1}],
+            "line_number":4
+          }
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":90,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":89,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":91,"width":1}],
               "line_number":4
             }
           },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":90,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":91,"width":1}],
-                "line_number":4
-              }
-            },
-            "classish_body_elements":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"property_declaration",
-                  "property_attribute_spec":{
-                    "kind":"old_attribute_specification",
-                    "old_attribute_specification_left_double_angle":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"<<",
-                        "text":"<<",
-                        "offset":92,
-                        "leading_width":2,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[{"kind":"whitespace","text":"  ","offset":92,"width":2}],
-                        "trailing":[],
-                        "line_number":5
-                      }
-                    },
-                    "old_attribute_specification_attributes":{
-                      "kind":"list",
-                      "elements":[
-                        {
-                          "kind":"list_item",
-                          "list_item":{
-                            "kind":"constructor_call",
-                            "constructor_call_type":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"__Const",
-                                "offset":96,
-                                "leading_width":0,
-                                "width":7,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":5
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "old_attribute_specification_right_double_angle":{
-                      "kind":"token",
-                      "token":{
-                        "kind":">>",
-                        "text":">>",
-                        "offset":103,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
-                        "line_number":5
-                      }
+          "classish_body_elements":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"property_declaration",
+                "property_attribute_spec":{
+                  "kind":"old_attribute_specification",
+                  "old_attribute_specification_left_double_angle":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"<<",
+                      "text":"<<",
+                      "offset":92,
+                      "leading_width":2,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":92,"width":2}],
+                      "trailing":[],
+                      "line_number":5
                     }
                   },
-                  "property_modifiers":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"abstract",
-                          "text":"abstract",
-                          "offset":106,
-                          "leading_width":0,
-                          "width":8,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":114,"width":1}],
-                          "line_number":5
-                        }
-                      },
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"static",
-                          "text":"static",
-                          "offset":115,
-                          "leading_width":0,
-                          "width":6,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":121,"width":1}],
-                          "line_number":5
-                        }
-                      },
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"public",
-                          "text":"public",
-                          "offset":122,
-                          "leading_width":0,
-                          "width":6,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":128,"width":1}],
-                          "line_number":5
-                        }
-                      }
-                    ]
-                  },
-                  "property_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"int",
-                        "text":"int",
-                        "offset":129,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":132,"width":1}],
-                        "line_number":5
-                      }
-                    }
-                  },
-                  "property_declarators":{
+                  "old_attribute_specification_attributes":{
                     "kind":"list",
                     "elements":[
                       {
                         "kind":"list_item",
                         "list_item":{
-                          "kind":"property_declarator",
-                          "property_name":{
+                          "kind":"constructor_call",
+                          "constructor_call_type":{
                             "kind":"token",
                             "token":{
-                              "kind":"variable",
-                              "text":"$a",
-                              "offset":133,
+                              "kind":"name",
+                              "text":"__Const",
+                              "offset":96,
                               "leading_width":0,
-                              "width":2,
-                              "trailing_width":1,
+                              "width":7,
+                              "trailing_width":0,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":135,"width":1}],
+                              "trailing":[],
                               "line_number":5
-                            }
-                          },
-                          "property_initializer":{
-                            "kind":"simple_initializer",
-                            "simple_initializer_equal":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"=",
-                                "text":"=",
-                                "offset":136,
-                                "leading_width":0,
-                                "width":1,
-                                "trailing_width":1,
-                                "leading":[],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":137,"width":1}],
-                                "line_number":5
-                              }
-                            },
-                            "simple_initializer_value":{
-                              "kind":"literal",
-                              "literal_expression":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"decimal_literal",
-                                  "text":"5",
-                                  "offset":138,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":5
-                                }
-                              }
                             }
                           }
                         }
                       }
                     ]
                   },
-                  "property_semicolon":{
+                  "old_attribute_specification_right_double_angle":{
                     "kind":"token",
                     "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":139,
+                      "kind":">>",
+                      "text":">>",
+                      "offset":103,
                       "leading_width":0,
-                      "width":1,
+                      "width":2,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":140,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
                       "line_number":5
                     }
                   }
                 },
-                {
-                  "kind":"const_declaration",
-                  "const_modifiers":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"abstract",
-                          "text":"abstract",
-                          "offset":141,
-                          "leading_width":2,
-                          "width":8,
-                          "trailing_width":1,
-                          "leading":[{"kind":"whitespace","text":"  ","offset":141,"width":2}],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":151,"width":1}],
-                          "line_number":6
-                        }
-                      }
-                    ]
-                  },
-                  "const_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"const",
-                      "text":"const",
-                      "offset":152,
-                      "leading_width":0,
-                      "width":5,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":157,"width":1}],
-                      "line_number":6
-                    }
-                  },
-                  "const_type_specifier":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
+                "property_modifiers":{
+                  "kind":"list",
+                  "elements":[
+                    {
                       "kind":"token",
                       "token":{
-                        "kind":"int",
-                        "text":"int",
-                        "offset":158,
+                        "kind":"abstract",
+                        "text":"abstract",
+                        "offset":106,
                         "leading_width":0,
-                        "width":3,
+                        "width":8,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":161,"width":1}],
-                        "line_number":6
+                        "trailing":[{"kind":"whitespace","text":" ","offset":114,"width":1}],
+                        "line_number":5
+                      }
+                    },
+                    {
+                      "kind":"token",
+                      "token":{
+                        "kind":"static",
+                        "text":"static",
+                        "offset":115,
+                        "leading_width":0,
+                        "width":6,
+                        "trailing_width":1,
+                        "leading":[],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":121,"width":1}],
+                        "line_number":5
+                      }
+                    },
+                    {
+                      "kind":"token",
+                      "token":{
+                        "kind":"public",
+                        "text":"public",
+                        "offset":122,
+                        "leading_width":0,
+                        "width":6,
+                        "trailing_width":1,
+                        "leading":[],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":128,"width":1}],
+                        "line_number":5
                       }
                     }
-                  },
-                  "const_declarators":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"constant_declarator",
-                          "constant_declarator_name":{
+                  ]
+                },
+                "property_type":{
+                  "kind":"simple_type_specifier",
+                  "simple_type_specifier":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"int",
+                      "text":"int",
+                      "offset":129,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":132,"width":1}],
+                      "line_number":5
+                    }
+                  }
+                },
+                "property_declarators":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"property_declarator",
+                        "property_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"variable",
+                            "text":"$a",
+                            "offset":133,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":135,"width":1}],
+                            "line_number":5
+                          }
+                        },
+                        "property_initializer":{
+                          "kind":"simple_initializer",
+                          "simple_initializer_equal":{
                             "kind":"token",
                             "token":{
-                              "kind":"name",
-                              "text":"C",
-                              "offset":162,
+                              "kind":"=",
+                              "text":"=",
+                              "offset":136,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":1,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":163,"width":1}],
-                              "line_number":6
+                              "trailing":[{"kind":"whitespace","text":" ","offset":137,"width":1}],
+                              "line_number":5
                             }
                           },
-                          "constant_declarator_initializer":{
-                            "kind":"simple_initializer",
-                            "simple_initializer_equal":{
+                          "simple_initializer_value":{
+                            "kind":"literal",
+                            "literal_expression":{
                               "kind":"token",
                               "token":{
-                                "kind":"=",
-                                "text":"=",
-                                "offset":164,
+                                "kind":"decimal_literal",
+                                "text":"5",
+                                "offset":138,
                                 "leading_width":0,
                                 "width":1,
-                                "trailing_width":1,
+                                "trailing_width":0,
                                 "leading":[],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
-                                "line_number":6
-                              }
-                            },
-                            "simple_initializer_value":{
-                              "kind":"literal",
-                              "literal_expression":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"decimal_literal",
-                                  "text":"5",
-                                  "offset":166,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":6
-                                }
+                                "trailing":[],
+                                "line_number":5
                               }
                             }
                           }
                         }
                       }
-                    ]
-                  },
-                  "const_semicolon":{
+                    }
+                  ]
+                },
+                "property_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":139,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":140,"width":1}],
+                    "line_number":5
+                  }
+                }
+              },
+              {
+                "kind":"const_declaration",
+                "const_modifiers":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"token",
+                      "token":{
+                        "kind":"abstract",
+                        "text":"abstract",
+                        "offset":141,
+                        "leading_width":2,
+                        "width":8,
+                        "trailing_width":1,
+                        "leading":[{"kind":"whitespace","text":"  ","offset":141,"width":2}],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":151,"width":1}],
+                        "line_number":6
+                      }
+                    }
+                  ]
+                },
+                "const_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"const",
+                    "text":"const",
+                    "offset":152,
+                    "leading_width":0,
+                    "width":5,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":157,"width":1}],
+                    "line_number":6
+                  }
+                },
+                "const_type_specifier":{
+                  "kind":"simple_type_specifier",
+                  "simple_type_specifier":{
                     "kind":"token",
                     "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":167,
+                      "kind":"int",
+                      "text":"int",
+                      "offset":158,
                       "leading_width":0,
-                      "width":1,
+                      "width":3,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":168,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":161,"width":1}],
                       "line_number":6
                     }
                   }
+                },
+                "const_declarators":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"constant_declarator",
+                        "constant_declarator_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"C",
+                            "offset":162,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":163,"width":1}],
+                            "line_number":6
+                          }
+                        },
+                        "constant_declarator_initializer":{
+                          "kind":"simple_initializer",
+                          "simple_initializer_equal":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"=",
+                              "text":"=",
+                              "offset":164,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":1,
+                              "leading":[],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
+                              "line_number":6
+                            }
+                          },
+                          "simple_initializer_value":{
+                            "kind":"literal",
+                            "literal_expression":{
+                              "kind":"token",
+                              "token":{
+                                "kind":"decimal_literal",
+                                "text":"5",
+                                "offset":166,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":0,
+                                "leading":[],
+                                "trailing":[],
+                                "line_number":6
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "const_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":167,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":168,"width":1}],
+                    "line_number":6
+                  }
                 }
-              ]
-            },
-            "classish_body_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":169,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":170,"width":1}],
-                "line_number":7
               }
-            }
-          }
-        },
-        {
-          "kind":"classish_declaration",
-          "classish_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"class",
-              "text":"class",
-              "offset":171,
-              "leading_width":0,
-              "width":5,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":176,"width":1}],
-              "line_number":8
-            }
+            ]
           },
-          "classish_name":{
+          "classish_body_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"name",
-              "text":"B",
-              "offset":177,
+              "kind":"}",
+              "text":"}",
+              "offset":169,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":178,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":170,"width":1}],
+              "line_number":7
+            }
+          }
+        }
+      },
+      {
+        "kind":"classish_declaration",
+        "classish_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"class",
+            "text":"class",
+            "offset":171,
+            "leading_width":0,
+            "width":5,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":176,"width":1}],
+            "line_number":8
+          }
+        },
+        "classish_name":{
+          "kind":"token",
+          "token":{
+            "kind":"name",
+            "text":"B",
+            "offset":177,
+            "leading_width":0,
+            "width":1,
+            "trailing_width":1,
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":178,"width":1}],
+            "line_number":8
+          }
+        },
+        "classish_body":{
+          "kind":"classish_body",
+          "classish_body_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":179,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":180,"width":1}],
               "line_number":8
             }
           },
-          "classish_body":{
-            "kind":"classish_body",
-            "classish_body_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":179,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":180,"width":1}],
-                "line_number":8
-              }
-            },
-            "classish_body_elements":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"property_declaration",
-                  "property_attribute_spec":{
-                    "kind":"old_attribute_specification",
-                    "old_attribute_specification_left_double_angle":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"<<",
-                        "text":"<<",
-                        "offset":181,
-                        "leading_width":2,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[{"kind":"whitespace","text":"  ","offset":181,"width":2}],
-                        "trailing":[],
-                        "line_number":9
-                      }
-                    },
-                    "old_attribute_specification_attributes":{
-                      "kind":"list",
-                      "elements":[
-                        {
-                          "kind":"list_item",
-                          "list_item":{
-                            "kind":"constructor_call",
-                            "constructor_call_type":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"__Const",
-                                "offset":185,
-                                "leading_width":0,
-                                "width":7,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":9
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "old_attribute_specification_right_double_angle":{
-                      "kind":"token",
-                      "token":{
-                        "kind":">>",
-                        "text":">>",
-                        "offset":192,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":194,"width":1}],
-                        "line_number":9
-                      }
+          "classish_body_elements":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"property_declaration",
+                "property_attribute_spec":{
+                  "kind":"old_attribute_specification",
+                  "old_attribute_specification_left_double_angle":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"<<",
+                      "text":"<<",
+                      "offset":181,
+                      "leading_width":2,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":181,"width":2}],
+                      "trailing":[],
+                      "line_number":9
                     }
                   },
-                  "property_modifiers":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"static",
-                          "text":"static",
-                          "offset":195,
-                          "leading_width":0,
-                          "width":6,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":201,"width":1}],
-                          "line_number":9
-                        }
-                      },
-                      {
-                        "kind":"token",
-                        "token":{
-                          "kind":"public",
-                          "text":"public",
-                          "offset":202,
-                          "leading_width":0,
-                          "width":6,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":208,"width":1}],
-                          "line_number":9
-                        }
-                      }
-                    ]
-                  },
-                  "property_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"int",
-                        "text":"int",
-                        "offset":209,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":212,"width":1}],
-                        "line_number":9
-                      }
-                    }
-                  },
-                  "property_declarators":{
+                  "old_attribute_specification_attributes":{
                     "kind":"list",
                     "elements":[
                       {
                         "kind":"list_item",
                         "list_item":{
-                          "kind":"property_declarator",
-                          "property_name":{
+                          "kind":"constructor_call",
+                          "constructor_call_type":{
                             "kind":"token",
                             "token":{
-                              "kind":"variable",
-                              "text":"$b",
-                              "offset":213,
+                              "kind":"name",
+                              "text":"__Const",
+                              "offset":185,
                               "leading_width":0,
-                              "width":2,
+                              "width":7,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
@@ -655,132 +564,219 @@
                       }
                     ]
                   },
-                  "property_semicolon":{
+                  "old_attribute_specification_right_double_angle":{
                     "kind":"token",
                     "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":215,
+                      "kind":">>",
+                      "text":">>",
+                      "offset":192,
                       "leading_width":0,
-                      "width":1,
+                      "width":2,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":216,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":194,"width":1}],
                       "line_number":9
                     }
                   }
                 },
-                {
-                  "kind":"const_declaration",
-                  "const_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"const",
-                      "text":"const",
-                      "offset":217,
-                      "leading_width":2,
-                      "width":5,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":217,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":224,"width":1}],
-                      "line_number":10
-                    }
-                  },
-                  "const_type_specifier":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
+                "property_modifiers":{
+                  "kind":"list",
+                  "elements":[
+                    {
                       "kind":"token",
                       "token":{
-                        "kind":"int",
-                        "text":"int",
-                        "offset":225,
+                        "kind":"static",
+                        "text":"static",
+                        "offset":195,
                         "leading_width":0,
-                        "width":3,
+                        "width":6,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":228,"width":1}],
-                        "line_number":10
+                        "trailing":[{"kind":"whitespace","text":" ","offset":201,"width":1}],
+                        "line_number":9
+                      }
+                    },
+                    {
+                      "kind":"token",
+                      "token":{
+                        "kind":"public",
+                        "text":"public",
+                        "offset":202,
+                        "leading_width":0,
+                        "width":6,
+                        "trailing_width":1,
+                        "leading":[],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":208,"width":1}],
+                        "line_number":9
                       }
                     }
-                  },
-                  "const_declarators":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"constant_declarator",
-                          "constant_declarator_name":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"name",
-                              "text":"C",
-                              "offset":229,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":10
-                            }
+                  ]
+                },
+                "property_type":{
+                  "kind":"simple_type_specifier",
+                  "simple_type_specifier":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"int",
+                      "text":"int",
+                      "offset":209,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":212,"width":1}],
+                      "line_number":9
+                    }
+                  }
+                },
+                "property_declarators":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"property_declarator",
+                        "property_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"variable",
+                            "text":"$b",
+                            "offset":213,
+                            "leading_width":0,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":9
                           }
                         }
                       }
-                    ]
-                  },
-                  "const_semicolon":{
+                    }
+                  ]
+                },
+                "property_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":215,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":216,"width":1}],
+                    "line_number":9
+                  }
+                }
+              },
+              {
+                "kind":"const_declaration",
+                "const_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"const",
+                    "text":"const",
+                    "offset":217,
+                    "leading_width":2,
+                    "width":5,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":217,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":224,"width":1}],
+                    "line_number":10
+                  }
+                },
+                "const_type_specifier":{
+                  "kind":"simple_type_specifier",
+                  "simple_type_specifier":{
                     "kind":"token",
                     "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":230,
+                      "kind":"int",
+                      "text":"int",
+                      "offset":225,
                       "leading_width":0,
-                      "width":1,
+                      "width":3,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":231,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":228,"width":1}],
                       "line_number":10
                     }
                   }
+                },
+                "const_declarators":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"constant_declarator",
+                        "constant_declarator_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"C",
+                            "offset":229,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":10
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "const_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":230,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":231,"width":1}],
+                    "line_number":10
+                  }
                 }
-              ]
-            },
-            "classish_body_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":232,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":233,"width":1}],
-                "line_number":11
               }
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
+            ]
+          },
+          "classish_body_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":234,
+              "kind":"}",
+              "text":"}",
+              "offset":232,
               "leading_width":0,
-              "width":0,
-              "trailing_width":0,
+              "width":1,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
-              "line_number":12
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":233,"width":1}],
+              "line_number":11
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nabstract class A {\n  <<__Const>> abstract static public int $a = 5;\n  abstract const int C = 5;\n}\nclass B {\n  <<__Const>> static public int $b;\n  const int C;\n}\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":234,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":12
+          }
+        }
+      }
+    ]
+  }
 }

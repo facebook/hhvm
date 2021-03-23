@@ -1,741 +1,509 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
+          "markup_suffix_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"hh",
+              "offset":2,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
+              "line_number":1
+            }
+          }
+        }
+      },
+      {
+        "kind":"function_declaration",
+        "function_declaration_header":{
+          "kind":"function_declaration_header",
+          "function_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"function",
+              "text":"function",
+              "offset":5,
+              "leading_width":0,
+              "width":8,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
+              "line_number":2
+            }
+          },
+          "function_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"bar",
+              "offset":14,
+              "leading_width":0,
+              "width":3,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "function_left_paren":{
+            "kind":"token",
+            "token":{
+              "kind":"(",
+              "text":"(",
+              "offset":17,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "function_right_paren":{
+            "kind":"token",
+            "token":{
+              "kind":")",
+              "text":")",
+              "offset":18,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":19,"width":1}],
+              "line_number":2
+            }
+          },
+          "function_colon":{
+            "kind":"token",
+            "token":{
+              "kind":":",
+              "text":":",
+              "offset":20,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
+              "line_number":2
+            }
+          },
+          "function_type":{
+            "kind":"simple_type_specifier",
+            "simple_type_specifier":{
               "kind":"token",
               "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
+                "kind":"void",
+                "text":"void",
+                "offset":22,
                 "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
+                "width":4,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
-                "line_number":1
+                "trailing":[{"kind":"whitespace","text":" ","offset":26,"width":1}],
+                "line_number":2
               }
             }
           }
         },
-        {
-          "kind":"function_declaration",
-          "function_declaration_header":{
-            "kind":"function_declaration_header",
-            "function_keyword":{
-              "kind":"token",
-              "token":{
-                "kind":"function",
-                "text":"function",
-                "offset":5,
-                "leading_width":0,
-                "width":8,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":13,"width":1}],
-                "line_number":2
-              }
-            },
-            "function_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"bar",
-                "offset":14,
-                "leading_width":0,
-                "width":3,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":2
-              }
-            },
-            "function_left_paren":{
-              "kind":"token",
-              "token":{
-                "kind":"(",
-                "text":"(",
-                "offset":17,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":2
-              }
-            },
-            "function_right_paren":{
-              "kind":"token",
-              "token":{
-                "kind":")",
-                "text":")",
-                "offset":18,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":19,"width":1}],
-                "line_number":2
-              }
-            },
-            "function_colon":{
-              "kind":"token",
-              "token":{
-                "kind":":",
-                "text":":",
-                "offset":20,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
-                "line_number":2
-              }
-            },
-            "function_type":{
-              "kind":"simple_type_specifier",
-              "simple_type_specifier":{
-                "kind":"token",
-                "token":{
-                  "kind":"void",
-                  "text":"void",
-                  "offset":22,
-                  "leading_width":0,
-                  "width":4,
-                  "trailing_width":1,
-                  "leading":[],
-                  "trailing":[{"kind":"whitespace","text":" ","offset":26,"width":1}],
-                  "line_number":2
-                }
-              }
+        "function_body":{
+          "kind":"compound_statement",
+          "compound_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":27,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":28,"width":1}],
+              "line_number":2
             }
           },
-          "function_body":{
-            "kind":"compound_statement",
-            "compound_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":27,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":28,"width":1}],
-                "line_number":2
-              }
-            },
-            "compound_statements":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"case_label",
-                  "case_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"case",
-                      "text":"case",
-                      "offset":29,
-                      "leading_width":2,
-                      "width":4,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":29,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":35,"width":1}],
-                      "line_number":3
-                    }
-                  },
-                  "case_expression":{
-                    "kind":"literal",
-                    "literal_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"decimal_literal",
-                        "text":"123",
-                        "offset":36,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":3
-                      }
-                    }
-                  },
-                  "case_colon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":":",
-                      "text":":",
-                      "offset":39,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":40,"width":1}],
-                      "line_number":3
-                    }
+          "compound_statements":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"case_label",
+                "case_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"case",
+                    "text":"case",
+                    "offset":29,
+                    "leading_width":2,
+                    "width":4,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":29,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":35,"width":1}],
+                    "line_number":3
                   }
                 },
-                {
-                  "kind":"expression_statement",
-                  "expression_statement_semicolon":{
+                "case_expression":{
+                  "kind":"literal",
+                  "literal_expression":{
                     "kind":"token",
                     "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":41,
+                      "kind":"decimal_literal",
+                      "text":"123",
+                      "offset":36,
                       "leading_width":0,
-                      "width":1,
-                      "trailing_width":26,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":42,"width":1},
-                        {
-                          "kind":"single_line_comment",
-                          "text":"// error, outside switch",
-                          "offset":43,
-                          "width":24
-                        },
-                        {"kind":"end_of_line","text":"\n","offset":67,"width":1}
-                      ],
-                      "line_number":3
-                    }
-                  }
-                },
-                {
-                  "kind":"default_label",
-                  "default_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"default",
-                      "text":"default",
-                      "offset":68,
-                      "leading_width":2,
-                      "width":7,
-                      "trailing_width":0,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":68,"width":2}],
-                      "trailing":[],
-                      "line_number":4
-                    }
-                  },
-                  "default_colon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":":",
-                      "text":":",
-                      "offset":77,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
-                      "line_number":4
-                    }
-                  }
-                },
-                {
-                  "kind":"expression_statement",
-                  "expression_statement_semicolon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":79,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":26,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":80,"width":1},
-                        {
-                          "kind":"single_line_comment",
-                          "text":"// error, outside switch",
-                          "offset":81,
-                          "width":24
-                        },
-                        {"kind":"end_of_line","text":"\n","offset":105,"width":1}
-                      ],
-                      "line_number":4
-                    }
-                  }
-                },
-                {
-                  "kind":"switch_statement",
-                  "switch_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"switch",
-                      "text":"switch",
-                      "offset":106,
-                      "leading_width":2,
-                      "width":6,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":106,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":114,"width":1}],
-                      "line_number":5
-                    }
-                  },
-                  "switch_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":115,
-                      "leading_width":0,
-                      "width":1,
+                      "width":3,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":5
+                      "line_number":3
                     }
-                  },
-                  "switch_expression":{
-                    "kind":"variable",
-                    "variable_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$x",
-                        "offset":116,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":5
-                      }
-                    }
-                  },
-                  "switch_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":118,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":119,"width":1}],
-                      "line_number":5
-                    }
-                  },
-                  "switch_left_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"{",
-                      "text":"{",
-                      "offset":120,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":121,"width":1}],
-                      "line_number":5
-                    }
-                  },
-                  "switch_sections":{
-                    "kind":"list",
-                    "elements":[
+                  }
+                },
+                "case_colon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":":",
+                    "text":":",
+                    "offset":39,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":40,"width":1}],
+                    "line_number":3
+                  }
+                }
+              },
+              {
+                "kind":"expression_statement",
+                "expression_statement_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":41,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":26,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":42,"width":1},
                       {
-                        "kind":"switch_section",
-                        "switch_section_labels":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"case_label",
-                              "case_keyword":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"case",
-                                  "text":"case",
-                                  "offset":122,
-                                  "leading_width":0,
-                                  "width":4,
-                                  "trailing_width":1,
-                                  "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":126,"width":1}],
-                                  "line_number":5
-                                }
-                              },
-                              "case_expression":{
-                                "kind":"literal",
-                                "literal_expression":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"decimal_literal",
-                                    "text":"123",
-                                    "offset":127,
-                                    "leading_width":0,
-                                    "width":3,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":5
-                                  }
-                                }
-                              },
-                              "case_colon":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":":",
-                                  "text":":",
-                                  "offset":130,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":1,
-                                  "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":131,"width":1}],
-                                  "line_number":5
-                                }
-                              }
-                            }
-                          ]
-                        },
-                        "switch_section_statements":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"expression_statement",
-                              "expression_statement_semicolon":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":";",
-                                  "text":";",
-                                  "offset":132,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":1,
-                                  "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":133,"width":1}],
-                                  "line_number":5
-                                }
-                              }
-                            }
-                          ]
-                        }
+                        "kind":"single_line_comment",
+                        "text":"// error, outside switch",
+                        "offset":43,
+                        "width":24
                       },
+                      {"kind":"end_of_line","text":"\n","offset":67,"width":1}
+                    ],
+                    "line_number":3
+                  }
+                }
+              },
+              {
+                "kind":"default_label",
+                "default_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"default",
+                    "text":"default",
+                    "offset":68,
+                    "leading_width":2,
+                    "width":7,
+                    "trailing_width":0,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":68,"width":2}],
+                    "trailing":[],
+                    "line_number":4
+                  }
+                },
+                "default_colon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":":",
+                    "text":":",
+                    "offset":77,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
+                    "line_number":4
+                  }
+                }
+              },
+              {
+                "kind":"expression_statement",
+                "expression_statement_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":79,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":26,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":80,"width":1},
                       {
-                        "kind":"switch_section",
-                        "switch_section_labels":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"default_label",
-                              "default_keyword":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"default",
-                                  "text":"default",
-                                  "offset":134,
-                                  "leading_width":0,
-                                  "width":7,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":5
-                                }
-                              },
-                              "default_colon":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":":",
-                                  "text":":",
-                                  "offset":141,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":1,
-                                  "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":142,"width":1}],
-                                  "line_number":5
-                                }
-                              }
-                            }
-                          ]
-                        },
-                        "switch_section_statements":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"break_statement",
-                              "break_keyword":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"break",
-                                  "text":"break",
-                                  "offset":143,
-                                  "leading_width":0,
-                                  "width":5,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":5
-                                }
-                              },
-                              "break_semicolon":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":";",
-                                  "text":";",
-                                  "offset":148,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":5
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  "switch_right_brace":{
+                        "kind":"single_line_comment",
+                        "text":"// error, outside switch",
+                        "offset":81,
+                        "width":24
+                      },
+                      {"kind":"end_of_line","text":"\n","offset":105,"width":1}
+                    ],
+                    "line_number":4
+                  }
+                }
+              },
+              {
+                "kind":"switch_statement",
+                "switch_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"switch",
+                    "text":"switch",
+                    "offset":106,
+                    "leading_width":2,
+                    "width":6,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":106,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":114,"width":1}],
+                    "line_number":5
+                  }
+                },
+                "switch_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":115,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":5
+                  }
+                },
+                "switch_expression":{
+                  "kind":"variable",
+                  "variable_expression":{
                     "kind":"token",
                     "token":{
-                      "kind":"}",
-                      "text":"}",
-                      "offset":149,
+                      "kind":"variable",
+                      "text":"$x",
+                      "offset":116,
                       "leading_width":0,
-                      "width":1,
-                      "trailing_width":13,
+                      "width":2,
+                      "trailing_width":0,
                       "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":150,"width":1},
-                        {"kind":"single_line_comment","text":"// no error","offset":151,"width":11},
-                        {"kind":"end_of_line","text":"\n","offset":162,"width":1}
-                      ],
+                      "trailing":[],
                       "line_number":5
                     }
                   }
                 },
-                {
-                  "kind":"break_statement",
-                  "break_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"break",
-                      "text":"break",
-                      "offset":163,
-                      "leading_width":2,
-                      "width":5,
-                      "trailing_width":0,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":163,"width":2}],
-                      "trailing":[],
-                      "line_number":6
-                    }
-                  },
-                  "break_semicolon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":170,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":10,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":171,"width":1},
-                        {"kind":"single_line_comment","text":"// error","offset":172,"width":8},
-                        {"kind":"end_of_line","text":"\n","offset":180,"width":1}
-                      ],
-                      "line_number":6
-                    }
+                "switch_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":118,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":119,"width":1}],
+                    "line_number":5
                   }
                 },
-                {
-                  "kind":"while_statement",
-                  "while_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"while",
-                      "text":"while",
-                      "offset":181,
-                      "leading_width":2,
-                      "width":5,
-                      "trailing_width":0,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":181,"width":2}],
-                      "trailing":[],
-                      "line_number":7
-                    }
-                  },
-                  "while_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":188,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":7
-                    }
-                  },
-                  "while_condition":{
-                    "kind":"variable",
-                    "variable_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$a",
-                        "offset":189,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":7
-                      }
-                    }
-                  },
-                  "while_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":191,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":192,"width":1}],
-                      "line_number":7
-                    }
-                  },
-                  "while_body":{
-                    "kind":"compound_statement",
-                    "compound_left_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"{",
-                        "text":"{",
-                        "offset":193,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"end_of_line","text":"\n","offset":194,"width":1}],
-                        "line_number":7
-                      }
-                    },
-                    "compound_statements":{
-                      "kind":"list",
-                      "elements":[
-                        {
-                          "kind":"if_statement",
-                          "if_keyword":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"if",
-                              "text":"if",
-                              "offset":195,
-                              "leading_width":4,
-                              "width":2,
-                              "trailing_width":1,
-                              "leading":[{"kind":"whitespace","text":"    ","offset":195,"width":4}],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":201,"width":1}],
-                              "line_number":8
-                            }
-                          },
-                          "if_left_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"(",
-                              "text":"(",
-                              "offset":202,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":8
-                            }
-                          },
-                          "if_condition":{
-                            "kind":"variable",
-                            "variable_expression":{
+                "switch_left_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"{",
+                    "text":"{",
+                    "offset":120,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":121,"width":1}],
+                    "line_number":5
+                  }
+                },
+                "switch_sections":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"switch_section",
+                      "switch_section_labels":{
+                        "kind":"list",
+                        "elements":[
+                          {
+                            "kind":"case_label",
+                            "case_keyword":{
                               "kind":"token",
                               "token":{
-                                "kind":"variable",
-                                "text":"$b",
-                                "offset":203,
+                                "kind":"case",
+                                "text":"case",
+                                "offset":122,
                                 "leading_width":0,
-                                "width":2,
+                                "width":4,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":126,"width":1}],
+                                "line_number":5
+                              }
+                            },
+                            "case_expression":{
+                              "kind":"literal",
+                              "literal_expression":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"decimal_literal",
+                                  "text":"123",
+                                  "offset":127,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":5
+                                }
+                              }
+                            },
+                            "case_colon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":":",
+                                "text":":",
+                                "offset":130,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":131,"width":1}],
+                                "line_number":5
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "switch_section_statements":{
+                        "kind":"list",
+                        "elements":[
+                          {
+                            "kind":"expression_statement",
+                            "expression_statement_semicolon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":";",
+                                "text":";",
+                                "offset":132,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":133,"width":1}],
+                                "line_number":5
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind":"switch_section",
+                      "switch_section_labels":{
+                        "kind":"list",
+                        "elements":[
+                          {
+                            "kind":"default_label",
+                            "default_keyword":{
+                              "kind":"token",
+                              "token":{
+                                "kind":"default",
+                                "text":"default",
+                                "offset":134,
+                                "leading_width":0,
+                                "width":7,
                                 "trailing_width":0,
                                 "leading":[],
                                 "trailing":[],
-                                "line_number":8
+                                "line_number":5
+                              }
+                            },
+                            "default_colon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":":",
+                                "text":":",
+                                "offset":141,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":142,"width":1}],
+                                "line_number":5
                               }
                             }
-                          },
-                          "if_right_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":")",
-                              "text":")",
-                              "offset":205,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":1,
-                              "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":206,"width":1}],
-                              "line_number":8
-                            }
-                          },
-                          "if_statement":{
+                          }
+                        ]
+                      },
+                      "switch_section_statements":{
+                        "kind":"list",
+                        "elements":[
+                          {
                             "kind":"break_statement",
                             "break_keyword":{
                               "kind":"token",
                               "token":{
                                 "kind":"break",
                                 "text":"break",
-                                "offset":207,
+                                "offset":143,
                                 "leading_width":0,
                                 "width":5,
                                 "trailing_width":0,
                                 "leading":[],
                                 "trailing":[],
-                                "line_number":8
+                                "line_number":5
                               }
                             },
                             "break_semicolon":{
@@ -743,622 +511,800 @@
                               "token":{
                                 "kind":";",
                                 "text":";",
-                                "offset":212,
+                                "offset":148,
                                 "leading_width":0,
                                 "width":1,
-                                "trailing_width":13,
-                                "leading":[],
-                                "trailing":[
-                                  {"kind":"whitespace","text":" ","offset":213,"width":1},
-                                  {"kind":"single_line_comment","text":"// no error","offset":214,"width":11},
-                                  {"kind":"end_of_line","text":"\n","offset":225,"width":1}
-                                ],
-                                "line_number":8
-                              }
-                            }
-                          }
-                        },
-                        {
-                          "kind":"if_statement",
-                          "if_keyword":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"if",
-                              "text":"if",
-                              "offset":226,
-                              "leading_width":4,
-                              "width":2,
-                              "trailing_width":1,
-                              "leading":[{"kind":"whitespace","text":"    ","offset":226,"width":4}],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":232,"width":1}],
-                              "line_number":9
-                            }
-                          },
-                          "if_left_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"(",
-                              "text":"(",
-                              "offset":233,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":9
-                            }
-                          },
-                          "if_condition":{
-                            "kind":"variable",
-                            "variable_expression":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"variable",
-                                "text":"$c",
-                                "offset":234,
-                                "leading_width":0,
-                                "width":2,
                                 "trailing_width":0,
                                 "leading":[],
                                 "trailing":[],
-                                "line_number":9
-                              }
-                            }
-                          },
-                          "if_right_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":")",
-                              "text":")",
-                              "offset":236,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":1,
-                              "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":237,"width":1}],
-                              "line_number":9
-                            }
-                          },
-                          "if_statement":{
-                            "kind":"continue_statement",
-                            "continue_keyword":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"continue",
-                                "text":"continue",
-                                "offset":238,
-                                "leading_width":0,
-                                "width":8,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":9
-                              }
-                            },
-                            "continue_semicolon":{
-                              "kind":"token",
-                              "token":{
-                                "kind":";",
-                                "text":";",
-                                "offset":246,
-                                "leading_width":0,
-                                "width":1,
-                                "trailing_width":13,
-                                "leading":[],
-                                "trailing":[
-                                  {"kind":"whitespace","text":" ","offset":247,"width":1},
-                                  {"kind":"single_line_comment","text":"// no error","offset":248,"width":11},
-                                  {"kind":"end_of_line","text":"\n","offset":259,"width":1}
-                                ],
-                                "line_number":9
+                                "line_number":5
                               }
                             }
                           }
-                        },
-                        {
-                          "kind":"expression_statement",
-                          "expression_statement_expression":{
-                            "kind":"binary_expression",
-                            "binary_left_operand":{
-                              "kind":"variable",
-                              "variable_expression":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"variable",
-                                  "text":"$x",
-                                  "offset":260,
-                                  "leading_width":4,
-                                  "width":2,
-                                  "trailing_width":1,
-                                  "leading":[{"kind":"whitespace","text":"    ","offset":260,"width":4}],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":266,"width":1}],
-                                  "line_number":10
-                                }
-                              }
-                            },
-                            "binary_operator":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"=",
-                                "text":"=",
-                                "offset":267,
-                                "leading_width":0,
-                                "width":1,
-                                "trailing_width":1,
-                                "leading":[],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":268,"width":1}],
-                                "line_number":10
-                              }
-                            },
-                            "binary_right_operand":{
-                              "kind":"anonymous_function",
-                              "anonymous_function_keyword":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"function",
-                                  "text":"function",
-                                  "offset":269,
-                                  "leading_width":0,
-                                  "width":8,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":10
-                                }
-                              },
-                              "anonymous_left_paren":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"(",
-                                  "text":"(",
-                                  "offset":277,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":10
-                                }
-                              },
-                              "anonymous_parameters":{
-                                "kind":"list",
-                                "elements":[
-                                  {
-                                    "kind":"list_item",
-                                    "list_item":{
-                                      "kind":"parameter_declaration",
-                                      "parameter_name":{
-                                        "kind":"token",
-                                        "token":{
-                                          "kind":"variable",
-                                          "text":"$b",
-                                          "offset":278,
-                                          "leading_width":0,
-                                          "width":2,
-                                          "trailing_width":0,
-                                          "leading":[],
-                                          "trailing":[],
-                                          "line_number":10
-                                        }
-                                      }
-                                    }
-                                  }
-                                ]
-                              },
-                              "anonymous_right_paren":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":")",
-                                  "text":")",
-                                  "offset":280,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":1,
-                                  "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":281,"width":1}],
-                                  "line_number":10
-                                }
-                              },
-                              "anonymous_body":{
-                                "kind":"compound_statement",
-                                "compound_left_brace":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"{",
-                                    "text":"{",
-                                    "offset":282,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":1,
-                                    "leading":[],
-                                    "trailing":[{"kind":"whitespace","text":" ","offset":283,"width":1}],
-                                    "line_number":10
-                                  }
-                                },
-                                "compound_statements":{
-                                  "kind":"list",
-                                  "elements":[
-                                    {
-                                      "kind":"break_statement",
-                                      "break_keyword":{
-                                        "kind":"token",
-                                        "token":{
-                                          "kind":"break",
-                                          "text":"break",
-                                          "offset":284,
-                                          "leading_width":0,
-                                          "width":5,
-                                          "trailing_width":0,
-                                          "leading":[],
-                                          "trailing":[],
-                                          "line_number":10
-                                        }
-                                      },
-                                      "break_semicolon":{
-                                        "kind":"token",
-                                        "token":{
-                                          "kind":";",
-                                          "text":";",
-                                          "offset":289,
-                                          "leading_width":0,
-                                          "width":1,
-                                          "trailing_width":1,
-                                          "leading":[],
-                                          "trailing":[{"kind":"whitespace","text":" ","offset":290,"width":1}],
-                                          "line_number":10
-                                        }
-                                      }
-                                    }
-                                  ]
-                                },
-                                "compound_right_brace":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"}",
-                                    "text":"}",
-                                    "offset":291,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":10
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "expression_statement_semicolon":{
-                            "kind":"token",
-                            "token":{
-                              "kind":";",
-                              "text":";",
-                              "offset":292,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":10,
-                              "leading":[],
-                              "trailing":[
-                                {"kind":"whitespace","text":" ","offset":293,"width":1},
-                                {"kind":"single_line_comment","text":"// error","offset":294,"width":8},
-                                {"kind":"end_of_line","text":"\n","offset":302,"width":1}
-                              ],
-                              "line_number":10
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "compound_right_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"}",
-                        "text":"}",
-                        "offset":303,
-                        "leading_width":2,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[{"kind":"whitespace","text":"  ","offset":303,"width":2}],
-                        "trailing":[{"kind":"end_of_line","text":"\n","offset":306,"width":1}],
-                        "line_number":11
+                        ]
                       }
+                    }
+                  ]
+                },
+                "switch_right_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"}",
+                    "text":"}",
+                    "offset":149,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":13,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":150,"width":1},
+                      {"kind":"single_line_comment","text":"// no error","offset":151,"width":11},
+                      {"kind":"end_of_line","text":"\n","offset":162,"width":1}
+                    ],
+                    "line_number":5
+                  }
+                }
+              },
+              {
+                "kind":"break_statement",
+                "break_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"break",
+                    "text":"break",
+                    "offset":163,
+                    "leading_width":2,
+                    "width":5,
+                    "trailing_width":0,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":163,"width":2}],
+                    "trailing":[],
+                    "line_number":6
+                  }
+                },
+                "break_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":170,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":10,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":171,"width":1},
+                      {"kind":"single_line_comment","text":"// error","offset":172,"width":8},
+                      {"kind":"end_of_line","text":"\n","offset":180,"width":1}
+                    ],
+                    "line_number":6
+                  }
+                }
+              },
+              {
+                "kind":"while_statement",
+                "while_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"while",
+                    "text":"while",
+                    "offset":181,
+                    "leading_width":2,
+                    "width":5,
+                    "trailing_width":0,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":181,"width":2}],
+                    "trailing":[],
+                    "line_number":7
+                  }
+                },
+                "while_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":188,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":7
+                  }
+                },
+                "while_condition":{
+                  "kind":"variable",
+                  "variable_expression":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$a",
+                      "offset":189,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":7
                     }
                   }
                 },
-                {
-                  "kind":"try_statement",
-                  "try_keyword":{
+                "while_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":191,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":192,"width":1}],
+                    "line_number":7
+                  }
+                },
+                "while_body":{
+                  "kind":"compound_statement",
+                  "compound_left_brace":{
                     "kind":"token",
                     "token":{
-                      "kind":"try",
-                      "text":"try",
-                      "offset":307,
-                      "leading_width":2,
-                      "width":3,
+                      "kind":"{",
+                      "text":"{",
+                      "offset":193,
+                      "leading_width":0,
+                      "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":307,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":312,"width":1}],
-                      "line_number":12
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":194,"width":1}],
+                      "line_number":7
                     }
                   },
-                  "try_compound_statement":{
-                    "kind":"compound_statement",
-                    "compound_left_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"{",
-                        "text":"{",
-                        "offset":313,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":12
-                      }
-                    },
-                    "compound_right_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"}",
-                        "text":"}",
-                        "offset":314,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":315,"width":1}],
-                        "line_number":12
-                      }
-                    }
-                  },
-                  "try_catch_clauses":{
+                  "compound_statements":{
                     "kind":"list",
                     "elements":[
                       {
-                        "kind":"catch_clause",
-                        "catch_keyword":{
+                        "kind":"if_statement",
+                        "if_keyword":{
                           "kind":"token",
                           "token":{
-                            "kind":"catch",
-                            "text":"catch",
-                            "offset":316,
-                            "leading_width":0,
-                            "width":5,
+                            "kind":"if",
+                            "text":"if",
+                            "offset":195,
+                            "leading_width":4,
+                            "width":2,
                             "trailing_width":1,
-                            "leading":[],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":321,"width":1}],
-                            "line_number":12
+                            "leading":[{"kind":"whitespace","text":"    ","offset":195,"width":4}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":201,"width":1}],
+                            "line_number":8
                           }
                         },
-                        "catch_left_paren":{
+                        "if_left_paren":{
                           "kind":"token",
                           "token":{
                             "kind":"(",
                             "text":"(",
-                            "offset":322,
+                            "offset":202,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":0,
                             "leading":[],
                             "trailing":[],
-                            "line_number":12
+                            "line_number":8
                           }
                         },
-                        "catch_type":{
-                          "kind":"simple_type_specifier",
-                          "simple_type_specifier":{
+                        "if_condition":{
+                          "kind":"variable",
+                          "variable_expression":{
                             "kind":"token",
                             "token":{
-                              "kind":"name",
-                              "text":"Exception",
-                              "offset":323,
+                              "kind":"variable",
+                              "text":"$b",
+                              "offset":203,
                               "leading_width":0,
-                              "width":9,
-                              "trailing_width":1,
+                              "width":2,
+                              "trailing_width":0,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":332,"width":1}],
-                              "line_number":12
+                              "trailing":[],
+                              "line_number":8
                             }
                           }
                         },
-                        "catch_variable":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"variable",
-                            "text":"$ex",
-                            "offset":333,
-                            "leading_width":0,
-                            "width":3,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":12
-                          }
-                        },
-                        "catch_right_paren":{
+                        "if_right_paren":{
                           "kind":"token",
                           "token":{
                             "kind":")",
                             "text":")",
-                            "offset":336,
+                            "offset":205,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":337,"width":1}],
-                            "line_number":12
+                            "trailing":[{"kind":"whitespace","text":" ","offset":206,"width":1}],
+                            "line_number":8
                           }
                         },
-                        "catch_body":{
-                          "kind":"compound_statement",
-                          "compound_left_brace":{
+                        "if_statement":{
+                          "kind":"break_statement",
+                          "break_keyword":{
                             "kind":"token",
                             "token":{
-                              "kind":"{",
-                              "text":"{",
-                              "offset":338,
+                              "kind":"break",
+                              "text":"break",
+                              "offset":207,
                               "leading_width":0,
-                              "width":1,
+                              "width":5,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":12
+                              "line_number":8
                             }
                           },
-                          "compound_right_brace":{
+                          "break_semicolon":{
                             "kind":"token",
                             "token":{
-                              "kind":"}",
-                              "text":"}",
-                              "offset":339,
+                              "kind":";",
+                              "text":";",
+                              "offset":212,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":13,
                               "leading":[],
                               "trailing":[
-                                {"kind":"whitespace","text":" ","offset":340,"width":1},
-                                {"kind":"single_line_comment","text":"// no error","offset":341,"width":11},
-                                {"kind":"end_of_line","text":"\n","offset":352,"width":1}
+                                {"kind":"whitespace","text":" ","offset":213,"width":1},
+                                {"kind":"single_line_comment","text":"// no error","offset":214,"width":11},
+                                {"kind":"end_of_line","text":"\n","offset":225,"width":1}
                               ],
-                              "line_number":12
+                              "line_number":8
                             }
+                          }
+                        }
+                      },
+                      {
+                        "kind":"if_statement",
+                        "if_keyword":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"if",
+                            "text":"if",
+                            "offset":226,
+                            "leading_width":4,
+                            "width":2,
+                            "trailing_width":1,
+                            "leading":[{"kind":"whitespace","text":"    ","offset":226,"width":4}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":232,"width":1}],
+                            "line_number":9
+                          }
+                        },
+                        "if_left_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"(",
+                            "text":"(",
+                            "offset":233,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":9
+                          }
+                        },
+                        "if_condition":{
+                          "kind":"variable",
+                          "variable_expression":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"variable",
+                              "text":"$c",
+                              "offset":234,
+                              "leading_width":0,
+                              "width":2,
+                              "trailing_width":0,
+                              "leading":[],
+                              "trailing":[],
+                              "line_number":9
+                            }
+                          }
+                        },
+                        "if_right_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":")",
+                            "text":")",
+                            "offset":236,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":237,"width":1}],
+                            "line_number":9
+                          }
+                        },
+                        "if_statement":{
+                          "kind":"continue_statement",
+                          "continue_keyword":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"continue",
+                              "text":"continue",
+                              "offset":238,
+                              "leading_width":0,
+                              "width":8,
+                              "trailing_width":0,
+                              "leading":[],
+                              "trailing":[],
+                              "line_number":9
+                            }
+                          },
+                          "continue_semicolon":{
+                            "kind":"token",
+                            "token":{
+                              "kind":";",
+                              "text":";",
+                              "offset":246,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":13,
+                              "leading":[],
+                              "trailing":[
+                                {"kind":"whitespace","text":" ","offset":247,"width":1},
+                                {"kind":"single_line_comment","text":"// no error","offset":248,"width":11},
+                                {"kind":"end_of_line","text":"\n","offset":259,"width":1}
+                              ],
+                              "line_number":9
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind":"expression_statement",
+                        "expression_statement_expression":{
+                          "kind":"binary_expression",
+                          "binary_left_operand":{
+                            "kind":"variable",
+                            "variable_expression":{
+                              "kind":"token",
+                              "token":{
+                                "kind":"variable",
+                                "text":"$x",
+                                "offset":260,
+                                "leading_width":4,
+                                "width":2,
+                                "trailing_width":1,
+                                "leading":[{"kind":"whitespace","text":"    ","offset":260,"width":4}],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":266,"width":1}],
+                                "line_number":10
+                              }
+                            }
+                          },
+                          "binary_operator":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"=",
+                              "text":"=",
+                              "offset":267,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":1,
+                              "leading":[],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":268,"width":1}],
+                              "line_number":10
+                            }
+                          },
+                          "binary_right_operand":{
+                            "kind":"anonymous_function",
+                            "anonymous_function_keyword":{
+                              "kind":"token",
+                              "token":{
+                                "kind":"function",
+                                "text":"function",
+                                "offset":269,
+                                "leading_width":0,
+                                "width":8,
+                                "trailing_width":0,
+                                "leading":[],
+                                "trailing":[],
+                                "line_number":10
+                              }
+                            },
+                            "anonymous_left_paren":{
+                              "kind":"token",
+                              "token":{
+                                "kind":"(",
+                                "text":"(",
+                                "offset":277,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":0,
+                                "leading":[],
+                                "trailing":[],
+                                "line_number":10
+                              }
+                            },
+                            "anonymous_parameters":{
+                              "kind":"list",
+                              "elements":[
+                                {
+                                  "kind":"list_item",
+                                  "list_item":{
+                                    "kind":"parameter_declaration",
+                                    "parameter_name":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":"variable",
+                                        "text":"$b",
+                                        "offset":278,
+                                        "leading_width":0,
+                                        "width":2,
+                                        "trailing_width":0,
+                                        "leading":[],
+                                        "trailing":[],
+                                        "line_number":10
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "anonymous_right_paren":{
+                              "kind":"token",
+                              "token":{
+                                "kind":")",
+                                "text":")",
+                                "offset":280,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":281,"width":1}],
+                                "line_number":10
+                              }
+                            },
+                            "anonymous_body":{
+                              "kind":"compound_statement",
+                              "compound_left_brace":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"{",
+                                  "text":"{",
+                                  "offset":282,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":1,
+                                  "leading":[],
+                                  "trailing":[{"kind":"whitespace","text":" ","offset":283,"width":1}],
+                                  "line_number":10
+                                }
+                              },
+                              "compound_statements":{
+                                "kind":"list",
+                                "elements":[
+                                  {
+                                    "kind":"break_statement",
+                                    "break_keyword":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":"break",
+                                        "text":"break",
+                                        "offset":284,
+                                        "leading_width":0,
+                                        "width":5,
+                                        "trailing_width":0,
+                                        "leading":[],
+                                        "trailing":[],
+                                        "line_number":10
+                                      }
+                                    },
+                                    "break_semicolon":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":";",
+                                        "text":";",
+                                        "offset":289,
+                                        "leading_width":0,
+                                        "width":1,
+                                        "trailing_width":1,
+                                        "leading":[],
+                                        "trailing":[{"kind":"whitespace","text":" ","offset":290,"width":1}],
+                                        "line_number":10
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "compound_right_brace":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"}",
+                                  "text":"}",
+                                  "offset":291,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":10
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "expression_statement_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":292,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":10,
+                            "leading":[],
+                            "trailing":[
+                              {"kind":"whitespace","text":" ","offset":293,"width":1},
+                              {"kind":"single_line_comment","text":"// error","offset":294,"width":8},
+                              {"kind":"end_of_line","text":"\n","offset":302,"width":1}
+                            ],
+                            "line_number":10
                           }
                         }
                       }
                     ]
-                  }
-                },
-                {
-                  "kind":"try_statement",
-                  "try_keyword":{
+                  },
+                  "compound_right_brace":{
                     "kind":"token",
                     "token":{
-                      "kind":"try",
-                      "text":"try",
-                      "offset":353,
+                      "kind":"}",
+                      "text":"}",
+                      "offset":303,
                       "leading_width":2,
-                      "width":3,
+                      "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":353,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":358,"width":1}],
-                      "line_number":13
+                      "leading":[{"kind":"whitespace","text":"  ","offset":303,"width":2}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":306,"width":1}],
+                      "line_number":11
+                    }
+                  }
+                }
+              },
+              {
+                "kind":"try_statement",
+                "try_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"try",
+                    "text":"try",
+                    "offset":307,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":307,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":312,"width":1}],
+                    "line_number":12
+                  }
+                },
+                "try_compound_statement":{
+                  "kind":"compound_statement",
+                  "compound_left_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"{",
+                      "text":"{",
+                      "offset":313,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":12
                     }
                   },
-                  "try_compound_statement":{
-                    "kind":"compound_statement",
-                    "compound_left_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"{",
-                        "text":"{",
-                        "offset":359,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":13
-                      }
-                    },
-                    "compound_right_brace":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"}",
-                        "text":"}",
-                        "offset":360,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":361,"width":1}],
-                        "line_number":13
-                      }
+                  "compound_right_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"}",
+                      "text":"}",
+                      "offset":314,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":315,"width":1}],
+                      "line_number":12
                     }
-                  },
-                  "try_finally_clause":{
-                    "kind":"finally_clause",
-                    "finally_keyword":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"finally",
-                        "text":"finally",
-                        "offset":362,
-                        "leading_width":0,
-                        "width":7,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":369,"width":1}],
-                        "line_number":13
-                      }
-                    },
-                    "finally_body":{
-                      "kind":"compound_statement",
-                      "compound_left_brace":{
+                  }
+                },
+                "try_catch_clauses":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"catch_clause",
+                      "catch_keyword":{
                         "kind":"token",
                         "token":{
-                          "kind":"{",
-                          "text":"{",
-                          "offset":370,
+                          "kind":"catch",
+                          "text":"catch",
+                          "offset":316,
+                          "leading_width":0,
+                          "width":5,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":321,"width":1}],
+                          "line_number":12
+                        }
+                      },
+                      "catch_left_paren":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"(",
+                          "text":"(",
+                          "offset":322,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
                           "leading":[],
                           "trailing":[],
-                          "line_number":13
+                          "line_number":12
                         }
                       },
-                      "compound_right_brace":{
+                      "catch_type":{
+                        "kind":"simple_type_specifier",
+                        "simple_type_specifier":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"Exception",
+                            "offset":323,
+                            "leading_width":0,
+                            "width":9,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":332,"width":1}],
+                            "line_number":12
+                          }
+                        }
+                      },
+                      "catch_variable":{
                         "kind":"token",
                         "token":{
-                          "kind":"}",
-                          "text":"}",
-                          "offset":371,
+                          "kind":"variable",
+                          "text":"$ex",
+                          "offset":333,
+                          "leading_width":0,
+                          "width":3,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":12
+                        }
+                      },
+                      "catch_right_paren":{
+                        "kind":"token",
+                        "token":{
+                          "kind":")",
+                          "text":")",
+                          "offset":336,
                           "leading_width":0,
                           "width":1,
-                          "trailing_width":13,
+                          "trailing_width":1,
                           "leading":[],
-                          "trailing":[
-                            {"kind":"whitespace","text":" ","offset":372,"width":1},
-                            {"kind":"single_line_comment","text":"// no error","offset":373,"width":11},
-                            {"kind":"end_of_line","text":"\n","offset":384,"width":1}
-                          ],
-                          "line_number":13
+                          "trailing":[{"kind":"whitespace","text":" ","offset":337,"width":1}],
+                          "line_number":12
+                        }
+                      },
+                      "catch_body":{
+                        "kind":"compound_statement",
+                        "compound_left_brace":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"{",
+                            "text":"{",
+                            "offset":338,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":12
+                          }
+                        },
+                        "compound_right_brace":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"}",
+                            "text":"}",
+                            "offset":339,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":13,
+                            "leading":[],
+                            "trailing":[
+                              {"kind":"whitespace","text":" ","offset":340,"width":1},
+                              {"kind":"single_line_comment","text":"// no error","offset":341,"width":11},
+                              {"kind":"end_of_line","text":"\n","offset":352,"width":1}
+                            ],
+                            "line_number":12
+                          }
                         }
                       }
                     }
+                  ]
+                }
+              },
+              {
+                "kind":"try_statement",
+                "try_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"try",
+                    "text":"try",
+                    "offset":353,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":353,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":358,"width":1}],
+                    "line_number":13
                   }
                 },
-                {
-                  "kind":"try_statement",
-                  "try_keyword":{
+                "try_compound_statement":{
+                  "kind":"compound_statement",
+                  "compound_left_brace":{
                     "kind":"token",
                     "token":{
-                      "kind":"try",
-                      "text":"try",
-                      "offset":385,
-                      "leading_width":2,
-                      "width":3,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":385,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":390,"width":1}],
-                      "line_number":14
+                      "kind":"{",
+                      "text":"{",
+                      "offset":359,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":13
                     }
                   },
-                  "try_compound_statement":{
+                  "compound_right_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"}",
+                      "text":"}",
+                      "offset":360,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":361,"width":1}],
+                      "line_number":13
+                    }
+                  }
+                },
+                "try_finally_clause":{
+                  "kind":"finally_clause",
+                  "finally_keyword":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"finally",
+                      "text":"finally",
+                      "offset":362,
+                      "leading_width":0,
+                      "width":7,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":369,"width":1}],
+                      "line_number":13
+                    }
+                  },
+                  "finally_body":{
                     "kind":"compound_statement",
                     "compound_left_brace":{
                       "kind":"token",
                       "token":{
                         "kind":"{",
                         "text":"{",
-                        "offset":391,
+                        "offset":370,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
                         "leading":[],
                         "trailing":[],
-                        "line_number":14
+                        "line_number":13
                       }
                     },
                     "compound_right_brace":{
@@ -1366,553 +1312,603 @@
                       "token":{
                         "kind":"}",
                         "text":"}",
-                        "offset":392,
+                        "offset":371,
                         "leading_width":0,
                         "width":1,
-                        "trailing_width":10,
+                        "trailing_width":13,
                         "leading":[],
                         "trailing":[
-                          {"kind":"whitespace","text":" ","offset":393,"width":1},
-                          {"kind":"single_line_comment","text":"// error","offset":394,"width":8},
-                          {"kind":"end_of_line","text":"\n","offset":402,"width":1}
+                          {"kind":"whitespace","text":" ","offset":372,"width":1},
+                          {"kind":"single_line_comment","text":"// no error","offset":373,"width":11},
+                          {"kind":"end_of_line","text":"\n","offset":384,"width":1}
                         ],
-                        "line_number":14
+                        "line_number":13
                       }
                     }
                   }
+                }
+              },
+              {
+                "kind":"try_statement",
+                "try_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"try",
+                    "text":"try",
+                    "offset":385,
+                    "leading_width":2,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":385,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":390,"width":1}],
+                    "line_number":14
+                  }
                 },
-                {
-                  "kind":"switch_statement",
-                  "switch_keyword":{
+                "try_compound_statement":{
+                  "kind":"compound_statement",
+                  "compound_left_brace":{
                     "kind":"token",
                     "token":{
-                      "kind":"switch",
-                      "text":"switch",
-                      "offset":403,
-                      "leading_width":2,
-                      "width":6,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":403,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":411,"width":1}],
-                      "line_number":15
-                    }
-                  },
-                  "switch_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":412,
+                      "kind":"{",
+                      "text":"{",
+                      "offset":391,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":15
+                      "line_number":14
                     }
                   },
-                  "switch_expression":{
-                    "kind":"variable",
-                    "variable_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$x",
-                        "offset":413,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":15
-                      }
-                    }
-                  },
-                  "switch_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":415,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":416,"width":1}],
-                      "line_number":15
-                    }
-                  },
-                  "switch_left_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"{",
-                      "text":"{",
-                      "offset":417,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":418,"width":1}],
-                      "line_number":15
-                    }
-                  },
-                  "switch_right_brace":{
+                  "compound_right_brace":{
                     "kind":"token",
                     "token":{
                       "kind":"}",
                       "text":"}",
-                      "offset":419,
+                      "offset":392,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":10,
                       "leading":[],
                       "trailing":[
-                        {"kind":"whitespace","text":" ","offset":420,"width":1},
-                        {"kind":"single_line_comment","text":"// error","offset":421,"width":8},
-                        {"kind":"end_of_line","text":"\n","offset":429,"width":1}
+                        {"kind":"whitespace","text":" ","offset":393,"width":1},
+                        {"kind":"single_line_comment","text":"// error","offset":394,"width":8},
+                        {"kind":"end_of_line","text":"\n","offset":402,"width":1}
                       ],
+                      "line_number":14
+                    }
+                  }
+                }
+              },
+              {
+                "kind":"switch_statement",
+                "switch_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"switch",
+                    "text":"switch",
+                    "offset":403,
+                    "leading_width":2,
+                    "width":6,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":403,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":411,"width":1}],
+                    "line_number":15
+                  }
+                },
+                "switch_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":412,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":15
+                  }
+                },
+                "switch_expression":{
+                  "kind":"variable",
+                  "variable_expression":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$x",
+                      "offset":413,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
                       "line_number":15
                     }
                   }
                 },
-                {
-                  "kind":"switch_statement",
-                  "switch_keyword":{
+                "switch_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":415,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":416,"width":1}],
+                    "line_number":15
+                  }
+                },
+                "switch_left_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"{",
+                    "text":"{",
+                    "offset":417,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":418,"width":1}],
+                    "line_number":15
+                  }
+                },
+                "switch_right_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"}",
+                    "text":"}",
+                    "offset":419,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":10,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":420,"width":1},
+                      {"kind":"single_line_comment","text":"// error","offset":421,"width":8},
+                      {"kind":"end_of_line","text":"\n","offset":429,"width":1}
+                    ],
+                    "line_number":15
+                  }
+                }
+              },
+              {
+                "kind":"switch_statement",
+                "switch_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"switch",
+                    "text":"switch",
+                    "offset":430,
+                    "leading_width":2,
+                    "width":6,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":430,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":438,"width":1}],
+                    "line_number":16
+                  }
+                },
+                "switch_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":439,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":16
+                  }
+                },
+                "switch_expression":{
+                  "kind":"variable",
+                  "variable_expression":{
                     "kind":"token",
                     "token":{
-                      "kind":"switch",
-                      "text":"switch",
-                      "offset":430,
-                      "leading_width":2,
-                      "width":6,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":430,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":438,"width":1}],
-                      "line_number":16
-                    }
-                  },
-                  "switch_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":439,
+                      "kind":"variable",
+                      "text":"$x",
+                      "offset":440,
                       "leading_width":0,
-                      "width":1,
+                      "width":2,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
                       "line_number":16
                     }
-                  },
-                  "switch_expression":{
-                    "kind":"variable",
-                    "variable_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$x",
-                        "offset":440,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":16
-                      }
-                    }
-                  },
-                  "switch_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":442,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":443,"width":1}],
-                      "line_number":16
-                    }
-                  },
-                  "switch_left_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"{",
-                      "text":"{",
-                      "offset":444,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":445,"width":1}],
-                      "line_number":16
-                    }
-                  },
-                  "switch_sections":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"switch_section",
-                        "switch_section_statements":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"expression_statement",
-                              "expression_statement_expression":{
-                                "kind":"function_call_expression",
-                                "function_call_receiver":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"name",
-                                    "text":"foo",
-                                    "offset":446,
-                                    "leading_width":0,
-                                    "width":3,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":16
-                                  }
-                                },
-                                "function_call_left_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"(",
-                                    "text":"(",
-                                    "offset":449,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":16
-                                  }
-                                },
-                                "function_call_right_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":")",
-                                    "text":")",
-                                    "offset":450,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":16
-                                  }
-                                }
-                              },
-                              "expression_statement_semicolon":{
+                  }
+                },
+                "switch_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":442,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":443,"width":1}],
+                    "line_number":16
+                  }
+                },
+                "switch_left_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"{",
+                    "text":"{",
+                    "offset":444,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":445,"width":1}],
+                    "line_number":16
+                  }
+                },
+                "switch_sections":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"switch_section",
+                      "switch_section_statements":{
+                        "kind":"list",
+                        "elements":[
+                          {
+                            "kind":"expression_statement",
+                            "expression_statement_expression":{
+                              "kind":"function_call_expression",
+                              "function_call_receiver":{
                                 "kind":"token",
                                 "token":{
-                                  "kind":";",
-                                  "text":";",
-                                  "offset":451,
+                                  "kind":"name",
+                                  "text":"foo",
+                                  "offset":446,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":16
+                                }
+                              },
+                              "function_call_left_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"(",
+                                  "text":"(",
+                                  "offset":449,
                                   "leading_width":0,
                                   "width":1,
-                                  "trailing_width":1,
+                                  "trailing_width":0,
                                   "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":452,"width":1}],
+                                  "trailing":[],
+                                  "line_number":16
+                                }
+                              },
+                              "function_call_right_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":")",
+                                  "text":")",
+                                  "offset":450,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
                                   "line_number":16
                                 }
                               }
+                            },
+                            "expression_statement_semicolon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":";",
+                                "text":";",
+                                "offset":451,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":452,"width":1}],
+                                "line_number":16
+                              }
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
-                    ]
-                  },
-                  "switch_right_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"}",
-                      "text":"}",
-                      "offset":453,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":10,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":454,"width":1},
-                        {"kind":"single_line_comment","text":"// error","offset":455,"width":8},
-                        {"kind":"end_of_line","text":"\n","offset":463,"width":1}
-                      ],
-                      "line_number":16
                     }
+                  ]
+                },
+                "switch_right_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"}",
+                    "text":"}",
+                    "offset":453,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":10,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":454,"width":1},
+                      {"kind":"single_line_comment","text":"// error","offset":455,"width":8},
+                      {"kind":"end_of_line","text":"\n","offset":463,"width":1}
+                    ],
+                    "line_number":16
+                  }
+                }
+              },
+              {
+                "kind":"switch_statement",
+                "switch_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"switch",
+                    "text":"switch",
+                    "offset":464,
+                    "leading_width":2,
+                    "width":6,
+                    "trailing_width":1,
+                    "leading":[{"kind":"whitespace","text":"  ","offset":464,"width":2}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":472,"width":1}],
+                    "line_number":17
                   }
                 },
-                {
-                  "kind":"switch_statement",
-                  "switch_keyword":{
+                "switch_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":473,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":17
+                  }
+                },
+                "switch_expression":{
+                  "kind":"variable",
+                  "variable_expression":{
                     "kind":"token",
                     "token":{
-                      "kind":"switch",
-                      "text":"switch",
-                      "offset":464,
-                      "leading_width":2,
-                      "width":6,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":464,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":472,"width":1}],
-                      "line_number":17
-                    }
-                  },
-                  "switch_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":473,
+                      "kind":"variable",
+                      "text":"$x",
+                      "offset":474,
                       "leading_width":0,
-                      "width":1,
+                      "width":2,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
                       "line_number":17
                     }
-                  },
-                  "switch_expression":{
-                    "kind":"variable",
-                    "variable_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$x",
-                        "offset":474,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":17
-                      }
-                    }
-                  },
-                  "switch_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":476,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":477,"width":1}],
-                      "line_number":17
-                    }
-                  },
-                  "switch_left_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"{",
-                      "text":"{",
-                      "offset":478,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":479,"width":1}],
-                      "line_number":17
-                    }
-                  },
-                  "switch_sections":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"switch_section",
-                        "switch_section_statements":{
-                          "kind":"list",
-                          "elements":[
-                            {
-                              "kind":"expression_statement",
-                              "expression_statement_expression":{
-                                "kind":"function_call_expression",
-                                "function_call_receiver":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"name",
-                                    "text":"foo",
-                                    "offset":480,
-                                    "leading_width":0,
-                                    "width":3,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                },
-                                "function_call_left_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"(",
-                                    "text":"(",
-                                    "offset":483,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                },
-                                "function_call_right_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":")",
-                                    "text":")",
-                                    "offset":484,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                }
-                              },
-                              "expression_statement_semicolon":{
+                  }
+                },
+                "switch_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":476,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":477,"width":1}],
+                    "line_number":17
+                  }
+                },
+                "switch_left_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"{",
+                    "text":"{",
+                    "offset":478,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":479,"width":1}],
+                    "line_number":17
+                  }
+                },
+                "switch_sections":{
+                  "kind":"list",
+                  "elements":[
+                    {
+                      "kind":"switch_section",
+                      "switch_section_statements":{
+                        "kind":"list",
+                        "elements":[
+                          {
+                            "kind":"expression_statement",
+                            "expression_statement_expression":{
+                              "kind":"function_call_expression",
+                              "function_call_receiver":{
                                 "kind":"token",
                                 "token":{
-                                  "kind":";",
-                                  "text":";",
-                                  "offset":485,
+                                  "kind":"name",
+                                  "text":"foo",
+                                  "offset":480,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":17
+                                }
+                              },
+                              "function_call_left_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"(",
+                                  "text":"(",
+                                  "offset":483,
                                   "leading_width":0,
                                   "width":1,
-                                  "trailing_width":1,
+                                  "trailing_width":0,
                                   "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":486,"width":1}],
+                                  "trailing":[],
+                                  "line_number":17
+                                }
+                              },
+                              "function_call_right_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":")",
+                                  "text":")",
+                                  "offset":484,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
                                   "line_number":17
                                 }
                               }
                             },
-                            {
-                              "kind":"expression_statement",
-                              "expression_statement_expression":{
-                                "kind":"function_call_expression",
-                                "function_call_receiver":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"name",
-                                    "text":"foo",
-                                    "offset":487,
-                                    "leading_width":0,
-                                    "width":3,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                },
-                                "function_call_left_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":"(",
-                                    "text":"(",
-                                    "offset":490,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                },
-                                "function_call_right_paren":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":")",
-                                    "text":")",
-                                    "offset":491,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":0,
-                                    "leading":[],
-                                    "trailing":[],
-                                    "line_number":17
-                                  }
-                                }
-                              },
-                              "expression_statement_semicolon":{
+                            "expression_statement_semicolon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":";",
+                                "text":";",
+                                "offset":485,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":486,"width":1}],
+                                "line_number":17
+                              }
+                            }
+                          },
+                          {
+                            "kind":"expression_statement",
+                            "expression_statement_expression":{
+                              "kind":"function_call_expression",
+                              "function_call_receiver":{
                                 "kind":"token",
                                 "token":{
-                                  "kind":";",
-                                  "text":";",
-                                  "offset":492,
+                                  "kind":"name",
+                                  "text":"foo",
+                                  "offset":487,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":17
+                                }
+                              },
+                              "function_call_left_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"(",
+                                  "text":"(",
+                                  "offset":490,
                                   "leading_width":0,
                                   "width":1,
-                                  "trailing_width":1,
+                                  "trailing_width":0,
                                   "leading":[],
-                                  "trailing":[{"kind":"whitespace","text":" ","offset":493,"width":1}],
+                                  "trailing":[],
+                                  "line_number":17
+                                }
+                              },
+                              "function_call_right_paren":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":")",
+                                  "text":")",
+                                  "offset":491,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
                                   "line_number":17
                                 }
                               }
+                            },
+                            "expression_statement_semicolon":{
+                              "kind":"token",
+                              "token":{
+                                "kind":";",
+                                "text":";",
+                                "offset":492,
+                                "leading_width":0,
+                                "width":1,
+                                "trailing_width":1,
+                                "leading":[],
+                                "trailing":[{"kind":"whitespace","text":" ","offset":493,"width":1}],
+                                "line_number":17
+                              }
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
-                    ]
-                  },
-                  "switch_right_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"}",
-                      "text":"}",
-                      "offset":494,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":10,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":495,"width":1},
-                        {"kind":"single_line_comment","text":"// error","offset":496,"width":8},
-                        {"kind":"end_of_line","text":"\n","offset":504,"width":1}
-                      ],
-                      "line_number":17
                     }
+                  ]
+                },
+                "switch_right_brace":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"}",
+                    "text":"}",
+                    "offset":494,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":10,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":495,"width":1},
+                      {"kind":"single_line_comment","text":"// error","offset":496,"width":8},
+                      {"kind":"end_of_line","text":"\n","offset":504,"width":1}
+                    ],
+                    "line_number":17
                   }
                 }
-              ]
-            },
-            "compound_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":505,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":506,"width":1}],
-                "line_number":18
               }
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
+            ]
+          },
+          "compound_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":507,
+              "kind":"}",
+              "text":"}",
+              "offset":505,
               "leading_width":0,
-              "width":0,
-              "trailing_width":0,
+              "width":1,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
-              "line_number":19
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":506,"width":1}],
+              "line_number":18
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh\nfunction bar() : void {\n  case 123: ; // error, outside switch\n  default: ; // error, outside switch\n  switch ($x) { case 123: ; default: break;} // no error\n  break; // error\n  while($a) {\n    if ($b) break; // no error\n    if ($c) continue; // no error\n    $x = function($b) { break; }; // error\n  }\n  try {} catch (Exception $ex) {} // no error\n  try {} finally {} // no error\n  try {} // error\n  switch ($x) { } // error\n  switch ($x) { foo(); } // error\n  switch ($x) { foo(); foo(); } // error\n}\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":507,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":19
+          }
+        }
+      }
+    ]
+  }
 }

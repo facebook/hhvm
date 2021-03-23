@@ -134,9 +134,12 @@ all errors that happen in a body. *)
       in
       remove_cascading e
 
+    let parse_tree_to_json ?with_value ?ignore_missing tree =
+      Syntax.to_json ?with_value ?ignore_missing tree.root
+
     let to_json ?with_value ?ignore_missing tree =
       let version = Full_fidelity_schema.full_fidelity_schema_version_number in
-      let root = Syntax.to_json ?with_value ?ignore_missing tree.root in
+      let root = parse_tree_to_json ?with_value ?ignore_missing tree in
       let text = Hh_json.JSON_String (SourceText.text tree.text) in
       Hh_json.JSON_Object
         [

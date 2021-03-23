@@ -1,268 +1,328 @@
 {
-  "parse_tree":{
-    "kind":"script",
-    "script_declarations":{
-      "kind":"list",
-      "elements":[
-        {
-          "kind":"markup_section",
-          "markup_hashbang":{
+  "kind":"script",
+  "script_declarations":{
+    "kind":"list",
+    "elements":[
+      {
+        "kind":"markup_section",
+        "markup_hashbang":{
+          "kind":"token",
+          "token":{
+            "kind":"hashbang",
+            "text":"",
+            "offset":0,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":1
+          }
+        },
+        "markup_suffix":{
+          "kind":"markup_suffix",
+          "markup_suffix_less_than_question":{
             "kind":"token",
             "token":{
-              "kind":"hashbang",
-              "text":"",
+              "kind":"<?",
+              "text":"<?",
               "offset":0,
               "leading_width":0,
-              "width":0,
+              "width":2,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
               "line_number":1
             }
           },
-          "markup_suffix":{
-            "kind":"markup_suffix",
-            "markup_suffix_less_than_question":{
-              "kind":"token",
-              "token":{
-                "kind":"<?",
-                "text":"<?",
-                "offset":0,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":1
-              }
-            },
-            "markup_suffix_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"hh",
-                "offset":2,
-                "leading_width":0,
-                "width":2,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
-                "line_number":1
-              }
+          "markup_suffix_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"hh",
+              "offset":2,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
+              "line_number":1
             }
           }
-        },
-        {
-          "kind":"function_declaration",
-          "function_declaration_header":{
-            "kind":"function_declaration_header",
-            "function_keyword":{
-              "kind":"token",
-              "token":{
-                "kind":"function",
-                "text":"function",
-                "offset":5,
-                "leading_width":1,
-                "width":8,
-                "trailing_width":1,
-                "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
-                "trailing":[{"kind":"whitespace","text":" ","offset":14,"width":1}],
-                "line_number":3
-              }
-            },
-            "function_name":{
-              "kind":"token",
-              "token":{
-                "kind":"name",
-                "text":"f",
-                "offset":15,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":3
-              }
-            },
-            "function_left_paren":{
-              "kind":"token",
-              "token":{
-                "kind":"(",
-                "text":"(",
-                "offset":16,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":3
-              }
-            },
-            "function_parameter_list":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"list_item",
-                  "list_item":{
-                    "kind":"parameter_declaration",
-                    "parameter_name":{
+        }
+      },
+      {
+        "kind":"function_declaration",
+        "function_declaration_header":{
+          "kind":"function_declaration_header",
+          "function_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"function",
+              "text":"function",
+              "offset":5,
+              "leading_width":1,
+              "width":8,
+              "trailing_width":1,
+              "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":14,"width":1}],
+              "line_number":3
+            }
+          },
+          "function_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"f",
+              "offset":15,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":3
+            }
+          },
+          "function_left_paren":{
+            "kind":"token",
+            "token":{
+              "kind":"(",
+              "text":"(",
+              "offset":16,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":3
+            }
+          },
+          "function_parameter_list":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"parameter_declaration",
+                  "parameter_name":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$foo",
+                      "offset":17,
+                      "leading_width":0,
+                      "width":4,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
+                      "line_number":3
+                    }
+                  },
+                  "parameter_default_value":{
+                    "kind":"simple_initializer",
+                    "simple_initializer_equal":{
                       "kind":"token",
                       "token":{
-                        "kind":"variable",
-                        "text":"$foo",
-                        "offset":17,
+                        "kind":"=",
+                        "text":"=",
+                        "offset":22,
                         "leading_width":0,
-                        "width":4,
+                        "width":1,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":23,"width":1}],
                         "line_number":3
                       }
                     },
-                    "parameter_default_value":{
-                      "kind":"simple_initializer",
-                      "simple_initializer_equal":{
+                    "simple_initializer_value":{
+                      "kind":"literal",
+                      "literal_expression":{
                         "kind":"token",
                         "token":{
-                          "kind":"=",
-                          "text":"=",
-                          "offset":22,
+                          "kind":"decimal_literal",
+                          "text":"1",
+                          "offset":24,
                           "leading_width":0,
                           "width":1,
-                          "trailing_width":1,
+                          "trailing_width":0,
                           "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":23,"width":1}],
+                          "trailing":[],
                           "line_number":3
-                        }
-                      },
-                      "simple_initializer_value":{
-                        "kind":"literal",
-                        "literal_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"decimal_literal",
-                            "text":"1",
-                            "offset":24,
-                            "leading_width":0,
-                            "width":1,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":3
-                          }
                         }
                       }
                     }
-                  },
-                  "list_separator":{
+                  }
+                },
+                "list_separator":{
+                  "kind":"token",
+                  "token":{
+                    "kind":",",
+                    "text":",",
+                    "offset":25,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":26,"width":1}],
+                    "line_number":3
+                  }
+                }
+              },
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"parameter_declaration",
+                  "parameter_name":{
                     "kind":"token",
                     "token":{
-                      "kind":",",
-                      "text":",",
-                      "offset":25,
+                      "kind":"variable",
+                      "text":"$bar",
+                      "offset":27,
+                      "leading_width":0,
+                      "width":4,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":3
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "function_right_paren":{
+            "kind":"token",
+            "token":{
+              "kind":")",
+              "text":")",
+              "offset":31,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
+              "line_number":3
+            }
+          }
+        },
+        "function_body":{
+          "kind":"compound_statement",
+          "compound_left_brace":{
+            "kind":"token",
+            "token":{
+              "kind":"{",
+              "text":"{",
+              "offset":33,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":51,
+              "leading":[],
+              "trailing":[
+                {"kind":"whitespace","text":" ","offset":34,"width":1},
+                {
+                  "kind":"single_line_comment",
+                  "text":"// missing value is illegal in hack, legal in php",
+                  "offset":35,
+                  "width":49
+                },
+                {"kind":"end_of_line","text":"\n","offset":84,"width":1}
+              ],
+              "line_number":3
+            }
+          },
+          "compound_statements":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"expression_statement",
+                "expression_statement_expression":{
+                  "kind":"binary_expression",
+                  "binary_left_operand":{
+                    "kind":"subscript_expression",
+                    "subscript_receiver":{
+                      "kind":"variable",
+                      "variable_expression":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"variable",
+                          "text":"$a",
+                          "offset":85,
+                          "leading_width":4,
+                          "width":2,
+                          "trailing_width":0,
+                          "leading":[{"kind":"whitespace","text":"    ","offset":85,"width":4}],
+                          "trailing":[],
+                          "line_number":4
+                        }
+                      }
+                    },
+                    "subscript_left_bracket":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"[",
+                        "text":"[",
+                        "offset":91,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":4
+                      }
+                    },
+                    "subscript_right_bracket":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"]",
+                        "text":"]",
+                        "offset":92,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":1,
+                        "leading":[],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":93,"width":1}],
+                        "line_number":4
+                      }
+                    }
+                  },
+                  "binary_operator":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"=",
+                      "text":"=",
+                      "offset":94,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":26,"width":1}],
-                      "line_number":3
+                      "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
+                      "line_number":4
                     }
-                  }
-                },
-                {
-                  "kind":"list_item",
-                  "list_item":{
-                    "kind":"parameter_declaration",
-                    "parameter_name":{
+                  },
+                  "binary_right_operand":{
+                    "kind":"object_creation_expression",
+                    "object_creation_new_keyword":{
                       "kind":"token",
                       "token":{
-                        "kind":"variable",
-                        "text":"$bar",
-                        "offset":27,
+                        "kind":"new",
+                        "text":"new",
+                        "offset":96,
                         "leading_width":0,
-                        "width":4,
-                        "trailing_width":0,
+                        "width":3,
+                        "trailing_width":1,
                         "leading":[],
-                        "trailing":[],
-                        "line_number":3
+                        "trailing":[{"kind":"whitespace","text":" ","offset":99,"width":1}],
+                        "line_number":4
                       }
-                    }
-                  }
-                }
-              ]
-            },
-            "function_right_paren":{
-              "kind":"token",
-              "token":{
-                "kind":")",
-                "text":")",
-                "offset":31,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
-                "line_number":3
-              }
-            }
-          },
-          "function_body":{
-            "kind":"compound_statement",
-            "compound_left_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"{",
-                "text":"{",
-                "offset":33,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":51,
-                "leading":[],
-                "trailing":[
-                  {"kind":"whitespace","text":" ","offset":34,"width":1},
-                  {
-                    "kind":"single_line_comment",
-                    "text":"// missing value is illegal in hack, legal in php",
-                    "offset":35,
-                    "width":49
-                  },
-                  {"kind":"end_of_line","text":"\n","offset":84,"width":1}
-                ],
-                "line_number":3
-              }
-            },
-            "compound_statements":{
-              "kind":"list",
-              "elements":[
-                {
-                  "kind":"expression_statement",
-                  "expression_statement_expression":{
-                    "kind":"binary_expression",
-                    "binary_left_operand":{
-                      "kind":"subscript_expression",
-                      "subscript_receiver":{
-                        "kind":"variable",
-                        "variable_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"variable",
-                            "text":"$a",
-                            "offset":85,
-                            "leading_width":4,
-                            "width":2,
-                            "trailing_width":0,
-                            "leading":[{"kind":"whitespace","text":"    ","offset":85,"width":4}],
-                            "trailing":[],
-                            "line_number":4
-                          }
-                        }
-                      },
-                      "subscript_left_bracket":{
+                    },
+                    "object_creation_object":{
+                      "kind":"constructor_call",
+                      "constructor_call_type":{
                         "kind":"token",
                         "token":{
-                          "kind":"[",
-                          "text":"[",
-                          "offset":91,
+                          "kind":"name",
+                          "text":"E",
+                          "offset":100,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -270,133 +330,69 @@
                           "trailing":[],
                           "line_number":4
                         }
-                      },
-                      "subscript_right_bracket":{
-                        "kind":"token",
-                        "token":{
-                          "kind":"]",
-                          "text":"]",
-                          "offset":92,
-                          "leading_width":0,
-                          "width":1,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":93,"width":1}],
-                          "line_number":4
-                        }
                       }
-                    },
-                    "binary_operator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"=",
-                        "text":"=",
-                        "offset":94,
-                        "leading_width":0,
-                        "width":1,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
-                        "line_number":4
-                      }
-                    },
-                    "binary_right_operand":{
-                      "kind":"object_creation_expression",
-                      "object_creation_new_keyword":{
-                        "kind":"token",
-                        "token":{
-                          "kind":"new",
-                          "text":"new",
-                          "offset":96,
-                          "leading_width":0,
-                          "width":3,
-                          "trailing_width":1,
-                          "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":99,"width":1}],
-                          "line_number":4
-                        }
-                      },
-                      "object_creation_object":{
-                        "kind":"constructor_call",
-                        "constructor_call_type":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"name",
-                            "text":"E",
-                            "offset":100,
-                            "leading_width":0,
-                            "width":1,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":4
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "expression_statement_semicolon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":";",
-                      "text":";",
-                      "offset":101,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":40,
-                      "leading":[],
-                      "trailing":[
-                        {"kind":"whitespace","text":" ","offset":102,"width":1},
-                        {
-                          "kind":"single_line_comment",
-                          "text":"// error2038 in hack, but legal in php",
-                          "offset":103,
-                          "width":38
-                        },
-                        {"kind":"end_of_line","text":"\n","offset":141,"width":1}
-                      ],
-                      "line_number":4
                     }
                   }
+                },
+                "expression_statement_semicolon":{
+                  "kind":"token",
+                  "token":{
+                    "kind":";",
+                    "text":";",
+                    "offset":101,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":40,
+                    "leading":[],
+                    "trailing":[
+                      {"kind":"whitespace","text":" ","offset":102,"width":1},
+                      {
+                        "kind":"single_line_comment",
+                        "text":"// error2038 in hack, but legal in php",
+                        "offset":103,
+                        "width":38
+                      },
+                      {"kind":"end_of_line","text":"\n","offset":141,"width":1}
+                    ],
+                    "line_number":4
+                  }
                 }
-              ]
-            },
-            "compound_right_brace":{
-              "kind":"token",
-              "token":{
-                "kind":"}",
-                "text":"}",
-                "offset":142,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":143,"width":1}],
-                "line_number":5
               }
-            }
-          }
-        },
-        {
-          "kind":"end_of_file",
-          "end_of_file_token":{
+            ]
+          },
+          "compound_right_brace":{
             "kind":"token",
             "token":{
-              "kind":"end_of_file",
-              "text":"",
-              "offset":144,
+              "kind":"}",
+              "text":"}",
+              "offset":142,
               "leading_width":0,
-              "width":0,
-              "trailing_width":0,
+              "width":1,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[],
-              "line_number":6
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":143,"width":1}],
+              "line_number":5
             }
           }
         }
-      ]
-    }
-  },
-  "program_text":"<?hh\n\nfunction f($foo = 1, $bar) { // missing value is illegal in hack, legal in php\n    $a[] = new E; // error2038 in hack, but legal in php\n}\n",
-  "version":"2021-01-05-0001"
+      },
+      {
+        "kind":"end_of_file",
+        "end_of_file_token":{
+          "kind":"token",
+          "token":{
+            "kind":"end_of_file",
+            "text":"",
+            "offset":144,
+            "leading_width":0,
+            "width":0,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":6
+          }
+        }
+      }
+    ]
+  }
 }

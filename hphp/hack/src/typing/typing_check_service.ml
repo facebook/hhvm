@@ -456,7 +456,10 @@ let process_files
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info) : typing_result * computation_progress =
-  clear_caches_and_force_gc ();
+  if longlived_workers then
+    clear_caches_and_force_gc ()
+  else
+    SharedMem.invalidate_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 

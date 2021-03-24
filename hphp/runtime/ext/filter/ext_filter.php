@@ -8,7 +8,7 @@
  *   IDs, they can be obtained with filter_id() from a name instead.
  *
  */
-<<__Native, __Pure>>
+<<__Native>>
 function filter_list()[]: mixed;
 
 /**
@@ -19,7 +19,7 @@ function filter_list()[]: mixed;
  * @return mixed - ID of a filter on success or FALSE if filter doesn't exist.
  *
  */
-<<__Native, __Pure>>
+<<__Native>>
 function filter_id(string $filtername)[]: mixed;
 
 /**
@@ -28,7 +28,7 @@ function filter_id(string $filtername)[]: mixed;
  * @return mixed - Returns the filtered data, or FALSE if the filter fails.
  *
  */
-<<__Native, __Pure>>
+<<__Native>>
 function filter_var(mixed $variable,
                     int $filter = FILTER_DEFAULT,
                     mixed $options = darray[])[]: mixed;

@@ -15,10 +15,10 @@ namespace {
  *
  * @return mixed -  Returns TRUE if name is callable, FALSE otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function is_callable(mixed $callback, bool $syntax_only = false)[]: bool;
 
-<<__Native, __Pure>>
+<<__Native>>
 function is_callable_with_name(mixed $callback,
                                bool $syntax_only,
                                <<__OutOnly>>
@@ -63,7 +63,7 @@ function call_user_func(mixed $callback,
  *   FALSE otherwise.    This function will return FALSE for constructs,
  *   such as include_once() and echo().
  */
-<<__Native, __Pure>>
+<<__Native>>
 function function_exists(string $function_name, bool $autoload = true)[]: bool;
 
 /**

@@ -403,7 +403,7 @@ function xml_error_string(int $code): string;
  * @return string - Returns the ISO-8859-1 translation of data.
  *
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function utf8_decode(string $data)[]: string;
 
 /**
@@ -423,5 +423,5 @@ function utf8_decode(string $data)[]: string;
  * @return string - Returns the UTF-8 translation of data.
  *
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function utf8_encode(string $data)[]: string;

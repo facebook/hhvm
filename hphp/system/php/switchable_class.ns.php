@@ -8,7 +8,6 @@ namespace HH {
 final class SwitchableClass<+T> {
   public function __construct(private T $data)[] {}
 
-  <<__Pure>>
   public function data()[]: T {
     return $this->data;
   }

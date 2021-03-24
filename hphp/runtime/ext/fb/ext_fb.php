@@ -17,7 +17,7 @@ namespace {
  * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __Pure>>
+<<__HipHopSpecific, __Native>>
 function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize previously fb_serialize()-ed data.
@@ -48,7 +48,7 @@ function fb_unserialize(mixed $thing,
  *    results on deserialization, so we want to make it the new default.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __Pure>>
+<<__HipHopSpecific, __Native>>
 function fb_compact_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.
@@ -160,7 +160,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * @return int - Returns the number of code points interpreting string as
  * UTF-8.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_strlen(string $input)[]: int;
 
 /** Cuts a portion of str specified by the start and length parameters.
@@ -180,7 +180,7 @@ function fb_utf8_strlen(string $input)[]: int;
  * length parameters.  If str is shorter than start characters long, the empty
  * string will be returned.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_substr(string $str,
                         int $start,
                         int $length = PHP_INT_MAX)[]: string;

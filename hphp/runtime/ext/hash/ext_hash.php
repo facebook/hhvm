@@ -25,7 +25,7 @@ function hash(string $algo, string $data,
  * @return array - A numerically indexed array containing the list of
  *                  supported hashing algorithms.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function hash_algos()[]: varray<string>;
 
 /**
@@ -322,7 +322,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
 // While this function could be marked __IsFoldable, doing so would defeat
 // the purpose of having a comparison function which takes a fixed amount
 // of time.
-<<__Native, __Pure>>
+<<__Native>>
 function hash_equals(mixed $known, mixed $user)[]: bool;
 
 /**
@@ -334,7 +334,7 @@ function hash_equals(mixed $known, mixed $user)[]: bool;
  *
  * @return int - A number in the range of 0-(nPart-1)
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function furchash_hphp_ext(string $key, int $len, int $npart)[]: int;
 
 /**
@@ -342,7 +342,7 @@ function furchash_hphp_ext(string $key, int $len, int $npart)[]: int;
  *
  * @return bool - True
  */
-<<__IsFoldable, __Pure>>
+<<__IsFoldable>>
 function furchash_hphp_ext_supported()[]: bool {
   return true;
 }
@@ -356,5 +356,5 @@ function furchash_hphp_ext_supported()[]: bool {
  *
  * @return - The Int64 hash of the first len input characters
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function hphp_murmurhash(string $key, int $len, int $seed)[]: int;

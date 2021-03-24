@@ -36,7 +36,7 @@ function preg_grep(string $pattern,
                    varray_or_darray $input,
                    int $flags = 0): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_grep_with_error(
   string $pattern,
   varray_or_darray $input,
@@ -95,7 +95,7 @@ function preg_match_all(string $pattern,
                         int $flags = 0,
                         int $offset = 0): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match_all_with_error(
   string $pattern,
   string $subject,
@@ -112,7 +112,7 @@ function preg_match_all_with_matches(string $pattern,
                                      int $flags = 0,
                                      int $offset = 0): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match_all_with_matches_and_error(
   string $pattern,
   string $subject,
@@ -155,7 +155,7 @@ function preg_match(string $pattern,
                     int $flags = 0,
                     int $offset = 0): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match_with_error(
   string $pattern,
   string $subject,
@@ -172,7 +172,7 @@ function preg_match_with_matches(string $pattern,
                                  int $flags = 0,
                                  int $offset = 0): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_match_with_matches_and_error(
   string $pattern,
   string $subject,
@@ -194,7 +194,7 @@ function preg_match_with_matches_and_error(
  *
  * @return string - Returns the quoted (escaped) string.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function preg_quote(string $str,
                     ?string $delimiter = NULL)[]: string;
 
@@ -324,7 +324,7 @@ function preg_replace(mixed $pattern,
                       mixed $subject,
                       int $limit = -1): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_replace_with_error(
   mixed $pattern,
   mixed $replacement,
@@ -341,7 +341,7 @@ function preg_replace_with_count(mixed $pattern,
                                  <<__OutOnly("KindOfInt64")>>
                                  inout ?int $count): mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_replace_with_count_and_error(
   mixed $pattern,
   mixed $replacement,
@@ -375,13 +375,13 @@ function preg_replace_with_count_and_error(
  * @return array - Returns an array containing substrings of subject
  *   split along boundaries matched by pattern.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function preg_split(string $pattern,
                     string $subject,
                     mixed $limit = null,
                     int $flags = 0)[]: mixed;
 
-<<__Native, __Pure>>
+<<__Native>>
 function preg_split_with_error(
   string $pattern,
   string $subject,

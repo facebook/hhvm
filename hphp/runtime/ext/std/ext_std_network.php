@@ -396,7 +396,7 @@ function http_response_code(int $response_code = 0): mixed;
  *
  * @return string - Returns a string representation of the address.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function inet_ntop(string $in_addr)[]: mixed;
 
 /**
@@ -405,7 +405,7 @@ function inet_ntop(string $in_addr)[]: mixed;
  * @param string $in_addr - A 32bit IPv4, or 128bit IPv6 address.
  * @return null|string - Returns a string representation of the address.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function inet_ntop_nullable(string $in_addr)[]: ?string;
 
 /**
@@ -413,7 +413,7 @@ function inet_ntop_nullable(string $in_addr)[]: ?string;
  * @param string $in_addr - A 32bit IPv4, or 128bit IPv6 address.
  * @return null|string - Returns a string representation of the address.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function inet_ntop_folly(string $in_addr)[]: ?string;
 
 /**
@@ -426,7 +426,7 @@ function inet_ntop_folly(string $in_addr)[]: ?string;
  *   example, an IPv4 address without dots or an IPv6 address without
  *   colons).
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function inet_pton(string $address)[]: mixed;
 
 /**
@@ -438,7 +438,7 @@ function inet_pton(string $address)[]: mixed;
  * @return int - Returns the IPv4 address or FALSE if ip_address is
  *   invalid.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function ip2long(string $ip_address)[]: mixed;
 
 /**
@@ -449,7 +449,7 @@ function ip2long(string $ip_address)[]: mixed;
  *
  * @return string - Returns the Internet IP address as a string.
  */
-<<__IsFoldable, __Pure, __Native>>
+<<__IsFoldable, __Native>>
 function long2ip(string $proper_address)[]: string;
 
 /**

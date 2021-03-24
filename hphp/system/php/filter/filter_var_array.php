@@ -64,7 +64,6 @@ function _filter_var_array_single($value, $filter, $options = darray[]) {
    *                     value will be FALSE if the filter fails, or NULL if
    *                     the variable is not set.
    */
-  <<__Pure>>
 function filter_var_array($data, $definition = null, $add_empty = true)[] {
   if (!HH\is_any_array($data)) {
     trigger_error('filter_var_array() expects parameter 1 to be array, '.

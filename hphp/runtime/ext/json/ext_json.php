@@ -41,7 +41,7 @@ function json_decode(string $json,
 /**
  * Like json_decode, but includes json_last_error(_msg) results.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function json_decode_with_error(
   string $json,
   inout ?(int, string) $error,
@@ -73,7 +73,7 @@ function json_encode(mixed $value,
 /**
  * Like json_encode, but includes json_last_error(_msg) results.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function json_encode_with_error(
   mixed $value,
   inout ?(int, string) $error,

@@ -4,7 +4,7 @@
  * @return float - The value of pi as float.
  *
  */
-<<__IsFoldable, __Pure>>
+<<__IsFoldable>>
 function pi()[]: float {
   return M_PI;
 }
@@ -25,7 +25,7 @@ function pi()[]: float {
  *   values.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function min(mixed $value1, ...$argv)[]: mixed;
 
 /**
@@ -48,7 +48,7 @@ function min(mixed $value1, ...$argv)[]: mixed;
  *   string it will be cast as an integer when comparing.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function max(mixed $value1, ...$argv)[]: mixed;
 
 /**
@@ -61,7 +61,7 @@ function max(mixed $value1, ...$argv)[]: mixed;
  *   float usually has a bigger value range than integer).
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function abs(mixed $number)[]: mixed;
 
 /**
@@ -73,7 +73,7 @@ function abs(mixed $number)[]: mixed;
  *   range for a PHP float on this platform, else FALSE.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function is_finite(float $val)[]: bool;
 
 /**
@@ -85,7 +85,7 @@ function is_finite(float $val)[]: bool;
  * @return bool - TRUE if val is infinite, else FALSE.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function is_infinite(float $val)[]: bool;
 
 /**
@@ -96,7 +96,7 @@ function is_infinite(float $val)[]: bool;
  * @return bool - Returns TRUE if val is 'not a number', else FALSE.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function is_nan(float $val)[]: bool;
 
 /**
@@ -107,7 +107,7 @@ function is_nan(float $val)[]: bool;
  *   usually bigger than that of integer.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function ceil(mixed $number)[]: mixed;
 
 /**
@@ -118,7 +118,7 @@ function ceil(mixed $number)[]: mixed;
  *   usually bigger than that of integer.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function floor(mixed $number)[]: mixed;
 
 /**
@@ -135,7 +135,7 @@ function floor(mixed $number)[]: mixed;
  * @return mixed - The rounded value
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function round(mixed $val,
                int $precision = 0,
                int $mode = PHP_ROUND_HALF_UP)[]: mixed;
@@ -148,7 +148,7 @@ function round(mixed $val,
  * @return float - The radian equivalent of number
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function deg2rad(float $number)[]: float;
 
 /**
@@ -159,7 +159,7 @@ function deg2rad(float $number)[]: float;
  * @return float - The equivalent of number in degrees
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function rad2deg(float $number)[]: float;
 
 /**
@@ -171,7 +171,7 @@ function rad2deg(float $number)[]: float;
  * @return string - Binary string representation of number
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function decbin(mixed $number)[]: string;
 
 /**
@@ -184,7 +184,7 @@ function decbin(mixed $number)[]: string;
  * @return string - Hexadecimal string representation of number
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function dechex(mixed $number)[]: string;
 
 /**
@@ -197,7 +197,7 @@ function dechex(mixed $number)[]: string;
  * @return string - Octal string representation of number
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function decoct(mixed $number)[]: string;
 
 /**
@@ -214,7 +214,7 @@ function decoct(mixed $number)[]: string;
  * @return mixed - The decimal value of binary_string
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function bindec(mixed $binary_string)[]: mixed;
 
 /**
@@ -227,7 +227,7 @@ function bindec(mixed $binary_string)[]: mixed;
  * @return mixed - The decimal representation of hex_string
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function hexdec(mixed $hex_string)[]: mixed;
 
 /**
@@ -239,7 +239,7 @@ function hexdec(mixed $hex_string)[]: mixed;
  * @return mixed - The decimal representation of octal_string
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function octdec(mixed $octal_string)[]: mixed;
 
 /**
@@ -259,7 +259,7 @@ function octdec(mixed $octal_string)[]: mixed;
  * @return mixed - number converted to base tobase
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
 
 /**
@@ -275,7 +275,7 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  *   returned instead.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function pow(mixed $base, mixed $exp)[]: mixed;
 
 /**
@@ -287,7 +287,7 @@ function pow(mixed $base, mixed $exp)[]: mixed;
  * @return float - 'e' raised to the power of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function exp(float $arg)[]: float;
 
 /**
@@ -301,7 +301,7 @@ function exp(float $arg)[]: float;
  * @return float - 'e' to the power of arg minus one
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function expm1(float $arg)[]: float;
 
 /**
@@ -312,7 +312,7 @@ function expm1(float $arg)[]: float;
  * @return float - The base-10 logarithm of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function log10(float $arg)[]: float;
 
 /**
@@ -325,7 +325,7 @@ function log10(float $arg)[]: float;
  * @return float - log(1 + number)
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function log1p(float $number)[]: float;
 
 /**
@@ -340,7 +340,7 @@ function log1p(float $number)[]: float;
  *   logarithm.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function log(float $arg, float $base = 0.0)[]: float;
 
 /**
@@ -352,7 +352,7 @@ function log(float $arg, float $base = 0.0)[]: float;
  * @return float - The cosine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function cos(float $arg)[]: float;
 
 /**
@@ -363,7 +363,7 @@ function cos(float $arg)[]: float;
  * @return float - The hyperbolic cosine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function cosh(float $arg)[]: float;
 
 /**
@@ -375,7 +375,7 @@ function cosh(float $arg)[]: float;
  * @return float - The sine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function sin(float $arg)[]: float;
 
 /**
@@ -386,7 +386,7 @@ function sin(float $arg)[]: float;
  * @return float - The hyperbolic sine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function sinh(float $arg)[]: float;
 
 /**
@@ -398,7 +398,7 @@ function sinh(float $arg)[]: float;
  * @return float - The tangent of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function tan(float $arg)[]: float;
 
 /**
@@ -409,7 +409,7 @@ function tan(float $arg)[]: float;
  * @return float - The hyperbolic tangent of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function tanh(float $arg)[]: float;
 
 /**
@@ -422,7 +422,7 @@ function tanh(float $arg)[]: float;
  * @return float - The arc cosine of arg in radians.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function acos(float $arg)[]: float;
 
 /**
@@ -434,7 +434,7 @@ function acos(float $arg)[]: float;
  * @return float - The inverse hyperbolic cosine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function acosh(float $arg)[]: float;
 
 /**
@@ -447,7 +447,7 @@ function acosh(float $arg)[]: float;
  * @return float - The arc sine of arg in radians
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function asin(float $arg)[]: float;
 
 /**
@@ -459,7 +459,7 @@ function asin(float $arg)[]: float;
  * @return float - The inverse hyperbolic sine of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function asinh(float $arg)[]: float;
 
 /**
@@ -472,7 +472,7 @@ function asinh(float $arg)[]: float;
  * @return float - The arc tangent of arg in radians.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function atan(float $arg)[]: float;
 
 /**
@@ -484,7 +484,7 @@ function atan(float $arg)[]: float;
  * @return float - Inverse hyperbolic tangent of arg
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function atanh(float $arg)[]: float;
 
 /**
@@ -494,7 +494,7 @@ function atanh(float $arg)[]: float;
  * @return float - The arc tangent of y/x in radians.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function atan2(float $y, float $x)[]: float;
 
 /**
@@ -508,7 +508,7 @@ function atan2(float $y, float $x)[]: float;
  * @return float - Calculated length of the hypotenuse
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function hypot(float $x, float $y)[]: float;
 
 /**
@@ -523,7 +523,7 @@ function hypot(float $x, float $y)[]: float;
  * @return float - The floating point remainder of x/y
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function fmod(float $x, float $y)[]: float;
 
 /**
@@ -535,7 +535,7 @@ function fmod(float $x, float $y)[]: float;
  *   negative numbers.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function sqrt(float $arg)[]: float;
 
 /**
@@ -620,5 +620,5 @@ function lcg_value(): float;
  *   is thrown.
  *
  */
-<<__IsFoldable, __Native, __Pure>>
+<<__IsFoldable, __Native>>
 function intdiv(int $numerator, int $divisor)[]: mixed;

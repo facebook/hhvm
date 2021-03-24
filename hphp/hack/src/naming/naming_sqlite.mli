@@ -65,16 +65,17 @@ val fold :
 val get_file_info : db_path -> Relative_path.t -> FileInfo.t option
 
 val get_type_pos :
-  db_path ->
-  string ->
-  case_insensitive:bool ->
-  (Relative_path.t * Naming_types.kind_of_type) option
+  db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option
+
+val get_itype_pos :
+  db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option
 
 val get_type_paths_by_dep_hash :
   db_path -> Typing_deps.Dep.t -> Relative_path.Set.t
 
-val get_fun_pos :
-  db_path -> string -> case_insensitive:bool -> Relative_path.t option
+val get_fun_pos : db_path -> string -> Relative_path.t option
+
+val get_ifun_pos : db_path -> string -> Relative_path.t option
 
 val get_fun_paths_by_dep_hash :
   db_path -> Typing_deps.Dep.t -> Relative_path.Set.t

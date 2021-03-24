@@ -158,8 +158,7 @@ module Types = struct
       Some (FileInfo.File (name_type, path), entry_type)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:(fun db_path ->
-          Naming_sqlite.get_type_pos db_path ~case_insensitive:false)
+      Option.map db_path_opt ~f:Naming_sqlite.get_type_pos
     in
     get_and_cache
       ~map_result
@@ -229,8 +228,7 @@ module Types = struct
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:(fun db_path ->
-          Naming_sqlite.get_type_pos db_path ~case_insensitive:true)
+      Option.map db_path_opt ~f:Naming_sqlite.get_itype_pos
     in
     get_and_cache
       ~map_result
@@ -299,8 +297,7 @@ module Funs = struct
   let get_pos db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:(fun db_path ->
-          Naming_sqlite.get_fun_pos db_path ~case_insensitive:false)
+      Option.map db_path_opt ~f:Naming_sqlite.get_fun_pos
     in
     get_and_cache
       ~map_result
@@ -333,8 +330,7 @@ module Funs = struct
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:(fun db_path ->
-          Naming_sqlite.get_fun_pos db_path ~case_insensitive:true)
+      Option.map db_path_opt ~f:Naming_sqlite.get_ifun_pos
     in
     get_and_cache
       ~map_result

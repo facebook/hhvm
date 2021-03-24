@@ -977,9 +977,13 @@ let get_file_info (db_path : db_path) path =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FileInfoTable.get_file_info db stmt_cache path
 
-let get_type_pos (db_path : db_path) name ~case_insensitive =
+let get_type_pos (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  TypesTable.get db stmt_cache ~name ~case_insensitive
+  TypesTable.get db stmt_cache ~name ~case_insensitive:false
+
+let get_itype_pos (db_path : db_path) name =
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  TypesTable.get db stmt_cache ~name ~case_insensitive:true
 
 let get_type_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =
@@ -987,9 +991,13 @@ let get_type_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
 
   TypesTable.get_paths_by_dep_hash db stmt_cache ~hash
 
-let get_fun_pos (db_path : db_path) name ~case_insensitive =
+let get_fun_pos (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  FunsTable.get db stmt_cache ~name ~case_insensitive
+  FunsTable.get db stmt_cache ~name ~case_insensitive:false
+
+let get_ifun_pos (db_path : db_path) name =
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  FunsTable.get db stmt_cache ~name ~case_insensitive:true
 
 let get_fun_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =

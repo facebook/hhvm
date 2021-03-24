@@ -1,4 +1,1 @@
-File "attribute_class_naming_conflict.php", line 5, characters 7-20:
-A class and an attribute class cannot share the same name. Conflicting class: `__Attribute__A` (Naming[2085])
-File "attribute_class_naming_conflict.php", line 3, characters 7-7:
-Previous definition: `A`
+No errors

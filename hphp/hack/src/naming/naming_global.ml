@@ -177,54 +177,21 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name p
 
-  let (attr_prefix, attr_prefix_len) =
-    let a = "\\__attribute__" in
-    (* lowercase because canon_key call *)
-    (a, String.length a)
-
   let new_cid ctx cid_kind (p, name) =
-    let validate canonical error =
-      let p' =
-        match Naming_provider.get_type_pos ctx canonical with
-        | Some x -> x
-        | None ->
-          failwith
-            ( "Failed to get canonical pos for name "
-            ^ name
-            ^ " vs canonical "
-            ^ canonical )
-      in
-      if not @@ GEnv.compare_pos ctx p' p canonical then
-        let (p, name) = GEnv.get_full_pos ctx (p, name) in
-        let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
-        error name canonical p p'
-    in
     if not (check_not_typehint ctx (p, name)) then
       ()
     else
       let name_key = canon_key name in
       match Naming_provider.get_type_canon_name ctx name_key with
-      | Some canonical -> validate canonical Errors.error_name_already_bound
-      | None ->
-        (* Check to prevent collision with attribute classes
-         * If we are checking \A, check \__Attribute__A and vice versa *)
-        let name_len = String.length name_key in
-        let alt_name_key =
-          if
-            name_len > attr_prefix_len
-            && String.equal attr_prefix (String.sub name_key 0 attr_prefix_len)
-          then
-            "\\"
-            ^ String.sub name_key attr_prefix_len (name_len - attr_prefix_len)
-          else
-            attr_prefix ^ String.sub name_key 1 (name_len - 1)
+      | Some canonical ->
+        let p' =
+          Option.value_exn (Naming_provider.get_type_pos ctx canonical)
         in
-        begin
-          match Naming_provider.get_type_canon_name ctx alt_name_key with
-          | Some alt_canonical ->
-            validate alt_canonical Errors.error_class_attribute_already_bound
-          | None -> ()
-        end;
+        if not @@ GEnv.compare_pos ctx p' p canonical then
+          let (p, name) = GEnv.get_full_pos ctx (p, name) in
+          let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
+          Errors.error_name_already_bound name canonical p p'
+      | None ->
         let backend = Provider_context.get_backend ctx in
         Naming_provider.add_type backend name p cid_kind
 

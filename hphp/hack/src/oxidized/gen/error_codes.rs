@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1cbff10cb28897a2ed4152674b8f609c>>
+// @generated SignedSource<<87c5aad61c9648ecb0682ed51a8e36b4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -119,7 +119,6 @@ pub enum Naming {
     XhpRequiredWithDefault = 2080,
     ArrayTypehintsDisallowed = 2082,
     WildcardHintDisallowed = 2084,
-    AttributeClassNameConflict = 2085,
     MethodNeedsVisibility = 2086,
     NonstaticPropertyWithLSB = 2094,
     UnsupportedTraitUseAs = 2102,

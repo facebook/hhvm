@@ -136,7 +136,7 @@ module Naming = struct
     | ArrayTypehintsDisallowed [@value 2082]
     (* | ArrayLiteralsDisallowedDEPRECATED [@value 2083] *)
     | WildcardHintDisallowed [@value 2084]
-    | AttributeClassNameConflict [@value 2085]
+    (* | AttributeClassNameConflictDEPRECATED [@value 2085] *)
     | MethodNeedsVisibility [@value 2086]
     (* | ReferenceInStrictModeDEPRECATED [@value 2087] *)
     (* | DeclareStatementDEPRECATED [@value 2089] *)

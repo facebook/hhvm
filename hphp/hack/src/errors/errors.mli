@@ -290,9 +290,6 @@ val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound :
   string -> string -> Pos.t -> Pos_or_decl.t -> unit
 
-val error_class_attribute_already_bound :
-  string -> string -> Pos.t -> Pos_or_decl.t -> unit
-
 val unbound_name : Pos.t -> string -> name_context -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit

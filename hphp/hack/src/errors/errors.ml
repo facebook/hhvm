@@ -1060,17 +1060,6 @@ let error_name_already_bound name name_prev (p : Pos.t) (p_prev : Pos_or_decl.t)
   in
   add_list (Naming.err_code Naming.ErrorNameAlreadyBound) claim reasons
 
-let error_class_attribute_already_bound name name_prev p p_prev =
-  let name = strip_ns name in
-  let name_prev = strip_ns name_prev in
-  let (claim, reasons) =
-    ( ( p,
-        "A class and an attribute class cannot share the same name. Conflicting class: "
-        ^ Markdown_lite.md_codify name ),
-      [(p_prev, "Previous definition: " ^ Markdown_lite.md_codify name_prev)] )
-  in
-  add_list (Naming.err_code Naming.AttributeClassNameConflict) claim reasons
-
 let unbound_name pos name kind =
   let kind_str =
     match kind with

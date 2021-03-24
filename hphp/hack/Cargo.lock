@@ -552,6 +552,7 @@ dependencies = [
  "ocamlrep_ocamlpool",
  "once_cell",
  "oxidized",
+ "typing_deps_hash",
 ]
 
 [[package]]
@@ -1919,11 +1920,11 @@ dependencies = [
 name = "names"
 version = "0.0.0"
 dependencies = [
- "deps_rust",
  "md-5",
  "ocamlrep",
  "oxidized",
  "rusqlite",
+ "typing_deps_hash",
 ]
 
 [[package]]
@@ -2959,6 +2960,14 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "typing_collections_rust",
+]
+
+[[package]]
+name = "typing_deps_hash"
+version = "0.0.0"
+dependencies = [
+ "fnv",
+ "oxidized",
 ]
 
 [[package]]

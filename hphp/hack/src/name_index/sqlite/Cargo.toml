@@ -8,8 +8,8 @@ edition = "2018"
 path = "lib.rs"
 
 [dependencies]
-deps_rust = { path = "../../deps" }
 md-5 = "0.8"
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 rusqlite = { version = "0.23", features = ["blob"] }
+typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

@@ -6,7 +6,6 @@
 #![cfg_attr(use_unstable_features, feature(test))]
 
 use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
-use fnv::FnvHasher;
 use im_rc::OrdSet;
 use ocamlrep::{FromError, FromOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
@@ -17,11 +16,11 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::convert::TryInto;
 use std::ffi::OsString;
-use std::hash::Hasher;
 use std::io;
 use std::io::{Read, Write};
 use std::panic;
 use std::sync::Mutex;
+use typing_deps_hash::{hash1, hash2, DepType};
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -343,104 +342,11 @@ impl DepGraphDelta {
     }
 }
 
-/// Variant types used in the naming table.
-///
-/// NOTE: Keep in sync with the order of the fields in `Typing_deps.ml`.
-#[derive(Copy, Clone, Debug)]
-pub enum DepType {
-    GConst = 0,
-    Fun = 1,
-    Class = 2,
-    Extends = 3,
-    Const = 5,
-    Cstr = 6,
-    Prop = 7,
-    SProp = 8,
-    Method = 9,
-    SMethod = 10,
-    AllMembers = 11,
-    FunName = 12,
-    GConstName = 13,
-}
-
 fn tag_to_dep_type(tag: u8) -> DepType {
-    match tag {
-        0 => DepType::GConst,
-        1 => DepType::Fun,
-        2 => DepType::Class,
-        3 => DepType::Extends,
-        5 => DepType::Const,
-        6 => DepType::Cstr,
-        7 => DepType::Prop,
-        8 => DepType::SProp,
-        9 => DepType::Method,
-        10 => DepType::SMethod,
-        11 => DepType::AllMembers,
-        12 => DepType::FunName,
-        13 => DepType::GConstName,
-        _ => panic!("Invalid dep type: {:?}", tag),
+    match DepType::from_u8(tag) {
+        Some(dep_type) => dep_type,
+        None => panic!("Invalid dep type: {:?}", tag),
     }
-}
-
-/// Select the hashing algorithm to use for dependency hashes.
-///
-/// FnvHasher appears to produce better hashes (fewer collisions) than
-/// `std::collections::hash_map::DefaultHasher` on our workloads. However, other
-/// hashing algorithms may perform better still.
-fn make_hasher() -> FnvHasher {
-    Default::default()
-}
-
-fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
-    let hash: u64 = match dep_type {
-        DepType::Class => {
-            // For class dependencies, set the lowest bit to 1. For extends
-            // dependencies, the lowest bit will be 0 (in the case below), so we'll
-            // be able to convert from a class hash to its extends hash without
-            // reversing the hash.
-            (hash << 1) | 1
-        }
-        _ => {
-            // Ensure that only classes have the lowest bit set to 1, so that we
-            // don't try to transitively traverse the subclasses of non-class
-            // dependencies.
-            hash << 1
-        }
-    };
-
-    match mode {
-        HashMode::Hash32Bit => {
-            // We are in the legacy dependency graph system:
-            //
-            // The shared-memory dependency graph stores edges as pairs of vertices.
-            // Each vertex has 31 bits of actual content and 1 bit of OCaml bookkeeping.
-            // Thus, we truncate the hash to 31 bits.
-            hash & ((1 << 31) - 1)
-        }
-        HashMode::Hash64Bit => {
-            // One bit is used for OCaml bookkeeping!
-            hash & !(1 << 63)
-        }
-    }
-}
-
-fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
-    match dep_type {
-        DepType::Class | DepType::Extends => {
-            // Use the same tag for classes and extends dependencies, so that we can
-            // convert between them without reversing the hash.
-            DepType::Class as u8
-        }
-        _ => dep_type as u8,
-    }
-}
-
-/// Hash a one-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash1(mode: HashMode, dep_type: DepType, name1: &[u8]) -> u64 {
-    let mut hasher = make_hasher();
-    hasher.write_u8(get_dep_type_hash_key(dep_type));
-    hasher.write(name1);
-    postprocess_hash(mode, dep_type, hasher.finish())
 }
 
 /// Hashes an `int` and `string`, arising from one of the one-argument cases of
@@ -482,15 +388,6 @@ unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize)
     let name1 = Value::from_bits(name1);
     let result = do_hash(mode, dep_type_tag, name1);
     Value::to_bits(result)
-}
-
-/// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash2(mode: HashMode, dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
-    let mut hasher = make_hasher();
-    hasher.write_u8(get_dep_type_hash_key(dep_type));
-    hasher.write(name1);
-    hasher.write(name2);
-    postprocess_hash(mode, dep_type, hasher.finish())
 }
 
 /// Hashes an `int` and two `string`s, arising from one of the two-argument cases of
@@ -546,14 +443,6 @@ unsafe extern "C" fn hash2_ocaml(
     let name2 = Value::from_bits(name2);
     let result = do_hash(mode, dep_type_tag, name1, name2);
     Value::to_bits(result)
-}
-
-/// Rust implementation of `Typing_deps.NamingHash.combine_hashes`.
-pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
-    let dep_hash = dep_hash & ((1 << 31) - 1);
-    let upper_31_bits = (dep_hash as i64) << 31;
-    let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
-    upper_31_bits | lower_31_bits
 }
 
 /// Rust set of dependencies that can be transferred from

@@ -46,9 +46,9 @@ fn insert(connection: &Connection, items: Vec<TypeItem>) -> Result<()> {
     let mut insert_statement = connection.prepare(&insert_statement)?;
 
     for mut item in items.into_iter() {
-        let hash = convert::name_to_hash(deps_rust::DepType::Class, &item.name);
+        let hash = convert::name_to_hash(typing_deps_hash::DepType::Class, &item.name);
         item.name.make_ascii_lowercase();
-        let canon_hash = convert::name_to_hash(deps_rust::DepType::Class, &item.name);
+        let canon_hash = convert::name_to_hash(typing_deps_hash::DepType::Class, &item.name);
 
         insert_statement.execute(params![
             hash,
@@ -77,7 +77,7 @@ pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativeP
         ";
 
     let mut select_statement = connection.prepare_cached(&select_statement)?;
-    let hash = convert::name_to_hash(deps_rust::DepType::Class, &name);
+    let hash = convert::name_to_hash(typing_deps_hash::DepType::Class, &name);
     select_statement
         .query_row(params![hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;
@@ -108,7 +108,7 @@ pub fn get_path_case_insensitive(
 
     let mut select_statement = connection.prepare_cached(&select_statement)?;
     name.make_ascii_lowercase();
-    let hash = convert::name_to_hash(deps_rust::DepType::Class, &name);
+    let hash = convert::name_to_hash(typing_deps_hash::DepType::Class, &name);
     select_statement
         .query_row(params![hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;

@@ -10,7 +10,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 depgraph = { path = "../../../depgraph" }
-deps_rust = { path = "../../../deps" }
+deps_rust = { path = "../../../deps/cargo/deps_rust" }
 env_logger = "0.7"
 log = { version = "0.4.8", features = ["kv_unstable"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

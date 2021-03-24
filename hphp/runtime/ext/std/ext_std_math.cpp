@@ -19,8 +19,9 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/zend-multiply.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/zend/zend-math.h"
 
@@ -45,9 +46,7 @@ const double k_M_SQRT2    = 1.4142135623731;
 const double k_M_SQRT3    = 1.7320508075689;
 const double k_M_SQRTPI   = 1.7724538509055;
 
-Variant HHVM_FUNCTION(min,
-                      const Variant& value,
-                      const Array& args /* = null_array */) {
+Variant HHVM_FUNCTION(min, const Variant& value, const Array& args) {
   if (args.empty()) {
     const auto& cell_value = *value.asTypedValue();
     if (UNLIKELY(!isContainer(cell_value))) {
@@ -79,9 +78,7 @@ Variant HHVM_FUNCTION(min,
   return Variant(VarNR(ret));
 }
 
-Variant HHVM_FUNCTION(max,
-                      const Variant& value,
-                      const Array& args /* = null_array */) {
+Variant HHVM_FUNCTION(max, const Variant& value, const Array& args) {
   if (args.empty()) {
     const auto& cell_value = *value.asTypedValue();
     if (UNLIKELY(!isContainer(cell_value))) {

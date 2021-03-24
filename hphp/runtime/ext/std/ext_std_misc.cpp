@@ -30,7 +30,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/type-profile.h"
 
-#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -45,6 +44,8 @@
 
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
+
+#include "hphp/zend/zend-math.h"
 
 namespace HPHP {
 

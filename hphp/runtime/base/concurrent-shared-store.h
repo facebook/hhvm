@@ -47,41 +47,37 @@ struct StoreValue {
    * Index into cache layer. Valid indices are >= 0 and never invalidated.
    */
   using HotCacheIdx = int32_t;
-  using HandleOrSerial = Either<APCHandle*,char*,either_policy::high_bit>;
 
   StoreValue() = default;
   StoreValue(const StoreValue& o)
-    : tagged_data{o.data()}
+    : m_data{o.m_data.load(std::memory_order_acquire)}
     , expireTime{o.expireTime.load(std::memory_order_relaxed)}
     , dataSize{o.dataSize}
     , kind(o.kind)
-    , readOnly(o.readOnly)
     , bumpTTL{o.bumpTTL.load(std::memory_order_relaxed)}
     , c_time{o.c_time}
     , maxExpireTime{o.maxExpireTime.load(std::memory_order_relaxed)}
-    // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
                    std::memory_order_relaxed);
   }
 
-  HandleOrSerial data() const {
-    return tagged_data.load(std::memory_order_acquire);
-  }
-  void clearData() {
-    tagged_data.store(nullptr, std::memory_order_release);
+  APCHandle* data() const {
+    auto data = m_data.load(std::memory_order_acquire);
+    assertx(data != nullptr);
+    return data;
   }
   void setHandle(APCHandle* v) {
     kind = v->kind();
-    tagged_data.store(v, std::memory_order_release);
+    m_data.store(v, std::memory_order_release);
   }
   APCKind getKind() const {
-    assertx(data().left());
-    assertx(data().left()->kind() == kind);
+    assertx(data());
+    assertx(data()->kind() == kind);
     return kind;
   }
   Variant toLocal() const {
-    return data().left()->toLocal();
+    return data()->toLocal();
   }
   void set(APCHandle* v, int64_t expireTTL, int64_t maxTTL, int64_t bumpTTL);
   bool expired() const;
@@ -89,16 +85,6 @@ struct StoreValue {
     return expireTime.load(std::memory_order_acquire);
   }
   uint32_t queueExpire() const;
-
-  int32_t getSerializedSize() const {
-    assertx(data().right() != nullptr);
-    return abs(dataSize);
-  }
-
-  bool isSerializedObj() const {
-    assertx(data().right() != nullptr);
-    return dataSize < 0;
-  }
 
   /* Special invalid indices; used to classify cache lookup misses. */
   static constexpr HotCacheIdx kHotCacheUnknown = -1;
@@ -108,29 +94,21 @@ struct StoreValue {
   // while holding a const pointer to the StoreValue, or remember a cache entry.
 
   /*
-   * Each entry in APC is either
-   *  (a) an APCHandle* or,
-   *  (b) a char* to serialized prime data; unserializes to (a) on first access.
-   * All primed values have an expiration time of zero, but make use of a
-   * lock during their initial (b) -> (a) conversion, so these two fields
-   * are unioned. Readers must check for (a)/(b) using data.left/right and
-   * acquire our lock for case (b). Writers must ensure any left -> right tag
-   * update happens after all other modifictions to our StoreValue.
+   * Each entry in APC is an APCHandle*
    *
-   * Note also that 'expire' may not be safe to read even if data.left() is
+   * Note also that 'expire' may not be safe to read even if data is
    * valid, due to non-atomicity of updates; use 'expired()'.
    *
    * Note: expiration, creation, and modification times are stored unsigned
    * in 32-bits as seconds since the Epoch to save cache-line space.
    * HHVM might get confused after 2106 :)
    */
-  mutable std::atomic<HandleOrSerial> tagged_data{HandleOrSerial()};
-  union { mutable std::atomic<uint32_t> expireTime{}; mutable SmallLock lock; };
+  mutable std::atomic<APCHandle*> m_data;
+  mutable std::atomic<uint32_t> expireTime{};
   int32_t dataSize{0};  // For file storage, negative means serialized object
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
-  APCKind kind;  // Only valid if data is an APCHandle*.
-  bool readOnly{false}; // Set for primed entries that will never change.
+  APCKind kind;
   mutable std::atomic<uint16_t> bumpTTL{0};
   mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
   uint32_t c_time{0}; // Creation time; 0 for primed values
@@ -168,7 +146,6 @@ struct EntryInfo {
   };
 
   EntryInfo(const char* apckey,
-            bool inMem,
             int32_t size,
             int64_t ttl,
             int64_t maxTTL,
@@ -177,7 +154,6 @@ struct EntryInfo {
             int64_t c_time,
             bool inHotCache)
     : key(apckey)
-    , inMem(inMem)
     , size(size)
     , ttl(ttl)
     , maxTTL(maxTTL)
@@ -190,7 +166,6 @@ struct EntryInfo {
   static Type getAPCType(const APCHandle* handle);
 
   std::string key;
-  bool inMem;
   int32_t size;
   int64_t ttl;
   int64_t maxTTL;
@@ -212,16 +187,6 @@ struct EntryInfo {
  * specified in seconds.
  */
 struct ConcurrentTableSharedStore {
-  struct KeyValuePair {
-    KeyValuePair() : value(nullptr), sAddr(nullptr), readOnly(false) {}
-    const char* key;
-    APCHandle* value;
-    char* sAddr;
-    int32_t sSize;
-    bool readOnly;
-    bool inMem() const { return value != nullptr; }
-  };
-
   ConcurrentTableSharedStore() = default;
   ConcurrentTableSharedStore(const ConcurrentTableSharedStore&) = delete;
   ConcurrentTableSharedStore&
@@ -432,7 +397,6 @@ private:
   bool eraseImpl(const char*, bool, int64_t, ExpMap::accessor* expAcc);
   bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
-  APCHandle* unserialize(const String&, StoreValue*);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
 

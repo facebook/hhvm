@@ -51,9 +51,7 @@ namespace {
 
 #ifdef HPHP_TRACE
 std::string show(const StoreValue& sval) {
-  return sval.data().left() ?
-    folly::sformat("size {} kind {}", sval.dataSize, (int)sval.getKind()) :
-    folly::sformat("size {} serialized", std::abs(sval.dataSize));
+  return folly::sformat("size {} kind {}", sval.dataSize, (int)sval.getKind());
 }
 #endif
 
@@ -421,12 +419,7 @@ bool ConcurrentTableSharedStore::clear() {
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     s_hotCache.clearValue(iter->second);
-    iter->second.data().match(
-      [&] (APCHandle* handle) {
-        handle->unreferenceRoot(iter->second.dataSize);
-      },
-      [&] (char*) {}
-    );
+    iter->second.data()->unreferenceRoot(iter->second.dataSize);
     const void* vpKey = iter->first;
     free(const_cast<void*>(vpKey));
   }
@@ -480,40 +473,37 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
   bool wasCached = s_hotCache.clearValue(storeVal);
 
   FTRACE(2, "Remove {} {}\n", acc->first, show(acc->second));
-  if (auto const var = storeVal.data().left()) {
-    auto const e = storeVal.rawExpire();
-    APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
-                                           e == 0, expired);
-    /*
-     * As an optimization, we eagerly delete uncounted values that expired
-     * long ago. But HotCache does not check expiration on every 'get', so
-     * any values previously cached there must take the usual treadmill route.
-     */
-    auto const canKillNow = [&] {
-      if (!expired ||
-          wasCached ||
-          e >= oldestLive ||
-          e == 1 ||
-          !var->isUncounted()) {
-        return false;
-      }
-      auto expected = Treadmill::kIdleGenCount;
-      auto const desired = Treadmill::kPurgedGenCount;
-      if (!storeVal.expireRequestIdx.compare_exchange_strong(expected,
-                                                             desired)) {
-        return false;
-      }
-      assertx(storeVal.rawExpire() == e);
-      return true;
-    }();
-    if (canKillNow) {
-      FTRACE(3, " - bypass treadmill {}\n", acc->first);
-      APCTypedValue::fromHandle(var)->deleteUncounted();
-    } else {
-      var->unreferenceRoot(storeVal.dataSize);
+  auto const var = storeVal.data();
+  auto const e = storeVal.rawExpire();
+  APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
+                                          e == 0, expired);
+  /*
+    * As an optimization, we eagerly delete uncounted values that expired
+    * long ago. But HotCache does not check expiration on every 'get', so
+    * any values previously cached there must take the usual treadmill route.
+    */
+  auto const canKillNow = [&] {
+    if (!expired ||
+        wasCached ||
+        e >= oldestLive ||
+        e == 1 ||
+        !var->isUncounted()) {
+      return false;
     }
+    auto expected = Treadmill::kIdleGenCount;
+    auto const desired = Treadmill::kPurgedGenCount;
+    if (!storeVal.expireRequestIdx.compare_exchange_strong(expected,
+                                                            desired)) {
+      return false;
+    }
+    assertx(storeVal.rawExpire() == e);
+    return true;
+  }();
+  if (canKillNow) {
+    FTRACE(3, " - bypass treadmill {}\n", acc->first);
+    APCTypedValue::fromHandle(var)->deleteUncounted();
   } else {
-    assertx(!expired);  // primed keys never say true to expired()
+    var->unreferenceRoot(storeVal.dataSize);
   }
 
   APCStats::getAPCStats().removeKey(strlen(acc->first));
@@ -610,7 +600,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   // Our handle may not be same as `svar' here because some other thread may
   // have updated it already, check before updating.
   auto& sval = acc->second;
-  auto const handle = sval.data().left();
+  auto const handle = sval.data();
   if (handle == svar && handle->kind() == APCKind::SerializedObject) {
     sval.setHandle(converted);
     APCStats::getAPCStats().updateAPCValue(
@@ -622,44 +612,6 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
 
   converted->unreferenceRoot(size);
   return false;
-}
-
-APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
-                                                   StoreValue* sval) {
-  auto const sAddr = sval->data().right();
-  assertx(sAddr != nullptr);
-  /*
-    This method is special, since another thread T may concurrently
-    attempt to 'get' this entry while we're unserializing it. If T
-    observes sval->data with a cleared tag, it will proceed without
-    any further locking (it only has a const_accessor).
-
-    Thus, this method must ensure that the tag of sval->data is cleared
-    only *after* sval is in a fully consistent unserialized state.
-   */
-
-  try {
-    auto const sType =
-      apcExtension::EnableApcSerialize
-        ? VariableUnserializer::Type::APCSerialize
-        : VariableUnserializer::Type::Internal;
-
-    VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
-    if (sval->readOnly) vu.setReadOnly();
-    Variant v = vu.unserialize();
-    auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
-                                        APCHandleLevel::Outer, false);
-    sval->dataSize = pair.size;
-    sval->setHandle(pair.handle);  // Publish unserialized value (see 'get').
-    APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
-    return pair.handle;
-  } catch (ResourceExceededException&) {
-    throw;
-  } catch (Exception& e) {
-    raise_notice("APC Primed fetch failed: key %s (%s).",
-                 key.c_str(), e.getMessage().c_str());
-    return nullptr;
-  }
 }
 
 bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
@@ -750,37 +702,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
       return false;
     }
     sval = &acc->second;
-    if (auto const handle = sval->data().left()) {
-      svar = handle;
-    } else {
-      std::lock_guard<SmallLock> sval_lock(sval->lock);
-
-      if (auto const handle = sval->data().left()) {
-        svar = handle;
-      } else {
-        /*
-         * When primed entries are loaded, the increase in APC memory is
-         * attributed to the request. However, we don't want to fatal the
-         * request if its memory usage during deserialization is too high. As
-         * long as the total usage (including the amount added to APC) falls
-         * below the threshold, we let it survive.
-         *
-         * Note that primed entries are not free, and they are still counted
-         * toward request usage, if the request triggers loading of a new entry.
-         */
-        MemoryManager::SuppressOOM so(*tl_heap);
-        /*
-         * Note that unserialize can run arbitrary php code via a __wakeup
-         * routine, which could try to access this same key, and we're
-         * holding various locks here.  This is only for promoting primed
-         * values to in-memory values, so it's basically not a real
-         * problem, but ... :)
-         */
-        svar = unserialize(keyStr, const_cast<StoreValue*>(sval));
-        if (!svar) return false;
-      }
-    }
-    assertx(sval->data().left() == svar);
+    svar = sval->data();
     APCKind kind = sval->getKind();
     if (apcExtension::AllowObj &&
         (kind == APCKind::SerializedObject ||
@@ -834,7 +756,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
    * file-backed storage from priming.  So we don't need to try to deserialize
    * anything or handle the case that sval.data is file-backed.
    */
-  auto const oldHandle = sval.data().left();
+  auto const oldHandle = sval.data();
   if (oldHandle == nullptr) return 0;
   if (oldHandle->kind() != APCKind::Int &&
       oldHandle->kind() != APCKind::Double) {
@@ -870,11 +792,8 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   auto& sval = acc->second;
   if (sval.expired()) return false;
   s_hotCache.clearValue(sval);
-  auto const oldHandle =
-    sval.data().match([&](APCHandle* h) { return h; },
-                      [&](char* /*file*/) { return unserialize(key, &sval); });
-  if (!oldHandle ||
-      (oldHandle->kind() != APCKind::Int &&
+  auto const oldHandle = sval.data();
+  if ((oldHandle->kind() != APCKind::Int &&
        oldHandle->kind() != APCKind::Double) ||
       oldHandle->toLocal().toInt64() != old) {
     return false;
@@ -915,31 +834,9 @@ int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
   if (sval->expired()) return 0;
 
   // We no longer need to worry about expiration: we are reading the already
-  // computed dataSize field on APCHandle svals and primed values that we
-  // unserialize never expire.
-  if (sval->data().left()) {
-    found = true;
-    return sval->dataSize;
-  }
-
-  std::lock_guard<SmallLock> sval_lock(sval->lock);
-
-  // Recheck this, since we are under the lock now
-  if (sval->data().left()) {
-    found = true;
-    return sval->dataSize;
-  }
-
-  // Same disclaimer as in get(); we are actually waking up the primed
-  // data, which could theoretically call on the same lock we already have for
-  // this key...but it's primed so we'll pretend it doesn't happen.
-  auto *handle = unserialize(key, const_cast<StoreValue*>(sval));
-  if (handle) {
-    found = true;
-    return sval->dataSize;
-  }
-
-  return 0;
+  // computed dataSize field on APCHandle svals
+  found = true;
+  return sval->dataSize;
 }
 
 static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
@@ -1021,7 +918,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   SharedMutex::ReadHolder l(m_lock);
   bool present;
   time_t expiry = 0;
-  bool overwritePrime = false;
   {
     Map::accessor acc;
     APCHandle* current = nullptr;
@@ -1038,27 +934,14 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
        * 'get' will soon update the entry with the new value.
        */
       s_hotCache.clearValue(*sval);
-      sval->data().match(
-        [&] (APCHandle* handle) {
-          current = handle;
-          // If ApcTTLLimit is set, then only primed keys can have
-          // expire == 0.
-          overwritePrime = sval->rawExpire() == 0;
-        },
-        [&] (char*) {
-          // Was inFile, but won't be anymore.
-          sval->clearData();
-          sval->dataSize = 0;
-          overwritePrime = true;
-        }
-      );
+      current = sval->data();
       FTRACE(2, "Update {} {}\n", acc->first, show(acc->second));
     } else {
       FTRACE(2, "Add {} {}\n", acc->first, show(acc->second));
       APCStats::getAPCStats().addKey(keyLen);
     }
 
-    int64_t adjustedMaxTTL = adjust_ttl(max_ttl, overwritePrime || !limit_ttl);
+    int64_t adjustedMaxTTL = adjust_ttl(max_ttl, !limit_ttl);
     if (adjustedMaxTTL > apcExtension::TTLMaxFinite) {
       adjustedMaxTTL = 0;
     }
@@ -1119,31 +1002,19 @@ void ConcurrentTableSharedStore::init() {
 EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
                                                     StoreValue* sval,
                                                     int64_t curr_time) {
-  int32_t size;
-  auto type = EntryInfo::Type::Unknown;
-  auto const inMem = sval->data().match(
-      [&](APCHandle* handle) {
-        size = sval->dataSize;
-        type = EntryInfo::getAPCType(handle);
-        return true;
-      },
-      [&](char*) {
-        size = sval->getSerializedSize();
-        return false;
-      });
-
+  auto const handle = sval->data();
+  int32_t size = sval->dataSize;
+  auto type = EntryInfo::getAPCType(handle);
   auto calcTTL = [&](uint32_t expire) -> int64_t {
-    if (inMem && expire) {
-      int64_t ttl = expire - curr_time;
-      if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
-      return ttl;
+    if (expire) {
+      return expire - curr_time;
     }
     return 0;
   };
 
   auto ttl = calcTTL(sval->rawExpire());
   auto maxTTL = calcTTL(sval->maxExpireTime.load(std::memory_order_acquire));
-  return EntryInfo(key, inMem, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire),
+  return EntryInfo(key, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire),
                    type, sval->c_time, s_hotCache.hasValue(String(key).get()));
 }
 
@@ -1177,19 +1048,8 @@ static void dumpOneKeyAndValue(std::ostream &out,
     out << key;
     out << " #### ";
     if (!sval->expired()) {
-      auto const value = sval->data().match(
-        [&] (APCHandle* handle) {
-          out << "INMEMORY ";
-          return handle->toLocal();
-        },
-        [&] (char* sAddr) {
-          out << "ONDISK ";
-          // we need unserialize and serialize again because the format was
-          // APCSerialize
-          return apc_unserialize(sAddr, sval->getSerializedSize());
-        }
-      );
-
+      out << "INMEMORY ";
+      auto const value = sval->data()->toLocal();
       try {
         auto valS = internal_serialize(value);
         out << valS.toCppString();
@@ -1204,7 +1064,7 @@ static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
   out << "key inmem size ttl type maxttl bumpttl inhotcache\n";
   for (auto entry : entries) {
     out << entry.key << " "
-        << static_cast<int32_t>(entry.inMem) << " "
+        << "1 " // If the value is in memory (before apc_prime could make it live on disk)
         << entry.size << " "
         << entry.ttl << " "
         << static_cast<int32_t>(entry.type) << " "
@@ -1275,7 +1135,6 @@ void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
   for (auto const& iter : m_vars) {
     const StoreValue& value = iter.second;
     if (value.c_time == 0) continue;
-    if (value.data().left() == nullptr) continue;
     if (value.expired()) continue;
     auto const key = iter.first;
     // We are going to use newline to separate different keys
@@ -1320,9 +1179,7 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
     StoreValue& value = iter.second;
     if (value.expired()) continue;
     int size = sizeof(StoreValue) + strlen(key) + 1;
-    if (value.data().left()) {          // in memory
-      size += value.dataSize;
-    }
+    size += value.dataSize;
     next -= size;
     if (next < 0) {
       samples.push_back(makeEntryInfo(key, &value, curr_time));

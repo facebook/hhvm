@@ -121,7 +121,6 @@ void initialize_apc() {
 
 const StaticString s_internal_preload("__apc_internal_preload");
 
-typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
@@ -594,7 +593,7 @@ Array HHVM_FUNCTION(
       DArrayInit ent(kEntryInfoSize);
       ent.add(s_info,
               Variant::attach(StringData::Make(entry.key.c_str())));
-      ent.add(s_in_memory, entry.inMem);
+      ent.add(s_in_memory, 1);
       ent.add(s_ttl, entry.ttl);
       ent.add(s_mem_size, entry.size);
       ent.add(s_type, static_cast<int64_t>(entry.type));
@@ -880,7 +879,7 @@ void apc_sample_by_size() {
   StructuredLogEntry sample;
   for (auto& entry : entries) {
     sample.setStr("key", entry.key);
-    sample.setInt("in_mem", static_cast<int64_t>(entry.inMem));
+    sample.setInt("in_mem", 1);
     sample.setInt("ttl", entry.ttl);
     sample.setInt("size", entry.size);
     StructuredLog::log("apc_samples", sample);

@@ -3189,6 +3189,12 @@ where
         attrs.iter().any(|attr| attr.name.1 == special_attrs::SOFT)
     }
 
+    fn has_sound_dynamic_callable(attrs: &[ast::UserAttribute]) -> bool {
+        attrs
+            .iter()
+            .any(|attr| attr.name.1 == special_attrs::SOUND_DYNAMIC_CALLABLE)
+    }
+
     fn soften_hint(attrs: &[ast::UserAttribute], hint: ast::Hint) -> ast::Hint {
         if Self::has_soft(attrs) {
             ast::Hint::new(hint.0.clone(), ast::Hint_::Hsoft(hint))
@@ -5006,7 +5012,10 @@ where
                     xhp_category: None,
                     reqs: vec![],
                     implements,
-                    implements_dynamic: implements_dynamic || extends_dynamic,
+                    implements_dynamic: implements_dynamic
+                        || extends_dynamic
+                        || env.parser_options.tco_enable_sound_dynamic
+                            && Self::has_sound_dynamic_callable(&user_attributes),
                     where_constraints,
                     consts: vec![],
                     typeconsts: vec![],

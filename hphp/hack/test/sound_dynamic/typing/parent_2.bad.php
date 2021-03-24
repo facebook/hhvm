@@ -1,6 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class Foo implements dynamic {}
+<<__SoundDynamicCallable>>
+class Foo {}
 
 class Bar extends Foo {}

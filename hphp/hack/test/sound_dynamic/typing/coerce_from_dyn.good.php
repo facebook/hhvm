@@ -21,7 +21,8 @@ function test_prim(dynamic $d) : void {
   f_nonnull($d);
 }
 
-class C implements dynamic {}
+<<__SoundDynamicCallable>>
+class C {}
 
 function f_c(C $c) : void {}
 

@@ -3,4 +3,5 @@
 
 class Foo {}
 
-class Bar extends Foo implements dynamic {}
+<<__SoundDynamicCallable>>
+class Bar extends Foo {}

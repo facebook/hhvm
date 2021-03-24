@@ -6,6 +6,8 @@
 
 interface I1 {}
 
-interface I2 extends dynamic {}
+<<__SoundDynamicCallable>>
+interface I2 {}
 
-class D implements I1, I2, dynamic {}
+<<__SoundDynamicCallable>>
+class D implements I1, I2 {}

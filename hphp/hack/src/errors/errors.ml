@@ -5104,7 +5104,9 @@ let method_is_not_dynamically_callable
           "A parameter of "
           ^ method_name
           ^ " is not enforceable. "
-          ^ "Try adding the <<__SoundDynamicCallable>> attribute to "
+          ^ "Try adding the <<"
+          ^ Naming_special_names.UserAttributes.uaSoundDynamicCallable
+          ^ ">> attribute to "
           ^ "the method to check if its code is safe for dynamic calling." );
       ]
   in

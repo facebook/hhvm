@@ -1,6 +1,7 @@
 <?hh
 
-class C implements dynamic {}
+<<__SoundDynamicCallable>>
+class C {}
 
 function f (dynamic $d) : dynamic {
   $c = new C();

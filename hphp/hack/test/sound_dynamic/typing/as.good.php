@@ -1,6 +1,7 @@
 <?hh
 
-class B<T> implements dynamic {
+<<__SoundDynamicCallable>>
+class B<T> {
 }
 
 function f(B<int> $i, B<int> $j) : void {

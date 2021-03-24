@@ -1,7 +1,8 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class C implements dynamic {
+<<__SoundDynamicCallable>>
+class C {
   // Legal, as we don't check signatures for private members
   private vec<int> $items;
   private function setItems(vec<int> $vi):void { $this->items = $vi; }

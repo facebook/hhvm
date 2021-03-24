@@ -3,8 +3,11 @@
 
   class C { }
   class G<T> { }
-  class D implements dynamic { }
-  class E implements dynamic {
+
+  <<__SoundDynamicCallable>>
+  class D { }
+  <<__SoundDynamicCallable>>
+  class E {
     // This should be rejected, as it is not a subtype of dynamic
     public ?C $x;
     // This should be rejected, as it is not enforceable

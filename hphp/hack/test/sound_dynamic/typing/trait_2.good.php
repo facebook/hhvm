@@ -3,15 +3,18 @@
 
 // No checks are performed upon encountering require extends
 
-class C implements dynamic {}
+<<__SoundDynamicCallable>>
+class C {}
 
 class D {}
 
-trait T1 implements dynamic {
+<<__SoundDynamicCallable>>
+trait T1 {
   require extends C;
 }
 
-trait T2 implements dynamic {
+<<__SoundDynamicCallable>>
+trait T2 {
   require extends D;
 }
 

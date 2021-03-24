@@ -1,8 +1,8 @@
-File "variadic_argument_1.bad.php", line 7, characters 19-21:
+File "variadic_argument_1.bad.php", line 8, characters 19-21:
 Method  `foo` in class `C` is not dynamically callable. (Typing[4402])
-  File "variadic_argument_1.bad.php", line 8, characters 13-17:
+  File "variadic_argument_1.bad.php", line 9, characters 13-17:
   Invalid argument
   File "variadic_argument_1.bad.php", line 4, characters 18-27:
   Expected `(int, int)`
-  File "variadic_argument_1.bad.php", line 7, characters 37-38:
+  File "variadic_argument_1.bad.php", line 8, characters 37-38:
   But got `dynamic` (variadic argument)

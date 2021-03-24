@@ -5,7 +5,8 @@ class Box<T> {
   public function  __construct(public T $x) {}
 }
 
-class C implements dynamic {
+<<__SoundDynamicCallable>>
+class C {
   <<__SoundDynamicCallable>>
   public function foo() : Box<int> {
     return new Box(42);

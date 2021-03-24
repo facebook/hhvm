@@ -1,11 +1,13 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-// If an interface extends another interface, then it can extend dynamic
-// if and only if the extended interface extends dynamic
+// If an interface extends another interface, then it can support dynamic
+// if and only if the extended interface supports dynamic
 
-interface I1 extends dynamic {}
+<<__SoundDynamicCallable>>
+interface I1 {}
 interface I2 extends I1 {}             // this is an error
 
 interface I3 {}
-interface I4 extends I3, dynamic {}    // this is also an error
+<<__SoundDynamicCallable>>
+interface I4 extends I3 {}    // this is also an error

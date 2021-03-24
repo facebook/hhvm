@@ -3757,7 +3757,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
 
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
 
-        let mut implements_dynamic = false;
+        let mut implements_dynamic = class_attributes.sound_dynamic_callable;
         let implements = self.slice(implements.iter().filter_map(
             |&node| match self.node_to_ty(node) {
                 Some(Ty(_, Ty_::Tdynamic)) => {

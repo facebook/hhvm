@@ -3,7 +3,8 @@
 
 function expectDyn(dynamic $_):void { }
 
-class C implements dynamic { }
+<<__SoundDynamicCallable>>
+class C { }
 
 function test1(
   (function(dynamic):int) $f1,

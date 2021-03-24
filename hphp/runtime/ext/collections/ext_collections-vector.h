@@ -254,7 +254,7 @@ public:
   }
 
   void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(arrayData());
+    scanner.scan(m_arr);
     scanner.scan(m_immCopy);
   }
 

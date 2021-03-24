@@ -15,7 +15,6 @@
  *)
 
 open Hh_prelude
-open Utils
 module SN = Naming_special_names
 
 (*****************************************************************************)
@@ -27,25 +26,39 @@ let canon_key = String.lowercase
 let category = "naming_global"
 
 module GEnv = struct
-  let get_full_pos ctx (pos, name) =
-    try (unsafe_opt (Naming_provider.get_full_pos ctx (pos, name)), name)
-    with Invalid_argument _ ->
-      (* We looked for a file in the file heap, but it was deleted
-          before we could get it. This occurs with highest probability when we
-          have multiple large rebases in quick succession, and the typechecker
-            doesn't get updates from watchman while checking. For now, we restart
-          gracefully, but in future versions we'll be restarting the server on
-          large rebases anyhow, so this is sufficient behavior.
+  (** This function logs and error and raises an exception,
+  ultimately causing the typechecker to terminate.
+  Why? We looked for a file in the file heap, but it was deleted
+  before we could get it. This occurs with highest probability when we
+  have multiple large rebases in quick succession, and the typechecker
+  doesn't get updates from watchman while checking. For now, we restart
+  gracefully, but in future versions we'll be restarting the server on
+  large rebases anyhow, so this is sufficient behavior.
 
-          TODO(jjwu): optimize this. Instead of forcing a server restart,
-          catch the exception in the recheck look and start another recheck cycle
-          by adding more files to the unprocessed/partially-processed set in
-          the previous loop.
-        *)
-      let fn = FileInfo.get_pos_filename pos in
-      Hh_logger.log "File missing: %s" (Relative_path.to_absolute fn);
-      Hh_logger.log "Name missing: %s" name;
-      raise File_provider.File_provider_stale
+  TODO(jjwu): optimize this. Instead of forcing a server restart,
+  catch the exception in the recheck look and start another recheck cycle
+  by adding more files to the unprocessed/partially-processed set in
+  the previous loop. *)
+  let file_disappeared_under_our_feet (pos, name) =
+    let fn = FileInfo.get_pos_filename pos in
+    Hh_logger.log "File missing: %s" (Relative_path.to_absolute fn);
+    Hh_logger.log "Name missing: %s" name;
+    raise File_provider.File_provider_stale
+
+  let get_fun_full_pos ctx (pos, name) =
+    match Naming_provider.get_fun_full_pos ctx (pos, name) with
+    | Some pos -> (pos, name)
+    | None -> file_disappeared_under_our_feet (pos, name)
+
+  let get_type_full_pos ctx (pos, name) =
+    match Naming_provider.get_type_full_pos ctx (pos, name) with
+    | Some pos -> (pos, name)
+    | None -> file_disappeared_under_our_feet (pos, name)
+
+  let get_const_full_pos ctx (pos, name) =
+    match Naming_provider.get_const_full_pos ctx (pos, name) with
+    | Some pos -> (pos, name)
+    | None -> file_disappeared_under_our_feet (pos, name)
 
   let type_canon_name ctx name =
     Naming_provider.get_type_canon_name ctx (canon_key name)
@@ -53,7 +66,7 @@ module GEnv = struct
   let type_pos ctx name =
     match Naming_provider.get_type_pos ctx name with
     | Some pos ->
-      let (p, _) = get_full_pos ctx (pos, name) in
+      let (p, _) = get_type_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
@@ -67,7 +80,7 @@ module GEnv = struct
         ( pos,
           ( ( Naming_types.TClass | Naming_types.TTypedef
             | Naming_types.TRecordDef ) as kind ) ) ->
-      let (p, _) = get_full_pos ctx (pos, name) in
+      let (p, _) = get_type_full_pos ctx (pos, name) in
       Some (p, kind)
     | None -> None
 
@@ -77,7 +90,7 @@ module GEnv = struct
   let fun_pos ctx name =
     match Naming_provider.get_fun_pos ctx name with
     | Some pos ->
-      let (p, _) = get_full_pos ctx (pos, name) in
+      let (p, _) = get_fun_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
@@ -88,7 +101,7 @@ module GEnv = struct
   let typedef_pos ctx name =
     match Naming_provider.get_type_pos_and_kind ctx name with
     | Some (pos, Naming_types.TTypedef) ->
-      let (p, _) = get_full_pos ctx (pos, name) in
+      let (p, _) = get_type_full_pos ctx (pos, name) in
       Some p
     | Some (_, Naming_types.TClass)
     | Some (_, Naming_types.TRecordDef)
@@ -98,7 +111,7 @@ module GEnv = struct
   let gconst_pos ctx name =
     match Naming_provider.get_const_pos ctx name with
     | Some pos ->
-      let (p, _) = get_full_pos ctx (pos, name) in
+      let (p, _) = get_const_full_pos ctx (pos, name) in
       Some p
     | None -> None
 
@@ -106,9 +119,17 @@ module GEnv = struct
     FileInfo.(
       match (p, q) with
       | (Full p', Full q') -> Pos.compare p' q' = 0
-      | (Full q', (File _ as p'))
-      | ((File _ as p'), Full q') ->
-        let p' = fst (get_full_pos ctx (p', name)) in
+      | ((File (Fun, _) as p'), Full q')
+      | (Full q', (File (Fun, _) as p')) ->
+        let p' = fst (get_fun_full_pos ctx (p', name)) in
+        Pos.compare p' q' = 0
+      | ((File (Const, _) as p'), Full q')
+      | (Full q', (File (Const, _) as p')) ->
+        let p' = fst (get_const_full_pos ctx (p', name)) in
+        Pos.compare p' q' = 0
+      | ((File ((Class | Typedef | RecordDef), _) as p'), Full q')
+      | (Full q', (File ((Class | Typedef | RecordDef), _) as p')) ->
+        let p' = fst (get_type_full_pos ctx (p', name)) in
         Pos.compare p' q' = 0
       | (File (x, fn1), File (y, fn2)) ->
         Relative_path.equal fn1 fn2 && equal_name_type x y)
@@ -116,13 +137,13 @@ end
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_not_typehint ctx (p, name) =
+  let check_type_not_typehint ctx (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
     if
       SN.Typehints.is_reserved_hh_name x
       || SN.Typehints.is_reserved_global_name x
     then (
-      let (p, name) = GEnv.get_full_pos ctx (p, name) in
+      let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
       Errors.name_is_reserved name p;
       false
     ) else
@@ -170,15 +191,15 @@ module Env = struct
     | Some canonical ->
       let p' = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
       if not @@ GEnv.compare_pos ctx p' p canonical then
-        let (p, name) = GEnv.get_full_pos ctx (p, name) in
-        let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
+        let (p, name) = GEnv.get_fun_full_pos ctx (p, name) in
+        let (p', canonical) = GEnv.get_fun_full_pos ctx (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
     | None ->
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name p
 
   let new_cid ctx cid_kind (p, name) =
-    if not (check_not_typehint ctx (p, name)) then
+    if not (check_type_not_typehint ctx (p, name)) then
       ()
     else
       let name_key = canon_key name in
@@ -188,8 +209,8 @@ module Env = struct
           Option.value_exn (Naming_provider.get_type_pos ctx canonical)
         in
         if not @@ GEnv.compare_pos ctx p' p canonical then
-          let (p, name) = GEnv.get_full_pos ctx (p, name) in
-          let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
+          let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
+          let (p', canonical) = GEnv.get_type_full_pos ctx (p', canonical) in
           Errors.error_name_already_bound name canonical p p'
       | None ->
         let backend = Provider_context.get_backend ctx in
@@ -205,8 +226,8 @@ module Env = struct
     match Naming_provider.get_const_pos ctx x with
     | Some p' ->
       if not @@ GEnv.compare_pos ctx p' p x then
-        let (p, x) = GEnv.get_full_pos ctx (p, x) in
-        let (p', x) = GEnv.get_full_pos ctx (p', x) in
+        let (p, x) = GEnv.get_const_full_pos ctx (p, x) in
+        let (p', x) = GEnv.get_const_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
     | None ->
       let backend = Provider_context.get_backend ctx in

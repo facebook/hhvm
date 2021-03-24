@@ -12,7 +12,13 @@
  *)
 
 module GEnv : sig
-  val get_full_pos :
+  val get_fun_full_pos :
+    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
+
+  val get_type_full_pos :
+    Provider_context.t -> FileInfo.pos * string -> Pos.t * string
+
+  val get_const_full_pos :
     Provider_context.t -> FileInfo.pos * string -> Pos.t * string
 
   val type_pos : Provider_context.t -> string -> Pos.t option

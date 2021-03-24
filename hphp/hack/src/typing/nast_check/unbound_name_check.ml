@@ -114,7 +114,7 @@ let check_type_name
         match Naming_provider.get_type_pos_and_kind env.ctx name with
         | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
           let (full_pos, _) =
-            Naming_global.GEnv.get_full_pos env.ctx (def_pos, name)
+            Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
           in
           Errors.unexpected_typedef pos full_pos kind
         | Some _ -> ()

@@ -258,39 +258,42 @@ let get_position_for_symbol
   (* Symbols can only be found if they are properly namespaced.
    * Even XHP classes must start with a backslash. *)
   let name_with_ns = Utils.add_ns symbol in
-  let pos_opt =
-    match kind with
-    | SI_XHP
-    | SI_Interface
-    | SI_Trait
-    | SI_Enum
-    | SI_Typedef
-    | SI_Class
-    | SI_Constructor
-    | SI_RecordDef ->
-      Naming_provider.get_type_pos ctx name_with_ns
-    | SI_Function -> Naming_provider.get_fun_pos ctx name_with_ns
-    | SI_GlobalConstant -> Naming_provider.get_const_pos ctx name_with_ns
-    (* Items below this are not global symbols and cannot be 'position'ed *)
-    | SI_Unknown
-    | SI_Namespace
-    | SI_ClassMethod
-    | SI_Literal
-    | SI_ClassConstant
-    | SI_Property
-    | SI_LocalVariable
-    | SI_Keyword
-    | SI_Mixed ->
-      None
+
+  let helper get_pos resolve_pos =
+    (* get_pos only gives us filename+nametype *)
+    let fileinfo_pos = get_pos ctx name_with_ns in
+    (* we have to resolve that into a proper position *)
+    Option.map fileinfo_pos ~f:(fun fileinfo_pos ->
+        let (pos, _) = resolve_pos ctx (fileinfo_pos, name_with_ns) in
+        let relpath = FileInfo.get_pos_filename fileinfo_pos in
+        let (line, col, _) = Pos.info_pos pos in
+        (relpath, line, col))
   in
-  (* Okay, we have a rough pos, convert that to a real pos *)
-  match pos_opt with
-  | None -> None
-  | Some fi ->
-    let (pos, _) = Naming_global.GEnv.get_full_pos ctx (fi, name_with_ns) in
-    let relpath = FileInfo.get_pos_filename fi in
-    let (line, col, _) = Pos.info_pos pos in
-    Some (relpath, line, col)
+  match kind with
+  | SI_XHP
+  | SI_Interface
+  | SI_Trait
+  | SI_Enum
+  | SI_Typedef
+  | SI_Class
+  | SI_Constructor
+  | SI_RecordDef ->
+    helper Naming_provider.get_type_pos Naming_global.GEnv.get_type_full_pos
+  | SI_Function ->
+    helper Naming_provider.get_fun_pos Naming_global.GEnv.get_fun_full_pos
+  | SI_GlobalConstant ->
+    helper Naming_provider.get_const_pos Naming_global.GEnv.get_const_full_pos
+  (* Items below this are not global symbols and cannot be 'position'ed *)
+  | SI_Unknown
+  | SI_Namespace
+  | SI_ClassMethod
+  | SI_Literal
+  | SI_ClassConstant
+  | SI_Property
+  | SI_LocalVariable
+  | SI_Keyword
+  | SI_Mixed ->
+    None
 
 let absolute_none = Pos.none |> Pos.to_absolute
 

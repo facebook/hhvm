@@ -193,9 +193,7 @@ module Types = struct
       match entry_type with
       | Naming_types.TClass ->
         begin
-          match
-            Ast_provider.find_class_in_file ~case_insensitive:true ctx path id
-          with
+          match Ast_provider.find_iclass_in_file ctx path id with
           | Some cls -> Some (snd cls.Aast.c_name)
           | None ->
             Hh_logger.log
@@ -206,9 +204,7 @@ module Types = struct
         end
       | Naming_types.TTypedef ->
         begin
-          match
-            Ast_provider.find_typedef_in_file ~case_insensitive:true ctx path id
-          with
+          match Ast_provider.find_itypedef_in_file ctx path id with
           | Some typedef -> Some (snd typedef.Aast.t_name)
           | None ->
             Hh_logger.log
@@ -219,13 +215,7 @@ module Types = struct
         end
       | Naming_types.TRecordDef ->
         begin
-          match
-            Ast_provider.find_record_def_in_file
-              ~case_insensitive:true
-              ctx
-              path
-              id
-          with
+          match Ast_provider.find_irecord_def_in_file ctx path id with
           | Some cls -> Some (snd cls.Aast.rd_name)
           | None ->
             Hh_logger.log
@@ -329,9 +319,7 @@ module Funs = struct
 
   let get_canon_name ctx name =
     let map_result path =
-      match
-        Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
-      with
+      match Ast_provider.find_ifun_in_file ctx path name with
       | Some f -> Some (snd f.Aast.f_name)
       | None ->
         let path_str = Relative_path.S.to_string path in

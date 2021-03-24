@@ -251,7 +251,12 @@ let get_ast_with_error ?(full = false) ctx path =
 
 let get_ast ?(full = false) ctx path = get_ast_with_error ~full ctx path |> snd
 
-let get_def ~full ctx file_name (f : Nast.def -> 'a option) : 'a option =
+let get_def
+    ?(full = false)
+    ctx
+    file_name
+    (node_getter : Nast.def -> ('a * string) option)
+    (name_matcher : string -> bool) : 'a option =
   let defs = get_ast ~full ctx file_name in
   let rec get acc defs =
     List.fold_left defs ~init:acc ~f:(fun acc def ->
@@ -259,58 +264,68 @@ let get_def ~full ctx file_name (f : Nast.def -> 'a option) : 'a option =
         | Aast.Namespace (_, defs) -> get acc defs
         | _ ->
           begin
-            match f def with
-            | Some r -> Some r
-            | None -> acc
+            match node_getter def with
+            | Some (node, name) when name_matcher name -> Some node
+            | _ -> acc
           end)
   in
   get None defs
 
-let is_match ~case_insensitive name =
-  if case_insensitive then
-    let name = Caml.String.lowercase_ascii name in
-    (fun s -> String.equal name (Caml.String.lowercase_ascii s))
-  else
-    String.equal name
+let find_class_impl (def : Nast.def) : (Nast.class_ * string) option =
+  match def with
+  | Aast.Class c -> Some (c, snd c.Aast.c_name)
+  | _ -> None
 
-let find_class_in_file
-    ?(full = false) ?(case_insensitive = false) ctx file_name class_name =
-  let is_match = is_match ~case_insensitive class_name in
-  get_def ~full ctx file_name (fun def ->
-      match def with
-      | Aast.Class c when is_match (snd c.Aast.c_name) -> Some c
-      | _ -> None)
+let find_record_def_impl def =
+  match def with
+  | Aast.RecordDef rd -> Some (rd, snd rd.Aast.rd_name)
+  | _ -> None
 
-let find_record_def_in_file
-    ?(full = false) ?(case_insensitive = false) ctx file_name record_name =
-  let is_match = is_match ~case_insensitive record_name in
-  get_def ~full ctx file_name (fun def ->
-      match def with
-      | Aast.RecordDef rd when is_match (snd rd.Aast.rd_name) -> Some rd
-      | _ -> None)
+let find_fun_impl def =
+  match def with
+  | Aast.Fun f -> Some (f, snd f.Aast.f_name)
+  | _ -> None
 
-let find_fun_in_file
-    ?(full = false) ?(case_insensitive = false) ctx file_name fun_name =
-  let is_match = is_match ~case_insensitive fun_name in
-  get_def ~full ctx file_name (fun def ->
-      match def with
-      | Aast.Fun f when is_match (snd f.Aast.f_name) -> Some f
-      | _ -> None)
+let find_typedef_impl def =
+  match def with
+  | Aast.Typedef t -> Some (t, snd t.Aast.t_name)
+  | _ -> None
 
-let find_typedef_in_file
-    ?(full = false) ?(case_insensitive = false) ctx file_name name =
-  let is_match = is_match ~case_insensitive name in
-  get_def ~full ctx file_name (fun def ->
-      match def with
-      | Aast.Typedef t when is_match (snd t.Aast.t_name) -> Some t
-      | _ -> None)
+let find_const_impl def =
+  match def with
+  | Aast.Constant cst -> Some (cst, snd cst.Aast.cst_name)
+  | _ -> None
+
+let iequal name =
+  let name = Caml.String.lowercase_ascii name in
+  (fun s -> String.equal name (Caml.String.lowercase_ascii s))
+
+let find_class_in_file ?(full = false) ctx file_name name =
+  get_def ~full ctx file_name find_class_impl (String.equal name)
+
+let find_iclass_in_file ctx file_name iname =
+  get_def ctx file_name find_class_impl (iequal iname)
+
+let find_record_def_in_file ?(full = false) ctx file_name name =
+  get_def ~full ctx file_name find_record_def_impl (String.equal name)
+
+let find_irecord_def_in_file ctx file_name iname =
+  get_def ctx file_name find_record_def_impl (iequal iname)
+
+let find_fun_in_file ?(full = false) ctx file_name name =
+  get_def ~full ctx file_name find_fun_impl (String.equal name)
+
+let find_ifun_in_file ctx file_name iname =
+  get_def ctx file_name find_fun_impl (iequal iname)
+
+let find_typedef_in_file ?(full = false) ctx file_name name =
+  get_def ~full ctx file_name find_typedef_impl (String.equal name)
+
+let find_itypedef_in_file ctx file_name iname =
+  get_def ctx file_name find_typedef_impl (iequal iname)
 
 let find_gconst_in_file ?(full = false) ctx file_name name =
-  let is_match = String.equal name in
-  get_def ~full ctx file_name (fun def ->
-      match def with
-      | Aast.Constant cst when is_match (snd cst.Aast.cst_name) -> Some cst
-      | _ -> None)
+  get_def ~full ctx file_name find_const_impl (String.equal name)
 
 let local_changes_push_sharedmem_stack () =
   ParserHeap.LocalChanges.push_stack ()

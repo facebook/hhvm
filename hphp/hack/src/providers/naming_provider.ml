@@ -262,7 +262,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
           canon_name_key)
   in
   let compute_symbol_canon_name path =
-    Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
+    Ast_provider.find_ifun_in_file ctx path name
     >>| fun { Aast.f_name = (_, canon_name); _ } -> canon_name
   in
 
@@ -515,13 +515,13 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
   let compute_symbol_canon_name path kind =
     match kind with
     | Naming_types.TClass ->
-      Ast_provider.find_class_in_file ~case_insensitive:true ctx path name
+      Ast_provider.find_iclass_in_file ctx path name
       >>| fun { Aast.c_name = (_, canon_name); _ } -> canon_name
     | Naming_types.TTypedef ->
-      Ast_provider.find_typedef_in_file ~case_insensitive:true ctx path name
+      Ast_provider.find_itypedef_in_file ctx path name
       >>| fun { Aast.t_name = (_, canon_name); _ } -> canon_name
     | Naming_types.TRecordDef ->
-      Ast_provider.find_record_def_in_file ~case_insensitive:true ctx path name
+      Ast_provider.find_irecord_def_in_file ctx path name
       >>| fun { Aast.rd_name = (_, canon_name); _ } -> canon_name
   in
 

@@ -116,11 +116,7 @@ using ClassPtr = AtomicSharedLowPtr<Class>;
 // compatible signatures.
 using ObjReleaseFunc = BuiltinDtorFunction;
 
-using ObjectProps = std::conditional_t<
-  wide_tv_val,
-  tv_layout::Tv7Up,
-  tv_layout::TvArray
->;
+using ObjectProps = tv_layout::Tv7Up;
 
 // As an optimization, we put multiple static props in a single RDS allocation
 // to speed up initialization and improve cache locality. Persistent props are

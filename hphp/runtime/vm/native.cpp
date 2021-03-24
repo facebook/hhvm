@@ -77,7 +77,7 @@ void pushInt(Registers& regs, const int64_t value) {
 }
 
 void pushRval(Registers& regs, tv_rval tv, bool isFCallBuiltin) {
-  if (!wide_tv_val || isFCallBuiltin) {
+  if (isFCallBuiltin) {
     // tv_rval either points at the stack, or we don't have wide
     // tv_vals. In either case, its actually pointing at a TypedValue
     // already.

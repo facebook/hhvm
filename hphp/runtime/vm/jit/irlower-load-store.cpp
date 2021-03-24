@@ -259,18 +259,14 @@ void cgLdMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
   vmain(env) << load{rvmtl()[off], dstLoc.reg(0)};
-  if (wide_tv_val) {
-    vmain(env) << load{rvmtl()[off + sizeof(intptr_t)], dstLoc.reg(1)};
-  }
+  vmain(env) << load{rvmtl()[off + sizeof(intptr_t)], dstLoc.reg(1)};
 }
 
 void cgStMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
   auto const srcLoc = irlower::srcLoc(env, inst, 0);
   vmain(env) << store{srcLoc.reg(0), rvmtl()[off]};
-  if (wide_tv_val) {
-    vmain(env) << store{srcLoc.reg(1), rvmtl()[off + sizeof(intptr_t)]};
-  }
+  vmain(env) << store{srcLoc.reg(1), rvmtl()[off + sizeof(intptr_t)]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,10 +294,8 @@ void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
     .shift(sizeof(ObjectData));
 
   v << lea{src[offs.dataOffset()], valReg};
-  if (wide_tv_val) {
-    static_assert(TVOFF(m_data) == 0, "");
-    v << lea{src[offs.typeOffset()], dstLoc.reg(tv_lval::type_idx)};
-  }
+  static_assert(TVOFF(m_data) == 0, "");
+  v << lea{src[offs.typeOffset()], dstLoc.reg(tv_lval::type_idx)};
 }
 
 void cgLdInitPropAddr(IRLS& env, const IRInstruction* inst) {
@@ -315,7 +309,7 @@ void cgLdInitPropAddr(IRLS& env, const IRInstruction* inst) {
   if (dstLoc.hasReg(tv_lval::val_idx)) {
     v << lea{obj[offs.dataOffset()], dstLoc.reg(tv_lval::val_idx)};
   }
-  if (wide_tv_val && dstLoc.hasReg(tv_lval::type_idx)) {
+  if (dstLoc.hasReg(tv_lval::type_idx)) {
     static_assert(TVOFF(m_data) == 0, "");
     v << lea{obj[offs.typeOffset()], dstLoc.reg(tv_lval::type_idx)};
   }

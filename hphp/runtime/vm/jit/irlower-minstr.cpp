@@ -631,10 +631,8 @@ void cgElemMixedArrayK(IRLS& env, const IRInstruction* inst) {
   auto const off = getMixedLayoutOffset(env, inst);
 
   v << lea{arr[off], dst.reg(tv_lval::val_idx)};
-  if (wide_tv_val) {
-    static_assert(TVOFF(m_data) == 0, "");
-    v << lea{arr[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
-  }
+  static_assert(TVOFF(m_data) == 0, "");
+  v << lea{arr[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -843,9 +841,7 @@ void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   vmain(env) << lea{addr.val, dstLoc.reg(tv_lval::val_idx)};
-  if (wide_tv_val) {
-    vmain(env) << lea{addr.type, dstLoc.reg(tv_lval::type_idx)};
-  }
+  vmain(env) << lea{addr.type, dstLoc.reg(tv_lval::type_idx)};
 }
 
 void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
@@ -952,10 +948,8 @@ void cgElemDictK(IRLS& env, const IRInstruction* inst) {
   auto const off = getMixedLayoutOffset(env, inst);
 
   v << lea{dict[off], dst.reg(tv_lval::val_idx)};
-  if (wide_tv_val) {
-    static_assert(TVOFF(m_data) == 0, "");
-    v << lea{dict[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
-  }
+  static_assert(TVOFF(m_data) == 0, "");
+  v << lea{dict[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
 }
 
 void cgDictGet(IRLS& env, const IRInstruction* inst) {
@@ -1040,10 +1034,8 @@ void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const off = getSetArrayLayoutOffset(env, inst);
   v << lea{keyset[off], dst.reg(tv_lval::val_idx)};
-  if (wide_tv_val) {
-    static_assert(TVOFF(m_data) == 0, "");
-    v << lea{keyset[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
-  }
+  static_assert(TVOFF(m_data) == 0, "");
+  v << lea{keyset[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
 }
 
 void cgKeysetGet(IRLS& env, const IRInstruction* inst) {

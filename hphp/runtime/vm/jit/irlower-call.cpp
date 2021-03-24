@@ -304,16 +304,12 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
         args.ssa(srcNum);
       } else {
         assertx(src->isA(TLvalToCell));
-        if (!wide_tv_val) {
-          args.ssa(srcNum);
-        } else {
-          auto const data = v.makeReg();
-          auto const type = v.makeReg();
-          auto const loc = srcLoc(env, inst, srcNum);
-          v << load{*loc.reg(tv_lval::val_idx), data};
-          v << loadb{*loc.reg(tv_lval::type_idx), type};
-          args.constPtrToTV(type, data);
-        }
+        auto const data = v.makeReg();
+        auto const type = v.makeReg();
+        auto const loc = srcLoc(env, inst, srcNum);
+        v << load{*loc.reg(tv_lval::val_idx), data};
+        v << loadb{*loc.reg(tv_lval::type_idx), type};
+        args.constPtrToTV(type, data);
       }
     }
   }

@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/hash-table-x64.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
-#include "hphp/util/wide-tv-val-def.h"
 
 #if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
     !defined(_MSC_VER)

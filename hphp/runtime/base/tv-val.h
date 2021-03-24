@@ -78,8 +78,8 @@ public:
    * If you do change these, you must also update the return registers used in
    * runtime/base/hash-table-*.S.
    */
-  static constexpr int type_idx = wide_tv_val ? 0 : -1;
-  static constexpr int val_idx = wide_tv_val ? 1 : 0;
+  static constexpr int type_idx = 0;
+  static constexpr int val_idx = 1;
 
   INLINE_FLATTEN tv_val();
   /* implicit */ INLINE_FLATTEN tv_val(std::nullptr_t);
@@ -226,7 +226,7 @@ private:
     value_t* m_val;
   };
 
-  using storage_t = std::conditional_t<wide_tv_val, wide_storage, storage>;
+  using storage_t = wide_storage;
   storage_t m_s;
 };
 
@@ -319,9 +319,7 @@ struct tv_val_offset_nonwide {
 
 } // namespace detail
 
-using tv_val_offset = std::conditional<wide_tv_val,
-                                       detail::tv_val_offset_wide,
-                                       detail::tv_val_offset_nonwide>::type;
+using tv_val_offset = detail::tv_val_offset_wide;
 
 }
 

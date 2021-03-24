@@ -48,16 +48,15 @@ struct APCHandle;
  * There are multiple layouts within PackedArray. See `stores_typed_values`.
  */
 struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
-  // When true, we'll store a simple array of TypedValues.
-  // When false, we'll use the "8 type bytes / 8 value words" chunked layout.
-  static constexpr bool stores_typed_values = !wide_tv_val;
+  // Use the "8 type bytes / 8 value words" chunked layout.
+  static constexpr bool stores_typed_values = false;
 
   // The default capacity of PackedLayout, used if capacity = 0.
-  static constexpr uint32_t SmallSize = wide_tv_val ? 5 : 3;
+  static constexpr uint32_t SmallSize = 5;
 
   // The smallest and largest MM size classes we use for PackedLayouts.
   static constexpr size_t SmallSizeIndex = 3;
-  static constexpr size_t MaxSizeIndex = wide_tv_val ? 119 : 121;
+  static constexpr size_t MaxSizeIndex = 119;
 
   static_assert(MaxSizeIndex <= std::numeric_limits<uint8_t>::max(),
                 "Size index must fit into 8-bits");

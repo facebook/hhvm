@@ -108,7 +108,7 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
       push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
     }
   } else {
-    if (wide_tv_val && (s->isA(TLvalToCell) && !s->isA(TBottom))) {
+    if (s->isA(TLvalToCell) && !s->isA(TBottom)) {
       // If there's exactly one register argument slot left, the whole tv_lval
       // goes on the stack instead of being split between a register and the
       // stack.

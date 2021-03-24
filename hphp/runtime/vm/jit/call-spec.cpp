@@ -103,7 +103,7 @@ bool CallSpec::verifySignature(const CallDest& dest,
     // TCell (for a TypedValue parameter) and wide TLvalToCell are special: one
     // SSATmp represents two argument registers, and the latter is passed as a
     // dummy TBottom argument. Make sure both are present.
-    if (param == TCell || (wide_tv_val && param == TLvalToCell)) {
+    if (param == TCell || param == TLvalToCell) {
       if (!(args[argi] <= param)) {
         fail("Incompatible type {} for first half of {} parameter {}",
              args[argi], param, parami);

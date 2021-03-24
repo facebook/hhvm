@@ -393,10 +393,8 @@ void cgConvPtrToLval(IRLS& env, const IRInstruction* inst) {
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
 
   v << copy{srcLoc.reg(), dstLoc.reg(tv_lval::val_idx)};
-  if (wide_tv_val) {
-    static_assert(TVOFF(m_data) == 0, "");
-    v << lea{srcLoc.reg()[TVOFF(m_type)], dstLoc.reg(tv_lval::type_idx)};
-  }
+  static_assert(TVOFF(m_data) == 0, "");
+  v << lea{srcLoc.reg()[TVOFF(m_type)], dstLoc.reg(tv_lval::type_idx)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

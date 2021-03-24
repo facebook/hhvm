@@ -32,14 +32,14 @@ namespace HPHP { namespace jit {
 
 inline Vptr memTVTypePtr(SSATmp* ptr, Vloc loc) {
   assertx(ptr->isA(TPtrToCell) || ptr->isA(TLvalToCell));
-  if (wide_tv_val && ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::type_idx);
+  if (ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::type_idx);
 
   return loc.reg()[TVOFF(m_type)];
 }
 
 inline Vptr memTVValPtr(SSATmp* ptr, Vloc loc) {
   assertx(ptr->isA(TPtrToCell) || ptr->isA(TLvalToCell));
-  if (wide_tv_val && ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::val_idx);
+  if (ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::val_idx);
 
   return loc.reg()[TVOFF(m_data)];
 }

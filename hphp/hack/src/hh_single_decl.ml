@@ -13,10 +13,11 @@ let popt
     ~auto_namespace_map
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
-    ~enable_enum_classes
+    ~disable_enum_classes
     ~enable_enum_supertyping
     ~hack_arr_dv_arrs
     ~interpret_soft_types_as_like_types =
+  let enable_enum_classes = not disable_enum_classes in
   let po = ParserOptions.default in
   let po =
     ParserOptions.with_disable_xhp_element_mangling
@@ -154,7 +155,7 @@ let () =
   let auto_namespace_map = ref [] in
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
-  let enable_enum_classes = ref false in
+  let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let hack_arr_dv_arrs = ref false in
   let interpret_soft_types_as_like_types = ref false in
@@ -185,9 +186,9 @@ let () =
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
         "." );
-      ( "--enable-enum-classes",
-        Arg.Set enable_enum_classes,
-        "Enable the enum classes extension." );
+      ( "--disable-enum-classes",
+        Arg.Set disable_enum_classes,
+        "Disable the enum classes extension." );
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         "Enable the enum supertyping extension." );
@@ -269,7 +270,7 @@ let () =
         let auto_namespace_map = !auto_namespace_map in
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
-        let enable_enum_classes = !enable_enum_classes in
+        let disable_enum_classes = !disable_enum_classes in
         let enable_enum_supertyping = !enable_enum_supertyping in
         let hack_arr_dv_arrs = !hack_arr_dv_arrs in
         let interpret_soft_types_as_like_types =
@@ -280,7 +281,7 @@ let () =
             ~auto_namespace_map
             ~enable_xhp_class_modifier
             ~disable_xhp_element_mangling
-            ~enable_enum_classes
+            ~disable_enum_classes
             ~enable_enum_supertyping
             ~hack_arr_dv_arrs
             ~interpret_soft_types_as_like_types

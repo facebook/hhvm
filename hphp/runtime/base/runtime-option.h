@@ -106,7 +106,7 @@ struct RepoOptions {
   H(bool,           DisableArray,                     true)           \
   H(bool,           DisableArrayCast,                 true)           \
   H(bool,           DisableArrayTypehint,             true)           \
-  H(bool,           EnableEnumClasses,                false)          \
+  H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowDynamicMethCallerArgs,    false)          \
   H(bool,           DisallowInstMeth,                 false)          \

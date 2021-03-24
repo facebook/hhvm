@@ -277,7 +277,7 @@ let parse_options () =
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref false in
-  let enable_enum_classes = ref false in
+  let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let hack_arr_dv_arrs = ref false in
   let interpret_soft_types_as_like_types = ref false in
@@ -647,9 +647,9 @@ let parse_options () =
       ( "--use-direct-decl-parser",
         Arg.Set use_direct_decl_parser,
         "Use direct decl parser" );
-      ( "--enable-enum-classes",
-        Arg.Set enable_enum_classes,
-        "Enable the enum classes extension." );
+      ( "--disable-enum-classes",
+        Arg.Set disable_enum_classes,
+        "Disable the enum classes extension." );
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         "Enable the enum supertyping extension." );
@@ -803,7 +803,7 @@ let parse_options () =
         else
           [] )
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
-      ~po_enable_enum_classes:!enable_enum_classes
+      ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_enable_enum_supertyping:!enable_enum_supertyping
       ~po_hack_arr_dv_arrs:!hack_arr_dv_arrs
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types

@@ -276,7 +276,9 @@ prefixed_flags!(
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
+        LangFlags::ENABLE_COROUTINES
+            | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
+            | LangFlags::ENABLE_ENUM_CLASSES
     }
 }
 
@@ -752,7 +754,7 @@ mod tests {
     "global_value": true
   },
   "hhvm.hack.lang.enable_enum_classes": {
-    "global_value": false
+    "global_value": true
   },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false

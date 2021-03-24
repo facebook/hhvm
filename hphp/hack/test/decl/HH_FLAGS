@@ -1,2 +1,1 @@
 --auto-namespace-map '{"Dict":"HH\\Lib\\Dict"}' --enable-xhp-class-modifier
---enable-enum-classes

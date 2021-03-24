@@ -1,1 +1,1 @@
--vRuntime.Hack.Lang.AllowUnstableFeatures=1 -vRuntime.Hack.Lang.EnableEnumClasses=1
+-vRuntime.Hack.Lang.AllowUnstableFeatures=1

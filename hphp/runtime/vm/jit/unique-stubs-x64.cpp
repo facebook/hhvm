@@ -84,28 +84,24 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
 
     auto const sf = emitCmpRefCount(v, OneReference, dataVal);
 
-    if (one_bit_refcount) {
-      ifThen(v, CC_E, sf, emit_destroy);
-    } else {
-      auto skipref = v.makeBlock();
-      auto destroy = v.makeBlock();
-      auto chkref  = v.makeBlock();
-      auto decref  = v.makeBlock();
+    auto skipref = v.makeBlock();
+    auto destroy = v.makeBlock();
+    auto chkref  = v.makeBlock();
+    auto decref  = v.makeBlock();
 
-      // We can't quite get the layout we want from two nested ifThens, because
-      // we want the else case from the first to jmp to the middle of the then
-      // case of the second (we want to share the ret).
-      v << jcc{CC_L, sf, {chkref, skipref}, StringTag{}};
-      v = chkref;
-      v << jcc{CC_NE, sf, {destroy, decref}, StringTag{}};
-      v = decref;
-      emitDecRefCount(v, dataVal);
-      v << jmp{skipref};
-      v = skipref;
-      v << ret{live};
-      v = destroy;
-      emit_destroy(v);
-    }
+    // We can't quite get the layout we want from two nested ifThens, because
+    // we want the else case from the first to jmp to the middle of the then
+    // case of the second (we want to share the ret).
+    v << jcc{CC_L, sf, {chkref, skipref}, StringTag{}};
+    v = chkref;
+    v << jcc{CC_NE, sf, {destroy, decref}, StringTag{}};
+    v = decref;
+    emitDecRefCount(v, dataVal);
+    v << jmp{skipref};
+    v = skipref;
+    v << ret{live};
+    v = destroy;
+    emit_destroy(v);
 
     v << ret{live};
   }, CodeKind::CrossTrace, true);

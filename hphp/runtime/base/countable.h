@@ -27,13 +27,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline RefCount& operator++(RefCount& count) {
-  assertx(!one_bit_refcount);
   count = static_cast<RefCount>(count + 1);
   return count;
 }
 
 inline RefCount& operator--(RefCount& count) {
-  assertx(!one_bit_refcount);
   count = static_cast<RefCount>(count - 1);
   return count;
 }
@@ -122,17 +120,6 @@ struct Countable : MaybeCountable {
 ALWAYS_INLINE bool MaybeCountable::uncountedIncRef() const {
   assertx(isUncounted());
   auto& count = m_atomic_count;
-  if (one_bit_refcount) {
-    auto val = count.load(std::memory_order_relaxed);
-    while (val != -1) {
-      assertx(val < 0);
-      if (count.compare_exchange_weak(val, val + 1,
-                                      std::memory_order_relaxed)) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_relaxed);
   assertx(val <= UncountedValue);
@@ -141,16 +128,12 @@ ALWAYS_INLINE bool MaybeCountable::uncountedIncRef() const {
 
 ALWAYS_INLINE bool MaybeCountable::uncountedDecRef() const {
   assertx(isUncounted());
-  auto const val = m_atomic_count.fetch_add(one_bit_refcount ? -1 : 1,
+  auto const val = m_atomic_count.fetch_add(1,
                                             std::memory_order_relaxed);
   return val == UncountedValue;
 }
 
 ALWAYS_INLINE bool MaybeCountable::checkCount() const {
-  if (one_bit_refcount) {
-    return m_count == OneReference || m_count == MultiReference || m_count < 0;
-  }
-
   // If this assertion fails, it indicates a double-free. Check it separately.
   assertx(m_count < RefCountMaxRealistic);
   return m_count >= 1 || m_count <= UncountedValue || m_count == StaticValue;
@@ -161,9 +144,6 @@ ALWAYS_INLINE bool MaybeCountable::checkCountZ() const {
 }
 
 ALWAYS_INLINE bool Countable::checkCount() const {
-  if (one_bit_refcount) {
-    return m_count == OneReference || m_count == MultiReference;
-  }
   // If this assertion fails, it indicates a double-free. Check it separately.
   assertx(m_count < RefCountMaxRealistic);
   return m_count >= 1;
@@ -182,15 +162,11 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
-  if (one_bit_refcount) return m_count != OneReference;
-
   return uint32_t(m_count) > 1; // treat Static/Uncounted as large counts
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
   assertx(checkCountZ());
-  if (one_bit_refcount) return m_count != OneReference;
-
   return m_count > 1;
 }
 
@@ -201,7 +177,6 @@ ALWAYS_INLINE bool MaybeCountable::hasExactlyOneRef() const {
 
 ALWAYS_INLINE bool MaybeCountable::hasZeroRefs() const {
   assertx(checkCountZ());
-  if (one_bit_refcount) return false;
   return m_count == 0;
 }
 
@@ -213,10 +188,6 @@ ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {
 ALWAYS_INLINE void MaybeCountable::incRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
-  if (one_bit_refcount) {
-    if (m_count == OneReference) m_count = MultiReference;
-    return;
-  }
 
   if (isRefCounted()) ++m_count;
 }
@@ -224,39 +195,18 @@ ALWAYS_INLINE void MaybeCountable::incRefCount() const {
 ALWAYS_INLINE void Countable::incRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
-  if (one_bit_refcount) {
-    if (unconditional_one_bit_incref || m_count == OneReference) {
-      m_count = MultiReference;
-    }
-    return;
-  }
-
   ++m_count;
 }
 
 ALWAYS_INLINE void MaybeCountable::rawIncRefCount() const {
   assertx(!tl_sweeping);
   assertx(isRefCounted());
-  if (one_bit_refcount) {
-    if (unconditional_one_bit_incref || m_count == OneReference) {
-      m_count = MultiReference;
-    }
-    return;
-  }
-
   ++m_count;
 }
 
 ALWAYS_INLINE void Countable::rawIncRefCount() const {
   assertx(!tl_sweeping);
   assertx(isRefCounted());
-  if (one_bit_refcount) {
-    if (unconditional_one_bit_incref || m_count == OneReference) {
-      m_count = MultiReference;
-    }
-    return;
-  }
-
   ++m_count;
 }
 
@@ -264,8 +214,6 @@ ALWAYS_INLINE void MaybeCountable::decRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
   assertx(hasMultipleRefs());
-  if (one_bit_refcount) return;
-
   if (isRefCounted()) --m_count;
 }
 
@@ -273,8 +221,6 @@ ALWAYS_INLINE void Countable::decRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
   assertx(hasMultipleRefs());
-  if (one_bit_refcount) return;
-
   --m_count;
 }
 
@@ -290,15 +236,13 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
   assertx(!tl_sweeping);
   assertx(checkCount());
   if (noop_decref) return false;
-  if (one_bit_refcount) return m_count == OneReference;
-
   if (m_count == 1) return true;
   if (m_count > 1) --m_count;
   return false;
 }
 
 ALWAYS_INLINE void MaybeCountable::fixCountForRelease() {
-  if (debug && !one_bit_refcount) {
+  if (debug) {
     if (!m_count) ++m_count;
   }
 }
@@ -307,7 +251,6 @@ ALWAYS_INLINE bool MaybeCountable::countedDecRefAndCheck() {
   assertx(!tl_sweeping);
   assertx(checkCount());
   if (noop_decref) return false;
-  if (one_bit_refcount) return m_count == OneReference;
   assertx(m_count > 0);
   return !(--m_count);
 }
@@ -328,8 +271,7 @@ ALWAYS_INLINE bool Countable::isStatic() const {
 
 ALWAYS_INLINE bool MaybeCountable::isUncounted() const {
   assertx(checkCount());
-  return one_bit_refcount ?
-    m_count < 0 && m_count != StaticValue : m_count <= UncountedValue;
+  return m_count <= UncountedValue;
 }
 
 ALWAYS_INLINE bool Countable::isUncounted() const {

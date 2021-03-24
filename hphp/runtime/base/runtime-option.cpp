@@ -1109,7 +1109,7 @@ static inline std::string hackCompilerCommandDefault() {
 }
 
 static inline bool enableGcDefault() {
-  return RuntimeOption::EvalEagerGC || one_bit_refcount;
+  return RuntimeOption::EvalEagerGC;
 }
 
 static inline uint64_t pgoThresholdDefault() {

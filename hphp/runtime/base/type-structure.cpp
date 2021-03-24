@@ -952,7 +952,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape=false);
 // Returns true and performs coercion if the given field of `arr` can be
 // coerced to a valid, resolved TypeStructure.
 bool coerceTSField(Array& arr, const String& name) {
-  assertx(one_bit_refcount || !arr->cowCheck());
+  assertx(!arr->cowCheck());
   auto field = arr.lvalForce(name);
   if (!tvIsHAMSafeDArray(field)) return false;
   return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
@@ -961,7 +961,7 @@ bool coerceTSField(Array& arr, const String& name) {
 // Returns true and performs coercion if the given field of `arr` can be
 // coerced to a list of valid, resolved TypeStructures.
 bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
-  assertx(one_bit_refcount || !arr->cowCheck());
+  assertx(!arr->cowCheck());
   auto field = arr.lvalForce(name);
   if (!coerceToVecOrVArray(field)) return false;
   assertx(tvIsHAMSafeVArray(field));
@@ -977,7 +977,7 @@ bool coerceOptTSListField(Array& arr, const String& name, bool shape=false) {
 }
 
 bool coerceToTypeStructureList(Array& arr, bool shape) {
-  assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
+  assertx(arr->empty() || !arr->cowCheck());
   if (!arr->isHAMSafeVArray()) return false;
 
   auto valid = true;
@@ -1001,7 +1001,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape) {
 }
 
 bool coerceToTypeStructure(Array& arr) {
-  assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
+  assertx(arr->empty() || !arr->cowCheck());
   if (!arr->isHAMSafeDArray()) return false;
 
   auto const kindfield = arr.lookup(s_kind);

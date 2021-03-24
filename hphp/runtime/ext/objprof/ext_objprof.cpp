@@ -457,14 +457,9 @@ std::pair<int, double> tvGetSize(
       );
       size += sizeof(*arr);
       size += size_of_array_pair.first;
-      if (one_bit_refcount) {
-        sized += sizeof(*arr);
-        sized += size_of_array_pair.second;
-      } else {
-        assertx(arr_ref_count > 0);
-        sized += sizeof(*arr) / (double)arr_ref_count;
-        sized += size_of_array_pair.second / (double)(arr_ref_count);
-      }
+      assertx(arr_ref_count > 0);
+      sized += sizeof(*arr) / (double)arr_ref_count;
+      sized += size_of_array_pair.second / (double)(arr_ref_count);
     } else {
       // static or uncounted array
       FTRACE(3, " ArrayData tv: at {} not refcounted\n", (void*)arr);
@@ -506,12 +501,8 @@ std::pair<int, double> tvGetSize(
             (void*)obj,
             obj_ref_count
           );
-          if (one_bit_refcount) {
-            sized += obj_size_pair.second;
-          } else {
-            assertx(obj_ref_count > 0);
-            sized += obj_size_pair.second / (double)(obj_ref_count);
-          }
+          assertx(obj_ref_count > 0);
+          sized += obj_size_pair.second / (double)(obj_ref_count);
         }
       } else if (stack && paths) {
         // notice we might have multiple OBJ->path->OBJ for same path
@@ -560,12 +551,8 @@ std::pair<int, double> tvGetSize(
       auto resource = tv.m_data.pres;
       auto resource_size = resource->heapSize();
       size += resource_size;
-      if (one_bit_refcount) {
-        sized += resource_size;
-      } else {
-        assertx(tvGetCount(tv) > 0);
-        sized += resource_size / (double)(tvGetCount(tv));
-      }
+      assertx(tvGetCount(tv) > 0);
+      sized += resource_size / (double)(tvGetCount(tv));
       break;
     }
     case KindOfPersistentString:
@@ -579,12 +566,8 @@ std::pair<int, double> tvGetSize(
           (void*)str,
           str_ref_count
         );
-        if (one_bit_refcount) {
-          sized += str->size();
-        } else {
-          assertx(str_ref_count > 0);
-          sized += (str->size() / (double)(str_ref_count));
-        }
+        assertx(str_ref_count > 0);
+        sized += (str->size() / (double)(str_ref_count));
       } else {
         // static or uncounted string
         FTRACE(3, " String tv: {} string at {} uncounted\n",
@@ -605,12 +588,8 @@ std::pair<int, double> tvGetSize(
           auto ref_count = int{tvGetCount(tv)};
           FTRACE(3, " ClsMeth tv: clsmeth at {} with ref count {}\n",
                 (void*)clsmeth.get(), ref_count);
-          if (one_bit_refcount) {
-            sized += sz;
-          } else {
-            assertx(ref_count > 0);
-            sized += sz / (double)ref_count;
-          }
+          assertx(ref_count > 0);
+          sized += sz / (double)ref_count;
         } else {
           FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
                 (void*)clsmeth.get());
@@ -626,12 +605,8 @@ std::pair<int, double> tvGetSize(
       size += sz;
       FTRACE(3, " RClsMeth tv: rclsmeth at {} with ref count {}\n",
              (void*)rclsmeth, ref_count);
-      if (one_bit_refcount) {
-        sized += sz;
-      } else {
-        assertx(ref_count > 0);
-        sized += sz / (double)ref_count;
-      }
+      assertx(ref_count > 0);
+      sized += sz / (double)ref_count;
       add_array_size(rclsmeth->m_arr);
     }
 

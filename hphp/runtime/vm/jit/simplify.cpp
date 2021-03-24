@@ -2550,8 +2550,6 @@ SSATmp* simplifyDecRef(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
-  if (one_bit_refcount) return gen(env, Nop);
-
   return decRefImpl(env, inst);
 }
 

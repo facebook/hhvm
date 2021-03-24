@@ -123,7 +123,7 @@ MemoryManager::MemoryManager() {
 MemoryManager::~MemoryManager() {
   FTRACE(1, "heap-id {} ~MM\n", tl_heap_id);
   // TODO(T20916887): Enable this for one-bit refcounting.
-  if (debug && !one_bit_refcount) {
+  if (debug) {
     // Check that every object in the heap is free.
     forEachHeapObject([&](HeapObject* h, size_t) {
         assert_flog(h->kind() == HeaderKind::Free,

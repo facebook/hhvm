@@ -87,21 +87,17 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 
     auto const sf = emitCmpRefCount(v, OneReference, dataVal);
 
-    if (one_bit_refcount) {
-      ifThen(v, CC_E, sf, destroy);
-    } else {
-      ifThen(v, CC_NL, sf, [&] (Vout& v) {
-        // The refcount is positive, so the value is refcounted.  We need to
-        // either decref or release.
-        ifThen(v, CC_NE, sf, [&] (Vout& v) {
-          // The refcount is greater than 1; decref it.
-          emitDecRefCount(v, dataVal);
-          v << stubret{live, true};
-        });
-
-        destroy(v);
+    ifThen(v, CC_NL, sf, [&] (Vout& v) {
+      // The refcount is positive, so the value is refcounted.  We need to
+      // either decref or release.
+      ifThen(v, CC_NE, sf, [&] (Vout& v) {
+        // The refcount is greater than 1; decref it.
+        emitDecRefCount(v, dataVal);
+        v << stubret{live, true};
       });
-    }
+
+      destroy(v);
+    });
 
     // Either we did a decref, or the value was static.
     v << stubret{live, true};

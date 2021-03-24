@@ -61,13 +61,11 @@ function get_expect_file_and_type($test, $options) {
     }
   }
 
-  // We're going to try to avoid adding hadva versions of the other types of
-  // expect files used above. The whole split expect file thing is a temporary
-  // hack until we complete Hack Array Migration unification.
-  $hadva = !isset($options['hadva']);
+  // Unconditionally prefer .expect.hadva files to .expect files. We'll clean
+  // up the .expect files in the next step.
   foreach ($types as $type) {
     $fname = "$test.$type";
-    if ($hadva && file_exists("$fname.hadva")) {
+    if (file_exists("$fname.hadva")) {
       return varray["$fname.hadva", $type];
     }
     if (file_exists($fname)) {
@@ -461,7 +459,6 @@ function get_options($argv) {
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
-    'hadva' => '',
     'lazyclass' => '',
     '*force-repo' => '',
   ];
@@ -849,10 +846,6 @@ function extra_args($options): string {
   if ($vendor !== null) {
     $args .= ' -d auto_prepend_file=';
     $args .= escapeshellarg($vendor.'/hh_autoload.php');
-  }
-
-  if (isset($options['hadva'])) {
-    $args .= ' -vEval.HackArrDVArrs=false';
   }
 
   if (isset($options['lazyclass'])) {
@@ -2063,14 +2056,13 @@ function skip_test($options, $test, $run_skipif = true): ?string {
   }
 
   $no_hadva_tag = "nohadva";
-  if (!isset($options['hadva']) &&
-      file_exists("$test.$no_hadva_tag")) {
-      return 'skip-hadva';
+  if (file_exists("$test.$no_hadva_tag")) {
+    return 'skip-hadva';
   }
   $no_lazyclass_tag = "nolazyclass";
   if (isset($options['lazyclass']) &&
       file_exists("$test.$no_lazyclass_tag")) {
-      return 'skip-lazyclass';
+    return 'skip-lazyclass';
   }
 
   if (!$run_skipif) return null;

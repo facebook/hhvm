@@ -58,8 +58,15 @@ let diff_hot_decls args =
   let (control_shallow_decls, test_shallow_decls) =
     get_test_control_pair args shallow_decls_filename
   in
-  DiffHotDecls.diff control_legacy_decls test_legacy_decls;
-  DiffHotDecls.diff control_shallow_decls test_shallow_decls
+  try
+    let legacy_decls_dff =
+      DiffHotDecls.diff control_legacy_decls test_legacy_decls
+    in
+    let shallow_decls_dff =
+      DiffHotDecls.diff control_shallow_decls test_shallow_decls
+    in
+    legacy_decls_dff || shallow_decls_dff
+  with Failure msg -> die msg
 
 let diff_naming_table args =
   let (control_naming_table, test_naming_table) =
@@ -78,5 +85,11 @@ let diff_naming_table args =
 
 let () =
   let args = parse_options () in
-  diff_naming_table args;
-  diff_hot_decls args
+  let naming_tables_and_errors_diff = diff_naming_table args in
+  let hot_decls_diff = diff_hot_decls args in
+  if naming_tables_and_errors_diff || hot_decls_diff then
+    die
+      (Printf.sprintf
+         "Saved states %s and %s are different"
+         args.control
+         args.test)

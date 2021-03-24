@@ -64,6 +64,15 @@ let empty_diff =
     added_errors = [];
   }
 
+let is_nonempty
+    ({ added_files; removed_files; changed_files; removed_errors; added_errors } :
+      diff) =
+  match
+    (added_files, removed_files, changed_files, removed_errors, added_errors)
+  with
+  | ([], [], [], [], []) -> false
+  | _ -> true
+
 let calculate_diff naming_table1 naming_table2 errors1 errors2 =
   let diff =
     Naming_table.fold
@@ -175,6 +184,10 @@ let print_diff print_count diff =
     print_category "Added errors" diff.added_errors;
     print_category "Removed errors" diff.removed_errors
 
+(*
+  Prints the diff of test and control (naming table, error) pairs, and
+  returns whether test and control differ.
+*)
 let diff (control_path, is_control_sqlite) (test_path, is_test_sqlite) =
   let provider_context = get_default_provider_context () in
   let (control_naming_table, control_errors) =
@@ -190,4 +203,5 @@ let diff (control_path, is_control_sqlite) (test_path, is_test_sqlite) =
       control_errors
       test_errors
   in
-  print_diff true diff
+  print_diff false diff;
+  is_nonempty diff

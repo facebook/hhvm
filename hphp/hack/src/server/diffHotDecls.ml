@@ -24,10 +24,15 @@ let legacy decls1 decls2 : bool = decls_type_match (decls1, decls2) ".decls"
 let shallow decls1 decls2 : bool =
   decls_type_match (decls1, decls2) ".shallowdecls"
 
+(*
+  Print the diff of decls1_str and decls2_str, and
+  return whether they differ.
+*)
 let diff_decls decls1_str decls2_str =
-  if String.equal decls1_str decls2_str then
-    Hh_logger.log "The hot decls are identical!"
-  else (
+  if String.equal decls1_str decls2_str then (
+    Hh_logger.log "The hot decls are identical!";
+    false
+  ) else (
     Hh_logger.log "The hot decls are different:";
     Tempfile.with_real_tempdir (fun dir ->
         let temp_dir = Path.to_string dir in
@@ -41,7 +46,8 @@ let diff_decls decls1_str decls2_str =
           ~diff_command:"diff --label control_decls --label test_decls"
           ~file1:control
           ~file2:test
-          ())
+          ());
+    true
   )
 
 let diff_legacy_decls

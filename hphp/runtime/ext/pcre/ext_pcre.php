@@ -233,6 +233,17 @@ function preg_replace_callback(mixed $pattern,
                                <<__OutOnly("KindOfInt64")>>
                                inout ?int $count): mixed;
 
+<<__Native, __Pure>>
+function preg_replace_callback_with_error(
+  mixed $pattern,
+  mixed $callback,
+  mixed $subject,
+  int $limit,
+  <<__OutOnly("KindOfInt64")>>
+  inout ?int $count,
+  inout ?int $error,
+): mixed;
+
 /**
  * Perform a regular expression search and replace using an associative array of
  * pattern and callback key/value pairs. In array order, each callback is called
@@ -269,6 +280,17 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      int $limit,
                                      <<__OutOnly("KindOfInt64")>>
                                      inout ?int $count): mixed;
+
+<<__Native, __Pure>>
+function preg_replace_callback_array_with_error(
+  mixed $patterns_and_callbacks,
+  mixed $subject,
+  int $limit,
+  <<__OutOnly("KindOfInt64")>>
+  inout ?int $count,
+  inout ?int $error,
+): mixed;
+
 /**
  * Perform a regular expression search and replace
  *

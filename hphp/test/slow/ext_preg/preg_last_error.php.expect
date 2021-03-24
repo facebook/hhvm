@@ -86,3 +86,25 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+=== preg_replace_callback ===
+- no error -
+bool(true)
+bool(true)
+- error induced -
+bool(true)
+bool(true)
+- error state preserved -
+bool(true)
+bool(true)
+bool(true)
+=== preg_replace_callback_array ===
+- no error -
+bool(true)
+bool(true)
+- error induced -
+bool(true)
+bool(true)
+- error state preserved -
+bool(true)
+bool(true)
+bool(true)

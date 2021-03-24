@@ -9,7 +9,7 @@
  *
  */
 <<__Native, __Pure>>
-function filter_list(): mixed;
+function filter_list()[]: mixed;
 
 /**
  * Returns the filter ID belonging to a named filter
@@ -20,7 +20,7 @@ function filter_list(): mixed;
  *
  */
 <<__Native, __Pure>>
-function filter_id(string $filtername): mixed;
+function filter_id(string $filtername)[]: mixed;
 
 /**
  * Filters a variable with a specified filter
@@ -31,4 +31,4 @@ function filter_id(string $filtername): mixed;
 <<__Native, __Pure>>
 function filter_var(mixed $variable,
                     int $filter = FILTER_DEFAULT,
-                    mixed $options = darray[]): mixed;
+                    mixed $options = darray[])[]: mixed;

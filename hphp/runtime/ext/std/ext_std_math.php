@@ -5,7 +5,7 @@
  *
  */
 <<__IsFoldable, __Pure>>
-function pi(): float {
+function pi()[]: float {
   return M_PI;
 }
 
@@ -26,7 +26,7 @@ function pi(): float {
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function min(mixed $value1, ...$argv): mixed;
+function min(mixed $value1, ...$argv)[]: mixed;
 
 /**
  * If the first and only parameter is an array, max() returns the highest
@@ -49,7 +49,7 @@ function min(mixed $value1, ...$argv): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function max(mixed $value1, ...$argv): mixed;
+function max(mixed $value1, ...$argv)[]: mixed;
 
 /**
  * Returns the absolute value of number.
@@ -62,7 +62,7 @@ function max(mixed $value1, ...$argv): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function abs(mixed $number): mixed;
+function abs(mixed $number)[]: mixed;
 
 /**
  * Checks whether val is a legal finite on this platform.
@@ -74,7 +74,7 @@ function abs(mixed $number): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_finite(float $val): bool;
+function is_finite(float $val)[]: bool;
 
 /**
  * Returns TRUE if val is infinite (positive or negative), like the result of
@@ -86,7 +86,7 @@ function is_finite(float $val): bool;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_infinite(float $val): bool;
+function is_infinite(float $val)[]: bool;
 
 /**
  * Checks whether val is 'not a number', like the result of acos(1.01).
@@ -97,7 +97,7 @@ function is_infinite(float $val): bool;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_nan(float $val): bool;
+function is_nan(float $val)[]: bool;
 
 /**
  * @param mixed $number - The value to round
@@ -108,7 +108,7 @@ function is_nan(float $val): bool;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function ceil(mixed $number): mixed;
+function ceil(mixed $number)[]: mixed;
 
 /**
  * @param mixed $number - The numeric value to round
@@ -119,7 +119,7 @@ function ceil(mixed $number): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function floor(mixed $number): mixed;
+function floor(mixed $number)[]: mixed;
 
 /**
  * Returns the rounded value of val to specified precision (number of digits
@@ -138,7 +138,7 @@ function floor(mixed $number): mixed;
 <<__IsFoldable, __Native, __Pure>>
 function round(mixed $val,
                int $precision = 0,
-               int $mode = PHP_ROUND_HALF_UP): mixed;
+               int $mode = PHP_ROUND_HALF_UP)[]: mixed;
 
 /**
  * This function converts number from degrees to the radian equivalent.
@@ -149,7 +149,7 @@ function round(mixed $val,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function deg2rad(float $number): float;
+function deg2rad(float $number)[]: float;
 
 /**
  * This function converts number from radian to degrees.
@@ -160,7 +160,7 @@ function deg2rad(float $number): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function rad2deg(float $number): float;
+function rad2deg(float $number)[]: float;
 
 /**
  * Returns a string containing a binary representation of the given number
@@ -172,7 +172,7 @@ function rad2deg(float $number): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function decbin(mixed $number): string;
+function decbin(mixed $number)[]: string;
 
 /**
  * Returns a string containing a hexadecimal representation of the given
@@ -185,7 +185,7 @@ function decbin(mixed $number): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function dechex(mixed $number): string;
+function dechex(mixed $number)[]: string;
 
 /**
  * Returns a string containing an octal representation of the given number
@@ -198,7 +198,7 @@ function dechex(mixed $number): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function decoct(mixed $number): string;
+function decoct(mixed $number)[]: string;
 
 /**
  * Returns the decimal equivalent of the binary number represented by the
@@ -215,7 +215,7 @@ function decoct(mixed $number): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function bindec(mixed $binary_string): mixed;
+function bindec(mixed $binary_string)[]: mixed;
 
 /**
  * Returns the decimal equivalent of the hexadecimal number represented by the
@@ -228,7 +228,7 @@ function bindec(mixed $binary_string): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function hexdec(mixed $hex_string): mixed;
+function hexdec(mixed $hex_string)[]: mixed;
 
 /**
  * Returns the decimal equivalent of the octal number represented by the
@@ -240,7 +240,7 @@ function hexdec(mixed $hex_string): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function octdec(mixed $octal_string): mixed;
+function octdec(mixed $octal_string)[]: mixed;
 
 /**
  * Returns a string containing number represented in base tobase. The base in
@@ -260,7 +260,7 @@ function octdec(mixed $octal_string): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function base_convert(mixed $number, int $frombase, int $tobase): mixed;
+function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
 
 /**
  * Returns base raised to the power of exp. Warning  In PHP 4.0.6 and earlier
@@ -276,7 +276,7 @@ function base_convert(mixed $number, int $frombase, int $tobase): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function pow(mixed $base, mixed $exp): mixed;
+function pow(mixed $base, mixed $exp)[]: mixed;
 
 /**
  * Returns e raised to the power of arg.  'e' is the base of the natural
@@ -288,7 +288,7 @@ function pow(mixed $base, mixed $exp): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function exp(float $arg): float;
+function exp(float $arg)[]: float;
 
 /**
  * expm1() returns the equivalent to 'exp(arg) - 1' computed in a way that is
@@ -302,7 +302,7 @@ function exp(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function expm1(float $arg): float;
+function expm1(float $arg)[]: float;
 
 /**
  * Returns the base-10 logarithm of arg.
@@ -313,7 +313,7 @@ function expm1(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function log10(float $arg): float;
+function log10(float $arg)[]: float;
 
 /**
  * log1p() returns log(1 + number) computed in a way that is accurate even
@@ -326,7 +326,7 @@ function log10(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function log1p(float $number): float;
+function log1p(float $number)[]: float;
 
 /**
  * If the optional base parameter is specified, log() returns logbase arg,
@@ -341,7 +341,7 @@ function log1p(float $number): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function log(float $arg, float $base = 0.0): float;
+function log(float $arg, float $base = 0.0)[]: float;
 
 /**
  * cos() returns the cosine of the arg parameter. The arg parameter is in
@@ -353,7 +353,7 @@ function log(float $arg, float $base = 0.0): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function cos(float $arg): float;
+function cos(float $arg)[]: float;
 
 /**
  * Returns the hyperbolic cosine of arg, defined as (exp(arg) + exp(-arg))/2.
@@ -364,7 +364,7 @@ function cos(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function cosh(float $arg): float;
+function cosh(float $arg)[]: float;
 
 /**
  * sin() returns the sine of the arg parameter. The arg parameter is in
@@ -376,7 +376,7 @@ function cosh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function sin(float $arg): float;
+function sin(float $arg)[]: float;
 
 /**
  * Returns the hyperbolic sine of arg, defined as (exp(arg) - exp(-arg))/2.
@@ -387,7 +387,7 @@ function sin(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function sinh(float $arg): float;
+function sinh(float $arg)[]: float;
 
 /**
  * tan() returns the tangent of the arg parameter. The arg parameter is in
@@ -399,7 +399,7 @@ function sinh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function tan(float $arg): float;
+function tan(float $arg)[]: float;
 
 /**
  * Returns the hyperbolic tangent of arg, defined as sinh(arg)/cosh(arg).
@@ -410,7 +410,7 @@ function tan(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function tanh(float $arg): float;
+function tanh(float $arg)[]: float;
 
 /**
  * Returns the arc cosine of arg in radians. acos() is the complementary
@@ -423,7 +423,7 @@ function tanh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function acos(float $arg): float;
+function acos(float $arg)[]: float;
 
 /**
  * Returns the inverse hyperbolic cosine of arg, i.e. the value whose
@@ -435,7 +435,7 @@ function acos(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function acosh(float $arg): float;
+function acosh(float $arg)[]: float;
 
 /**
  * Returns the arc sine of arg in radians. asin() is the complementary
@@ -448,7 +448,7 @@ function acosh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function asin(float $arg): float;
+function asin(float $arg)[]: float;
 
 /**
  * Returns the inverse hyperbolic sine of arg, i.e. the value whose hyperbolic
@@ -460,7 +460,7 @@ function asin(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function asinh(float $arg): float;
+function asinh(float $arg)[]: float;
 
 /**
  * Returns the arc tangent of arg in radians. atan() is the complementary
@@ -473,7 +473,7 @@ function asinh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function atan(float $arg): float;
+function atan(float $arg)[]: float;
 
 /**
  * Returns the inverse hyperbolic tangent of arg, i.e. the value whose
@@ -485,7 +485,7 @@ function atan(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function atanh(float $arg): float;
+function atanh(float $arg)[]: float;
 
 /**
  * @param float $y - Dividend parameter
@@ -495,7 +495,7 @@ function atanh(float $arg): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function atan2(float $y, float $x): float;
+function atan2(float $y, float $x)[]: float;
 
 /**
  * hypot() returns the length of the hypotenuse of a right-angle triangle with
@@ -509,7 +509,7 @@ function atan2(float $y, float $x): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function hypot(float $x, float $y): float;
+function hypot(float $x, float $y)[]: float;
 
 /**
  * Returns the floating point remainder of dividing the dividend (x) by the
@@ -524,7 +524,7 @@ function hypot(float $x, float $y): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function fmod(float $x, float $y): float;
+function fmod(float $x, float $y)[]: float;
 
 /**
  * Returns the square root of arg.
@@ -536,14 +536,14 @@ function fmod(float $x, float $y): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function sqrt(float $arg): float;
+function sqrt(float $arg)[]: float;
 
 /**
  * @return int - The largest possible random value returned by rand()
  *
  */
 <<__IsFoldable, __Native>>
-function getrandmax(): int;
+function getrandmax()[]: int;
 
 /**
  * Seeds the random number generator with seed or with a random value if no
@@ -572,7 +572,7 @@ function rand(int $min = 0, ?int $max = null): int;
  *
  */
 <<__IsFoldable, __Native>>
-function mt_getrandmax(): int;
+function mt_getrandmax()[]: int;
 
 /**
  * Seeds the random number generator with seed or with a random value if no
@@ -621,4 +621,4 @@ function lcg_value(): float;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function intdiv(int $numerator, int $divisor): mixed;
+function intdiv(int $numerator, int $divisor)[]: mixed;

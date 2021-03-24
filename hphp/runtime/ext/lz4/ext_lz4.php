@@ -9,7 +9,7 @@
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __IsFoldable, __Pure>>
-function lz4_compress(string $uncompressed, bool $high = false): mixed;
+function lz4_compress(string $uncompressed, bool $high = false)[]: mixed;
 
 /**
  * This function compresses the given string using the lz4lib data format, which
@@ -20,7 +20,7 @@ function lz4_compress(string $uncompressed, bool $high = false): mixed;
  * @return string - The compressed data, or FALSE on error
  */
 <<__HipHopSpecific, __IsFoldable, __Pure>>
-function lz4_hccompress(string $uncompressed): mixed {
+function lz4_hccompress(string $uncompressed)[]: mixed {
   return lz4_compress($uncompressed, true);
 }
 
@@ -34,4 +34,4 @@ function lz4_hccompress(string $uncompressed): mixed {
  * @return string - The uncompressed data or FALSE on error
  */
 <<__Native, __IsFoldable, __Pure>>
-function lz4_uncompress(string $compressed): mixed;
+function lz4_uncompress(string $compressed)[]: mixed;

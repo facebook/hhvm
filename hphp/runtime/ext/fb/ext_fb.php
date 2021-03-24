@@ -18,7 +18,7 @@ namespace {
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native, __Pure>>
-function fb_serialize(mixed $thing, int $options = 0): mixed;
+function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize previously fb_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
@@ -49,7 +49,7 @@ function fb_unserialize(mixed $thing,
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native, __Pure>>
-function fb_compact_serialize(mixed $thing, int $options = 0): mixed;
+function fb_compact_serialize(mixed $thing, int $options = 0)[]: mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
@@ -161,7 +161,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * UTF-8.
  */
 <<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
-function fb_utf8_strlen(string $input): int;
+function fb_utf8_strlen(string $input)[]: int;
 
 /** Cuts a portion of str specified by the start and length parameters.
  * @param string $str - The original string.
@@ -183,7 +183,7 @@ function fb_utf8_strlen(string $input): int;
 <<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
 function fb_utf8_substr(string $str,
                         int $start,
-                        int $length = PHP_INT_MAX): string;
+                        int $length = PHP_INT_MAX)[]: string;
 
 /** Returns code coverage data collected so far. Turn on code coverage by
  * Eval.RecordCodeCoverage or by using fb_enable_code_coverage and call this

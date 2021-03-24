@@ -32,7 +32,7 @@ function bzclose(resource $bz): bool;
  */
 <<__Native, __IsFoldable>>
 function bzcompress(string $source, int $blocksize = 4,
-                    int $workfactor = 0): mixed;
+                    int $workfactor = 0)[]: mixed;
 
 /**
  * Decompresses bzip2 encoded data
@@ -47,7 +47,7 @@ function bzcompress(string $source, int $blocksize = 4,
  *                 occurred.
  */
 <<__Native, __IsFoldable>>
-function bzdecompress(string $source, int $small = 0): mixed;
+function bzdecompress(string $source, int $small = 0)[]: mixed;
 
 /**
  * Returns a bzip2 error number

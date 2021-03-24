@@ -29,7 +29,7 @@ namespace {
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function addcslashes(string $str, string $charlist): string;
+function addcslashes(string $str, string $charlist)[]: string;
 
 /**
  * Returns a string with backslashes stripped off. Recognizes C-like \n, \r
@@ -41,7 +41,7 @@ function addcslashes(string $str, string $charlist): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function stripcslashes(string $str): string;
+function stripcslashes(string $str)[]: string;
 
 /**
  * Returns a string with backslashes before characters that need to be quoted
@@ -68,7 +68,7 @@ function stripcslashes(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function addslashes(string $str): string;
+function addslashes(string $str)[]: string;
 
 /**
  * Un-quotes a quoted string.  If magic_quotes_sybase is on, no backslashes
@@ -86,7 +86,7 @@ function addslashes(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function stripslashes(string $str): string;
+function stripslashes(string $str)[]: string;
 
 /**
  * Returns an ASCII string containing the hexadecimal representation of str.
@@ -99,7 +99,7 @@ function stripslashes(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function bin2hex(string $str): string;
+function bin2hex(string $str)[]: string;
 
 /**
  * Returns an ASCII string containing the binary representation of hexidecimal
@@ -125,7 +125,7 @@ function hex2bin(string $str): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function nl2br(string $str, bool $is_xhtml = true): string;
+function nl2br(string $str, bool $is_xhtml = true)[]: string;
 
 /**
  * Returns a version of str with a backslash character (\) before every
@@ -137,7 +137,7 @@ function nl2br(string $str, bool $is_xhtml = true): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function quotemeta(string $str): string;
+function quotemeta(string $str)[]: string;
 
 /**
  * @param string $str - The input string.
@@ -157,7 +157,7 @@ function str_shuffle(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strrev(string $str): string;
+function strrev(string $str)[]: string;
 
 /**
  * Returns string with all alphabetic characters converted to lowercase.  Note
@@ -171,7 +171,7 @@ function strrev(string $str): string;
  *
  */
 <<__Native, __Pure>>
-function strtolower(string $str): string;
+function strtolower(string $str)[]: string;
 
 /**
  * Returns string with all alphabetic characters converted to uppercase.  Note
@@ -184,7 +184,7 @@ function strtolower(string $str): string;
  *
  */
 <<__Native, __Pure>>
-function strtoupper(string $str): string;
+function strtoupper(string $str)[]: string;
 
 /**
  * Returns a string with the first character of str capitalized, if that
@@ -262,7 +262,7 @@ function strip_tags(string $str, mixed $allowable_tags = ""): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
+function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
 
 /**
  * Strip whitespace (or other characters) from the beginning of a string.
@@ -281,7 +281,7 @@ function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
+function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
 
 /**
  * This function returns a string with whitespace stripped from the end of
@@ -300,10 +300,10 @@ function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
+function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
 
 <<__IsFoldable, __Native, __Pure>>
-function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
+function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
 
 /**
  * Returns an array of strings, each of which is a substring of string formed
@@ -331,7 +331,7 @@ function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST): string;
 <<__IsFoldable, __Native, __Pure>>
 function explode(string $delimiter,
                  string $str,
-                 int $limit = 0x7FFFFFFF): mixed;
+                 int $limit = 0x7FFFFFFF)[]: mixed;
 
 /**
  * Join container elements with a glue string.  implode() can, for historical
@@ -350,14 +350,14 @@ function explode(string $delimiter,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function implode(mixed $arg1, mixed $arg2 = null): string;
+function implode(mixed $arg1, mixed $arg2 = null)[]: string;
 
 /**
  * An alias for implode().
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function join(mixed $arg1, mixed $arg2 = null): string;
+function join(mixed $arg1, mixed $arg2 = null)[]: string;
 
 /**
  * Converts a string to an array.
@@ -374,7 +374,7 @@ function join(mixed $arg1, mixed $arg2 = null): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function str_split(string $str, int $split_length = 1): mixed;
+function str_split(string $str, int $split_length = 1)[]: mixed;
 
 /**
  * Can be used to split a string into smaller chunks which is useful for e.g.
@@ -391,7 +391,7 @@ function str_split(string $str, int $split_length = 1): mixed;
 <<__Native, __IsFoldable, __Pure>>
 function chunk_split(string $body,
                      int $chunklen = 76,
-                     string $end = "\r\n"): mixed;
+                     string $end = "\r\n")[]: mixed;
 
 /**
  * strtok() splits a string (str) into smaller strings (tokens), with each
@@ -446,7 +446,7 @@ function strtok(string $str, mixed $token = null): mixed;
 <<__IsFoldable, __Native, __Pure>>
 function str_replace(mixed $search,
                      mixed $replace,
-                     mixed $subject): mixed;
+                     mixed $subject)[]: mixed;
 
 <<__IsFoldable, __Native, __Pure>>
 function str_replace_with_count(mixed $search,
@@ -515,7 +515,7 @@ function str_ireplace_with_count(mixed $search,
 function substr_replace(mixed $str,
                         mixed $replacement,
                         mixed $start,
-                        mixed $length = 0x7FFFFFFF): mixed;
+                        mixed $length = 0x7FFFFFFF)[]: mixed;
 
 /**
  * Returns the portion of string specified by the start and length parameters.
@@ -542,7 +542,7 @@ function substr_replace(mixed $str,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function substr(string $str, int $start, int $length = 0x7FFFFFFF): mixed;
+function substr(string $str, int $start, int $length = 0x7FFFFFFF)[]: mixed;
 
 /**
  * This functions returns the input string padded on the left, the right, or
@@ -567,7 +567,7 @@ function substr(string $str, int $start, int $length = 0x7FFFFFFF): mixed;
 function str_pad(string $input,
                  int $pad_length,
                  string $pad_string = " ",
-                 int $pad_type = STR_PAD_RIGHT): string;
+                 int $pad_type = STR_PAD_RIGHT)[]: string;
 
 /**
  * Returns input repeated multiplier times.
@@ -582,7 +582,7 @@ function str_pad(string $input,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function str_repeat(string $input, int $multiplier): string;
+function str_repeat(string $input, int $multiplier)[]: string;
 
 /**
  * html_entity_decode() is the opposite of htmlentities() in that it converts
@@ -798,7 +798,7 @@ function fb_htmlspecialchars(string $str,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function quoted_printable_encode(string $str): string;
+function quoted_printable_encode(string $str)[]: string;
 
 /**
  * This function returns an 8-bit binary string corresponding to the decoded
@@ -813,7 +813,7 @@ function quoted_printable_encode(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function quoted_printable_decode(string $str): string;
+function quoted_printable_decode(string $str)[]: string;
 
 /**
  * convert_uudecode() decodes a uuencoded string.
@@ -824,7 +824,7 @@ function quoted_printable_decode(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function convert_uudecode(string $data): mixed;
+function convert_uudecode(string $data)[]: mixed;
 
 /**
  * convert_uuencode() encodes a string using the uuencode algorithm.  Uuencode
@@ -838,7 +838,7 @@ function convert_uudecode(string $data): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function convert_uuencode(string $data): mixed;
+function convert_uuencode(string $data)[]: mixed;
 
 /**
  * Performs the ROT13 encoding on the str argument and returns the resulting
@@ -853,7 +853,7 @@ function convert_uuencode(string $data): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function str_rot13(string $str): string;
+function str_rot13(string $str)[]: string;
 
 /**
  * Generates the cyclic redundancy checksum polynomial of 32-bit lengths of
@@ -869,7 +869,7 @@ function str_rot13(string $str): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function crc32(string $str): int;
+function crc32(string $str)[]: int;
 
 /**
  * crypt() will return a hashed string using the standard Unix DES-based
@@ -943,7 +943,7 @@ function crypt(string $str, string $salt = ""): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function md5(string $str, bool $raw_output = false): string;
+function md5(string $str, bool $raw_output = false)[]: string;
 
 /**
  * @param string $str - The input string.
@@ -955,7 +955,7 @@ function md5(string $str, bool $raw_output = false): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function sha1(string $str, bool $raw_output = false): string;
+function sha1(string $str, bool $raw_output = false)[]: string;
 
 /**
  * This function returns a copy of str, translating all occurrences of each
@@ -972,7 +972,7 @@ function sha1(string $str, bool $raw_output = false): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strtr(string $str, mixed $from, mixed $to = null): mixed;
+function strtr(string $str, mixed $from, mixed $to = null)[]: mixed;
 
 /**
  * Converts from one Cyrillic character set to another. Supported characters
@@ -989,7 +989,7 @@ function strtr(string $str, mixed $from, mixed $to = null): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function convert_cyr_string(string $str, string $from, string $to): string;
+function convert_cyr_string(string $str, string $from, string $to)[]: string;
 
 /**
  * get_html_translation_table() will return the translation table that is used
@@ -1124,7 +1124,7 @@ function nl_langinfo(int $item): mixed;
  *
  */
 <<__Native, __Pure>>
-function sscanf(string $str, string $format): mixed;
+function sscanf(string $str, string $format)[]: mixed;
 
 /**
  * Returns a one-character string containing the character specified by ascii.
@@ -1136,7 +1136,7 @@ function sscanf(string $str, string $format): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function chr(mixed $ascii): string;
+function chr(mixed $ascii)[]: string;
 
 /**
  * Returns the ASCII value of the first character of string.  This function
@@ -1148,7 +1148,7 @@ function chr(mixed $ascii): string;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function ord(string $str): int;
+function ord(string $str)[]: int;
 
 /**
  * money_format() returns a formatted version of number. This function wraps
@@ -1194,7 +1194,7 @@ function money_format(string $format, float $number): mixed;
 function number_format(float $number,
                        int $decimals = 0,
                        mixed $dec_point = ".",
-                       mixed $thousands_sep = ","): string;
+                       mixed $thousands_sep = ",")[]: string;
 
 /**
  * @param string $str1 - The first string.
@@ -1205,7 +1205,7 @@ function number_format(float $number,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strcmp(string $str1, string $str2): int;
+function strcmp(string $str1, string $str2)[]: int;
 
 /**
  * This function is similar to strcmp(), with the difference that you can
@@ -1221,7 +1221,7 @@ function strcmp(string $str1, string $str2): int;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strncmp(string $str1, string $str2, int $len): mixed;
+function strncmp(string $str1, string $str2, int $len)[]: mixed;
 
 /**
  * This function implements a comparison algorithm that orders alphanumeric
@@ -1237,7 +1237,7 @@ function strncmp(string $str1, string $str2, int $len): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strnatcmp(string $str1, string $str2): int;
+function strnatcmp(string $str1, string $str2)[]: int;
 
 /**
  * Binary safe case-insensitive string comparison.
@@ -1250,7 +1250,7 @@ function strnatcmp(string $str1, string $str2): int;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strcasecmp(string $str1, string $str2): int;
+function strcasecmp(string $str1, string $str2)[]: int;
 
 /**
  * This function is similar to strcasecmp(), with the difference that you can
@@ -1266,7 +1266,7 @@ function strcasecmp(string $str1, string $str2): int;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strncasecmp(string $str1, string $str2, int $len): mixed;
+function strncasecmp(string $str1, string $str2, int $len)[]: mixed;
 
 /**
  * This function implements a comparison algorithm that orders alphanumeric
@@ -1284,7 +1284,7 @@ function strncasecmp(string $str1, string $str2, int $len): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strnatcasecmp(string $str1, string $str2): int;
+function strnatcasecmp(string $str1, string $str2)[]: int;
 
 /**
  * Note that this comparison is case sensitive, and unlike strcmp() this
@@ -1300,7 +1300,7 @@ function strnatcasecmp(string $str1, string $str2): int;
  *
  */
 <<__IsFoldable, __Native>>
-function strcoll(string $str1, string $str2): int;
+function strcoll(string $str1, string $str2)[]: int;
 
 /**
  * substr_compare() compares main_str from position offset with str up to
@@ -1327,10 +1327,10 @@ function substr_compare(string $main_str,
                         string $str,
                         int $offset,
                         int $length = 0x7FFFFFFF,
-                        bool $case_insensitivity = false): mixed;
+                        bool $case_insensitivity = false)[]: mixed;
 
 <<__IsFoldable, __Native, __Pure>>
-function strchr(string $haystack, mixed $needle): mixed;
+function strchr(string $haystack, mixed $needle)[]: mixed;
 
 /**
  * This function returns the portion of haystack which starts at the last
@@ -1347,7 +1347,7 @@ function strchr(string $haystack, mixed $needle): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strrchr(string $haystack, mixed $needle): mixed;
+function strrchr(string $haystack, mixed $needle)[]: mixed;
 
 /**
  * Returns part of haystack string from the first occurrence of needle to the
@@ -1369,7 +1369,7 @@ function strrchr(string $haystack, mixed $needle): mixed;
 <<__IsFoldable, __Native, __Pure>>
 function strstr(string $haystack,
                 mixed $needle,
-                bool $before_needle = false): mixed;
+                bool $before_needle = false)[]: mixed;
 
 /**
  * Returns all of haystack from the first occurrence of needle to the end.
@@ -1388,7 +1388,7 @@ function strstr(string $haystack,
 <<__IsFoldable, __Native, __Pure>>
 function stristr(string $haystack,
                  mixed $needle,
-                 bool $before_needle = false): mixed;
+                 bool $before_needle = false)[]: mixed;
 
 /**
  * strpbrk() searches the haystack string for a char_list.
@@ -1401,7 +1401,7 @@ function stristr(string $haystack,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strpbrk(string $haystack, string $char_list): mixed;
+function strpbrk(string $haystack, string $char_list)[]: mixed;
 
 /**
  * Returns the numeric position of the first occurrence of needle in the
@@ -1423,7 +1423,7 @@ function strpbrk(string $haystack, string $char_list): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strpos(string $haystack, mixed $needle, int $offset = 0): mixed;
+function strpos(string $haystack, mixed $needle, int $offset = 0)[]: mixed;
 
 /**
  * Returns the numeric position of the first occurrence of needle in the
@@ -1445,7 +1445,7 @@ function strpos(string $haystack, mixed $needle, int $offset = 0): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function stripos(string $haystack, mixed $needle, int $offset = 0): mixed;
+function stripos(string $haystack, mixed $needle, int $offset = 0)[]: mixed;
 
 /**
  * Returns the numeric position of the last occurrence of needle in the
@@ -1465,7 +1465,7 @@ function stripos(string $haystack, mixed $needle, int $offset = 0): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strrpos(string $haystack, mixed $needle, int $offset = 0): mixed;
+function strrpos(string $haystack, mixed $needle, int $offset = 0)[]: mixed;
 
 /**
  * Find position of last occurrence of a case-insensitive string in a string.
@@ -1488,7 +1488,7 @@ function strrpos(string $haystack, mixed $needle, int $offset = 0): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strripos(string $haystack, mixed $needle, int $offset = 0): mixed;
+function strripos(string $haystack, mixed $needle, int $offset = 0)[]: mixed;
 
 /**
  * substr_count() returns the number of times the needle substring occurs in
@@ -1509,7 +1509,7 @@ function strripos(string $haystack, mixed $needle, int $offset = 0): mixed;
 function substr_count(string $haystack,
                       string $needle,
                       int $offset = 0,
-                      int $length = 0x7FFFFFFF): mixed;
+                      int $length = 0x7FFFFFFF)[]: mixed;
 
 /**
  * Returns the length of the first group of consecutive characters from mask
@@ -1543,7 +1543,7 @@ function substr_count(string $haystack,
 function strspn(string $str1,
                 string $str2,
                 int $start = 0,
-                int $length = 0x7FFFFFFF): mixed;
+                int $length = 0x7FFFFFFF)[]: mixed;
 
 /**
  * Returns the length of the initial segment of str1 which does not contain
@@ -1561,7 +1561,7 @@ function strspn(string $str1,
 function strcspn(string $str1,
                  string $str2,
                  int $start = 0,
-                 int $length = 0x7FFFFFFF): mixed;
+                 int $length = 0x7FFFFFFF)[]: mixed;
 
 /**
  * Returns the length of the given string.
@@ -1573,7 +1573,7 @@ function strcspn(string $str1,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function strlen(string $vstr): int;
+function strlen(string $vstr)[]: int;
 
 /**
  * Parses a string input for fields in CSV format and returns an array
@@ -1612,7 +1612,7 @@ function str_getcsv(string $input,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function count_chars(string $str, int $mode = 0): mixed;
+function count_chars(string $str, int $mode = 0)[]: mixed;
 
 /**
  * Counts the number of words inside string. If the optional format is not
@@ -1640,7 +1640,7 @@ function count_chars(string $str, int $mode = 0): mixed;
 <<__IsFoldable, __Native>>
 function str_word_count(string $str,
                         int $format = 0,
-                        string $charlist = ""): mixed;
+                        string $charlist = "")[]: mixed;
 
 /**
  * The Levenshtein distance is defined as the minimal number of characters you
@@ -1672,7 +1672,7 @@ function levenshtein(string $str1,
                      string $str2,
                      int $cost_ins = 1,
                      int $cost_rep = 1,
-                     int $cost_del = 1): int;
+                     int $cost_del = 1)[]: int;
 
 /**
  * This calculates the similarity between two strings as described in Oliver
@@ -1710,7 +1710,7 @@ function similar_text(string $first,
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function soundex(string $str): mixed;
+function soundex(string $str)[]: mixed;
 
 /**
  * Calculates the metaphone key of str.  Similar to soundex() metaphone
@@ -1729,7 +1729,7 @@ function soundex(string $str): mixed;
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function metaphone(string $str, int $phones = 0): mixed;
+function metaphone(string $str, int $phones = 0)[]: mixed;
 
 }
 

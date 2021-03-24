@@ -24,7 +24,7 @@ function gzclose(resource $zp): bool;
  * @level      mixed
  */
 <<__Native, __IsFoldable, __Pure>>
-function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
+function zlib_encode(string $data, int $encoding, int $level = -1)[]: mixed;
 
 /**
  * ( excerpt from http://php.net/manual/en/function.zlib-decode.php )
@@ -37,7 +37,7 @@ function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
  *             mixed
  */
 <<__Native, __IsFoldable, __Pure>>
-function zlib_decode(string $data, int $max_len = 0): mixed;
+function zlib_decode(string $data, int $max_len = 0)[]: mixed;
 
 /**
  * Compress a string
@@ -50,7 +50,7 @@ function zlib_decode(string $data, int $max_len = 0): mixed;
  * @return string - The compressed string or FALSE if an error occurred.
  */
 <<__Native, __IsFoldable, __Pure>>
-function gzcompress(string $data, int $level = -1): mixed;
+function gzcompress(string $data, int $level = -1)[]: mixed;
 
 /**
  * Decodes a gzip compressed string
@@ -62,7 +62,7 @@ function gzcompress(string $data, int $level = -1): mixed;
  */
 <<__Native, __IsFoldable, __Pure>>
 function gzdecode(string $data,
-                  int $length = 0): mixed;
+                  int $length = 0)[]: mixed;
 
 /**
  * Deflate a string
@@ -76,7 +76,7 @@ function gzdecode(string $data,
  * @return string - The deflated string or FALSE if an error occurred.
  */
 <<__Native, __IsFoldable, __Pure>>
-function gzdeflate(string $data, int $level = -1): mixed;
+function gzdeflate(string $data, int $level = -1)[]: mixed;
 
 /**
  * Create a gzip compressed string
@@ -99,7 +99,7 @@ function gzdeflate(string $data, int $level = -1): mixed;
 <<__Native, __IsFoldable, __Pure>>
 function gzencode(string $data,
                   int $level = -1,
-                  int $encoding_mode = FORCE_GZIP): mixed;
+                  int $encoding_mode = FORCE_GZIP)[]: mixed;
 
 /**
  * Test for  on a gz-file pointer
@@ -181,7 +181,7 @@ function gzgetss(resource $zp,
  *   the optional parameter length.
  */
 <<__Native, __IsFoldable, __Pure>>
-function gzinflate(string $data, int $length = 0): mixed;
+function gzinflate(string $data, int $length = 0)[]: mixed;
 
 /**
  * Open gz-file
@@ -339,7 +339,7 @@ function readgzfile(string $filename,
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __HipHopSpecific, __IsFoldable, __Pure>>
-function nzcompress(string $uncompressed): mixed;
+function nzcompress(string $uncompressed)[]: mixed;
 
 /**
  * This function uncompresses the given string given that it is in the nzlib
@@ -351,7 +351,7 @@ function nzcompress(string $uncompressed): mixed;
  * @return string - The uncompressed data or FALSE on error
  */
 <<__Native, __HipHopSpecific, __IsFoldable, __Pure>>
-function nzuncompress(string $compressed): mixed;
+function nzuncompress(string $compressed)[]: mixed;
 
 } // root namespace
 

@@ -60,7 +60,7 @@ function spl_classes(): darray {
  * and is always the same for each object.
  */
 <<__Native>>
-function spl_object_hash(object $obj): string;
+function spl_object_hash(object $obj)[]: string;
 
 /** This function returns low level raw pointer the object. Used by closure and
  * internal purposes.

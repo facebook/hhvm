@@ -404,7 +404,7 @@ function xml_error_string(int $code): string;
  *
  */
 <<__Native, __IsFoldable, __Pure>>
-function utf8_decode(string $data): string;
+function utf8_decode(string $data)[]: string;
 
 /**
  * This function encodes the string data to UTF-8, and returns the encoded
@@ -424,4 +424,4 @@ function utf8_decode(string $data): string;
  *
  */
 <<__Native, __IsFoldable, __Pure>>
-function utf8_encode(string $data): string;
+function utf8_encode(string $data)[]: string;

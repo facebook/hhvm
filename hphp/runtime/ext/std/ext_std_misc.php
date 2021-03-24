@@ -154,7 +154,7 @@ function ignore_user_abort(bool $setting = false): int;
  * @return mixed - Returns a binary string containing data.
  */
 <<__Native, __IsFoldable, __Pure>>
-function pack(string $format, ...$args): mixed;
+function pack(string $format, ...$args)[]: mixed;
 
 /** @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was
@@ -227,7 +227,7 @@ function uniqid(string $prefix = "",
  */
 <<__Native, __IsFoldable, __Pure>>
 function unpack(string $format,
-                string $data): mixed;
+                string $data)[]: mixed;
 
 /** Returns three samples representing the average system load (the number of
  * processes in the system run queue) over the last 1, 5 and 15 minutes,
@@ -243,7 +243,7 @@ function sys_getloadavg(): varray;
  * @return string - The result of the string cast.
  */
 <<__Native, __IsFoldable, __Pure>>
-function hphp_to_string(mixed $v): string;
+function hphp_to_string(mixed $v)[]: string;
 
 function __hhas_adata(string $incorrect_hhas_adata) {
   throw new Exception(

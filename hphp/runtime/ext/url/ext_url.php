@@ -11,7 +11,7 @@
  *                  data may be binary.
  */
 <<__Native, __IsFoldable, __Pure>>
-function base64_decode(string $data, bool $strict = false): mixed;
+function base64_decode(string $data, bool $strict = false)[]: mixed;
 
 /**
  * Encodes data with MIME base64
@@ -21,7 +21,7 @@ function base64_decode(string $data, bool $strict = false): mixed;
  * @return string - The encoded data, as a string.
  */
 <<__Native, __IsFoldable, __Pure>>
-function base64_encode(string $data): string;
+function base64_encode(string $data)[]: string;
 
 /**
  * Fetches all the headers sent by the server in response to a HTTP request
@@ -83,7 +83,7 @@ function http_build_query(
   mixed $query_data,
   ?string $numeric_prefix = "",
   string $arg_separator = "",
-  int $enc_type = PHP_QUERY_RFC1738): mixed;
+  int $enc_type = PHP_QUERY_RFC1738)[]: mixed;
 
 /**
  * Parse a URL and return its components
@@ -113,7 +113,7 @@ function parse_url(string $url, int $component = -1): mixed;
  * @return string - Returns the decoded URL, as a string.
  */
 <<__Native, __IsFoldable, __Pure>>
-function rawurldecode(string $str): string;
+function rawurldecode(string $str)[]: string;
 
 /**
  * URL-encode according to RFC 3986
@@ -125,7 +125,7 @@ function rawurldecode(string $str): string;
  *                  followed by two hex digits.
  */
 <<__Native, __IsFoldable, __Pure>>
-function rawurlencode(string $str): string;
+function rawurlencode(string $str)[]: string;
 
 /**
  * Decode URL-encoded strings
@@ -135,7 +135,7 @@ function rawurlencode(string $str): string;
  * @return string - Returns the decoded URL, as a string.
  */
 <<__Native, __IsFoldable, __Pure>>
-function urldecode(string $str): string;
+function urldecode(string $str)[]: string;
 
 /**
  * URL-encodes string
@@ -148,4 +148,4 @@ function urldecode(string $str): string;
  *                  signs.
  */
 <<__Native, __IsFoldable, __Pure>>
-function urlencode(string $str): string;
+function urlencode(string $str)[]: string;

@@ -48,7 +48,7 @@ function json_decode_with_error(
   bool $assoc = false,
   int $depth = 512,
   int $options = 0,
-): mixed;
+)[]: mixed;
 
 /**
  * Returns the JSON representation of a value
@@ -79,7 +79,7 @@ function json_encode_with_error(
   inout ?(int, string) $error,
   int $options = 0,
   int $depth = 512,
-): mixed;
+)[]: mixed;
 
 /**
  * Returns the error string of the last json_encode() or json_decode() call

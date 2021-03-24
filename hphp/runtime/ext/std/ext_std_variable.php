@@ -4,33 +4,33 @@ namespace {
 /* Finds whether the given variable is a boolean.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_bool(<<__MaybeMutable>> mixed $var): bool;
+function is_bool(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the type of the given variable is integer.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_int(<<__MaybeMutable>> mixed $var): bool;
+function is_int(<<__MaybeMutable>> mixed $var)[]: bool;
 
 <<__IsFoldable, __Native, __Pure>>
-function is_integer(<<__MaybeMutable>> mixed $var): bool;
+function is_integer(<<__MaybeMutable>> mixed $var)[]: bool;
 
 <<__IsFoldable, __Native, __Pure>>
-function is_long(<<__MaybeMutable>> mixed $var): bool;
+function is_long(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the type of the given variable is float.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_float(<<__MaybeMutable>> mixed $var): bool;
+function is_float(<<__MaybeMutable>> mixed $var)[]: bool;
 
 <<__IsFoldable, __Native, __Pure>>
-function is_double(<<__MaybeMutable>> mixed $var): bool;
+function is_double(<<__MaybeMutable>> mixed $var)[]: bool;
 
 <<__IsFoldable, __Native, __Pure>>
-function is_real(<<__MaybeMutable>> mixed $var): bool;
+function is_real(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the given variable is numeric. Numeric strings consist of
  * optional sign, any number of digits, optional decimal part and optional
@@ -39,12 +39,12 @@ function is_real(<<__MaybeMutable>> mixed $var): bool;
  * exponential part.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_numeric(<<__MaybeMutable>> mixed $var): bool;
+function is_numeric(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the type given variable is string.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_string(<<__MaybeMutable>> mixed $var): bool;
+function is_string(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the given variable is a scalar.  Scalar variables are those
  * containing an integer, float, string or boolean. Types array, object and
@@ -54,7 +54,7 @@ function is_string(<<__MaybeMutable>> mixed $var): bool;
  * it may change.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_scalar(<<__MaybeMutable>> mixed $var): bool;
+function is_scalar(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the given variable is an array.
  */
@@ -64,17 +64,17 @@ function is_array(<<__MaybeMutable>> mixed $var): bool;
 /* Finds whether the given variable is an object.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_object(<<__MaybeMutable>> mixed $var): bool;
+function is_object(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the given variable is a resource.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_resource(<<__MaybeMutable>> mixed $var): bool;
+function is_resource(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Finds whether the given variable is NULL.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_null(<<__MaybeMutable>> mixed $var): bool;
+function is_null(<<__MaybeMutable>> mixed $var)[]: bool;
 
 /* Returns the type of the PHP variable var. Warning Never use gettype() to
  * test for a certain type, since the returned string may be subject to change
@@ -82,15 +82,15 @@ function is_null(<<__MaybeMutable>> mixed $var): bool;
  * comparison. Instead, use the is_* functions.
  */
 <<__IsFoldable, __Native, __Pure>>
-function gettype(<<__MaybeMutable>> mixed $v): string;
+function gettype(<<__MaybeMutable>> mixed $v)[]: string;
 
 /* This function gets the type of the given resource.
  */
 <<__IsFoldable, __Native, __Pure>>
-function get_resource_type(<<__MaybeMutable>> resource $handle): string;
+function get_resource_type(<<__MaybeMutable>> resource $handle)[]: string;
 
 <<__IsFoldable, __Native, __Pure>>
-function boolval(mixed $var): bool;
+function boolval(mixed $var)[]: bool;
 
 /* Returns the integer value of var, using the specified base for the
  * conversion (the default is base 10). intval() should not be used on
@@ -98,18 +98,18 @@ function boolval(mixed $var): bool;
  */
 <<__IsFoldable, __Native, __Pure>>
 function intval(mixed $var,
-                int $base = 10): int;
+                int $base = 10)[]: int;
 
 /* Gets the float value of var.
  */
 <<__IsFoldable, __Native, __Pure>>
-function floatval(mixed $var): float;
+function floatval(mixed $var)[]: float;
 
 <<__IsFoldable, __Native, __Pure>>
-function doubleval(mixed $var): float;
+function doubleval(mixed $var)[]: float;
 
 <<__IsFoldable, __Native, __Pure>>
-function strval(mixed $var): string;
+function strval(mixed $var)[]: string;
 
 /* print_r() displays information about a variable in a way that's readable by
  * humans.  print_r(), var_dump() and var_export() will also show protected
@@ -149,7 +149,7 @@ function debug_zval_dump(mixed $variable): void;
  * code.
  */
 <<__IsFoldable, __Native, __Pure>>
-function serialize(mixed $value): string;
+function serialize(mixed $value)[]: string;
 
 <<__Native, __Pure>>
 function unserialize(string $str,

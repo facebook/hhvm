@@ -14,7 +14,7 @@ namespace {
  */
 <<__Native, __Pure>>
 function class_exists(string $class_name,
-                      bool $autoload = true): bool;
+                      bool $autoload = true)[]: bool;
 
 /**
  * Get the constants of the given class.
@@ -24,7 +24,7 @@ function class_exists(string $class_name,
  * @return array - Returns an associative array of constants with their values.
  */
 <<__Native, __HipHopSpecific, __Pure>>
-function get_class_constants(string $class_name): darray<string, mixed>;
+function get_class_constants(string $class_name)[]: darray<string, mixed>;
 
 /**
  * Gets the class methods' names
@@ -35,7 +35,7 @@ function get_class_constants(string $class_name): darray<string, mixed>;
  *   specified by class_name. In case of an error, it returns NULL.
  */
 <<__Native, __Pure>>
-function get_class_methods(mixed $class_name): ?varray;
+function get_class_methods(mixed $class_name)[]: ?varray;
 
 /**
  * Get the default properties of the class
@@ -62,7 +62,7 @@ function get_class_vars(string $class_name): mixed;
  *   omitted when inside a class, the name of that class is returned.
  */
 <<__Native, __Pure>>
-function get_class(<<__MaybeMutable>> mixed $object = null): mixed;
+function get_class(<<__MaybeMutable>> mixed $object = null)[]: mixed;
 
 /**
  * Returns an array with the name of the defined classes
@@ -106,7 +106,7 @@ function get_declared_traits(): varray<string>;
  *   NULL value.
  */
 <<__Native, __Pure>>
-function get_object_vars(<<__MaybeMutable>> object $object): darray<string, mixed>;
+function get_object_vars(<<__MaybeMutable>> object $object)[]: darray<string, mixed>;
 
 /**
  * Retrieves the parent class name for object or class
@@ -120,7 +120,7 @@ function get_object_vars(<<__MaybeMutable>> object $object): darray<string, mixe
  *   returns FALSE.
  */
 <<__Native, __Pure>>
-function get_parent_class(<<__MaybeMutable>> mixed $object = null): mixed;
+function get_parent_class(<<__MaybeMutable>> mixed $object = null)[]: mixed;
 
 /**
  * Checks if the interface has been defined
@@ -133,7 +133,7 @@ function get_parent_class(<<__MaybeMutable>> mixed $object = null): mixed;
  */
 <<__Native, __Pure>>
 function interface_exists(string $interface_name,
-                          bool $autoload = true): bool;
+                          bool $autoload = true)[]: bool;
 
 /**
  * Checks if the object is of this class or has this class as one of its
@@ -151,7 +151,7 @@ function interface_exists(string $interface_name,
 <<__Native, __Pure>>
 function is_a(<<__MaybeMutable>> mixed $object,
               string $class_name,
-              bool $allow_string = false): bool;
+              bool $allow_string = false)[]: bool;
 
 /**
  * Checks if the object has this class as one of its parents
@@ -168,7 +168,7 @@ function is_a(<<__MaybeMutable>> mixed $object,
 <<__Native, __Pure>>
 function is_subclass_of(<<__MaybeMutable>> mixed $object,
                         string $class_name,
-                        bool $allow_string = true): bool;
+                        bool $allow_string = true)[]: bool;
 
 /**
  * Checks if the class method exists
@@ -181,7 +181,7 @@ function is_subclass_of(<<__MaybeMutable>> mixed $object,
  */
 <<__Native, __Pure>>
 function method_exists(<<__MaybeMutable>> mixed $object,
-                       string $method_name): bool;
+                       string $method_name)[]: bool;
 
 /**
  * Checks if the object or class has a property
@@ -195,7 +195,7 @@ function method_exists(<<__MaybeMutable>> mixed $object,
  */
 <<__Native, __Pure>>
 function property_exists(<<__MaybeMutable>> mixed $class,
-                         string $property): ?bool;
+                         string $property)[]: ?bool;
 
 /**
  * Checks if the trait exists
@@ -208,7 +208,7 @@ function property_exists(<<__MaybeMutable>> mixed $class,
  */
 <<__Native, __Pure>>
 function trait_exists(string $traitname,
-                      bool $autoload = true): bool;
+                      bool $autoload = true)[]: bool;
 
 /**
  * Checks if the enum exists
@@ -220,7 +220,7 @@ function trait_exists(string $traitname,
  */
 <<__Native, __Pure>>
 function enum_exists(string $enumname,
-                      bool $autoload = true): bool;
+                      bool $autoload = true)[]: bool;
 
 }
 

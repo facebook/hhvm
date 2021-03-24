@@ -9,7 +9,7 @@
  *   letter or a digit, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_alnum(mixed $text): bool;
+function ctype_alnum(mixed $text)[]: bool;
 
 /**
  * Check for alphabetic character(s)
@@ -20,7 +20,7 @@ function ctype_alnum(mixed $text): bool;
  *   from the current locale, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_alpha(mixed $text): bool;
+function ctype_alpha(mixed $text)[]: bool;
 
 /**
  * Check for control character(s)
@@ -31,7 +31,7 @@ function ctype_alpha(mixed $text): bool;
  *   character from the current locale, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_cntrl(mixed $text): bool;
+function ctype_cntrl(mixed $text)[]: bool;
 
 /**
  * Check for numeric character(s)
@@ -42,7 +42,7 @@ function ctype_cntrl(mixed $text): bool;
  *   decimal digit, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_digit(mixed $text): bool;
+function ctype_digit(mixed $text)[]: bool;
 
 /**
  * Check for any printable character(s) except space
@@ -53,7 +53,7 @@ function ctype_digit(mixed $text): bool;
  *   and actually creates visible output (no white space), FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_graph(mixed $text): bool;
+function ctype_graph(mixed $text)[]: bool;
 
 /**
  * Check for lowercase character(s)
@@ -64,7 +64,7 @@ function ctype_graph(mixed $text): bool;
  *   letter in the current locale.
  */
 <<__Native, __Pure>>
-function ctype_lower(mixed $text): bool;
+function ctype_lower(mixed $text)[]: bool;
 
 /**
  * Check for printable character(s)
@@ -77,7 +77,7 @@ function ctype_lower(mixed $text): bool;
  *   control function at all.
  */
 <<__Native, __Pure>>
-function ctype_print(mixed $text): bool;
+function ctype_print(mixed $text)[]: bool;
 
 /**
  * Check for any printable character which is not whitespace or an
@@ -90,7 +90,7 @@ function ctype_print(mixed $text): bool;
  *   but neither letter, digit or blank, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_punct(mixed $text): bool;
+function ctype_punct(mixed $text)[]: bool;
 
 /**
  * Check for whitespace character(s)
@@ -103,7 +103,7 @@ function ctype_punct(mixed $text): bool;
  *   feed characters.
  */
 <<__Native, __Pure>>
-function ctype_space(mixed $text): bool;
+function ctype_space(mixed $text)[]: bool;
 
 /**
  * Check for uppercase character(s)
@@ -114,7 +114,7 @@ function ctype_space(mixed $text): bool;
  *   letter in the current locale.
  */
 <<__Native, __Pure>>
-function ctype_upper(mixed $text): bool;
+function ctype_upper(mixed $text)[]: bool;
 
 /**
  * Check for character(s) representing a hexadecimal digit
@@ -127,4 +127,4 @@ function ctype_upper(mixed $text): bool;
  *   [A-Fa-f] , FALSE otherwise.
  */
 <<__Native, __Pure>>
-function ctype_xdigit(mixed $text): bool;
+function ctype_xdigit(mixed $text)[]: bool;

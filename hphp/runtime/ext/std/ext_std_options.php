@@ -336,7 +336,7 @@ function sys_get_temp_dir(): string;
 <<__IsFoldable, __Pure, __Native>>
 function version_compare(string $version1,
                          string $version2,
-                         string $sop = ""): mixed;
+                         string $sop = "")[]: mixed;
 
 } // root namespace
 

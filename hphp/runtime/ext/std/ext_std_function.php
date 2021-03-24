@@ -16,13 +16,13 @@ namespace {
  * @return mixed -  Returns TRUE if name is callable, FALSE otherwise.
  */
 <<__Native, __Pure>>
-function is_callable(mixed $callback, bool $syntax_only = false): bool;
+function is_callable(mixed $callback, bool $syntax_only = false)[]: bool;
 
 <<__Native, __Pure>>
 function is_callable_with_name(mixed $callback,
                                bool $syntax_only,
                                <<__OutOnly>>
-                               inout mixed $callable_name): bool;
+                               inout mixed $callable_name)[]: bool;
 
 /**
  * Call a callback with an array of parameters
@@ -64,7 +64,7 @@ function call_user_func(mixed $callback,
  *   such as include_once() and echo().
  */
 <<__Native, __Pure>>
-function function_exists(string $function_name, bool $autoload = true): bool;
+function function_exists(string $function_name, bool $autoload = true)[]: bool;
 
 /**
  * Returns an array of all defined functions

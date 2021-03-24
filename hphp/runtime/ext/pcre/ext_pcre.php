@@ -42,7 +42,7 @@ function preg_grep_with_error(
   varray_or_darray $input,
   inout ?int $error,
   int $flags = 0,
-): mixed;
+)[]: mixed;
 
 /**
  * Returns the error code of the last PCRE regex execution
@@ -102,7 +102,7 @@ function preg_match_all_with_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-): mixed;
+)[]: mixed;
 
 <<__Native, __Pure>>
 function preg_match_all_with_matches(string $pattern,
@@ -121,7 +121,7 @@ function preg_match_all_with_matches_and_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-): mixed;
+)[]: mixed;
 
 /**
  * Perform a regular expression match
@@ -162,7 +162,7 @@ function preg_match_with_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-): mixed;
+)[]: mixed;
 
 <<__Native, __Pure>>
 function preg_match_with_matches(string $pattern,
@@ -181,7 +181,7 @@ function preg_match_with_matches_and_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-): mixed;
+)[]: mixed;
 
 /**
  * Quote regular expression characters
@@ -196,7 +196,7 @@ function preg_match_with_matches_and_error(
  */
 <<__IsFoldable, __Pure, __Native>>
 function preg_quote(string $str,
-                    ?string $delimiter = NULL): string;
+                    ?string $delimiter = NULL)[]: string;
 
 /**
  * Perform a regular expression search and replace using a callback
@@ -331,7 +331,7 @@ function preg_replace_with_error(
   mixed $subject,
   inout ?int $error,
   int $limit = -1,
-): mixed;
+)[]: mixed;
 
 <<__Native, __Pure>>
 function preg_replace_with_count(mixed $pattern,
@@ -350,7 +350,7 @@ function preg_replace_with_count_and_error(
   <<__OutOnly("KindOfInt64")>>
   inout ?int $count,
   inout ?int $error,
-): mixed;
+)[]: mixed;
 
 /**
  * Split string by a regular expression
@@ -379,7 +379,7 @@ function preg_replace_with_count_and_error(
 function preg_split(string $pattern,
                     string $subject,
                     mixed $limit = null,
-                    int $flags = 0): mixed;
+                    int $flags = 0)[]: mixed;
 
 <<__Native, __Pure>>
 function preg_split_with_error(
@@ -388,7 +388,7 @@ function preg_split_with_error(
   inout ?int $error,
   mixed $limit = null,
   int $flags = 0,
-): mixed;
+)[]: mixed;
 
 /**
  * Replace regular expression

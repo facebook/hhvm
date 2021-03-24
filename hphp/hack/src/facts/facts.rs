@@ -30,6 +30,15 @@ pub type Attributes = BTreeMap<String, Vec<String>>;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct MethodFacts {
+    #[serde(skip_serializing_if = "Attributes::is_empty")]
+    pub attributes: Attributes,
+}
+
+pub type Methods = BTreeMap<String, MethodFacts>;
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
     pub base_types: StringSet,
     #[serde(rename = "kindOf")]
@@ -38,6 +47,8 @@ pub struct TypeFacts {
     pub flags: isize,
     pub require_extends: StringSet,
     pub require_implements: StringSet,
+    #[serde(skip_serializing_if = "Methods::is_empty")]
+    pub methods: Methods,
 }
 
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
@@ -229,6 +240,7 @@ mod tests {
                     require_implements: StringSet::new(),
                     base_types,
                     flags: 6,
+                    methods: Methods::new(),
                 },
             );
             // verify requireImplements and requireExtends are skipped if empty and Class kind
@@ -241,6 +253,7 @@ mod tests {
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
                     flags: 0,
+                    methods: Methods::new(),
                 },
             );
             // verify only requireImplements is skipped if empty and Interface kind
@@ -253,6 +266,7 @@ mod tests {
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
                     flags: 1,
+                    methods: Methods::new(),
                 },
             );
             // verify non-empty require* is included
@@ -282,6 +296,39 @@ mod tests {
                     },
                     base_types: StringSet::new(),
                     flags: 9,
+                    methods: Methods::new(),
+                },
+            );
+            types.insert(
+                String::from("include_method_attrs"),
+                TypeFacts {
+                    kind: TypeKind::Class,
+                    attributes: Attributes::new(),
+                    require_extends: StringSet::new(),
+                    require_implements: StringSet::new(),
+                    base_types: StringSet::new(),
+                    flags: 6,
+                    methods: vec![
+                        (
+                            String::from("no_attrs"),
+                            MethodFacts {
+                                attributes: Attributes::new(),
+                            },
+                        ),
+                        (
+                            String::from("one_attr_with_arg"),
+                            MethodFacts {
+                                attributes: vec![(
+                                    String::from("attr_with_arg"),
+                                    vec![String::from("arg")],
+                                )]
+                                .into_iter()
+                                .collect(),
+                            },
+                        ),
+                    ]
+                    .into_iter()
+                    .collect(),
                 },
             );
         }
@@ -332,6 +379,22 @@ mod tests {
       "kindOf": "interface",
       "name": "include_empty_req_extends_when_interface_kind",
       "requireExtends": []
+    },
+    {
+      "baseTypes": [],
+      "flags": 6,
+      "kindOf": "class",
+      "methods": {
+        "no_attrs": {},
+        "one_attr_with_arg": {
+          "attributes": {
+            "attr_with_arg": [
+              "arg"
+            ]
+          }
+        }
+      },
+      "name": "include_method_attrs"
     },
     {
       "attributes": {

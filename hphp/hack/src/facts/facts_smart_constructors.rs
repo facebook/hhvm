@@ -78,7 +78,7 @@ pub enum Node {
     // declarations
     ClassDecl(Box<ClassDeclChildren>),
     FunctionDecl(Box<Node>),
-    MethodDecl(Box<Node>),
+    MethodDecl(Box<Node>, Box<Node>, Box<Node>),
     EnumUseClause(Box<Node>),
     EnumDecl(Box<EnumDeclChildren>),
     EnumClassDecl(Box<EnumClassDeclChildren>),
@@ -479,15 +479,16 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
 
     fn make_methodish_declaration(
         &mut self,
-        _attributes: Self::R,
-        _function_decl_header: Self::R,
+        attributes: Self::R,
+        function_decl_header: Self::R,
         body: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        match body {
-            Node::Ignored => Node::Ignored,
-            _ => Node::MethodDecl(Box::new(body)),
-        }
+        Node::MethodDecl(
+            Box::new(attributes),
+            Box::new(function_decl_header),
+            Box::new(body),
+        )
     }
 
     fn make_classish_declaration(

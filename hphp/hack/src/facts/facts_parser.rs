@@ -177,32 +177,39 @@ fn type_info_from_class_body(
     type_facts: &mut TypeFacts,
     namespaced_xhp: bool,
 ) {
-    let aux = |mut constants: Vec<String>, node| {
-        if let RequireExtendsClause(name) = node {
-            if check_require {
-                if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
-                    type_facts.require_extends.insert(name);
+    if let List(nodes) = body {
+        for node in nodes {
+            if let RequireExtendsClause(name) = node {
+                if check_require {
+                    if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
+                        type_facts.require_extends.insert(name);
+                    }
                 }
-            }
-        } else if let RequireImplementsClause(name) = node {
-            if check_require {
-                if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
-                    type_facts.require_implements.insert(name);
+            } else if let RequireImplementsClause(name) = node {
+                if check_require {
+                    if let Some(name) = qualified_name(namespace, *name, namespaced_xhp) {
+                        type_facts.require_implements.insert(name);
+                    }
                 }
-            }
-        } else if let TraitUseClause(uses) = node {
-            typenames_from_list(*uses, namespace, &mut type_facts.base_types, namespaced_xhp);
-        } else if let MethodDecl(body) = node {
-            if namespace.is_empty() {
-                // in methods we collect only defines
-                constants = defines_from_method_body(constants, *body);
+            } else if let TraitUseClause(uses) = node {
+                typenames_from_list(*uses, namespace, &mut type_facts.base_types, namespaced_xhp);
+            } else if let MethodDecl(attrs, header, body) = node {
+                facts.constants =
+                    defines_from_method_body(std::mem::take(&mut facts.constants), *body);
+                // Add this method to the parser output iff it's decorated with attributes
+                let attributes = attributes_into_facts(namespace, *attrs);
+                if !attributes.is_empty() {
+                    if let FunctionDecl(name) = *header {
+                        if let Some(method_name) = qualified_name(namespace, *name, namespaced_xhp)
+                        {
+                            type_facts
+                                .methods
+                                .insert(method_name, MethodFacts { attributes });
+                        }
+                    }
+                }
             }
         }
-        constants
-    };
-    if let List(nodes) = body {
-        let facts_constants = std::mem::replace(&mut facts.constants, vec![]);
-        facts.constants = nodes.into_iter().fold(facts_constants, aux);
     }
     type_facts.attributes = attributes_into_facts(namespace, attributes);
 }
@@ -271,6 +278,7 @@ fn class_decl_into_facts(
             base_types: StringSet::new(),
             require_extends: StringSet::new(),
             require_implements: StringSet::new(),
+            methods: Methods::new(),
         };
         type_info_from_class_body(
             namespace,
@@ -347,6 +355,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
+                    methods: Methods::new(),
                 };
                 use_clauses_into_facts(decl.use_clauses, &mut enum_facts, &acc.0, acc.2);
                 enum_facts.base_types.insert("HH\\BuiltinEnum".into());
@@ -363,6 +372,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
+                    methods: Methods::new(),
                 };
                 typenames_from_list(
                     decl.extends,
@@ -396,6 +406,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
+                    methods: Methods::new(),
                 };
                 add_or_update_classish_decl(name.clone(), type_alias_facts, &mut acc.1.types);
                 acc.1.type_aliases.push(name);

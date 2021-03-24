@@ -1300,7 +1300,7 @@ let class_var_def ~is_static cls env cv =
       (string_of_visibility cv.cv_visibility)
       cv.cv_id;
   let (env, global_inference_env) = Env.extract_global_inference_env env in
-  let cv_type =
+  let ((cv_type_ty, _) as cv_type) =
     match expected with
     | Some expected ->
       (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
@@ -1320,19 +1320,21 @@ let class_var_def ~is_static cls env cv =
           Errors.property_is_not_enforceable
             (fst cv.cv_id)
             (snd cv.cv_id)
-            (Cls.name cls));
+            (Cls.name cls)
+            (get_pos ty, Typing_print.full_strip_ns_decl env ty));
     if
       not
         (Typing_subtype.is_sub_type_for_union
            ~coerce:(Some Typing_logic.CoerceToDynamic)
            env
-           (fst cv_type)
+           cv_type_ty
            (mk (Reason.Rnone, Tdynamic)))
     then
       Errors.property_is_not_dynamic
         (fst cv.cv_id)
         (snd cv.cv_id)
         (Cls.name cls)
+        (get_pos cv_type_ty, Typing_print.full_strip_ns env cv_type_ty)
   end;
   ( env,
     ( {

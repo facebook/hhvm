@@ -5121,27 +5121,33 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
-let property_is_not_enforceable pos prop_name class_name =
-  let class_name = strip_ns class_name in
-  add
+let property_is_not_enforceable pos prop_name class_name (prop_pos, prop_type) =
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+  let prop_name = Markdown_lite.md_codify prop_name in
+  let prop_type = Markdown_lite.md_codify prop_type in
+  add_list
     (Typing.err_code Typing.ImplementsDynamic)
-    pos
-    ( "Class "
-    ^ Markdown_lite.md_codify class_name
-    ^ " cannot implement dynamic because property "
-    ^ Markdown_lite.md_codify prop_name
-    ^ " does not have an enforceable type" )
+    ( pos,
+      "Class "
+      ^ class_name
+      ^ " cannot implement dynamic because property "
+      ^ prop_name
+      ^ " does not have an enforceable type" )
+    [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
 
-let property_is_not_dynamic pos prop_name class_name =
-  let class_name = strip_ns class_name in
-  add
+let property_is_not_dynamic pos prop_name class_name (prop_pos, prop_type) =
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+  let prop_name = Markdown_lite.md_codify prop_name in
+  let prop_type = Markdown_lite.md_codify prop_type in
+  add_list
     (Typing.err_code Typing.ImplementsDynamic)
-    pos
-    ( "Class "
-    ^ Markdown_lite.md_codify class_name
-    ^ " cannot implement dynamic because property "
-    ^ Markdown_lite.md_codify prop_name
-    ^ " cannot be assigned to dynamic" )
+    ( pos,
+      "Class "
+      ^ class_name
+      ^ " cannot implement dynamic because property "
+      ^ prop_name
+      ^ " cannot be assigned to dynamic" )
+    [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
 
 let immutable_local pos =
   add

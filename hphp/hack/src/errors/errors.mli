@@ -1451,9 +1451,11 @@ val method_is_not_dynamically_callable :
   error option ->
   unit
 
-val property_is_not_enforceable : Pos.t -> string -> string -> unit
+val property_is_not_enforceable :
+  Pos.t -> string -> string -> Pos.t * string -> unit
 
-val property_is_not_dynamic : Pos.t -> string -> string -> unit
+val property_is_not_dynamic :
+  Pos.t -> string -> string -> Pos.t * string -> unit
 
 val immutable_local : Pos.t -> unit
 

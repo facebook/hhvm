@@ -243,23 +243,15 @@ def _un_quick_index(qi):
 
 
 def tv_layout_at(layout_type, props_base, idx):
-    layout_type = layout_type.strip_typedefs()
     try:
-        if layout_type == T("HPHP::tv_layout::TvArray"):
-            prop_vec = props_base.cast(T("HPHP::TypedValue").pointer())
-            return prop_vec[idx]
-    except:
-        pass
-    try:
-        if layout_type == T("HPHP::tv_layout::Tv7Up"):
-            idx = int(idx)
-            quot = idx // 7
-            rem = idx % 7
-            chunk = props_base + T("HPHP::Value").sizeof * 8 * quot
-            ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
-            valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
-            val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
-            return pretty_tv(ty, val)
+        idx = int(idx)
+        quot = idx // 7
+        rem = idx % 7
+        chunk = props_base + T("HPHP::Value").sizeof * 8 * quot
+        ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
+        valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
+        val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
+        return pretty_tv(ty, val)
     except:
         pass
 

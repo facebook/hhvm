@@ -60,14 +60,7 @@ IMPL_OPCODE_CALL(AllocObjReified)
 
 namespace {
 
-template <typename T> void
-objectPropsRawInitImpl(Vout& v, Vreg base, size_t props);
-
-template <> void
-objectPropsRawInitImpl<tv_layout::TvArray>(Vout& v, Vreg base, size_t props) {}
-
-template <> void
-objectPropsRawInitImpl<tv_layout::Tv7Up>(Vout& v, Vreg base, size_t props) {
+void objectPropsRawInit(Vout& v, Vreg base, size_t props) {
   if (props == 0) return;
 
   auto const last_type_word_offset =
@@ -77,10 +70,7 @@ objectPropsRawInitImpl<tv_layout::Tv7Up>(Vout& v, Vreg base, size_t props) {
   v << storeqi{0, base[last_type_word_offset]};
 }
 
-static auto constexpr objectPropsRawInit = &objectPropsRawInitImpl<ObjectProps>;
-
 }
-
 
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);

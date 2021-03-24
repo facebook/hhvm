@@ -410,8 +410,18 @@ let method_dynamically_callable
     in
     let params_need_immutable = get_ctx_vars m.m_ctxs in
     let (env, _) =
-      let bind_param_and_check env param =
-        let name = (snd param).param_name in
+      (* This time, bind_param_and_check receives a pair where the lhs is
+       * always Tdynamic, but the fun_param is still referencing the source
+       * hint. We replace this hint with Hdynamic before calling bind_param
+       * so the right enforcement is computed.
+       *)
+      let bind_param_and_check env lty_and_param =
+        let (ty, param) = lty_and_param in
+        let name = param.param_name in
+        let (hi, hopt) = param.param_type_hint in
+        let hopt = Option.map hopt ~f:(fun (p, _) -> (p, Hdynamic)) in
+        let param_type_hint = (hi, hopt) in
+        let param = (ty, { param with param_type_hint }) in
         let immutable =
           List.exists ~f:(String.equal name) params_need_immutable
         in

@@ -168,9 +168,6 @@ static void PrepareEnv(Array& env, Transport *transport) {
   case Arch::ARM:
     env.set(s_HHVM_ARCH, "arm");
     break;
-  case Arch::PPC64:
-    env.set(s_HHVM_ARCH, "ppc64");
-    break;
   }
 
   bool isServer =

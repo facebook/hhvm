@@ -1321,16 +1321,6 @@ struct RuntimeOption {
    | ARM   Options. |                                                   \
    *****************/                                                   \
   F(bool, JitArmLse, armLseDefault())                                   \
-  /******************                                                   \
-   | PPC64 Options. |                                                   \
-   *****************/                                                   \
-  /* Minimum immediate size to use TOC */                               \
-  F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
-  /* Relocation features. Use with care on production */                \
-  /*  Allow a Far branch be converted to a Near branch. */              \
-  F(bool, PPC64RelocationShrinkFarBranches, false)                      \
-  /*  Remove nops from a Far branch. */                                 \
-  F(bool, PPC64RelocationRemoveFarBranchesNops, true)                   \
   /********************                                                 \
    | Profiling flags. |                                                 \
    ********************/                                                \

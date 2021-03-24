@@ -37,8 +37,6 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/ppc64-asm/asm-ppc64.h"
-
 #include <algorithm>
 #include <cstdio>
 #include <vector>

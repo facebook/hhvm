@@ -103,10 +103,6 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
 
   if (s->isA(TDbl) && allowFP) {
     push_SIMDarg(ArgDesc{s, loc}, s->type());
-    if (arch() == Arch::PPC64) {
-      // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
-      push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
-    }
   } else {
     if (s->isA(TLvalToCell) && !s->isA(TBottom)) {
       // If there's exactly one register argument slot left, the whole tv_lval

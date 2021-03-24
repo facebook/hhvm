@@ -36,7 +36,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
-#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/vixl/a64/decoder-a64.h"
 
 #include "hphp/util/arch.h"

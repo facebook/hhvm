@@ -28,12 +28,6 @@ enum class x64 : uint8_t {
   R8,  R9,  R10, R11, R12, R13, R14, R15, RIP
 };
 
-enum class ppc64 : uint8_t {
-  R0,  R1,  TOC, R3,  R4,  R5,  R6,  R7,  R8,  R9,  R10, R11, R12, TLS,
-  R14, R15, R16, R17, R18, R19, R20, R21, R22, R23, R24, R25, R26, SP,
-  R28, R29, R30, FP,  LR = 65
-};
-
 enum class arm : uint8_t {
   X0,  X1,  X2,  X3,  X4,  X5,  X6,  X7,
   X8,  X9,  X10, X11, X12, X13, X14, X15,
@@ -44,8 +38,6 @@ enum class arm : uint8_t {
 constexpr auto FP = static_cast<uint8_t>(
 #if defined(__x86_64__)
   x64::RBP
-#elif defined(__powerpc64__)
-  ppc64::FP
 #elif defined(__aarch64__)
   arm::X29
 #else
@@ -56,8 +48,6 @@ constexpr auto FP = static_cast<uint8_t>(
 constexpr auto SP = static_cast<uint8_t>(
 #if defined(__x86_64__)
   x64::RSP
-#elif defined(__powerpc64__)
-  ppc64::SP
 #elif defined(__aarch64__)
   arm::SP
 #else
@@ -68,20 +58,12 @@ constexpr auto SP = static_cast<uint8_t>(
 constexpr auto IP = static_cast<uint8_t>(
 #if defined(__x86_64__)
   x64::RIP
-#elif defined(__powerpc64__)
-  ppc64::LR
 #elif defined(__aarch64__)
   arm::X30
 #else
   0
 #endif
 );
-
-#if defined(__powerpc64__)
-constexpr auto TOC = static_cast<uint8_t>(
-  ppc64::TOC
-);
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -198,9 +198,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::decq:
     case Vinstr::divint:
     case Vinstr::divsd:
-    case Vinstr::fcmpo:
-    case Vinstr::fcmpu:
-    case Vinstr::fctidz:
     case Vinstr::fcvtzs:
     case Vinstr::imul:
     case Vinstr::incl:
@@ -325,7 +322,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::loadzbq:
     case Vinstr::loadzwq:
     case Vinstr::loadzlq:
-    case Vinstr::mflr:
     case Vinstr::mrs:
     case Vinstr::testbim:
     case Vinstr::testbm:
@@ -390,7 +386,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::mcprep:
     case Vinstr::movqs:
     case Vinstr::msr:
-    case Vinstr::mtlr:
     case Vinstr::nothrow:
     case Vinstr::orbim:
     case Vinstr::orlim:

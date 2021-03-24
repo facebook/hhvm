@@ -37,8 +37,6 @@
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/vixl/a64/disasm-a64.h"
 
-#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
-
 #include <folly/Optional.h>
 
 namespace HPHP { namespace jit { namespace svcreq {

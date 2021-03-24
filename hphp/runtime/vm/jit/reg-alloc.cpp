@@ -50,7 +50,6 @@ bool loadsCell(const IRInstruction& inst) {
     switch (arch()) {
     case Arch::X64: return true;
     case Arch::ARM: return true;
-    case Arch::PPC64: return true;
     }
     not_reached();
   }();
@@ -100,7 +99,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (arch()) {
   case Arch::X64: break;
   case Arch::ARM: break;
-  case Arch::PPC64: return false;
   }
 
   // If this function returns true for an operand, then the register allocator

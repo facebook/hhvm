@@ -51,9 +51,6 @@
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 
-#include "hphp/ppc64-asm/asm-ppc64.h"
-#include "hphp/ppc64-asm/dasm-ppc64.h"
-
 #include "hphp/vixl/a64/disasm-a64.h"
 
 namespace HPHP { namespace jit {
@@ -671,13 +668,6 @@ void disasmRange(std::ostream& os,
       return;
     }
 
-    case Arch::PPC64: {
-      ppc64_asm::Disassembler disasm(printEncoding, true, indent, colorStr);
-      for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
-        disasm.disassembly(os, begin);
-      }
-      return;
-    }
   }
   not_reached();
 }

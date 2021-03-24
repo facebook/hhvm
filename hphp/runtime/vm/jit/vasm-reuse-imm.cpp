@@ -55,7 +55,6 @@ struct Env {
 bool isMultiword(int64_t imm) {
   switch (arch()) {
   case Arch::X64:
-  case Arch::PPC64:
     break;
   case Arch::ARM:
     uint64_t val = std::abs(imm);

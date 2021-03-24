@@ -265,13 +265,6 @@ namespace arm {
   constexpr int kSvcReqExit = 16;
 }
 
-namespace ppc64 {
-  // Standard ppc64 instructions are 4 bytes long
-  constexpr int kStdIns = 4;
-  // Leap for ppc64, in worst case, have 5 standard ppc64 instructions.
-  constexpr int kLeaVMSpLen = kStdIns * 5;
-}
-
 /*
  * Space used by an ephemeral stub.
  *
@@ -290,11 +283,6 @@ constexpr size_t stub_size() {
       return arm::kLeaVmSpLen +
         kTotalArgs * arm::kMovLen +
         arm::kPersist + arm::kSvcReqExit;
-    case Arch::PPC64:
-      // This calculus was based on the amount of emitted instructions in
-      // emit_svcreq.
-      return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
-          ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
     default:
       // GCC has a bug with throwing in a constexpr function.
       // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67371
@@ -302,8 +290,8 @@ constexpr size_t stub_size() {
       break;
   }
   // Because of GCC's issue, we have this assert, and a return value.
-  static_assert(arch() == Arch::X64 || arch() == Arch::ARM ||
-                arch() == Arch::PPC64, "Stub size not defined on architecture");
+  static_assert(arch() == Arch::X64 || arch() == Arch::ARM,
+                "Stub size not defined on architecture");
   return 0;
 }
 

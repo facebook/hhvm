@@ -232,12 +232,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::fcvtzs:
     case Vinstr::mrs:
     case Vinstr::msr:
-    // ppc64 instructions
-    case Vinstr::fcmpo:
-    case Vinstr::fcmpu:
-    case Vinstr::fctidz:
-    case Vinstr::mflr:
-    case Vinstr::mtlr:
       return Width::AnyNF;
 
     case Vinstr::andb:

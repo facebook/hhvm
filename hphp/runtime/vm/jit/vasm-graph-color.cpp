@@ -22,8 +22,6 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
-#include "hphp/ppc64-asm/asm-ppc64.h"
-
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
@@ -1309,7 +1307,6 @@ State make_state(Vunit& unit, const Abi& abi) {
     switch (arch()) {
       case Arch::X64:   return reg::xmm15;
       case Arch::ARM:   return vixl::d31;
-      case Arch::PPC64: return ppc64_asm::reg::v29;
     }
     always_assert(false);
   }();
@@ -9373,7 +9370,6 @@ bool can_single_swap(PhysReg r1, PhysReg r2) {
   switch (arch()) {
     case Arch::X64:   return r1.isGP() && r2.isGP();
     case Arch::ARM:   return false;
-    case Arch::PPC64: return false;
   }
   always_assert(false);
 }

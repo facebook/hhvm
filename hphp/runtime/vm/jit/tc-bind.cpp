@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/vixl/a64/decoder-a64.h"
 
 #include "hphp/util/arch.h"
@@ -66,9 +65,6 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, bool& smashed) {
         return instr->IsCondBranchImm();
       }
 
-      case Arch::PPC64:
-        ppc64_asm::DecodedInstruction di(toSmash);
-        return di.isBranch(ppc64_asm::AllowCond::OnlyCond);
     }
     not_reached();
   }();
@@ -108,9 +104,6 @@ TCA bindJmpToStub(TCA toSmash, TCA oldTarget, TCA stub,
         return instr->IsCondBranchImm();
       }
 
-      case Arch::PPC64:
-        ppc64_asm::DecodedInstruction di(toSmash);
-        return di.isBranch(ppc64_asm::AllowCond::OnlyCond);
     }
     not_reached();
   }();

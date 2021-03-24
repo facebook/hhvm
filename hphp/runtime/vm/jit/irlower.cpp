@@ -119,9 +119,6 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
     case Arch::ARM:
       optimizeARM(unit, abi, regAlloc);
       break;
-    case Arch::PPC64:
-      optimizePPC64(unit, abi, regAlloc);
-      break;
   }
 }
 

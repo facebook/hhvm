@@ -111,7 +111,6 @@ inline bool simplify_impl(Env& env, Vlabel b, size_t i, const Vinstr& instr) {
 
 namespace x64   { bool simplify(Env& env, Vlabel b, size_t i); }
 namespace arm   { bool simplify(Env& env, Vlabel b, size_t i); }
-namespace ppc64 { bool simplify(Env& env, Vlabel b, size_t i); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

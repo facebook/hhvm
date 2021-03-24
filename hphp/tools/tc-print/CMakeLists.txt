@@ -20,7 +20,7 @@ if(IS_X64)
 else()
   add_executable(tc-print "mappers.cpp" "offline-trans-data.cpp"
                           "offline-code.cpp"  "perf-events.cpp"
-                          "offline-arm-code.cpp" "offline-ppc64-code.cpp"
+                          "offline-arm-code.cpp"
                           "repo-wrapper.cpp"  "tc-print.cpp"
                           "../../hhvm/process-init.cpp" "std-logger.cpp")
   link_object_libraries(tc-print ${HHVM_WHOLE_ARCHIVE_LIBRARIES})

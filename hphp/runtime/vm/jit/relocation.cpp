@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/relocation-arm.h"
-#include "hphp/runtime/vm/jit/relocation-ppc64.h"
 #include "hphp/runtime/vm/jit/relocation-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 

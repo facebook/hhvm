@@ -115,9 +115,6 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
     case Arch::ARM:
       emitARM(vunit, vtext, meta, ai);
       break;
-    case Arch::PPC64:
-      emitPPC64(vunit, vtext, meta, ai);
-      break;
   }
 }
 
@@ -157,7 +154,6 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
       switch (arch()) {
         case Arch::X64:
           return 1;
-        case Arch::PPC64:
         case Arch::ARM:
           return 4;
       }

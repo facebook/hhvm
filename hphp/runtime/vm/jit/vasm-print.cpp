@@ -295,27 +295,6 @@ std::string show(Vptr p) {
       str += ']';
       return str;
     }
-    case Arch::PPC64: {
-      auto prefix = false;
-      if (p.disp) {
-        folly::format(&str, "{}{:#x}",
-                      p.disp < 0 ? "-" : "+",
-                      std::abs(p.disp));
-        prefix = true;
-      }
-
-      if (p.base.isValid()) {
-        folly::toAppend(prefix ? "(" : "", show(p.base), &str);
-        if (prefix == true) {
-          folly::toAppend(")", &str);
-        }
-        prefix = true;
-      }
-      if (p.index.isValid()) {
-        folly::toAppend(prefix ? "," : "", show(p.index), &str);
-      }
-      return str;
-    }
   }
   not_reached();
 }

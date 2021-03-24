@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -133,10 +132,6 @@ Vauto::~Vauto() {
             optimizeARM(unit(), abi, true /* regalloc */);
             emitARM(unit(), text, m_fixups, nullptr);
             break;
-          case Arch::PPC64:
-            optimizePPC64(unit(), abi, true /* regalloc */);
-            emitPPC64(unit(), text, m_fixups, nullptr);
-            break;
         }
 
         if (m_relocate) {
@@ -162,9 +157,6 @@ Vauto::~Vauto() {
           break;
         case Arch::ARM:
           emitARM(unit(), m_text, m_fixups, nullptr);
-          break;
-        case Arch::PPC64:
-          emitPPC64(unit(), m_text, m_fixups, nullptr);
           break;
       }
     }

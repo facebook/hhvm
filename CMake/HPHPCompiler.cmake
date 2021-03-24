@@ -29,12 +29,6 @@ CHECK_CXX_SOURCE_COMPILES("
 #endif
 int main() { return 0; }" IS_AARCH64)
 
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __powerpc64__
-#error Not PPC64
-#endif
-int main() { return 0; }" IS_PPC64)
-
 # using Clang or GCC
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # Warnings to disable by name, -Wno-${name}
@@ -243,11 +237,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
           list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
         endif()
       endif()
-    endif()
-
-    # PPC64
-    if(NOT IS_PPC64)
-      list(APPEND RELEASE_CXX_OPTIONS "momit-leaf-frame-pointer")
     endif()
 
     if(STATIC_CXX_LIB)

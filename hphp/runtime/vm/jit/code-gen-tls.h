@@ -92,7 +92,6 @@ void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 }}
 
 #include "hphp/runtime/vm/jit/code-gen-tls-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-tls-ppc64.h"
 #include "hphp/runtime/vm/jit/code-gen-tls-arm.h"
 
 // This has to follow all the arch-specific includes.

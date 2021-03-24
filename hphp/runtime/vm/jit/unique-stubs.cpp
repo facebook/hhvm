@@ -59,7 +59,6 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
-#include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -874,7 +873,6 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     auto const fullFrame = [&] {
       switch (arch()) {
         case Arch::ARM:
-        case Arch::PPC64:
           return true;
         case Arch::X64:
           return false;
@@ -932,7 +930,6 @@ namespace {
 void alignNativeStack(Vout& v, bool exit) {
   switch (arch()) {
     case Arch::X64:
-    case Arch::PPC64:
       v << lea{rsp()[exit ? 8 : -8], rsp()};
       break;
     case Arch::ARM:
@@ -971,10 +968,7 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
     );
 
     // Perform a native return.
-    //
-    // On PPC64, as there is no new frame created when entering the VM, the FP
-    // must not be restored.
-    v << stubret{cross_jit, arch() != Arch::PPC64};
+    v << stubret{cross_jit, true};
   });
 }
 
@@ -992,7 +986,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << inittc{};
 
     // Native func prologue.
-    v << stublogue{arch() != Arch::PPC64};
+    v << stublogue{true};
 
     // Set up linkage with the top VM frame in this nesting.
     v << store{rsp(), firstAR[AROFF(m_sfp)]};

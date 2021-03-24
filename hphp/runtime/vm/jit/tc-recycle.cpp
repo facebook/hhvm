@@ -36,9 +36,6 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/ppc64-asm/asm-ppc64.h"
-#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
-
 #include "hphp/vixl/a64/instructions-a64.h"
 
 #include <condition_variable>
@@ -207,14 +204,6 @@ void clearTCMaps(TCA start, TCA end) {
         isCall = instr->Mask(UnconditionalBranchMask) == BL ||
           instr->Mask(UnconditionalBranchToRegisterMask) == BLR;
         instSz = vixl::kInstructionSize;
-        break;
-      }
-      case Arch::PPC64: {
-        ppc64_asm::DecodedInstruction di(start);
-        isBranch = di.isBranch();
-        isNop = di.isNop();
-        isCall = di.isCall();
-        instSz = di.size();
         break;
       }
       case Arch::X64: {

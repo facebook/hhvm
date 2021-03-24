@@ -326,11 +326,6 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
         case Arch::ARM:
         case Arch::X64:
           return {nullptr, sfp};
-        case Arch::PPC64:
-          // On PPC64 the fp->m_savedRip is not the return address of the
-          // context of fp, but from the next frame. So if the callToExit is
-          // found in fp->m_savedRip, the correct frame to be returned is fp.
-          return {nullptr, fp};
       }
     }
 
@@ -399,21 +394,6 @@ void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
     case Arch::X64:
       ehfw.offset_extended_sf(dw_reg::IP,
                               (record_size - AROFF(m_savedRip)) / 8);
-      break;
-
-    case Arch::PPC64:
-      // On PPC64, the return address for the current frame is found in the
-      // parent frame.  The following expression uses the FP to get the parent
-      // frame and recovers the return address from it.
-      //
-      // LR is at (*SP) + 2 * data_align
-      ehfw.begin_val_expression(dw_reg::IP);
-      ehfw.op_breg(dw_reg::FP, 0);
-      ehfw.op_deref();                              // Previous frame
-      ehfw.op_consts(AROFF(m_savedRip));            // LR position
-      ehfw.op_plus();
-      ehfw.op_deref();                              // Grab data, not address
-      ehfw.end_expression();
       break;
   }
 

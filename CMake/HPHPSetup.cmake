@@ -42,7 +42,6 @@ set(HHVM_LINK_LIBRARIES
   hphp_util
   hphp_hhbbc
   jit_sort
-  ppc64-asm
   vixl neo)
 
 if(ENABLE_FASTCGI)

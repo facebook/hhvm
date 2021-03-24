@@ -354,12 +354,6 @@ struct Vunit;
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
-  /* ppc64 instructions */\
-  O(fcmpo, Inone, U(s0) U(s1), D(sf))\
-  O(fcmpu, Inone, U(s0) U(s1), D(sf))\
-  O(fctidz, Inone, U(s), D(d) D(sf))\
-  O(mflr, Inone, Un, D(d))\
-  O(mtlr, Inone, U(s), Dn)\
   /* */
 
 /*
@@ -1251,15 +1245,6 @@ struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
-
-/*
- * ppc64 intrinsics.
- */
-struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
-struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
-struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
-struct mflr { Vreg64 d; };
-struct mtlr { Vreg64 s; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

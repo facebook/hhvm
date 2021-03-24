@@ -48,7 +48,6 @@ struct Vcost {
  */
 void optimizeX64(Vunit&, const Abi&, bool regalloc);
 void optimizeARM(Vunit&, const Abi&, bool regalloc);
-void optimizePPC64(Vunit&, const Abi&, bool regalloc);
 
 /*
  * Emit code for the given unit using the given code areas. The unit must have
@@ -56,7 +55,6 @@ void optimizePPC64(Vunit&, const Abi&, bool regalloc);
  */
 void emitX64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
 void emitARM(Vunit&, Vtext&, CGMeta&, AsmInfo*);
-void emitPPC64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
 
 /*
  * Emit code for the given Vunit, which must already be register-allocated, to

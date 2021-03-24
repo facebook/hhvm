@@ -101,7 +101,16 @@ let check =
         ty_expr will take linear time, and the full check may take O(n^2) time
         if we recurse on expressions in the visitor. We expect this to generally
         be quite small, though. *)
-      | Obj_get (e1, _, _, _) -> self#ty_expr env e1
+      | Obj_get (e1, e2, _, _) ->
+        (match self#ty_expr env e1 with
+        | Readonly -> Readonly
+        | Mut ->
+          (* In the mut case, we need to check if the property is marked readonly *)
+          let prop_elts = self#get_prop_elts env e1 e2 in
+          let readonly_prop =
+            List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
+          in
+          Option.value_map readonly_prop ~default:Mut ~f:(fun _ -> Readonly))
       | Await e -> self#ty_expr env e
       (* $array[$x] access *)
       | Array_get (e, Some _) -> self#ty_expr env e

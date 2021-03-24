@@ -1,0 +1,6 @@
+File "nested_prop.php", line 18, characters 3-9:
+This value is readonly, its properties cannot be modified (Typing[4409])
+File "nested_prop.php", line 18, characters 7-9:
+This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "nested_prop.php", line 12, characters 21-23:
+  The property is defined here.

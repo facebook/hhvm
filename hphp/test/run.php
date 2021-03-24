@@ -61,13 +61,8 @@ function get_expect_file_and_type($test, $options) {
     }
   }
 
-  // Unconditionally prefer .expect.hadva files to .expect files. We'll clean
-  // up the .expect files in the next step.
   foreach ($types as $type) {
     $fname = "$test.$type";
-    if (file_exists("$fname.hadva")) {
-      return varray["$fname.hadva", $type];
-    }
     if (file_exists($fname)) {
       return varray[$fname, $type];
     }
@@ -2055,10 +2050,6 @@ function skip_test($options, $test, $run_skipif = true): ?string {
       return 'skip-bespoke';
   }
 
-  $no_hadva_tag = "nohadva";
-  if (file_exists("$test.$no_hadva_tag")) {
-    return 'skip-hadva';
-  }
   $no_lazyclass_tag = "nolazyclass";
   if (isset($options['lazyclass']) &&
       file_exists("$test.$no_lazyclass_tag")) {

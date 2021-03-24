@@ -1,73 +1,41 @@
 ----------------------------------------------------------
 vec[] === vec[]
 vec[] !== vec[$c]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-vec[] !== varray[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
+vec[] === varray[]
 vec[] !== varray[$c]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-vec[] !== HH\array_mark_legacy(varray[])
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
+vec[] === HH\array_mark_legacy(varray[])
 vec[] !== HH\array_mark_legacy(varray[$c])
 ----------------------------------------------------------
 vec[$c] !== vec[]
 vec[$c] === vec[$c]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
 vec[$c] !== varray[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-vec[$c] !== varray[$c]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
+vec[$c] === varray[$c]
 vec[$c] !== HH\array_mark_legacy(varray[])
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-vec[$c] !== HH\array_mark_legacy(varray[$c])
+vec[$c] === HH\array_mark_legacy(varray[$c])
 ----------------------------------------------------------
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-varray[] !== vec[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
+varray[] === vec[]
 varray[] !== vec[$c]
 varray[] === varray[]
 varray[] !== varray[$c]
 varray[] === HH\array_mark_legacy(varray[])
 varray[] !== HH\array_mark_legacy(varray[$c])
 ----------------------------------------------------------
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
 varray[$c] !== vec[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-varray[$c] !== vec[$c]
+varray[$c] === vec[$c]
 varray[$c] !== varray[]
 varray[$c] === varray[$c]
 varray[$c] !== HH\array_mark_legacy(varray[])
 varray[$c] === HH\array_mark_legacy(varray[$c])
 ----------------------------------------------------------
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-HH\array_mark_legacy(varray[]) !== vec[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
+HH\array_mark_legacy(varray[]) === vec[]
 HH\array_mark_legacy(varray[]) !== vec[$c]
 HH\array_mark_legacy(varray[]) === varray[]
 HH\array_mark_legacy(varray[]) !== varray[$c]
 HH\array_mark_legacy(varray[]) === HH\array_mark_legacy(varray[])
 HH\array_mark_legacy(varray[]) !== HH\array_mark_legacy(varray[$c])
 ----------------------------------------------------------
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
 HH\array_mark_legacy(varray[$c]) !== vec[]
-
-Notice: Hack Array Compat: Comparing PHP array with Hack array in %s
-HH\array_mark_legacy(varray[$c]) !== vec[$c]
+HH\array_mark_legacy(varray[$c]) === vec[$c]
 HH\array_mark_legacy(varray[$c]) !== varray[]
 HH\array_mark_legacy(varray[$c]) === varray[$c]
 HH\array_mark_legacy(varray[$c]) !== HH\array_mark_legacy(varray[])

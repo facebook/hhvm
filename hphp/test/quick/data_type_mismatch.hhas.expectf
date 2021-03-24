@@ -1,37 +1,25 @@
-Verification Error (unit %s func main): Keyset references array data that is a DArray
-
-Verification Error (unit %s func main): Array references array data that is a Dict
-
-Verification Error (unit %s func main): Dict references array data that is a Vec
-
-Verification Error (unit %s func main): Vec references array data that is a Keyset
-
-Verification Error (unit %s func main): Keyset references array data that is a DArray
-
-Verification Error (unit %s func main): Dict references array data that is a VArray
-
-Verification Error (unit %s func main): Vec references array data that is a DArray
+Verification Error (unit %s func main): Keyset references array data that is a Dict
 
 Verification Error (unit %s func main): Keyset references array data that is a Dict
 
-Verification Error (unit %s func main): Array references array data that is a Vec
+Verification Error (unit %s func main): Keyset references array data that is a Vec
 
-Verification Error (unit %s func main): Dict references array data that is a Keyset
+Verification Error (unit %s func main): Vec references array data that is a Keyset
 
-Verification Error (unit %s func main): Dict references array data that is a DArray
-
-Verification Error (unit %s func main): Vec references array data that is a VArray
-
-Verification Error (unit %s func main): Dict references array data that is a DArray
-
-Verification Error (unit %s func main): Vec references array data that is a Dict
+Verification Error (unit %s func main): Keyset references array data that is a Dict
 
 Verification Error (unit %s func main): Keyset references array data that is a Vec
 
-Verification Error (unit %s func main): Array references array data that is a Keyset
+Verification Error (unit %s func main): Vec references array data that is a Dict
 
-Verification Error (unit %s func main): Vec references array data that is a DArray
+Verification Error (unit %s func main): Vec references array data that is a Dict
 
-Verification Error (unit %s func main): Keyset references array data that is a VArray
+Verification Error (unit %s func main): Dict references array data that is a Vec
+
+Verification Error (unit %s func main): Dict references array data that is a Keyset
+
+Verification Error (unit %s func main): Vec references array data that is a Dict
+
+Verification Error (unit %s func main): Dict references array data that is a Vec
 
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

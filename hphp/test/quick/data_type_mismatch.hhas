@@ -8,7 +8,7 @@
 .adata A_5 = """y:1:{i:1;}""";
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
-  Array @A_0
+  Dict @A_0
   PopC
   Dict @A_1
   PopC
@@ -16,48 +16,35 @@
   PopC
   Keyset @A_3
   PopC
-  Array @A_4
-  PopC
-  Array @A_5
-  PopC
-
-  Keyset @A_0
-  PopC
-  Array @A_1
-  PopC
-  Dict @A_2
-  PopC
-  Vec @A_3
-  PopC
-  Keyset @A_4
-  PopC
-  Dict @A_5
-  PopC
-
-  Vec @A_0
-  PopC
-  Keyset @A_1
-  PopC
-  Array @A_2
-  PopC
-  Dict @A_3
-  PopC
   Dict @A_4
   PopC
   Vec @A_5
   PopC
 
-  Dict @A_0
+  Keyset @A_0
   PopC
-  Vec @A_1
+  Keyset @A_1
   PopC
   Keyset @A_2
   PopC
-  Array @A_3
+  Vec @A_3
+  PopC
+  Keyset @A_4
+  PopC
+  Keyset @A_5
+  PopC
+
+  Vec @A_0
+  PopC
+  Vec @A_1
+  PopC
+  Dict @A_2
+  PopC
+  Dict @A_3
   PopC
   Vec @A_4
   PopC
-  Keyset @A_5
+  Dict @A_5
   PopC
 
   Int 1

@@ -3397,6 +3397,7 @@ where
         prop: S<'a, Token, Value>,
         p_names: &mut HashSet<String>,
         c_names: &mut HashSet<String>,
+        xhp_names: &mut HashSet<String>,
     ) {
         let mut check = |sname, names: &mut HashSet<String>| {
             let name = self.text(sname);
@@ -3432,6 +3433,13 @@ where
             }
             TypeConstDeclaration(x) => check(&x.name, c_names),
             ContextConstDeclaration(x) => check(&x.name, c_names),
+            XHPClassAttributeDeclaration(x) => {
+                for attr in Self::syntax_to_list_no_separators(&x.attributes) {
+                    if let XHPClassAttribute(x) = &attr.children {
+                        check(&x.name, xhp_names)
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -3868,12 +3876,14 @@ where
 
                 let mut p_names = HashSet::<String>::new();
                 let mut c_names = HashSet::<String>::new();
+                let mut xhp_names = HashSet::<String>::new();
                 for elt in class_body_elts() {
                     self.check_repeated_properties_tconst_const(
                         &full_name,
                         elt,
                         &mut p_names,
                         &mut c_names,
+                        &mut xhp_names,
                     );
                 }
                 let has_abstract_fn = class_body_methods().any(&Self::has_modifier_abstract);

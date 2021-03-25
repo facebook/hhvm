@@ -445,7 +445,6 @@ type t = {
    * rolled out broadly, rather it is meant to be used by
    * power users only. *)
   predeclare_ide: bool;
-  predeclare_ide_deps: bool;
   max_typechecker_worker_memory_mb: int option;
   longlived_workers: bool;
   hg_aware: bool;
@@ -592,7 +591,6 @@ let default =
     prechecked_files = false;
     enable_type_check_filter_files = false;
     predeclare_ide = false;
-    predeclare_ide_deps = false;
     max_typechecker_worker_memory_mb = None;
     longlived_workers = false;
     hg_aware = false;
@@ -962,13 +960,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let predeclare_ide_deps =
-    bool_if_min_version
-      "predeclare_ide_deps"
-      ~default:default.predeclare_ide_deps
-      ~current_version
-      config
-  in
   let max_typechecker_worker_memory_mb =
     int_opt "max_typechecker_worker_memory_mb" config
   in
@@ -1258,7 +1249,6 @@ let load_ fn ~silent ~current_version overrides =
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;
     disable_conservative_redecl;
-    predeclare_ide_deps;
     ide_parser_cache;
     ide_tast_cache;
     store_decls_in_saved_state;

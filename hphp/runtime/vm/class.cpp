@@ -1656,28 +1656,41 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
     make_tv<KindOfPersistentString>(const_cast<StringData*>(cns.name.get()))
   };
 
-  auto ret = g_context->invokeFuncFew(
-    meth86cinit,
-    const_cast<Class*>(this),
-    1,
-    args,
-    false,
-    false
-  );
+  // Wrap the call to 'invokeFuncFew' and call 'raise_error' if an
+  // 'Object' exception is encountered. The effect of this is to treat
+  // constant intialization errors as terminal.
+  auto invokeFuncFew = [&]() -> TypedValue {
+    try {
+      return g_context->invokeFuncFew(
+               meth86cinit,
+               const_cast<Class*>(this),
+               1,
+               args,
+               false,
+               false
+             );
+    } catch(Object& e) {
+      auto const msg = throwable_to_string(e.get());
+      raise_error(
+                  "'%s::%s' initialization failure: %s"
+                  , m_preClass->name()->data(), clsCnsName->data(), msg.data());
+    }
+  };
+  auto ret = invokeFuncFew();
 
   switch (tvAsCVarRef(&ret).isAllowedAsConstantValue()) {
-    case Variant::AllowedAsConstantValue::Allowed:
-      break;
-    case Variant::AllowedAsConstantValue::NotAllowed: {
-      always_assert(false);
+  case Variant::AllowedAsConstantValue::Allowed:
+    break;
+  case Variant::AllowedAsConstantValue::NotAllowed: {
+    always_assert(false);
+  }
+  case Variant::AllowedAsConstantValue::ContainsObject: {
+    // Generally, objects are not allowed as class constants.
+    if (!(attrs() & AttrEnumClass)) {
+      raise_error("Value unsuitable as class constant");
     }
-    case Variant::AllowedAsConstantValue::ContainsObject: {
-      // Generally, objects are not allowed as class constants.
-      if (!(attrs() & AttrEnumClass)) {
-        raise_error("Value unsuitable as class constant");
-      }
-      break;
-    }
+    break;
+  }
   }
 
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(ret), true /* isKey */);

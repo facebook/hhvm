@@ -1,0 +1,7 @@
+Fatal error: 'E::bad' initialization failure: exception 'HH\InvariantException' with message 'Fail' in %s.php:%d
+Stack trace:
+#0 %s.php(%d): HH\invariant_violation()
+#1 %s.php(%d): EnumVal::bad()
+#2 %s.php(%d): UseE::bad()
+#3 (): main()
+#4 {main} in %s.php on line %d

@@ -25,8 +25,8 @@ let recheck_naming ctx filename_l =
                 ()
               | _ -> ())))
 
-let helper ctx acc filetuple_l =
-  let filename_l = List.rev_map filetuple_l fst in
+let helper ctx acc filename_l =
+  let filename_l = List.rev filename_l in
   recheck_naming ctx filename_l;
   let tasts =
     List.map filename_l ~f:(fun path ->
@@ -40,13 +40,13 @@ let helper ctx acc filetuple_l =
   let symbol_types = SymbolTypeService.generate_types ctx tasts in
   (fun_calls, symbol_types) :: acc
 
-let parallel_helper workers filetuple_l tcopt =
+let parallel_helper workers filename_l tcopt =
   MultiWorker.call
     workers
     ~job:(helper tcopt)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers filetuple_l)
+    ~next:(MultiWorker.next workers filename_l)
 
 (* Format result from '(fun_calls * symbol_types) list' raw result into *)
 (* 'fun_calls list, symbol_types list' and store in SymbolInfoService.result *)
@@ -67,25 +67,16 @@ let format_result raw_result =
 
 (* Entry Point *)
 let go workers file_list env =
-  (* Convert 'string list' into 'fileinfo list' *)
-  let filetuple_l =
-    List.fold_left
-      file_list
-      ~f:
-        begin
-          fun acc file_path ->
-          let fn = Relative_path.create Relative_path.Root file_path in
-          match Naming_table.get_file_info env.ServerEnv.naming_table fn with
-          | Some fileinfo -> (fn, fileinfo) :: acc
-          | None -> acc
-        end
-      ~init:[]
+  let filename_l =
+    file_list
+    |> List.filter ~f:FindUtils.file_filter
+    |> List.map ~f:(Relative_path.create Relative_path.Root)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let raw_result =
-    if List.length file_list < 10 then
-      helper ctx [] filetuple_l
+    if List.length filename_l < 10 then
+      helper ctx [] filename_l
     else
-      parallel_helper workers filetuple_l ctx
+      parallel_helper workers filename_l ctx
   in
   format_result raw_result

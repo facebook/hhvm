@@ -1634,10 +1634,8 @@ let handle_mode
   | Dump_symbol_info ->
     iter_over_files (fun filename ->
         match Relative_path.Map.find_opt files_info filename with
-        | Some fileinfo ->
-          let raw_result =
-            SymbolInfoService.helper ctx [] [(filename, fileinfo)]
-          in
+        | Some _fileinfo ->
+          let raw_result = SymbolInfoService.helper ctx [] [filename] in
           let result = SymbolInfoService.format_result raw_result in
           let result_json = ClientSymbolInfo.to_json result in
           print_endline (Hh_json.json_to_multiline result_json)

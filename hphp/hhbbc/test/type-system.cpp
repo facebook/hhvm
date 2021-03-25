@@ -63,16 +63,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-struct TypeTest : ::testing::Test {
- protected:
-  void SetUp() override {
-    RO::EvalHackArrDVArrs = false;
-  }
-  void TearDown() override {}
-};
-
-//////////////////////////////////////////////////////////////////////
-
 const StaticString s_test("test");
 const StaticString s_TestClass("TestClass");
 const StaticString s_Base("Base");
@@ -314,20 +304,8 @@ SArray static_vec(Args&&... args) {
 }
 
 template<typename... Args>
-SArray static_varray(Args&&... args) {
-  auto ar = make_varray(std::forward<Args>(args)...);
-  return ArrayData::GetScalarArray(std::move(ar));
-}
-
-template<typename... Args>
 SArray static_dict(Args&&... args) {
   auto ar = make_dict_array(std::forward<Args>(args)...);
-  return ArrayData::GetScalarArray(std::move(ar));
-}
-
-template<typename... Args>
-SArray static_darray(Args&&... args) {
-  auto ar = make_darray(std::forward<Args>(args)...);
   return ArrayData::GetScalarArray(std::move(ar));
 }
 
@@ -400,12 +378,8 @@ std::vector<Type> withData(const Index& index) {
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
-  auto const svarr1 = static_varray(s_A.get(), s_B.get());
-  auto const svarr2 = static_varray(123, 456);
   auto const sdict1 = static_dict(s_A.get(), s_B.get(), s_C.get(), 123);
   auto const sdict2 = static_dict(100, s_A.get(), 200, s_C.get());
-  auto const sdarr1 = static_darray(s_A.get(), s_B.get(), s_C.get(), 123);
-  auto const sdarr2 = static_darray(100, s_A.get(), 200, s_C.get());
   auto const skeyset1 = static_keyset(s_A.get(), s_B.get());
   auto const skeyset2 = static_keyset(123, 456);
 
@@ -413,7 +387,10 @@ std::vector<Type> withData(const Index& index) {
   auto const nonSupport = BCell & ~support;
 
   auto const add = [&] (trep b) {
-    types.emplace_back(Type{b});
+    auto const type = Type{b};
+    if (type.subtypeAmong(BVArr|BDArr, BArrLike)) return;
+
+    types.emplace_back(type);
 
     if (b == BTop) return;
 
@@ -608,17 +585,9 @@ std::vector<Type> withData(const Index& index) {
         types.emplace_back(make_specialized_arrval(b, svec1));
         types.emplace_back(make_specialized_arrval(b, svec2));
       }
-      if (subtypeAmong(b, BSVArrN, BArrLikeN)) {
-        types.emplace_back(make_specialized_arrval(b, svarr1));
-        types.emplace_back(make_specialized_arrval(b, svarr2));
-      }
       if (subtypeAmong(b, BSDictN, BArrLikeN)) {
         types.emplace_back(make_specialized_arrval(b, sdict1));
         types.emplace_back(make_specialized_arrval(b, sdict2));
-      }
-      if (subtypeAmong(b, BSDArrN, BArrLikeN)) {
-        types.emplace_back(make_specialized_arrval(b, sdarr1));
-        types.emplace_back(make_specialized_arrval(b, sdarr2));
       }
       if (subtypeAmong(b, BSKeysetN, BArrLikeN)) {
         types.emplace_back(make_specialized_arrval(b, skeyset1));
@@ -638,14 +607,14 @@ auto const specialized_arrays = folly::lazy([]{
 
   auto const add = [&] (trep b) {
     if (!b) return;
+    auto const type = Type{b};
+    if (type.subtypeAmong(BVArr|BDArr, BArrLike)) return;
 
-    types.emplace_back(Type{b});
+    types.emplace_back(type);
 
     auto const containsUncounted = [] (trep bits) {
       if ((bits & BVecN)    == BSVecN)    return true;
-      if ((bits & BVArrN)   == BSVArrN)   return true;
       if ((bits & BDictN)   == BSDictN)   return true;
-      if ((bits & BDArrN)   == BSDArrN)   return true;
       if ((bits & BKeysetN) == BSKeysetN) return true;
       return false;
     };
@@ -890,23 +859,15 @@ auto const specialized_arrays = folly::lazy([]{
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
-  auto const svarr1 = static_varray(s_A.get(), s_B.get());
-  auto const svarr2 = static_varray(123, 456);
   auto const sdict1 = static_dict(s_A.get(), s_B.get(), s_C.get(), 123);
   auto const sdict2 = static_dict(100, s_A.get(), 200, s_C.get());
-  auto const sdarr1 = static_darray(s_A.get(), s_B.get(), s_C.get(), 123);
-  auto const sdarr2 = static_darray(100, s_A.get(), 200, s_C.get());
   auto const skeyset1 = static_keyset(s_A.get(), s_B.get());
   auto const skeyset2 = static_keyset(123, 456);
 
   types.emplace_back(make_specialized_arrval(BSVecN, svec1));
   types.emplace_back(make_specialized_arrval(BSVecN, svec2));
-  types.emplace_back(make_specialized_arrval(BSVArrN, svarr1));
-  types.emplace_back(make_specialized_arrval(BSVArrN, svarr2));
   types.emplace_back(make_specialized_arrval(BSDictN, sdict1));
   types.emplace_back(make_specialized_arrval(BSDictN, sdict2));
-  types.emplace_back(make_specialized_arrval(BSDArrN, sdarr1));
-  types.emplace_back(make_specialized_arrval(BSDArrN, sdarr2));
   types.emplace_back(make_specialized_arrval(BSKeysetN, skeyset1));
   types.emplace_back(make_specialized_arrval(BSKeysetN, skeyset2));
 
@@ -936,10 +897,6 @@ auto const allBits = folly::lazy([]{
     BSVecN,
     BCDictN,
     BSDictN,
-    BCVArrN,
-    BSVArrN,
-    BCDArrN,
-    BSDArrN,
     BCKeysetN,
     BSKeysetN,
   };
@@ -964,7 +921,7 @@ auto const allBits = folly::lazy([]{
 
 }
 
-TEST_F(TypeTest, Bits) {
+TEST(Type, Bits) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -992,7 +949,7 @@ TEST_F(TypeTest, Bits) {
   }
 }
 
-TEST_F(TypeTest, Top) {
+TEST(Type, Top) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1015,7 +972,7 @@ TEST_F(TypeTest, Top) {
   }
 }
 
-TEST_F(TypeTest, Bottom) {
+TEST(Type, Bottom) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1036,7 +993,7 @@ TEST_F(TypeTest, Bottom) {
   }
 }
 
-TEST_F(TypeTest, Prims) {
+TEST(Type, Prims) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1272,7 +1229,7 @@ void test_basic_operators(const std::vector<Type>& types) {
 
 }
 
-TEST_F(TypeTest, BasicOperators) {
+TEST(Type, BasicOperators) {
   auto const program = make_test_program();
   Index index { program.get() };
   test_basic_operators(withData(index));
@@ -1281,7 +1238,7 @@ TEST_F(TypeTest, BasicOperators) {
   EXPECT_EQ(union_of(TInt,sval(s_A)), TUncArrKey);
 }
 
-TEST_F(TypeTest, SpecializedArrays) {
+TEST(Type, SpecializedArrays) {
   test_basic_operators(specialized_arrays());
 
   EXPECT_EQ(
@@ -1351,8 +1308,8 @@ TEST_F(TypeTest, SpecializedArrays) {
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrpacked(BDictN|BVecN, {TInitCell}),
-      make_specialized_arrpacked(BDArrN|BSVecN, {TInitCell})
+      make_specialized_arrpacked(BSDictN|BVecN, {TInitCell}),
+      make_specialized_arrpacked(BCDictN|BSVecN, {TInitCell})
     ),
     make_specialized_arrpacked(BSVecN, {TInitUnc})
   );
@@ -1390,8 +1347,8 @@ TEST_F(TypeTest, SpecializedArrays) {
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrpackedn(BDictN|BVecN, Type{BInitCell & ~BObj}),
-      make_specialized_arrpackedn(BSDictN|BDArrN, Type{BInitCell & ~BObj})
+      make_specialized_arrpackedn(BDictN|BSVecN, Type{BInitCell & ~BObj}),
+      make_specialized_arrpackedn(BSDictN|BCVecN, Type{BInitCell & ~BObj})
     ),
     make_specialized_arrpackedn(BSDictN, TInitUnc)
   );
@@ -1451,30 +1408,23 @@ TEST_F(TypeTest, SpecializedArrays) {
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmapn(BDictN|BDArrN, TCStr, TInt),
-      Type{BSDictN|BDArrN}
+      make_specialized_arrmapn(BDictN|BCKeysetN, TCStr, TCStr),
+      Type{BDictN|BSKeysetN}
     ),
-    make_specialized_arrmapn(BDArrN, TCStr, TInt)
-  );
-  EXPECT_EQ(
-    intersection_of(
-      make_specialized_arrmapn(BDictN|BDArrN, TStr, TObj),
-      Type{BSDictN|BDArrN}
-    ),
-    make_specialized_arrmapn(BDArrN, TStr, TObj)
+    make_specialized_arrmapn(BDictN, TCStr, TCStr)
   );
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmapn(BDictN|BDArrN, TArrKey, Type{BInitCell & ~BObj}),
+      make_specialized_arrmapn(BDictN|BKeysetN, TArrKey, Type{BInitCell & ~BObj}),
       make_specialized_arrmapn(BSDictN|BVecN, TUncArrKey, Type{BInitCell & ~BObj})
     ),
     TSDictN
   );
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmapn(BDictN|BVecN, TArrKey, Type{BInitCell & ~BObj}),
-      make_specialized_arrmapn(BDArrN|BSVecN, TUncArrKey, Type{BInitCell & ~BObj})
+      make_specialized_arrmapn(BCDictN|BSVecN, TArrKey, Type{BInitCell & ~BObj}),
+      make_specialized_arrmapn(BSDictN|BVecN, TUncArrKey, Type{BInitCell & ~BObj})
     ),
     TSVecN
   );
@@ -1510,32 +1460,32 @@ TEST_F(TypeTest, SpecializedArrays) {
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmap(BDictN|BKeysetN, {map_elem(s_A, TArrKey)}),
-      make_specialized_arrmap(BDArrN|BKeysetN, {map_elem(s_A, TArrKey)})
+      make_specialized_arrmap(BCDictN|BKeysetN, {map_elem(s_A, TArrKey)}),
+      make_specialized_arrmap(BSDictN|BKeysetN, {map_elem(s_A, TArrKey)})
     ),
     make_specialized_arrmap(BKeysetN, {map_elem(s_A, sval(s_A))})
   );
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmap(BDictN|BKeysetN, {map_elem_nonstatic(s_A, sval(s_A))}),
-      make_specialized_arrmap(BDArrN|BKeysetN, {map_elem_nonstatic(s_A, sval(s_A))})
+      make_specialized_arrmap(BCDictN|BKeysetN, {map_elem_nonstatic(s_A, sval(s_A))}),
+      make_specialized_arrmap(BSDictN|BKeysetN, {map_elem_nonstatic(s_A, sval(s_A))})
     ),
     make_specialized_arrmap(BKeysetN, {map_elem(s_A, sval(s_A))})
   );
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmap(BDictN|BKeysetN, {map_elem(s_A, TArrKey)}),
-      make_specialized_arrmap(BDArrN|BKeysetN, {map_elem_nonstatic(s_A, TCStr)})
+      make_specialized_arrmap(BSDictN|BKeysetN, {map_elem(s_A, TArrKey)}),
+      make_specialized_arrmap(BCDictN|BKeysetN, {map_elem_nonstatic(s_A, TCStr)})
     ),
     TBottom
   );
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmap(BDictN|BDArrN, {map_elem_counted(s_A, ival(123))}),
-      Type{BSDictN|BDArrN}
+      make_specialized_arrmap(BDictN|BKeysetN, {map_elem_counted(s_A, TCStr)}),
+      Type{BDictN|BSKeysetN}
     ),
-    make_specialized_arrmap(BDArrN, {map_elem_counted(s_A, ival(123))})
+    make_specialized_arrmap(BDictN, {map_elem_counted(s_A, TCStr)})
   );
   EXPECT_EQ(
     intersection_of(
@@ -1547,10 +1497,10 @@ TEST_F(TypeTest, SpecializedArrays) {
 
   EXPECT_EQ(
     intersection_of(
-      make_specialized_arrmap(BDictN|BSDArrN, {map_elem(s_A, TInitCell)}, TArrKey, TInitCell),
-      make_specialized_arrmap(BKeysetN|BSDArrN, {map_elem(s_A, TArrKey)}, TArrKey, TArrKey)
+      make_specialized_arrmap(BDictN, {map_elem(s_A, TInitCell)}, TArrKey, TInitCell),
+      make_specialized_arrmap(BSDictN|BKeysetN, {map_elem(s_A, TArrKey)}, TArrKey, TArrKey)
     ),
-    make_specialized_arrmap(BSDArrN, {map_elem(s_A, TUncArrKey)}, TUncArrKey, TUncArrKey)
+    make_specialized_arrmap(BSDictN, {map_elem(s_A, TUncArrKey)}, TUncArrKey, TUncArrKey)
   );
 
   EXPECT_EQ(
@@ -1562,7 +1512,7 @@ TEST_F(TypeTest, SpecializedArrays) {
   );
 }
 
-TEST_F(TypeTest, Split) {
+TEST(Type, Split) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1728,7 +1678,7 @@ TEST_F(TypeTest, Split) {
   EXPECT_EQ(split.second, TInt);
 }
 
-TEST_F(TypeTest, Remove) {
+TEST(Type, Remove) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -1820,7 +1770,7 @@ TEST_F(TypeTest, Remove) {
   EXPECT_EQ(remove_obj(make_specialized_sub_object(BObj|BFalse, *clsA)), TFalse);
 }
 
-TEST_F(TypeTest, Prim) {
+TEST(Type, Prim) {
   const std::initializer_list<std::pair<Type, Type>> subtype_true{
     { TInt,      TPrim },
     { TBool,     TPrim },
@@ -1912,7 +1862,7 @@ TEST_F(TypeTest, Prim) {
   EXPECT_FALSE(TPrim.couldBe(TClsMeth));
 }
 
-TEST_F(TypeTest, CouldBeValues) {
+TEST(Type, CouldBeValues) {
   EXPECT_FALSE(ival(2).couldBe(ival(3)));
   EXPECT_TRUE(ival(2).couldBe(ival(2)));
 
@@ -1938,7 +1888,7 @@ TEST_F(TypeTest, CouldBeValues) {
   EXPECT_FALSE(sval_nonstatic(s_test).couldBe(sval(s_A)));
 }
 
-TEST_F(TypeTest, Unc) {
+TEST(Type, Unc) {
   EXPECT_TRUE(TInt.subtypeOf(BInitUnc));
   EXPECT_TRUE(TInt.subtypeOf(BUnc));
   EXPECT_TRUE(TDbl.subtypeOf(BInitUnc));
@@ -1979,7 +1929,7 @@ TEST_F(TypeTest, Unc) {
   }
 }
 
-TEST_F(TypeTest, DblNan) {
+TEST(Type, DblNan) {
   auto const qnan = std::numeric_limits<double>::quiet_NaN();
   EXPECT_TRUE(dval(qnan).subtypeOf(dval(qnan)));
   EXPECT_TRUE(dval(qnan).couldBe(dval(qnan)));
@@ -1989,7 +1939,7 @@ TEST_F(TypeTest, DblNan) {
   EXPECT_EQ(intersection_of(dval(qnan), dval(qnan)), dval(qnan));
 }
 
-TEST_F(TypeTest, ToObj) {
+TEST(Type, ToObj) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2034,7 +1984,7 @@ TEST_F(TypeTest, ToObj) {
             make_specialized_sub_class(BCls, awaitable));
 }
 
-TEST_F(TypeTest, Option) {
+TEST(Type, Option) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2076,15 +2026,6 @@ TEST_F(TypeTest, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(BOptStr));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptStr));
 
-  EXPECT_TRUE(TSVArr.subtypeOf(BOptSVArr));
-  EXPECT_TRUE(!TVArr.subtypeOf(BOptSVArr));
-  EXPECT_TRUE(TInitNull.subtypeOf(BOptSVArr));
-  EXPECT_TRUE(!TUninit.subtypeOf(BOptSVArr));
-
-  EXPECT_TRUE(TDArr.subtypeOf(BOptDArr));
-  EXPECT_TRUE(TInitNull.subtypeOf(BOptDArr));
-  EXPECT_TRUE(!TUninit.subtypeOf(BOptDArr));
-
   EXPECT_TRUE(TObj.subtypeOf(BOptObj));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptObj));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptObj));
@@ -2121,7 +2062,7 @@ TEST_F(TypeTest, Option) {
     wait_handle(index, dval(2.0))));
 }
 
-TEST_F(TypeTest, OptUnionOf) {
+TEST(Type, OptUnionOf) {
   EXPECT_EQ(opt(ival(2)), union_of(ival(2), TInitNull));
   EXPECT_EQ(opt(dval(2.0)), union_of(TInitNull, dval(2.0)));
   EXPECT_EQ(opt(sval(s_test)), union_of(sval(s_test), TInitNull));
@@ -2133,11 +2074,6 @@ TEST_F(TypeTest, OptUnionOf) {
 
   EXPECT_EQ(TOptBool, union_of(TOptFalse, TOptTrue));
   EXPECT_EQ(TOptBool, union_of(TOptTrue, TOptFalse));
-
-  EXPECT_EQ(TOptSDArr, union_of(TInitNull, TOptSDArr));
-  EXPECT_EQ(TOptSVArr, union_of(TOptSVArr, TInitNull));
-  EXPECT_EQ(TOptDArr, union_of(TOptDArr, TInitNull));
-  EXPECT_EQ(TOptVArr, union_of(TInitNull, TOptVArr));
 
   EXPECT_EQ(TOptSStr,
             union_of(opt(sval(s_test)), opt(sval(s_TestClass))));
@@ -2186,7 +2122,7 @@ TEST_F(TypeTest, OptUnionOf) {
   EXPECT_TRUE(union_of(owh2, wh3) == owh1);
 }
 
-TEST_F(TypeTest, TV) {
+TEST(Type, TV) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2199,8 +2135,6 @@ TEST_F(TypeTest, TV) {
 
     if (t.couldBe(BCounted & ~(BArrLike | BStr)) ||
         (t.couldBe(BStr) && t.subtypeAmong(BCStr, BStr)) ||
-        (t.couldBe(BVArr) && t.subtypeAmong(BCVArr, BVArr)) ||
-        (t.couldBe(BDArr) && t.subtypeAmong(BCDArr, BDArr)) ||
         (t.couldBe(BVec) && t.subtypeAmong(BCVec, BVec)) ||
         (t.couldBe(BDict) && t.subtypeAmong(BCDict, BDict)) ||
         (t.couldBe(BKeyset) && t.subtypeAmong(BCKeyset, BKeyset))) {
@@ -2218,9 +2152,7 @@ TEST_F(TypeTest, TV) {
     }
 
     if (t.couldBe(BArrLikeE)) {
-      if (!t.subtypeAmong(BVArrE, BArrLike) &&
-          !t.subtypeAmong(BDArrE, BArrLike) &&
-          !t.subtypeAmong(BVecE, BArrLike) &&
+      if (!t.subtypeAmong(BVecE, BArrLike) &&
           !t.subtypeAmong(BDictE, BArrLike) &&
           !t.subtypeAmong(BKeysetE, BArrLike)) {
         EXPECT_FALSE(tv(t).has_value());
@@ -2236,12 +2168,8 @@ TEST_F(TypeTest, TV) {
   test(TInitNull, make_tv<KindOfNull>());
   test(TTrue, make_tv<KindOfBoolean>(true));
   test(TFalse, make_tv<KindOfBoolean>(false));
-  test(aempty_varray(), make_array_like_tv(staticEmptyVArray()));
-  test(some_aempty_varray(), make_array_like_tv(staticEmptyVArray()));
   test(vec_empty(), make_array_like_tv(staticEmptyVec()));
   test(some_vec_empty(), make_array_like_tv(staticEmptyVec()));
-  test(aempty_darray(), make_array_like_tv(staticEmptyDArray()));
-  test(some_aempty_darray(), make_array_like_tv(staticEmptyDArray()));
   test(dict_empty(), make_array_like_tv(staticEmptyDictArray()));
   test(some_dict_empty(), make_array_like_tv(staticEmptyDictArray()));
   test(keyset_empty(), make_array_like_tv(staticEmptyKeysetArray()));
@@ -2334,8 +2262,6 @@ TEST_F(TypeTest, TV) {
     }
 
     if (!(t.couldBe(BStr) && t.subtypeAmong(BCStr, BStr)) &&
-        !(t.couldBe(BVArr) && t.subtypeAmong(BCVArr, BVArr)) &&
-        !(t.couldBe(BDArr) && t.subtypeAmong(BCDArr, BDArr)) &&
         !(t.couldBe(BVec) && t.subtypeAmong(BCVec, BVec)) &&
         !(t.couldBe(BDict) && t.subtypeAmong(BCDict, BDict)) &&
         !(t.couldBe(BKeyset) && t.subtypeAmong(BCKeyset, BKeyset))) {
@@ -2353,9 +2279,7 @@ TEST_F(TypeTest, TV) {
     }
 
     if (t.couldBe(BArrLikeE)) {
-      if (!t.subtypeAmong(BVArrE, BArrLike) &&
-          !t.subtypeAmong(BDArrE, BArrLike) &&
-          !t.subtypeAmong(BVecE, BArrLike) &&
+      if (!t.subtypeAmong(BVecE, BArrLike) &&
           !t.subtypeAmong(BDictE, BArrLike) &&
           !t.subtypeAmong(BKeysetE, BArrLike)) {
         EXPECT_FALSE(tv(t).has_value());
@@ -2367,8 +2291,6 @@ TEST_F(TypeTest, TV) {
     auto const val = tvCounted(t);
     EXPECT_TRUE(val && tvSame(*val, d));
   };
-  testC(make_unmarked(TCVArrE), make_array_like_tv(staticEmptyVArray()));
-  testC(make_unmarked(TCDArrE), make_array_like_tv(staticEmptyDArray()));
   testC(make_unmarked(TCVecE), make_array_like_tv(staticEmptyVec()));
   testC(make_unmarked(TCDictE), make_array_like_tv(staticEmptyDictArray()));
   testC(TCKeysetE, make_array_like_tv(staticEmptyKeysetArray()));
@@ -2401,7 +2323,7 @@ TEST_F(TypeTest, TV) {
   );
 }
 
-TEST_F(TypeTest, OptCouldBe) {
+TEST(Type, OptCouldBe) {
   for (auto const& t : optionals()) {
     if (t.subtypeOf(BInitNull)) continue;
     EXPECT_TRUE(t.couldBe(unopt(t)));
@@ -2480,7 +2402,7 @@ TEST_F(TypeTest, OptCouldBe) {
   }
 }
 
-TEST_F(TypeTest, ArrayLikeElem) {
+TEST(Type, ArrayLikeElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -2860,7 +2782,7 @@ TEST_F(TypeTest, ArrayLikeElem) {
   }
 }
 
-TEST_F(TypeTest, ArrayLikeNewElem) {
+TEST(Type, ArrayLikeNewElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -3185,7 +3107,7 @@ TEST_F(TypeTest, ArrayLikeNewElem) {
   }
 }
 
-TEST_F(TypeTest, ArrayLikeSetElem) {
+TEST(Type, ArrayLikeSetElem) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -3501,7 +3423,7 @@ TEST_F(TypeTest, ArrayLikeSetElem) {
   }
 }
 
-TEST_F(TypeTest, SpecificExamples) {
+TEST(Type, SpecificExamples) {
   // Random examples to stress option types, values, etc:
 
   EXPECT_TRUE(!TInt.subtypeOf(ival(1)));
@@ -3582,7 +3504,7 @@ TEST_F(TypeTest, SpecificExamples) {
   }
 }
 
-TEST_F(TypeTest, IndexBased) {
+TEST(Type, IndexBased) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -3732,7 +3654,7 @@ TEST_F(TypeTest, IndexBased) {
   EXPECT_TRUE(opt(subObjBaseTy).couldBe(opt(objExactTy)));
 }
 
-TEST_F(TypeTest, Hierarchies) {
+TEST(Type, Hierarchies) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -4092,7 +4014,7 @@ TEST_F(TypeTest, Hierarchies) {
   EXPECT_EQ(union_of(opt(subObjAATy), objExactTestClassTy), opt(TObj));
 }
 
-TEST_F(TypeTest, Interface) {
+TEST(Type, Interface) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
@@ -4157,7 +4079,7 @@ TEST_F(TypeTest, Interface) {
   EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
 }
 
-TEST_F(TypeTest, LoosenInterfaces) {
+TEST(Type, LoosenInterfaces) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -4192,7 +4114,7 @@ TEST_F(TypeTest, LoosenInterfaces) {
   }
 }
 
-TEST_F(TypeTest, WaitH) {
+TEST(Type, WaitH) {
   auto const program = make_test_program();
   Index index { program.get() };
 
@@ -4303,7 +4225,7 @@ TEST_F(TypeTest, WaitH) {
   }
 }
 
-TEST_F(TypeTest, FromHNIConstraint) {
+TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\resource")), TOptRes);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\resource")), TRes);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\bool")), TBool);
@@ -4325,7 +4247,7 @@ TEST_F(TypeTest, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("")), TCell);
 }
 
-TEST_F(TypeTest, DictPacked1) {
+TEST(Type, DictPacked1) {
   auto const a1 = dict_packed({ival(2), TSStr, TInt});
   auto const a2 = dict_packed({TInt,    TStr,  TInitCell});
   auto const s1 = sdict_packed({ival(2), TSStr, TInt});
@@ -4363,7 +4285,7 @@ TEST_F(TypeTest, DictPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST_F(TypeTest, OptDictPacked1) {
+TEST(Type, OptDictPacked1) {
   auto const a1 = opt(dict_packed({ival(2), TSStr, TInt}));
   auto const a2 = opt(dict_packed({TInt,    TStr,  TInitCell}));
   auto const s1 = opt(sdict_packed({ival(2), TSStr, TInt}));
@@ -4401,7 +4323,7 @@ TEST_F(TypeTest, OptDictPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST_F(TypeTest, DictPacked2) {
+TEST(Type, DictPacked2) {
   {
     auto const a1 = dict_packed({TInt, TInt, TDbl});
     auto const a2 = dict_packed({TInt, TInt});
@@ -4447,7 +4369,7 @@ TEST_F(TypeTest, DictPacked2) {
   }
 }
 
-TEST_F(TypeTest, DictPackedUnion) {
+TEST(Type, DictPackedUnion) {
   {
     auto const a1 = dict_packed({TInt, TDbl});
     auto const a2 = dict_packed({TDbl, TInt});
@@ -4504,7 +4426,7 @@ TEST_F(TypeTest, DictPackedUnion) {
   }
 }
 
-TEST_F(TypeTest, DictPackedN) {
+TEST(Type, DictPackedN) {
   auto const packedDict = static_dict(0, 42, 1, 23, 2, 12);
   auto const a1 = dict_val(packedDict);
   auto const a2 = sdict_packed({TInt, TInt});
@@ -4540,7 +4462,7 @@ TEST_F(TypeTest, DictPackedN) {
   EXPECT_FALSE(s2.couldBe(sn2));
 }
 
-TEST_F(TypeTest, DictStruct) {
+TEST(Type, DictStruct) {
   auto const test_map_a          = MapElems{map_elem(s_test, ival(2))};
   auto const test_map_b          = MapElems{map_elem(s_test, TInt)};
   auto const test_map_c          = MapElems{map_elem(s_test, ival(2)),
@@ -4593,7 +4515,7 @@ TEST_F(TypeTest, DictStruct) {
   EXPECT_TRUE(se.couldBe(dict_val(testDict)));
 }
 
-TEST_F(TypeTest, DictMapN) {
+TEST(Type, DictMapN) {
   auto const test_map =
     dict_val(static_dict(s_A.get(), s_B.get(), s_test.get(), 12));
   EXPECT_TRUE(test_map != dict_n(TSStr, TInitUnc));
@@ -4624,7 +4546,7 @@ TEST_F(TypeTest, DictMapN) {
   EXPECT_FALSE(tstruct.couldBe(dict_n(TSStr, TObj)));
 }
 
-TEST_F(TypeTest, DictEquivalentRepresentations) {
+TEST(Type, DictEquivalentRepresentations) {
   {
     auto const simple = dict_val(static_dict(0, 42, 1, 23, 2, 12));
     auto const bulky  = sdict_packed({ival(42), ival(23), ival(12)});
@@ -4644,7 +4566,7 @@ TEST_F(TypeTest, DictEquivalentRepresentations) {
   }
 }
 
-TEST_F(TypeTest, DictUnions) {
+TEST(Type, DictUnions) {
   auto const test_map_a    = MapElems{map_elem(s_test, ival(2))};
   auto const tstruct       = sdict_map(test_map_a);
 
@@ -4681,7 +4603,7 @@ TEST_F(TypeTest, DictUnions) {
   );
 }
 
-TEST_F(TypeTest, DictIntersections) {
+TEST(Type, DictIntersections) {
   auto const test_map_a    = MapElems{map_elem(s_test, ival(2))};
   auto const tstruct       = sdict_map(test_map_a);
 
@@ -4771,7 +4693,7 @@ TEST_F(TypeTest, DictIntersections) {
   );
 }
 
-TEST_F(TypeTest, DictOfDict) {
+TEST(Type, DictOfDict) {
   auto const t1 = dict_n(TSStr, dict_n(TInt, TSStr));
   auto const t2 = dict_n(TSStr, TDict);
   auto const t3 = dict_n(TSStr, dict_packedn(TSStr));
@@ -4786,7 +4708,7 @@ TEST_F(TypeTest, DictOfDict) {
   EXPECT_TRUE(t4.subtypeOf(t2));
 }
 
-TEST_F(TypeTest, WideningAlreadyStable) {
+TEST(Type, WideningAlreadyStable) {
   // A widening union on types that are already stable should not move
   // the type anywhere.
   auto const program = make_test_program();
@@ -4813,7 +4735,7 @@ TEST_F(TypeTest, WideningAlreadyStable) {
   EXPECT_EQ(deepMapN, widening_union(deepMapN, sdict_n(TInt, deepMapN)));
 }
 
-TEST_F(TypeTest, EmptyDict) {
+TEST(Type, EmptyDict) {
   {
     auto const possible_e = union_of(dict_packedn(TInt), dict_empty());
     EXPECT_TRUE(possible_e.couldBe(dict_empty()));
@@ -4846,7 +4768,7 @@ TEST_F(TypeTest, EmptyDict) {
   );
 }
 
-TEST_F(TypeTest, ArrKey) {
+TEST(Type, ArrKey) {
   EXPECT_TRUE(TInt.subtypeOf(BArrKey));
   EXPECT_TRUE(TStr.subtypeOf(BArrKey));
   EXPECT_TRUE(ival(0).subtypeOf(BArrKey));
@@ -4877,7 +4799,7 @@ TEST_F(TypeTest, ArrKey) {
   EXPECT_EQ(unopt(TOptUncArrKey), TUncArrKey);
 }
 
-TEST_F(TypeTest, LoosenStaticness) {
+TEST(Type, LoosenStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -4961,12 +4883,6 @@ TEST_F(TypeTest, LoosenStaticness) {
     { TSDictishE, TDictishE },
     { TSDictishN, TDictishN },
     { TSDictish, TDictish },
-    { TSVArrE, TVArrE },
-    { TSVArrN, TVArrN },
-    { TSVArr, TVArr },
-    { TSDArrE, TDArrE },
-    { TSDArrN, TDArrN },
-    { TSDArr, TDArr },
     { TSVecE, TVecE },
     { TSVecN, TVecN },
     { TSVec, TVec },
@@ -5010,7 +4926,7 @@ TEST_F(TypeTest, LoosenStaticness) {
   }
 }
 
-TEST_F(TypeTest, LoosenStringStaticness) {
+TEST(Type, LoosenStringStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5061,7 +4977,7 @@ TEST_F(TypeTest, LoosenStringStaticness) {
   }
 }
 
-TEST_F(TypeTest, LoosenArrayStaticness) {
+TEST(Type, LoosenArrayStaticness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5120,12 +5036,6 @@ TEST_F(TypeTest, LoosenArrayStaticness) {
     { TSDictishE, TDictishE },
     { TSDictishN, TDictishN },
     { TSDictish, TDictish },
-    { TSVArrE, TVArrE },
-    { TSVArrN, TVArrN },
-    { TSVArr, TVArr },
-    { TSDArrE, TDArrE },
-    { TSDArrN, TDArrN },
-    { TSDArr, TDArr },
     { TSVecE, TVecE },
     { TSVecN, TVecN },
     { TSVec, TVec },
@@ -5169,7 +5079,7 @@ TEST_F(TypeTest, LoosenArrayStaticness) {
   }
 }
 
-TEST_F(TypeTest, Emptiness) {
+TEST(Type, Emptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5206,7 +5116,7 @@ TEST_F(TypeTest, Emptiness) {
   }
 }
 
-TEST_F(TypeTest, AssertNonEmptiness) {
+TEST(Type, AssertNonEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5274,7 +5184,7 @@ TEST_F(TypeTest, AssertNonEmptiness) {
   }
 }
 
-TEST_F(TypeTest, AssertEmptiness) {
+TEST(Type, AssertEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5343,7 +5253,7 @@ TEST_F(TypeTest, AssertEmptiness) {
   }
 }
 
-TEST_F(TypeTest, LoosenEmptiness) {
+TEST(Type, LoosenEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5369,14 +5279,6 @@ TEST_F(TypeTest, LoosenEmptiness) {
 
   auto const test_map    = MapElems{map_elem(s_A, TInt)};
   std::vector<std::pair<Type, Type>> tests = {
-    { TSVArrE, TSVArr },
-    { TSVArrN, TSVArr },
-    { TVArrE, TVArr },
-    { TVArrN, TVArr },
-    { TSDArrE, TSDArr },
-    { TSDArrN, TSDArr },
-    { TDArrE, TDArr },
-    { TDArrN, TDArr },
     { TSVecE, TSVec },
     { TSVecN, TSVec },
     { TVecE, TVec },
@@ -5414,7 +5316,7 @@ TEST_F(TypeTest, LoosenEmptiness) {
   }
 }
 
-TEST_F(TypeTest, LoosenValues) {
+TEST(Type, LoosenValues) {
   auto const program = make_test_program();
   auto const unit = program->units.back().get();
     auto const func = [&]() -> php::Func* {
@@ -5492,7 +5394,7 @@ TEST_F(TypeTest, LoosenValues) {
   EXPECT_TRUE(loosen_values(opt(subObj(*cls))) == opt(subObj(*cls)));
 }
 
-TEST_F(TypeTest, LoosenArrayValues) {
+TEST(Type, LoosenArrayValues) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5508,7 +5410,7 @@ TEST_F(TypeTest, LoosenArrayValues) {
   }
 }
 
-TEST_F(TypeTest, LoosenStringValues) {
+TEST(Type, LoosenStringValues) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5524,7 +5426,7 @@ TEST_F(TypeTest, LoosenStringValues) {
   }
 }
 
-TEST_F(TypeTest, AddNonEmptiness) {
+TEST(Type, AddNonEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5552,14 +5454,6 @@ TEST_F(TypeTest, AddNonEmptiness) {
 
   auto const test_map    = MapElems{map_elem(s_A, TInt)};
   std::vector<std::pair<Type, Type>> tests = {
-    { TVArrE, TVArr },
-    { TSVArrE, TSVArr },
-    { TVArrN, TVArrN },
-    { TSVArrN, TSVArrN },
-    { TDArrE, TDArr },
-    { TSDArrE, TSDArr },
-    { TDArrN, TDArrN },
-    { TSDArrN, TSDArrN },
     { TVecE, TVec },
     { TSVecE, TSVec },
     { TVecN, TVecN },
@@ -5601,7 +5495,7 @@ TEST_F(TypeTest, AddNonEmptiness) {
   }
 }
 
-TEST_F(TypeTest, LoosenVecishOrDictish) {
+TEST(Type, LoosenVecishOrDictish) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5628,8 +5522,7 @@ TEST_F(TypeTest, LoosenVecishOrDictish) {
   }
 
   auto const vecOrDict = union_of(TVec, TDict);
-  auto const varrOrDArr = union_of(TVArr, TDArr);
-  auto const both = union_of(vecOrDict, varrOrDArr);
+  auto const both = union_of(vecOrDict, Type{BVArr|BDArr});
   std::vector<std::pair<Type, Type>> tests = {
     { TSVecE, vecOrDict },
     { TSVecN, vecOrDict },
@@ -5643,36 +5536,12 @@ TEST_F(TypeTest, LoosenVecishOrDictish) {
     { TDictN, vecOrDict },
     { TSDict, vecOrDict },
     { TDict, vecOrDict },
-    { TSVArrE, varrOrDArr },
-    { TSVArrN, varrOrDArr },
-    { TVArrE, varrOrDArr },
-    { TVArrN, varrOrDArr },
-    { TSVArr, varrOrDArr },
-    { TVArr, varrOrDArr },
-    { TSDArrE, varrOrDArr },
-    { TSDArrN, varrOrDArr },
-    { TDArrE, varrOrDArr },
-    { TDArrN, varrOrDArr },
-    { TSDArr, varrOrDArr },
-    { TDArr, varrOrDArr },
     { TSKeysetE, TSKeysetE },
     { TSKeysetN, TSKeysetN },
     { TKeysetE, TKeysetE },
     { TKeysetN, TKeysetN },
     { TSKeyset, TSKeyset },
     { TKeyset, TKeyset },
-    { TSVecishE, both },
-    { TSVecishN, both },
-    { TVecishE, both },
-    { TVecishN, both },
-    { TSVecish, both },
-    { TVecish, both },
-    { TSDictishE, both },
-    { TSDictishN, both },
-    { TDictishE, both },
-    { TDictishN, both },
-    { TSDictish, both },
-    { TDictish, both },
     { TSArrLikeE, union_of(both, TSKeysetE) },
     { TSArrLikeN, union_of(both, TSKeysetN) },
     { TArrLikeE, union_of(both, TKeysetE) },
@@ -5697,7 +5566,7 @@ TEST_F(TypeTest, LoosenVecishOrDictish) {
   }
 }
 
-TEST_F(TypeTest, Scalarize) {
+TEST(Type, Scalarize) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -5726,10 +5595,6 @@ TEST_F(TypeTest, Scalarize) {
     { TInitNull, TInitNull },
     { TFalse, TFalse },
     { TTrue, TTrue },
-    { TSVArrE, TSVArrE },
-    { TVArrE, TSVArrE },
-    { TSDArrE, TSDArrE },
-    { TDArrE, TSDArrE },
     { TSVecE, TSVecE },
     { TVecE, TSVecE },
     { TSDictE, TSDictE },
@@ -5756,7 +5621,7 @@ TEST_F(TypeTest, Scalarize) {
   }
 }
 
-TEST_F(TypeTest, StrValues) {
+TEST(Type, StrValues) {
   auto const t1 = sval(s_test);
   auto const t2 = sval_nonstatic(s_test);
   auto const t3 = sval(s_A);
@@ -5819,7 +5684,7 @@ TEST_F(TypeTest, StrValues) {
   EXPECT_EQ(union_of(t5, t2), TStr);
 }
 
-TEST_F(TypeTest, DictMapOptValues) {
+TEST(Type, DictMapOptValues) {
   auto const test_map_a = MapElems{map_elem(s_A, TInt), map_elem(s_B, TDbl)};
   auto const test_map_b = MapElems{map_elem(s_A, TInt)};
   auto const test_map_c = MapElems{map_elem(s_A, TInt), map_elem(s_test, TInt)};
@@ -6064,7 +5929,7 @@ TEST_F(TypeTest, DictMapOptValues) {
   );
 }
 
-TEST_F(TypeTest, ContextDependent) {
+TEST(Type, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
   auto const program = make_test_program();
@@ -6437,7 +6302,7 @@ TEST_F(TypeTest, ContextDependent) {
 #undef REFINE_EQ
 }
 
-TEST_F(TypeTest, ArrLike) {
+TEST(Type, ArrLike) {
   const std::initializer_list<std::pair<Type, Type>> subtype_true{
     // Expect all static arrays to be subtypes
     { TSKeyset, TArrLike },
@@ -6447,9 +6312,6 @@ TEST_F(TypeTest, ArrLike) {
     { TKeyset,  TArrLike },
     { TDict,    TArrLike },
     { TVec,     TArrLike },
-    // Expect VArray and DArray to be subtypes
-    { TDArr,    TArrLike },
-    { TVArr,    TArrLike },
   };
 
   const std::initializer_list<std::pair<Type, Type>> subtype_false{
@@ -6495,7 +6357,7 @@ TEST_F(TypeTest, ArrLike) {
   }
 }
 
-TEST_F(TypeTest, LoosenLikeness) {
+TEST(Type, LoosenLikeness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -6510,13 +6372,13 @@ TEST_F(TypeTest, LoosenLikeness) {
     } else {
       auto u = BBottom;
       if (t.couldBe(BCls | BLazyCls)) u |= BSStr;
-      if (t.couldBe(BClsMeth)) u |= BVArrN|BDArrN;
+      if (t.couldBe(BClsMeth)) u |= BVecN;
       EXPECT_EQ(loosen_likeness(t), union_of(t, Type{u}));
     }
   }
 
   std::vector<std::pair<Type, Type>> tests{
-    { TClsMeth, Type{BClsMeth|BVArrN|BDArrN} },
+    { TClsMeth, Type{BClsMeth|BVecN} },
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
     { TInt, TInt },
@@ -6527,7 +6389,7 @@ TEST_F(TypeTest, LoosenLikeness) {
   }
 }
 
-TEST_F(TypeTest, LoosenLikenessRecursively) {
+TEST(Type, LoosenLikenessRecursively) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
@@ -6566,13 +6428,13 @@ TEST_F(TypeTest, LoosenLikenessRecursively) {
     } else {
       auto u = BBottom;
       if (t.couldBe(BCls | BLazyCls)) u |= BSStr;
-      if (t.couldBe(BClsMeth)) u |= BVArrN|BDArrN;
+      if (t.couldBe(BClsMeth)) u |= BVecN;
       EXPECT_EQ(loosen_likeness_recursively(t), union_of(t, Type{u}));
     }
   };
 
   auto const almostAll1 = Type{BInitCell & ~BSStr};
-  auto const almostAll2 = Type{BInitCell & ~(BVArrN|BDArrN)};
+  auto const almostAll2 = Type{BInitCell & ~BVecN};
 
   auto const& all = allCases(index);
   for (auto const& t : all) test(t);
@@ -6580,32 +6442,32 @@ TEST_F(TypeTest, LoosenLikenessRecursively) {
   test(almostAll2);
 
   std::vector<std::pair<Type, Type>> tests{
-    { TClsMeth, Type{BClsMeth|BVArrN|BDArrN} },
+    { TClsMeth, Type{BClsMeth|BVecN} },
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
     { TInt, TInt },
     { Type{BInt|BCls}, Type{BCls|BSStr|BInt} },
     { wait_handle(index, TInt), wait_handle(index, TInt) },
     { wait_handle(index, TCls), wait_handle(index, Type{BCls|BSStr}) },
-    { wait_handle(index, TClsMeth), wait_handle(index, Type{BClsMeth|BVArrN|BDArrN}) },
+    { wait_handle(index, TClsMeth), wait_handle(index, Type{BClsMeth|BVecN}) },
     { dict_val(static_dict(s_A, 100, s_B, 200)),
       dict_map({map_elem(s_A, ival(100)), map_elem(s_B, ival(200))}) },
     { vec_n(TInt), vec_n(TInt) },
     { vec_n(TCls), vec_n(Type{BCls|BSStr}) },
-    { vec_n(TClsMeth), vec_n(Type{BClsMeth|BVArrN|BDArrN}) },
+    { vec_n(TClsMeth), vec_n(Type{BClsMeth|BVecN}) },
     { vec({TInt}), vec({TInt}) },
     { vec({TCls}), vec({Type{BCls|BSStr}}) },
-    { vec({TClsMeth}), vec({Type{BClsMeth|BVArrN|BDArrN}}) },
+    { vec({TClsMeth}), vec({Type{BClsMeth|BVecN}}) },
     { dict_n(TArrKey, TInt), dict_n(TArrKey, TInt) },
     { dict_n(TArrKey, TCls), dict_n(TArrKey, Type{BCls|BSStr}) },
-    { dict_n(TArrKey, TClsMeth), dict_n(TArrKey, Type{BClsMeth|BVArrN|BDArrN}) },
+    { dict_n(TArrKey, TClsMeth), dict_n(TArrKey, Type{BClsMeth|BVecN}) },
     { dict_map({map_elem(s_A, TInt)}, TArrKey, TInt),
       dict_map({map_elem(s_A, TInt)}, TArrKey, TInt) },
     { dict_map({map_elem(s_A, TCls)}, TArrKey, TCls),
       dict_map({map_elem(s_A, Type{BCls|BSStr})}, TArrKey, Type{BCls|BSStr}) },
     { dict_map({map_elem(s_A, TClsMeth)}, TArrKey, TClsMeth),
-      dict_map({map_elem(s_A, Type{BClsMeth|BVArrN|BDArrN})},
-               TArrKey, Type{BClsMeth|BVArrN|BDArrN}) },
+      dict_map({map_elem(s_A, Type{BClsMeth|BVecN})},
+               TArrKey, Type{BClsMeth|BVecN}) },
     { vec_n(almostAll1), TVecN },
     { vec_n(almostAll2), TVecN },
     { dict_n(TArrKey, almostAll1), TDictN },
@@ -6617,46 +6479,7 @@ TEST_F(TypeTest, LoosenLikenessRecursively) {
   }
 }
 
-TEST_F(TypeTest, ArrayProvenance) {
-  RO::EvalArrayProvenance = true;
-
-  auto const program = make_test_program();
-  Index index{ program.get() };
-
-  auto const& all = allCases(index);
-  for (auto const& t : all) {
-    EXPECT_EQ(opt(loosen_provenance(t)), loosen_provenance(opt(t)));
-    if (t.strictSubtypeOf(BInitCell)) {
-      EXPECT_EQ(wait_handle(index, loosen_provenance(t)),
-                loosen_provenance(wait_handle(index, t)));
-    }
-
-    if (!t.couldBe(BArrLike) && !is_specialized_wait_handle(t)) {
-      EXPECT_EQ(t, loosen_provenance(t));
-    } else {
-      EXPECT_FALSE(is_specialized_array_like_arrval(loosen_provenance(t)));
-    }
-
-    if (t.subtypeOf(BCell)) {
-      EXPECT_FALSE(
-        assert_nonemptiness(union_of(t,TArrLikeE)).couldBe(BArrLikeE)
-      );
-
-      EXPECT_FALSE(
-        remove_bits(union_of(t,TArrLikeE), BArrLikeE).couldBe(BArrLikeE)
-      );
-
-      EXPECT_FALSE(
-        intersection_of(
-          union_of(t, TVecishE),
-          TDictish
-        ).couldBe(BVecishE)
-      );
-    }
-  }
-}
-
-TEST_F(TypeTest, IterTypes) {
+TEST(Type, IterTypes) {
   auto const elem1 = map_elem(s_A, TObj);
   auto const elem2 = map_elem_nonstatic(s_B, TInt);
   auto const sdict1 = static_dict(s_A, 100);

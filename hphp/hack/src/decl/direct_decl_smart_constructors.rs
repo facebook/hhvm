@@ -720,6 +720,7 @@ pub enum Node<'a> {
     XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
     XhpAttributeUse(&'a Node<'a>),
     TypeConstant(&'a ShallowTypeconst<'a>),
+    ContextConstraint(&'a (ConstraintKind, Node<'a>)),
     RequireClause(&'a RequireClause<'a>),
     ClassishBody(&'a &'a [Node<'a>]),
     TypeParameter(&'a TypeParameterDecl<'a>),
@@ -2994,6 +2995,15 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         Node::TypeConstraint(self.alloc((kind, value)))
     }
 
+    fn make_context_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+        let kind = match kind.token_kind() {
+            Some(TokenKind::As) => ConstraintKind::ConstraintAs,
+            Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
+            _ => return Node::Ignored(SK::ContextConstraint),
+        };
+        Node::ContextConstraint(self.alloc((kind, value)))
+    }
+
     fn make_type_parameter(
         &mut self,
         user_attributes: Self::R,
@@ -4822,7 +4832,7 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         _ctx_keyword: Self::R,
         name: Self::R,
         _type_parameters: Self::R,
-        _as_constraint: Self::R,
+        constraints: Self::R,
         _equal: Self::R,
         ctx_list: Self::R,
         _semicolon: Self::R,
@@ -4841,12 +4851,24 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
             (true, None) => (context, TypeconstAbstractKind::TCAbstract(context)),
             (true, Some(_)) => (None, TypeconstAbstractKind::TCAbstract(context)),
         };
+        // note: lowerer ensures that there's at most 1 constraint of each kind
+        let mut as_constraint = None;
+        let mut super_constraint = None;
+        for c in constraints.iter() {
+            if let Node::ContextConstraint(&(kind, hint)) = c {
+                let ty = self.node_to_ty(hint);
+                match kind {
+                    ConstraintKind::ConstraintSuper => super_constraint = ty,
+                    ConstraintKind::ConstraintAs => as_constraint = ty,
+                    _ => {}
+                }
+            }
+        }
         Node::TypeConstant(self.alloc(ShallowTypeconst {
             abstract_,
             name: name.into(),
-            as_constraint: None,
-            // TODO(coeffects) properly handle super/as constraints
-            super_constraint: None,
+            as_constraint,
+            super_constraint,
             type_: context,
             enforceable: (Pos::none(), false),
             reifiable: None,

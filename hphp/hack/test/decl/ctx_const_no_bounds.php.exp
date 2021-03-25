@@ -1,0 +1,43 @@
+--- legacy
++++ direct decl
+@@ -1,38 +1,39 @@
+ [("\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
+        sc_name = ([3:16-17], "\\C"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts =
+        [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
+           stc_as_constraint = None; stc_super_constraint = None;
+           stc_name = ([4:22-23], "C"); stc_type = None;
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          ];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
+   ("\\D",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+         sc_name = ([7:7-8], "\\D"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends = [(Rhint ([7:17-18]), (Tapply (([7:17-18], "\\C"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+         sc_req_implements = []; sc_implements = [];
+         sc_implements_dynamic = false; sc_consts = [];
+         sc_typeconsts =
+         [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+            stc_as_constraint = None; stc_super_constraint = None;
+            stc_name = ([8:13-14], "C");
+-           stc_type = (Some (Rhint ([8:17-19]), (Tintersection [])));
++           stc_type =
++           (Some (Rhint ([8:17-19]), (Toption (Rhint ([8:17-19]), Tnonnull))));
+            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+           ];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }))
+   ]

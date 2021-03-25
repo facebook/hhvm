@@ -291,29 +291,25 @@ namespace HH {
 
 namespace HH\Lib\_Private\Native {
   /*
-  * container intrinsic for HH\traversable
+  * These functions all take Containers
   */
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function first(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     mixed $iterable
-  ): mixed;
+  )[]: mixed;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function first_key(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     mixed $iterable
-  ): mixed;
+  )[]: mixed;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function last(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     mixed $iterable
-  ): mixed;
+  )[]: mixed;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function last_key(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     mixed $iterable
-  ): mixed;
+  )[]: mixed;
 }

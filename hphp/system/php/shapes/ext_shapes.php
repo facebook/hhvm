@@ -3,50 +3,45 @@
 namespace HH {
   abstract final class Shapes {
 
-    <<__Pure, __IsFoldable>>
+    <<__IsFoldable>>
     public static function idx(
       ?darray $shape,
       arraykey $index,
       mixed $default = null,
-    ) {
+    )[] {
       return idx($shape, $index, $default);
     }
 
-    <<__Pure>>
     public static function at(
       darray $shape,
       arraykey $index,
-    ) {
+    )[] {
       return $shape[$index];
     }
 
-    <<__Pure>>
     public static function keyExists(
       darray $shape,
       arraykey $index,
-    ): bool {
+    )[]: bool {
       return \array_key_exists($index, $shape);
     }
 
-    <<__Pure>>
     public static function removeKey(
       inout darray $shape,
       arraykey $index,
-    ): void {
+    )[]: void {
       unset($shape[$index]);
     }
 
-    <<__Pure>>
     public static function toArray(
       darray $shape,
-    ): darray {
+    )[]: darray {
       return $shape;
     }
 
-    <<__Pure>>
     public static function toDict(
       darray $shape,
-    ): dict {
+    )[]: dict {
       return dict(\HH\array_unmark_legacy($shape));
     }
 

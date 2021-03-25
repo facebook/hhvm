@@ -40,24 +40,24 @@ function server_warmup_status_monotonic(): string;
 <<__Native>>
 function execution_context(): string;
 
-<<__Pure, __Native, __IsFoldable>>
-function array_mark_legacy(mixed $v, bool $recursive = false): mixed;
+<<__Native, __IsFoldable>>
+function array_mark_legacy(mixed $v, bool $recursive = false)[]: mixed;
 
-<<__Pure, __Native, __IsFoldable>>
-function array_unmark_legacy(mixed $v, bool $recursive = false): mixed;
+<<__Native, __IsFoldable>>
+function array_unmark_legacy(mixed $v, bool $recursive = false)[]: mixed;
 
-<<__Pure, __IsFoldable>>
-function array_mark_legacy_recursive(mixed $v): mixed {
+<<__IsFoldable>>
+function array_mark_legacy_recursive(mixed $v)[]: mixed {
   return array_mark_legacy($v, true);
 }
 
-<<__Pure, __IsFoldable>>
-function array_unmark_legacy_recursive(mixed $v): mixed {
+<<__IsFoldable>>
+function array_unmark_legacy_recursive(mixed $v)[]: mixed {
   return array_unmark_legacy($v, true);
 }
 
-<<__Pure, __Native, __IsFoldable>>
-function is_array_marked_legacy(mixed $v): bool;
+<<__Native, __IsFoldable>>
+function is_array_marked_legacy(mixed $v)[]: bool;
 
 
 

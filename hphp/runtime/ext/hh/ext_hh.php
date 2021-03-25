@@ -142,7 +142,7 @@ function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 <<__Native>>
 function ffp_parse_string_native(string $program): string;
 
-function ffp_parse_string(string $program): darray {
+function ffp_parse_string(string $program)[]: darray {
   $json = ffp_parse_string_native($program);
   // 2048 is MAX_JSON_DEPTH to avoid making a global constant
   return \json_decode($json, true, 2048);
@@ -170,7 +170,7 @@ function clear_instance_memoization(object $obj) : bool;
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */
  <<__Native>>
-function set_frame_metadata(mixed $metadata): void;
+function set_frame_metadata(mixed $metadata)[]: void;
 
 /**
  * Get the total number of requests dispatched since the server started.
@@ -211,15 +211,15 @@ function prefetch_units(keyset<string> $paths, bool $hint): void;
  * Construct a function pointer for the function with $name. The function should
  * be marked __DynamicallyCallable.
  */
-<<__Native, __Pure>>
-function dynamic_fun(string $name): mixed;
+<<__Native>>
+function dynamic_fun(string $name)[]: mixed;
 
 /**
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
  * a static method marked __DynamicallyCallable.
  */
-<<__Native, __Pure>>
-function dynamic_class_meth(string $cls, string $meth): mixed;
+<<__Native>>
+function dynamic_class_meth(string $cls, string $meth)[]: mixed;
 
 /**
  * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
@@ -525,8 +525,7 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
-  <<__Pure>>
-  function get_type_structure<reify T>(): mixed {
+  function get_type_structure<reify T>()[]: mixed {
     return \__systemlib_reified_generics()[0];
   }
 
@@ -534,8 +533,7 @@ namespace HH\ReifiedGenerics {
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
    */
-  <<__Pure>>
-  function get_classname<reify T>(): classname<T> {
+  function get_classname<reify T>()[]: classname<T> {
     $clsname = idx(namespace\get_type_structure<T>(), 'classname', null);
     if ($clsname is null) {
       throw new \Exception('Trying to get the classname out of a reified type'.

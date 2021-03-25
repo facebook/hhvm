@@ -192,18 +192,18 @@ namespace HH {
 
   /* Finds whether the given variable is a vec.
    */
-  <<__Native, __IsFoldable, __Pure>>
-  function is_vec(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_vec(mixed $var)[]: bool;
 
   /* Finds whether the given variable is a dict.
    */
-  <<__Native, __IsFoldable, __Pure>>
-  function is_dict(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_dict(mixed $var)[]: bool;
 
   /* Finds whether the given variable is a keyset.
    */
-  <<__Native, __IsFoldable, __Pure>>
-  function is_keyset(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_keyset(mixed $var)[]: bool;
 
   <<__Native, __IsFoldable, __Pure>>
   function is_varray(<<__MaybeMutable>> mixed $var): bool;
@@ -211,27 +211,27 @@ namespace HH {
   <<__Native, __IsFoldable, __Pure>>
   function is_darray(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_any_array(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_any_array(mixed $var)[]: bool;
 
-  <<__Native, __Pure>>
-  function is_php_array(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native>>
+  function is_php_array(mixed $var)[]: bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_dict_or_darray(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_dict_or_darray(mixed $var)[]: bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_vec_or_varray(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_vec_or_varray(mixed $var)[]: bool;
 
   /*
    * Check if the input is an array-like containing only integer keys running
    * from 0 to N-1, in that order.
    */
-  <<__Native, __IsFoldable, __Pure>>
-  function is_list_like(<<__MaybeMutable>> AnyArray $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_list_like(AnyArray $var)[]: bool;
 
-  <<__Native, __IsFoldable, __Pure>>
-  function is_meth_caller(<<__MaybeMutable>> mixed $var): bool;
+  <<__Native, __IsFoldable>>
+  function is_meth_caller(mixed $var)[]: bool;
 
  /*
   * Behaves like serialize() but takes an optional set of options.
@@ -260,7 +260,7 @@ namespace HH {
    * as casting the object to an array.
    */
   <<__Native>>
-  function object_prop_array(object $obj): darray;
+  function object_prop_array(object $obj)[]: darray;
 
   /*
    * Return true if the <<__LateInit>> property (with name $prop) on the given

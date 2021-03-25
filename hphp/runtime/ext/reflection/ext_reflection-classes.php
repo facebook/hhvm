@@ -1369,8 +1369,8 @@ namespace HH {
    * @return        darray   The resolved type structure for either a type
    *                         constant or a type alias.
    */
-  <<__Native, __Pure>>
-  function type_structure(mixed $cls_or_obj, ?string $cns_name = null): darray;
+  <<__Native>>
+  function type_structure(mixed $cls_or_obj, ?string $cns_name = null)[]: darray;
 
   /**
    * Same as type_structure but does not throw when there's an undefined symbol
@@ -1396,8 +1396,7 @@ namespace HH {
    *
    * @return        darray   The resolved type structure for a type alias.
    */
-  <<__Pure>>
-  function type_structure_for_alias(mixed $cls_or_obj): darray {
+  function type_structure_for_alias(mixed $cls_or_obj)[]: darray {
     return type_structure($cls_or_obj, null);
   }
 }

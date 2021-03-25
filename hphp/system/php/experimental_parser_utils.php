@@ -2,7 +2,7 @@
 
 namespace HH\ExperimentalParserUtils {
 
-  function find_all_functions(darray $json): dict<int, darray> {
+  function find_all_functions(darray $json)[]: dict<int, darray> {
     $funs = Map {};
     ffp_json_dfs(
       $json,
@@ -24,7 +24,7 @@ namespace HH\ExperimentalParserUtils {
     return \HH\dict($funs);
   }
 
-  function body_bounds(darray $function): ((int, int), (int, int)) {
+  function body_bounds(darray $function)[]: ((int, int), (int, int)) {
     if ($function["kind"] === "lambda_expression") {
       $body = $function["lambda_body"];
     } else if ($function["kind"] === "anonymous_function") {
@@ -167,7 +167,7 @@ namespace HH\ExperimentalParserUtils {
   }
 
   // expects JSON of a file with a single type alias that is a shape
-  function extract_type_of_only_shape_type_alias(darray $json): dict<string, (string, bool)> {
+  function extract_type_of_only_shape_type_alias(darray $json)[]: dict<string, (string, bool)> {
     $elements = $json["parse_tree"]["script_declarations"]["elements"];
     invariant(\count($elements) === 3, "Supplied JSON must be parse tree of a single type alias.");
     invariant($elements[0]["kind"] === "markup_section",
@@ -209,7 +209,7 @@ namespace HH\ExperimentalParserUtils {
     return $result;
   }
 
-  function find_enum_body(darray $json, string $name): ?darray {
+  function find_enum_body(darray $json, string $name)[]: ?darray {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {
       if ($d["kind"] === "enum_declaration") {
@@ -222,7 +222,7 @@ namespace HH\ExperimentalParserUtils {
     return null;
   }
 
-  function extract_enum_comments(darray $enumerators): dict<string, vec<string>> {
+  function extract_enum_comments(darray $enumerators)[]: dict<string, vec<string>> {
     $result = dict[];
     if ($enumerators["kind"] === "missing") {
       return $result;
@@ -242,7 +242,7 @@ namespace HH\ExperimentalParserUtils {
    * can do a shallow search of the tree to collect methods by name.
    * If there is a tie, use the line number
    */
-  function find_method_parameters(darray $json, string $method_name, int $line_number): darray {
+  function find_method_parameters(darray $json, string $method_name, int $line_number)[]: darray {
     $candidates = vec[];
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {
@@ -280,7 +280,7 @@ namespace HH\ExperimentalParserUtils {
     return $method["methodish_function_decl_header"]["function_parameter_list"];
   }
 
-  function extract_parameter_comments(darray $params): dict<string, vec<string>> {
+  function extract_parameter_comments(darray $params)[]: dict<string, vec<string>> {
     $result = dict[];
     if ($params["kind"] === "missing") {
       return $result;
@@ -298,7 +298,7 @@ namespace HH\ExperimentalParserUtils {
     return $result;
   }
 
-  function find_class_method_shape_return_type(darray $class_body, string $name): ?darray {
+  function find_class_method_shape_return_type(darray $class_body, string $name)[]: ?darray {
     $m = find_class_method($class_body, $name);
     if ($m === null) {
       return null;
@@ -325,7 +325,7 @@ namespace HH\ExperimentalParserUtils {
     return null;
   }
 
-  function find_class_body(darray $json, string $name): ?darray {
+  function find_class_body(darray $json, string $name)[]: ?darray {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {
       if ($d["kind"] === "classish_declaration") {
@@ -338,7 +338,7 @@ namespace HH\ExperimentalParserUtils {
     return null;
   }
 
-  function find_class_shape_type_constant(darray $class_body, string $name): ?darray {
+  function find_class_shape_type_constant(darray $class_body, string $name)[]: ?darray {
     $elements = $class_body["classish_body_elements"];
     if ($elements["kind"] === "missing") {
       return null;
@@ -356,7 +356,7 @@ namespace HH\ExperimentalParserUtils {
     return null;
   }
 
-  function find_single_shape_type_alias(darray $json, string $name): ?(string, darray) {
+  function find_single_shape_type_alias(darray $json, string $name)[]: ?(string, darray) {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {
       if ($d["kind"] === "alias_declaration") {
@@ -390,7 +390,7 @@ namespace HH\ExperimentalParserUtils {
     }
   }
 
-  function extract_shape_comments(darray $shape): dict<string, vec<string>> {
+  function extract_shape_comments(darray $shape)[]: dict<string, vec<string>> {
     $result = dict[];
     $fields = $shape["shape_type_fields"];
     if ($fields["kind"] === "missing") {

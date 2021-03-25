@@ -105,6 +105,6 @@ namespace HH {
    * @param mixed $fun
    * @return function name
    */
-  <<__Native, __Pure>>
-  function fun_get_function(mixed $fun): string;
+  <<__Native>>
+  function fun_get_function(mixed $fun)[]: string;
 }

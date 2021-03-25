@@ -231,38 +231,38 @@ namespace HH {
  * @param mixed $class_meth
  * @return class name
  */
-<<__Native, __Pure>>
-function class_meth_get_class(mixed $class_meth): string;
+<<__Native>>
+function class_meth_get_class(mixed $class_meth)[]: string;
 
 /**
  * Get class name from class
  * @param mixed $class
  * @return class name
  */
-<<__Native, __Pure>>
-function class_get_class_name(mixed $class): string;
+<<__Native>>
+function class_get_class_name(mixed $class)[]: string;
 
 /**
  * Get method name from class_meth
  * @param mixed $class_meth
  * @return method name
  */
-<<__Native,  __Pure>>
-function class_meth_get_method(mixed $class_meth): string;
+<<__Native>>
+function class_meth_get_method(mixed $class_meth)[]: string;
 
 /**
  * Get class name from meth_caller
  * @param mixed $meth_caller
  * @return class name
  */
-<<__Native, __IsFoldable, __Pure>>
-function meth_caller_get_class(mixed $meth_caller): string;
+<<__Native, __IsFoldable>>
+function meth_caller_get_class(mixed $meth_caller)[]: string;
 
 /**
  * Get method name from meth_caller
  * @param mixed $meth_caller
  * @return method name
  */
-<<__Native, __IsFoldable, __Pure>>
-function meth_caller_get_method(mixed $meth_caller): string;
+<<__Native, __IsFoldable>>
+function meth_caller_get_method(mixed $meth_caller)[]: string;
 }

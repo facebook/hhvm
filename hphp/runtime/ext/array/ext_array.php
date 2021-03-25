@@ -1384,35 +1384,35 @@ namespace __SystemLib {
 }
 
 namespace HH {
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function dict(
-    <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
+    mixed
       $arr,
-  ): dict;
+  )[]: dict;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function vec(
-    <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
+    mixed
       $arr,
-  ): vec;
+  )[]: vec;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function keyset(
-    <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
+    mixed
       $arr,
-  ): keyset;
+  )[]: keyset;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function varray(
-    <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
+    mixed
       $arr,
-  ): varray;
+  )[]: varray;
 
-  <<__Native, __IsFoldable, __Pure, __AtMostRxAsArgs>>
+  <<__Native, __IsFoldable>>
   function darray(
-    <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
+    mixed
       $arr,
-  ): darray;
+  )[]: darray;
 
   /**
    * array_key_cast() can be used to convert a given value to the equivalent
@@ -1430,12 +1430,12 @@ namespace HH {
    *
    * @return arraykey - Returns the converted value.
    */
-  <<__Native, __IsFoldable, __Pure>>
-  function array_key_cast(mixed $key): arraykey;
+  <<__Native, __IsFoldable>>
+  function array_key_cast(mixed $key)[]: arraykey;
 
   <<__Native>>
   function get_provenance(mixed $key): string;
 
-  <<__Native, __Pure>>
-  function tag_provenance_here(mixed $key, int $flags = 0): mixed;
+  <<__Native>>
+  function tag_provenance_here(mixed $key, int $flags = 0)[]: mixed;
 }

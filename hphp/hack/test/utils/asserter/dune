@@ -4,4 +4,5 @@
   (libraries
     hh_json
     relative_path
-    str))
+    str
+    symbol_name))

@@ -85,3 +85,18 @@ vec(3) {
   string(1) "A"
 }
 T::rmeth6
+vec(2) {
+  string(2) ":Z"
+  string(2) ":Z"
+}
+rfunc1
+vec(2) {
+  string(2) ":Z"
+  string(2) ":Z"
+}
+T::rsmeth1
+vec(2) {
+  string(2) ":Z"
+  string(2) ":Z"
+}
+T::rmeth1

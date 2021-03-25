@@ -151,4 +151,6 @@ Array resolvePartial(const Array& ts,
 
 }
 
+std::string xhpNameFromTS(const Array& arr);
+
 }

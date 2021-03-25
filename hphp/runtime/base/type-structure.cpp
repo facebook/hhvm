@@ -845,6 +845,12 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
 } // anonymous namespace
 
+std::string xhpNameFromTS(const Array& arr) {
+  std::string name;
+  xhpTypeName(arr, name);
+  return name;
+}
+
 String TypeStructure::toString(const Array& arr, TSDisplayType type) {
   if (arr.empty()) return String();
   return String(fullName(arr, type));

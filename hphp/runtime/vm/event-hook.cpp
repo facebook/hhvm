@@ -187,6 +187,10 @@ Array getReifiedClasses(const ActRec* ar) {
       );
       break;
 
+    case K::T_xhp:
+      clist.append(String{xhpNameFromTS(ArrNR{val(ts).parr})});
+      break;
+
     case K::T_void:
     case K::T_int:
     case K::T_bool:
@@ -218,7 +222,6 @@ Array getReifiedClasses(const ActRec* ar) {
 
     case K::T_unresolved:
     case K::T_typeaccess:
-    case K::T_xhp:
     case K::T_reifiedtype:
       // These type structures should always be resolved
       always_assert(false);

@@ -32,6 +32,8 @@ type X = int;
 newtype Y = A;
 class TC { const type T = Y; }
 
+class :Z {}
+
 <<__EntryPoint>>
 function main() {
   fb_setprofile(($mode, $fn, $frame) ==> var_dump($frame['reified_classes'] ?? null), SETPROFILE_FLAGS_ENTERS);
@@ -56,4 +58,9 @@ function main() {
   (new T)->rmeth4<A, Q>();
   (new T)->rmeth5<A, TC::T, E>();
   (new T)->rmeth6<X, A, Y>();
+
+
+  rfunc1<:Z, :Z>();
+  T::rsmeth1<:Z, :Z>();
+  (new T)->rmeth1<:Z, :Z>();
 }

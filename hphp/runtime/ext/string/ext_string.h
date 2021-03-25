@@ -356,6 +356,8 @@ Variant HHVM_FUNCTION(soundex,
 Variant HHVM_FUNCTION(metaphone,
                       const String& str,
                       int phones = 0);
+bool HHVM_FUNCTION(HH_str_number_coercible,
+                   const String& str);
 Variant HHVM_FUNCTION(HH_str_to_numeric,
                       const String& str);
 

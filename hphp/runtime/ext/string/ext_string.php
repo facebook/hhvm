@@ -1734,14 +1734,27 @@ function metaphone(string $str, int $phones = 0)[]: mixed;
 }
 
 namespace HH {
+
 /**
  *
  * @param string $str - The input string
  *
- * @return ?num - If $str is not "numeric" as per the definition of `is_numeric`
- * null is returned. Otherwise, return the value of the string coerced to a number
+ * @return bool - If $str is "numeric" such that (int)$str would yield either
+ * non-zero or 0 for a reason other than that the string didn't look numeric enough
  *
  */
 <<__IsFoldable, __Native, __Pure>>
-function str_to_numeric(string $str): ?num;
+function str_number_coercible(string $str)[]: bool;
+
+/**
+ *
+ * @param string $str - The input string
+ *
+ * @return ?num - If $str is not "numeric" as per the definition of
+ * `str_number_coercible` null is returned. Otherwise, return the value of the
+ * string coerced to a number
+ */
+<<__IsFoldable, __Native, __Pure>>
+function str_to_numeric(string $str)[]: ?num;
+
 }

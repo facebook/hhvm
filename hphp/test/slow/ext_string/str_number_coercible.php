@@ -51,10 +51,10 @@ const BAD_VALS = vec[
 
 <<__EntryPoint>> function main(): void {
   foreach (GOOD_VALS as $val) {
-    invariant(HH\str_to_numeric($val) is nonnull, '%s should convert', $val);
+    invariant(HH\str_number_coercible($val), '%s should be coercible', $val);
   }
   foreach (BAD_VALS as $val) {
-    invariant(HH\str_to_numeric($val) is null, '%s shouldn\'t convert', $val);
+    invariant(!HH\str_number_coercible($val), '%s shouldn\'t be coercible', $val);
   }
   echo "All passed!\n";
 

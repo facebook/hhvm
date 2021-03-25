@@ -6,6 +6,17 @@
   (libraries
     opaque_digest
     pos
+    symbol_name
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name symbol_name)
+  (wrapped false)
+  (modules
+    symbol_name)
+  (libraries
+    collections
     utils_core)
   (preprocess (pps ppx_deriving.std)))
 

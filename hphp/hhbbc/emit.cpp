@@ -1285,7 +1285,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     if (cconst.kind == ConstModifiers::Kind::Context) {
       pce->addContextConstant(
         cconst.name,
-        cconst.coeffects,
+        std::vector<LowStringPtr>(cconst.coeffects),
         cconst.isAbstract,
         cconst.isFromTrait
       );

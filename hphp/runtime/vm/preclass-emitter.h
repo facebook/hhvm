@@ -124,19 +124,21 @@ struct PreClassEmitter {
   };
 
   struct Const {
+    using CoeffectsVec = std::vector<LowStringPtr>;
+
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)
       , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
-      , m_coeffects(StaticCoeffects::none())
+      , m_coeffects({})
       , m_kind(ConstModifiers::Kind::Value)
       , m_isAbstract(false)
       , m_fromTrait(false)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode,
-          const StaticCoeffects coeffects, const ConstModifiers::Kind kind,
+          const CoeffectsVec&& coeffects, const ConstModifiers::Kind kind,
           const bool isAbstract, const bool fromTrait)
       : m_name(n)
       , m_typeConstraint(typeConstraint)
@@ -159,7 +161,7 @@ struct PreClassEmitter {
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
     bool isAbstract() const { return m_isAbstract; }
-    StaticCoeffects coeffects() const { return m_coeffects; }
+    const CoeffectsVec& coeffects() const { return m_coeffects; }
     ConstModifiers::Kind kind() const { return m_kind; }
     bool isFromTrait() const { return m_fromTrait; }
 
@@ -178,7 +180,7 @@ struct PreClassEmitter {
     LowStringPtr m_typeConstraint;
     folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
-    StaticCoeffects m_coeffects;
+    CoeffectsVec m_coeffects;
     ConstModifiers::Kind m_kind;
     bool m_isAbstract;
     bool m_fromTrait;
@@ -253,7 +255,8 @@ struct PreClassEmitter {
                     ConstModifiers::Kind::Value,
                    const bool fromTrait = false,
                    const Array& typeStructure = Array{});
-  bool addContextConstant(const StringData* n, StaticCoeffects coeffects,
+  bool addContextConstant(const StringData* n,
+                          Const::CoeffectsVec&& coeffects,
                           const bool isAbstract, const bool fromTrait = false);
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,

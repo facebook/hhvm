@@ -3041,13 +3041,13 @@ void parse_context_constant(AsmState& as) {
   as.in.skipWhitespace();
   bool isAbstract = as.in.tryConsume("isAbstract");
 
-  auto coeffects = StaticCoeffects::none();
+  auto coeffects = PreClassEmitter::Const::CoeffectsVec{};
 
   while (true) {
     as.in.skipWhitespace();
     std::string coeffect;
     if (!as.in.readword(coeffect)) break;
-    coeffects |= CoeffectsConfig::fromName(coeffect);
+    coeffects.push_back(makeStaticString(coeffect));
   }
 
   as.in.expectWs(';');
@@ -3056,7 +3056,7 @@ void parse_context_constant(AsmState& as) {
   if (isAbstract) return;
 
   DEBUG_ONLY auto added =
-    as.pce->addContextConstant(makeStaticString(name), coeffects,
+    as.pce->addContextConstant(makeStaticString(name), std::move(coeffects),
                                false /* isAbstract */);
   assertx(added);
 }

@@ -989,7 +989,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
             tvaux,
             staticEmptyString(),
             staticEmptyString(),
-            StaticCoeffects::none(),
+            {},
             ConstModifiers::Kind::Value,
             false,
             false

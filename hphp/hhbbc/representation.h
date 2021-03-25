@@ -454,7 +454,7 @@ struct Const {
   LSString phpCode;
   LSString typeConstraint;
 
-  StaticCoeffects coeffects;
+  std::vector<LowStringPtr> coeffects;
 
   ConstModifiers::Kind kind;
   bool isAbstract   : 1;

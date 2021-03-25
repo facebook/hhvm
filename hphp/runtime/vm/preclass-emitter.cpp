@@ -20,6 +20,7 @@
 #include <folly/Memory.h>
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
@@ -203,13 +204,14 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
     return false;
   }
   PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr,
-                             StaticCoeffects::none(), kind, true, fromTrait);
+                             {}, kind, true, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
 
 bool PreClassEmitter::addContextConstant(const StringData* n,
-                                         StaticCoeffects coeffects,
+                                         PreClassEmitter::Const::CoeffectsVec&&
+                                           coeffects,
                                          const bool isAbstract,
                                          const bool fromTrait) {
   auto it = m_constMap.find(n);
@@ -217,7 +219,8 @@ bool PreClassEmitter::addContextConstant(const StringData* n,
     return false;
   }
   PreClassEmitter::Const cns(n, nullptr, nullptr, nullptr,
-                             coeffects, ConstModifiers::Kind::Context,
+                             std::move(coeffects),
+                             ConstModifiers::Kind::Context,
                              isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
@@ -245,7 +248,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
     tvVal = *val;
   }
   PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode,
-                             StaticCoeffects::none(), kind, false, fromTrait);
+                             {}, kind, false, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -406,7 +409,11 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
     tvaux.constModifiers() = {};
     if (const_.kind() == ConstModifiers::Kind::Context) {
       tvaux.constModifiers().setIsAbstract(const_.isAbstract());
-      tvaux.constModifiers().setCoeffects(const_.coeffects());
+      auto coeffects = StaticCoeffects::none();
+      for (auto const& coeffect : const_.coeffects()) {
+        coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
+      }
+      tvaux.constModifiers().setCoeffects(coeffects);
     } else {
       if (const_.isAbstract()) {
         tvWriteUninit(tvaux);

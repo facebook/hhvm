@@ -48,7 +48,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
       auto const msg =
         folly::sformat("Coeffect rule requires parameter at position "
                        "{} to be an object or null",
-                       paramIdx);
+                       paramIdx + 1);
       gen(env, RaiseError, cns(env, makeStaticString(msg)));
       return cns(env, 0);
     }

@@ -317,7 +317,7 @@ void raiseCoeffectsFunParamTypeViolation(TypedValue tv,
     folly::sformat("Coeffect rule requires parameter at position {} to be a "
                    "closure object, function/method pointer or null but "
                    "{} given",
-                   paramIdx, describe_actual_type(&tv));
+                   paramIdx + 1, describe_actual_type(&tv));
   raise_warning(errMsg);
 }
 

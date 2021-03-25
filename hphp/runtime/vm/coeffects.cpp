@@ -118,7 +118,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
   if (!tvIsObject(tv)) {
     raise_error(folly::sformat("Coeffect rule requires parameter at "
                                "position {} to be an object or null",
-                               paramIdx));
+                               paramIdx + 1));
   }
   auto const cls = tv->m_data.pobj->getVMClass();
   return cls->clsCtxCnsGet(name);

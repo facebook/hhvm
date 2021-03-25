@@ -259,10 +259,6 @@ bool clsHasClosureCoeffectsPropHelper(const Class* c) {
   return c->hasClosureCoeffectsProp();
 }
 
-uint64_t ldFuncRequiredCoeffectsHelper(const Func* f) {
-  return f->requiredCoeffects().value();
-}
-
 } // namespace
 
 void cgFuncHasCoeffectRules(IRLS& env, const IRInstruction* inst) {
@@ -283,11 +279,9 @@ void cgClsHasClosureCoeffectsProp(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdFuncRequiredCoeffects(IRLS& env, const IRInstruction* inst) {
-  // TODO: Optimize by storing requiredCoeffects on the func directly
-  auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0);
-  auto const target = CallSpec::direct(ldFuncRequiredCoeffectsHelper);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  vmain(env) << loadzwq{func[Func::requiredCoeffectsOff()], dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

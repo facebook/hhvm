@@ -266,6 +266,13 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
 
+  auto coeffects = StaticCoeffects::none();
+  for (auto const& name : staticCoeffects) {
+    coeffects |= CoeffectsConfig::fromName(name->toCppString());
+  }
+  auto const shallowCoeffectsWithLocals = coeffects.toShallowWithLocals();
+  f->m_requiredCoeffects = coeffects.toRequired();
+
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
@@ -275,6 +282,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
+    shallowCoeffectsWithLocals.value() != 0 ||
     !coeffectRules.empty();
 
   const unsigned char* bc = nullptr;
@@ -314,15 +322,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
       ex->m_coeffectRules = coeffectRules;
       f->shared()->m_allFlags.m_hasCoeffectRules = true;
     }
+    ex->m_shallowCoeffectsWithLocals = shallowCoeffectsWithLocals;
   }
-
-  auto coeffects = StaticCoeffects::none();
-  for (auto const& name : staticCoeffects) {
-    f->shared()->m_staticCoeffectNames.push_back(name);
-    coeffects |= CoeffectsConfig::fromName(name->toCppString());
-  }
-  f->m_staticCoeffects = coeffects;
-
 
   std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < params.size(); ++i) {
@@ -375,6 +376,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
   f->shared()->m_allFlags.m_isRxDisabled = isRxDisabled;
+
+  for (auto const& name : staticCoeffects) {
+    f->shared()->m_staticCoeffectNames.push_back(name);
+  }
 
   if (hasReifiedGenerics) {
     auto tv = uait->second;

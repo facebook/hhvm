@@ -597,15 +597,16 @@ inline bool Func::isResumable() const {
 // Coeffects.
 
 inline RuntimeCoeffects Func::requiredCoeffects() const {
-  return m_staticCoeffects.toRequired();
+  return m_requiredCoeffects;
 }
 
 inline RuntimeCoeffects Func::shallowCoeffectsWithLocals() const {
-  return m_staticCoeffects.toShallowWithLocals();
+  return extShared() ? extShared()->m_shallowCoeffectsWithLocals
+                     : RuntimeCoeffects::none();
 }
 
-inline void Func::setStaticCoeffects(StaticCoeffects c) {
-  m_staticCoeffects = c;
+inline void Func::setRequiredCoeffects(RuntimeCoeffects c) {
+  m_requiredCoeffects = c;
 }
 
 inline StaticCoeffectNamesMap Func::staticCoeffectNames() const {

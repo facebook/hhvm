@@ -816,9 +816,9 @@ struct Func final {
   RuntimeCoeffects shallowCoeffectsWithLocals() const;
 
   /*
-   * Sets static coeffects
+   * Sets required coeffects
    */
-  void setStaticCoeffects(StaticCoeffects);
+  void setRequiredCoeffects(RuntimeCoeffects);
 
   /*
    * Names of the static coeffects on the function
@@ -1150,7 +1150,7 @@ struct Func final {
     return offsetof(Func, m_##f);       \
   }
   OFF(attrs)
-  OFF(staticCoeffects)
+  OFF(requiredCoeffects)
   OFF(name)
   OFF(maxStackCells)
   OFF(maybeIntercepted)
@@ -1360,7 +1360,7 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     MaybeDataType m_hniReturnType;
-    /* 2 byte hole */
+    RuntimeCoeffects m_shallowCoeffectsWithLocals{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
   };
   static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 272 : 304>(), "");
@@ -1691,7 +1691,7 @@ private:
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
   // 2 free bits
-  StaticCoeffects m_staticCoeffects{StaticCoeffects::none()};
+  RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
   Unit* const m_unit;

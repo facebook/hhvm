@@ -249,6 +249,49 @@ void cgIsClsDynConstructible(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+bool hasCoeffectRulesHelper(const Func* f) {
+  return f->hasCoeffectRules();
+}
+
+bool clsHasClosureCoeffectsPropHelper(const Class* c) {
+  return c->hasClosureCoeffectsProp();
+}
+
+uint64_t ldFuncRequiredCoeffectsHelper(const Func* f) {
+  return f->requiredCoeffects().value();
+}
+
+} // namespace
+
+void cgFuncHasCoeffectRules(IRLS& env, const IRInstruction* inst) {
+  // TODO: Optimize by reading the size field off FixedVector that
+  // stores the coeffectRules
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0);
+  auto const target = CallSpec::direct(hasCoeffectRulesHelper);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
+void cgClsHasClosureCoeffectsProp(IRLS& env, const IRInstruction* inst) {
+  // TODO: Optimize by using cgFuncHasCoeffectRules in non debug mode
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0);
+  auto const target = CallSpec::direct(clsHasClosureCoeffectsPropHelper);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
+void cgLdFuncRequiredCoeffects(IRLS& env, const IRInstruction* inst) {
+  // TODO: Optimize by storing requiredCoeffects on the func directly
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0);
+  auto const target = CallSpec::direct(ldFuncRequiredCoeffectsHelper);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
   auto const clsMethDataRef = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

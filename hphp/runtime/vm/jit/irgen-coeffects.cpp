@@ -37,11 +37,9 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   return cond(
     env,
     [&] (Block* taken) {
-      auto const isObj = gen(env, IsType, TObj, tv);
-      gen(env, JmpZero, taken, isObj);
+      return gen(env, CheckType, TObj, taken, tv);
     },
-    [&] {
-      auto const obj = gen(env, AssertType, TObj, tv);
+    [&] (SSATmp* obj) {
       auto const cls  = gen(env, LdObjClass, obj);
       return gen(env, LookupClsCtxCns, cls, cns(env, name));
     },
@@ -78,9 +76,145 @@ SSATmp* emitCCThis(IRGS& env, const Func* f, const StringData* name,
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
 
-SSATmp* emitFunParam() {
-  // TODO(oulgen): Implement this
-  return nullptr;
+SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
+                     uint32_t paramIdx) {
+  if (paramIdx >= numArgsInclUnpack) return nullptr;
+  auto const index =
+    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
+  auto const tv = topC(env, BCSPRelOffset {static_cast<int32_t>(index)});
+
+  auto const emitCond = [&](const Type& t, auto successFn, auto failFn) {
+    return cond(
+      env,
+      [&] (Block* taken) {
+        return gen(env, CheckType, t, taken, tv);
+      },
+      successFn,
+      failFn
+    );
+  };
+
+  auto const fail = [&] {
+    hint(env, Block::Hint::Unlikely);
+    auto const data = ParamData { static_cast<int32_t>(paramIdx) };
+    gen(env, RaiseCoeffectsFunParamTypeViolation, data, tv);
+    return cns(env, RuntimeCoeffects::full().value());
+  };
+
+  auto const objSuccess = [&](SSATmp* obj) {
+    auto const cls = gen(env, LdObjClass, obj);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        // TODO: Checking for invoke method is not enough to identify closure
+        // Add AttrIsClosure and AttrHasClosureCoeffectsProp
+        return gen(env, LdObjInvoke, taken, cls);
+      },
+      [&] (SSATmp* invoke) {
+        return cond(
+          env,
+          [&] (Block* taken) {
+            auto const success = gen(env, ClsHasClosureCoeffectsProp, cls);
+            gen(env, JmpZero, taken, success);
+          },
+          [&] {
+            // Rules
+            auto const addr = gen(env, LdPropAddr, IndexData { 0 },
+                                  TInt.lval(Ptr::Prop), obj);
+            return gen(env, LdMem, TInt, addr);
+          },
+          [&] {
+            // Statically known coeffects
+            return gen(env, LdFuncRequiredCoeffects, invoke);
+          }
+        );
+      },
+      fail
+    );
+  };
+
+  auto const fnPtrs = [&] {
+    auto const is_any_func_type = [&] (Block* toFail) {
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, CheckType, TFunc, taken, tv);
+        },
+        [&] (SSATmp* func) {
+          return func;
+        },
+        [&] {
+          return cond(
+            env,
+            [&] (Block* taken) {
+              return gen(env, CheckType, TRFunc, taken, tv);
+            },
+            [&] (SSATmp* ptr) {
+              return gen(env, LdFuncFromRFunc, ptr);
+            },
+            [&] {
+              return cond(
+                env,
+                [&] (Block* taken) {
+                  return gen(env, CheckType, TClsMeth, taken, tv);
+                },
+                [&] (SSATmp* ptr) {
+                  return gen(env, LdFuncFromClsMeth, ptr);
+                },
+                [&] {
+                  return cond(
+                    env,
+                    [&] (Block* taken) {
+                      return gen(env, CheckType, TRClsMeth, taken, tv);
+                    },
+                    [&] (SSATmp* ptr) {
+                      return gen(env, LdFuncFromRClsMeth, ptr);
+                    },
+                    [&] {
+                      gen(env, Jmp, toFail);
+                      // To keep JIT type system happy
+                      return cns(env, SystemLib::s_nullFunc);
+                    }
+                  );
+                }
+              );
+            }
+          );
+        }
+      );
+    };
+    auto const handle_func = [&](SSATmp* func) {
+      return cond(
+        env,
+        [&] (Block* taken) {
+          auto const success = gen(env, FuncHasCoeffectRules, func);
+          gen(env, JmpNZero, taken, success);
+        },
+        [&] {
+          // Static coeffects
+          return gen(env, LdFuncRequiredCoeffects, func);
+        },
+        [&] {
+          // Rules
+          hint(env, Block::Hint::Unlikely);
+          gen(env, RaiseCoeffectsFunParamCoeffectRulesViolation, func);
+          return cns(env, RuntimeCoeffects::full().value());
+        }
+      );
+    };
+    return cond(env, is_any_func_type, handle_func, fail);
+  };
+
+  return emitCond(
+    TNull,
+    [&] (SSATmp*) {
+      return cns(env, RuntimeCoeffects::full().value());
+    },
+    [&] {
+      return emitCond(TObj, objSuccess, fnPtrs);
+    }
+  );
+
 }
 
 SSATmp* emitClosureInheritFromParent(IRGS& env, const Func* f,
@@ -111,7 +245,7 @@ jit::SSATmp* CoeffectRule::emitJit(jit::irgen::IRGS& env,
     case Type::CCThis:
       return emitCCThis(env, f, m_name, prologueCtx);
     case Type::FunParam:
-      return emitFunParam();
+      return emitFunParam(env, f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(env, f, prologueCtx);
     case Type::Invalid:

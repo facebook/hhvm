@@ -66,6 +66,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
                                  RuntimeCoeffects provided,
                                  RuntimeCoeffects required);
 
+void raiseCoeffectsFunParamTypeViolation(TypedValue, int32_t);
+void raiseCoeffectsFunParamCoeffectRulesViolation(const Func*);
+
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

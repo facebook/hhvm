@@ -419,6 +419,8 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseArraySerializeNotice:
   case RaiseClsMethPropConvertNotice:
   case RaiseCoeffectsCallViolation:
+  case RaiseCoeffectsFunParamCoeffectRulesViolation:
+  case RaiseCoeffectsFunParamTypeViolation:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
@@ -551,6 +553,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckTypeMem:
   case CheckVecBounds:
   case ChrInt:
+  case ClsHasClosureCoeffectsProp:
   case CmpBool:
   case CmpDbl:
   case CmpInt:
@@ -656,6 +659,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Floor:
   case FuncCred:
   case FuncHasAttr:
+  case FuncHasCoeffectRules:
   case GenericRetDecRefs:
   case GetDictPtrIter:
   case GetMemoKeyScalar:
@@ -754,6 +758,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFuncFromRFunc:
   case LdFuncName:
   case LdFuncNumParams:
+  case LdFuncRequiredCoeffects:
   case LdFuncVecLen:
   case LdGenericsFromRClsMeth:
   case LdGenericsFromRFunc:

@@ -1,0 +1,50 @@
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [rx] in %s on line 12
+in defaults
+in rx
+in pure
+
+Warning: Call to foo() requires [defaults] coeffects but bar() provided [rx] in %s on line 19
+in defaults
+in rx
+in pure
+
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [rx] in %s on line 12
+in defaults
+in rx
+in pure
+
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [] in %s on line 12
+in defaults
+
+Warning: Call to rx() requires [rx] coeffects but foo() provided [] in %s on line 13
+in rx
+in pure
+
+Warning: Call to foo() requires [defaults] coeffects but bar() provided [rx] in %s on line 23
+in defaults
+in rx
+in pure
+
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [rx] in %s on line 12
+in defaults
+in rx
+in pure
+
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [] in %s on line 12
+in defaults
+
+Warning: Call to rx() requires [rx] coeffects but foo() provided [] in %s on line 13
+in rx
+in pure
+
+Warning: Call to foo() requires [defaults] coeffects but bar() provided [rx] in %s on line 26
+in defaults
+in rx
+in pure
+
+Warning: Call to defaults() requires [defaults] coeffects but foo() provided [] in %s on line 12
+in defaults
+
+Warning: Call to rx() requires [rx] coeffects but foo() provided [] in %s on line 13
+in rx
+in pure

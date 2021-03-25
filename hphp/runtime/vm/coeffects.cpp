@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
@@ -133,9 +134,39 @@ RuntimeCoeffects emitCCThis(const Func* f, const StringData* name,
   return cls->clsCtxCnsGet(name);
 }
 
-RuntimeCoeffects emitFunParam() {
-  // TODO(oulgen): implement this
-  return RuntimeCoeffects::full();
+RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
+                              uint32_t paramIdx) {
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::full();
+  auto const index =
+    numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
+  auto const tv = vmStack().indC(index);
+  auto const handleFunc = [&](const Func* func) {
+    if (func->hasCoeffectRules()) {
+      raiseCoeffectsFunParamCoeffectRulesViolation(func);
+      return RuntimeCoeffects::full();
+    }
+    return func->requiredCoeffects();
+  };
+  auto const error = [&]{
+    raiseCoeffectsFunParamTypeViolation(*tv, paramIdx);
+    return RuntimeCoeffects::full();
+  };
+  if (tvIsNull(tv))     return RuntimeCoeffects::full();
+  if (tvIsFunc(tv))     return handleFunc(tv->m_data.pfunc);
+  if (tvIsRFunc(tv))    return handleFunc(tv->m_data.prfunc->m_func);
+  if (tvIsClsMeth(tv))  return handleFunc(tv->m_data.pclsmeth->getFunc());
+  if (tvIsRClsMeth(tv)) return handleFunc(tv->m_data.prclsmeth->m_func);
+  if (tvIsObject(tv)) {
+    auto const obj = tv->m_data.pobj;
+    auto const closureCls = obj->getVMClass();
+    if (closureCls->parent() != c_Closure::classof()) return error();
+    if (!closureCls->hasClosureCoeffectsProp()) {
+      assertx(!closureCls->getCachedInvoke()->hasCoeffectRules());
+      return closureCls->getCachedInvoke()->requiredCoeffects();
+    }
+    return c_Closure::fromObject(obj)->getCoeffects();
+  }
+  return error();
 }
 
 RuntimeCoeffects emitClosureInheritFromParent(const Func* f,
@@ -157,7 +188,7 @@ RuntimeCoeffects CoeffectRule::emit(const Func* f,
     case Type::CCThis:
       return emitCCThis(f, m_name, prologueCtx);
     case Type::FunParam:
-      return emitFunParam();
+      return emitFunParam(f, numArgsInclUnpack, m_index);
     case Type::ClosureInheritFromParent:
       return emitClosureInheritFromParent(f, prologueCtx);
     case Type::Invalid:

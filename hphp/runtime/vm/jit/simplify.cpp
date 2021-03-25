@@ -43,6 +43,7 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/util/overflow.h"
 #include "hphp/util/trace.h"
@@ -346,6 +347,30 @@ SSATmp* simplifyFuncHasAttr(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
     ? cns(env, (funcTmp->funcVal()->attrs() & inst->extra<AttrData>()->attr))
+    : nullptr;
+}
+
+SSATmp* simplifyFuncHasCoeffectRules(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, (funcTmp->funcVal()->hasCoeffectRules()))
+    : nullptr;
+}
+
+SSATmp* simplifyClsHasClosureCoeffectsProp(State& env,
+                                           const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  if (!clsTmp->hasConstVal(TCls)) return nullptr;
+  auto const cls = clsTmp->clsVal();
+  // cls->hasClosureCoeffectsProp() requires the class to be closure class
+  if (cls->parent() != c_Closure::classof()) return nullptr;
+  return cns(env, cls->hasClosureCoeffectsProp());
+}
+
+SSATmp* simplifyLdFuncRequiredCoeffects(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, (funcTmp->funcVal()->requiredCoeffects().value()))
     : nullptr;
 }
 
@@ -3757,6 +3782,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdVecElem)
       X(MethodExists)
       X(FuncHasAttr)
+      X(FuncHasCoeffectRules)
+      X(ClsHasClosureCoeffectsProp)
+      X(LdFuncRequiredCoeffects)
       X(IsClsDynConstructible)
       X(LdObjClass)
       X(LdObjInvoke)

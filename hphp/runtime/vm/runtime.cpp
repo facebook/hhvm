@@ -311,6 +311,25 @@ void raiseCoeffectsCallViolation(const Func* callee,
   }
 }
 
+void raiseCoeffectsFunParamTypeViolation(TypedValue tv,
+                                         int32_t paramIdx) {
+  auto const errMsg =
+    folly::sformat("Coeffect rule requires parameter at position {} to be a "
+                   "closure object, function/method pointer or null but "
+                   "{} given",
+                   paramIdx, describe_actual_type(&tv));
+  raise_warning(errMsg);
+}
+
+void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
+  assertx(f);
+  auto const errMsg =
+    folly::sformat("Function/method pointer to {}() contains polymorphic "
+                   "coeffects but is used as a coeffect rule",
+                   f->fullNameWithClosureName());
+  raise_warning(errMsg);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

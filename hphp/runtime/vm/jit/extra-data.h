@@ -2642,6 +2642,7 @@ X(ThrowMissingArg,              FuncArgData);
 X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
+X(RaiseCoeffectsFunParamTypeViolation, ParamData);
 X(ThrowParamInOutMismatch,      ParamData);
 X(ThrowParamInOutMismatchRange, CheckInOutsData);
 X(ThrowParameterWrongType,      FuncArgTypeData);

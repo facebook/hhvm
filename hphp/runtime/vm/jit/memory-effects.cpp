@@ -1596,6 +1596,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case FuncHasAttr:
+  case FuncHasCoeffectRules:
+  case ClsHasClosureCoeffectsProp:
+  case LdFuncRequiredCoeffects:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
   case JmpPlaceholder:
@@ -1840,6 +1843,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case RaiseCoeffectsCallViolation:
+  case RaiseCoeffectsFunParamCoeffectRulesViolation:
+  case RaiseCoeffectsFunParamTypeViolation:
     return may_load_store(AEmpty, AEmpty);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

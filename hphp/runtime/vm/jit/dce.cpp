@@ -271,6 +271,9 @@ bool canDCE(IRInstruction* inst) {
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
+  case LdFuncRequiredCoeffects:
+  case FuncHasCoeffectRules:
+  case ClsHasClosureCoeffectsProp:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
@@ -523,6 +526,8 @@ bool canDCE(IRInstruction* inst) {
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseCoeffectsCallViolation:
+  case RaiseCoeffectsFunParamTypeViolation:
+  case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:

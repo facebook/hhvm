@@ -1,0 +1,1 @@
+ Warning: Function/method pointer to poly() contains polymorphic coeffects but is used as a coeffect rule in %s on line 13

@@ -1,0 +1,1 @@
+Warning: Coeffect rule requires parameter at position 0 to be a closure object, function/method pointer or null but int given in %s on line 7

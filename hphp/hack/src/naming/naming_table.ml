@@ -507,19 +507,19 @@ let update_reverse_entries_helper
       | Some fi ->
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
+          (fi.FileInfo.classes |> List.map ~f:snd);
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
+          (fi.FileInfo.typedefs |> List.map ~f:snd);
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
+          (fi.FileInfo.record_defs |> List.map ~f:snd);
         Naming_provider.remove_fun_batch
           backend
-          (fi.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
+          (fi.FileInfo.funs |> List.map ~f:snd);
         Naming_provider.remove_const_batch
           backend
-          (fi.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
+          (fi.FileInfo.consts |> List.map ~f:snd)
       | None -> ())
     changed_file_infos;
 

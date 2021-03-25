@@ -84,7 +84,7 @@ module type ReverseNamingTable = sig
 
   val is_defined : Naming_sqlite.db_path option -> string -> bool
 
-  val remove_batch : Naming_sqlite.db_path option -> SSet.t -> unit
+  val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
   val heap_string_of_key : string -> string
 
@@ -240,6 +240,7 @@ module Types = struct
       ~key:id
 
   let remove_batch db_path_opt types =
+    let types = SSet.of_list types in
     let canon_key_types = canonize_set types in
     TypeCanonHeap.remove_batch canon_key_types;
     TypePosHeap.remove_batch types;
@@ -342,6 +343,7 @@ module Funs = struct
       ~key:name
 
   let remove_batch db_path_opt funs =
+    let funs = SSet.of_list funs in
     let canon_key_funs = canonize_set funs in
     FunCanonHeap.remove_batch canon_key_funs;
     FunPosHeap.remove_batch funs;
@@ -406,6 +408,7 @@ module Consts = struct
   let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
   let remove_batch db_path_opt consts =
+    let consts = SSet.of_list consts in
     ConstPosHeap.remove_batch consts;
     match db_path_opt with
     | None -> ()

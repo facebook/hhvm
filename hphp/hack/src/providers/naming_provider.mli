@@ -29,7 +29,7 @@ val add_const : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Remove all global constants with the given names from the reverse naming
 table. *)
-val remove_const_batch : Provider_backend.t -> SSet.t -> unit
+val remove_const_batch : Provider_backend.t -> string list -> unit
 
 (** Determine whether a global function with the given name is declared in
 the reverse naming table. *)
@@ -64,7 +64,7 @@ val add_fun : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Remove all global functions with the given names from the reverse naming
 table. *)
-val remove_fun_batch : Provider_backend.t -> SSet.t -> unit
+val remove_fun_batch : Provider_backend.t -> string list -> unit
 
 (** Record that a type (one of [Naming_types.kind_of_type] was declared at
 the given position. These types all live in the same namespace, unlike
@@ -77,7 +77,7 @@ val add_type :
   unit
 
 (** Remove all types with the given names from the reverse naming table. *)
-val remove_type_batch : Provider_backend.t -> SSet.t -> unit
+val remove_type_batch : Provider_backend.t -> string list -> unit
 
 (** Look up the position at which the given type was declared in the reverse
 naming table. *)

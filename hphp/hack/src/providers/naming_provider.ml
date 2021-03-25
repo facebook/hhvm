@@ -177,7 +177,8 @@ let add_const
         SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
     | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
-let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
+let remove_const_batch (backend : Provider_backend.t) (names : string list) :
+    unit =
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
@@ -188,10 +189,10 @@ let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.consts :=
-      SSet.fold
+      List.fold
         names
         ~init:!(reverse_naming_table_delta.consts)
-        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted)
+        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
@@ -322,7 +323,8 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
        it to update in response to the list of changed files. *)
       ()
 
-let remove_fun_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
+let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
+    =
   match backend with
   | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
@@ -333,15 +335,15 @@ let remove_fun_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.funs :=
-      SSet.fold
+      List.fold
         names
         ~init:!(reverse_naming_table_delta.funs)
-        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted);
+        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted);
     reverse_naming_table_delta.funs_canon_key :=
-      SSet.fold
+      List.fold
         names
         ~init:!(reverse_naming_table_delta.funs_canon_key)
-        ~f:(fun name acc ->
+        ~f:(fun acc name ->
           SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
   | Provider_backend.Decl_service _ as backend ->
     (* Removing cache items is not the responsibility of hh_worker. *)
@@ -373,7 +375,8 @@ let add_type
       (* Do nothing. Naming table updates should be done already. *)
       ()
 
-let remove_type_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
+let remove_type_batch (backend : Provider_backend.t) (names : string list) :
+    unit =
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
@@ -384,15 +387,15 @@ let remove_type_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.types :=
-      SSet.fold
+      List.fold
         names
         ~init:!(reverse_naming_table_delta.types)
-        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted);
+        ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted);
     reverse_naming_table_delta.types_canon_key :=
-      SSet.fold
+      List.fold
         names
         ~init:!(reverse_naming_table_delta.types_canon_key)
-        ~f:(fun name acc ->
+        ~f:(fun acc name ->
           SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
   | Provider_backend.Decl_service _ as backend ->
     (* Removing cache items is not the responsibility of hh_worker. *)
@@ -711,9 +714,7 @@ let update
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option) : unit =
   let open FileInfo in
-  let strip_positions symbols =
-    List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) -> SSet.add acc x)
-  in
+  let strip_positions symbols = List.map symbols ~f:snd in
   match backend with
   | Provider_backend.Decl_service _ -> not_implemented backend
   | Provider_backend.Analysis -> failwith "invalid"
@@ -750,10 +751,23 @@ let update
     let open Provider_backend.Reverse_naming_table_delta in
     (* helper*)
     let update ?(case_insensitive = false) olds news delta name_type =
+      (* The following code has a bug.
+      Given "olds/news", it calculates "added/removed" based on case-sensitive comparison.
+      That's straightforwardly correct for our case-sensitives maps.
+      But how does it work for our case-insensitive maps? e.g. olds={Aa,aA}, news={aa}.
+      Therefore added={aa}, removed={Aa,aA} because we calculated these case-sensitively.
+      (1) it removes the lowercase version of "Aa"
+      (2) it removes the lowercase version of "aA"  <-- failwith
+      (3) it adds the lowercase version of "aa"
+      Correctness requires that removal is idempotent, and that we do adds
+      after removes. Unfortunately removal currently isn't idempotent;
+      if fails if you try to remove the same thing twice. *)
       let olds = strip_positions olds in
       let news = strip_positions news in
-      let removed = SSet.diff olds news in
-      let added = SSet.diff news olds in
+      let olds_s = SSet.of_list olds in
+      let news_s = SSet.of_list news in
+      let removed = SSet.diff olds_s news_s in
+      let added = SSet.diff news_s olds_s in
       SSet.iter removed ~f:(fun name ->
           delta := remove ~case_insensitive !delta path name);
       SSet.iter added ~f:(fun name ->

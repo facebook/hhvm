@@ -55,11 +55,11 @@ val make_env :
 (* Removing declarations *)
 val remove_decls :
   backend:Provider_backend.t ->
-  funs:SSet.t ->
-  classes:SSet.t ->
-  record_defs:SSet.t ->
-  typedefs:SSet.t ->
-  consts:SSet.t ->
+  funs:string list ->
+  classes:string list ->
+  record_defs:string list ->
+  typedefs:string list ->
+  consts:string list ->
   unit
 
 val ndecl_file_fast :

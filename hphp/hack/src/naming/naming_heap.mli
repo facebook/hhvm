@@ -20,7 +20,7 @@ module type ReverseNamingTable = sig
 
   val is_defined : Naming_sqlite.db_path option -> string -> bool
 
-  val remove_batch : Naming_sqlite.db_path option -> SSet.t -> unit
+  val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
   val heap_string_of_key : string -> string
 

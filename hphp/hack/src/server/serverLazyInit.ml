@@ -509,19 +509,19 @@ let naming_from_saved_state
           let backend = Provider_context.get_backend ctx in
           Naming_provider.remove_type_batch
             backend
-            (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
+            (v.FileInfo.classes |> List.map ~f:snd);
           Naming_provider.remove_type_batch
             backend
-            (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
+            (v.FileInfo.typedefs |> List.map ~f:snd);
           Naming_provider.remove_type_batch
             backend
-            (v.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
+            (v.FileInfo.record_defs |> List.map ~f:snd);
           Naming_provider.remove_fun_batch
             backend
-            (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
+            (v.FileInfo.funs |> List.map ~f:snd);
           Naming_provider.remove_const_batch
             backend
-            (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list));
+            (v.FileInfo.consts |> List.map ~f:snd));
     Unix.gettimeofday ()
   | None ->
     (* Name all the files from the old fast (except the new ones we parsed) *)

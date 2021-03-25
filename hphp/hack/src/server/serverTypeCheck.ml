@@ -146,13 +146,6 @@ let debug_print_fast_keys genv name fast =
           ]))
 
 (*****************************************************************************)
-(* Given a set of Ast.id list produce a SSet.t (got rid of the positions)    *)
-(*****************************************************************************)
-
-let set_of_idl l =
-  List.fold_left l ~f:(fun acc (_, x) -> SSet.add acc x) ~init:SSet.empty
-
-(*****************************************************************************)
 (* We want add all the declarations that were present in a file *before* the
  * current modification. The scenario:
  * File foo.php was defining the class A.
@@ -195,27 +188,23 @@ let remove_decls env fast_parsed =
       | None -> ()
       | Some
           {
-            FileInfo.funs = funl;
-            classes = classel;
-            record_defs = record_defsl;
-            typedefs = typel;
-            consts = constl;
+            FileInfo.funs;
+            classes;
+            record_defs;
+            typedefs;
+            consts;
             file_mode = _;
             comments = _;
             hash = _;
           } ->
-        let funs = set_of_idl funl in
-        let classes = set_of_idl classel in
-        let record_defs = set_of_idl record_defsl in
-        let typedefs = set_of_idl typel in
-        let consts = set_of_idl constl in
+        (* we use [snd] to strip away positions *)
         Naming_global.remove_decls
           ~backend:(Provider_backend.get ())
-          ~funs
-          ~classes
-          ~record_defs
-          ~typedefs
-          ~consts)
+          ~funs:(List.map funs ~f:snd)
+          ~classes:(List.map classes ~f:snd)
+          ~record_defs:(List.map record_defs ~f:snd)
+          ~typedefs:(List.map typedefs ~f:snd)
+          ~consts:(List.map consts ~f:snd))
 
 (* If the only things that would change about file analysis are positions,
  * we're not going to recheck it, and positions in its error list might

@@ -833,6 +833,11 @@ struct Func final {
   bool isRxDisabled() const;
 
   /*
+   * Does this function use coeffects local to store its ambient coeffects?
+   */
+  bool hasCoeffectsLocal() const;
+
+  /*
    * Does this function have coeffect rules?
    */
   bool hasCoeffectRules() const;

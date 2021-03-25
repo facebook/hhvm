@@ -86,7 +86,8 @@ inline Offset nextBcOff(const IRGS& env) {
 inline SSATmp* curRequiredCoeffects(IRGS& env) {
   auto const func = curFunc(env);
   assertx(func);
-  if (!func->hasCoeffectRules()) {
+  if (!func->hasCoeffectsLocal()) {
+    assertx(!func->hasCoeffectRules());
     return cns(env, func->requiredCoeffects().value());
   }
   // Access 0Coeffects variable

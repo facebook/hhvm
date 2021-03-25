@@ -176,7 +176,7 @@ inline bool calleeCoeffectChecks(const Func* callee,
                                  uint32_t numArgsInclUnpack,
                                  void* prologueCtx) {
   if (!CoeffectsConfig::enabled()) {
-    if (callee->hasCoeffectRules()) {
+    if (callee->hasCoeffectsLocal()) {
       vmStack().pushInt(RuntimeCoeffects::none().value());
     }
     return true;
@@ -187,7 +187,7 @@ inline bool calleeCoeffectChecks(const Func* callee,
     for (auto const& rule : callee->getCoeffectRules()) {
       required &= rule.emit(callee, numArgsInclUnpack, prologueCtx);
     }
-    vmStack().pushInt(required.value());
+    if (callee->hasCoeffectsLocal()) vmStack().pushInt(required.value());
     return required;
   }();
   if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
@@ -267,7 +267,7 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
   // by calleeArgumentArityChecks().
   if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
 
-  CoeffectsSaver cs{callee->hasCoeffectRules()};
+  CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
   auto const numParams = callee->numNonVariadicParams();
   while (numArgsInclUnpack < numParams) {

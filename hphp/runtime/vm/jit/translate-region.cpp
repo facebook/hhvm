@@ -198,7 +198,7 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
     loc++;
   }
-  if (func->hasCoeffectRules()) {
+  if (func->hasCoeffectsLocal()) {
     // First non parameter local will specially set
     assertx(func->coeffectsLocalId() == loc);
     irgen::assertTypeLocation(irgs, Location::Local { loc }, TInt);

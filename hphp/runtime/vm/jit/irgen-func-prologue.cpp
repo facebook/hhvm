@@ -261,7 +261,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   assertx(callFlags);
 
   if (!CoeffectsConfig::enabled()) {
-    if (callee->hasCoeffectRules()) {
+    if (callee->hasCoeffectsLocal()) {
       push(env, cns(env, RuntimeCoeffects::none().value()));
       updateMarker(env);
       env.irb->exceptionStackBoundary();
@@ -276,11 +276,13 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
         required = gen(env, AndInt, required, coeffect);
       }
     }
-    push(env, required);
-    // This is a *gross* hack to reduce register pressure for prologues
-    env.irb->fs().forgetValue(offsetFromIRSP(env, BCSPRelOffset{0}));
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    if (callee->hasCoeffectsLocal()) {
+      push(env, required);
+      // This is a *gross* hack to reduce register pressure for prologues
+      env.irb->fs().forgetValue(offsetFromIRSP(env, BCSPRelOffset{0}));
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+    }
     return required;
   }();
 
@@ -392,7 +394,7 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
   if (argc == callee->numParams()) return;
 
   // Generics and coeffects are already initialized
-  auto const coeffects = callee->hasCoeffectRules()
+  auto const coeffects = callee->hasCoeffectsLocal()
     ? popC(env, DataTypeGeneric) : nullptr;
   auto const generics = callee->hasReifiedGenerics()
     ? popC(env, DataTypeGeneric) : nullptr;
@@ -485,7 +487,7 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
     assertx(callee->reifiedGenericsLocalId() == numInited);
     ++numInited;
   }
-  if (callee->hasCoeffectRules()) {
+  if (callee->hasCoeffectsLocal()) {
     assertx(callee->coeffectsLocalId() == numInited);
     ++numInited;
   }

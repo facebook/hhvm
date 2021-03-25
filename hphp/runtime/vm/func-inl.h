@@ -437,7 +437,7 @@ inline Id Func::numNamedLocals() const {
 }
 
 inline Id Func::coeffectsLocalId() const {
-  assertx(hasCoeffectRules());
+  assertx(hasCoeffectsLocal());
   return numParams() + (hasReifiedGenerics() ? 1 : 0);
 }
 
@@ -614,6 +614,10 @@ inline StaticCoeffectNamesMap Func::staticCoeffectNames() const {
 
 inline bool Func::isRxDisabled() const {
   return shared()->m_allFlags.m_isRxDisabled;
+}
+
+inline bool Func::hasCoeffectsLocal() const {
+  return hasCoeffectRules();
 }
 
 inline bool Func::hasCoeffectRules() const {

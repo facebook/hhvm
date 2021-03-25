@@ -908,7 +908,7 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
     reinterpret_cast<TypedValue*>(ar) - vmStack().top() ==
       ar->func()->numParams()
       + (ar->func()->hasReifiedGenerics() ? 1U : 0U)
-      + (ar->func()->hasCoeffectRules() ? 1U : 0U)
+      + (ar->func()->hasCoeffectsLocal() ? 1U : 0U)
   );
 
   // +- Order Of Stack-------+
@@ -929,7 +929,7 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
     nlocals++;
   }
 
-  if (ar->func()->hasCoeffectRules()) {
+  if (ar->func()->hasCoeffectsLocal()) {
     assertx(func->coeffectsLocalId() == nlocals);
     nlocals++;
   }

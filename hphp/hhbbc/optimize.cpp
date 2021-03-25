@@ -709,9 +709,8 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
   if (interface_supports_non_objects(tc.typeName())) return;
   auto const resolved = index.resolve_type_name(tc.typeName());
 
-  assertx(!RuntimeOption::EvalHackArrDVArrs ||
-          (resolved.type != AnnotType::VArray &&
-           resolved.type != AnnotType::DArray));
+  assertx(resolved.type != AnnotType::VArray &&
+          resolved.type != AnnotType::DArray);
 
   if (resolved.type == AnnotType::Object) {
     auto const resolvedValue = match<folly::Optional<res::Class>>(

@@ -73,8 +73,8 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   auto const numGenerics = info.m_typeParamInfo.size();
   assertx(numGenerics > 0);
-  std::vector<Type> types(numGenerics, RO::EvalHackArrDVArrs ? TDictN : TDArrN);
-  return RO::EvalHackArrDVArrs ? vec(types) : arr_packed_varray(types);
+  std::vector<Type> types(numGenerics, TDictN);
+  return vec(types);
 }
 
 const StaticString s_reified_generics_var("0ReifiedGenerics");
@@ -112,16 +112,12 @@ State entry_state(const Index& index, const Context& ctx,
           std::vector<Type> pack(knownArgs->args.begin() + locId,
                                  knownArgs->args.end());
           for (auto& p : pack) p = unctx(std::move(p));
-          ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
-            ? vec(std::move(pack))
-            : arr_packed_varray(std::move(pack));
+          ret.locals[locId] = vec(std::move(pack));
         } else {
           ret.locals[locId] = unctx(knownArgs->args[locId]);
         }
       } else {
-        ret.locals[locId] = ctx.func->params[locId].isVariadic
-          ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
-          : TUninit;
+        ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
       continue;
     }
@@ -136,9 +132,7 @@ State entry_state(const Index& index, const Context& ctx,
     }
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
-    ret.locals[locId] = ctx.func->params[locId].isVariadic
-      ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
-      : TInitCell;
+    ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TInitCell;
   }
 
   // Closures have use vars, we need to look up their types from the index.
@@ -249,9 +243,8 @@ prepare_incompleteQ(const Index& index,
       ai.bdata[dv].stateIn.copy_from(entryState);
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
-        ai.bdata[dv].stateIn.locals[locId] = ctx.func->params[locId].isVariadic
-          ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
-          : TUninit;
+        ai.bdata[dv].stateIn.locals[locId] =
+          ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
     }
   }

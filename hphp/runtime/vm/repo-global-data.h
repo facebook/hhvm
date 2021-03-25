@@ -88,11 +88,6 @@ struct Repo::GlobalData {
   bool HackArrCompatSerializeNotices = false;
 
   /*
-   * Are d/varrays dicts and vecs?
-   */
-  bool HackArrDVArrs = false;
-
-  /*
    * Should the extension containing HHVM intrinsics be enabled?
    */
   bool EnableIntrinsicsExtension = false;
@@ -146,9 +141,6 @@ struct Repo::GlobalData {
   /* Skip ClsMeth type refinement when this is true. */
   bool IsCompatibleClsMethType = false;
 
-  /* Avoid optimizations that interfere with array provenance */
-  bool ArrayProvenance = false;
-
   /* Whether implicit class conversions can raise a warning */
   bool RaiseClassConversionWarning = false;
 
@@ -190,7 +182,6 @@ struct Repo::GlobalData {
       (HackArrCompatNotices)
       (HackArrCompatIsVecDictNotices)
       (HackArrCompatSerializeNotices)
-      (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)
       (ForbidDynamicCallsToClsMeth)
@@ -206,7 +197,6 @@ struct Repo::GlobalData {
       (EmitClsMethPointers)
       (IsVecNotices)
       (IsCompatibleClsMethType)
-      (ArrayProvenance)
       (RaiseClassConversionWarning)
       (ClassPassesClassname)
       (ClassnameNotices)

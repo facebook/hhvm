@@ -354,8 +354,7 @@ TypeOrReduced impl_builtin_type_structure(ISS& env, const php::Func* func,
   if (!ts) return NoReduced{};
   if (fca.numArgs() == 2) reduce(env, bc::PopC {});
   reduce(env, bc::PopC {});
-  RuntimeOption::EvalHackArrDVArrs
-    ? reduce(env, bc::Dict { ts }) : reduce(env, bc::Array { ts });
+  reduce(env, bc::Dict { ts });
   return Reduced{};
 }
 
@@ -543,17 +542,8 @@ folly::Optional<Type> const_fold(ISS& env,
   assertx(!RuntimeOption::EvalJit);
   return eval_cell(
     [&] {
-      auto retVal = g_context->invokeFuncFew(
+      auto const retVal = g_context->invokeFuncFew(
         func, cls, args.size(), args.data(), false, false);
-
-      if (tvIsArrayLike(retVal)) {
-        if (auto const tag = provTagHere(env)) {
-          arrprov::TagOverride _{tag};
-          auto const tagged = arrprov::tagTvRecursively(retVal, /*flags=*/0);
-          tvMove(tagged, retVal);
-        }
-      }
-
       assertx(tvIsPlausible(retVal));
       return retVal;
     }

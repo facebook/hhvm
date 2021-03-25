@@ -294,10 +294,8 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 Type typeSame(const Type& a, const Type& b) {
   // The comparison will recurse into array values, so we need to
   // loosen the likeness recursively (unlike normal).
-  auto const nsa =
-    loosen_likeness_recursively(loosen_staticness(loosen_provenance(a)));
-  auto const nsb =
-    loosen_likeness_recursively(loosen_staticness(loosen_provenance(b)));
+  auto const nsa = loosen_likeness_recursively(loosen_staticness(a));
+  auto const nsb = loosen_likeness_recursively(loosen_staticness(b));
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }

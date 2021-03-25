@@ -300,10 +300,6 @@ struct HAMSandwich {
   // which don't care about array-provenance (vec, dict, etc).
   static const HAMSandwich Unmarked;
 
-  // Create a HAMSandwich with an unmarked legacy mark and the given
-  // array provenance tag.
-  static HAMSandwich UnmarkedWithTag(arrprov::Tag);
-
   // Create the appropriate HAMSandwich for the given static array.
   static HAMSandwich FromSArr(SArray);
 
@@ -315,17 +311,6 @@ struct HAMSandwich {
   // need to drop any array provenance information.
   HAMSandwich project(trep) const;
 
-  // "Loosen" the array provenance information (if present) to its
-  // most general allowed form.
-  HAMSandwich loosenProvTag() const;
-
-  // If this HAMSandwich has known array provenance information,
-  // return it. If we have the "top" array provenance information,
-  // return folly::none. Note: if array provenance is disabled or
-  // array provenance isn't appropriate for the given type, this will
-  // always return arrprov::Tag{}.
-  folly::Optional<arrprov::Tag> provTag(trep) const;
-
   // Return the legacy mark information in this HAMSandwich. If the
   // given type does not require legacy mark information, Unmarked is
   // always returned.
@@ -334,12 +319,6 @@ struct HAMSandwich {
   // Return true if this is the "bottom" HAMSandwich type. That is,
   // the result of intersecting together incompatible ones.
   bool isBottom(trep b) const;
-
-  // Raw getter:
-  folly::Optional<arrprov::Tag> rawProvTag() const {
-    return (m_tag_state == TagState::Value)
-      ? folly::make_optional(m_tag) : folly::none;
-  }
 
   // Check if the intersection between this and another HAMSandwich is
   // non-empty.
@@ -364,24 +343,11 @@ struct HAMSandwich {
   bool checkInvariants(trep) const;
 
 private:
-  // We only track array provenance information for VArr and DArr.
-  static constexpr trep kTagBits = BVArr | BDArr;
   // Legacy marks are only tracked for Vecish and Dictish.
   static constexpr trep kMarkBits = BVecish | BDictish;
 
-  enum class TagState : uint8_t {
-    Bottom,
-    Value,
-    Top
-  };
+  explicit HAMSandwich(LegacyMark mark) : m_mark{mark} {}
 
-  HAMSandwich(arrprov::Tag tag, TagState state, LegacyMark mark)
-    : m_tag{tag}
-    , m_tag_state{state}
-    , m_mark{mark} {}
-
-  arrprov::Tag m_tag;
-  TagState m_tag_state;
   LegacyMark m_mark;
 };
 
@@ -515,7 +481,6 @@ private:
   friend Type sval_counted(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
-  friend Type aval(SArray);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
@@ -580,15 +545,11 @@ private:
   friend folly::Optional<RepoAuthType> make_repo_type_arr(ArrayTypeTable::Builder&,
                                                           const Type&);
 
-  friend Type aempty_varray(arrprov::Tag);
-  friend Type aempty_darray(arrprov::Tag);
   friend Type vec_val(SArray);
   friend Type vec_empty();
   friend Type some_vec_empty();
   friend Type dict_val(SArray);
   friend Type dict_empty();
-  friend Type some_aempty_darray(arrprov::Tag);
-  friend Type some_aempty_varray(arrprov::Tag);
   friend Type some_dict_empty();
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
@@ -596,7 +557,6 @@ private:
   friend Type loosen_staticness(Type);
   friend Type loosen_string_staticness(Type);
   friend Type loosen_array_staticness(Type);
-  friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_string_values(Type);
   friend Type loosen_array_values(Type);
@@ -772,7 +732,6 @@ Type wait_handle_inner(const Type& t);
  */
 Type ival(int64_t);
 Type dval(double);
-Type aval(SArray);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
@@ -794,8 +753,6 @@ Type sempty_counted();
 /*
  * Create static empty array types
  */
-Type aempty_varray(arrprov::Tag = {});
-Type aempty_darray(arrprov::Tag = {});
 Type vec_empty();
 Type dict_empty();
 Type keyset_empty();
@@ -803,8 +760,6 @@ Type keyset_empty();
 /*
  * Create an any-countedness empty array/vec/dict type.
  */
-Type some_aempty_darray(arrprov::Tag = {});
-Type some_aempty_varray(arrprov::Tag = {});
 Type some_vec_empty();
 Type some_dict_empty();
 Type some_keyset_empty();
@@ -824,20 +779,6 @@ Type clsExact(res::Class);
  */
 Type exactRecord(res::Record);
 Type subRecord(res::Record);
-
-/*
- * Packed varray types with known size.
- *
- * Pre: !v.empty()
- */
-Type arr_packed_varray(std::vector<Type> v, arrprov::Tag = {});
-
-/*
- * Struct-like darrays.
- *
- * Pre: !m.empty()
- */
-Type arr_map_darray(MapElems m, arrprov::Tag = {});
 
 /*
  * vec types with known size.
@@ -1270,11 +1211,6 @@ Type loosen_string_staticness(Type);
  * modified.
  */
 Type loosen_vecish_or_dictish(Type);
-
-/*
- * Discard any specific provenance tag on this type and any sub-arrays
- */
-Type loosen_provenance(Type);
 
 /*
  * Drop any data from the type (except for object class information) and force

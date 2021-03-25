@@ -1002,21 +1002,6 @@ void killPrivateStatics(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // misc
 
-arrprov::Tag provTagHere(ISS& env) {
-  if (!RO::EvalArrayProvenance) return arrprov::Tag{};
-  auto const idx = env.srcLoc;
-  // We might have a negative index into the srcLoc table if the
-  // bytecode was copied from another unit, e.g. from a trait ${X}inits
-  if (idx < 0) return arrprov::Tag::TraitMerge(env.ctx.unit->filename);
-  auto const unit = env.ctx.func && env.ctx.func->originalUnit
-    ? env.ctx.func->originalUnit
-    : env.ctx.unit;
-  return arrprov::Tag::Known(
-    unit->filename,
-    static_cast<int>(unit->srcLocs[idx].past.line)
-  );
-}
-
 void badPropInitialValue(ISS& env) {
   FTRACE(2, "    badPropInitialValue\n");
   env.collect.props.setBadPropInitialValues();

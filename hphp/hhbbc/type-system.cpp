@@ -45,12 +45,8 @@ namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
-const HAMSandwich HAMSandwich::None{
-  arrprov::Tag{}, HAMSandwich::TagState::Bottom, LegacyMark::Bottom
-};
-const HAMSandwich HAMSandwich::Unmarked{
-  arrprov::Tag{}, HAMSandwich::TagState::Bottom, LegacyMark::Unmarked
-};
+const HAMSandwich HAMSandwich::None{ LegacyMark::Bottom };
+const HAMSandwich HAMSandwich::Unmarked{ LegacyMark::Unmarked };
 
 #define X(y, ...) const Type T##y{B##y};
 HHBBC_TYPE_PREDEFINED(X)
@@ -92,7 +88,7 @@ static_assert(CheckSize<DObj, 16>(), "");
 static_assert(CheckSize<DWaitHandle, 16>(), "");
 static_assert(CheckSize<DRecord, 16>(), "");
 static_assert(CheckSize<copy_ptr<DArrLikeMapN>, 8>(), "");
-static_assert(CheckSize<HAMSandwich, 8>(), "");
+static_assert(CheckSize<HAMSandwich, 1>(), "");
 static_assert(CheckSize<Type, 32>(), "");
 
 //////////////////////////////////////////////////////////////////////
@@ -1772,9 +1768,6 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
   assertx(ham.checkInvariants(bits));
   ARRPROV_USE_RUNTIME_LOCATION();
 
-  auto const provTag = ham.provTag(bits);
-  if (!provTag) return folly::none;
-
   auto const legacyMark = ham.legacyMark(bits);
   if (legacyMark == LegacyMark::Unknown) return folly::none;
 
@@ -1789,11 +1782,6 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
   if (legacyMark == LegacyMark::Marked) {
     var.asArrRef().setLegacyArray(true);
   }
-  if (provTag->valid()) {
-    assertx(RO::EvalArrayProvenance);
-    assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
-    arrprov::setTag(var.asArrRef().get(), *provTag);
-  }
 
   if (force_static) var.setEvalScalar();
   return tvReturn(std::move(var));
@@ -1802,7 +1790,6 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
 template<bool allow_counted>
 bool checkTypeVec(const std::vector<Type>& elems, trep bits, HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
-  if (!ham.provTag(bits)) return false;
   if (ham.legacyMark(bits) == LegacyMark::Unknown) return false;
   for (auto const& t : elems) {
     if (allow_counted ? !is_scalar_counted(t) : !is_scalar(t)) return false;
@@ -1832,9 +1819,6 @@ folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
   assertx(ham.checkInvariants(bits));
   ARRPROV_USE_RUNTIME_LOCATION();
 
-  auto const provTag = ham.provTag(bits);
-  if (!provTag) return folly::none;
-
   auto const legacyMark = ham.legacyMark(bits);
   if (legacyMark == LegacyMark::Unknown) return folly::none;
 
@@ -1854,11 +1838,6 @@ folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
     if (legacyMark == LegacyMark::Marked) {
       var.asArrRef().setLegacyArray(true);
     }
-    if (provTag->valid()) {
-      assertx(RO::EvalArrayProvenance);
-      assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
-      arrprov::setTag(var.asArrRef().get(), *provTag);
-    }
 
     if (force_static) var.setEvalScalar();
     return tvReturn(std::move(var));
@@ -1870,7 +1849,6 @@ folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
 template<bool allow_counted>
 bool checkTypeMap(const MapElems& elems, trep bits, HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
-  if (!ham.provTag(bits)) return false;
   if (ham.legacyMark(bits) == LegacyMark::Unknown) return false;
   for (auto const& elem : elems) {
     if (!allow_counted && elem.second.keyStaticness == TriBool::No) {
@@ -1922,103 +1900,32 @@ MapElem MapElem::KeyFromType(const Type& key, Type val) {
 
 //////////////////////////////////////////////////////////////////////
 
-HAMSandwich HAMSandwich::UnmarkedWithTag(arrprov::Tag tag) {
-  assertx(IMPLIES(tag.valid(), RO::EvalArrayProvenance));
-  return {
-    tag,
-    RO::EvalArrayProvenance ? TagState::Value : TagState::Bottom,
-    LegacyMark::Unmarked
-  };
-}
-
 HAMSandwich HAMSandwich::TopForBits(trep b) {
   using HPHP::HHBBC::couldBe;
-  // NB: We cannot check RO::EvalArrayProvenance here because we might
-  // be calling this at static initialization time (before
-  // RuntimeOptions are set up). This means that the tag state may be
-  // Top or Bottom if EvalArrayProvenance is false. Users should avoid
-  // making assumptions about the state all together when
-  // EvalArrayProvenance is false.
-  return {
-    arrprov::Tag{},
-    couldBe(b, kTagBits)  ? TagState::Top : TagState::Bottom,
+  return HAMSandwich {
     couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
   };
 }
 
 HAMSandwich HAMSandwich::FromSArr(SArray a) {
-  // NB: Array might not always actually be static here
-  auto const [tag, tagState] = [&] {
-    if (!RO::EvalArrayProvenance || !a->isDVArray()) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    return std::make_pair(arrprov::getTag(a), TagState::Value);
-  }();
-
   auto const mark = [&] {
     if (a->isKeysetType()) return LegacyMark::Bottom;
     return a->isLegacyArray() ? LegacyMark::Marked : LegacyMark::Unmarked;
   }();
-
-  return { tag, tagState, mark };
+  return HAMSandwich { mark };
 }
 
 HAMSandwich HAMSandwich::operator|(HAMSandwich o) const {
-  auto const [tag, tagState] = [&] {
-    if (!RO::EvalArrayProvenance) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    if (m_tag_state == TagState::Bottom) {
-      return std::make_pair(o.m_tag, o.m_tag_state);
-    }
-    if (o.m_tag_state == TagState::Bottom) {
-      return std::make_pair(m_tag, m_tag_state);
-    }
-    if (m_tag_state == TagState::Top) {
-      return std::make_pair(m_tag, m_tag_state);
-    }
-    if (o.m_tag_state == TagState::Top) {
-      return std::make_pair(o.m_tag, o.m_tag_state);
-    }
-    if (m_tag != o.m_tag) {
-      return std::make_pair(arrprov::Tag{}, TagState::Top);
-    }
-    return std::make_pair(m_tag, TagState::Value);
-  }();
-
   auto const mark = [&] {
     if (m_mark == o.m_mark) return m_mark;
     if (m_mark == LegacyMark::Bottom)   return o.m_mark;
     if (o.m_mark == LegacyMark::Bottom) return m_mark;
     return LegacyMark::Unknown;
   }();
-
-  return { tag, tagState, mark };
+  return HAMSandwich { mark };
 }
 
 HAMSandwich HAMSandwich::operator&(HAMSandwich o) const {
-  auto const [tag, tagState] = [&] {
-    if (!RO::EvalArrayProvenance) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    if (m_tag_state == TagState::Bottom) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    if (o.m_tag_state == TagState::Bottom) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    if (m_tag_state == TagState::Top) {
-      return std::make_pair(o.m_tag, o.m_tag_state);
-    }
-    if (o.m_tag_state == TagState::Top) {
-      return std::make_pair(m_tag, m_tag_state);
-    }
-    if (m_tag != o.m_tag) {
-      return std::make_pair(arrprov::Tag{}, TagState::Bottom);
-    }
-    return std::make_pair(m_tag, TagState::Value);
-  }();
-
   auto const mark = [&] {
     if (m_mark == o.m_mark) return m_mark;
     if (m_mark == LegacyMark::Bottom) return LegacyMark::Bottom;
@@ -2027,39 +1934,14 @@ HAMSandwich HAMSandwich::operator&(HAMSandwich o) const {
     if (o.m_mark == LegacyMark::Unknown) return m_mark;
     return LegacyMark::Unknown;
   }();
-
-  return { tag, tagState, mark };
+  return HAMSandwich { mark };
 }
 
 bool HAMSandwich::operator==(HAMSandwich o) const {
-  // Don't check the tag if EvalArrayProvenance isn't enabled. This
-  // isn't just an optimization. When its false, the tag may be set
-  // inconsistently.
-  if (RO::EvalArrayProvenance) {
-    if (m_tag_state != o.m_tag_state) return false;
-    if (m_tag_state == TagState::Value && m_tag != o.m_tag) return false;
-  }
   return m_mark == o.m_mark;
 }
 
 bool HAMSandwich::couldBe(HAMSandwich o) const {
-  // Don't check the tag if EvalArrayProvenance isn't enabled. This
-  // isn't just an optimization. When its false, the tag may be set
-  // inconsistently.
-  if (RO::EvalArrayProvenance) {
-    auto const could = [&] {
-      if (m_tag_state != o.m_tag_state) {
-        if (m_tag_state == TagState::Bottom ||
-            o.m_tag_state == TagState::Bottom) return false;
-        return
-          m_tag_state == TagState::Top ||
-          o.m_tag_state == TagState::Top;
-      }
-      if (m_tag_state != TagState::Value) return true;
-      return m_tag == o.m_tag;
-    }();
-    if (!could) return false;
-  }
   if (m_mark == o.m_mark) return true;
   if (m_mark == LegacyMark::Bottom ||
       o.m_mark == LegacyMark::Bottom) return false;
@@ -2069,20 +1951,6 @@ bool HAMSandwich::couldBe(HAMSandwich o) const {
 }
 
 bool HAMSandwich::subtypeOf(HAMSandwich o) const {
-  // Don't check the tag if EvalArrayProvenance isn't enabled. This
-  // isn't just an optimization. When its false, the tag may be set
-  // inconsistently.
-  if (RO::EvalArrayProvenance) {
-    auto const subtype = [&] {
-      if (m_tag_state != o.m_tag_state) {
-        if (m_tag_state == TagState::Bottom) return true;
-        return o.m_tag_state == TagState::Top;
-      }
-      if (m_tag_state != TagState::Value) return true;
-      return m_tag == o.m_tag;
-    }();
-    if (!subtype) return false;
-  }
   if (m_mark == o.m_mark) return true;
   if (m_mark == LegacyMark::Bottom) return true;
   return o.m_mark == LegacyMark::Unknown;
@@ -2090,43 +1958,13 @@ bool HAMSandwich::subtypeOf(HAMSandwich o) const {
 
 HAMSandwich HAMSandwich::project(trep b) const {
   using HPHP::HHBBC::couldBe;
-  auto const maybeDV = couldBe(b, kTagBits);
-  return {
-    maybeDV ? m_tag : arrprov::Tag{},
-    maybeDV ? m_tag_state : TagState::Bottom,
-    couldBe(b, kMarkBits) ? m_mark : LegacyMark::Bottom
-  };
-}
-
-HAMSandwich HAMSandwich::loosenProvTag() const {
-  return {
-    arrprov::Tag{},
-    m_tag_state == TagState::Bottom ? TagState::Bottom : TagState::Top,
-    m_mark
-  };
+  return HAMSandwich { couldBe(b, kMarkBits) ? m_mark : LegacyMark::Bottom };
 }
 
 bool HAMSandwich::checkInvariants(trep b) const {
   using HPHP::HHBBC::couldBe;
 
   if (!debug) return true;
-
-  assertx(IMPLIES(m_tag.valid(), m_tag_state == TagState::Value));
-
-  // NB: Even when EvalArrayProvenance is off, we might still have
-  // provTags if the type could be a BVarr or DArr. This is because we
-  // might have created Types before RuntimeOptions was set up.
-
-  if (couldBe(b, kTagBits)) {
-    if (RO::EvalArrayProvenance) {
-      assertx(m_tag_state != TagState::Bottom);
-    } else {
-      assertx(m_tag_state == TagState::Top ||
-              m_tag_state == TagState::Bottom);
-    }
-  } else {
-    assertx(m_tag_state == TagState::Bottom);
-  }
 
   if (couldBe(b, kMarkBits)) {
     assertx(m_mark != LegacyMark::Bottom);
@@ -2138,19 +1976,8 @@ bool HAMSandwich::checkInvariants(trep b) const {
 }
 
 bool HAMSandwich::isBottom(trep b) const {
-  if (RO::EvalArrayProvenance &&
-      HPHP::HHBBC::couldBe(b, kTagBits) &&
-      m_tag_state == TagState::Bottom) return true;
   return HPHP::HHBBC::couldBe(b, kMarkBits)
     ? (m_mark == LegacyMark::Bottom) : false;
-}
-
-folly::Optional<arrprov::Tag> HAMSandwich::provTag(trep b) const {
-  if (!RO::EvalArrayProvenance) return arrprov::Tag{};
-  if (!HPHP::HHBBC::couldBe(b, kTagBits)) return arrprov::Tag{};
-  if (m_tag_state == TagState::Top) return folly::none;
-  assertx(m_tag_state == TagState::Value);
-  return m_tag;
 }
 
 LegacyMark HAMSandwich::legacyMark(trep b) const {
@@ -2888,7 +2715,7 @@ bool Type::checkInvariants() const {
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
     assertx(!m_data.aval->empty());
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_data.aval->isNotDVArray()));
+    assertx(m_data.aval->isNotDVArray());
     assertx(couldBe(BArrLikeN));
     assertx(subtypeOf(BArrLikeN | kNonSupportBits));
 
@@ -3151,51 +2978,6 @@ Type dval(double val) {
   return r;
 }
 
-Type aval(SArray val) {
-  assertx(val->isStatic());
-  assertx(val->isPHPArrayType());
-  assertx(!RO::EvalHackArrDVArrs);
-
-  auto const ham = HAMSandwich::FromSArr(val);
-  if (val->empty()) {
-    if (val->isDArray()) return Type { BSDArrE, ham };
-    if (val->isVArray()) return Type { BSVArrE, ham };
-    always_assert(false);
-  }
-
-  auto const b = [&] {
-    if (val->isDArray()) return BSDArrN;
-    if (val->isVArray()) return BSVArrN;
-    always_assert(false);
-  }();
-
-  auto t = Type { b, ham };
-  t.m_data.aval = val;
-  t.m_dataTag = DataTag::ArrLikeVal;
-  assertx(t.checkInvariants());
-  return t;
-}
-
-Type aempty_varray(arrprov::Tag tag)  {
-  assertx(!RO::EvalHackArrDVArrs);
-  return Type { BSVArrE, HAMSandwich::UnmarkedWithTag(tag) };
-}
-
-Type some_aempty_varray(arrprov::Tag tag) {
-  assertx(!RO::EvalHackArrDVArrs);
-  return Type { BVArrE, HAMSandwich::UnmarkedWithTag(tag) };
-}
-
-Type aempty_darray(arrprov::Tag tag)  {
-  assertx(!RO::EvalHackArrDVArrs);
-  return Type { BSDArrE, HAMSandwich::UnmarkedWithTag(tag) };
-}
-
-Type some_aempty_darray(arrprov::Tag tag) {
-  assertx(!RO::EvalHackArrDVArrs);
-  return Type { BDArrE, HAMSandwich::UnmarkedWithTag(tag) };
-}
-
 Type vec_val(SArray val) {
   assertx(val->isStatic());
   assertx(val->isVecType());
@@ -3441,15 +3223,6 @@ Type clsExact(res::Class val) {
   return r;
 }
 
-Type arr_packed_varray(std::vector<Type> elems, arrprov::Tag tag) {
-  assertx(!RO::EvalHackArrDVArrs);
-  return packed_impl(
-    BVArrN,
-    HAMSandwich::UnmarkedWithTag(tag),
-    std::move(elems)
-  );
-}
-
 Type map_impl(trep bits, HAMSandwich ham, MapElems m,
               Type optKey, Type optVal) {
   assertx(!m.empty());
@@ -3510,17 +3283,6 @@ Type map_impl(trep bits, HAMSandwich ham, MapElems m,
   r.m_dataTag = DataTag::ArrLikeMap;
   assertx(r.checkInvariants());
   return r;
-}
-
-Type arr_map_darray(MapElems m, arrprov::Tag tag) {
-  assertx(!RO::EvalHackArrDVArrs);
-  return map_impl(
-    BDArrN,
-    HAMSandwich::UnmarkedWithTag(tag),
-    std::move(m),
-    TBottom,
-    TBottom
-  );
 }
 
 Type mapn_impl(trep bits, HAMSandwich ham, Type k, Type v) {
@@ -3849,19 +3611,6 @@ struct tvHelper {
   static R makePersistentArray(Args&&... args) {
     return make_persistent_array_like_tv(std::forward<Args>(args)...);
   }
-  template<typename... Args>
-  static R makeAndTagPersistentArray(arrprov::Tag t,
-                                     ArrayData* a,
-                                     Args&&... args) {
-    assertx(a->isStatic());
-    if (!t.valid()) return makePersistentArray(a, std::forward<Args>(args)...);
-    assertx(arrprov::arrayWantsTag(a));
-    return makePersistentArray(
-      arrprov::tagStaticArr(a, t),
-      std::forward<Args>(args)...
-    );
-  }
-
   template<typename Init, typename... Args>
   static R fromMap(Args&&... args) {
     return fromTypeMap<Init, force_static, allow_counted>(
@@ -3882,8 +3631,6 @@ struct tvHelper<bool, ignored, allow_counted> {
   static bool make(Args&&...) { return true; }
   template <typename... Args>
   static bool makePersistentArray(Args&&...) { return true; }
-  template <typename... Args>
-  static bool makeAndTagPersistentArray(Args&&...) { return true; }
   template<typename Init, typename... Args>
   static bool fromMap(Args&&... args) {
     return checkTypeMap<allow_counted>(std::forward<Args>(args)...);
@@ -3903,14 +3650,9 @@ R tvImpl(const Type& t) {
     auto const legacyMark = t.m_ham.legacyMark(t.bits());
     if (legacyMark == LegacyMark::Unknown) return R{};
 
-    if (auto const provTag = t.m_ham.provTag(t.bits())) {
-      auto const ad =
-        legacyMark == LegacyMark::Unmarked ? unmarked() : marked();
-      assertx(ad->empty());
-      assertx(IMPLIES(RO::EvalArrayProvenance, !arrprov::getTag(ad).valid()));
-      return H::makeAndTagPersistentArray(*provTag, ad);
-    }
-    return R{};
+    auto const ad = legacyMark == LegacyMark::Unmarked ? unmarked() : marked();
+    assertx(ad->empty());
+    return H::makePersistentArray(ad);
   };
 
   switch (t.bits()) {
@@ -3918,14 +3660,13 @@ R tvImpl(const Type& t) {
   case BInitNull:    return H::template make<KindOfNull>();
   case BTrue:        return H::template make<KindOfBoolean>(true);
   case BFalse:       return H::template make<KindOfBoolean>(false);
+
   case BVArrE:
   case BSVArrE:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return emptyArray(staticEmptyVArray, staticEmptyMarkedVArray);
   case BDArrE:
   case BSDArrE:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return emptyArray(staticEmptyDArray, staticEmptyMarkedDArray);
+    always_assert(false);
+
   case BVecE:
   case BSVecE:
     return emptyArray(staticEmptyVec, staticEmptyMarkedVec);
@@ -3942,12 +3683,11 @@ R tvImpl(const Type& t) {
 
   if (allow_counted) {
     switch (t.bits()) {
+
       case BCVArrE:
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return emptyArray(staticEmptyVArray, staticEmptyMarkedVArray);
       case BCDArrE:
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return emptyArray(staticEmptyDArray, staticEmptyMarkedDArray);
+        always_assert(false);
+
       case BCVecE:
         return emptyArray(staticEmptyVec, staticEmptyMarkedVec);
       case BCDictE:
@@ -3987,10 +3727,7 @@ R tvImpl(const Type& t) {
                                                t.m_ham);
       } else if (t.subtypeOf(BDArrN) &&
                  (allow_counted || !t.subtypeOf(BCDArrN))) {
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return H::template fromMap<DArrayInit>(t.m_data.map->map,
-                                               t.bits(),
-                                               t.m_ham);
+        always_assert(false);
       }
       break;
     case DataTag::ArrLikePacked:
@@ -4011,16 +3748,10 @@ R tvImpl(const Type& t) {
                                                      t.m_ham);
       } else if (t.subtypeOf(BVArrN) &&
                  (allow_counted || !t.subtypeOf(BCVArrN))) {
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return H::template fromVec<VArrayInit>(t.m_data.packed->elems,
-                                               t.bits(),
-                                               t.m_ham);
+        always_assert(false);
       } else if (t.subtypeOf(BDArrN) &&
                  (allow_counted || !t.subtypeOf(BCDArrN))) {
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return H::template fromVec<DArrayInit>(t.m_data.packed->elems,
-                                               t.bits(),
-                                               t.m_ham);
+        always_assert(false);
       }
       break;
     case DataTag::ArrLikePackedN:
@@ -4098,22 +3829,17 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Str:    return union_of(TStr, TCls, TLazyCls);
   case IsTypeOp::Res:    return TRes;
   case IsTypeOp::PHPArr:
-    return !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
-      ? union_of(TVArr, TDArr, TClsMeth)
-      : union_of(TVArr, TDArr);
+    return union_of(TVArr, TDArr);
   case IsTypeOp::Vec:
-    return RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
-      ? union_of(TVec, TClsMeth) : TVec;
+    return RO::EvalIsCompatibleClsMethType ? union_of(TVec, TClsMeth) : TVec;
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
+
   case IsTypeOp::VArray:
-    assertx(!RO::EvalHackArrDVArrs);
-    return RO::EvalIsCompatibleClsMethType
-      ? union_of(TVArr, TClsMeth) : TVArr;
   case IsTypeOp::DArray:
-    assertx(!RO::EvalHackArrDVArrs);
-    return TDArr;
+    always_assert(false);
+
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Class: return union_of(TCls, TLazyCls);
   case IsTypeOp::Func: return TFunc;
@@ -4138,12 +3864,10 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   if (t.subtypeOf(BKeyset)) return IsTypeOp::Keyset;
   if (t.subtypeOf(BObj))    return IsTypeOp::Obj;
   if (t.subtypeOf(BVArr)) {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return IsTypeOp::VArray;
+    always_assert(false);
   }
   if (t.subtypeOf(BDArr)) {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return IsTypeOp::DArray;
+    always_assert(false);
   }
   if (t.subtypeOf(BVArr | BDArr)) return IsTypeOp::PHPArr;
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
@@ -4167,7 +3891,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
       case TypeStructure::Kind::T_arraykey: return TArrKey;
       case TypeStructure::Kind::T_dict:     return TDict;
       case TypeStructure::Kind::T_vec:
-        if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+        if (RO::EvalIsCompatibleClsMethType) {
           return union_of(TVec, TClsMeth);
         }
         return TVec;
@@ -4184,7 +3908,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
           v.emplace_back(remove_uninit(std::move(t.value())));
         }
         if (v.empty()) return folly::none;
-        return RO::EvalHackArrDVArrs ? vec(v) : arr_packed_varray(v);
+        return vec(v);
       }
       case TypeStructure::Kind::T_shape: {
         // Taking a very conservative approach to shapes where we dont do any
@@ -4228,7 +3952,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
           );
         }
         if (map.empty()) return folly::none;
-        return RO::EvalHackArrDVArrs ? dict_map(map) : arr_map_darray(map);
+        return dict_map(map);
       }
       case TypeStructure::Kind::T_vec_or_dict: return union_of(TVec, TDict);
       case TypeStructure::Kind::T_any_array:   return TArrLike;
@@ -4327,9 +4051,7 @@ Type from_cell(TypedValue cell) {
   case KindOfDArray:
   case KindOfPersistentVArray:
   case KindOfVArray:
-    always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isPHPArrayType());
-    return aval(cell.m_data.parr);
+    always_assert(false);
 
   case KindOfLazyClass: return TLazyCls;
 
@@ -4402,22 +4124,13 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\vec"))      return union_of(std::move(ret), TVec);
   if (!strcasecmp(p, "HH\\keyset"))   return union_of(std::move(ret), TKeyset);
   if (!strcasecmp(p, "HH\\varray")) {
-    return union_of(
-      std::move(ret),
-      RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr
-    );
+    return union_of(std::move(ret), TVec);
   }
   if (!strcasecmp(p, "HH\\darray")) {
-    return union_of(
-      std::move(ret),
-      RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr
-    );
+    return union_of(std::move(ret), TDict);
   }
   if (!strcasecmp(p, "HH\\varray_or_darray")) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      return union_of(std::move(ret), TVec, TDict);
-    }
-    return union_of(std::move(ret), TVArr, TDArr);
+    return union_of(std::move(ret), TVec, TDict);
   }
   if (!strcasecmp(p, "HH\\vec_or_dict")) {
     return union_of(std::move(ret), TVec, TDict);
@@ -5240,68 +4953,6 @@ Type loosen_vecish_or_dictish(Type t) {
   return t;
 }
 
-Type loosen_provenance(Type t) {
-  if (!RO::EvalArrayProvenance) return t;
-
-  switch (t.m_dataTag) {
-    case DataTag::None:
-    case DataTag::Str:
-    case DataTag::Int:
-    case DataTag::Dbl:
-    case DataTag::Obj:
-    case DataTag::Cls:
-    case DataTag::Record:
-      break;
-
-    case DataTag::ArrLikeVal:
-      // ArrLikeVal must have a precise provenance, so we must convert
-      // to DArrLike before we can loosen.
-      return loosen_provenance(toDArrLike(t.m_data.aval, t.bits(), t.m_ham));
-
-    case DataTag::WaitHandle: {
-      auto inner = t.m_data.dwh.inner.mutate();
-      *inner = loosen_provenance(std::move(*inner));
-      break;
-    }
-
-    case DataTag::ArrLikePacked: {
-      auto& packed = *t.m_data.packed.mutate();
-      for (auto& e : packed.elems) {
-        e = loosen_provenance(std::move(e));
-      }
-      break;
-    }
-
-    case DataTag::ArrLikePackedN: {
-      auto& packed = *t.m_data.packedn.mutate();
-      packed.type = loosen_provenance(std::move(packed.type));
-      break;
-    }
-
-    case DataTag::ArrLikeMap: {
-      auto& map = *t.m_data.map.mutate();
-      for (auto it = map.map.begin(); it != map.map.end(); it++) {
-        auto val = loosen_provenance(it->second.val);
-        map.map.update(it, it->second.withType(std::move(val)));
-      }
-      map.optKey = loosen_provenance(std::move(map.optKey));
-      map.optVal = loosen_provenance(std::move(map.optVal));
-      break;
-    }
-
-    case DataTag::ArrLikeMapN: {
-      auto& map = *t.m_data.mapn.mutate();
-      map.key = loosen_provenance(std::move(map.key));
-      map.val = loosen_provenance(std::move(map.val));
-      break;
-    }
-  }
-
-  t.m_ham = t.m_ham.loosenProvTag();
-  assertx(t.checkInvariants());
-  return t;
-}
-
 Type loosen_string_values(Type t) {
   return t.m_dataTag == DataTag::Str
     ? Type { t.bits(), t.m_ham } : t;
@@ -5372,13 +5023,7 @@ Type loosen_emptiness(Type t) {
 
 Type loosen_likeness(Type t) {
   if (RuntimeOption::EvalIsCompatibleClsMethType && t.couldBe(BClsMeth)) {
-    if (!RuntimeOption::EvalHackArrDVArrs) {
-      // Ideally we would just union in TVArr, however, varray and darray need
-      // to behave the same in most instances.
-      t |= Type{BVArrN|BDArrN};
-    } else {
-      t |= TVecN;
-    }
+    t |= TVecN;
   }
   if (t.couldBe(BCls | BLazyCls)) t |= TSStr;
   return t;
@@ -5458,13 +5103,11 @@ Type loosen_likeness_recursively(Type t) {
 
 Type loosen_all(Type t) {
   return
-    loosen_provenance(
-      loosen_staticness(
-        loosen_emptiness(
-          loosen_likeness(
-            loosen_values(
-              std::move(t)
-            )
+    loosen_staticness(
+      loosen_emptiness(
+        loosen_likeness(
+          loosen_values(
+            std::move(t)
           )
         )
       )
@@ -5925,11 +5568,6 @@ bool could_contain_objects(const Type& t) {
 }
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
-  // Before we flip the HADVAs flag, any type test that could distinguish
-  // between array and non-array types may log a serialization notice.
-  auto const HADVAs = RO::EvalHackArrDVArrs;
-  auto const mayLogSerialization = !HADVAs && valTy.couldBe(BVArr | BDArr);
-
   auto const mayLogClsMeth =
     RO::EvalIsVecNotices &&
     valTy.couldBe(BClsMeth) &&
@@ -5940,14 +5578,13 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 
   assertx(
     !RO::EvalIsCompatibleClsMethType ||
-    (!testTy.is(BVArr) && !testTy.is(HADVAs ? BVec : (BVArr | BDArr)))
+    (!testTy.is(BVArr) && !testTy.is(BVec))
   );
   assertx(
     RO::EvalIsCompatibleClsMethType ||
-    (!testTy.is(BVArr | BClsMeth) &&
-     !testTy.is((HADVAs ? BVec : (BVArr | BDArr)) | BClsMeth))
+    (!testTy.is(BVArr | BClsMeth) && !testTy.is(BVec | BClsMeth))
   );
-  assertx(!testTy.is((HADVAs ? (BVArr | BDArr) : BVec) | BClsMeth));
+  assertx(!testTy.is(BVArr | BDArr | BClsMeth));
   assertx(!mayLogClsMeth || RO::EvalIsCompatibleClsMethType);
 
   if (testTy.couldBe(BInitNull) && !testTy.subtypeOf(BInitNull)) {
@@ -5957,15 +5594,15 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (testTy.is(BStr | BCls | BLazyCls)) {
     return valTy.couldBe(BCls | BLazyCls);
   } else if (testTy.is(BVArr | BDArr) || testTy.is(BVArr | BDArr | BClsMeth)) {
-    return mayLogSerialization || mayLogClsMeth;
+    return mayLogClsMeth;
   } else if (testTy.is(BVArr) || testTy.is(BVArr | BClsMeth)) {
-    return mayLogSerialization || mayLogClsMeth;
+    return mayLogClsMeth;
   } else if (testTy.is(BDArr)) {
-    return mayLogSerialization;
+    return false;
   } else if (testTy.is(BVec) || testTy.is(BVec | BClsMeth)) {
-    return mayLogSerialization || mayLogClsMeth;
+    return mayLogClsMeth;
   } else if (testTy.is(BDict)) {
-    return mayLogSerialization;
+    return false;
   } else if (testTy.is(BArrLike | BClsMeth)) {
     assertx(RO::EvalIsCompatibleClsMethType);
     return mayLogClsMeth;
@@ -6115,10 +5752,7 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
   if (auto const f = checkOne(BKeyset)) return *f;
 
   if (RuntimeOption::EvalEmitClsMethPointers) {
-    if (!RuntimeOption::EvalHackArrDVArrs) {
-      if (t1.couldBe(BClsMeth) && t2.couldBe(BVArr | BDArr)) return true;
-      if (t1.couldBe(BVArr | BDArr) && t2.couldBe(BClsMeth)) return true;
-    } else if (RuntimeOption::EvalEmitClsMethPointers) {
+    if (RuntimeOption::EvalEmitClsMethPointers) {
       if (t1.couldBe(BClsMeth) && t2.couldBe(BVec))     return true;
       if (t1.couldBe(BVec)     && t2.couldBe(BClsMeth)) return true;
     }
@@ -7070,9 +6704,7 @@ std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type ty) {
   // ClsMeths promote into a vec or varray with two elements, both
   // static strings.
   ty.m_bits &= ~BClsMeth;
-  ty |= RO::EvalHackArrDVArrs
-    ? vec({TSStr, TSStr})
-    : arr_packed_varray({TSStr, TSStr});
+  ty |= vec({TSStr, TSStr});
 
   return std::make_pair(
     std::move(ty),

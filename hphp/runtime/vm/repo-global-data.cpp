@@ -35,7 +35,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(PHP7_Substr);
   SHOW(HackArrCompatNotices);
   SHOW(HackArrCompatSerializeNotices);
-  SHOW(HackArrDVArrs);
   SHOW(EnableIntrinsicsExtension);
   SHOW(ForbidDynamicCallsToFunc);
   SHOW(ForbidDynamicCallsToClsMeth);
@@ -51,7 +50,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
   SHOW(IsCompatibleClsMethType);
-  SHOW(ArrayProvenance);
   SHOW(RaiseClassConversionWarning);
   SHOW(ClassPassesClassname);
   SHOW(ClassnameNotices);

@@ -85,13 +85,9 @@ Type native_function_return_type(const php::Func* f) {
     return hni ? from_DataType(*hni) : TInitCell;
   }();
   if (t.subtypeOf(BVArr | BDArr)) {
-    if (f->retTypeConstraint.isVArray()) {
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      t = TVArr;
-    } else if (f->retTypeConstraint.isDArray()) {
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      t = TDArr;
-    }
+    // More cleanup is possible here. This block should be dead.
+    always_assert(!f->retTypeConstraint.isVArray() &&
+                  !f->retTypeConstraint.isDArray());
   }
 
   // Non-simple types (ones that are represented by pointers) can always

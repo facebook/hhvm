@@ -155,7 +155,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.LogKnownMethodsAsDynamicCalls =
     RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
-  gd.ArrayProvenance             = RuntimeOption::EvalArrayProvenance;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.InitialNamedEntityTableSize =
@@ -166,7 +165,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
     RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
-  gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;

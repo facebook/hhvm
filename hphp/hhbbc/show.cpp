@@ -696,14 +696,6 @@ std::string show(const Type& t) {
     return gathered.first;
   }();
 
-  // Finally, print any array provenance if applicable. Static arrays
-  // already print it out, so avoid double printing it.
-  if (RO::EvalArrayProvenance && t.m_dataTag != DataTag::ArrLikeVal) {
-    if (auto const tag = t.m_ham.rawProvTag()) {
-      folly::format(&ret, " [{}]", tag->toString());
-    }
-  }
-
   return ret;
 }
 

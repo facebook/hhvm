@@ -204,32 +204,7 @@ template <typename Fn>
 bool mutate_add_elem_array(ISS& env, Fn&& mutate) {
   auto const arr = add_elem_array(env);
   if (!arr) return false;
-
-  if (!RuntimeOption::EvalArrayProvenance) {
-    mutate(arr);
-    return true;
-  }
-
-  // We need to propagate the provenance info in case we promote *arr from
-  // static to counted (or if its representation changes in some other way)...
-  auto const ham = HAMSandwich::FromSArr(*arr);
-
   mutate(arr);
-
-  // ...which means we'll have to setTag if
-  //   - the array still needs a tag AND
-  //   - the set op cleared the provenance bit somehow
-  //     (representation changed or we CoWed a static array)
-  if (arrprov::arrayWantsTag(*arr) && !arrprov::getTag(*arr).valid()) {
-    auto const tag = ham.rawProvTag();
-    assertx(tag.has_value());
-    assertx(tag->valid());
-    arrprov::setTag(*arr, *tag);
-  }
-
-  // Make sure that, if provenance is enabled and the array wants a tag, we
-  // definitely assigned one leaving this op.
-  assertx(!arrprov::arrayWantsTag(*arr) || arrprov::getTag(*arr).valid());
   return true;
 }
 
@@ -885,10 +860,7 @@ void in(ISS& env, const bc::String& op) {
 }
 
 void in(ISS& env, const bc::Array& op) {
-  assertx(op.arr1->isPHPArrayType());
-  assertx(!RuntimeOption::EvalHackArrDVArrs || op.arr1->isNotDVArray());
-  effect_free(env);
-  push(env, aval(op.arr1));
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::Vec& op) {
@@ -915,23 +887,11 @@ void in(ISS& env, const bc::NewDictArray& op) {
 }
 
 void in(ISS& env, const bc::NewVArray& op) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto elems = std::vector<Type>{};
-  elems.reserve(op.arg1);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
-  }
-  discard(env, op.arg1);
-  push(env, arr_packed_varray(std::move(elems), provTagHere(env)));
-  effect_free(env);
-  constprop(env);
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::NewDArray& op) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  effect_free(env);
-  auto const tag = provTagHere(env);
-  push(env, op.arg1 == 0 ? aempty_darray(tag) : some_aempty_darray(tag));
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::NewRecord& op) {
@@ -941,17 +901,7 @@ void in(ISS& env, const bc::NewRecord& op) {
 }
 
 void in(ISS& env, const bc::NewStructDArray& op) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto map = MapElems{};
-  for (auto it = op.keys.end(); it != op.keys.begin(); ) {
-    map.emplace_front(
-      make_tv<KindOfPersistentString>(*--it),
-      MapElem::SStrKey(popC(env))
-    );
-  }
-  push(env, arr_map_darray(std::move(map), provTagHere(env)));
-  effect_free(env);
-  constprop(env);
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::NewStructDict& op) {
@@ -1547,8 +1497,7 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   if (ty0.couldBe(BLazyCls) && ty1.couldBe(BStr)) return false;
   if (ty1.couldBe(BLazyCls) && ty0.couldBe(BStr)) return false;
 
-  // We need to loosen provenance here because it doesn't affect same / equal.
-  auto isect = intersection_of(loosen_provenance(ty0), loosen_provenance(ty1));
+  auto isect = intersection_of(ty0, ty1);
 
   // Unfortunately, floating point negative zero and positive zero are
   // different, but are identical using as far as Same is concerened. We should
@@ -1758,12 +1707,7 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   if (t.subtypeOf(target)) return reduce(env);
   popC(env);
 
-  auto const needsRuntimeProvenance =
-    RO::EvalArrayProvenance &&
-    env.ctx.func->attrs & AttrProvenanceSkipFrame &&
-    target.subtypeOf(BVArr | BDArr);
-
-  if (fn && !needsRuntimeProvenance) {
+  if (fn) {
     if (auto val = tv(t)) {
       // Legacy dvarrays may raise a notice on cast. In order to simplify the
       // rollout of these notices, we don't const-fold casts on these arrays.
@@ -1806,15 +1750,11 @@ void in(ISS& env, const bc::CastKeyset&) {
 }
 
 void in(ISS& env, const bc::CastVArray&)  {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  arrprov::TagOverride tag_override{provTagHere(env)};
-  castImpl(env, TVArr, tvCastToVArrayInPlace);
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  arrprov::TagOverride tag_override{provTagHere(env)};
-  castImpl(env, TDArr, tvCastToDArrayInPlace);
+  always_assert(false);
 }
 
 void in(ISS& env, const bc::DblAsBits&) {
@@ -2486,18 +2426,14 @@ void in(ISS& env, const bc::ClassGetC& op) {
 void in(ISS& env, const bc::ClassGetTS& op) {
   // TODO(T31677864): implement real optimizations
   auto const ts = popC(env);
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  if (!ts.couldBe(requiredTSType)) {
+  if (!ts.couldBe(BDict)) {
     push(env, TBottom);
     push(env, TBottom);
     return;
   }
 
-  auto const& genericsType =
-    RuntimeOption::EvalHackArrDVArrs ? TOptVec : TOptVArr;
-
   push(env, TCls);
-  push(env, genericsType);
+  push(env, TOptVec);
 }
 
 void in(ISS& env, const bc::AKExists&) {
@@ -3180,8 +3116,7 @@ void in(ISS& env, const bc::IsLateBoundCls& op) {
 }
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  if (!topC(env).couldBe(requiredTSType)) {
+  if (!topC(env).couldBe(BDict)) {
     popC(env);
     popC(env);
     return unreachable(env);
@@ -3229,7 +3164,6 @@ void in(ISS& env, const bc::ThrowAsTypeStructException& op) {
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   assertx(op.arg1 > 0);
   auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
   auto const first = tv(topC(env));
   if (first && isValidTSType(*first, false)) {
     auto const ts = first->m_data.parr;
@@ -3237,9 +3171,7 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     if (op.arg1 == 1) {
       if (canReduceToDontResolve(ts, true)) return reduce(env);
       if (auto const resolved = resolveTSStatically(env, ts, env.ctx.cls)) {
-        return RuntimeOption::EvalHackArrDVArrs
-          ? reduce(env, bc::PopC {}, bc::Dict  { resolved })
-          : reduce(env, bc::PopC {}, bc::Array { resolved });
+        return reduce(env, bc::PopC {}, bc::Dict  { resolved });
       }
     }
     // Optimize double input that needs a single combination and looks of the
@@ -3268,20 +3200,19 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
 
   for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
-    valid &= t.couldBe(requiredTSType);
+    valid &= t.couldBe(BDict);
   }
   if (!valid) return unreachable(env);
   nothrow(env);
-  push(env, requiredTSType);
+  push(env, TDict);
 }
 
 void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   // TODO(T31677864): implement real optimizations
   auto const t = popC(env);
-  auto const required = RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr;
-  if (!t.couldBe(required)) return unreachable(env);
-  if (t.subtypeOf(required)) nothrow(env);
-  push(env, RuntimeOption::EvalHackArrDVArrs ? TSVec : TSVArr);
+  if (!t.couldBe(BVec)) return unreachable(env);
+  if (t.subtypeOf(BVec)) nothrow(env);
+  push(env, TSVec);
 }
 
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {
@@ -3582,7 +3513,7 @@ bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
 
   // Repack not needed if unpack args have the correct type.
   auto const unpackArgs = topC(env, fca.hasGenerics() ? 1 : 0);
-  return unpackArgs.subtypeOf(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr);
+  return unpackArgs.subtypeOf(BVec);
 }
 
 template<class FCallWithFCA>
@@ -3706,15 +3637,6 @@ bool fcallTryFold(
       repl.push_back(bc::PopU {});
     }
     repl.push_back(gen_constant(*v));
-
-    auto const needsRuntimeProvenance =
-      RO::EvalArrayProvenance &&
-      foldableFunc->attrs & AttrProvenanceSkipFrame;
-    if (needsRuntimeProvenance) {
-      repl.push_back(bc::Int { 0 });
-      repl.push_back(bc::TagProvenanceHere {});
-    }
-
     reduce(env, std::move(repl));
     return true;
   }
@@ -3858,7 +3780,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
 
   if (op.fca.hasGenerics()) {
     auto const tsList = topC(env);
-    if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    if (!tsList.couldBe(BVec)) {
       return unreachable(env);
     }
 
@@ -3966,11 +3888,7 @@ void in(ISS& env, const bc::ResolveRFunc& op) {
 void in(ISS& env, const bc::ResolveObjMethod& op) {
   popC(env);
   popC(env);
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    push(env, TVec);
-  } else {
-    push(env, TVArr);
-  }
+  push(env, TVec);
 }
 
 namespace {
@@ -4180,7 +4098,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
 void in(ISS& env, const bc::FCallObjMethodD& op) {
   if (op.fca.hasGenerics()) {
     auto const tsList = topC(env);
-    if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    if (!tsList.couldBe(BVec)) {
       return unreachable(env);
     }
 
@@ -4892,8 +4810,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   auto const a = topC(env);
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  if (!a.couldBe(requiredTSType)) {
+  if (!a.couldBe(BDict)) {
     unreachable(env);
     popC(env);
     return;
@@ -4916,8 +4833,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
-      RuntimeOption::EvalHackArrDVArrs ? reduce(env, bc::Dict { resolvedTS })
-                                       : reduce(env, bc::Array { resolvedTS });
+      reduce(env, bc::Dict { resolvedTS });
       reduce(env, bc::VerifyParamTypeTS { op.loc1 });
       return;
     }
@@ -5055,8 +4971,7 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
 
 void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   auto const a = topC(env);
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  if (!a.couldBe(requiredTSType)) {
+  if (!a.couldBe(BDict)) {
     unreachable(env);
     popC(env);
     return;
@@ -5078,8 +4993,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
-      RuntimeOption::EvalHackArrDVArrs ? reduce(env, bc::Dict { resolvedTS })
-                                       : reduce(env, bc::Array { resolvedTS });
+      reduce(env, bc::Dict { resolvedTS });
       reduce(env, bc::VerifyRetTypeTS {});
       return;
     }
@@ -5349,8 +5263,9 @@ void in(ISS& env, const bc::ArrayUnmarkLegacy&) {
 }
 
 void in(ISS& env, const bc::TagProvenanceHere&) {
+  // TODO(kshaunak): Eliminate this bytecode completely.
   auto in = topC(env, 1);
-  auto out = loosen_provenance(loosen_staticness(loosen_values(std::move(in))));
+  auto out = loosen_staticness(loosen_values(std::move(in)));
 
   popC(env);
   popC(env);

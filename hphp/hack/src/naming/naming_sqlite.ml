@@ -44,6 +44,8 @@ type 'a forward_naming_table_delta =
 
 type file_deltas = FileInfo.t forward_naming_table_delta Relative_path.Map.t
 
+type blob_format = FileInfo.saved forward_naming_table_delta Relative_path.Map.t
+
 let pp_file_deltas =
   Relative_path.Map.make_pp
     Relative_path.pp
@@ -172,16 +174,15 @@ module LocalChanges = struct
 
   let prime db stmt_cache base_content_version =
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
-    let empty =
-      Marshal.to_string Relative_path.Map.empty [Marshal.No_sharing]
-    in
+    let (blob : blob_format) = Relative_path.Map.empty in
+    let empty = Marshal.to_string blob [Marshal.No_sharing] in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT base_content_version)
     |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
 
   let update db stmt_cache (local_changes : local_changes) =
-    let local_changes_saved =
+    let (local_changes_saved : blob_format) =
       Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
           match delta with
           | Modified fi -> Modified (FileInfo.to_saved fi)
@@ -202,7 +203,9 @@ module LocalChanges = struct
      * exactly one row. *)
     | Sqlite3.Rc.ROW ->
       let local_changes_blob = column_blob get_stmt 0 in
-      let local_changes_saved = Marshal.from_string local_changes_blob 0 in
+      let (local_changes_saved : blob_format) =
+        Marshal.from_string local_changes_blob 0
+      in
       let base_content_version = column_str get_stmt 1 in
       let file_deltas =
         Relative_path.Map.mapi local_changes_saved ~f:(fun path delta ->

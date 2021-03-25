@@ -1896,7 +1896,6 @@ and expr_
             ft_params = fty.ft_params;
             ft_implicit_params = fty.ft_implicit_params;
             ft_ret = fty.ft_ret;
-            (* propagate 'is_coroutine' from the method being called*)
             ft_flags = fty.ft_flags;
             ft_ifc_decl = fty.ft_ifc_decl;
           }

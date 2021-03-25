@@ -35,7 +35,7 @@ pub fn emit_fatal_program<'p>(
     })
 }
 
-/// This is the entry point from hh_single_compile & coroutine
+/// This is the entry point from hh_single_compile
 pub fn emit_program<'p>(
     emitter: &mut Emitter,
     flags: FromAstFlags,

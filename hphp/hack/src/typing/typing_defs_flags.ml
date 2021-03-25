@@ -34,8 +34,6 @@ let ft_flags_returns_mutable    = 1 lsl 1
 
 let ft_flags_returns_void_to_rx = 1 lsl 2
 
-let ft_flags_is_coroutine       = 1 lsl 3
-
 let ft_flags_async              = 1 lsl 4
 
 let ft_flags_generator          = 1 lsl 5

@@ -33,7 +33,7 @@
 //! opts.hhvm_flags.contains(
 //!     HhvmFlags::RX_IS_ENABLED);          // hhvm.rx_is_enabled
 //! opts.hhvm.hack_lang_flags.set(
-//!     LangFlags::ENABLE_COROUTINES);      // hhvm.hack.lang.enable_coroutines
+//!     LangFlags::ENABLE_ENUM_CLASSES);      // hhvm.hack.lang.enable_enum_classes
 //! ```
 
 mod options_cli;
@@ -266,7 +266,6 @@ prefixed_flags!(
     DISALLOW_HASH_COMMENTS,
     DISALLOW_DYNAMIC_METH_CALLER_ARGS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
-    ENABLE_COROUTINES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY_CAST,
@@ -276,7 +275,7 @@ prefixed_flags!(
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
+        LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
     }
 }
 
@@ -748,9 +747,6 @@ mod tests {
   "hhvm.hack.lang.enable_class_level_where_clauses": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_coroutines": {
-    "global_value": true
-  },
   "hhvm.hack.lang.enable_enum_classes": {
     "global_value": false
   },
@@ -952,7 +948,7 @@ mod tests {
         let jsons: [String; 2] = [
             json!({
                 // override an options from 1 to 0 in first JSON,
-                "hhvm.hack.lang.enable_coroutines": { "global_value": false },
+                "hhvm.hack.lang.enable_enum_classes": { "global_value": false },
                 // but specify the default (0) on rx_is_enabled)
                 "hhvm.rx_is_enabled": { "global_value": false }
             })
@@ -976,7 +972,7 @@ mod tests {
             !act.hhvm
                 .hack_lang
                 .flags
-                .contains(LangFlags::ENABLE_COROUTINES)
+                .contains(LangFlags::ENABLE_ENUM_CLASSES)
         );
         assert!(act.hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED));
     }
@@ -1136,9 +1132,7 @@ bitflags! {
         const HACK_ARR_DV_ARRS = 1 << 8;
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
-        // No longer using bit 11.
-        const ENABLE_COROUTINES = 1 << 12;
-        // No longer using bit 13.
+        // No longer using bits 11-13.
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
         // No longer using bits 16-21.

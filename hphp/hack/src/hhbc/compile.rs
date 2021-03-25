@@ -105,7 +105,7 @@ bitflags! {
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13;
         const DISALLOW_HASH_COMMENTS=1 << 14;
-        const ENABLE_COROUTINES=1 << 15;
+        // No longer using bit 15.
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
@@ -233,9 +233,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISALLOW_HASH_COMMENTS) {
             f |= LangFlags::DISALLOW_HASH_COMMENTS;
-        }
-        if self.contains(ParserFlags::ENABLE_COROUTINES) {
-            f |= LangFlags::ENABLE_COROUTINES;
         }
         if self.contains(ParserFlags::ENABLE_ENUM_CLASSES) {
             f |= LangFlags::ENABLE_ENUM_CLASSES;

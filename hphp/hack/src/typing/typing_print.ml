@@ -223,17 +223,7 @@ module Full = struct
   let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
   let tfun ~ty to_doc st env ft =
-    Concat
-      [
-        text "(";
-        ( if get_ft_is_coroutine ft then
-          text "coroutine" ^^ Space
-        else
-          Nothing );
-        text "function";
-        fun_type ~ty to_doc st env ft;
-        text ")";
-      ]
+    Concat [text "("; text "function"; fun_type ~ty to_doc st env ft; text ")"]
 
   let ttuple k tyl = list "(" k tyl ")"
 
@@ -995,12 +985,7 @@ module Json = struct
     | (_, Tintersection [ty]) -> from_type env ty
     | (p, Tintersection tyl) -> obj @@ kind p "intersection" @ args tyl
     | (p, Tfun ft) ->
-      let fun_kind p =
-        if get_ft_is_coroutine ft then
-          kind p "coroutine"
-        else
-          kind p "function"
-      in
+      let fun_kind p = kind p "function" in
       let callconv cc =
         [("callConvention", JSON_String (param_mode_to_string cc))]
       in
@@ -1341,8 +1326,7 @@ module Json = struct
         | "intersection" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           aux_args args ~keytrace >>= fun tyl -> ty (Tintersection tyl)
-        | ("function" | "coroutine") as kind ->
-          let _ft_is_coroutine = String.equal kind "coroutine" in
+        | "function" ->
           get_array "params" (json, keytrace)
           >>= fun (params, params_keytrace) ->
           let params =

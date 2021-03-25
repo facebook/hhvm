@@ -397,9 +397,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
   if (DisallowHashComments) {
     parser_flags |= DISALLOW_HASH_COMMENTS;
   }
-  if (EnableCoroutines) {
-    parser_flags |= ENABLE_COROUTINES;
-  }
   if (EnableEnumClasses) {
     parser_flags |= ENABLE_ENUM_CLASSES;
   }

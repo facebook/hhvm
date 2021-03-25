@@ -204,13 +204,13 @@ module NastCheck = struct
     (* | OptionalShapeFieldsNotSupportedDEPRECATED [@value 3033] *)
     (* | AwaitNotAllowedDEPRECATED [@value 3034] *)
     (* | AsyncInInterfaceDEPRECATED [@value 3035] *)
-    | AwaitInCoroutine [@value 3036]
-    | YieldInCoroutine [@value 3037]
+    (* | AwaitInCoroutine [@value 3036] *)
+    (* | YieldInCoroutine [@value 3037] *)
     (* | SuspendOutsideOfCoroutine [@value 3038] *)
     (* | SuspendInFinally [@value 3039] *)
     (* | BreakContinueNNotSupportedDEPRECATED [@value 3040] *)
     | StaticMemoizedFunction [@value 3041]
-    | InoutParamsInCoroutine [@value 3042]
+    (* | InoutParamsInCoroutine [@value 3042] *)
     | InoutParamsSpecial [@value 3043]
     (* | InoutParamsMixByrefDEPRECATED [@value 3044] *)
     | InoutParamsMemoize [@value 3045]
@@ -220,7 +220,7 @@ module NastCheck = struct
     (* | RetiredError3049DEPRECATED [@value 3049] *)
     | InoutArgumentBadExpr [@value 3050]
     | IllegalDestructor [@value 3056]
-    | CoroutineInConstructor [@value 3065]
+    (* | CoroutineInConstructor [@value 3065] *)
     (* | IllegalReturnByRefDEPRECATED [@value 3066] *)
     (* | IllegalByRefExprDEPRECATED [@value 3067] *)
     (* | VariadicByRefParamDEPRECATED [@value 3068] *)
@@ -421,8 +421,8 @@ module Typing = struct
     (* | NonCallArgumentInSuspend [@value 4169] *)
     (* | NonCoroutineCallInSuspend [@value 4170] *)
     (* | CoroutineCallOutsideOfSuspend [@value 4171] *)
-    | FunctionIsNotCoroutine [@value 4172]
-    | CoroutinnessMismatch [@value 4173]
+    (* | FunctionIsNotCoroutine [@value 4172] *)
+    (* | CoroutinnessMismatch [@value 4173] *)
     (* | ExpectingAwaitableReturnTypeHint [@value 4174] *)
     (* | ReffinessInvariantDEPRECATED [@value 4175] *)
     | DollardollarLvalue [@value 4176]
@@ -480,7 +480,8 @@ module Typing = struct
     (* | InvalidPPLCallDEPRECATED [@value 4264] *)
     (* | InvalidPPLStaticCallDEPRECATED [@value 4265] *)
     (* | TypeTestInLambdaDEPRECATED [@value 4266] *)
-    | CoroutineOutsideExperimental [@value 4271]
+    (* | InvalidTraversableInRx [@value 4267] *)
+    (* | CoroutineOutsideExperimental [@value 4271] *)
     (* | PPLMethPointerDEPRECATED [@value 4272] *)
     (* | InvalidTruthinessTestDEPRECATED [@value 4273] *)
     | RePrefixedNonString [@value 4274]

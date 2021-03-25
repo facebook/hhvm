@@ -433,8 +433,6 @@ module Flags = struct
 
   let get_ft_is_const ft = is_set ft.ft_flags ft_flags_is_const
 
-  let get_ft_is_coroutine ft = is_set ft.ft_flags ft_flags_is_coroutine
-
   let get_ft_async ft = is_set ft.ft_flags ft_flags_async
 
   let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator

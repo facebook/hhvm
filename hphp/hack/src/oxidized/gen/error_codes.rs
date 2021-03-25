@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1abc4483ac51d09c4f0483ee313e1db7>>
+// @generated SignedSource<<04a82d5e576fa60ee5929faf3bd17f45>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -181,16 +181,12 @@ pub enum NastCheck {
     ConstructorRequired = 3030,
     InterfaceWithPartialTypeconst = 3031,
     MultipleXhpCategory = 3032,
-    AwaitInCoroutine = 3036,
-    YieldInCoroutine = 3037,
     StaticMemoizedFunction = 3041,
-    InoutParamsInCoroutine = 3042,
     InoutParamsSpecial = 3043,
     InoutParamsMemoize = 3045,
     ReadingFromAppend = 3047,
     InoutArgumentBadExpr = 3050,
     IllegalDestructor = 3056,
-    CoroutineInConstructor = 3065,
     RequiresFinalClass = 3072,
     InterfaceUsesTrait = 3073,
     NonstaticMethodInAbstractFinalClass = 3074,
@@ -353,8 +349,6 @@ pub enum Typing {
     ArrayGetWithOptionalField = 4165,
     UnknownFieldDisallowedInShape = 4166,
     NullableCast = 4167,
-    FunctionIsNotCoroutine = 4172,
-    CoroutinnessMismatch = 4173,
     DollardollarLvalue = 4176,
     DuplicateUsingVar = 4178,
     IllegalDisposable = 4179,
@@ -395,7 +389,6 @@ pub enum Typing {
     ShapesMethodAccessWithNonExistentField = 4251,
     NonClassMember = 4252,
     AmbiguousObjectAccess = 4256,
-    CoroutineOutsideExperimental = 4271,
     RePrefixedNonString = 4274,
     BadRegexPattern = 4275,
     LateInitWithDefault = 4277,

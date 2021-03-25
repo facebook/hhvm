@@ -89,7 +89,6 @@ struct RepoOptions {
   N(StringMap,      AliasedNamespaces,                StringMap{})    \
   P(bool,           UVS,                              s_PHP7_master)  \
   P(bool,           LTRAssign,                        s_PHP7_master)  \
-  H(bool,           EnableCoroutines,                 true)           \
   H(bool,           Hacksperimental,                  false)          \
   H(bool,           DisableLvalAsAnExpression,        false)          \
   H(bool,           AllowNewAttributeSyntax,          false)          \

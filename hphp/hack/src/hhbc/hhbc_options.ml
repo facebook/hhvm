@@ -23,7 +23,6 @@ type t = {
   option_hack_arr_dv_arrs: bool;
   option_repo_authoritative: bool;
   option_jit_enable_rename_function: bool;
-  option_enable_coroutines: bool;
   option_doc_root: string;
   option_include_search_paths: string list;
   option_include_roots: string SMap.t;
@@ -77,7 +76,6 @@ let default =
     option_hack_arr_dv_arrs = false;
     option_repo_authoritative = false;
     option_jit_enable_rename_function = false;
-    option_enable_coroutines = true;
     option_doc_root = "";
     option_include_search_paths = [];
     option_include_roots = SMap.empty;
@@ -136,8 +134,6 @@ let hack_arr_dv_arrs o = o.option_hack_arr_dv_arrs
 let repo_authoritative o = o.option_repo_authoritative
 
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
-
-let enable_coroutines o = o.option_enable_coroutines
 
 let doc_root o = o.option_doc_root
 
@@ -243,7 +239,6 @@ let to_string o =
       Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o;
       Printf.sprintf "jit_enable_rename_function: %B"
       @@ jit_enable_rename_function o;
-      Printf.sprintf "enable_coroutines: %B" @@ enable_coroutines o;
       Printf.sprintf "doc_root: %s" @@ doc_root o;
       Printf.sprintf "include_search_paths: [%s]" search_paths;
       Printf.sprintf "include_roots: {%s}" inc_roots;
@@ -325,8 +320,6 @@ let set_option options name value =
     { options with option_repo_authoritative = as_bool value }
   | "eval.jitenablerenamefunction" ->
     { options with option_jit_enable_rename_function = as_bool value }
-  | "hack.lang.enablecoroutines" ->
-    { options with option_enable_coroutines = as_bool value }
   | "eval.logexterncompilerperf" ->
     { options with option_log_extern_compiler_perf = as_bool value }
   | "eval.enableintrinsicsextension" ->
@@ -488,8 +481,6 @@ let value_setters =
     @@ fun opts v -> { opts with option_repo_authoritative = v = 1 } );
     ( set_value "hhvm.jit_enable_rename_function" get_value_from_config_int
     @@ fun opts v -> { opts with option_jit_enable_rename_function = v = 1 } );
-    ( set_value "hhvm.hack.lang.enable_coroutines" get_value_from_config_int
-    @@ fun opts v -> { opts with option_enable_coroutines = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_lval_as_an_expression"
         get_value_from_config_int

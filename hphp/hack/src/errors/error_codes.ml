@@ -629,6 +629,8 @@ module Typing = struct
     | NonVoidAnnotationOnReturnVoidFun [@value 4422]
     | BitwiseMathInvalidArgument [@value 4423]
     | CyclicClassConstant [@value 4424]
+    | PrivateDynamicRead [@value 4425]
+    | PrivateDynamicWrite [@value 4426]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

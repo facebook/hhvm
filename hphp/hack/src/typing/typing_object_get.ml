@@ -464,6 +464,38 @@ let rec obj_get_concrete_ty
     end
   (* match Env.get_class env (snd x) *)
   | (_, Tdynamic) ->
+    ( if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+      (* Any access to a *private* member through dynamic might potentially
+       * be unsound, if the receiver is an instance of a class that implements dynamic,
+       * as we do no checks on enforceability or subtype-dynamic at the definition site
+       * of private members.
+       *)
+      match Env.get_self_class env with
+      | Some self_class
+        when Cls.get_implements_dynamic self_class || not (Cls.final self_class)
+        ->
+        (match Env.get_member is_method env self_class id_str with
+        | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
+          when not is_method ->
+          ( if read_context then
+            let (env, locl_ty) =
+              Phase.localize_with_self ~ignore_errors:true env ty
+            in
+            Typing_dynamic.check_property_sound_for_dynamic_read
+              ~on_error:Errors.private_property_is_not_dynamic
+              env
+              (Cls.name self_class)
+              (id_pos, id_str)
+              locl_ty );
+          if not read_context then
+            Typing_dynamic.check_property_sound_for_dynamic_write
+              ~on_error:Errors.private_property_is_not_enforceable
+              env
+              (Cls.name self_class)
+              (id_pos, id_str)
+              ty
+        | _ -> ())
+      | _ -> () );
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, (ty, []))
   | (_, Tobject)

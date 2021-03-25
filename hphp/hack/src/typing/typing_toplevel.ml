@@ -1315,26 +1315,18 @@ let class_var_def ~is_static cls env cv =
     && not (Aast.equal_visibility cv.cv_visibility Private)
   then begin
     Option.iter decl_cty (fun ty ->
-        let te_check = Typing_enforceability.is_enforceable env ty in
-        if not te_check then
-          Errors.property_is_not_enforceable
-            (fst cv.cv_id)
-            (snd cv.cv_id)
-            (Cls.name cls)
-            (get_pos ty, Typing_print.full_strip_ns_decl env ty));
-    if
-      not
-        (Typing_subtype.is_sub_type_for_union
-           ~coerce:(Some Typing_logic.CoerceToDynamic)
-           env
-           cv_type_ty
-           (mk (Reason.Rnone, Tdynamic)))
-    then
-      Errors.property_is_not_dynamic
-        (fst cv.cv_id)
-        (snd cv.cv_id)
-        (Cls.name cls)
-        (get_pos cv_type_ty, Typing_print.full_strip_ns env cv_type_ty)
+        Typing_dynamic.check_property_sound_for_dynamic_write
+          ~on_error:Errors.property_is_not_enforceable
+          env
+          (Cls.name cls)
+          cv.cv_id
+          ty);
+    Typing_dynamic.check_property_sound_for_dynamic_read
+      ~on_error:Errors.property_is_not_dynamic
+      env
+      (Cls.name cls)
+      cv.cv_id
+      cv_type_ty
   end;
   ( env,
     ( {

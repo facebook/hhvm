@@ -1457,6 +1457,12 @@ val property_is_not_enforceable :
 val property_is_not_dynamic :
   Pos.t -> string -> string -> Pos.t * string -> unit
 
+val private_property_is_not_enforceable :
+  Pos.t -> string -> string -> Pos.t * string -> unit
+
+val private_property_is_not_dynamic :
+  Pos.t -> string -> string -> Pos.t * string -> unit
+
 val immutable_local : Pos.t -> unit
 
 val enum_classes_reserved_syntax : Pos.t -> unit

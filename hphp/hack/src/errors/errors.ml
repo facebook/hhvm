@@ -5149,6 +5149,36 @@ let property_is_not_dynamic pos prop_name class_name (prop_pos, prop_type) =
       ^ " cannot be assigned to dynamic" )
     [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
 
+let private_property_is_not_enforceable
+    pos prop_name class_name (prop_pos, prop_type) =
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+  let prop_name = Markdown_lite.md_codify prop_name in
+  let prop_type = Markdown_lite.md_codify prop_type in
+  add_list
+    (Typing.err_code Typing.PrivateDynamicWrite)
+    ( pos,
+      "Cannot write to property "
+      ^ prop_name
+      ^ " through dynamic type because private property in "
+      ^ class_name
+      ^ " does not have an enforceable type" )
+    [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
+
+let private_property_is_not_dynamic
+    pos prop_name class_name (prop_pos, prop_type) =
+  let class_name = Markdown_lite.md_codify (strip_ns class_name) in
+  let prop_name = Markdown_lite.md_codify prop_name in
+  let prop_type = Markdown_lite.md_codify prop_type in
+  add_list
+    (Typing.err_code Typing.PrivateDynamicRead)
+    ( pos,
+      "Cannot read from property "
+      ^ prop_name
+      ^ " through dynamic type because private property in "
+      ^ class_name
+      ^ " cannot be assigned to dynamic" )
+    [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
+
 let immutable_local pos =
   add
     (Typing.err_code Typing.ImmutableLocal)

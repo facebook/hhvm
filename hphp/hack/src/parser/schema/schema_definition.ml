@@ -1218,7 +1218,6 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
-          ("static_keyword", ZeroOrOne Token);
           ("async_keyword", ZeroOrOne Token);
           ("function_keyword", Token);
           ("left_paren", Token);

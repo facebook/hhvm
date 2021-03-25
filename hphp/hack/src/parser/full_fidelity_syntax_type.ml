@@ -119,7 +119,6 @@ struct
 
   and anonymous_function = {
     anonymous_attribute_spec: t;
-    anonymous_static_keyword: t;
     anonymous_async_keyword: t;
     anonymous_function_keyword: t;
     anonymous_left_paren: t;
@@ -663,7 +662,6 @@ struct
       }
     | AnonymousFunction of {
         anonymous_attribute_spec: t;
-        anonymous_static_keyword: t;
         anonymous_async_keyword: t;
         anonymous_function_keyword: t;
         anonymous_left_paren: t;
@@ -2016,7 +2014,6 @@ struct
 
   and anonymous_function = {
     anonymous_attribute_spec: attribute_specification option value;
-    anonymous_static_keyword: Token.t option value;
     anonymous_async_keyword: Token.t option value;
     anonymous_function_keyword: Token.t value;
     anonymous_left_paren: Token.t value;

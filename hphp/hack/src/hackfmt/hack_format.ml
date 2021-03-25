@@ -1390,7 +1390,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.AnonymousFunction
         {
           anonymous_attribute_spec = attr;
-          anonymous_static_keyword = static_kw;
           anonymous_async_keyword = async_kw;
           anonymous_function_keyword = fun_kw;
           anonymous_left_paren = lp;
@@ -1407,8 +1406,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           handle_attribute_spec env attr ~always_split:false;
           when_present attr space;
-          t env static_kw;
-          when_present static_kw space;
           t env async_kw;
           when_present async_kw space;
           t env fun_kw;

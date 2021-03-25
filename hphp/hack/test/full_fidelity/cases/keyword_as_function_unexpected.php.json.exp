@@ -8710,36 +8710,47 @@
       {
         "kind":"expression_statement",
         "expression_statement_expression":{
-          "kind":"lambda_expression",
-          "lambda_signature":{
-            "kind":"lambda_signature",
-            "lambda_left_paren":{
-              "kind":"token",
-              "token":{
-                "kind":"(",
-                "text":"(",
-                "offset":2369,
-                "leading_width":6,
-                "width":1,
-                "trailing_width":0,
-                "leading":[{"kind":"extra_token_error","text":"static","offset":2369,"width":6}],
-                "trailing":[],
-                "line_number":115
-              }
-            },
-            "lambda_right_paren":{
-              "kind":"token",
-              "token":{
-                "kind":")",
-                "text":")",
-                "offset":2376,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":115
-              }
+          "kind":"function_call_expression",
+          "function_call_receiver":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"static",
+              "offset":2369,
+              "leading_width":0,
+              "width":6,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":115
+            }
+          },
+          "function_call_left_paren":{
+            "kind":"token",
+            "token":{
+              "kind":"(",
+              "text":"(",
+              "offset":2375,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":115
+            }
+          },
+          "function_call_right_paren":{
+            "kind":"token",
+            "token":{
+              "kind":")",
+              "text":")",
+              "offset":2376,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":115
             }
           }
         },

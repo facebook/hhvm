@@ -1596,7 +1596,6 @@ module WithToken (Token : TokenType) = struct
       | AnonymousFunction
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -1610,7 +1609,6 @@ module WithToken (Token : TokenType) = struct
             anonymous_body;
           } ->
         let acc = f acc anonymous_attribute_spec in
-        let acc = f acc anonymous_static_keyword in
         let acc = f acc anonymous_async_keyword in
         let acc = f acc anonymous_function_keyword in
         let acc = f acc anonymous_left_paren in
@@ -3264,7 +3262,6 @@ module WithToken (Token : TokenType) = struct
       | AnonymousFunction
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -3279,7 +3276,6 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           anonymous_attribute_spec;
-          anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
@@ -4885,7 +4881,6 @@ module WithToken (Token : TokenType) = struct
       | AnonymousFunction
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -4900,7 +4895,6 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "anonymous_attribute_spec";
-          "anonymous_static_keyword";
           "anonymous_async_keyword";
           "anonymous_function_keyword";
           "anonymous_left_paren";
@@ -6679,7 +6673,6 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.AnonymousFunction,
           [
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -6695,7 +6688,6 @@ module WithToken (Token : TokenType) = struct
         AnonymousFunction
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -8791,7 +8783,6 @@ module WithToken (Token : TokenType) = struct
 
       let make_anonymous_function
           anonymous_attribute_spec
-          anonymous_static_keyword
           anonymous_async_keyword
           anonymous_function_keyword
           anonymous_left_paren
@@ -8807,7 +8798,6 @@ module WithToken (Token : TokenType) = struct
           AnonymousFunction
             {
               anonymous_attribute_spec;
-              anonymous_static_keyword;
               anonymous_async_keyword;
               anonymous_function_keyword;
               anonymous_left_paren;
@@ -10032,7 +10022,6 @@ module WithToken (Token : TokenType) = struct
       let from_anonymous_function
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -10048,7 +10037,6 @@ module WithToken (Token : TokenType) = struct
         AnonymousFunction
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;
@@ -10199,7 +10187,6 @@ module WithToken (Token : TokenType) = struct
         | AnonymousFunction
             {
               anonymous_attribute_spec;
-              anonymous_static_keyword;
               anonymous_async_keyword;
               anonymous_function_keyword;
               anonymous_left_paren;
@@ -10214,7 +10201,6 @@ module WithToken (Token : TokenType) = struct
             } ->
           {
             anonymous_attribute_spec;
-            anonymous_static_keyword;
             anonymous_async_keyword;
             anonymous_function_keyword;
             anonymous_left_paren;

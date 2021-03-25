@@ -1890,7 +1890,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self, arg12: Self) -> Self {
+    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
@@ -1903,8 +1903,7 @@ where
           arg8.value, 
           arg9.value, 
           arg10.value, 
-          arg11.value, 
-          arg12.value
+          arg11.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -1923,8 +1922,7 @@ where
               arg8.syntax, 
               arg9.syntax, 
               arg10.syntax, 
-              arg11.syntax, 
-              arg12.syntax
+              arg11.syntax
           ],
       );
       Self { syntax, value }

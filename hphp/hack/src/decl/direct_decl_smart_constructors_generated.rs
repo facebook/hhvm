@@ -388,8 +388,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_class(self, class_keyword, left_paren, argument_list, right_paren, extends_keyword, extends_list, implements_keyword, implements_list, body)
     }
 
-    fn make_anonymous_function(&mut self, attribute_spec: Self::R, static_keyword: Self::R, async_keyword: Self::R, function_keyword: Self::R, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, ctx_list: Self::R, colon: Self::R, readonly_return: Self::R, type_: Self::R, use_: Self::R, body: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_function(self, attribute_spec, static_keyword, async_keyword, function_keyword, left_paren, parameters, right_paren, ctx_list, colon, readonly_return, type_, use_, body)
+    fn make_anonymous_function(&mut self, attribute_spec: Self::R, async_keyword: Self::R, function_keyword: Self::R, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, ctx_list: Self::R, colon: Self::R, readonly_return: Self::R, type_: Self::R, use_: Self::R, body: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_anonymous_function(self, attribute_spec, async_keyword, function_keyword, left_paren, parameters, right_paren, ctx_list, colon, readonly_return, type_, use_, body)
     }
 
     fn make_anonymous_function_use_clause(&mut self, keyword: Self::R, left_paren: Self::R, variables: Self::R, right_paren: Self::R) -> Self::R {

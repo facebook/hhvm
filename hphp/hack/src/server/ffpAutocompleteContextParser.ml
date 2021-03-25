@@ -589,8 +589,6 @@ let is_method_static (method_object : PositionedSyntax.syntax) : bool =
           List.exists
             (syntax_node_to_list h.function_modifiers)
             ~f:(is_specific_token Static)
-        | AnonymousFunction { anonymous_static_keyword = static; _ } ->
-          is_specific_token Static static
         | _ -> false)))
 
 let is_function_async (function_object : PositionedSyntax.syntax) : bool =

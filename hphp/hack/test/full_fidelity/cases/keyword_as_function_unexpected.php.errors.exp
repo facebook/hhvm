@@ -111,8 +111,6 @@
 (111,10)-(111,10) An expression is expected here.
 (112,15)-(112,15) An expression is expected here.
 (113,9)-(113,9) An expression is expected here.
-(115,1)-(115,7) Encountered unexpected token `static`.
-(115,9)-(115,9) A lambda arrow `==>` is expected here.
 (117,8)-(117,8) An expression is expected here.
 (120,4)-(120,4) A name is expected here.
 (120,6)-(120,6) An expression is expected here.

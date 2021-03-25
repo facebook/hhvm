@@ -2534,7 +2534,6 @@ where
         let parser1 = self.clone();
         let attribute_spec = self.with_decl_parser(|p| p.parse_attribute_specification_opt());
         let mut parser2 = self.clone();
-        let _ = parser2.optional_token(TokenKind::Static);
         let _ = parser2.optional_token(TokenKind::Async);
         match parser2.peek_token_kind() {
             TokenKind::Function => self.parse_anon(attribute_spec),
@@ -2544,8 +2543,8 @@ where
             }
             _ => {
                 self.continue_from(parser1);
-                let static_or_async_as_name = self.next_token_as_name();
-                S!(make_token, self, static_or_async_as_name)
+                let async_as_name = self.next_token_as_name();
+                S!(make_token, self, async_as_name)
             }
         }
     }
@@ -2614,7 +2613,7 @@ where
     fn parse_anon(&mut self, attribute_spec: S::R) -> S::R {
         // SPEC
         // anonymous-function-creation-expression:
-        //   static-opt async-opt function
+        //   async-opt function
         //     ( anonymous-function-parameter-list-opt  )
         //     anonymous-function-return-opt
         //     anonymous-function-use-clauseopt
@@ -2625,7 +2624,6 @@ where
         // The "..." syntax and trailing commas are supported. We'll simply
         // parse an optional parameter list; it already takes care of making the
         // type annotations optional.
-        let static_ = self.optional_token(TokenKind::Static);
         let async_ = self.optional_token(TokenKind::Async);
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
@@ -2648,7 +2646,6 @@ where
             make_anonymous_function,
             self,
             attribute_spec,
-            static_,
             async_,
             fn_,
             left_paren,

@@ -2120,13 +2120,6 @@ where
                 true,
             )),
             AnonymousFunction(c) => {
-                if Self::token_kind(&c.static_keyword) == Some(TK::Static) {
-                    Self::raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::static_closures_are_disabled,
-                    );
-                }
                 let p_arg = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
                     Token(_) => mk_name_lid(n, e),
                     _ => Self::missing_syntax("use variable", n, e),

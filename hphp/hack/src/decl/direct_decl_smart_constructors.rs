@@ -2637,7 +2637,6 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
     fn make_anonymous_function(
         &mut self,
         _attribute_spec: Self::R,
-        _static_keyword: Self::R,
         _async_keyword: Self::R,
         _function_keyword: Self::R,
         _left_paren: Self::R,

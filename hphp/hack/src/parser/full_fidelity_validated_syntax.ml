@@ -3992,8 +3992,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_token x.anonymous_function_keyword;
           anonymous_async_keyword =
             validate_option_with validate_token x.anonymous_async_keyword;
-          anonymous_static_keyword =
-            validate_option_with validate_token x.anonymous_static_keyword;
           anonymous_attribute_spec =
             validate_option_with
               validate_attribute_specification
@@ -4011,8 +4009,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_attribute_specification
                 x.anonymous_attribute_spec;
-            anonymous_static_keyword =
-              invalidate_option_with invalidate_token x.anonymous_static_keyword;
             anonymous_async_keyword =
               invalidate_option_with invalidate_token x.anonymous_async_keyword;
             anonymous_function_keyword =

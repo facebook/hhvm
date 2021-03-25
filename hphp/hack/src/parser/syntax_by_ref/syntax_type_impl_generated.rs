@@ -962,10 +962,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(ctx: &C, attribute_spec: Self, static_keyword: Self, async_keyword: Self, function_keyword: Self, left_paren: Self, parameters: Self, right_paren: Self, ctx_list: Self, colon: Self, readonly_return: Self, type_: Self, use_: Self, body: Self) -> Self {
+    fn make_anonymous_function(ctx: &C, attribute_spec: Self, async_keyword: Self, function_keyword: Self, left_paren: Self, parameters: Self, right_paren: Self, ctx_list: Self, colon: Self, readonly_return: Self, type_: Self, use_: Self, body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(ctx.get_arena().alloc(AnonymousFunctionChildren {
             attribute_spec,
-            static_keyword,
             async_keyword,
             function_keyword,
             left_paren,

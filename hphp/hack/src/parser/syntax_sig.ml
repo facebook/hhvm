@@ -533,7 +533,6 @@ module type Syntax_S = sig
       }
     | AnonymousFunction of {
         anonymous_attribute_spec: t;
-        anonymous_static_keyword: t;
         anonymous_async_keyword: t;
         anonymous_function_keyword: t;
         anonymous_left_paren: t;
@@ -1252,7 +1251,7 @@ module type Syntax_S = sig
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
 

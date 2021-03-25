@@ -881,7 +881,6 @@ pub struct AnonymousClassChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct AnonymousFunctionChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
-    pub static_keyword: Syntax<'a, T, V>,
     pub async_keyword: Syntax<'a, T, V>,
     pub function_keyword: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,

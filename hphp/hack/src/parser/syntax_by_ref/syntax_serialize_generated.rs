@@ -806,11 +806,10 @@ ss.serialize_field("anonymous_class_implements_list", &self.with(implements_list
 ss.serialize_field("anonymous_class_body", &self.with(body))?;
       ss.end()
 } 
-SyntaxVariant::AnonymousFunction (AnonymousFunctionChildren{attribute_spec,static_keyword,async_keyword,function_keyword,left_paren,parameters,right_paren,ctx_list,colon,readonly_return,type_,use_,body} ) => {
-      let mut ss = s.serialize_struct("", 14)?;
+SyntaxVariant::AnonymousFunction (AnonymousFunctionChildren{attribute_spec,async_keyword,function_keyword,left_paren,parameters,right_paren,ctx_list,colon,readonly_return,type_,use_,body} ) => {
+      let mut ss = s.serialize_struct("", 13)?;
       ss.serialize_field("kind", "anonymous_function")?;
       ss.serialize_field("anonymous_attribute_spec", &self.with(attribute_spec))?;
-ss.serialize_field("anonymous_static_keyword", &self.with(static_keyword))?;
 ss.serialize_field("anonymous_async_keyword", &self.with(async_keyword))?;
 ss.serialize_field("anonymous_function_keyword", &self.with(function_keyword))?;
 ss.serialize_field("anonymous_left_paren", &self.with(left_paren))?;

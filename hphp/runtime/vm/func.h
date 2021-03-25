@@ -1350,7 +1350,6 @@ private:
     ExtendedSharedData(const ExtendedSharedData&) = delete;
     ExtendedSharedData(ExtendedSharedData&&) = delete;
 
-    MaybeDataType m_hniReturnType;
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
     ReifiedGenericsInfo m_reifiedGenericsInfo;
@@ -1360,9 +1359,11 @@ private:
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
+    MaybeDataType m_hniReturnType;
+    /* 2 byte hole */
     int64_t m_dynCallSampleRate;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 312>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 272 : 304>(), "");
 
   /*
    * SharedData accessors for internal use.

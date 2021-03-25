@@ -29,4 +29,5 @@ pub mod s_map;
 pub mod s_set;
 pub mod scoured_comments_impl;
 pub mod shape_map;
+pub mod symbol_name;
 pub mod uast;

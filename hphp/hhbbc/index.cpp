@@ -389,14 +389,13 @@ struct res::Func::FuncFamily {
   static_assert(sizeof(PFuncVec) == sizeof(uintptr_t),
                 "CompactVector must be layout compatible with a pointer");
 
-  explicit FuncFamily(PFuncVec&& v)
-    : m_v{std::move(v)} {}
-  FuncFamily(FuncFamily&& o) noexcept : m_v(o.m_v) {
-    o.m_bits = 0;
+  explicit FuncFamily(PFuncVec&& v) : m_v{std::move(v)} {}
+  FuncFamily(FuncFamily&& o) noexcept : m_v(std::move(o.m_v)) {}
+  FuncFamily& operator=(FuncFamily&& o) noexcept {
+    m_v = std::move(o.m_v);
+    return *this;
   }
-  ~FuncFamily() {
-    m_v.~PFuncVec();
-  }
+  FuncFamily(const FuncFamily&) = delete;
   FuncFamily& operator=(const FuncFamily&) = delete;
 
   const PFuncVec& possibleFuncs() const {
@@ -405,11 +404,9 @@ struct res::Func::FuncFamily {
 
   friend auto begin(const FuncFamily& ff) { return ff.m_v.begin(); }
   friend auto end(const FuncFamily& ff) { return ff.m_v.end(); }
+
 private:
-  union {
-    uintptr_t m_bits;
-    PFuncVec  m_v;
-  };
+  PFuncVec  m_v;
 };
 
 //////////////////////////////////////////////////////////////////////

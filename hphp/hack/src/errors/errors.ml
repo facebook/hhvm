@@ -5130,7 +5130,7 @@ let property_is_not_enforceable pos prop_name class_name (prop_pos, prop_type) =
     ( pos,
       "Class "
       ^ class_name
-      ^ " cannot implement dynamic because property "
+      ^ " cannot support dynamic because property "
       ^ prop_name
       ^ " does not have an enforceable type" )
     [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]
@@ -5144,7 +5144,7 @@ let property_is_not_dynamic pos prop_name class_name (prop_pos, prop_type) =
     ( pos,
       "Class "
       ^ class_name
-      ^ " cannot implement dynamic because property "
+      ^ " cannot support dynamic because property "
       ^ prop_name
       ^ " cannot be assigned to dynamic" )
     [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)]

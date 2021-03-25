@@ -1,2 +1,0 @@
-File "class_extends_dynamic.bad.php", line 6, characters 17-23:
-Unbound name: `dynamic` (an object type) (Naming[2049])

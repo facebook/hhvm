@@ -3754,20 +3754,9 @@ impl<'a> FlattenSmartConstructors<'a, DirectDeclSmartConstructors<'a>>
         let static_methods = static_methods.into_bump_slice();
         let methods = methods.into_bump_slice();
         let user_attributes = user_attributes.into_bump_slice();
-
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
-
-        let mut implements_dynamic = class_attributes.sound_dynamic_callable;
-        let implements = self.slice(implements.iter().filter_map(
-            |&node| match self.node_to_ty(node) {
-                Some(Ty(_, Ty_::Tdynamic)) => {
-                    implements_dynamic = true;
-                    None
-                }
-                x => x,
-            },
-        ));
-
+        let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
+        let implements_dynamic = class_attributes.sound_dynamic_callable;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
 

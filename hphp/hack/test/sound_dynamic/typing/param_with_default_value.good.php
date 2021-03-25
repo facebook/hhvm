@@ -1,6 +1,7 @@
 <?hh
 
-class D implements dynamic {
+<<__SoundDynamicCallable>>
+class D {
   public function foo(vec<int> $v, bool $x = false) : void {
   }
 }

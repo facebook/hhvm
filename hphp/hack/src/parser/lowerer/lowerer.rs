@@ -3105,17 +3105,6 @@ where
         Self::map_fold(&f, &op, node, env, acc)
     }
 
-    fn could_map_filter<R, F>(
-        f: F,
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-    ) -> Result<(Vec<R>, bool)>
-    where
-        F: Fn(S<'a, T, V>, &mut Env<'a, TF>) -> Result<Option<R>>,
-    {
-        Self::map_flatten_filter_(f, node, env, (vec![], false))
-    }
-
     #[inline]
     fn map_flatten_filter_<R, F>(
         f: F,
@@ -4955,42 +4944,12 @@ where
                     Some(TK::Enum) => ast::ClassKind::Cenum,
                     _ => Self::missing_syntax("class kind", &c.keyword, env)?,
                 };
-                let filter_dynamic =
-                    |node: S<'a, T, V>, env: &mut Env<'a, TF>| -> Result<Option<ast::Hint>> {
-                        match Self::p_hint(node, env) {
-                            Err(e) => Err(e),
-                            Ok(h) => match &*h.1 {
-                                oxidized::aast_defs::Hint_::Happly(oxidized::ast::Id(_, id), _) => {
-                                    if id == "dynamic" {
-                                        Ok(None)
-                                    } else {
-                                        Ok(Some(h))
-                                    }
-                                }
-                                _ => Ok(Some(h)),
-                            },
-                        }
-                    };
-                let (extends, extends_dynamic) = match class_kind {
-                    ast::ClassKind::Cinterface if env.parser_options.tco_enable_sound_dynamic => {
-                        Self::could_map_filter(filter_dynamic, &c.extends_list, env)?
-                    }
-                    _ => (Self::could_map(Self::p_hint, &c.extends_list, env)?, false),
-                };
+                let extends = Self::could_map(Self::p_hint, &c.extends_list, env)?;
                 *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
                     Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
                     _ => false,
                 };
-                let (implements, implements_dynamic) =
-                    if env.parser_options.tco_enable_sound_dynamic {
-                        Self::could_map_filter(filter_dynamic, &c.implements_list, env)?
-                    } else {
-                        (
-                            Self::could_map(Self::p_hint, &c.implements_list, env)?,
-                            false,
-                        )
-                    };
-
+                let implements = Self::could_map(Self::p_hint, &c.implements_list, env)?;
                 let where_constraints = Self::p_where_constraint(true, node, &c.where_clause, env)?;
                 let namespace = Self::mk_empty_ns_env(env);
                 let span = Self::p_pos(node, env);
@@ -5012,10 +4971,8 @@ where
                     xhp_category: None,
                     reqs: vec![],
                     implements,
-                    implements_dynamic: implements_dynamic
-                        || extends_dynamic
-                        || env.parser_options.tco_enable_sound_dynamic
-                            && Self::has_sound_dynamic_callable(&user_attributes),
+                    implements_dynamic: env.parser_options.tco_enable_sound_dynamic
+                        && Self::has_sound_dynamic_callable(&user_attributes),
                     where_constraints,
                     consts: vec![],
                     typeconsts: vec![],

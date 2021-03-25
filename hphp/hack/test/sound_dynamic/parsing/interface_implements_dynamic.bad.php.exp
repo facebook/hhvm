@@ -1,2 +1,0 @@
-File "interface_implements_dynamic.bad.php", line 6, characters 1-33:
-Interfaces may not implement other interfaces or classes (Parsing[1002])

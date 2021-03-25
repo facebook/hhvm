@@ -35,6 +35,21 @@ module Bool_comparator = struct
     | (false, true) -> false
 end
 
+module Make_deriving_comparator (T : sig
+  type t
+
+  val equal : t -> t -> bool
+
+  val show : t -> string
+end) =
+struct
+  type t = T.t
+
+  let to_string = T.show
+
+  let is_equal = T.equal
+end
+
 module Hh_json_json_comparator = struct
   type t = Hh_json.json
 
@@ -202,3 +217,9 @@ module Hh_json_json_asserter = Make_asserter (Hh_json_json_comparator)
 module Int_asserter = Make_asserter (Int_comparator)
 module Process_status_asserter = Make_asserter (Process_status_comparator)
 module Relative_path_asserter = Make_asserter (Relative_path_comparator)
+module Type_name_asserter =
+  Make_asserter (Make_deriving_comparator (Symbol_name.Type))
+module Fun_name_asserter =
+  Make_asserter (Make_deriving_comparator (Symbol_name.Fun))
+module Const_name_asserter =
+  Make_asserter (Make_deriving_comparator (Symbol_name.Const))

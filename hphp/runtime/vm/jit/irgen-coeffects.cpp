@@ -36,33 +36,21 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   auto const tv = topC(env, BCSPRelOffset {static_cast<int32_t>(index)});
   return cond(
     env,
-    [&] (Block* taken) {
-      return gen(env, CheckType, TObj, taken, tv);
-    },
+    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
     [&] (SSATmp* obj) {
       auto const cls  = gen(env, LdObjClass, obj);
       return gen(env, LookupClsCtxCns, cls, cns(env, name));
     },
+    [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
+    [&] (SSATmp*) { return cns(env, RuntimeCoeffects::full().value()); },
     [&] {
-      return cond(
-        env,
-        [&] (Block* taken) {
-          auto const isObj = gen(env, IsType, TNull, tv);
-          gen(env, JmpZero, taken, isObj);
-        },
-        [&] {
-          return cns(env, RuntimeCoeffects::full().value());
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          auto const msg =
-            folly::sformat("Coeffect rule requires parameter at position "
-                           "{} to be an object or null",
-                           paramIdx);
-          gen(env, RaiseError, cns(env, makeStaticString(msg)));
-          return cns(env, 0);
-        }
-      );
+      hint(env, Block::Hint::Unlikely);
+      auto const msg =
+        folly::sformat("Coeffect rule requires parameter at position "
+                       "{} to be an object or null",
+                       paramIdx);
+      gen(env, RaiseError, cns(env, makeStaticString(msg)));
+      return cns(env, 0);
     }
   );
 }
@@ -82,17 +70,6 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   auto const index =
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
   auto const tv = topC(env, BCSPRelOffset {static_cast<int32_t>(index)});
-
-  auto const emitCond = [&](const Type& t, auto successFn, auto failFn) {
-    return cond(
-      env,
-      [&] (Block* taken) {
-        return gen(env, CheckType, t, taken, tv);
-      },
-      successFn,
-      failFn
-    );
-  };
 
   auto const fail = [&] {
     hint(env, Block::Hint::Unlikely);
@@ -137,49 +114,18 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     auto const is_any_func_type = [&] (Block* toFail) {
       return cond(
         env,
-        [&] (Block* taken) {
-          return gen(env, CheckType, TFunc, taken, tv);
-        },
-        [&] (SSATmp* func) {
-          return func;
-        },
+        [&] (Block* taken) { return gen(env, CheckType, TFunc, taken, tv); },
+        [&] (SSATmp* func) { return func; },
+        [&] (Block* taken) { return gen(env, CheckType, TRFunc, taken, tv); },
+        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRFunc, ptr); },
+        [&] (Block* taken) { return gen(env, CheckType, TClsMeth, taken, tv); },
+        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromClsMeth, ptr); },
+        [&] (Block* taken) { return gen(env, CheckType, TRClsMeth, taken, tv); },
+        [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRClsMeth, ptr); },
         [&] {
-          return cond(
-            env,
-            [&] (Block* taken) {
-              return gen(env, CheckType, TRFunc, taken, tv);
-            },
-            [&] (SSATmp* ptr) {
-              return gen(env, LdFuncFromRFunc, ptr);
-            },
-            [&] {
-              return cond(
-                env,
-                [&] (Block* taken) {
-                  return gen(env, CheckType, TClsMeth, taken, tv);
-                },
-                [&] (SSATmp* ptr) {
-                  return gen(env, LdFuncFromClsMeth, ptr);
-                },
-                [&] {
-                  return cond(
-                    env,
-                    [&] (Block* taken) {
-                      return gen(env, CheckType, TRClsMeth, taken, tv);
-                    },
-                    [&] (SSATmp* ptr) {
-                      return gen(env, LdFuncFromRClsMeth, ptr);
-                    },
-                    [&] {
-                      gen(env, Jmp, toFail);
-                      // To keep JIT type system happy
-                      return cns(env, SystemLib::s_nullFunc);
-                    }
-                  );
-                }
-              );
-            }
-          );
+          gen(env, Jmp, toFail);
+          // To keep JIT type system happy
+          return cns(env, SystemLib::s_nullFunc);
         }
       );
     };
@@ -205,14 +151,13 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     return cond(env, is_any_func_type, handle_func, fail);
   };
 
-  return emitCond(
-    TNull,
-    [&] (SSATmp*) {
-      return cns(env, RuntimeCoeffects::full().value());
-    },
-    [&] {
-      return emitCond(TObj, objSuccess, fnPtrs);
-    }
+  return cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
+    [&] (SSATmp*)      { return cns(env, RuntimeCoeffects::full().value()); },
+    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
+    objSuccess,
+    fnPtrs
   );
 
 }

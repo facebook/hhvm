@@ -200,6 +200,14 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
   return nullptr;
 }
 
+// Helper to allow for chaining of Branch/Next pairs
+template<class Branch1, class Next1, class Branch2, class Next2, class... Args>
+SSATmp* cond(IRGS& env, Branch1 b1, Next1 n1, Branch2 b2, Next2 n2,
+             Args&&... args) {
+  return cond(env, b1, n1,
+              [&]{ return cond(env, b2, n2, std::forward<Args>(args)...); });
+}
+
 template<class Branch, class Next, class Taken>
 std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
                                      Branch branch,

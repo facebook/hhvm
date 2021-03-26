@@ -405,7 +405,7 @@ function rel_path($to) {
   return implode('/', $relPath);
 }
 
-function get_options($argv) {
+function get_options($argv): (darray<string, mixed>, varray<string>) {
   // Options marked * affect test behavior, and need to be reported by list_tests
   $parameters = darray[
     '*env:' => '',
@@ -567,7 +567,7 @@ function get_options($argv) {
     exit(1);
   }
 
-  return varray[$options, $files];
+  return tuple($options, $files);
 }
 
 /*
@@ -643,18 +643,18 @@ function find_test_files($file) {
 
 // Some tests have to be run together in the same test bucket, serially, one
 // after other in order to avoid races and other collisions.
-function serial_only_tests($tests) {
+function serial_only_tests(varray<string> $tests): varray<string> {
   if (is_testing_dso_extension()) {
     return varray[];
   }
   // Add a <testname>.php.serial file to make your test run in the serial
   // bucket.
-  $serial_tests = array_filter(
+  $serial_tests = varray(array_filter(
     $tests,
     function($test) {
       return file_exists($test . '.serial');
     }
-  );
+  ));
   return $serial_tests;
 }
 
@@ -674,7 +674,7 @@ function exec_find(mixed $files, string $extra): mixed {
   return $results;
 }
 
-function find_tests($files, darray $options = null) {
+function find_tests($files, darray $options = null): varray<string> {
   if (!$files) {
     $files = varray['quick'];
   }
@@ -717,37 +717,37 @@ function find_tests($files, darray $options = null) {
           usage());
   }
   asort(inout $tests);
-  $tests = array_filter($tests);
+  $tests = varray(array_filter($tests));
   if ($options['exclude'] ?? false) {
     $exclude = $options['exclude'];
-    $tests = array_filter($tests, function($test) use ($exclude) {
+    $tests = varray(array_filter($tests, function($test) use ($exclude) {
       return (false === strpos($test, $exclude));
-    });
+    }));
   }
   if ($options['exclude-pattern'] ?? false) {
     $exclude = $options['exclude-pattern'];
-    $tests = array_filter($tests, function($test) use ($exclude) {
+    $tests = varray(array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
-    });
+    }));
   }
   if ($options['exclude-recorded-failures'] ?? false) {
     $exclude_file = $options['exclude-recorded-failures'];
     $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
-    $tests = array_filter($tests, function($test) use ($exclude) {
+    $tests = varray(array_filter($tests, function($test) use ($exclude) {
       return (false === in_array(canonical_path($test), $exclude));
-    });
+    }));
   }
   if ($options['include'] ?? false) {
     $include = $options['include'];
-    $tests = array_filter($tests, function($test) use ($include) {
+    $tests = varray(array_filter($tests, function($test) use ($include) {
       return (false !== strpos($test, $include));
-    });
+    }));
   }
   if ($options['include-pattern'] ?? false) {
     $include = $options['include-pattern'];
-    $tests = array_filter($tests, function($test) use ($include) {
+    $tests = varray(array_filter($tests, function($test) use ($include) {
       return preg_match($include, $test);
-    });
+    }));
   }
   return $tests;
 }
@@ -771,14 +771,18 @@ function list_tests($files, $options) {
   }
 }
 
-function find_test_ext($test, $ext, $configName='config') {
+function find_test_ext(
+  string $test,
+  string $ext,
+  string $configName='config',
+): ?string {
   if (is_file("{$test}.{$ext}")) {
     return "{$test}.{$ext}";
   }
   return find_file_for_dir(dirname($test), "{$configName}.{$ext}");
 }
 
-function find_file_for_dir($dir, $name) {
+function find_file_for_dir(string $dir, string $name): ?string {
   // Handle the case where the $dir might come in as '.' because you
   // are running the test runner on a file from the same directory as
   // the test e.g., './mytest.php'. dirname() will give you the '.' when
@@ -1968,11 +1972,15 @@ function clean_intermediate_files($test, $options) {
   }
 }
 
-function run($options, $tests, $bad_test_file) {
+function child_main(
+  darray<string, mixed> $options,
+  varray<string> $tests,
+  string $json_results_file,
+): int {
   foreach ($tests as $test) {
     run_and_lock_test($options, $test);
   }
-  file_put_contents($bad_test_file, json_encode(Status::getResults()));
+  file_put_contents($json_results_file, json_encode(Status::getResults()));
   foreach (Status::getResults() as $result) {
     if ($result['status'] == 'failed') {
       return 1;
@@ -2000,7 +2008,11 @@ function is_hack_file($options, $test) {
   return false;
 }
 
-function skip_test($options, $test, $run_skipif = true): ?string {
+function should_skip_test(
+  darray<string, mixed> $options,
+  string $test,
+  bool $run_skipif = true
+): ?string {
   if (isset($options['hack-only']) &&
       substr($test, -5) !== '.hhas' &&
       !is_hack_file($options, $test)) {
@@ -2311,7 +2323,10 @@ function can_run_server_test($test, $options) {
 
 const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
-  invariant(can_run_server_test($test, $options), "skip_test should have skipped this");
+  invariant(
+    can_run_server_test($test, $options),
+    'should_skip_test should have skipped this',
+  );
 
   Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini');
@@ -2629,7 +2644,11 @@ function run_and_lock_test($options, $test) {
 }
 
 function run_test($options, $test) {
-  $skip_reason = skip_test($options, $test, !($options['no-skipif'] ?? false));
+  $skip_reason = should_skip_test(
+    $options,
+    $test,
+    !($options['no-skipif'] ?? false)
+  );
   if ($skip_reason !== null) return $skip_reason;
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
@@ -2735,7 +2754,10 @@ function run_test($options, $test) {
   }
 
   if (isset($options['hhas-round-trip'])) {
-    invariant(substr($test, -5) !== ".hhas", "skip_test should have skipped");
+    invariant(
+      substr($test, -5) !== ".hhas",
+      'should_skip_test should have skipped this',
+    );
     // create tmpdir now so that we can write hhas
     Status::createTestTmpDir($test);
     // dumping hhas, not running code so arbitrarily picking a mode
@@ -3299,7 +3321,7 @@ function main($argv) {
         error("Couldn't find config file for $test");
       }
       if (array_key_exists($config, $configs)) continue;
-      if (skip_test($options, $test, false) !== null) continue;
+      if (should_skip_test($options, $test, false) !== null) continue;
       $configs[] = $config;
     }
 
@@ -3390,25 +3412,25 @@ function main($argv) {
 
   // Fork "worker" children (if needed).
   $children = darray[];
-  // A poor man's shared memory.
-  $bad_test_files = varray[];
+  // We write results as json in each child and collate them at the end
+  $json_results_files = varray[];
   if (Status::$nofork) {
     Status::registerCleanup(isset($options['no-clean']));
-    $bad_test_file = tempnam('/tmp', 'test-run-');
-    $bad_test_files[] = $bad_test_file;
+    $json_results_file = tempnam('/tmp', 'test-run-');
+    $json_results_files[] = $json_results_file;
     invariant(count($test_buckets) === 1, "nofork was set erroneously");
-    $return_value = run($options, $test_buckets[0], $bad_test_file);
+    $return_value = child_main($options, $test_buckets[0], $json_results_file);
   } else {
     foreach ($test_buckets as $test_bucket) {
-      $bad_test_file = tempnam('/tmp', 'test-run-');
-      $bad_test_files[] = $bad_test_file;
+      $json_results_file = tempnam('/tmp', 'test-run-');
+      $json_results_files[] = $json_results_file;
       $pid = pcntl_fork();
       if ($pid == -1) {
         error('could not fork');
       } else if ($pid) {
         $children[$pid] = $pid;
       } else {
-        exit(run($options, $test_bucket, $bad_test_file));
+        exit(child_main($options, $test_bucket, $json_results_file));
       }
     }
 
@@ -3469,8 +3491,8 @@ function main($argv) {
 
   // aggregate results
   $results = darray[];
-  foreach ($bad_test_files as $bad_test_file) {
-    $json = json_decode(file_get_contents($bad_test_file), true);
+  foreach ($json_results_files as $json_results_file) {
+    $json = json_decode(file_get_contents($json_results_file), true);
     if (!is_array($json)) {
       error(
         "\nNo JSON output was received from a test thread. ".
@@ -3478,7 +3500,7 @@ function main($argv) {
       );
     }
     $results = array_merge($results, $json);
-    unlink($bad_test_file);
+    unlink($json_results_file);
   }
 
   // print results

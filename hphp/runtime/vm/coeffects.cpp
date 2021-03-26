@@ -159,7 +159,7 @@ RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
   if (tvIsObject(tv)) {
     auto const obj = tv->m_data.pobj;
     auto const closureCls = obj->getVMClass();
-    if (closureCls->parent() != c_Closure::classof()) return error();
+    if (!closureCls->isClosureClass()) return error();
     if (!closureCls->hasClosureCoeffectsProp()) {
       assertx(!closureCls->getCachedInvoke()->hasCoeffectRules());
       return closureCls->getCachedInvoke()->requiredCoeffects();

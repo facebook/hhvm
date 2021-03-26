@@ -1224,6 +1224,11 @@ public:
   // Closure subclasses.
 
   /*
+   * Is this a subclass of Closure?
+   */
+  bool isClosureClass() const;
+
+  /*
    * Is this a scoped subclass of Closure?
    */
   bool isScopedClosure() const;

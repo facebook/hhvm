@@ -1463,13 +1463,18 @@ Slot Class::propIndexToSlot(uint16_t index) const {
   always_assert_flog(0, "propIndexToSlot: no slot found for index = {}", index);
 }
 
+bool Class::isClosureClass() const {
+  assertx(IMPLIES(attrs() & AttrIsClosureClass,
+                  parent() == c_Closure::classof()));
+  return attrs() & AttrIsClosureClass;
+}
+
 bool Class::hasClosureCoeffectsProp() const {
-  assertx(parent() == c_Closure::classof());
-  auto const func = getCachedInvoke();
-  assertx(func);
-  if (!func->hasCoeffectRules()) return false;
-  assertx(func->getCoeffectRules().size() == 1);
-  assertx(func->getCoeffectRules()[0].isClosureInheritFromParent());
+  assertx(isClosureClass());
+  if (!(attrs() & AttrHasClosureCoeffectsProp)) return false;
+  assertx(getCachedInvoke()->hasCoeffectRules());
+  assertx(getCachedInvoke()->getCoeffectRules().size() == 1);
+  assertx(getCachedInvoke()->getCoeffectRules()[0].isClosureInheritFromParent());
   return true;
 }
 

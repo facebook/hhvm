@@ -659,7 +659,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Floor:
   case FuncCred:
   case FuncHasAttr:
-  case FuncHasCoeffectRules:
   case GenericRetDecRefs:
   case GetDictPtrIter:
   case GetMemoKeyScalar:

@@ -147,6 +147,8 @@ enum Attr {
   // Set on closure classes that use a property to store required coeffects
   AttrHasClosureCoeffectsProp                                          //
                            = (1u << 25), //    X  |          |         //
+  // Set on functions with coeffect rules
+  AttrHasCoeffectRules     = (1u << 25), //       |          |    X    //
   // Indicates that this property was declared as readonly             //
   AttrIsReadOnly           = (1u << 26), //       |    X     |         //
                                          //       |          |         //

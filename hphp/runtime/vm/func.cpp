@@ -768,7 +768,6 @@ Func::SharedData::SharedData(unsigned char const* bc, Offset bclen,
   m_allFlags.m_isRxDisabled = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;
   m_allFlags.m_hasReturnWithMultiUBs = false;
-  m_allFlags.m_hasCoeffectRules = false;
 
   m_bclenSmall = std::min<uint32_t>(bclen, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);

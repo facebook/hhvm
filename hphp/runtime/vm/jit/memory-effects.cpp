@@ -1597,7 +1597,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsCnsVecLen:
   case FuncHasAttr:
   case ClassHasAttr:
-  case FuncHasCoeffectRules:
   case LdFuncRequiredCoeffects:
   case IsFunReifiedGenericsMatched:
   case JmpPlaceholder:

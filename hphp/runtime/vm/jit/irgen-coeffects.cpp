@@ -137,7 +137,8 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
       return cond(
         env,
         [&] (Block* taken) {
-          auto const success = gen(env, FuncHasCoeffectRules, func);
+          auto const data = AttrData { AttrHasCoeffectRules };
+          auto const success = gen(env, FuncHasAttr, data, func);
           gen(env, JmpNZero, taken, success);
         },
         [&] {

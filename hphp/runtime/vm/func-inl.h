@@ -622,7 +622,7 @@ inline bool Func::hasCoeffectsLocal() const {
 }
 
 inline bool Func::hasCoeffectRules() const {
-  return shared()->m_allFlags.m_hasCoeffectRules;
+  return attrs() & AttrHasCoeffectRules;
 }
 
 inline const Func::CoeffectRules& Func::getCoeffectRules() const {

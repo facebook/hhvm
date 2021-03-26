@@ -1335,10 +1335,6 @@ To string conversions:
 
   Tests for Class::m_attrsCopy & attr.
 
-| FuncHasCoeffectRules, D(Bool), S(Func), NF
-
-  Returns the value of func->hasCoeffectRules().
-
 | LdFuncRequiredCoeffects, D(Int), S(Func), NF
 
   Returns the value of func->requiredCoeffects().

@@ -357,13 +357,6 @@ SSATmp* simplifyClassHasAttr(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
-SSATmp* simplifyFuncHasCoeffectRules(State& env, const IRInstruction* inst) {
-  auto const funcTmp = inst->src(0);
-  return funcTmp->hasConstVal(TFunc)
-    ? cns(env, (funcTmp->funcVal()->hasCoeffectRules()))
-    : nullptr;
-}
-
 SSATmp* simplifyLdFuncRequiredCoeffects(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -3773,7 +3766,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(MethodExists)
       X(FuncHasAttr)
       X(ClassHasAttr)
-      X(FuncHasCoeffectRules)
       X(LdFuncRequiredCoeffects)
       X(LdObjClass)
       X(LdObjInvoke)

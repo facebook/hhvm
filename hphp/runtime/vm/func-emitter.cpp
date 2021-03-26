@@ -243,6 +243,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     attrs |= AttrSupportsAsyncEagerReturn;
   }
 
+  if (!coeffectRules.empty()) attrs |= AttrHasCoeffectRules;
+
   auto const dynCallSampleRate = [&] () -> folly::Optional<int64_t> {
     if (!(attrs & AttrDynamicallyCallable)) return {};
 
@@ -318,10 +320,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
 
-    if (!coeffectRules.empty()) {
-      ex->m_coeffectRules = coeffectRules;
-      f->shared()->m_allFlags.m_hasCoeffectRules = true;
-    }
+    if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_shallowCoeffectsWithLocals = shallowCoeffectsWithLocals;
   }
 

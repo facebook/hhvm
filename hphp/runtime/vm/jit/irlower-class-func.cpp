@@ -246,23 +246,6 @@ void cgClassHasAttr(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-bool hasCoeffectRulesHelper(const Func* f) {
-  return f->hasCoeffectRules();
-}
-
-} // namespace
-
-void cgFuncHasCoeffectRules(IRLS& env, const IRInstruction* inst) {
-  // TODO: Optimize by reading the size field off FixedVector that
-  // stores the coeffectRules
-  auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0);
-  auto const target = CallSpec::direct(hasCoeffectRulesHelper);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
-}
-
 void cgLdFuncRequiredCoeffects(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

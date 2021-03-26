@@ -1288,7 +1288,6 @@ private:
         bool m_isRxDisabled : true;
         bool m_hasParamsWithMultiUBs : true;
         bool m_hasReturnWithMultiUBs : true;
-        bool m_hasCoeffectRules : true;
       };
       uint16_t m_allFlags;
     };

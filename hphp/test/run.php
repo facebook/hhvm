@@ -448,7 +448,6 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     '*vendor:' => '',
     'record-failures:' => '',
     '*hackc' => '',
-    '*hack-only' => '',
     '*ignore-oids' => '',
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
@@ -1989,36 +1988,11 @@ function child_main(
   return 0;
 }
 
-function is_hack_file($options, $test) {
-  if (substr($test, -3) === '.hh') return true;
-
-  $file = fopen($test, 'r');
-  if ($file === false) return false;
-
-  // Skip lines that are a shebang or whitespace.
-  while (($line = fgets($file)) !== false) {
-    $line = trim($line);
-    if ($line === '' || substr($line, 0, 2) === '#!') continue;
-    // Allow partial and strict, but don't count decl files as Hack code
-    if ($line === '<?hh' || $line === '<?hh //strict') return true;
-    break;
-  }
-  fclose($file);
-
-  return false;
-}
-
 function should_skip_test(
   darray<string, mixed> $options,
   string $test,
   bool $run_skipif = true
 ): ?string {
-  if (isset($options['hack-only']) &&
-      substr($test, -5) !== '.hhas' &&
-      !is_hack_file($options, $test)) {
-    return 'skip-hack-only';
-  }
-
   if ((isset($options['cli-server']) || isset($options['server'])) &&
       !can_run_server_test($test, $options)) {
     return 'skip-server';

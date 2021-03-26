@@ -1988,6 +1988,295 @@ function child_main(
   return 0;
 }
 
+/**
+ * The runif feature is similar in spirit to skipif, but instead of allowing
+ * one to run arbitrary code it can only skip based on pre-defined reasons
+ * understood by the test runner.
+ *
+ * The .runif file should consist of one or more lines made up of words
+ * separated by spaces, optionally followed by a comment starting with #.
+ * Empty lines (or lines with only comments) are ignored. The first word
+ * determines the interpretation of the rest. The .runif file will allow the
+ * test to run if all the non-empty lines 'match'.
+ *
+ * Currently supported operations:
+ *   os [not] <os_name> # matches if we are (or are not) on the named OS
+ *   euid [not] root # matches if we are (or are not) running as root (euid==0)
+ *   extension <extension_name> # matches if the named extension is available
+ *   function <function_name> # matches if the named function is available
+ *   class <class_name> # matches if the named class is available
+ *   method <class_name> <method name> # matches if the method is available
+ *   const <constant_name> # matches if the named constant is available
+ *
+ * Several functions in this implementation return RunifResult. Valid sets of
+ * keys are:
+ *   valid, error # valid will be false
+ *   valid, match # valid will be true, match will be true
+ *   valid, match, skip_reason # valid will be true, match will be false
+ */
+type RunifResult = shape(
+  'valid' => bool, // was the runif file valid
+  ?'error' => string, // if !valid, what was the problem
+  ?'match' => bool, // did the line match/did all the lines in the file match
+  ?'skip_reason' => string, // if !match, the skip reason to use
+);
+
+<<__Memoize>> function runif_canonical_os(): string {
+  if (PHP_OS === 'Linux' || PHP_OS === 'Darwin') return PHP_OS;
+  if (substr(PHP_OS, 0, 3) === 'WIN') return 'WIN';
+  invariant_violation('add proper canonicalization for your OS');
+}
+
+function runif_known_os(string $match_os): bool {
+  switch ($match_os) {
+    case 'Linux':
+    case 'Darwin':
+    case 'WIN':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function runif_os_matches(varray<string> $words): RunifResult {
+  if (count($words) === 2) {
+    if ($words[0] !== 'not') {
+      return shape('valid' => false, 'error' => "malformed 'os' match");
+    }
+    $match_os = $words[1];
+    $invert = true;
+  } else if (count($words) === 1) {
+    $match_os = $words[0];
+    $invert = false;
+  } else {
+    return shape('valid' => false, 'error' => "malformed 'os' match");
+  }
+  if (!runif_known_os($match_os)) {
+    return shape('valid' => false, 'error' => "unknown os '$match_os'");
+  }
+  $matches = (runif_canonical_os() === $match_os);
+  if ($matches !== $invert) return shape('valid' => true, 'match' => true);
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-os-' . implode('-', $words)
+  );
+}
+
+function runif_test_for_feature(
+  darray<string, mixed> $options,
+  string $test,
+  string $bool_expression,
+): bool {
+  $tmp = tempnam(sys_get_temp_dir(), 'test-run-runif-');
+  file_put_contents(
+    $tmp,
+    "<?hh\n" .
+      "<<__EntryPoint>> function main(): void {\n" .
+      "  echo ($bool_expression) as bool ? 'PRESENT' : 'ABSENT';\n" .
+      "}\n",
+  );
+
+  // Run the check in non-repo mode to avoid building the repo (same features
+  // should be available). Pick the mode arbitrarily for the same reason.
+  $options_without_repo = $options;
+  unset($options_without_repo['repo']);
+  list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $tmp, true);
+  $hhvm = $hhvm[0];
+  // Remove any --count <n> from the command
+  $hhvm = preg_replace('/ --count[ =][\d+] /', ' ', $hhvm);
+  // some tests set open_basedir to a restrictive value, override to permissive
+  $hhvm .= ' -dopen_basedir= ';
+
+  $result = shell_exec("$hhvm 2>&1");
+  invariant ($result !== false, 'shell_exec in runif_test_for_feature failed');
+  $result = trim($result);
+  if ($result === 'ABSENT') return false;
+  if ($result === 'PRESENT') return true;
+  invariant_violation(
+    "unexpected output from shell_exec in runif_test_for_feature: '$result'"
+  );
+}
+
+function runif_euid_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) === 2) {
+    if ($words[0] !== 'not' || $words[1] !== 'root') {
+      return shape('valid' => false, 'error' => "malformed 'euid' match");
+    }
+    $invert = true;
+  } else if (count($words) === 1) {
+    if ($words[0] !== 'root') {
+      return shape('valid' => false, 'error' => "malformed 'euid' match");
+    }
+    $invert = false;
+  } else {
+    return shape('valid' => false, 'error' => "malformed 'euid' match");
+  }
+  $matches = runif_test_for_feature($options, $test, 'posix_geteuid() === 0');
+  if ($matches !== $invert) return shape('valid' => true, 'match' => true);
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-euid-' . implode('-', $words)
+  );
+}
+
+function runif_extension_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) !== 1) {
+    return shape('valid' => false, 'error' => "malformed 'extension' match");
+  }
+  if (runif_test_for_feature($options, $test, "extension_loaded('{$words[0]}')")) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-extension-' . $words[0]
+  );
+}
+
+function runif_function_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) !== 1) {
+    return shape('valid' => false, 'error' => "malformed 'function' match");
+  }
+  if (runif_test_for_feature($options, $test, "function_exists('{$words[0]}')")) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-function-' . $words[0]
+  );
+}
+
+function runif_class_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) !== 1) {
+    return shape('valid' => false, 'error' => "malformed 'class' match");
+  }
+  if (runif_test_for_feature($options, $test, "class_exists('{$words[0]}')")) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-class-' . $words[0]
+  );
+}
+
+function runif_method_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) !== 2) {
+    return shape('valid' => false, 'error' => "malformed 'method' match");
+  }
+  if (runif_test_for_feature($options, $test,
+                             "method_exists('{$words[0]}', '{$words[1]}')")) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-method-' . $words[0] . '-' . $words[1],
+  );
+}
+
+function runif_const_matches(
+  darray<string, mixed> $options,
+  string $test,
+  varray<string> $words,
+): RunifResult {
+  if (count($words) !== 1) {
+    return shape('valid' => false, 'error' => "malformed 'const' match");
+  }
+  if (runif_test_for_feature($options, $test, "defined('{$words[0]}')")) {
+    return shape('valid' => true, 'match' => true);
+  }
+  return shape(
+    'valid' => true,
+    'match' => false,
+    'skip_reason' => 'skip-runif-const-' . $words[0]
+  );
+}
+
+function runif_should_skip_test(
+  darray<string, mixed> $options,
+  string $test,
+): RunifResult {
+  $runif_path = find_test_ext($test, 'runif');
+  if (!$runif_path) return shape('valid' => true, 'match' => true);
+
+  $file_empty = true;
+  $contents = file($runif_path, FILE_IGNORE_NEW_LINES);
+  foreach ($contents as $line) {
+    $line = preg_replace('/[#].*$/', '', $line); // remove comment
+    $line = trim($line);
+    if ($line === '') continue;
+    $file_empty = false;
+
+    $words = preg_split('/ +/', $line);
+    if (count($words) < 2) {
+      return shape('valid' => false, 'error' => "malformed line '$line'");
+    }
+    foreach ($words as $word) {
+      if (!preg_match('/^\w+$/', $word)) {
+        return shape(
+          'valid' => false,
+          'error' => "bad word '$word' in line '$line'",
+        );
+      }
+    }
+
+    $type = array_shift(inout $words);
+    $words = varray($words); // array_shift always promotes to darray :-\
+    switch ($type) {
+      case 'os':
+        $result = runif_os_matches($words);
+        break;
+      case 'euid':
+        $result = runif_euid_matches($options, $test, $words);
+        break;
+      case 'extension':
+        $result = runif_extension_matches($options, $test, $words);
+        break;
+      case 'function':
+        $result = runif_function_matches($options, $test, $words);
+        break;
+      case 'class':
+        $result = runif_class_matches($options, $test, $words);
+        break;
+      case 'method':
+        $result = runif_method_matches($options, $test, $words);
+        break;
+      case 'const':
+        $result = runif_const_matches($options, $test, $words);
+        break;
+      default:
+        return shape('valid' => false, 'error' => "bad match type '$type'");
+    }
+    if (!$result['valid'] || !$result['match']) return $result;
+  }
+  if ($file_empty) return shape('valid' => false, 'error' => 'empty runif file');
+  return shape('valid' => true, 'match' => true);
+}
+
 function should_skip_test_simple(
   darray<string, mixed> $options,
   string $test,
@@ -2598,6 +2887,17 @@ function run_test($options, $test) {
   if (!($options['no-skipif'] ?? false)) {
     $skip_reason = skipif_should_skip_test($options, $test);
     if ($skip_reason !== null) return $skip_reason;
+
+    $result = runif_should_skip_test($options, $test);
+    if (!$result['valid']) {
+      invariant($result['error'] is string, 'missing runif error');
+      Status::writeDiff($test, 'Invalid .runif file: ' . $result['error']);
+      return false;
+    }
+    if (!$result['match']) {
+      invariant($result['skip_reason'] is string, 'missing skip_reason');
+      return $result['skip_reason'];
+    }
   }
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);

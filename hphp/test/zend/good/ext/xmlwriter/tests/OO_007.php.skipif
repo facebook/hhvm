@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("xmlwriter")) die("skip");
-if (LIBXML_VERSION < 20629) die("skip: libxml2 2.6.29+ required");
-}

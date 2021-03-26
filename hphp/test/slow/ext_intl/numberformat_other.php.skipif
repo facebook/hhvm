@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (version_compare(INTL_ICU_VERSION, '4.2.1', '<=')) {
-  die("This libicu version has a bug which makes this test fail");
-}
-}

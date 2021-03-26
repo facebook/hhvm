@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (LIBXML_VERSION < 20708) die('skip LibXML too old');
-}

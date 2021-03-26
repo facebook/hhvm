@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("gmp")) print "skip";
-if (version_compare(GMP_VERSION, "4.2.0", "<")) print "skip";
-}

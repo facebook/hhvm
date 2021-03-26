@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (version_compare(PHP_VERSION, '5.4.0', '<')) die("skip this test if PHP_VERSION is less than 5.4.0");
-}

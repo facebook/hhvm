@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('strtotime')) echo "SKIP";
-}

@@ -1,9 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-if(!function_exists('jpeg2wbmp')) {
-    die('skip jpeg2wbmp function is not available');
-}
-}

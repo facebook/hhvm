@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!defined("IMAGETYPE_SWC") || !defined("IMAGETYPE_ICO") || !extension_loaded('zlib')) {
-    die("skip zlib extension is not available or IMAGETYPE_SWC/IMAGETYPE_ICO is not defined ");
-}
-}

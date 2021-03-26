@@ -1,0 +1,2 @@
+extension intl
+const INTL_IDNA_VARIANT_UTS46

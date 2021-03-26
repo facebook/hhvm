@@ -1,0 +1,3 @@
+extension sockets
+os not Darwin
+euid not root

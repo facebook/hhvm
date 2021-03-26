@@ -1,0 +1,2 @@
+extension gd
+function imagecreatetruecolor

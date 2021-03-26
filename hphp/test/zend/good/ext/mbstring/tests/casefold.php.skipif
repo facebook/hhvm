@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('mbstring') || die('skip mbstring not available');
-(function_exists('mb_strtolower') && function_exists('mb_convert_case')) ||
-    die("skip mb_convert_case() is not available");
-}

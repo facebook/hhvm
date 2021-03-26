@@ -1,0 +1,2 @@
+os not WIN # no link()/symlink() on Windows
+function posix_mkfifo

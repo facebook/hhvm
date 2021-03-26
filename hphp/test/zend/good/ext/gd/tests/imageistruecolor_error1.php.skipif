@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("gd")) die("skip GD not present");
-if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
-}

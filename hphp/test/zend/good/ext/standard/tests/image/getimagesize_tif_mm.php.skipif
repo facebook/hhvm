@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!defined("IMAGETYPE_TIFF_MM")) {
-    die("skip tiff_mm file format is not available");
-}
-}

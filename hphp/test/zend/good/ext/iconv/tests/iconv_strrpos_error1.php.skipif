@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('iconv') || die('skip');
-function_exists('iconv_strrpos') || die("skip iconv_strrpos() is not available in this build");
-}

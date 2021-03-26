@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('date_sub')) echo "skip: date_sub() function not found!";
-}

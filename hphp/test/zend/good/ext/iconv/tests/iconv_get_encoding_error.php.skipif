@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('iconv') || die('skip');
-function_exists('iconv_get_encoding') || die("skip iconv_get_encoding() is not available in this build");
-}

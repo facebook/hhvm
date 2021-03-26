@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('mbstring') || die('skip');
-function_exists('mb_internal_encoding') || die("skip mb_internal_encoding() is not available in this build");
-}

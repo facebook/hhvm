@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('simplexml')) echo 'skip simplexml extension is not loaded';
-}

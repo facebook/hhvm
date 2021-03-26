@@ -1,0 +1,3 @@
+extension gd
+function imagejpeg
+function imagecreatefromgif

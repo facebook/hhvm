@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-/* $Id$ */
-if(!extension_loaded('zip')) die('skip');
-}

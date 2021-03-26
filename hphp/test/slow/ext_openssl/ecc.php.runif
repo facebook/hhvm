@@ -1,0 +1,2 @@
+extension openssl
+const OPENSSL_KEYTYPE_EC

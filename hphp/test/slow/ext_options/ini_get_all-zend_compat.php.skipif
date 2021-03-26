@@ -1,8 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!(
-  extension_loaded('pcre_zend_compat')
-)) {
-  echo 'Skip';
-}
-}

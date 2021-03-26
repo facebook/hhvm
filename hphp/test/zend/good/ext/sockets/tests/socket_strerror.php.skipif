@@ -1,9 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('sockets') || !function_exists('socket_strerror')) {
-    die('skip sockets extension not available.');
-}
-if (!stristr(PHP_OS, "Linux")) {
-    die('skip - test validates linux error strings only.');
-}
-}

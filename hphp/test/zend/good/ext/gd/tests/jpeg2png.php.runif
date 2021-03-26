@@ -1,0 +1,5 @@
+extension gd
+function imagecreatefrompng
+function imagepng
+function imagecreatefromjpeg
+function imagejpeg

@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-function_exists('expm1') || die('skip expm1() is not supported in this build.');
-}

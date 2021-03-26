@@ -1,0 +1,2 @@
+extension iconv
+function iconv_get_encoding

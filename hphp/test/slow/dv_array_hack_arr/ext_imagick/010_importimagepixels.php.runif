@@ -1,0 +1,2 @@
+extension imagick
+method imagick importImagePixels

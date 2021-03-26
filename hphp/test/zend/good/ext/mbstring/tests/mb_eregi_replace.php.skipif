@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
-function_exists('mb_eregi_replace') || die("skip mb_eregi_replace() is not available in this build");
-}

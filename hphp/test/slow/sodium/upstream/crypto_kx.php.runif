@@ -1,0 +1,2 @@
+extension sodium
+const SODIUM_CRYPTO_KX_KEYPAIRBYTES

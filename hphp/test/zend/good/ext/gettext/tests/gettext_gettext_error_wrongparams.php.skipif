@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("gettext")) {
-    die("skip extension gettext not loaded\n");
-}
-}

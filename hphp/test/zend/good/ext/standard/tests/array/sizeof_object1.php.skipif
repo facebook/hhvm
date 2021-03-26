@@ -1,7 +1,0 @@
-<?hh
-
-// Skip the test case if Standard PHP Library(spl) is not installed
-<<__EntryPoint>> function main(): void { if( !extension_loaded('spl')) {
-  die('skip spl is not installed');
-}
-}

@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("simplexml")) print "skip simplexml not available";
-if (!extension_loaded("json")) print "skip json not available";
-}

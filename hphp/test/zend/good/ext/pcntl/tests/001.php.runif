@@ -1,0 +1,2 @@
+extension pcntl
+function posix_kill

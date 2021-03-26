@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('memory_get_usage')) die('skip PHP is configured without memory_limit');
-}

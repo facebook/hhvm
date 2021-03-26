@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('mbstring') || die('skip');
-function_exists('mb_decode_mimeheader') || die("skip mb_decode_mimeheader() is not available in this build");
-}

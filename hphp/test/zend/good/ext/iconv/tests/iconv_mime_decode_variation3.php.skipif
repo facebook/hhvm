@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('iconv') || die('skip');
-function_exists('iconv_mime_decode') || die("skip iconv_mime_decode() is not available in this build");
-}

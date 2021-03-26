@@ -1,0 +1,2 @@
+extension mbstring
+function mb_strripos

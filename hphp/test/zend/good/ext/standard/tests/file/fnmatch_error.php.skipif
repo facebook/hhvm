@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('fnmatch'))
-    die("skip fnmatch() function is not available");
-}

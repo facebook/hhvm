@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('mbstring') || die('skip');
-function_exists('mb_stristr') || die("skip mb_stristr() is not available in this build");
-}

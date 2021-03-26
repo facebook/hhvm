@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('snappy_compress', false)) {
-    echo 'skip';
-}
-}

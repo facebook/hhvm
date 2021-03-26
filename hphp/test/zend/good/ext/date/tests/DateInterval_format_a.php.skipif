@@ -1,3 +1,0 @@
-<?hh 
-<<__EntryPoint>> function main(): void { if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); 
-}

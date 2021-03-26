@@ -1,7 +1,0 @@
-<?hh
-<<__EntryPoint>>
-function main(): void {
-  if (!extension_loaded("xmlreader")) die("skip");
-  $reader = new XMLReader();
-  if (!method_exists($reader, 'readInnerXML')) die("skip");
-}

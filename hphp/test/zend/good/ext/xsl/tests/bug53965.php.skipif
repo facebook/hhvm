@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
-}

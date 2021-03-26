@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!function_exists('imagecopy')) die("skip gd extension not available\n");
-}

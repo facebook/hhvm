@@ -1,0 +1,5 @@
+extension pcntl
+function pcntl_signal
+function pcntl_signal_dispatch
+function posix_kill
+function posix_getpid

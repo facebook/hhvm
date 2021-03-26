@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded("exif") || die("skip need exif");
-}

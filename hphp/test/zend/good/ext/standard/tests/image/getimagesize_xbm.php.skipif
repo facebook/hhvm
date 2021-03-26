@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!defined("IMAGETYPE_XBM")) {
-    die("skip xbm file format is not available");
-}
-}

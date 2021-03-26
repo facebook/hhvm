@@ -1,9 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
-if (posix_geteuid() == 0) {
-    die('SKIP Test cannot be run as root.');
-}
-}

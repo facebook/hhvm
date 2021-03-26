@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
-if (!function_exists("mb_convert_kana")) print "skip mb_convert_kana() not available";
-}

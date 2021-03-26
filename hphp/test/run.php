@@ -1988,10 +1988,9 @@ function child_main(
   return 0;
 }
 
-function should_skip_test(
+function should_skip_test_simple(
   darray<string, mixed> $options,
   string $test,
-  bool $run_skipif = true
 ): ?string {
   if ((isset($options['cli-server']) || isset($options['server'])) &&
       !can_run_server_test($test, $options)) {
@@ -2042,7 +2041,13 @@ function should_skip_test(
     return 'skip-lazyclass';
   }
 
-  if (!$run_skipif) return null;
+  return null;
+}
+
+function skipif_should_skip_test(
+  darray<string, mixed> $options,
+  string $test,
+): ?string {
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
     return null;
@@ -2299,7 +2304,7 @@ const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
   invariant(
     can_run_server_test($test, $options),
-    'should_skip_test should have skipped this',
+    'should_skip_test_simple should have skipped this',
   );
 
   Status::createTestTmpDir($test); // force it to be created
@@ -2588,12 +2593,12 @@ function run_and_log_test($options, $test) {
 }
 
 function run_test($options, $test) {
-  $skip_reason = should_skip_test(
-    $options,
-    $test,
-    !($options['no-skipif'] ?? false)
-  );
+  $skip_reason = should_skip_test_simple($options, $test);
   if ($skip_reason !== null) return $skip_reason;
+  if (!($options['no-skipif'] ?? false)) {
+    $skip_reason = skipif_should_skip_test($options, $test);
+    if ($skip_reason !== null) return $skip_reason;
+  }
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
@@ -2700,7 +2705,7 @@ function run_test($options, $test) {
   if (isset($options['hhas-round-trip'])) {
     invariant(
       substr($test, -5) !== ".hhas",
-      'should_skip_test should have skipped this',
+      'should_skip_test_simple should have skipped this',
     );
     // create tmpdir now so that we can write hhas
     Status::createTestTmpDir($test);
@@ -3265,7 +3270,7 @@ function main($argv) {
         error("Couldn't find config file for $test");
       }
       if (array_key_exists($config, $configs)) continue;
-      if (should_skip_test($options, $test, false) !== null) continue;
+      if (should_skip_test_simple($options, $test) !== null) continue;
       $configs[] = $config;
     }
 

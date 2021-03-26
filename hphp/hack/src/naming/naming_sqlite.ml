@@ -980,13 +980,31 @@ let get_file_info (db_path : db_path) path =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FileInfoTable.get_file_info db stmt_cache path
 
+(* Same as `get_db_and_stmt_cache` but with logging for when opening the
+database fails. *)
+let sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name =
+  try get_db_and_stmt_cache db_path
+  with Sqlite3.Error _ as exn ->
+    Hh_logger.info
+      "Sqlite_db_open_bug: couldn't open the DB at `%s` while getting the position of `%s` with case insensitivity `%b`\n"
+      (show_db_path db_path)
+      name
+      case_insensitive;
+    raise exn
+
 let get_type_pos (db_path : db_path) name =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  TypesTable.get db stmt_cache ~name ~case_insensitive:false
+  let case_insensitive = false in
+  let (db, stmt_cache) =
+    sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name
+  in
+  TypesTable.get db stmt_cache ~name ~case_insensitive
 
 let get_itype_pos (db_path : db_path) name =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  TypesTable.get db stmt_cache ~name ~case_insensitive:true
+  let case_insensitive = true in
+  let (db, stmt_cache) =
+    sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name
+  in
+  TypesTable.get db stmt_cache ~name ~case_insensitive
 
 let get_type_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =

@@ -277,13 +277,21 @@ impl<'arena> TypedValue<'arena> {
 
     // String concatenation
     pub fn concat(self, alloc: &'arena bumpalo::Bump, v2: Self) -> Option<Self> {
+        fn safe_to_cast(t: &TypedValue) -> bool {
+            matches!(
+                t,
+                TypedValue::Int(_) | TypedValue::String(_) | TypedValue::LazyClass(_)
+            )
+        }
+        if !safe_to_cast(&self) || !safe_to_cast(&v2) {
+            return None;
+        }
+
         use std::convert::TryInto;
         let s1: Option<std::string::String> = self.try_into().ok();
         let s2: Option<std::string::String> = v2.try_into().ok();
         match (s1, s2) {
-            (Some(l), Some(r)) => Some(Self::String(
-                bumpalo::collections::String::from_str_in((l + &r).as_str(), alloc).into_bump_str(),
-            )),
+            (Some(l), Some(r)) => Some(Self::String(alloc.alloc_str((l + &r).as_str()))),
             _ => None,
         }
     }

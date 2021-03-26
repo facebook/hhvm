@@ -47,6 +47,17 @@ macro_rules! impl_id {
             (alloc, s).into()
         }
 
+        #[allow(dead_code)]
+        fn from_raw_string_with_suffix<'arena>(alloc: &'arena bumpalo::Bump, s: &str, suffix: &str) -> $type<'arena> {
+            let mut r = bumpalo::collections::String::<'arena>::with_capacity_in(
+                s.len() + suffix.len(),
+                alloc,
+            );
+            r.push_str(s);
+            r.push_str(suffix);
+            $type(r.into_bump_str())
+        }
+
         impl<'arena, 'a, S> std::convert::From<(&'arena bumpalo::Bump, S)> for $type<'arena>
         where
             S: std::convert::Into<&'a str>,
@@ -75,10 +86,8 @@ macro_rules! impl_add_suffix {
     ($type: ident) => {
         // ok (multiple impl Struct blocks are allowed if needed)
         impl<'arena> $type<'arena> {
-            pub fn add_suffix(&mut self, alloc: &'arena bumpalo::Bump, suffix: &str) {
-                let mut s = bumpalo::collections::String::<'arena>::from_str_in(self.0, alloc);
-                s.push_str(suffix);
-                self.0 = s.into_bump_str()
+            pub fn add_suffix(alloc: &'arena bumpalo::Bump, id: &Self, suffix: &str) -> Self {
+                from_raw_string_with_suffix(alloc, id.0, suffix)
             }
         }
     };
@@ -124,6 +133,20 @@ pub mod method {
         }
     });
     impl_add_suffix!(Type);
+
+    impl<'arena> Type<'arena> {
+        pub fn from_ast_name_and_suffix(
+            alloc: &'arena bumpalo::Bump,
+            s: &str,
+            suffix: &str,
+        ) -> Self {
+            from_raw_string_with_suffix(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+                suffix,
+            )
+        }
+    }
 }
 
 pub mod function {
@@ -165,8 +188,8 @@ mod tests {
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let mut id: prop::Type = (&alloc, "Some").into();
-        id.add_suffix(&alloc, "Property");
+        let id: prop::Type = (&alloc, "Some").into();
+        let id = prop::Type::add_suffix(&alloc, &id, "Property");
         assert_eq!("SomeProperty", id.to_raw_string());
     }
 

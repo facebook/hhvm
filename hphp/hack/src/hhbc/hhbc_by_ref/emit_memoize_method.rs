@@ -351,9 +351,11 @@ fn make_memoize_method_with_params_code<'a, 'arena>(
             if args.method.static_ {
                 call_cls_method(alloc, fcall_args, args)
             } else {
-                let mut renamed_method_id: method::Type<'arena> =
-                    method::Type::from_ast_name(alloc, args.method_id.to_raw_string());
-                renamed_method_id.add_suffix(alloc, emit_memoize_helpers::MEMOIZE_SUFFIX);
+                let renamed_method_id = method::Type::add_suffix(
+                    alloc,
+                    args.method_id,
+                    emit_memoize_helpers::MEMOIZE_SUFFIX,
+                );
                 instr::fcallobjmethodd_nullthrows(alloc, fcall_args, renamed_method_id)
             },
             instr::memoset(alloc, Some((first_local, param_count.try_into().unwrap()))),
@@ -441,9 +443,11 @@ fn make_memoize_method_no_params_code<'a, 'arena>(
             if args.method.static_ {
                 call_cls_method(alloc, fcall_args, args)
             } else {
-                let mut renamed_method_id: method::Type<'arena> =
-                    method::Type::from_ast_name(alloc, args.method_id.to_raw_string());
-                renamed_method_id.add_suffix(alloc, emit_memoize_helpers::MEMOIZE_SUFFIX);
+                let renamed_method_id = method::Type::add_suffix(
+                    alloc,
+                    args.method_id,
+                    emit_memoize_helpers::MEMOIZE_SUFFIX,
+                );
                 instr::fcallobjmethodd_nullthrows(alloc, fcall_args, renamed_method_id)
             },
             instr::memoset(alloc, None),
@@ -508,9 +512,8 @@ fn call_cls_method<'a, 'arena>(
     fcall_args: FcallArgs<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> InstrSeq<'arena> {
-    let mut method_id: method::Type<'arena> =
-        method::Type::from_ast_name(alloc, args.method_id.to_raw_string());
-    method_id.add_suffix(alloc, emit_memoize_helpers::MEMOIZE_SUFFIX);
+    let method_id =
+        method::Type::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
         instr::fcallclsmethodsd(alloc, fcall_args, SpecialClsRef::Self_, method_id)
     } else {

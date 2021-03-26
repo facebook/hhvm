@@ -13,7 +13,7 @@ use hhbc_by_ref_hhas_attribute as hhas_attribute;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhbc_id::method;
+use hhbc_by_ref_hhbc_id::{method, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, Result};
 use hhbc_by_ref_options::{HhvmFlags, Options};
@@ -232,12 +232,15 @@ pub fn from_ast<'a, 'arena>(
         )?
     };
     let name = {
-        let mut name: method::Type<'arena> =
-            (alloc, string_utils::strip_global_ns(&method.name.1)).into();
         if is_memoize {
-            name.add_suffix(alloc, emit_memoize_helpers::MEMOIZE_SUFFIX);
-        };
-        name
+            method::Type::from_ast_name_and_suffix(
+                alloc,
+                &method.name.1,
+                emit_memoize_helpers::MEMOIZE_SUFFIX,
+            )
+        } else {
+            method::Type::from_ast_name(alloc, &method.name.1)
+        }
     };
     let is_interceptable = is_method_interceptable(emitter.options());
     let span = if is_native_opcode_impl {

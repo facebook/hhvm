@@ -30,7 +30,7 @@ pub fn emit_function<'a, 'arena>(
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
-    let mut original_id = hhbc_id::function::Type::from_ast_name(alloc, &f.name.1);
+    let original_id = hhbc_id::function::Type::from_ast_name(alloc, &f.name.1);
     let mut flags = Flags::empty();
     flags.set(
         hhas_function::Flags::ASYNC,
@@ -46,9 +46,14 @@ pub fn emit_function<'a, 'arena>(
 
     let renamed_id = {
         if memoized {
-            original_id.add_suffix(alloc, emit_memoize_helpers::MEMOIZE_SUFFIX);
+            hhbc_id::function::Type::add_suffix(
+                alloc,
+                &original_id,
+                emit_memoize_helpers::MEMOIZE_SUFFIX,
+            )
+        } else {
+            original_id
         }
-        original_id
     };
     flags.set(
         Flags::INTERCEPTABLE,

@@ -561,7 +561,7 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
             };
             // for lambdas nested in trait methods HHVM replaces __METHOD__
             // with enclosing method name - do the same and bubble up from lambdas *
-            let scope = env.scope.iter().find(|x| is_trait && x.is_in_lambda());
+            let scope = env.scope.iter().find(|x| !(is_trait && x.is_in_lambda()));
 
             match scope {
                 Some(ScopeItem::Function(fd)) => ret((prefix + strip_id(fd.get_name())).into()),

@@ -11,7 +11,7 @@ function curl_cli_server_start() {
 
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
-	$router = "responder/get.php";
+	$router = "responder/get.inc";
 
 	$descriptorspec = darray[
 		0 => STDIN,

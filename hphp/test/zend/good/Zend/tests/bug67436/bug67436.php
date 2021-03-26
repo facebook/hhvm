@@ -3,9 +3,9 @@
 HH\autoload_set_paths(
 	dict[
 		'class' => dict[
-			'a' => 'a.php',
-			'b' => 'b.php',
-			'c' => 'c.php',
+			'a' => 'a.inc',
+			'b' => 'b.inc',
+			'c' => 'c.inc',
 		],
 	],
 	__DIR__.'/',

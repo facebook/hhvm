@@ -21,8 +21,8 @@ namespace {
 namespace {
     <<__EntryPoint>>
     function main() {
-        require 'includes/global_bar.php';
-        require 'includes/foo_bar.php';
+        require 'includes/global_bar.inc';
+        require 'includes/foo_bar.inc';
 
         test1();
         test2();

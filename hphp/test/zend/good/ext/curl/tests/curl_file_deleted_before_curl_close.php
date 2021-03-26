@@ -1,7 +1,7 @@
 <?hh
 
-include 'server.inc';
 <<__EntryPoint>> function main(): void {
+require_once 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init($host);
 

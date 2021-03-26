@@ -1,4 +1,0 @@
-<?hh
-
-function baz() {
-}

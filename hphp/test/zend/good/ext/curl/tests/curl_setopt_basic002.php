@@ -1,7 +1,7 @@
 <?hh
 
-include 'server.inc';
 <<__EntryPoint>> function main(): void {
+require_once 'server.inc';
 $host = curl_cli_server_start();
 // start testing
 echo "*** Testing curl_setopt with CURLOPT_STDERR\n";

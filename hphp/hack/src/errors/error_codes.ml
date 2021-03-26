@@ -22,20 +22,6 @@
  *)
 (*****************************************************************************)
 
-(* Errors in the Temporary range are for errors that will disappear in the
- * future. *)
-module Temporary = struct
-  let darray_not_supported = 1
-
-  let varray_not_supported = 2
-
-  (* DEPRECATED let unknown_fields_not_supported = 3 *)
-  let varray_or_darray_not_supported = 4
-
-  (* DEPRECATED let goto_not_supported = 5 *)
-  let nonnull_not_supported = 6
-end
-
 module Parsing = struct
   type t =
     | FixmeFormat [@value 1001]

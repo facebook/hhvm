@@ -84,11 +84,6 @@ Type native_function_return_type(const php::Func* f) {
     auto const hni = f->nativeInfo->returnType;
     return hni ? from_DataType(*hni) : TInitCell;
   }();
-  if (t.subtypeOf(BVArr | BDArr)) {
-    // More cleanup is possible here. This block should be dead.
-    always_assert(!f->retTypeConstraint.isVArray() &&
-                  !f->retTypeConstraint.isDArray());
-  }
 
   // Non-simple types (ones that are represented by pointers) can always
   // possibly be null.

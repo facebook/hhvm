@@ -62,7 +62,7 @@
  *   Array types are divided along two dimensions: counted or
  *   uncounted, and empty or non-empty.  Unions of either are allowed.
  *   The naming convention is {S,C,}Arr{N,E,} (where Arr can be any
- *   array type, for example Vecish or Dictish), where leaving out
+ *   array type, for example Vec, Dict, or Keyset), where leaving out
  *   either bit means it's unknown along that dimension. An example
  *   lattice looks like this:
  *
@@ -307,8 +307,8 @@ struct HAMSandwich {
   static HAMSandwich TopForBits(trep);
 
   // Return a new HAMSandwich refined based on the given type. For
-  // example, if the given type no longer contains VArr or DArr, we
-  // need to drop any array provenance information.
+  // example, if the given type no longer contains Vec or Dict, we
+  // need to drop any marking information.
   HAMSandwich project(trep) const;
 
   // Return the legacy mark information in this HAMSandwich. If the
@@ -343,8 +343,8 @@ struct HAMSandwich {
   bool checkInvariants(trep) const;
 
 private:
-  // Legacy marks are only tracked for Vecish and Dictish.
-  static constexpr trep kMarkBits = BVecish | BDictish;
+  // Legacy marks are only tracked for Vec and Dict.
+  static constexpr trep kMarkBits = BVec | BDict;
 
   explicit HAMSandwich(LegacyMark mark) : m_mark{mark} {}
 
@@ -1205,12 +1205,11 @@ Type loosen_array_staticness(Type);
 Type loosen_string_staticness(Type);
 
 /*
- * Force any type which might contain TVArr or TDArr to contain
- * TVArr|TDArr, and likewise with TVec and TDict. This discards any
- * emptiness, staticness, or value information if the type is
- * modified.
+ * Force any type which might contain TVec or TDict to contain TVec|TDict.
+ * This discards any emptiness, staticness, or value information if the
+ * type is modified.
  */
-Type loosen_vecish_or_dictish(Type);
+Type loosen_vec_or_dict(Type);
 
 /*
  * Drop any data from the type (except for object class information) and force
@@ -1240,7 +1239,7 @@ Type loosen_emptiness(Type t);
 
 /*
  * Force any type which includes TCls or TLazyCls to also include
- * TSStr, and all TClsMeth to include either TVecN or TVArrN|TDArrN.
+ * TSStr, and all TClsMeth to include TVecN.
  */
 Type loosen_likeness(Type t);
 

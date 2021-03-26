@@ -678,7 +678,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
                                                            cnsName.m_data.pstr,
                                                            true);
         if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type
-            || !tvIsHAMSafeDArray(&*cnst->val)) {
+            || !tvIsDict(&*cnst->val)) {
           return nullptr;
         }
         if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {
@@ -984,7 +984,7 @@ void in(ISS& env, const bc::AddElemC&) {
 
   auto outTy = [&] (const Type& key) -> folly::Optional<Type> {
     if (!key.subtypeOf(BArrKey)) return folly::none;
-    if (inTy.subtypeOf(BDictish)) {
+    if (inTy.subtypeOf(BDict)) {
       auto const r = array_like_set(std::move(inTy), key, v);
       if (!r.second) return r.first;
     }
@@ -1036,7 +1036,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
   auto inTy = (env.state.stack.end() - 2).unspecialize();
 
   auto outTy = [&] () -> folly::Optional<Type> {
-    if (inTy.subtypeOf(BVecish | BKeyset)) {
+    if (inTy.subtypeOf(BVec | BKeyset)) {
       auto const r = array_like_newelem(std::move(inTy), v);
       if (!r.second) return r.first;
     }
@@ -1709,20 +1709,9 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
 
   if (fn) {
     if (auto val = tv(t)) {
-      // Legacy dvarrays may raise a notice on cast. In order to simplify the
-      // rollout of these notices, we don't const-fold casts on these arrays.
-      auto const may_raise_notice = [&]{
-        if (!tvIsArrayLike(*val)) return false;
-        auto const ad = val->m_data.parr;
-        if (!ad->isLegacyArray()) return false;
-        return (ad->isDArray() && target.is(BDict)) ||
-               (ad->isVArray() && target.is(BVec));
-      }();
-      if (!may_raise_notice) {
-        if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
-          constprop(env);
-          target = *result;
-        }
+      if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
+        constprop(env);
+        target = *result;
       }
     }
   }
@@ -2504,7 +2493,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // usual). Converting an object to a memo key might invoke PHP code if it has
   // the IMemoizeParam interface, and if it doesn't, we'll throw.
   if (!locCouldBeUninit(env, op.nloc1.id) &&
-      !inTy.couldBe(BObj | BVecish | BDictish)) {
+      !inTy.couldBe(BObj | BVec | BDict)) {
     effect_free(env);
     constprop(env);
   }
@@ -2954,9 +2943,9 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_shape:
       return check(ts_type, TDict);
     case TypeStructure::Kind::T_dict:
-      return check(ts_type, TDArr);
+      return check(ts_type);
     case TypeStructure::Kind::T_vec:
-      return check(ts_type, TVArr);
+      return check(ts_type);
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
       return result(TFalse);
@@ -4886,19 +4875,10 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
       dont_reduce = true;
     }
 
-    // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
+    // VerifyRetType will convert TClsMeth to TVec implicitly
     if (stackT.couldBe(BClsMeth) && RO::EvalIsCompatibleClsMethType) {
       if (tcT.couldBe(BVec)) {
         stackT |= TVec;
-        dont_reduce = true;
-      }
-      if (tcT.couldBe(BVArr)) {
-        stackT |= TVArr;
-        dont_reduce = true;
-      }
-      if (tcT.couldBe(BVArr | BDArr)) {
-        stackT |= TVArr;
-        stackT |= TDArr;
         dont_reduce = true;
       }
     }

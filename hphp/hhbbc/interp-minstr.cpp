@@ -1827,14 +1827,14 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
       refine |= BArrLike;
     } else {
       auto e = key.subtypeOf(BArrKey) ? Effects::None : Effects::Throws;
-      if (base.couldBe(BVecish) && key.couldBe(BInt)) e = Effects::Throws;
+      if (base.couldBe(BVec) && key.couldBe(BInt)) e = Effects::Throws;
       effects = unionEffects(effects, e);
 
       // We purposefully do not model the effects of unset on array
       // structure. This lets us assume that if we have array structure,
       // we also have no tombstones. Pessimize the base which drops array
       // structure and also remove emptiness information.
-      if (!base.subtypeAmong(BVecish, BArrLike) || key.couldBe(BInt)) {
+      if (!base.subtypeAmong(BVec, BArrLike) || key.couldBe(BInt)) {
         base = loosen_array_staticness(loosen_array_values(std::move(base)));
         base = loosen_emptiness(std::move(base));
         update = true;

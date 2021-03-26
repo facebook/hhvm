@@ -1037,18 +1037,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::NonNull:
     return;
 
-  case T::OptSArr:
-  case T::OptArr:
-  case T::SArr:
-  case T::Arr:
-  case T::OptSVArr:
-  case T::OptVArr:
-  case T::SVArr:
-  case T::VArr:
-  case T::OptSDArr:
-  case T::OptDArr:
-  case T::SDArr:
-  case T::DArr:
   case T::OptSVec:
   case T::OptVec:
   case T::SVec:
@@ -1061,25 +1049,13 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptKeyset:
   case T::SKeyset:
   case T::Keyset:
-  case T::SVecish:
-  case T::Vecish:
-  case T::OptSVecish:
-  case T::OptVecish:
-  case T::SDictish:
-  case T::Dictish:
-  case T::OptSDictish:
-  case T::OptDictish:
   case T::SArrLike:
   case T::ArrLike:
   case T::OptSArrLike:
   case T::OptArrLike:
 
-  case T::ArrCompat:
-  case T::VArrCompat:
   case T::VecCompat:
   case T::ArrLikeCompat:
-  case T::OptArrCompat:
-  case T::OptVArrCompat:
   case T::OptVecCompat:
   case T::OptArrLikeCompat:
     // NOTE: In repo mode, RAT's in Array's might only contain global litstr

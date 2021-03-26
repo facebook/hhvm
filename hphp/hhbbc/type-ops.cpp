@@ -98,9 +98,6 @@ Type typeAdd(Type t1, Type t2) {
     if (auto t = eval_const(t1, t2, tvAdd)) return *t;
   }
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
-    return union_of(TVArr,TDArr);
-  }
   if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
   if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
   if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
@@ -113,9 +110,6 @@ Type typeAddO(Type t1, Type t2) {
   }
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BVArr | BDArr) && t2.subtypeOf(BVArr | BDArr)) {
-    return union_of(TVArr, TDArr);
-  }
   if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
   if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
   if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
@@ -256,9 +250,7 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
     // at runtime it will not be static.  For now just throw that
     // away.  TODO(#3696042): should be able to loosen_staticness here.
     if (resultTy->subtypeOf(BStr)) resultTy = TStr;
-    else if (resultTy->subtypeOf(BVArr | BDArr)) {
-      resultTy = union_of(TVArr, TDArr);
-    } else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
+    else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
     else if (resultTy->subtypeOf(BDict)) resultTy = TDict;
     else if (resultTy->subtypeOf(BKeyset)) resultTy = TKeyset;
 

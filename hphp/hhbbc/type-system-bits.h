@@ -69,8 +69,6 @@
 // "Array" types. These has both counted/uncounted and empti/non-empty
 // base type variations, and various unions between them.
 #define HHBBC_TYPE_DECL_ARRAY(X, Y)             \
-  X(VArr, Y)                                    \
-  X(DArr, Y)                                    \
   X(Vec, Y)                                     \
   X(Dict, Y)                                    \
   X(Keyset, Y)                                  \
@@ -93,10 +91,8 @@
 // are already unions and we need to generate unions of all
 // sub-unions.
 #define HHBBC_TYPE_DECL_ARRAY_UNION(X, Y)       \
-  X(Vecish, Y, Vec, VArr)                       \
-  X(Dictish, Y, Dict, DArr)                     \
-  X(KVish, Y, Vecish, Dictish)                  \
-  X(ArrLike, Y, Vecish, Dictish, Keyset)        \
+  X(KVish, Y, Vec, Dict)                        \
+  X(ArrLike, Y, Vec, Dict, Keyset)              \
 
 //////////////////////////////////////////////////////////////////////
 

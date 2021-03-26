@@ -246,8 +246,7 @@ TypeOrReduced builtin_is_callable(ISS& env, const php::Func* func,
   auto const res = [&]() -> folly::Optional<bool> {
     if (ty.subtypeOf(BClsMeth | BFunc)) return true;
     if (ty.subtypeOf(BArrLikeE | BKeyset) ||
-        !ty.couldBe(BClsMeth | BFunc | BVArr | BDArr |
-                    BVec | BDict | BObj | BStr)) {
+        !ty.couldBe(BClsMeth | BFunc | BVec | BDict | BObj | BStr)) {
       return false;
     }
     return {};
@@ -270,7 +269,7 @@ TypeOrReduced builtin_is_list_like(ISS& env, const php::Func* func,
   }
 
   if (!ty.couldBe(BArrLike | BClsMeth)) return TFalse;
-  if (ty.subtypeOf(BVec | BVArr | BClsMeth)) return TTrue;
+  if (ty.subtypeOf(BVec | BClsMeth)) return TTrue;
 
   switch (categorize_array(ty).cat) {
     case Type::ArrayCat::Empty:
@@ -312,7 +311,7 @@ ArrayData* impl_type_structure_opts(ISS& env,
     }
     if (check_lsb && !cnst->isNoOverride) return nullptr;
     auto const typeCns = cnst->val;
-    if (!tvIsHAMSafeDArray(&*typeCns)) return nullptr;
+    if (!tvIsDict(&*typeCns)) return nullptr;
     return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls);
   };
   auto const cns_name = tv(getArg(env, func, fca, 1));

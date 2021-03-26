@@ -69,7 +69,7 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   auto const it = ua.find(s___Reified.get());
   assertx(it != ua.end());
   auto const tv = it->second;
-  assertx(tvIsHAMSafeVArray(&tv));
+  assertx(tvIsVec(&tv));
   auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   auto const numGenerics = info.m_typeParamInfo.size();
   assertx(numGenerics > 0);
@@ -650,7 +650,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_vecish_or_dictish(loosen_all(cellTy));
+      auto t = loosen_vec_or_dict(loosen_all(cellTy));
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit

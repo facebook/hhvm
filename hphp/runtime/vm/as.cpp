@@ -1007,12 +1007,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Record=", T::OptExactRecord);
   Y("?Record<=",T::OptSubRecord);
   Y("Record<=", T::SubRecord);
-  X("Arr",      T::Arr);
-  X("?Arr",     T::OptArr);
-  X("VArr",     T::VArr);
-  X("?VArr",    T::OptVArr);
-  X("DArr",     T::DArr);
-  X("?DArr",    T::OptDArr);
   X("Vec",      T::Vec);
   X("?Vec",     T::OptVec);
   X("Dict",     T::Dict);
@@ -1045,12 +1039,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?LazyCls",    T::OptLazyCls);
   X("?Res",     T::OptRes);
   X("Res",      T::Res);
-  X("?SArr",    T::OptSArr);
-  X("SArr",     T::SArr);
-  X("?SVArr",   T::OptSVArr);
-  X("SVArr",    T::SVArr);
-  X("?SDArr",   T::OptSDArr);
-  X("SDArr",    T::SDArr);
   X("?SVec",    T::OptSVec);
   X("SVec",     T::SVec);
   X("?SDict",   T::OptSDict);
@@ -1077,20 +1065,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("UncArrKeyCompat",T::UncArrKeyCompat);
   X("ArrKeyCompat",   T::ArrKeyCompat);
   X("VecCompat",T::VecCompat);
-  X("VArrCompat",T::VArrCompat);
-  X("ArrCompat",T::ArrCompat);
   X("?VecCompat",T::OptVecCompat);
-  X("?VArrCompat",T::OptVArrCompat);
-  X("?ArrCompat",T::OptArrCompat);
   X("Uninit",   T::Uninit);
-  X("SVecish", T::SVecish);
-  X("?SVecish", T::OptSVecish);
-  X("Vecish", T::Vecish);
-  X("?Vecish", T::OptVecish);
-  X("SDictish", T::SDictish);
-  X("?SDictish", T::OptSDictish);
-  X("Dictish", T::Dictish);
-  X("?Dictish", T::OptDictish);
   X("SArrLike", T::SArrLike);
   X("?SArrLike", T::OptSArrLike);
   X("ArrLike", T::ArrLike);
@@ -1126,18 +1102,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::Str:
   case T::OptStr:
   case T::UninitStr:
-  case T::SArr:
-  case T::OptSArr:
-  case T::Arr:
-  case T::OptArr:
-  case T::SVArr:
-  case T::OptSVArr:
-  case T::VArr:
-  case T::OptVArr:
-  case T::SDArr:
-  case T::OptSDArr:
-  case T::DArr:
-  case T::OptDArr:
   case T::SVec:
   case T::OptSVec:
   case T::Vec:
@@ -1150,14 +1114,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-  case T::SVecish:
-  case T::Vecish:
-  case T::OptSVecish:
-  case T::OptVecish:
-  case T::SDictish:
-  case T::Dictish:
-  case T::OptSDictish:
-  case T::OptDictish:
   case T::SArrLike:
   case T::ArrLike:
   case T::OptSArrLike:
@@ -1189,12 +1145,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptArrKeyCompat:
   case T::UncArrKeyCompat:
   case T::ArrKeyCompat:
-  case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::OptArrCompat:
-  case T::VArrCompat:
   case T::VecCompat:
-  case T::ArrCompat:
   case T::ArrLikeCompat:
   case T::OptArrLikeCompat:
   case T::Num:

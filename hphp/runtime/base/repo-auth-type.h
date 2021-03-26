@@ -108,24 +108,8 @@ struct RepoAuthType {
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     /* Types where array() may be non-null. */    \
-    TAG(ArrCompat)                                \
-    TAG(OptArrCompat)                             \
-    TAG(VArrCompat)                               \
     TAG(VecCompat)                                \
-    TAG(OptVArrCompat)                            \
     TAG(OptVecCompat)                             \
-    TAG(SArr)                                     \
-    TAG(OptSArr)                                  \
-    TAG(Arr)                                      \
-    TAG(OptArr)                                   \
-    TAG(SVArr)                                    \
-    TAG(OptSVArr)                                 \
-    TAG(VArr)                                     \
-    TAG(OptVArr)                                  \
-    TAG(SDArr)                                    \
-    TAG(OptSDArr)                                 \
-    TAG(DArr)                                     \
-    TAG(OptDArr)                                  \
     TAG(SVec)                                     \
     TAG(OptSVec)                                  \
     TAG(Vec)                                      \
@@ -138,14 +122,6 @@ struct RepoAuthType {
     TAG(OptSKeyset)                               \
     TAG(Keyset)                                   \
     TAG(OptKeyset)                                \
-    TAG(SVecish)                                  \
-    TAG(OptSVecish)                               \
-    TAG(Vecish)                                   \
-    TAG(OptVecish)                                \
-    TAG(SDictish)                                 \
-    TAG(OptSDictish)                              \
-    TAG(Dictish)                                  \
-    TAG(OptDictish)                               \
     TAG(SArrLike)                                 \
     TAG(OptSArrLike)                              \
     TAG(ArrLike)                                  \
@@ -268,19 +244,11 @@ struct RepoAuthType {
 
   bool mayHaveArrData() const {
     switch (tag()) {
-    case Tag::OptArr:  case Tag::OptSArr:  case Tag::Arr:  case Tag::SArr:
-    case Tag::OptVArr: case Tag::OptSVArr: case Tag::VArr: case Tag::SVArr:
-    case Tag::OptDArr: case Tag::OptSDArr: case Tag::DArr: case Tag::SDArr:
     case Tag::OptVec:  case Tag::OptSVec:  case Tag::Vec:  case Tag::SVec:
     case Tag::OptDict: case Tag::OptSDict: case Tag::Dict: case Tag::SDict:
     case Tag::OptKeyset: case Tag::OptSKeyset:
     case Tag::Keyset:    case Tag::SKeyset:
-    case Tag::ArrCompat: case Tag::OptArrCompat:
     case Tag::VecCompat: case Tag::OptVecCompat:
-    case Tag::OptVecish: case Tag::OptSVecish:
-    case Tag::Vecish:    case Tag::SVecish:
-    case Tag::OptDictish: case Tag::OptSDictish:
-    case Tag::Dictish:    case Tag::SDictish:
     case Tag::OptArrLike: case Tag::OptSArrLike:
     case Tag::ArrLike:    case Tag::SArrLike:
     case Tag::ArrLikeCompat: case Tag::OptArrLikeCompat:

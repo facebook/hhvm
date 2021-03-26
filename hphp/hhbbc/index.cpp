@@ -4812,11 +4812,7 @@ Index::ConstraintResolution Index::resolve_named_type(
         return subObj(rcls);
       }
 
-      if (candidate.subtypeOf(BInitNull | BVArr | BDArr)) {
-        if (interface_supports_arrlike(rcls.name())) {
-          return union_of(TVArr, TDArr);
-        }
-      } else if (candidate.subtypeOf(BOptVec)) {
+      if (candidate.subtypeOf(BOptVec)) {
         if (interface_supports_arrlike(rcls.name())) return TVec;
       } else if (candidate.subtypeOf(BOptDict)) {
         if (interface_supports_arrlike(rcls.name())) return TDict;
@@ -5134,10 +5130,13 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfDict:         return TDict;
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return TKeyset;
+
       case KindOfPersistentDArray:
-      case KindOfDArray:       return TDArr;
+      case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:       return TVArr;
+      case KindOfVArray:
+        always_assert(false);
+
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
       case KindOfRecord:       // fallthrough
@@ -5191,9 +5190,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(BDict)) return TDict;
       return union_of(TVec, TDict);
     case AnnotMetaType::ArrayLike:
-      if (candidate.subtypeOf(BVArr)) return TVArr;
-      if (candidate.subtypeOf(BDArr)) return TDArr;
-      if (candidate.subtypeOf(BVArr | BDArr)) return union_of(TVArr, TDArr);
       if (candidate.subtypeOf(BVec)) return TVec;
       if (candidate.subtypeOf(BDict)) return TDict;
       if (candidate.subtypeOf(BKeyset)) return TKeyset;

@@ -957,7 +957,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
   if (!elem) return;
   auto adjusted = adjust_type_for_prop(
     env.index, *env.ctx.cls, elem->tc,
-    loosen_vecish_or_dictish(loosen_all(type)));
+    loosen_vec_or_dict(loosen_all(type)));
   elem->ty |= std::move(adjusted);
 }
 

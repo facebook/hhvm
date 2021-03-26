@@ -1070,8 +1070,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
         }                                                               \
       }()
 
-    case T::SArr:           return X(TStaticArr, StaticArray, StaticArray);
-    case T::Arr:            return X(TArr, Array, CountedArray);
     case T::SVec:           return X(TStaticVec, StaticVec, StaticVec);
     case T::Vec:            return X(TVec, Vec, CountedVec);
     case T::SDict:          return X(TStaticDict, StaticDict, StaticDict);
@@ -1080,10 +1078,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Keyset:         return X(TKeyset, Keyset, Keyset);
     case T::VecCompat:      return X(TVec, Vec, CountedVec) | TClsMeth;
 
-    case T::OptSArr:        return X(TStaticArr, StaticArray, StaticArray)
-                                   | TInitNull;
-    case T::OptArr:         return X(TArr, Array, CountedArray)
-                                   | TInitNull;
     case T::OptSVec:        return X(TStaticVec, StaticVec, StaticVec)
                                    | TInitNull;
     case T::OptVec:         return X(TVec, Vec, CountedVec)
@@ -1098,37 +1092,9 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
                                    | TInitNull;
     case T::OptVecCompat:   return X(TVec, Vec, CountedVec)
                                    | TClsMeth | TInitNull;
-    case T::ArrCompat:      return X(TArr, Array, CountedArray) | TClsMeth;
-    case T::OptArrCompat:   return X(TArr, Array, CountedArray)
-                                   | TClsMeth | TInitNull;
-
-    case T::SVArr:          return X(TStaticVArr, StaticVArr, StaticVArr);
-    case T::VArr:           return X(TVArr, VArr, CountedVArr);
-    case T::OptSVArr:       return X(TStaticVArr, StaticVArr, StaticVArr)
-                                   | TInitNull;
-    case T::OptVArr:        return X(TVArr, VArr, CountedVArr)
-                                   | TInitNull;
-    case T::SDArr:          return X(TStaticDArr, StaticDArr, StaticDArr);
-    case T::DArr:           return X(TDArr, DArr, CountedDArr);
-    case T::OptSDArr:       return X(TStaticDArr, StaticDArr, StaticDArr)
-                                   | TInitNull;
-    case T::OptDArr:        return X(TDArr, DArr, CountedDArr)
-                                   | TInitNull;
-    case T::VArrCompat:     return X(TVArr, VArr, CountedVArr)
-                                   | TClsMeth;
-    case T::OptVArrCompat:  return X(TVArr, VArr, CountedVArr)
-                                   | TClsMeth | TInitNull;
 
     // If these have specializations, its not clear which type to
     // apply them to. Ignore them for now.
-    case T::SVecish:        return TStaticVec | TStaticVArr;
-    case T::Vecish:         return TVec | TVArr;
-    case T::OptSVecish:     return TStaticVec | TStaticVArr | TInitNull;
-    case T::OptVecish:      return TVec | TVArr | TInitNull;
-    case T::SDictish:       return TStaticDict | TStaticDArr;
-    case T::Dictish:        return TDict | TDArr;
-    case T::OptSDictish:    return TStaticDict | TStaticDArr | TInitNull;
-    case T::OptDictish:     return TDict | TDArr | TInitNull;
     case T::SArrLike:       return TStaticVec | TStaticVArr | TStaticDict |
                                    TStaticDArr | TStaticKeyset;
     case T::ArrLike:        return TVec | TVArr | TDict | TDArr | TKeyset;

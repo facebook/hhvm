@@ -205,9 +205,8 @@ enum class Use {
   Not = 1,
 
   /*
-   * Indicates that the stack slot contains an array-like being
-   * constructed by AddElemCs, which looks like it can be optimized to
-   * a NewStructDArray, NewPackedVArray, or NewVec.
+   * Indicates that the stack slot contains an array-like being constructed
+   * by AddElemCs, which looks like it can be optimized to NewStructDict.
    */
   AddElemC = 3,
 
@@ -1266,9 +1265,7 @@ void updateSrcLocForAddElemC(UseInfo& ui, int32_t srcLoc) {
     if (it.second.action != DceAction::Replace) continue;
 
     auto& bc = it.second.bcs[0];
-    if (bc.op == Op::NewStructDArray ||
-        bc.op == Op::NewStructDict ||
-        bc.op == Op::NewVArray) {
+    if (bc.op == Op::NewStructDict) {
       bc.srcLoc = srcLoc;
     }
   }
@@ -1357,43 +1354,14 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
         auto v = tv(arrPost);
         CompactVector<Bytecode> bcs;
-        if (arrPost.subtypeOf(BVArrN | BDArrN)) {
-          bcs.emplace_back(bc::Array { v->m_data.parr });
-        } else {
-          assertx(arrPost.subtypeOf(BDictN));
-          bcs.emplace_back(bc::Dict { v->m_data.parr });
-        }
+        assertx(arrPost.subtypeOf(BDictN));
+        bcs.emplace_back(bc::Dict { v->m_data.parr });
         ui.actions[env.id] = DceAction(DceAction::PopAndReplace,
                                        std::move(bcs));
         return PushFlags::MarkUnused;
       }
 
       if (isLinked(ui)) return PushFlags::MarkLive;
-
-      if (arrPost.strictSubtypeOf(BVArrN | BDArrN)) {
-        CompactVector<Bytecode> bcs;
-        if (cat.cat == Type::ArrayCat::Struct &&
-            *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(BDArrN)) {
-            bcs.emplace_back(bc::NewStructDArray { get_string_keys(arrPost) });
-          } else {
-            return PushFlags::MarkLive;
-          }
-        } else if (cat.cat == Type::ArrayCat::Packed &&
-                   *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(BVArrN)) {
-            bcs.emplace_back(
-              bc::NewVArray { static_cast<uint32_t>(*postSize) }
-            );
-          } else {
-            return PushFlags::MarkLive;
-          }
-        } else {
-          return PushFlags::MarkLive;
-        }
-        ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
-        return PushFlags::AddElemC;
-      }
 
       if (arrPost.strictSubtypeOf(BDictN) &&
           cat.cat == Type::ArrayCat::Struct &&
@@ -1421,11 +1389,11 @@ void dceNewArrayLike(Env& env, const Op& op) {
   pushRemovableIfNoThrow(env);
 }
 
-void dce(Env& env, const bc::NewStructDArray& op) { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewStructDArray& op) { always_assert(false); }
 void dce(Env& env, const bc::NewStructDict& op)   { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewVec& op)          { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewKeysetArray& op)  { dceNewArrayLike(env, op); }
-void dce(Env& env, const bc::NewVArray& op)       { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewVArray& op)       { always_assert(false); }
 
 void dce(Env& env, const bc::NewPair& op)         { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::ColFromArray& op)    { dceNewArrayLike(env, op); }
@@ -1568,13 +1536,13 @@ void dce(Env& env, const bc::BitNot&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitOr&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitXor&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastBool&)         { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastDArray&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastDArray&)       { always_assert(false); }
 void dce(Env& env, const bc::CastDict&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastDouble&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastInt&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastVArray&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastVArray&)       { always_assert(false); }
 void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CGetS&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Cmp&)              { pushRemovableIfNoThrow(env); }

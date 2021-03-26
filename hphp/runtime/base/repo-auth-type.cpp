@@ -169,36 +169,12 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Keyset:
   case T::OptSKeyset:
   case T::OptKeyset:
-  case T::OptSArr:
-  case T::OptArr:
-  case T::OptSVArr:
-  case T::OptVArr:
-  case T::OptSDArr:
-  case T::OptDArr:
-  case T::SArr:
-  case T::Arr:
-  case T::SVArr:
-  case T::VArr:
-  case T::SDArr:
-  case T::DArr:
-  case T::SVecish:
-  case T::Vecish:
-  case T::OptSVecish:
-  case T::OptVecish:
-  case T::SDictish:
-  case T::Dictish:
-  case T::OptSDictish:
-  case T::OptDictish:
   case T::SArrLike:
   case T::ArrLike:
   case T::OptSArrLike:
   case T::OptArrLike:
-  case T::VArrCompat:
   case T::VecCompat:
-  case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::ArrCompat:
-  case T::OptArrCompat:
   case T::ArrLikeCompat:
   case T::OptArrLikeCompat:
     // array id equals to either kInvalidArrayId for null array info, or a
@@ -292,95 +268,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::Str:
     return isStringType(tv.m_type);
 
-  case T::OptSArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::SArr:
-    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
-      return false;
-    }
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptArrCompat:
-    if (initNull) return true;
-    // fallthrough
-  case T::ArrCompat:
-    if (isClsMethType(tv.m_type)) return true;
-    if (!isArrayType(tv.m_type)) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::Arr:
-    if (!isArrayType(tv.m_type)) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptSVArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::SVArr:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (!isArrayType(tv.m_type) ||
-        !tv.m_data.parr->isStatic() ||
-        !tv.m_data.parr->isVArray()) {
-      return false;
-    }
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptVArrCompat:
-  case T::OptVArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::VArrCompat:
-    if (ty.tag() != T::OptVArr && isClsMethType(tv.m_type)) return true;
-    // fallthrough
-  case T::VArr:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isVArray()) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptSDArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::SDArr:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (!isArrayType(tv.m_type) ||
-        !tv.m_data.parr->isStatic() ||
-        !tv.m_data.parr->isDArray()) {
-      return false;
-    }
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptDArr:
-    if (initNull) return true;
-    // fallthrough
-  case T::DArr:
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isDArray()) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
   case T::OptSVec:
     if (initNull) return true;
     // fallthrough
@@ -440,50 +327,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::Keyset:
     if (!isKeysetType(tv.m_type)) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptSVecish:
-    if (initNull) return true;
-    // fallthrough
-  case T::SVecish:
-    if (!isVecOrVArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
-      return false;
-    }
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptVecish:
-    if (initNull) return true;
-    // fallthrough
-  case T::Vecish:
-    if (!isVecOrVArrayType(tv.m_type)) return false;
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptSDictish:
-    if (initNull) return true;
-    // fallthrough
-  case T::SDictish:
-    if (!isDictOrDArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
-      return false;
-    }
-    if (auto const arr = ty.array()) {
-      if (!tvMatchesArrayType(tv, arr)) return false;
-    }
-    return true;
-
-  case T::OptDictish:
-    if (initNull) return true;
-    // fallthrough
-  case T::Dictish:
-    if (!isDictOrDArrayType(tv.m_type)) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;
     }
@@ -750,18 +593,6 @@ std::string show(RepoAuthType rat) {
   case T::InitPrim:      return "InitPrim";
   case T::NonNull:       return "NonNull";
 
-  case T::OptSArr:
-  case T::OptArr:
-  case T::SArr:
-  case T::Arr:
-  case T::OptSVArr:
-  case T::OptVArr:
-  case T::SVArr:
-  case T::VArr:
-  case T::OptSDArr:
-  case T::OptDArr:
-  case T::SDArr:
-  case T::DArr:
   case T::SVec:
   case T::Vec:
   case T::OptSVec:
@@ -774,46 +605,22 @@ std::string show(RepoAuthType rat) {
   case T::Keyset:
   case T::OptSKeyset:
   case T::OptKeyset:
-  case T::SVecish:
-  case T::Vecish:
-  case T::OptSVecish:
-  case T::OptVecish:
-  case T::SDictish:
-  case T::Dictish:
-  case T::OptSDictish:
-  case T::OptDictish:
   case T::SArrLike:
   case T::ArrLike:
   case T::OptSArrLike:
   case T::OptArrLike:
-  case T::VArrCompat:
   case T::VecCompat:
-  case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::ArrCompat:
-  case T::OptArrCompat:
   case T::ArrLikeCompat:
   case T::OptArrLikeCompat:
     {
       auto ret = std::string{};
-      if (tag == T::OptArr    || tag == T::OptSArr ||
-          tag == T::OptVArr   || tag == T::OptSVArr ||
-          tag == T::OptDArr   || tag == T::OptSDArr ||
-          tag == T::OptVec    || tag == T::OptSVec ||
+      if (tag == T::OptVec    || tag == T::OptSVec ||
           tag == T::OptDict   || tag == T::OptSDict ||
           tag == T::OptKeyset || tag == T::OptSKeyset ||
-          tag == T::OptVecish || tag == T::OptSVecish ||
-          tag == T::OptDictish || tag == T::OptSDictish ||
           tag == T::OptArrLike || tag == T::OptSArrLike ||
-          tag == T::OptVArrCompat || tag == T::OptVecCompat ||
-          tag == T::OptArrCompat || tag == T::OptArrLikeCompat) {
+          tag == T::OptArrLikeCompat) {
         ret += '?';
-      }
-      if (tag == T::ArrCompat || tag == T::OptArrCompat) {
-        ret += "ArrCompat";
-      }
-      if (tag == T::VArrCompat || tag == T::OptVArrCompat) {
-        ret += "VArrCompat";
       }
       if (tag == T::VecCompat || tag == T::OptVecCompat) {
         ret += "VecCompat";
@@ -821,28 +628,14 @@ std::string show(RepoAuthType rat) {
       if (tag == T::ArrLikeCompat || tag == T::OptArrLikeCompat) {
         ret += "ArrLikeCompat";
       }
-      if (tag == T::SArr    || tag == T::OptSArr ||
-          tag == T::SVArr   || tag == T::OptSVArr ||
-          tag == T::SDArr   || tag == T::OptSDArr ||
-          tag == T::SVec    || tag == T::OptSVec ||
+      if (tag == T::SVec    || tag == T::OptSVec ||
           tag == T::SDict   || tag == T::OptSDict ||
           tag == T::SKeyset || tag == T::OptSKeyset ||
-          tag == T::SVecish || tag == T::OptSVecish ||
-          tag == T::SDictish || tag == T::OptSDictish ||
           tag == T::SArrLike || tag == T::OptSArrLike) {
         ret += 'S';
       }
-      if (tag == T::OptArr  || tag == T::Arr ||
-          tag == T::OptSArr || tag == T::SArr) {
-        ret += "Arr";
-      } else if (tag == T::OptVArr  || tag == T::VArr ||
-                 tag == T::OptSVArr || tag == T::SVArr) {
-        ret += "VArr";
-      } else if (tag == T::OptDArr  || tag == T::DArr ||
-                 tag == T::OptSDArr || tag == T::SDArr) {
-        ret += "DArr";
-      } else if (tag == T::OptVec  || tag == T::Vec ||
-                 tag == T::OptSVec || tag == T::SVec) {
+      if (tag == T::OptVec  || tag == T::Vec ||
+          tag == T::OptSVec || tag == T::SVec) {
         ret += "Vec";
       } else if (tag == T::OptDict  || tag == T::Dict ||
                  tag == T::OptSDict || tag == T::SDict) {
@@ -850,12 +643,6 @@ std::string show(RepoAuthType rat) {
       } else if (tag == T::OptKeyset  || tag == T::Keyset ||
                  tag == T::OptSKeyset || tag == T::SKeyset) {
         ret += "Keyset";
-      } else if (tag == T::OptVecish || tag == T::Vecish ||
-                 tag == T::OptSVecish || tag == T::SVecish) {
-        ret += "Vecish";
-      } else if (tag == T::OptDictish || tag == T::Dictish ||
-                 tag == T::OptSDictish || tag == T::SDictish) {
-        ret += "Dictish";
       } else if (tag == T::OptArrLike || tag == T::ArrLike ||
                  tag == T::OptSArrLike || tag == T::SArrLike) {
         ret += "ArrLike";

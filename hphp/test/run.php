@@ -2390,12 +2390,6 @@ function run_config_post($outputs, $test, $options) {
     return false;
   }
 
-  // Needed for testing non-hhvm binaries that don't actually run the code
-  // e.g. parser/test/parse_tester.cpp.
-  if ($output == "FORCE PASS") {
-    return true;
-  }
-
   $repeats = 0;
   if (!$check_hhbbc_error) {
     if (isset($options['retranslate-all'])) {

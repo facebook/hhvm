@@ -33,7 +33,7 @@ pub fn emit_fatal_program<'a, 'arena>(
     })
 }
 
-/// This is the entry point from hh_single_compile & coroutine
+/// This is the entry point from hh_single_compile
 pub fn emit_program<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena>,

@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-extension_loaded('iconv') || die('skip');
-function_exists('iconv_strpos') || die("skip iconv_strpos() is not available in this build");
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-}

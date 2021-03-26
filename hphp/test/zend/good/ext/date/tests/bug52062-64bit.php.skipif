@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (PHP_INT_SIZE == 4) die('skip 64 bit only');
-}

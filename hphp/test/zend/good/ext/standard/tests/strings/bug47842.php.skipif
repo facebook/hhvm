@@ -1,4 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (PHP_INT_MAX < pow(2,31)) die("skip PHP_INT_MAX < 32b\n");
-}

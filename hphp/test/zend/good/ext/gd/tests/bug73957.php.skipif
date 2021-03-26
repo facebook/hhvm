@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('gd')) die('skip gd extension not available');
-if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only');
-}

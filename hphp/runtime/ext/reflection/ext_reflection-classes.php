@@ -22,8 +22,7 @@ interface Reflector {
    * argument list is available.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString();
+  public function __toString()[];
 }
 
 trait ReflectionLegacyAttribute {
@@ -107,8 +106,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   No value is returned.
    */
-  <<__Pure>>
-  public function __construct($func, $param) {
+  public function __construct($func, $param)[] {
     if (is_null($func) && is_null($param)) {
       return;
     }
@@ -197,8 +195,7 @@ class ReflectionParameter implements Reflector {
     return $out;
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     return $this->toString();
   }
 
@@ -242,8 +239,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   The name of the reflected parameter.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName() {
+  public function getName()[] {
     return $this->info['name'];
   }
 
@@ -259,8 +255,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   TRUE if the parameter is passed in by reference,
    *                     otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isPassedByReference() {
+  public function isPassedByReference()[] {
     // FIXME: backward compatibility hack for places that were checking for
     //        inout by looking at reffy wrappers.
     return $this->isInOut();
@@ -278,8 +273,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   Returns TRUE if the parameter can be passed by value,
    *                     FALSE otherwise. Returns NULL in case of an error.
    */
-  <<__Pure, __MaybeMutable>>
-  public function canBePassedByValue() {
+  public function canBePassedByValue()[] {
     // FIXME: backward compatibility hack for places that were checking for
     //        inout by looking at reffy wrappers.
     return !$this->isInOut();
@@ -290,8 +284,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if the parameter is inout, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isInOut() {
+  public function isInOut()[] {
     return ($this->info['inout'] ?? false);
   }
 
@@ -305,8 +298,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDeclaringClass() {
+  public function getDeclaringClass()[] {
     if (!($this->info['class'] ?? false)) {
       return null;
     }
@@ -323,8 +315,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   A ReflectionFunction object.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDeclaringFunction() {
+  public function getDeclaringFunction()[] {
     if (!($this->info['class'] ?? false)) {
       return new ReflectionFunction($this->info['function']);
     }
@@ -341,8 +332,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getClass() {
+  public function getClass()[] {
     if (!($this->info['type'] ?? false)) {
       return null;
     }
@@ -377,8 +367,7 @@ class ReflectionParameter implements Reflector {
     return new ReflectionClass($this->info['type']);
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function getTypehintText() {
+  public function getTypehintText()[] {
     if (isset($this->info['type'])) {
       if ($this->info['type'] === 'self' && ($this->info['class'] ?? false)) {
         return $this->info['class'];
@@ -388,8 +377,7 @@ class ReflectionParameter implements Reflector {
     return '';
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function getTypeText() {
+  public function getTypeText()[] {
     return isset($this->info['type_hint']) ? $this->info['type_hint'] : '';
   }
 
@@ -402,8 +390,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   TRUE if an array is expected, FALSE otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isArray() {
+  public function isArray()[] {
     return $this->info['type'] == 'array';
   }
 
@@ -417,8 +404,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   TRUE if NULL is allowed, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function allowsNull() {
+  public function allowsNull()[] {
     return isset($this->info['nullable']);
   }
 
@@ -431,8 +417,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if the parameter is optional, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isOptional(): bool {
+  public function isOptional()[]: bool {
     return ($this->info['is_optional'] ?? false);
   }
 
@@ -441,8 +426,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if the parameter is variadic, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isVariadic(): bool {
+  public function isVariadic()[]: bool {
     return ($this->info['is_variadic'] ?? false);
   }
 
@@ -457,8 +441,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   TRUE if a default value is available, otherwise
    *                     FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isDefaultValueAvailable() {
+  public function isDefaultValueAvailable()[] {
     if (!array_key_exists('default', $this->info)) {
       return false;
     }
@@ -476,8 +459,7 @@ class ReflectionParameter implements Reflector {
    * @return     bool   If parameters default value is constant, or NULL if
    *                    a default value does not exist.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isDefaultValueConstant(): ?bool {
+  public function isDefaultValueConstant()[]: ?bool {
     // No default value, return null.
     if (!$this->isDefaultValueAvailable()) {
       return null;
@@ -502,8 +484,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   The parameters default value.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDefaultValue() {
+  public function getDefaultValue()[] {
     if (!array_key_exists('default', $this->info)) {
       throw new ReflectionException('Parameter is not optional');
     }
@@ -528,8 +509,7 @@ class ReflectionParameter implements Reflector {
     * @return string The raw text of a default value, or empty if it does not
     *                exist.
     */
-  <<__Pure, __MaybeMutable>>
-  public function getDefaultValueText() {
+  public function getDefaultValueText()[] {
     if (array_key_exists('defaultText', $this->info)) {
       return $this->info['defaultText'];
     }
@@ -547,8 +527,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   Returns string on success or NULL on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDefaultValueConstantName() {
+  public function getDefaultValueConstantName()[] {
     if ($this->isDefaultValueConstant()) {
       return $this->info['defaultText'];
     }
@@ -565,8 +544,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   The position of the parameter, left to right,
    *                     starting at position #0.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getPosition() {
+  public function getPosition()[] {
     return $this->info['index'];
   }
 
@@ -590,8 +568,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   Returns TRUE if the parameter is callable, FALSE if
    *                     it is not or NULL on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isCallable() {
+  public function isCallable()[] {
     return $this->getTypeText() === 'callable';
   }
 
@@ -603,8 +580,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if a type is specified, FALSE otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function hasType(): bool {
+  public function hasType()[]: bool {
     return $this->info['type_hint'] !== '';
   }
 
@@ -617,8 +593,7 @@ class ReflectionParameter implements Reflector {
    * @return     ?ReflectionType   Returns a ReflectionType object if a
    *                               parameter type is specified, NULL otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getType(): ?ReflectionType {
+  public function getType()[]: ?ReflectionType {
     if ($this->hasType()) {
       return new ReflectionType(
         $this,
@@ -670,8 +645,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   No value is returned.
    */
-  <<__Native, __Pure>>
-  public function __construct(mixed $cls, string $name): void;
+  <<__Native>>
+  public function __construct(mixed $cls, string $name)[]: void;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -682,8 +657,7 @@ class ReflectionProperty implements Reflector {
    * argument list is available.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     if ($this->isStatic()) {
       $def = '';
     } elseif ($this->isDefault()) {
@@ -743,8 +717,7 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   The name of the reflected property.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName() {
+  public function getName()[] {
     return $this->name;
   }
 
@@ -757,8 +730,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   TRUE if the property is public, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isPublic(): bool;
+  <<__Native>>
+  public function isPublic()[]: bool;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -769,8 +742,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   TRUE if the property is private, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isPrivate(): bool;
+  <<__Native>>
+  public function isPrivate()[]: bool;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -781,8 +754,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   TRUE if the property is protected, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isProtected(): bool;
+  <<__Native>>
+  public function isProtected()[]: bool;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -793,8 +766,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   TRUE if the property is static, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isStatic(): bool;
+  <<__Native>>
+  public function isStatic()[]: bool;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -806,8 +779,8 @@ class ReflectionProperty implements Reflector {
    * @return     mixed   TRUE if the property was declared at compile-time,
    *                     or FALSE if it was created at run-time.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isDefault(): bool;
+  <<__Native>>
+  public function isDefault()[]: bool;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -835,8 +808,8 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   A numeric representation of the modifiers.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getModifiers(): int;
+  <<__Native>>
+  public function getModifiers()[]: int;
 
   // This doc comment block generated by idl/sysdoc.php
   /**
@@ -948,8 +921,7 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDeclaringClass() {
+  public function getDeclaringClass()[] {
     return new ReflectionClass($this->class);
   }
 
@@ -963,11 +935,11 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   The doc comment.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getDocComment(): mixed;
+  <<__Native>>
+  public function getDocComment()[]: mixed;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getTypeText(): string;
+  <<__Native>>
+  public function getTypeText()[]: string;
 
   <<__Pure, __MaybeMutable>>
   private function isAccessible() {
@@ -1021,8 +993,7 @@ class ReflectionExtension implements Reflector {
    *
    * @return     mixed   A ReflectionExtension object.
    */
-  <<__Pure>>
-  public function __construct($name) {
+  public function __construct($name)[] {
     $this->info = hphp_get_extension_info($name);
     $this->__name = $name;
   }
@@ -1038,8 +1009,7 @@ class ReflectionExtension implements Reflector {
    * @return     mixed   Returns the exported extension as a string, in the
    *                     same way as the ReflectionExtension::export().
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     /* HHVM extensions don't (currently) track what consts/ini/funcs/classes
      * are associated with them (nor do they track a unique number).
      * Provide a placeholder string with the data we do have pending
@@ -1090,8 +1060,7 @@ class ReflectionExtension implements Reflector {
    *
    * @return     mixed   The extensions name.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName() {
+  public function getName()[] {
     return $this->info['name'];
   }
 
@@ -1104,8 +1073,7 @@ class ReflectionExtension implements Reflector {
    *
    * @return     mixed   The version of the extension.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getVersion() {
+  public function getVersion()[] {
     return $this->info['version'];
   }
 
@@ -1121,8 +1089,7 @@ class ReflectionExtension implements Reflector {
    *                     keys being the function names. If no function are
    *                     defined, an empty array is returned.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getFunctions() {
+  public function getFunctions()[] {
     return $this->info['functions'];
   }
 
@@ -1135,8 +1102,7 @@ class ReflectionExtension implements Reflector {
    *
    * @return     mixed   An associative array with constant names as keys.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getConstants() {
+  public function getConstants()[] {
     return $this->info['constants'];
   }
 
@@ -1150,8 +1116,7 @@ class ReflectionExtension implements Reflector {
    * @return     mixed   An associative array with the ini entries as keys,
    *                     with their defined values as values.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getINIEntries() {
+  public function getINIEntries()[] {
     return $this->info['ini'];
   }
 
@@ -1166,8 +1131,7 @@ class ReflectionExtension implements Reflector {
    *                     class within the extension. If no classes are
    *                     defined, an empty array is returned.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getClasses() {
+  public function getClasses()[] {
     return $this->info['classes'];
   }
 
@@ -1182,8 +1146,7 @@ class ReflectionExtension implements Reflector {
    *                     extension. If no classes are defined, an empty array
    *                     is returned.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getClassNames() {
+  public function getClassNames()[] {
     $ret = varray[];
     foreach ($this->info['classes'] as $cls) {
       $ret[] = $cls->getName();
@@ -1199,8 +1162,7 @@ class ReflectionExtension implements Reflector {
    *
    * @return     mixed   Information about the extension.
    */
-  <<__Pure, __MaybeMutable>>
-  public function info() {
+  public function info()[] {
     return $this->info['info'];
   }
 }
@@ -1245,8 +1207,7 @@ class ReflectionType {
    *           otherwise.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function allowsNull(): bool {
+  public function allowsNull()[]: bool {
     return idx($this->type_hint_info, 'nullable', false);
   }
 
@@ -1258,8 +1219,7 @@ class ReflectionType {
    * @return - true if the type is a builtin type; false otherwise.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function isBuiltin(): bool {
+  public function isBuiltin()[]: bool {
     return idx($this->type_hint_info, 'builtin', false);
   }
 
@@ -1272,8 +1232,7 @@ class ReflectionType {
    *           the empty string.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString(): string {
+  public function __toString()[]: string {
     return idx($this->type_hint_info, 'name', '');
   }
 

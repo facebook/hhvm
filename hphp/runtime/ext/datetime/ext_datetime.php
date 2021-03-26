@@ -218,8 +218,8 @@ class DateTimeZone {
    * @param string $timezone
    *
    */
-  <<__Native, __Pure>>
-  public function __construct(string $timezone): void;
+  <<__Native>>
+  public function __construct(string $timezone)[]: void;
 
   /**
    * Returns location information for a timezone
@@ -227,8 +227,8 @@ class DateTimeZone {
    * @return array - Array containing location information about timezone.
    *
    */
-  <<__Native, __Pure>>
-  public function getLocation(): darray;
+  <<__Native>>
+  public function getLocation()[]: darray;
 
   /**
    * Returns the name of the timezone.
@@ -236,8 +236,8 @@ class DateTimeZone {
    * @return string - One of timezones.
    *
    */
-  <<__Native, __Pure>>
-  public function getName(): string;
+  <<__Native>>
+  public function getName()[]: string;
 
   /**
    * This function returns the offset to GMT for the date/time specified in the
@@ -251,24 +251,24 @@ class DateTimeZone {
    *   failure.
    *
    */
-  <<__Native, __Pure>>
-  public function getOffset(DateTimeInterface $datetime): mixed;
+  <<__Native>>
+  public function getOffset(DateTimeInterface $datetime)[]: mixed;
 
   /**
    * @return array - Returns numerically indexed array containing associative
    *   array with all transitions on success or FALSE on failure.
    *
    */
-  <<__Native, __Pure>>
+  <<__Native>>
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
-                          int $timestamp_end = PHP_INT_MAX): mixed;
+                          int $timestamp_end = PHP_INT_MAX)[]: mixed;
 
   /**
    * @return array - Returns array on success or FALSE on failure.
    *
    */
-  <<__Native, __Pure>>
-  public static function listAbbreviations(): darray;
+  <<__Native>>
+  public static function listAbbreviations()[]: darray;
 
   /**
    * @param int $what - One of DateTimeZone class constants.
@@ -278,9 +278,9 @@ class DateTimeZone {
    * @return mixed - Returns array on success or FALSE on failure.
    *
    */
-  <<__Native, __Pure>>
+  <<__Native>>
   public static function listIdentifiers(int $what = 2047,
-                                  string $country = ""): mixed;
+                                  string $country = "")[]: mixed;
 
   <<__Native, __Pure>>
   public function __debugInfo(): darray;

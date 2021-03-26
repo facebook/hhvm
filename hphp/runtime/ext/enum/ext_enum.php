@@ -16,8 +16,8 @@ abstract class BuiltinEnum<+T> {
    *
    * @return darray['CONST_NAME' => $value, ....]
    */
-  <<__Native, __Pure>>
-  final public static function getValues(): darray<string, T>;
+  <<__Native>>
+  final public static function getValues()[]: darray<string, T>;
 
   /**
    * Get the names of all the const values, indexed by value. Calls
@@ -25,28 +25,27 @@ abstract class BuiltinEnum<+T> {
    *
    * @return darray[$value => 'CONST_NAME', ....]
    */
-  <<__Native, __Pure>>
-  final public static function getNames(): darray<T, string>;
+  <<__Native>>
+  final public static function getNames()[]: darray<T, string>;
 
   /**
    * Returns whether or not the value is defined as a constant.
    */
-  <<__Native, __Pure>>
-  final public static function isValid(mixed $value): bool;
+  <<__Native>>
+  final public static function isValid(mixed $value)[]: bool;
 
   /**
    * Coerce to a valid value or null.
    * This is useful for typing deserialized enum values.
    */
-  <<__Native, __Pure>>
-  final public static function coerce(mixed $value): ?T;
+  <<__Native>>
+  final public static function coerce(mixed $value)[]: ?T;
 
   /**
    * Coerce to valid value or throw UnexpectedValueException
    * This is useful for typing deserialized enum values.
    */
-  <<__Pure>>
-  final public static function assert(mixed $value): T {
+  final public static function assert(mixed $value)[]: T {
     $new_value = static::coerce($value);
     if (null === $new_value) {
       $cls = static::class;
@@ -61,10 +60,9 @@ abstract class BuiltinEnum<+T> {
    * Coerce all the values in a traversable. If the value is not an
    * array of valid items, an UnexpectedValueException is thrown
    */
-  <<__Pure, __AtMostRxAsArgs>>
   final public static function assertAll(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<mixed> $values,
-  ): Container<T> {
+    Traversable<mixed> $values,
+  )[]: Container<T> {
     $new_values = varray[];
     foreach ($values as $value) {
       $new_values[] = static::assert($value);

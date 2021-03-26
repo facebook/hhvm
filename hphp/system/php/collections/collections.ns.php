@@ -4,22 +4,17 @@ namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection extends HH\Rx\Countable {
-  <<__Pure, __MaybeMutable>>
-  public function isEmpty();
-  <<__Pure, __MaybeMutable>>
-  public function count();
-  <<__Pure, __MutableReturn>>
-  public function items();
+  public function isEmpty()[];
+  public function count()[];
+  public function items()[];
 }
 
 <<__Sealed(\HH\Collection::class)>>
 interface OutputCollection {
-  <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add($e);
-  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function add($e)[write_props];
   public function addAll(
-    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> $iterable
-  );
+    $iterable
+  )[write_props];
 }
 
 }
@@ -29,8 +24,7 @@ namespace HH {
 <<__Sealed(\MutableMap::class, \MutableSet::class, \MutableVector::class)>>
 interface Collection extends \ConstCollection,
                              \OutputCollection {
-  <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function clear();
+  public function clear()[write_props];
 }
 
 }
@@ -39,36 +33,28 @@ namespace {
 
 <<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess {
-  <<__Pure, __MaybeMutable>>
-  public function contains($m);
+  public function contains($m)[];
 }
 
 <<__Sealed(MapAccess::class, MutableSet::class)>>
 interface SetAccess extends ConstSetAccess {
-  <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function remove($m);
+  public function remove($m)[write_props];
 }
 
 <<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess {
-  <<__Pure, __MaybeMutable>>
-  public function at($k);
-  <<__Pure, __MaybeMutable>>
-  public function get($k);
-  <<__Pure, __MaybeMutable>>
-  public function containsKey($k);
+  public function at($k)[];
+  public function get($k)[];
+  public function containsKey($k)[];
 }
 
 <<__Sealed(MapAccess::class, MutableVector::class)>>
 interface IndexAccess extends ConstIndexAccess {
-  <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function set($k,$v);
-  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function set($k,$v)[write_props];
   public function setAll(
-    <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> $iterable
-  );
-  <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function removeKey($k);
+    $iterable
+  )[write_props];
+  public function removeKey($k)[write_props];
 }
 
 <<__Sealed(ConstMap::class, MapAccess::class)>>
@@ -468,7 +454,7 @@ trait LazyIterable implements \HH\Iterable {
   public function filter($callback) {
     return new LazyFilterIterable($this, $callback);
   }
-  public function zip($iterable) {
+  public function zip($iterable)[] {
     if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }

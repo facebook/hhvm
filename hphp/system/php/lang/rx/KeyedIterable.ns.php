@@ -10,8 +10,7 @@ interface KeyedIterable extends
   public function mapWithKey(<<__AtMostRxAsFunc>> $callback);
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__AtMostRxAsFunc>> $callback);
-  <<__Pure, __MutableReturn, __MaybeMutable>>
-  public function keys();
+  public function keys()[];
 }
 
 }

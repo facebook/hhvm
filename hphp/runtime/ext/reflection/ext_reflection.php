@@ -44,8 +44,7 @@ class Reflection {
    *
    * @return     mixed   An array of modifier names.
    */
-  <<__Pure>>
-  public static function getModifierNames($modifiers) {
+  public static function getModifierNames($modifiers)[] {
     $ret = varray[];
 
     $abstract = ReflectionMethod::IS_ABSTRACT |

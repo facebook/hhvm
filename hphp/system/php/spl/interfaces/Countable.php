@@ -29,8 +29,7 @@ interface Countable {
 namespace HH\Rx {
 
 interface Countable extends \Countable {
-  <<__Pure, __MaybeMutable>>
-  public function count(): int;
+  public function count()[]: int;
 }
 
 }

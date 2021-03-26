@@ -26,8 +26,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     string   The name of the function.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getName(): string;
+  <<__Native>>
+  public function getName()[]: string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionfunctionabstract.innamespace.php
@@ -37,8 +37,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function inNamespace(): bool {
+  public function inNamespace()[]: bool {
     return strrpos($this->getName(), '\\') !== false;
   }
 
@@ -50,8 +49,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     string   The namespace name.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getNamespaceName(): string {
+  public function getNamespaceName()[]: string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? '' : substr($name, 0, $pos);
@@ -65,15 +63,14 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     string  The short name of the function.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getShortName(): string {
+  public function getShortName()[]: string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
-  <<__Native, __HipHopSpecific, __Pure, __MaybeMutable>>
-  public function isHack(): bool;
+  <<__Native, __HipHopSpecific>>
+  public function isHack()[]: bool;
 
   /**
    * ( excerpt from
@@ -85,8 +82,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   TRUE if it's internal, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isInternal(): bool;
+  <<__Native>>
+  public function isInternal()[]: bool;
 
   /**
    * ( excerpt from
@@ -97,8 +94,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     bool   TRUE if it's a closure, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isClosure(): bool {
+  public function isClosure()[]: bool {
     return false;
   }
 
@@ -111,14 +107,14 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     bool   TRUE if the function is generator, otherwise FALSE.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isGenerator(): bool;
+  <<__Native>>
+  public function isGenerator()[]: bool;
 
   /**
    * @return     bool   TRUE if the function is async, otherwise FALSE.
    */
-  <<__Native, __HipHopSpecific, __Pure, __MaybeMutable>>
-  public function isAsync(): bool;
+  <<__Native, __HipHopSpecific>>
+  public function isAsync()[]: bool;
 
   /**
    * Indicates whether the function has ...$varargs as its last parameter
@@ -126,8 +122,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     bool   TRUE if the function is variadic, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isVariadic(): bool;
+  <<__Native>>
+  public function isVariadic()[]: bool;
 
   /**
    * ( excerpt from
@@ -139,8 +135,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   TRUE if it's user-defined, otherwise false;
    */
-  <<__Pure, __MaybeMutable>>
-  public function isUserDefined(): bool {
+  public function isUserDefined()[]: bool {
     return !$this->isInternal();
   }
 
@@ -153,8 +148,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   The file name.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getFileName(): mixed;
+  <<__Native>>
+  public function getFileName()[]: mixed;
 
   /**
    * Gets the declaring file for a user-defined function.
@@ -162,8 +157,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return ReflectionFile   A ReflectionFile object of the file that the
    *                           reflected function is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getFile(): ReflectionFile {
+  public function getFile()[]: ReflectionFile {
     $fileName = $this->getFileName();
 
     if ($fileName === false) {
@@ -191,8 +185,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   The starting line number.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getStartLine(): mixed;
+  <<__Native>>
+  public function getStartLine()[]: mixed;
 
   /**
    * ( excerpt from
@@ -204,8 +198,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     mixed   The ending line number of the user defined function,
    *                     or FALSE if unknown.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getEndLine(): mixed;
+  <<__Native>>
+  public function getEndLine()[]: mixed;
 
   /**
    * ( excerpt from
@@ -216,8 +210,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   The doc comment string if it exists, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getDocComment(): mixed;
+  <<__Native>>
+  public function getDocComment()[]: mixed;
 
   <<__Native, __Pure, __MaybeMutable>>
   private function getRetTypeInfo(): dict;
@@ -225,16 +219,16 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native, __HipHopSpecific, __Pure, __MaybeMutable>>
   private function getReturnTypeHint(): string;
 
-  <<__HipHopSpecific, __Pure, __MaybeMutable>>
-  public function getReturnTypeText() {
+  <<__HipHopSpecific>>
+  public function getReturnTypeText()[] {
     return $this->getReturnTypeHint() ?: false;
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getReifiedTypeParamInfo(): varray;
+  <<__Native>>
+  public function getReifiedTypeParamInfo()[]: varray;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getCoeffects(): vec;
+  <<__Native>>
+  public function getCoeffects()[]: vec;
 
   /**
    * ( excerpt from
@@ -246,8 +240,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return - true if the function has a specified return type; false
    *           otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function hasReturnType(): bool {
+  public function hasReturnType()[]: bool {
     return (bool) $this->getReturnTypeText();
   }
 
@@ -261,8 +254,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return - a ReflectionType object if a return type is specified; null
    *           otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getReturnType(): ?ReflectionType {
+  public function getReturnType()[]: ?ReflectionType {
     if ($this->hasReturnType()) {
       $retTypeInfo = $this->getRetTypeInfo();
       return new ReflectionType(
@@ -290,8 +282,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   use ReflectionLegacyAttribute;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getNumberOfParameters(): int;
+  <<__Native>>
+  public function getNumberOfParameters()[]: int;
 
   <<__Native, __Pure, __MaybeMutable>>
   private function getParamInfo(): varray<darray<string, mixed>>;
@@ -308,8 +300,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     array  The parameters, as a ReflectionParameter object.
    */
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function getParameters(): varray<ReflectionParameter> {
+  <<__ProvenanceSkipFrame>>
+  public function getParameters()[]: varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
     if (null === $this->params) {
@@ -340,8 +332,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   The number of required parameters.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getNumberOfRequiredParameters() {
+  public function getNumberOfRequiredParameters()[] {
     $count = 0;
     $params = $this->getParameters();
     foreach ($params as $name => $param) {
@@ -360,19 +351,16 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * Returns whether the function is deprecated.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isDeprecated(): bool {
+  public function isDeprecated()[]: bool {
     return null !== $this->getAttribute('__Deprecated');
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function getExtension() {
+  public function getExtension()[] {
     // FIXME: HHVM doesn't support this
     return null;
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function getExtensionName() {
+  public function getExtensionName()[] {
     return null;
   }
 
@@ -474,8 +462,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *
    * @return     mixed   No value is returned.
    */
-  <<__Pure>>
-  public function __construct($name_or_closure) {
+  public function __construct($name_or_closure)[] {
     if ($name_or_closure is Closure) {
       $this->closure = $name_or_closure;
       $this->__initClosure($name_or_closure);
@@ -540,8 +527,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *
    * @return     string  A representation of this ReflectionFunction.
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString(): string {
+  public function __toString()[]: string {
     return $this->__toStringHelper($this->isClosure() ? 'Closure' : 'Function');
   }
 
@@ -610,8 +596,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if it's disable, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function isDisabled(): bool {
+  public function isDisabled()[]: bool {
     // FIXME: HHVM doesn't support the disable_functions directive.
     return false;
   }
@@ -678,8 +663,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @class_and_method string  Class name and method, separated by ::
    */
-  <<__Pure>>
-  public function __construct(...$args) {
+  public function __construct(...$args)[] {
     if (count($args) == 0 || count($args) > 2) {
       throw new Exception(
         'ReflectionMethod::__construct() takes either 1 or 2 arguments');
@@ -717,8 +701,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     string  A string representation of this ReflectionMethod.
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString(): string {
+  public function __toString()[]: string {
     $preAttrs = varray[];
 
     $decl_class = $this->getDeclaringClassname();
@@ -866,8 +849,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is final, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isFinal(): bool;
+  <<__Native>>
+  public function isFinal()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.isabstract.php
@@ -877,8 +860,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is abstract, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isAbstract(): bool;
+  <<__Native>>
+  public function isAbstract()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.ispublic.php )
@@ -887,8 +870,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is public, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isPublic(): bool;
+  <<__Native>>
+  public function isPublic()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.isprotected.php
@@ -898,8 +881,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is protected, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isProtected(): bool;
+  <<__Native>>
+  public function isProtected()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.isprivate.php )
@@ -909,8 +892,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is private, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isPrivate(): bool;
+  <<__Native>>
+  public function isPrivate()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.isstatic.php )
@@ -919,8 +902,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is static, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isStatic(): bool;
+  <<__Native>>
+  public function isStatic()[]: bool;
 
   <<__Native, __Pure, __MaybeMutable>>
   private function isStaticInPrologue(): bool;
@@ -933,8 +916,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     bool   TRUE if the method is a constructor, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isConstructor(): bool;
+  <<__Native>>
+  public function isConstructor()[]: bool;
 
   /**
    * ( excerpt from
@@ -947,8 +930,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *                   these modifiers are described in the predefined
    *                   constants.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getModifiers(): int;
+  <<__Native>>
+  public function getModifiers()[]: int;
 
   /**
    * ( excerpt from
@@ -958,8 +941,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     object   A ReflectionMethod instance of the method prototype.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getPrototype(): ReflectionMethod {
+  public function getPrototype()[]: ReflectionMethod {
     $proto_cls = $this->getPrototypeClassname();
     $name = $this->getName();
     if ($proto_cls) {
@@ -1034,8 +1016,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected method is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDeclaringClass() {
+  public function getDeclaringClass()[] {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 
@@ -1071,8 +1052,7 @@ class ReflectionClass implements Reflector {
    * @name       mixed   Either a string containing the name of the class to
    *                     reflect, or an object.
    */
-  <<__Pure>>
-  public function __construct(<<__MaybeMutable>> mixed $name_or_obj) {
+  public function __construct(mixed $name_or_obj)[] {
     if (is_object($name_or_obj)) {
       $this->obj = $name_or_obj;
       $classname = get_class($name_or_obj);
@@ -1094,8 +1074,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     string  A string representation of this ReflectionClass.
    */
-  <<__Pure, __MaybeMutable>>
-  public function __toString(): string {
+  public function __toString()[]: string {
     $ret = '';
     if ($docComment = $this->getDocComment()) {
       $ret .= $docComment . "\n";
@@ -1264,8 +1243,8 @@ class ReflectionClass implements Reflector {
     print $str;
   }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getName(): string;
+  <<__Native>>
+  public function getName()[]: string;
 
   <<__Native, __Pure, __MaybeMutable>>
   private function getParentName(): string;
@@ -1278,8 +1257,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function inNamespace(): bool {
+  public function inNamespace()[]: bool {
     return strrpos($this->getName(), '\\') !== false;
   }
 
@@ -1291,8 +1269,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     string   The namespace name.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getNamespaceName(): string {
+  public function getNamespaceName()[]: string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? '' : substr($name, 0, $pos);
@@ -1306,8 +1283,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     string  The short name of the function.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getShortName(): string {
+  public function getShortName()[]: string {
     $name = $this->getName();
     $pos = strrpos($name, '\\');
     return ($pos === false) ? $name : substr($name, $pos + 1);
@@ -1324,11 +1300,10 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isInternal(): bool;
+  <<__Native>>
+  public function isInternal()[]: bool;
 
-  <<__Pure, __MaybeMutable>>
-  public function isUserDefined(): bool {
+  public function isUserDefined()[]: bool {
     return !$this->isInternal();
   }
 
@@ -1340,8 +1315,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isInstantiable(): bool;
+  <<__Native>>
+  public function isInstantiable()[]: bool;
 
   /**
    * ( excerpt from
@@ -1351,8 +1326,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE if the class is cloneable, FALSE otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isCloneable(): bool {
+  public function isCloneable()[]: bool {
     return $this->isInstantiable() &&
       (!$this->hasMethod('__clone') || $this->getMethod('__clone')->isPublic());
   }
@@ -1366,8 +1340,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   A ReflectionMethod.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getMethod($name): ReflectionMethod {
+  public function getMethod($name)[]: ReflectionMethod {
     return new ReflectionMethod($this->getName(), $name);
   }
 
@@ -1380,8 +1353,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool    TRUE if it has the method, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function hasMethod(string $name): bool;
+  <<__Native>>
+  public function hasMethod(string $name)[]: bool;
 
   /* Helper for getMethods: correctly ordered Set of the methods
    * declared on this class and its parents */
@@ -1421,8 +1394,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   An array of ReflectionMethod objects reflecting each
    *                     method.
    */
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function getMethods(?int $filter = null): varray<ReflectionMethod> {
+  <<__ProvenanceSkipFrame>>
+  public function getMethods(?int $filter = null)[]: varray<ReflectionMethod> {
     $ret = varray[];
     $clsname = $this->getName();
     foreach ($this->getMethodOrderWithCaching($filter) as $name) {
@@ -1441,8 +1414,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   TRUE if the constant is defined, otherwise FALSE.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function hasConstant(string $name): bool;
+  <<__Native>>
+  public function hasConstant(string $name)[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getconstant.php
@@ -1455,8 +1428,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Value of the constant, or FALSE if it doesn't exist
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getConstant(string $name): mixed;
+  <<__Native>>
+  public function getConstant(string $name)[]: mixed;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getconstants.php
@@ -1468,8 +1441,7 @@ class ReflectionClass implements Reflector {
    * @return     array   An array of constants. Constant name in key,
    *                     constant value in value.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getConstants(): darray<string, mixed> {
+  public function getConstants()[]: darray<string, mixed> {
     return self::getConstantsCache($this->getName());
   }
 
@@ -1490,8 +1462,7 @@ class ReflectionClass implements Reflector {
    *
    * @return  array<string, string>
    */
-  <<__Pure, __MaybeMutable>>
-  public function getAbstractConstantNames(): darray<string, string> {
+  public function getAbstractConstantNames()[]: darray<string, string> {
     return self::getAbstractConstantNamesCache($this->getName());
   }
 
@@ -1514,18 +1485,16 @@ class ReflectionClass implements Reflector {
     return self::getOrderedTypeConstants($clsname);
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function getTypeConstant(string $name): ReflectionTypeConstant {
+  public function getTypeConstant(string $name)[]: ReflectionTypeConstant {
     return new ReflectionTypeConstant($this->getName(), $name);
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function hasTypeConstant($name): bool {
+  public function hasTypeConstant($name)[]: bool {
     return array_key_exists($name, $this->getTypeConstantNamesWithCaching());
   }
 
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function getTypeConstants(): varray<ReflectionTypeConstant> {
+  <<__ProvenanceSkipFrame>>
+  public function getTypeConstants()[]: varray<ReflectionTypeConstant> {
     $ret = varray[];
     $class = $this->getName();
     foreach ($this->getTypeConstantNamesWithCaching() as $name) {
@@ -1558,8 +1527,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   A numerical array with interface names as the
    *                     values.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getInterfaceNames(): varray<string>;
+  <<__Native>>
+  public function getInterfaceNames()[]: varray<string>;
 
   /**
    * ( excerpt from
@@ -1571,8 +1540,7 @@ class ReflectionClass implements Reflector {
    *                     interface names and the array values as
    *                     ReflectionClass objects.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getInterfaces(): darray<string, ReflectionClass> {
+  public function getInterfaces()[]: darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getInterfaceNames());
   }
 
@@ -1581,8 +1549,8 @@ class ReflectionClass implements Reflector {
    * implement an interface / use a trait. Empty array for abstract and
    * concrete classes.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getRequirementNames(): varray<string>;
+  <<__Native>>
+  public function getRequirementNames()[]: varray<string>;
 
   /**
    * Gets ReflectionClass-es for the requirements of this class
@@ -1590,8 +1558,7 @@ class ReflectionClass implements Reflector {
    * @return  An associative array of requirements, with keys as
    *          requirement names and the array values as ReflectionClass objects.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getRequirements(): darray<string, ReflectionClass> {
+  public function getRequirements()[]: darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getRequirementNames());
   }
 
@@ -1605,8 +1572,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   Returns an array with trait names in values. Returns
    *                     NULL in case of an error.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getTraitNames(): varray<string>;
+  <<__Native>>
+  public function getTraitNames()[]: varray<string>;
 
   /**
    * ( excerpt from
@@ -1619,8 +1586,8 @@ class ReflectionClass implements Reflector {
    *                     original names (in the format "TraitName::original")
    *                     in values. Returns NULL in case of an error.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getTraitAliases(): darray<string, string>;
+  <<__Native>>
+  public function getTraitAliases()[]: darray<string, string>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
@@ -1632,8 +1599,7 @@ class ReflectionClass implements Reflector {
    *                     instances of trait's ReflectionClass in values.
    *                     Returns NULL in case of an error.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getTraits(): darray<string, ReflectionClass> {
+  public function getTraits()[]: darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getTraitNames());
   }
 
@@ -1657,8 +1623,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isInterface(): bool;
+  <<__Native>>
+  public function isInterface()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.isabstract.php )
@@ -1667,8 +1633,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isAbstract(): bool;
+  <<__Native>>
+  public function isAbstract()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.isfinal.php )
@@ -1677,8 +1643,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isFinal(): bool;
+  <<__Native>>
+  public function isFinal()[]: bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
@@ -1687,16 +1653,16 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE if this is a trait, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isTrait(): bool;
+  <<__Native>>
+  public function isTrait()[]: bool;
 
   /**
    * Returns whether this ReflectionClass represents an enum.
    *
    * @return     bool   Returns TRUE if this is an enum, FALSE otherwise.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isEnum(): bool;
+  <<__Native>>
+  public function isEnum()[]: bool;
 
   /**
    * Returns the underlying type of this ReflectionClass, given that it
@@ -1704,8 +1670,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     string   the string representation of the underlying type.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getEnumUnderlyingType(): string;
+  <<__Native>>
+  public function getEnumUnderlyingType()[]: string;
 
 
   /**
@@ -1716,8 +1682,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     int   Returns bitmask of modifier constants.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getModifiers(): int;
+  <<__Native>>
+  public function getModifiers()[]: int;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.isinstance.php )
@@ -1728,8 +1694,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isInstance(<<__MaybeMutable>> $obj): bool {
+  public function isInstance($obj)[]: bool {
     return is_a($obj, $this->getName());
   }
 
@@ -1746,8 +1711,7 @@ class ReflectionClass implements Reflector {
    *                     constructor, or NULL if the class has no
    *                     constructor.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getConstructor(): ?ReflectionMethod {
+  public function getConstructor()[]: ?ReflectionMethod {
     $constructor_name = $this->getConstructorName();
     return $constructor_name ? $this->getMethod($constructor_name): null;
   }
@@ -1800,7 +1764,7 @@ class ReflectionClass implements Reflector {
    *
    * Creates a new instance of the class without invoking the constructor.
    */
-  public function newInstanceWithoutConstructor() {
+  public function newInstanceWithoutConstructor()[] {
     return hphp_create_object_without_constructor($this->getName());
   }
 
@@ -1848,8 +1812,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   A ReflectionProperty.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getProperty($name) {
+  public function getProperty($name)[] {
     $class = $this->name;
     if (!$this->hasProperty($name)) {
       throw new ReflectionException("Property $class::$name does not exist");
@@ -1871,8 +1834,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   TRUE if it has the property, otherwise FALSE
    */
-  <<__Pure, __MaybeMutable>>
-  public function hasProperty($name): bool {
+  public function hasProperty($name)[]: bool {
     return $this->getOrderedPropertyInfos()->containsKey($name);
   }
 
@@ -1887,8 +1849,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   An array of ReflectionProperty objects.
    */
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function getProperties($filter = 0xFFFF): varray<ReflectionProperty> {
+  <<__ProvenanceSkipFrame>>
+  public function getProperties($filter = 0xFFFF)[]: varray<ReflectionProperty> {
     $ret = varray[];
     foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
       if ($this->obj) {
@@ -1988,8 +1950,8 @@ class ReflectionClass implements Reflector {
    *                     properties and does not take visibility modifiers
    *                     into account.
    */
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function getDefaultProperties(): darray<string, mixed> {
+  <<__ProvenanceSkipFrame>>
+  public function getDefaultProperties()[]: darray<string, mixed> {
     $ret = darray[];
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
@@ -2010,8 +1972,7 @@ class ReflectionClass implements Reflector {
    *                     extension which defined the class, or NULL for
    *                     user-defined classes.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getExtension(): ?ReflectionExtension {
+  public function getExtension()[]: ?ReflectionExtension {
     // FIXME: HHVM doesn't support extension info
     return new ReflectionExtension($this->getExtensionName());
     // Truthful implementation would be:
@@ -2029,8 +1990,7 @@ class ReflectionClass implements Reflector {
    * @return     mixed   The name of the extension which defined the class,
    *                     or FALSE for user-defined classes.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getExtensionName(): mixed {
+  public function getExtensionName()[]: mixed {
     // FIXME: HHVM doesn't support extension info
     return '';
     // Truthful implementation would be:
@@ -2046,8 +2006,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isIterateable(): bool {
+  public function isIterateable()[]: bool {
     return $this->isSubclassOf(\HH\Traversable::class);
   }
 
@@ -2061,8 +2020,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool    Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function implementsInterface($cls): bool {
+  public function implementsInterface($cls)[]: bool {
     if ($cls is ReflectionClass) { $cls = $cls->getName(); }
 
     // Normalize to avoid autoloading twice for undefined classes
@@ -2084,8 +2042,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   A ReflectionClass, or false.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getParentClass(): mixed {
+  public function getParentClass()[]: mixed {
     $parent = $this->getParentName();
     return $parent ? new ReflectionClass($parent) : false;
   }
@@ -2101,8 +2058,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     bool    Returns TRUE on success or FALSE on failure.
    */
-  <<__Pure, __MaybeMutable>>
-  public function isSubclassOf($cls): bool {
+  public function isSubclassOf($cls)[]: bool {
     if ($cls is ReflectionClass) {
       $cls = $cls->getName();
     }
@@ -2119,8 +2075,8 @@ class ReflectionClass implements Reflector {
    *                     has been defined. If the class is defined in the PHP
    *                     core or in a PHP extension, FALSE is returned.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getFileName(): mixed;
+  <<__Native>>
+  public function getFileName()[]: mixed;
 
   /**
    * Gets the declaring file for the reflected class.
@@ -2128,8 +2084,7 @@ class ReflectionClass implements Reflector {
    * @return ReflectionFile   A ReflectionFile object of the file that the
    *                           reflected class is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getFile(): ReflectionFile {
+  public function getFile()[]: ReflectionFile {
     $fileName = $this->getFileName();
 
     if ($fileName === false) {
@@ -2157,8 +2112,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     int   The starting line number, as an integer.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getStartLine(): mixed;
+  <<__Native>>
+  public function getStartLine()[]: mixed;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getendline.php )
@@ -2168,8 +2123,8 @@ class ReflectionClass implements Reflector {
    * @return     int   The ending line number of the user defined class, or
    *                   FALSE if unknown.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getEndLine(): mixed;
+  <<__Native>>
+  public function getEndLine()[]: mixed;
 
   /**
    * ( excerpt from
@@ -2180,8 +2135,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   The doc comment if it exists, otherwise FALSE
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getDocComment(): mixed;
+  <<__Native>>
+  public function getDocComment()[]: mixed;
 
   use ReflectionTypedAttribute;
 
@@ -2266,8 +2221,7 @@ class ReflectionTypeConstant implements Reflector {
    *                     contains the type constant.
    * @name       string  Name of the type constant.
    */
-  <<__Pure>>
-  public function __construct(mixed $cls, string $name) {
+  public function __construct(mixed $cls, string $name)[] {
     if (!$this->__init($cls, (string) $name)) {
       $classname = is_object($cls) ? get_class($cls) : $cls;
       throw new ReflectionException(
@@ -2280,24 +2234,23 @@ class ReflectionTypeConstant implements Reflector {
    *
    * @return     string   The name of the type constant.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getName(): string;
+  <<__Native>>
+  public function getName()[]: string;
 
   /**
    * Checks if the type constant is abstract
    *
    * @return     bool   Returns TRUE on success or FALSE on failure.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function isAbstract(): bool;
+  <<__Native>>
+  public function isAbstract()[]: bool;
 
   /**
    * Get the type assigned to this type constant as a string
    *
    * @return     NULL | string   The assigned type or null if is abstract
    */
-  <<__Pure, __MaybeMutable>>
-  public function getAssignedTypeText(): ?string {
+  public function getAssignedTypeText()[]: ?string {
     return $this->getAssignedTypeHint() ?: null;
   }
 
@@ -2308,8 +2261,7 @@ class ReflectionTypeConstant implements Reflector {
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected type constant is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getDeclaringClass() {
+  public function getDeclaringClass()[] {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 
@@ -2319,13 +2271,11 @@ class ReflectionTypeConstant implements Reflector {
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected type constant is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getClass() {
+  public function getClass()[] {
     return new ReflectionClass($this->getClassname());
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     $abstract = $this->isAbstract() ? 'abstract ' : '';
 
     $val = $this->isAbstract() ? '' : " = {$this->getAssignedTypeText()}";
@@ -2390,8 +2340,7 @@ class ReflectionTypeAlias implements Reflector {
    *
    * @name      string  Name of the type alias.
    */
-  <<__Pure>>
-  final public function __construct(string $name) {
+  final public function __construct(string $name)[] {
     $n = $this->__init($name);
     if (!$n) {
       throw new ReflectionException(
@@ -2410,8 +2359,8 @@ class ReflectionTypeAlias implements Reflector {
    *
    * @return    array  The type structure of the type alias.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getTypeStructure(): darray;
+  <<__Native>>
+  public function getTypeStructure()[]: darray;
 
   /**
    * Gets all attributes
@@ -2432,8 +2381,7 @@ class ReflectionTypeAlias implements Reflector {
    *
    * @return    array  The resolved type structure of the type alias.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getResolvedTypeStructure() {
+  public function getResolvedTypeStructure()[] {
     return HH\type_structure($this->name);
   }
 
@@ -2442,24 +2390,23 @@ class ReflectionTypeAlias implements Reflector {
    *
    * @return    string The assigned type.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getAssignedTypeText(): string;
+  <<__Native>>
+  public function getAssignedTypeText()[]: string;
 
   /**
    * Get the name of the type alias.
    *
    * @return    string  The name of the type alias
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName() {
+  public function getName()[] {
     return $this->name;
   }
 
   /**
    * Get the name of the file in which the type alias was defined.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getFileName(): string;
+  <<__Native>>
+  public function getFileName()[]: string;
 
   /**
    * Gets the declaring file for the reflected type alias.
@@ -2467,8 +2414,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return ReflectionFile   A ReflectionFile object of the file that the
    *                           reflected type alias is part of.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getFile() {
+  public function getFile()[] {
     return new ReflectionFile($this->getFileName());
   }
 
@@ -2479,8 +2425,7 @@ class ReflectionTypeAlias implements Reflector {
     );
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     return "TypeAlias [ {$this->name} : {$this->getAssignedTypeText()} ]\n";
   }
 
@@ -2502,8 +2447,7 @@ final class ReflectionFile implements Reflector {
    *
    * @name      string  Name of the file.
    */
-  <<__Pure>>
-  final public function __construct(string $name) {
+  final public function __construct(string $name)[] {
     $n = $this->__init($name);
     if (!$n) {
       throw new ReflectionException(
@@ -2534,8 +2478,7 @@ final class ReflectionFile implements Reflector {
    *
    * @return    string  The name of the file
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName() {
+  public function getName()[] {
     return $this->name;
   }
 
@@ -2546,8 +2489,7 @@ final class ReflectionFile implements Reflector {
     );
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function __toString() {
+  public function __toString()[] {
     return "File [ {$this->name} ]\n";
   }
 

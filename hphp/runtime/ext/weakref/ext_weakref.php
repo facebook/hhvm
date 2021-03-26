@@ -16,7 +16,7 @@ final class WeakRef<T> {
    * Constructs a new weak reference.
    */
   <<__Native>>
-  public function __construct(?T $reference);
+  public function __construct(?T $reference)[];
 
   /**
    * ( excerpt from
@@ -26,7 +26,7 @@ final class WeakRef<T> {
    * reference into a strong one.
    */
   <<__Native>>
-  public function acquire(): bool;
+  public function acquire()[write_props]: bool;
 
   /**
    * ( excerpt from
@@ -35,7 +35,7 @@ final class WeakRef<T> {
    * Returns the object pointed to by the weak reference.
    */
   <<__Native>>
-  public function get(): ?T;
+  public function get()[]: ?T;
 
   /**
    * ( excerpt from
@@ -45,7 +45,7 @@ final class WeakRef<T> {
    * reference back into a weak reference.
    */
   <<__Native>>
-  public function release(): bool;
+  public function release()[write_props]: bool;
 
   /**
    * ( excerpt from
@@ -54,5 +54,5 @@ final class WeakRef<T> {
    * Checks whether the object referenced still exists.
    */
   <<__Native>>
-  public function valid(): bool;
+  public function valid()[]: bool;
 }

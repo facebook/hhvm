@@ -67,7 +67,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function formatCurrency(float $value,
-                                 string $currency): string;
+                                 string $currency)[]: string;
 
   /**
    * Format a number
@@ -81,7 +81,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function format(mixed $value,
-                         int $type = NumberFormatter::TYPE_DEFAULT): mixed;
+                         int $type = NumberFormatter::TYPE_DEFAULT)[]: mixed;
 
   /**
    * Get an attribute
@@ -92,7 +92,7 @@ class NumberFormatter {
    * @return mixed - Return attribute value on success, or FALSE on error.
    */
   <<__Native>>
-  public function getAttribute(int $attr): mixed;
+  public function getAttribute(int $attr)[]: mixed;
 
   /**
    * Get formatter's last error code.
@@ -100,7 +100,7 @@ class NumberFormatter {
    * @return int - Returns error code from last formatter call.
    */
   <<__Native>>
-  public function getErrorCode(): int;
+  public function getErrorCode()[]: int;
 
   /**
    * Get formatter's last error message.
@@ -108,7 +108,7 @@ class NumberFormatter {
    * @return string - Returns error message from last formatter call.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage()[]: string;
 
   /**
    * Get formatter locale
@@ -120,7 +120,7 @@ class NumberFormatter {
    * @return string - The locale name used to create the formatter.
    */
   <<__Native>>
-  public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string;
+  public function getLocale(int $type = ULOC_ACTUAL_LOCALE)[]: string;
 
   /**
    * Get formatter pattern
@@ -129,7 +129,7 @@ class NumberFormatter {
    *   FALSE if an error happens.
    */
   <<__Native>>
-  public function getPattern(): string;
+  public function getPattern()[]: string;
 
   /**
    * Get a symbol value
@@ -140,7 +140,7 @@ class NumberFormatter {
    * @return string - The symbol string or FALSE on error.
    */
   <<__Native>>
-  public function getSymbol(int $attr): string;
+  public function getSymbol(int $attr)[]: string;
 
   /**
    * Get a text attribute
@@ -152,7 +152,7 @@ class NumberFormatter {
    *   error.
    */
   <<__Native>>
-  public function getTextAttribute(int $attr): string;
+  public function getTextAttribute(int $attr)[]: string;
 
   /**
    * Parse a currency number
@@ -207,7 +207,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function setAttribute(int $attr,
-                               mixed $value): bool;
+                               mixed $value)[]: bool;
 
   /**
    * Set formatter pattern
@@ -218,7 +218,7 @@ class NumberFormatter {
    * @return bool -
    */
   <<__Native>>
-  public function setPattern(string $pattern): bool;
+  public function setPattern(string $pattern)[]: bool;
 
   /**
    * Set a symbol value
@@ -231,7 +231,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function setSymbol(int $attr,
-                            string $value): bool;
+                            string $value)[]: bool;
 
   /**
    * Set a text attribute
@@ -244,7 +244,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function setTextAttribute(int $attr,
-                                   string $value): bool;
+                                   string $value)[]: bool;
 
 }
 

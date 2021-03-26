@@ -1088,6 +1088,8 @@ val dynamic_class_name_in_strict_mode : Pos.t -> unit
 
 val reading_from_append : Pos.t -> unit
 
+val list_rvalue : Pos.t -> unit
+
 val nullable_cast : Pos.t -> string -> Pos_or_decl.t -> unit
 
 val return_disposable_mismatch :

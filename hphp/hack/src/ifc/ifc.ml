@@ -1474,6 +1474,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   | A.List es ->
     let (env, ptys) = List.map_env env es ~f:expr in
     (env, Ttuple ptys)
+  | A.Tuple es ->
+    let (env, ptys) = List.map_env env es ~f:expr in
+    (env, Ttuple ptys)
   | A.Pipe ((_, dollardollar), e1, e2) ->
     let (env, t1) = expr env e1 in
     let dd_old = Env.get_local_type env dollardollar in

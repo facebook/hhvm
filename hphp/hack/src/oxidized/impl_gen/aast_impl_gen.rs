@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c12c88f3c774ecf2e6bf2b3ef2a7205>>
+// @generated SignedSource<<14c433bb557dfc30f31982ae351890fa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1020,6 +1020,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_readonly_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ReadonlyExpr(Box::new(p0))
     }
+    pub fn mk_tuple(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
+        Expr_::Tuple(p0)
+    }
     pub fn mk_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::List(p0)
     }
@@ -1288,6 +1291,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_readonly_expr(&self) -> bool {
         match self {
             Expr_::ReadonlyExpr(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_tuple(&self) -> bool {
+        match self {
+            Expr_::Tuple(..) => true,
             _ => false,
         }
     }
@@ -1621,6 +1630,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_readonly_expr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_tuple(&self) -> Option<&Vec<Expr<Ex, Fb, En, Hi>>> {
+        match self {
+            Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }
@@ -1994,6 +2009,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_readonly_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_tuple_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En, Hi>>> {
+        match self {
+            Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2372,6 +2393,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_readonly_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_tuple_into(self) -> Option<Vec<Expr<Ex, Fb, En, Hi>>> {
+        match self {
+            Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }

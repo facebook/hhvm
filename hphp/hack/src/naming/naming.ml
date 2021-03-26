@@ -2001,7 +2001,7 @@ and expr_ env p (e : Nast.expr_) =
     | [] ->
       Errors.naming_too_few_arguments p;
       N.Any
-    | el -> N.List (exprl env el))
+    | el -> N.Tuple (exprl env el))
   | Aast.Call ((p, Aast.Id f), tal, el, unpacked_element) ->
     N.Call
       ((p, N.Id f), targl env p tal, exprl env el, oexpr env unpacked_element)
@@ -2041,6 +2041,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.FunctionPointer _ -> N.Any
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
+  | Aast.Tuple el -> N.Tuple (exprl env el)
   | Aast.List el -> N.List (exprl env el)
   | Aast.Cast (ty, e2) ->
     let ((p, x), hl) =

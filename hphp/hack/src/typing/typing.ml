@@ -2065,6 +2065,16 @@ and expr_
         Env.get_local env x
     in
     make_result env p (Aast.Lvar id) ty
+  | Tuple el ->
+    let (env, expected) = expand_expected_and_get_node env expected in
+    let (env, tel, tyl) =
+      match expected with
+      | Some (pos, ur, _, Ttuple expected_tyl) ->
+        exprs_expected (pos, ur, expected_tyl) env el
+      | _ -> exprs env el
+    in
+    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
+    make_result env p (Aast.Tuple tel) ty
   | List el ->
     let (env, tel, tyl) =
       match valkind with

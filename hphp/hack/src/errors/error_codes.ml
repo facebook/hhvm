@@ -229,6 +229,7 @@ module NastCheck = struct
     | DynamicallyCallableReified [@value 3089]
     | IllegalContext [@value 3090]
     | InvalidConstFunAttribute [@value 3091]
+    | ListRvalue [@value 3092]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

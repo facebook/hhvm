@@ -1057,8 +1057,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | ValCollection(_) | Varray(_) | Xml(_)
-                        | Yield(_) => None,
+                        | Shape(_) | SmethodId(_) | Tuple(_) | ValCollection(_) | Varray(_)
+                        | Xml(_) | Yield(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(

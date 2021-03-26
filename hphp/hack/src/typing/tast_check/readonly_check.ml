@@ -210,6 +210,7 @@ let check =
       | String _
       | String2 _
       | Collection (_, _, _)
+      | Tuple _
       | Float _
       | PrefixedString _ ->
         Mut
@@ -613,6 +614,7 @@ let check =
       | (_, Class_get (_, _, _))
       | (_, Yield _)
       | (_, Await _)
+      | (_, Tuple _)
       | (_, List _)
       | (_, Cast (_, _))
       | (_, Unop (_, _))

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f784515d3a9eb7bd2dffe7420908fa8>>
+// @generated SignedSource<<099d50e73941ac2c44b6d005ab736fbf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -668,11 +668,12 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ///
     /// readonly $foo
     ReadonlyExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
+    /// Tuple expression.
+    ///
+    /// tuple("a", 1, $foo)
+    Tuple(&'a [&'a Expr<'a, Ex, Fb, En, Hi>]),
     /// List expression, only used in destructuring. Allows any arbitrary
     /// lvalue as a subexpression. May also nest.
-    ///
-    /// Note that tuple(1, 2) is lowered to a Call, but naming converts it to a List.
-    /// TODO: Define a separate AAST node for tuple.
     ///
     /// list($x, $y) = vec[1, 2];
     /// list(, $y) = vec[1, 2]; // skipping items

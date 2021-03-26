@@ -31,6 +31,7 @@ let visitor =
       Trait_reuse_check.handler;
       Enum_classes_check.handler;
       Enum_supertyping_check.handler;
+      List_rvalue_check.handler;
     ]
 
 let stateful_visitor ctx =

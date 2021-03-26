@@ -1549,6 +1549,10 @@ end = struct
       Fmt.(prefix (const string "list") @@ parens @@ list ~sep:comma pp_expr)
         ppf
         exprs
+    | Aast.Tuple exprs ->
+      Fmt.(prefix (const string "tuple") @@ parens @@ list ~sep:comma pp_expr)
+        ppf
+        exprs
     | Aast.Cast (hint, expr) ->
       Fmt.(pair ~sep:nop (parens @@ pp_hint ~is_ctx:false) pp_expr)
         ppf

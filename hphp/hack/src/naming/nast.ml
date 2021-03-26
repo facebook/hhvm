@@ -797,6 +797,7 @@ module Visitor_DEPRECATED = struct
         | Smethod_id (cid, pstr) -> this#on_smethod_id acc cid pstr
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
+        | Tuple el -> this#on_list acc el
         | List el -> this#on_list acc el
         | Clone e -> this#on_clone acc e
         | Obj_get (e1, e2, _, _) -> this#on_obj_get acc e1 e2

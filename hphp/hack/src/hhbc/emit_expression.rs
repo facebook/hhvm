@@ -510,6 +510,10 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             pos,
             "list() can only be used as an lvar. Did you mean to use tuple()?",
         )),
+        Expr_::Tuple(_) => {
+            unimplemented!("TODO: generate Tuple nodes in lowerer and update codegen")
+        }
+
         Expr_::Any => Err(unrecoverable("Cannot codegen from an Any node")),
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")

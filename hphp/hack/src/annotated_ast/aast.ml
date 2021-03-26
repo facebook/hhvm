@@ -461,12 +461,13 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Readonly expression.
 
           readonly $foo *)
+  | Tuple of ('ex, 'fb, 'en, 'hi) expr list
+      (** Tuple expression.
+
+          tuple("a", 1, $foo) *)
   | List of ('ex, 'fb, 'en, 'hi) expr list
       (** List expression, only used in destructuring. Allows any arbitrary
           lvalue as a subexpression. May also nest.
-
-          Note that tuple(1, 2) is lowered to a Call, but naming converts it to a List.
-          TODO: Define a separate AAST node for tuple.
 
           list($x, $y) = vec[1, 2];
           list(, $y) = vec[1, 2]; // skipping items

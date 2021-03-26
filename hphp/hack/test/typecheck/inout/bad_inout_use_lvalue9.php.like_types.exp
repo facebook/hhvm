@@ -8,3 +8,9 @@ Invalid argument (Typing[4110])
   Expected `~varray<int>` because it is an unenforceable type
   File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
   But got `(int, int)`
+File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+  Expected `(int, int)`
+  File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
+  But got `varray<int>`

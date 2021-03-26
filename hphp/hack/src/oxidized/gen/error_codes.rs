@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<04a82d5e576fa60ee5929faf3bd17f45>>
+// @generated SignedSource<<b765ec8c52fc7c1508f276e3d2183443>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -201,6 +201,7 @@ pub enum NastCheck {
     DynamicallyCallableReified = 3089,
     IllegalContext = 3090,
     InvalidConstFunAttribute = 3091,
+    ListRvalue = 3092,
 }
 impl TrivialDrop for NastCheck {}
 

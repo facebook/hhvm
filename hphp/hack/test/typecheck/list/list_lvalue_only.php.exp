@@ -1,0 +1,2 @@
+File "list_lvalue_only.php", line 5, characters 8-13:
+`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])

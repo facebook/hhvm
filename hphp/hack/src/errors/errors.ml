@@ -2026,6 +2026,12 @@ let reading_from_append pos =
     pos
     "Cannot use `[]` for reading"
 
+let list_rvalue pos =
+  add
+    (NastCheck.err_code NastCheck.ListRvalue)
+    pos
+    "`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`?"
+
 let inout_argument_bad_expr pos =
   add
     (NastCheck.err_code NastCheck.InoutArgumentBadExpr)

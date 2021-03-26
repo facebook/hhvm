@@ -269,11 +269,10 @@ bool canDCE(IRInstruction* inst) {
   case Select:
   case LdARFlags:
   case FuncHasAttr:
+  case ClassHasAttr:
   case IsFunReifiedGenericsMatched:
-  case IsClsDynConstructible:
   case LdFuncRequiredCoeffects:
   case FuncHasCoeffectRules:
-  case ClsHasClosureCoeffectsProp:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:

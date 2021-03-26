@@ -142,6 +142,11 @@ enum Attr {
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //
+  // Set on closure classes                                            //
+  AttrIsClosureClass       = (1u << 24), //    X  |          |         //
+  // Set on closure classes that use a property to store required coeffects
+  AttrHasClosureCoeffectsProp                                          //
+                           = (1u << 25), //    X  |          |         //
   // Indicates that this property was declared as readonly             //
   AttrIsReadOnly           = (1u << 26), //       |    X     |         //
                                          //       |          |         //

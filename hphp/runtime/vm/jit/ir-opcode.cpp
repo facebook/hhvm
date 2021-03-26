@@ -553,7 +553,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckTypeMem:
   case CheckVecBounds:
   case ChrInt:
-  case ClsHasClosureCoeffectsProp:
+  case ClassHasAttr:
   case CmpBool:
   case CmpDbl:
   case CmpInt:
@@ -702,7 +702,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InterfaceSupportsStr:
   case InterpOneCF:
   case IsCol:
-  case IsClsDynConstructible:
   case IsFunReifiedGenericsMatched:
   case IsNType:
   case IsNTypeMem:

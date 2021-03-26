@@ -2400,16 +2400,20 @@ struct EnterTCUnwindData : IRExtraData {
 };
 
 /*
- * Func attributes
+ * Func/Class/Prop attributes
  */
 struct AttrData : IRExtraData {
-  explicit AttrData(int32_t attr) : attr(attr) {}
+  explicit AttrData(Attr attr) : attr(static_cast<int32_t>(attr)) {}
 
   std::string show() const {
     return folly::format("{}", attr).str();
   }
 
   size_t stableHash() const {
+    return std::hash<int32_t>()(attr);
+  }
+
+  size_t hash() const {
     return std::hash<int32_t>()(attr);
   }
 
@@ -2754,6 +2758,7 @@ X(VerifyPropCoerce,             TypeConstraintData);
 X(EndCatch,                     EndCatchData);
 X(EnterTCUnwind,                EnterTCUnwindData);
 X(FuncHasAttr,                  AttrData);
+X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);
 X(LdRecDescCached,              RecNameData);
 X(LdRecDescCachedSafe,          RecNameData);

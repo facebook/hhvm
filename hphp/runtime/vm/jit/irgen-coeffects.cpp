@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/coeffects.h"
 
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
@@ -83,15 +84,16 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     return cond(
       env,
       [&] (Block* taken) {
-        // TODO: Checking for invoke method is not enough to identify closure
-        // Add AttrIsClosure and AttrHasClosureCoeffectsProp
-        return gen(env, LdObjInvoke, taken, cls);
+        auto const data = AttrData { AttrIsClosureClass };
+        auto const success = gen(env, ClassHasAttr, data, cls);
+        gen(env, JmpZero, taken, success);
       },
-      [&] (SSATmp* invoke) {
+      [&] {
         return cond(
           env,
           [&] (Block* taken) {
-            auto const success = gen(env, ClsHasClosureCoeffectsProp, cls);
+            auto const data = AttrData { AttrHasClosureCoeffectsProp };
+            auto const success = gen(env, ClassHasAttr, data, cls);
             gen(env, JmpZero, taken, success);
           },
           [&] {
@@ -102,6 +104,8 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
           },
           [&] {
             // Statically known coeffects
+            auto const unreachable = makeUnreachable(env, ASSERT_REASON);
+            auto const invoke = gen(env, LdObjInvoke, unreachable, cls);
             return gen(env, LdFuncRequiredCoeffects, invoke);
           }
         );

@@ -308,6 +308,16 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
     return val(rate).num;
   }();
 
+  auto const invoke = lookupMethod(s_invoke.get());
+  if (invoke && invoke->isClosureBody) {
+    attrs |= AttrIsClosureClass;
+    if (!invoke->coeffectRules.empty()) {
+      assertx(invoke->coeffectRules.size() == 1);
+      assertx(invoke->coeffectRules[0].isClosureInheritFromParent());
+      attrs |= AttrHasClosureCoeffectsProp;
+    }
+  }
+
   assertx(attrs & AttrPersistent || SystemLib::s_inited);
 
   auto pc = std::make_unique<PreClass>(
@@ -366,26 +376,21 @@ PreClass* PreClassEmitter::create(Unit& unit, bool saveLineTable) const {
   pc->m_methods.create(methodBuild);
 
   PreClass::PropMap::Builder propBuild;
-  auto const invoke = lookupMethod(s_invoke.get());
-  if (invoke && invoke->isClosureBody) {
-    if (!invoke->coeffectRules.empty()) {
-      assertx(invoke->coeffectRules.size() == 1);
-      assertx(invoke->coeffectRules[0].isClosureInheritFromParent());
-      TypedValue tvInit;
-      tvWriteUninit(tvInit);
+  if (pc->attrs() & AttrHasClosureCoeffectsProp) {
+    TypedValue tvInit;
+    tvWriteUninit(tvInit);
 
-      propBuild.add(s_coeffectsProp.get(), PreClass::Prop(pc.get(),
-        s_coeffectsProp.get(),
-        AttrPrivate|AttrSystemInitialValue,
-        staticEmptyString(),
-        TypeConstraint(),
-        CompactVector<TypeConstraint>{},
-        staticEmptyString(),
-        tvInit,
-        RepoAuthType{},
-        UserAttributeMap{}
-      ));
-    }
+    propBuild.add(s_coeffectsProp.get(), PreClass::Prop(pc.get(),
+      s_coeffectsProp.get(),
+      AttrPrivate|AttrSystemInitialValue,
+      staticEmptyString(),
+      TypeConstraint(),
+      CompactVector<TypeConstraint>{},
+      staticEmptyString(),
+      tvInit,
+      RepoAuthType{},
+      UserAttributeMap{}
+    ));
   }
   for (unsigned i = 0; i < m_propMap.size(); ++i) {
     const Prop& prop = m_propMap[i];

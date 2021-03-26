@@ -328,7 +328,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case CheckMissingKeyInArrLike:
   case LdFuncRequiredCoeffects:
   case FuncHasCoeffectRules:
-  case ClsHasClosureCoeffectsProp:
+  case FuncHasAttr:
+  case ClassHasAttr:
     return true;
 
   case EqArrLike:

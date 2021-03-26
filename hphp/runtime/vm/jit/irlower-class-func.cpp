@@ -233,17 +233,14 @@ void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
-void cgIsClsDynConstructible(IRLS& env, const IRInstruction* inst) {
+void cgClassHasAttr(IRLS& env, const IRInstruction* inst) {
   auto const cls = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
+  auto const attr = inst->extra<AttrData>()->attr;
 
+  auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testlim{
-    static_cast<int32_t>(AttrDynamicallyConstructible),
-    cls[Class::attrCopyOff()],
-    sf
-  };
+  v << testlim{attr, cls[Class::attrCopyOff()], sf};
   v << setcc{CC_NZ, sf, dst};
 }
 
@@ -255,10 +252,6 @@ bool hasCoeffectRulesHelper(const Func* f) {
   return f->hasCoeffectRules();
 }
 
-bool clsHasClosureCoeffectsPropHelper(const Class* c) {
-  return c->hasClosureCoeffectsProp();
-}
-
 } // namespace
 
 void cgFuncHasCoeffectRules(IRLS& env, const IRInstruction* inst) {
@@ -267,14 +260,6 @@ void cgFuncHasCoeffectRules(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0);
   auto const target = CallSpec::direct(hasCoeffectRulesHelper);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
-}
-
-void cgClsHasClosureCoeffectsProp(IRLS& env, const IRInstruction* inst) {
-  // TODO: Optimize by using cgFuncHasCoeffectRules in non debug mode
-  auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0);
-  auto const target = CallSpec::direct(clsHasClosureCoeffectsPropHelper);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 

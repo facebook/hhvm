@@ -949,7 +949,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
     return cond(
         env,
         [&] (Block* taken) {
-          auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+          auto const attr = AttrData { AttrIsMethCaller };
           auto isMC = gen(env, FuncHasAttr, attr, value);
           gen(env, JmpZero, taken, isMC);
         },
@@ -1103,11 +1103,7 @@ SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
   if (value->isA(TFunc)) {
-    return gen(
-      env,
-      FuncHasAttr,
-      AttrData {static_cast<int32_t>(AttrIsMethCaller)},
-      value);
+    return gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, value);
   }
   if (value->isA(TObj)) {
     auto const mcCls = Class::lookup(s_meth_caller_cls.get());

@@ -350,6 +350,13 @@ SSATmp* simplifyFuncHasAttr(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
+SSATmp* simplifyClassHasAttr(State& env, const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  return clsTmp->hasConstVal(TCls)
+    ? cns(env, (clsTmp->clsVal()->attrs() & inst->extra<AttrData>()->attr))
+    : nullptr;
+}
+
 SSATmp* simplifyFuncHasCoeffectRules(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -357,27 +364,10 @@ SSATmp* simplifyFuncHasCoeffectRules(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
-SSATmp* simplifyClsHasClosureCoeffectsProp(State& env,
-                                           const IRInstruction* inst) {
-  auto const clsTmp = inst->src(0);
-  if (!clsTmp->hasConstVal(TCls)) return nullptr;
-  auto const cls = clsTmp->clsVal();
-  // cls->hasClosureCoeffectsProp() requires the class to be closure class
-  if (cls->parent() != c_Closure::classof()) return nullptr;
-  return cns(env, cls->hasClosureCoeffectsProp());
-}
-
 SSATmp* simplifyLdFuncRequiredCoeffects(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
     ? cns(env, (funcTmp->funcVal()->requiredCoeffects().value()))
-    : nullptr;
-}
-
-SSATmp* simplifyIsClsDynConstructible(State& env, const IRInstruction* inst) {
-  auto const clsTmp = inst->src(0);
-  return clsTmp->hasConstVal(TCls)
-    ? cns(env, clsTmp->clsVal()->isDynamicallyConstructible())
     : nullptr;
 }
 
@@ -3782,10 +3772,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdVecElem)
       X(MethodExists)
       X(FuncHasAttr)
+      X(ClassHasAttr)
       X(FuncHasCoeffectRules)
-      X(ClsHasClosureCoeffectsProp)
       X(LdFuncRequiredCoeffects)
-      X(IsClsDynConstructible)
       X(LdObjClass)
       X(LdObjInvoke)
       X(Mov)

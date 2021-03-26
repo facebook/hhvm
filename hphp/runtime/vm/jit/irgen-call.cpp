@@ -132,11 +132,8 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
     ifElse(
       env,
       [&] (Block* skip) {
-        auto const dynCallable = gen(
-          env,
-          FuncHasAttr,
-          AttrData {static_cast<int32_t>(AttrDynamicallyCallable)},
-          callee);
+        auto const data = AttrData { AttrDynamicallyCallable };
+        auto const dynCallable = gen(env, FuncHasAttr, data, callee);
         gen(env, JmpNZero, skip, dynCallable);
       },
       [&] {
@@ -895,7 +892,7 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
     env,
     [&] (Block* taken) {
       gen(env, CheckNonNull, taken, gen(env, LdFuncCls, func));
-      auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+      auto const attr = AttrData { AttrIsMethCaller };
       gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, func));
     },
     [&] { // next, attrs & IsMethCaller == 0 && Func has Cls
@@ -1129,7 +1126,8 @@ void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   ifElse(
     env,
     [&] (Block* skip) {
-      auto const dynConstructible = gen(env, IsClsDynConstructible, cls);
+      auto const data = AttrData { AttrDynamicallyConstructible };
+      auto const dynConstructible = gen(env, ClassHasAttr, data, cls);
       gen(env, JmpNZero, skip, dynConstructible);
     },
     [&] {

@@ -1,6 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded('intl')) die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '49') < 0) die('skip for ICU >= 49');
-if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1');
-}

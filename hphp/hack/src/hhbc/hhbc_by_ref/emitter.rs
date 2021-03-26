@@ -132,9 +132,8 @@ impl<'arena> Emitter<'arena> {
     pub fn emit_global_state(&self) -> &GlobalState {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
-    pub fn emit_global_state_mut(&mut self, alloc: &'arena bumpalo::Bump) -> &mut GlobalState {
-        self.global_state_
-            .get_or_insert_with(|| GlobalState::init(alloc))
+    pub fn emit_global_state_mut(&mut self) -> &mut GlobalState {
+        self.global_state_.get_or_insert_with(GlobalState::init)
     }
     pub fn into_global_emit_state(self) -> GlobalState {
         self.global_state_.expect("uninit'd global_state")

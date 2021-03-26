@@ -9,23 +9,23 @@ use oxidized::{
     pos::Pos,
 };
 
-struct RewriteXmlVisitor<'arena> {
-    phantom: std::marker::PhantomData<&'arena ()>,
+struct RewriteXmlVisitor<'emitter, 'arena> {
+    phantom: std::marker::PhantomData<&'emitter &'arena ()>,
 }
 
-struct Ctx<'arena> {
+struct Ctx<'emitter, 'arena> {
     alloc: &'arena bumpalo::Bump,
-    emitter: &'arena mut Emitter<'arena>,
+    emitter: &'emitter mut Emitter<'arena>,
 }
 
-impl<'ast, 'arena> VisitorMut<'ast> for RewriteXmlVisitor<'arena> {
-    type P = AstParams<Ctx<'arena>, hhbc_by_ref_instruction_sequence::Error>;
+impl<'ast, 'arena, 'emitter> VisitorMut<'ast> for RewriteXmlVisitor<'emitter, 'arena> {
+    type P = AstParams<Ctx<'emitter, 'arena>, hhbc_by_ref_instruction_sequence::Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'arena>, e: &'ast mut tast::Expr) -> Result<()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'emitter, 'arena>, e: &'ast mut tast::Expr) -> Result<()> {
         let tast::Expr(pos, expr) = e;
         let alloc = &c.alloc;
         let emitter = &mut c.emitter;
@@ -37,15 +37,15 @@ impl<'ast, 'arena> VisitorMut<'ast> for RewriteXmlVisitor<'arena> {
     }
 }
 
-pub fn rewrite_xml<'p, 'arena>(
+pub fn rewrite_xml<'p, 'arena, 'emitter>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &'arena mut Emitter<'arena>,
+    emitter: &'emitter mut Emitter<'arena>,
     prog: &'p mut tast::Program,
 ) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
-    let mut c: Ctx<'arena> = Ctx { alloc, emitter };
+    let mut c: Ctx<'emitter, 'arena> = Ctx { alloc, emitter };
 
     visit_mut(&mut xml_visitor, &mut c, prog)
 }

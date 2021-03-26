@@ -85,6 +85,21 @@ where
     }
 }
 
+impl<P: Params, T> Node<P> for &[T]
+where
+    T: Node<P>,
+{
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        Ok(for i in *self {
+            i.accept(c, v)?;
+        })
+    }
+}
+
 impl<P: Params, T> Node<P> for Vec<T>
 where
     T: Node<P>,

@@ -24,7 +24,6 @@ use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_options::{HhvmFlags, Options};
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{members, user_attributes as ua};
-use ocamlrep::rc::RcOc;
 use oxidized::{ast as T, pos::Pos};
 
 use std::convert::TryInto;

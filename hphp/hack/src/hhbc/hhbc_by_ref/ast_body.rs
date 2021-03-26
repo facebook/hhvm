@@ -5,4 +5,4 @@
 use itertools::Either;
 use oxidized::ast::*;
 
-pub type AstBody<'a> = Either<&'a Program, &'a Block>;
+pub type AstBody<'a> = Either<&'a [Def], &'a [Stmt]>;

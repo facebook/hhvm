@@ -1484,20 +1484,24 @@ Slot Class::getCoeffectsProp() const {
 
 const StaticString s_classname("classname");
 
-RuntimeCoeffects Class::clsCtxCnsGet(const StringData* name) const {
+folly::Optional<RuntimeCoeffects>
+Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   auto const slot = m_constants.findIndex(name);
 
   if (slot == kInvalidSlot) {
+    if (!failIsFatal) return folly::none;
     // TODO: Once coeffect migration is done, convert this back to raise_error
     raise_warning("Context constant %s does not exist", name->data());
     return RuntimeCoeffects::full();
   }
   auto const& cns = m_constants[slot];
   if (cns.kind() != ConstModifiers::Kind::Context) {
+    if (!failIsFatal) return folly::none;
     raise_error("%s is a %s, looking for a context constant",
                 name->data(), ConstModifiers::show(cns.kind()));
   }
   if (cns.isAbstract()) {
+    if (!failIsFatal) return folly::none;
     // TODO: Once coeffect migration is done, convert this back to raise_error
     raise_warning("Context constant %s is abstract", name->data());
     return RuntimeCoeffects::full();

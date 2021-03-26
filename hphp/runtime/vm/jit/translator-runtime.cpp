@@ -686,7 +686,7 @@ TypedValue lookupClsCns(const Class* cls, const StringData* cnsName) {
 }
 
 int lookupClsCtxCns(const Class* cls, const StringData* cnsName) {
-  return cls->clsCtxCnsGet(cnsName).value();
+  return cls->clsCtxCnsGet(cnsName, true)->value();
 }
 
 bool methodExistsHelper(Class* cls, StringData* meth) {

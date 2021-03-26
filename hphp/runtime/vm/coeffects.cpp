@@ -121,7 +121,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
                                paramIdx + 1));
   }
   auto const cls = tv->m_data.pobj->getVMClass();
-  return cls->clsCtxCnsGet(name);
+  return *cls->clsCtxCnsGet(name, true);
 }
 
 RuntimeCoeffects emitCCThis(const Func* f, const StringData* name,
@@ -131,7 +131,7 @@ RuntimeCoeffects emitCCThis(const Func* f, const StringData* name,
   auto const cls = f->isStatic()
     ? reinterpret_cast<Class*>(prologueCtx)
     : reinterpret_cast<ObjectData*>(prologueCtx)->getVMClass();
-  return cls->clsCtxCnsGet(name);
+  return *cls->clsCtxCnsGet(name, true);
 }
 
 RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,

@@ -364,6 +364,15 @@ SSATmp* simplifyLdFuncRequiredCoeffects(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
+SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  auto const nameTmp = inst->src(1);
+  if (!clsTmp->hasConstVal(TCls) || !nameTmp->hasConstVal(TStr)) return nullptr;
+  auto const result = clsTmp->clsVal()->clsCtxCnsGet(nameTmp->strVal(), false);
+  if (!result) return nullptr; // we will raise warning/error
+  return cns(env, result->value());
+}
+
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   if (inst->src(0)->inst()->is(LdClsName)) return inst->src(0)->inst()->src(0);
   return nullptr;
@@ -3767,6 +3776,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(FuncHasAttr)
       X(ClassHasAttr)
       X(LdFuncRequiredCoeffects)
+      X(LookupClsCtxCns)
       X(LdObjClass)
       X(LdObjInvoke)
       X(Mov)

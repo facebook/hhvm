@@ -1,5 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (!is_executable('/bin/sleep')) echo 'skip sleep not found';
+  if (!is_executable('/bin/sleep')) echo 'skip sleep not found';
 }

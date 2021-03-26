@@ -1977,7 +1977,7 @@ function child_main(
   string $json_results_file,
 ): int {
   foreach ($tests as $test) {
-    run_and_lock_test($options, $test);
+    run_and_log_test($options, $test);
   }
   file_put_contents($json_results_file, json_encode(Status::getResults()));
   foreach (Status::getResults() as $result) {
@@ -2565,53 +2565,29 @@ function run_foreach_config(
   return $result;
 }
 
-function run_and_lock_test($options, $test) {
+function run_and_log_test($options, $test) {
   $stime = time();
   $time = microtime(true);
-  $failmsg = "";
-  $status = false;
-  $lock = fopen($test, 'r');
-  $wouldblock = false;
-  if (!$lock || !flock($lock, LOCK_EX, inout $wouldblock)) {
-    $failmsg = "Failed to lock test";
-    if ($lock) fclose($lock);
-    $lock = null;
-  } else {
-    $status = run_test($options, $test);
-  }
+  $status = run_test($options, $test);
   $time = microtime(true) - $time;
   $etime = time();
-  if ($lock) {
-    if ($status) {
-      clean_intermediate_files($test, $options);
-    } else if ($failmsg === '') {
-      $failmsg = Status::diffForTest($test);
-      if (!$failmsg) $failmsg = "Test failed with empty diff";
-    }
-    if (!flock($lock, LOCK_UN, inout $wouldblock)) {
-      if ($failmsg !== '') $failmsg .= "\n";
-      $failmsg .= "Failed to release test lock";
-      $status = false;
-    }
-    if (!fclose($lock)) {
-      if ($failmsg !== '') $failmsg .= "\n";
-      $failmsg .= "Failed to close lock file";
-      $status = false;
-    }
-  }
+
   if ($status === false) {
-    invariant($failmsg !== '', "test failed with empty failmsg");
-    Status::fail($test, $time, $stime, $etime, $failmsg);
+    $diff = Status::diffForTest($test);
+    if ($diff === '') {
+      $diff = 'Test failed with empty diff';
+    }
+    Status::fail($test, $time, $stime, $etime, $diff);
   } else if ($status === true) {
-    invariant($failmsg === '', "test passed with non-empty failmsg $failmsg");
     Status::pass($test, $time, $stime, $etime);
+    clean_intermediate_files($test, $options);
   } else if ($status is string) {
     invariant(
       preg_match('/^skip-[\w-]+$/', $status),
       "invalid skip status $status"
     );
-    invariant($failmsg === '', "test skipped with non-empty failmsg $failmsg");
     Status::skip($test, substr($status, 5), $time, $stime, $etime);
+    clean_intermediate_files($test, $options);
   } else {
     invariant_violation("invalid status type " . gettype($status));
   }

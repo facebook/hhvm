@@ -32,17 +32,9 @@ bool same_arrays(const Array& a1, const Array& a2) {
   return a1->same(a2.get());
 }
 
-struct ArrayTest : ::testing::Test {
- protected:
-  void SetUp() override {
-    RO::EvalHackArrDVArrs = false;
-  }
-  void TearDown() override {}
-};
-
 }
 
-TEST_F(ArrayTest, Constructors) {
+TEST(Array, Constructors) {
   const String s_name("name");
 
   Array arr;
@@ -50,22 +42,27 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.size() == 0);
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(arr.isNull());
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
+  EXPECT_FALSE(arr.isDict());
+  EXPECT_FALSE(arr.isVec());
+  EXPECT_FALSE(arr.isKeyset());
 
   arr = Array::Create();
   EXPECT_TRUE(arr.empty());
   EXPECT_TRUE(arr.size() == 0);
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
+  EXPECT_TRUE(arr.isDict());
+  EXPECT_FALSE(arr.isVec());
+  EXPECT_FALSE(arr.isKeyset());
 
   arr = Array::CreatePHPArray();
   arr.append(1);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
+  EXPECT_TRUE(arr.isDict());
+  EXPECT_FALSE(arr.isVec());
+  EXPECT_FALSE(arr.isKeyset());
 
   arr = make_varray(0);
   EXPECT_TRUE(!arr.empty());
@@ -73,8 +70,9 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr[0].toInt32() == 0);
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
+  EXPECT_TRUE(arr.isVec());
+  EXPECT_FALSE(arr.isDict());
+  EXPECT_FALSE(arr.isKeyset());
 
   arr = make_varray("test");
   EXPECT_TRUE(!arr.empty());
@@ -82,8 +80,9 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(equal(arr[0], String("test")));
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
+  EXPECT_TRUE(arr.isVec());
+  EXPECT_FALSE(arr.isDict());
+  EXPECT_FALSE(arr.isKeyset());
 
   Array arrCopy = arr;
   arr = make_varray(arrCopy);
@@ -93,8 +92,9 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr[0].toArray().size() == 1);
   EXPECT_TRUE(equal(arr[0], arrCopy));
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
+  EXPECT_TRUE(arr.isVec());
+  EXPECT_FALSE(arr.isDict());
+  EXPECT_FALSE(arr.isKeyset());
 
   arr = Array::CreateVec();
   EXPECT_TRUE(arr.empty());
@@ -102,10 +102,8 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isVec());
-  EXPECT_TRUE(arr.isHackArray());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
-  EXPECT_FALSE(arr.isPHPArray());
 
   arr = Array::CreateDict();
   EXPECT_TRUE(arr.empty());
@@ -113,10 +111,8 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isDict());
-  EXPECT_TRUE(arr.isHackArray());
   EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
-  EXPECT_FALSE(arr.isPHPArray());
 
   arr = Array::CreateKeyset();
   EXPECT_TRUE(arr.empty());
@@ -124,13 +120,11 @@ TEST_F(ArrayTest, Constructors) {
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isKeyset());
-  EXPECT_TRUE(arr.isHackArray());
   EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
-  EXPECT_FALSE(arr.isPHPArray());
 }
 
-TEST_F(ArrayTest, Iteration) {
+TEST(Array, Iteration) {
   Array arr = make_map_array("n1", "v1", "n2", "v2");
   int i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
@@ -184,7 +178,7 @@ TEST_F(ArrayTest, Iteration) {
   EXPECT_TRUE(i == 2);
 }
 
-TEST_F(ArrayTest, Conversions) {
+TEST(Array, Conversions) {
   const String s_Vec("Vec");
   const String s_Dict("Dict");
   const String s_Keyset("Keyset");
@@ -258,7 +252,7 @@ TEST_F(ArrayTest, Conversions) {
   EXPECT_TRUE(keyset1.toDouble() == 1.0);
 }
 
-TEST_F(ArrayTest, Offsets) {
+TEST(Array, Offsets) {
   const String s_n1("n1");
   const String s_n2("n2");
   const String s_1("1");
@@ -372,7 +366,7 @@ TEST_F(ArrayTest, Offsets) {
   }
 }
 
-TEST_F(ArrayTest, Membership) {
+TEST(Array, Membership) {
   const String s_n1("n1");
   const String s_n2("n2");
   const String s_name("name");
@@ -506,7 +500,7 @@ TEST_F(ArrayTest, Membership) {
   }
 }
 
-TEST_F(ArrayTest, IsVectorData) {
+TEST(Array, IsVectorData) {
   {
     Array arr = make_map_array(0, "a", 1, "b");
     EXPECT_TRUE(arr->isVectorData());

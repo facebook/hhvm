@@ -254,16 +254,11 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     };
 
     auto const base = type.unspecialize();
-    if (base == TArrLike)       return cmp(KindOfKeyset, CC_BE);
-    if (type == (TVArr|TDArr))  return cmp(KindOfVArray, CC_BE);
-    if (type == TNull)          return cmp(KindOfUninit, CC_AE);
     if (type == TStaticStr)     return test(KindOfString);
     if (type.isKnownDataType()) return test(type.toDataType());
-
-    if (type == (TVec|TDict)) {
-      always_assert(RO::EvalHackArrDVArrs);
-      return cmp(KindOfVec, CC_BE);
-    }
+    if (base == TArrLike)       return cmp(KindOfKeyset, CC_BE);
+    if (type == (TVec|TDict))   return cmp(KindOfVec, CC_BE);
+    if (type == TNull)          return cmp(KindOfUninit, CC_AE);
 
     if (type == TUncountedInit) {
       auto const rtype = emitGetTVType(v, typeSrc);

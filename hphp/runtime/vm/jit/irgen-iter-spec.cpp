@@ -267,8 +267,6 @@ void logArrayIterProfile(
 
 Type getArrType(IterSpecialization specialization) {
   switch (specialization.base_type) {
-    case IterSpecialization::Packed: return TVArr;
-    case IterSpecialization::Mixed:  return TDArr;
     case IterSpecialization::Vec:    return TVec;
     case IterSpecialization::Dict:   return TDict;
   }
@@ -435,7 +433,7 @@ struct BespokeAccessor : public Accessor {
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     auto const result = gen(env, CheckType, exit, arr_type, base);
-    if (result->isA(TDArr|TDict)) {
+    if (result->isA(TDict)) {
       auto const size = gen(env, Count, result);
       auto const used = gen(env, BespokeIterEnd, result);
       auto const same = gen(env, EqInt, size, used);
@@ -474,11 +472,9 @@ std::unique_ptr<Accessor> getAccessor(
     return std::make_unique<BespokeAccessor>(type, layout);
   }
   switch (type.base_type) {
-    case IterSpecialization::Packed:
     case IterSpecialization::Vec: {
       return std::make_unique<PackedAccessor>(type);
     }
-    case IterSpecialization::Mixed:
     case IterSpecialization::Dict: {
       return std::make_unique<MixedAccessor>(type);
     }

@@ -86,7 +86,7 @@ Type Type::narrowToLayout(ArrayLayout layout) const {
 
 const ArrayData* Type::arrLikeVal() const {
   assertx(hasConstVal(TArrLike));
-  assertx(subtypeOfAny(TArr, TVec, TDict, TKeyset));
+  assertx(subtypeOfAny(TVec, TDict, TKeyset));
   return reinterpret_cast<const ArrayData*>(m_extra);
 }
 
@@ -572,14 +572,10 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfPersistentVec    : return kPersistentVec;
     case KindOfPersistentDict   : return kPersistentDict;
     case KindOfPersistentKeyset : return kPersistentKeyset;
-    case KindOfPersistentDArray : return kPersistentDArr;
-    case KindOfPersistentVArray : return kPersistentVArr;
 
     case KindOfVec              : return kVec;
     case KindOfDict             : return kDict;
     case KindOfKeyset           : return kKeyset;
-    case KindOfDArray           : return kDArr;
-    case KindOfVArray           : return kVArr;
 
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
@@ -590,6 +586,12 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
     case KindOfRecord           : return kRecord;
+
+    case KindOfPersistentDArray:
+    case KindOfPersistentVArray:
+    case KindOfDArray:
+    case KindOfVArray:
+      always_assert(false);
   }
   not_reached();
 }
@@ -607,10 +609,6 @@ DataType Type::toDataType() const {
   if (*this <= TDbl)         return KindOfDouble;
   if (*this <= TPersistentStr) return KindOfPersistentString;
   if (*this <= TStr)         return KindOfString;
-  if (*this <= TPersistentVArr) return KindOfPersistentVArray;
-  if (*this <= TVArr)         return KindOfVArray;
-  if (*this <= TPersistentDArr) return KindOfPersistentDArray;
-  if (*this <= TDArr)         return KindOfDArray;
   if (*this <= TPersistentVec) return KindOfPersistentVec;
   if (*this <= TVec)         return KindOfVec;
   if (*this <= TPersistentDict) return KindOfPersistentDict;
@@ -660,8 +658,6 @@ Type Type::specialize(TypeSpec spec) const {
 
 Type Type::modified() const {
   auto t = unspecialize();
-  if (t.maybe(TVArr))   t |= TVArr;
-  if (t.maybe(TDArr))   t |= TDArr;
   if (t.maybe(TVec))    t |= TVec;
   if (t.maybe(TDict))   t |= TDict;
   if (t.maybe(TKeyset)) t |= TKeyset;
@@ -1095,17 +1091,12 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
 
     // If these have specializations, its not clear which type to
     // apply them to. Ignore them for now.
-    case T::SArrLike:       return TStaticVec | TStaticVArr | TStaticDict |
-                                   TStaticDArr | TStaticKeyset;
-    case T::ArrLike:        return TVec | TVArr | TDict | TDArr | TKeyset;
-    case T::OptSArrLike:    return TStaticVec | TStaticVArr | TStaticDict |
-                                   TStaticDArr | TStaticKeyset | TInitNull;
-    case T::OptArrLike:     return TVec | TVArr | TDict | TDArr |
-                                   TKeyset | TInitNull;
-    case T::ArrLikeCompat:  return TVec | TVArr | TDict | TDArr |
-                                   TKeyset | TClsMeth;
-    case T::OptArrLikeCompat: return TVec | TVArr | TDict | TDArr |
-                                   TKeyset | TClsMeth | TInitNull;
+    case T::ArrLike:          return TArrLike;
+    case T::OptArrLike:       return TArrLike | TInitNull;
+    case T::SArrLike:         return TStaticArrLike;
+    case T::OptSArrLike:      return TStaticArrLike | TInitNull;
+    case T::ArrLikeCompat:    return TArrLike | TClsMeth;
+    case T::OptArrLikeCompat: return TArrLike | TClsMeth | TInitNull;
 
 #undef X
 
@@ -1207,9 +1198,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Nonnull:    return TInitCell - TInitNull;
       case A::Number:     return TInt | TDbl;
       case A::ArrayKey:   return TInt | TStr;
-      case A::VArray:     return TVArr;
-      case A::DArray:     return TDArr;
-      case A::VArrOrDArr: return TVArr | TDArr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::Classname:  return TStr | TCls | TLazyCls;
@@ -1223,6 +1211,9 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Self:
       case A::Parent:
       case A::Callable:
+      case A::VArray:
+      case A::DArray:
+      case A::VArrOrDArr:
         break;
     }
     always_assert(false);
@@ -1277,8 +1268,6 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   auto tmp = srcType - typeParam;
   if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
-    if (tmp.maybe(TCountedVArr)) tmp |= TVArr;
-    if (tmp.maybe(TCountedDArr)) tmp |= TDArr;
     if (tmp.maybe(TCountedVec)) tmp |= TVec;
     if (tmp.maybe(TCountedDict)) tmp |= TDict;
     if (tmp.maybe(TCountedKeyset)) tmp |= TKeyset;
@@ -1338,12 +1327,9 @@ Type relaxToGuardable(Type ty) {
 
   // We don't support guarding on counted-ness or static-ness, so widen
   // subtypes of any maybe-countable types to the full type.
-  if (ty <= TVArr) return TVArr;
-  if (ty <= TDArr) return TDArr;
   if (ty <= TVec) return TVec;
   if (ty <= TDict) return TDict;
   if (ty <= TKeyset) return TKeyset;
-
   if (ty <= TArrLike) return TArrLike;
 
   // We can guard on StaticStr but not CountedStr.

@@ -62,10 +62,9 @@ void emitClassGetC(IRGS& env) {
 }
 
 void emitClassGetTS(IRGS& env) {
-  auto const required_ts_type = RO::EvalHackArrDVArrs ? TDict : TDArr;
   auto const ts = topC(env);
-  if (!ts->isA(required_ts_type)) {
-    if (ts->type().maybe(required_ts_type)) {
+  if (!ts->isA(TDict)) {
+    if (ts->type().maybe(TDict)) {
       PUNT(ClassGetTS-UnguardedTS);
     } else {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
@@ -274,83 +273,11 @@ void emitClassName(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCastVArray(IRGS& env) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-
-  auto const src = popC(env);
-
-  auto const raise = [&](const char* type) {
-    gen(
-      env,
-      ThrowInvalidOperation,
-      cns(
-        env,
-        makeStaticString(folly::sformat("{} to varray conversion", type))
-      )
-    );
-    return cns(env, TBottom);
-  };
-
-  push(
-    env,
-    [&] {
-      if (src->isA(TVArr))   return src;
-      if (src->isA(TArrLike)) return gen(env, ConvArrLikeToVArr, src);
-      if (src->isA(TClsMeth)) {
-        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
-        return gen(env, ConvClsMethToVArr, src);
-      }
-      if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
-      if (src->isA(TRecord)) PUNT(CastVArrayRecord); // TODO: T53309767
-      if (src->isA(TNull))   return raise("Null");
-      if (src->isA(TBool))   return raise("Bool");
-      if (src->isA(TInt))    return raise("Int");
-      if (src->isA(TDbl))    return raise("Double");
-      if (src->isA(TStr))    return raise("String");
-      if (src->isA(TFunc))   return raise("Func");
-      if (src->isA(TRes))    return raise("Resource");
-      PUNT(CastVArrayUnknown);
-    }()
-  );
+  always_assert(false);
 }
 
 void emitCastDArray(IRGS& env) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-
-  auto const src = popC(env);
-
-  auto const raise = [&](const char* type) {
-    gen(
-      env,
-      ThrowInvalidOperation,
-      cns(
-        env,
-        makeStaticString(folly::sformat("{} to darray conversion", type))
-      )
-    );
-    return cns(env, TBottom);
-  };
-
-  push(
-    env,
-    [&] {
-      if (src->isA(TDArr))   return src;
-      if (src->isA(TArrLike)) return gen(env, ConvArrLikeToDArr, src);
-      if (src->isA(TClsMeth)) {
-        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
-        return gen(env, ConvClsMethToDArr, src);
-      }
-      if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
-      if (src->isA(TRecord)) PUNT(CastDArrayRecord); // TODO: T53309767
-      if (src->isA(TNull))   return raise("Null");
-      if (src->isA(TBool))   return raise("Bool");
-      if (src->isA(TInt))    return raise("Int");
-      if (src->isA(TDbl))    return raise("Double");
-      if (src->isA(TStr))    return raise("String");
-      if (src->isA(TFunc))   return raise("Func");
-      if (src->isA(TRes))    return raise("Resource");
-      PUNT(CastDArrayUnknown);
-    }()
-  );
+  always_assert(false);
 }
 
 void emitCastVec(IRGS& env) {
@@ -560,9 +487,7 @@ void emitFuncCred(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitArray(IRGS& env, const ArrayData* x) {
-  assertx(x->isPHPArrayType());
-  assertx(!RuntimeOption::EvalHackArrDVArrs || x->isNotDVArray());
-  push(env, cns(env, x));
+  always_assert(false);
 }
 
 void emitVec(IRGS& env, const ArrayData* x) {

@@ -130,15 +130,26 @@ TEST(Simplifier, Count) {
     EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
   }
 
-  // Count($varr) --> CountVec($varr)
+  // Count($dict) --> CountDict($dict)
   {
-    auto const arr = unit.gen(Conjure, dummy, TVArr);
+    auto const arr = unit.gen(Conjure, dummy, TDict);
     auto const count = unit.gen(Count, dummy, arr->dst());
     auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountDict, arr->dst());
+  }
+
+  // Count($keyset) --> CountKeyset($keyset)
+  {
+    auto const arr = unit.gen(Conjure, dummy, TKeyset);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
+
+    EXPECT_NE(nullptr, result.dst);
+    EXPECT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], CountKeyset, arr->dst());
   }
 
   // Count($some_obj) --> Count($some_obj)

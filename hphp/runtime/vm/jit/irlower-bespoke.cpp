@@ -94,23 +94,23 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
 //    - the ones on the vanilla arrays (Packed, Mixed, Set);
 //    - failing all those options, the CallSpec Generic
 //
-#define CALL_TARGET(Type, Fn, Generic)                                    \
-  [&]{                                                                    \
-    auto const layout = Type.arrSpec().layout();                          \
-    if (layout.bespoke()) {                                               \
-      auto const vtable = layout.bespokeLayout()->vtable();               \
-      if (vtable->fn##Fn) {                                               \
-        return CallSpec::direct(vtable->fn##Fn);                          \
-      } else {                                                            \
-        return CallSpec::direct(BespokeArray::Fn);                        \
-      }                                                                   \
-    }                                                                     \
-    if (layout.vanilla()) {                                               \
-      if (arr <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Fn); \
-      if (arr <= (TDArr|TDict)) return CallSpec::direct(MixedArray::Fn);  \
-      if (arr <= TKeyset)       return CallSpec::direct(SetArray::Fn);    \
-    }                                                                     \
-    return Generic;                                                       \
+#define CALL_TARGET(Type, Fn, Generic)                              \
+  [&]{                                                              \
+    auto const layout = Type.arrSpec().layout();                    \
+    if (layout.bespoke()) {                                         \
+      auto const vtable = layout.bespokeLayout()->vtable();         \
+      if (vtable->fn##Fn) {                                         \
+        return CallSpec::direct(vtable->fn##Fn);                    \
+      } else {                                                      \
+        return CallSpec::direct(BespokeArray::Fn);                  \
+      }                                                             \
+    }                                                               \
+    if (layout.vanilla()) {                                         \
+      if (arr <= TVec)    return CallSpec::direct(PackedArray::Fn); \
+      if (arr <= TDict)   return CallSpec::direct(MixedArray::Fn);  \
+      if (arr <= TKeyset) return CallSpec::direct(SetArray::Fn);    \
+    }                                                               \
+    return Generic;                                                 \
   }()
 
 #define CALL_TARGET_SYNTH(Type, Fn, Generic)                                 \
@@ -125,10 +125,10 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
       }                                                                      \
     }                                                                        \
     if (layout.vanilla()) {                                                  \
-      if (arr <= (TVArr|TVec)) {                                             \
+      if (arr <= TVec) {                                                     \
         return CallSpec::direct(SynthesizedArrayFunctions<PackedArray>::Fn); \
       }                                                                      \
-      if (arr <= (TDArr|TDict)) {                                            \
+      if (arr <= TDict) {                                                    \
         return CallSpec::direct(SynthesizedArrayFunctions<MixedArray>::Fn);  \
       }                                                                      \
       if (arr <= TKeyset) {                                                  \
@@ -318,7 +318,7 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
     using namespace MInstrHelpers;
     auto const throwOnMissing = inst->src(2)->boolVal();
     if (layout.vanilla()) {
-      if (arr->isA(TDArr|TDict)) {
+      if (arr->isA(TDict)) {
         return key->isA(TStr)
           ? CallSpec::direct(throwOnMissing ? elemDictSD : elemDictSU)
           : CallSpec::direct(throwOnMissing ? elemDictID : elemDictIU);
@@ -430,17 +430,10 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////////////
 // StructDict
 
-namespace {
-
 using bespoke::StructDict;
 using bespoke::StructLayout;
 
-void newStructImpl(
-  IRLS& env,
-  const IRInstruction* inst,
-  StructDict* (*f)(const StructLayout* layout, uint32_t size,
-                    const Slot* slots, const TypedValue* vals)
-) {
+void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewBespokeStructData>();
   auto& v = vmain(env);
@@ -448,24 +441,14 @@ void newStructImpl(
   auto const table = v.allocData<Slot>(extra->numSlots);
   memcpy(table, extra->slots, extra->numSlots * sizeof(*extra->slots));
 
+  auto const target = CallSpec::direct(StructDict::MakeStructDict);
   auto const args = argGroup(env, inst)
     .imm(StructLayout::As(extra->layout.bespokeLayout()))
     .imm(extra->numSlots)
     .dataPtr(table)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
-  cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst),
-               SyncOptions::None, args);
-}
-
-}
-
-void cgNewBespokeStructDArray(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, StructDict::MakeStructDArray);
-}
-
-void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, StructDict::MakeStructDict);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 //////////////////////////////////////////////////////////////////////////////

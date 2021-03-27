@@ -39,20 +39,18 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
   auto result = IterSpecialization::generic();
 
   switch (arr->kind()) {
-    case ArrayData::kPackedKind:
     case ArrayData::kVecKind: {
       result.specialized = true;
-      result.base_type = arr->isPHPArrayType() ? S::Packed : S::Vec;
+      result.base_type = S::Vec;
       result.key_types = S::Int;
       return result;
     }
 
-    case ArrayData::kMixedKind:
     case ArrayData::kDictKind: {
       auto const keys = MixedArray::asMixed(arr)->keyTypes();
       if (keys.mayIncludeTombstone()) return result;
       result.specialized = true;
-      result.base_type = arr->isPHPArrayType() ? S::Mixed : S::Dict;
+      result.base_type = S::Dict;
       result.key_types = [&]{
         if (keys.mustBeStaticStrs()) return S::StaticStr;
         if (keys.mustBeInts()) return S::Int;
@@ -62,7 +60,7 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
       return result;
     }
 
-  default: return result;
+    default: return result;
   }
 }
 
@@ -97,12 +95,10 @@ ArrayIterProfile::Result ArrayIterProfile::result() const {
   auto const strs    = statics + counts[IterSpecialization::Str];
   result.top_specialization.key_types = [&]{
     auto const type = result.top_specialization.base_type;
-    if (type == IterSpecialization::Packed || type == IterSpecialization::Vec) {
-      return IterSpecialization::Int;
-    }
-    if (statics == key_types_total) return IterSpecialization::StaticStr;
-    if (ints    == key_types_total) return IterSpecialization::Int;
-    if (strs    == key_types_total) return IterSpecialization::Str;
+    if (type == IterSpecialization::Vec) return IterSpecialization::Int;
+    if (statics == key_types_total)      return IterSpecialization::StaticStr;
+    if (ints    == key_types_total)      return IterSpecialization::Int;
+    if (strs    == key_types_total)      return IterSpecialization::Str;
     return IterSpecialization::ArrayKey;
   }();
   return result;

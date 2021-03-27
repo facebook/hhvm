@@ -1134,11 +1134,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case NewStructDArray:
   case NewStructDict:
     {
-      // NewStruct{Dict,DArray} is reading elements from the stack, but writes
-      // to a completely new array, so we can treat the store set as empty.
+      // NewStructDict reads elements from the stack, but writes to a
+      // completely new array, so we can treat the store set as empty.
       auto const extra = inst.extra<NewStructData>();
       auto const stack_in = AStack::range(
         extra->offset,
@@ -1147,11 +1146,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case NewBespokeStructDArray:
   case NewBespokeStructDict:
     {
-      // NewBespokeStruct{Dict,DArray} is reading elements from the stack, but
-      // writes to a completely new array, so we can treat the stores as empty.
+      // NewBespokeStructDict reads elements from the stack, but writes to
+      // a completely new array, so we can treat the stores as empty.
       // TODO(kshaunak): Introduce an Alloc version for the numSlots == 0 case.
       auto const extra = inst.extra<NewBespokeStructData>();
       if (extra->numSlots == 0) return may_load_store(AEmpty, AEmpty);
@@ -1240,7 +1238,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeIterGetVal:
     return may_load_store(AElemAny, AEmpty);
 
-  case ElemMixedArrayK:
   case ElemDictK:
   case ElemKeysetK:
     return IrrelevantEffects {};
@@ -1270,7 +1267,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case CheckDictKeys:
-  case CheckMixedArrayOffset:
   case CheckDictOffset:
   case CheckKeysetOffset:
   case CheckMissingKeyInArrLike:
@@ -1407,13 +1403,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewColFromArray:
   case NewPair:
   case NewInstanceRaw:
-  case NewDArray:
   case NewDictArray:
   case NewRFunc:
   case FuncCred:
-  case AllocVArray:
   case AllocVec:
-  case AllocStructDArray:
   case AllocStructDict:
   case ConvDblToStr:
   case ConvIntToStr:
@@ -1880,8 +1873,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LtArrLike:
   case LteArrLike:
   case CmpArrLike:
-  case ConvObjToVArr:  // can invoke PHP
-  case ConvObjToDArr:  // can invoke PHP
   case OODeclExists:
   case LdCls:          // autoload
   case LdClsCached:    // autoload
@@ -1937,7 +1928,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayMarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
-  case TagProvenanceHere:
   case SetOpTV:
   case OutlineSetOp:
   case ThrowAsTypeStructException:
@@ -1953,14 +1943,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrLikeToVec:
-  case ConvArrLikeToVArr:
-  case ConvArrLikeToDArr: // May raise Hack array compat notices
   case ConvArrLikeToDict:
   case ConvArrLikeToKeyset: // Decrefs input values
-  case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
-  case ConvClsMethToVArr:
   case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
 

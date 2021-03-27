@@ -38,7 +38,6 @@ Type arithOpResult(Type t1, Type t2) {
 
   auto both = t1 | t2;
   if (both.maybe(TDbl)) return TDbl;
-  if (both.maybe(TArr)) return TArr;
   if (both.maybe(TVec)) return TVec;
   if (both.maybe(TDict)) return TDict;
   if (both.maybe(TKeyset)) return TKeyset;
@@ -123,9 +122,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutPredBool:
     case OutBooleanImm:  return TBool;
     case OutInt64:       return TInt;
-    case OutArrayImm:    return TArr; // Should be StaticArr/Vec/Dict: t2124292
-    case OutVArray:      return RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-    case OutDArray:      return RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+    case OutArrayImm:    always_assert(false);
     case OutVec:         return TVec;
     case OutVecImm:      return TVec;
     case OutDict:        return TDict;

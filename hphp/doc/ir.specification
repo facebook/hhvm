@@ -407,24 +407,6 @@ To keyset conversions:
 | ConvObjToKeyset,              D(Keyset), S(Obj),                   PRc|CRc
 
 
-To varray conversions:
-
-| ConvArrLikeToVArr,            DVArr, S(ArrLike),                   PRc|CRc|LP
-
-| ConvClsMethToVArr,            DVArr, S(ClsMeth),                   PRc|CRc
-
-| ConvObjToVArr,                DVArr, S(Obj),                       PRc|CRc
-
-
-To darray conversion:
-
-| ConvArrLikeToDArr,            DDArr, S(ArrLike),                   PRc|CRc|LP
-
-| ConvClsMethToDArr,            DDArr, S(ClsMeth),                   PRc|CRc
-
-| ConvObjToDArr,                DDArr, S(Obj),                       PRc|CRc
-
-
 To bool conversions:
 
 | ConvDblToBool,               D(Bool), S(Dbl),                           NF
@@ -742,7 +724,7 @@ To string conversions:
   Returns whether t instanceof S0 returns true when t is of the given type.
 
 | ResolveTypeStruct<class,suppress,offset,size,isOrAsOp>,
-|   DDArr, S(StkPtr) S(Cls|Nullptr), NF
+|   D(Dict), S(StkPtr) S(Cls|Nullptr), NF
 
   Applies class/alias resolution on the type structure that is at the stack
   offset given by S0 and offset. If size > 1, combine the type structures on
@@ -753,29 +735,29 @@ To string conversions:
   If there is an error during type structure resolution, this instruction raises
   an error. If suppress is set, this error is demoted to a warning.
 
-| IsTypeStruct<handle>, D(Bool), SDArr S(Cell), NF
+| IsTypeStruct<handle>, D(Bool), S(Dict) S(Cell), LA
 
   Returns whether S1 matches the type structure of a defined type in S0 and S1
   is a subtype of S0. The input type structure (S0) must be resolved.
   Handle is used for caching purposes.
 
-| IsTypeStructCached, D(Bool), SDArr S(Cell), B
+| IsTypeStructCached, D(Bool), S(Dict) S(Cell), B|LA
 
   Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a
   subtype of S0. Otherwise, it branches.
 
-| ProfileIsTypeStruct<handle>, ND, SDArr, ND
+| ProfileIsTypeStruct<handle>, ND, S(Dict), LA|ND
 
   Profile S0 to determine whether S0 is a type structure holding a reference to
   a Class*.
 
-| ThrowAsTypeStructException, ND, SDArr S(Cell), T
+| ThrowAsTypeStructException, ND, S(Dict) S(Cell), LA|T
 
   Throws an exception indicating why S1 does not match the type structure of a
   defined type in S0 or why S1 is not a subtype of S0. The input type structure
   (S0) must be resolved.
 
-| RaiseErrorOnInvalidIsAsExpressionType, DDArr, SDArr, NF
+| RaiseErrorOnInvalidIsAsExpressionType, D(Dict), S(Dict), LA
 
   Raises an error if the type hint for is/as expression contains an invalid
   type such as callables, erased type variables and trait type hints.
@@ -1123,12 +1105,12 @@ To string conversions:
 
   Load the size of S0's constant table.
 
-| LdTypeCns, DStaticDArr, S(InitCell), B
+| LdTypeCns, D(StaticDict), S(InitCell), B
 
   Loads the resolved type constant S0 or branches to B if S0 is not resolved or
   not a type constant.
 
-| LdClsTypeCns, DStaticDArr, S(Cls) S(Str), NF
+| LdClsTypeCns, D(StaticDict), S(Cls) S(Str), NF
 
   Loads type constant S1 of class S0 or raises an error if no such constant
   could be found, or if S0::S1 is not a type constant.
@@ -1355,7 +1337,7 @@ To string conversions:
 
   Load the Func* of the RClsMeth* in S0.
 
-| LdGenericsFromRClsMeth, DVArr, S(RClsMeth), NF
+| LdGenericsFromRClsMeth, D(Vec), S(RClsMeth), NF
 
   Load the ArrayData* containing the generics attached to the RClsMeth in S0
 
@@ -1363,7 +1345,7 @@ To string conversions:
 
   Load the Func* of the RFuncData in S0
 
-| LdGenericsFromRFunc, DVArr, S(RFunc), NF
+| LdGenericsFromRFunc, D(Vec), S(RFunc), NF
 
   Load the ArrayData* containing the generics attached to the RFuncData in S0
 
@@ -1373,10 +1355,10 @@ To string conversions:
 
   Allocates a new object of class S1.
 
-| AllocObjReified, DAllocObj, S(Cls) SVArr, PRc
+| AllocObjReified, DAllocObj, S(Cls) S(Vec), LA|PRc
 
-  Allocates a new object of class S1 and sets S2 as the reified generics of this
-  class. If this class is not reified, this instruction raises an error.
+  Allocates a new object of class S1 and sets S2 as the reified generics of
+  this class. If this class is not reified, this instruction raises an error.
 
 | InitProps<class>, ND, NA, NF
 
@@ -1402,7 +1384,7 @@ To string conversions:
   property in the parent, has a declared type equivalent to the parent
   declaration.
 
-| DebugBacktrace, DVArr, S(Int), PRc
+| DebugBacktrace, D(Vec), S(Int), PRc
 
   Obtain stack trace by calling the debug_backtrace() method.
 
@@ -1439,7 +1421,7 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewLoggingArray, DLoggingArrLike, S(VArr,DArr,Vec,Dict,Keyset), PRc|CRc|LA
+| NewLoggingArray, DLoggingArrLike, S(Vec,Dict,Keyset), PRc|CRc|LA
 
   Maybe create a LoggingArray wrapping the vanilla array-like S0. The decision
   may be based on flags or sampling. If we don't create an array, we return S0
@@ -1462,10 +1444,6 @@ To string conversions:
   Log that we failed to guard input S0 to the given type. Useful for catching
   performance bugs in bespoke layout selection, but may have more general use.
 
-| NewDArray, DDArr, C(Int), PRc
-
-  Allocate a new dict-like array with the expected capacity S0.
-
 | NewDictArray, D(Dict), C(Int), PRc
 
   Allocate a new dict with the expected capacity S0.
@@ -1476,32 +1454,24 @@ To string conversions:
   `offset'. This instruction moves the elements off the stack without
   manipulating their reference counts.
 
-| AllocVArray<size>, DVArr, NA, PRc
-
-  Allocate a new uninitialized vec-like array with space for size elements in
-  it.  The array will be initialized with values using either InitVecElem or
-  InitVecElemLoop.
-
 | AllocVec<size>, D(Vec), NA, PRc
 
   Allocate a new uninitialized vector array with space for size elements in it.
   The array will be initialized with values using either InitVecElem or
   InitVecElemLoop.
 
-| InitVecElem<index>, ND, S(VArr,Vec) S(Cell), CRc
+| InitVecElem<index>, ND, S(Vec) S(Cell), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
-  array allocated with AllocVArray or AllocVec.
+  array allocated with AllocVec.
 
-| InitVecElemLoop<offset,size>, ND, S(VArr,Vec) S(StkPtr), CRc
+| InitVecElemLoop<offset,size>, ND, S(Vec) S(StkPtr), CRc
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
-  array.  Used to initialize an array allocated with AllocVArray or
-  AllocVec that was too big to use a series of InitVecElem ops.
-
-| AllocStructDArray<keys...>, DDArr,   NA, PRc
+  array.  Used to initialize an array allocated with or AllocVec that was too
+  big for us to use a series of InitVecElem ops.
 
 | AllocStructDict<keys...>,   D(Dict), NA, PRc
 
@@ -1509,28 +1479,23 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitDictElem for that.
 
-| InitDictElem<index,key>, ND, S(DArr,Dict) S(Cell), NF
+| InitDictElem<index,key>, ND, S(Dict) S(Cell), NF
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
-  S1 has already been inc-reffed. Used to initialize an array allocated by
-  AllocStructArray / AllocStructDArray / AllocStructDict.
-
-| NewStructDArray<offset,keys...>, DDArr,   S(StkPtr), PRc|CRc
+  S1 has already been inc-reffed. Used with the result of AllocStructDict.
 
 | NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PRc|CRc
 
-  Allocate a new key/value dict or mixed-layout array, given N string literal
-  immediates for keys and N stack elements at `offset` on stack S0 for values.
-  This op assumes it can take values from the stack without inc-reffing them.
+  Allocate a new key/value dict, given N string literal immediates for keys
+  and N stack elements at `offset` on stack S0 for values.  This op assumes it
+  can move values from the stack without inc-reffing them.
 
-| NewBespokeStructDArray<offset,layout,slots...>, DStructArr, S(StkPtr), PRc|CRc
+| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc
 
-| NewBespokeStructDict<offset,layout,slots...>,   DStructArr, S(StkPtr), PRc|CRc
-
-  Allocate a new dict or darray with the bespoke StructLayout `layout`.
-  Then, initialize the N fields with the given `slots` with N stack elements
-  starting at `offset`. This op moves stack values with no refcounting.
+  Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the
+  N fields with the given `slots` with N stack elements starting at `offset`.
+  This op moves stack values with no refcounting.
 
 | NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
 
@@ -1563,12 +1528,12 @@ To string conversions:
 
   Allocate a new ClsMethDataRef.
 
-| NewRClsMeth, D(RClsMeth), S(Cls) S(Func) SVArr, PRc
+| NewRClsMeth, D(RClsMeth), S(Cls) S(Func) S(Vec), LA|PRc
 
   Allocate a new reified class method by storing the Class in S0,
   the Func in S1 and the reified generics in S2.
 
-| NewRFunc, D(RFunc), S(Func) SVArr, PRc
+| NewRFunc, D(RFunc), S(Func) S(Vec), LA|PRc
 
   Allocate a new reified function pointer given the Func pointer in S0
   and reified generics in S1.
@@ -1773,7 +1738,7 @@ To string conversions:
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
 
-| RecordReifiedGenericsAndGetTSList, DVArr, SVArr, CRc
+| RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec), CRc|LA
 
   Takes a varray of reified generics from the stack and adds them to the reified
   generics table and returns the input varray of reified generics, possibly
@@ -1903,9 +1868,9 @@ To string conversions:
   computed by returning the value of their count method. Objects that do not
   implement Countable have a count of 1.
 
-| CountVec,        D(Int), S(VArr,Vec),    LA
+| CountVec,        D(Int), S(Vec),    LA
 
-| CountDict,       D(Int), S(DArr,Dict),   LA
+| CountDict,       D(Int), S(Dict),   LA
 
 | CountKeyset,     D(Int), S(Keyset), LA
 
@@ -2038,12 +2003,12 @@ To string conversions:
   false otherwise. Once support for coercing class_meth types is removed this
   ir instruction can also be removed (T61738946).
 
-| VerifyReifiedLocalType<id>, ND, SDArr, NF
+| VerifyReifiedLocalType<id>, ND, S(Dict), LA
 
   Raises a catchable type hint error if the reified generics of function
   parameter id does not match the type structure given on S0.
 
-| VerifyReifiedReturnType, ND, S(Cell) SDArr, NF
+| VerifyReifiedReturnType, ND, S(Cell) S(Dict), LA
 
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.
@@ -2068,7 +2033,7 @@ To string conversions:
 
   Raises a fatal for an undefined property named S1 on the class of S0.
 
-| RaiseTooManyArg<func>, ND, S(VArr,Vec), CRc|LA
+| RaiseTooManyArg<func>, ND, S(Vec), CRc|LA
 
   Raise a too many argument warning because extra arguments stored in S0 were
   passed to function func.
@@ -2160,12 +2125,12 @@ To string conversions:
 
   Raises runtime errors if the func in S0 is not a callable static method.
 
-| CheckClsReifiedGenericMismatch<cls>, ND, SVArr, NF
+| CheckClsReifiedGenericMismatch<cls>, ND, S(Vec), LA
 
   Raises a runtime error unless whether each generic in S0 is reified or erased
   matches exactly to the expectations of the cls.
 
-| CheckFunReifiedGenericMismatch, ND, S(Func) SVArr, NF
+| CheckFunReifiedGenericMismatch, ND, S(Func) S(Vec), LA
 
   Raises a runtime error unless whether each generic in S0 is reified or erased
   matches exactly to the expectations of the func.
@@ -2214,14 +2179,14 @@ To string conversions:
 
 | AddNewElemKeyset, D(Keyset),    S(Keyset) S(Cell),   CRc|PRc
 
-| AddNewElemVec,    DModified(0), S(VArr,Vec) S(Cell), CRc|PRc
+| AddNewElemVec,    DModified(0), S(Vec) S(Cell), CRc|PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)
 
-| AKExistsDict, D(Bool), S(DArr,Dict) S(Int,Str), NF
+| AKExistsDict, D(Bool), S(Dict) S(Int,Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 
@@ -2247,7 +2212,7 @@ To string conversions:
   Identical to GetMemoKey but only accepts scalar types and cannot produce
   errors.
 
-| DictIdx<sizeHint>, DDictElem, S(DArr,Dict) S(Int,Str) S(Cell), NF
+| DictIdx<sizeHint>, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
@@ -2668,7 +2633,7 @@ To string conversions:
   We can use this operation to elide stores for iterator fields that do not
   get loaded again. In debug builds, it will write poison values to the fields.
 
-| GetDictPtrIter,  DPtrIter, S(DArr,Dict) S(Int), NF
+| GetDictPtrIter,  DPtrIter, S(Dict) S(Int), NF
 
   Returns a pointer to the elm S1 of a mixed-layout array S0. S1 does not need
   to be a valid array position; for example, it may equal the size of the array
@@ -2807,29 +2772,22 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.
 
-| CheckDictKeys<T>, ND, S(DArr,Dict), B
+| CheckDictKeys<T>, ND, S(Dict), B
 
   Check that the given mixed array is free of tombstones and that all of its
   elements' keys match the type T. If any check fails, branch to block B.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckMixedArrayOffset<pos>, ND, S(DArr) S(Int,Str), B
-
-  Check that `pos' is within the usage bounds of S0 (including tombstones), and
-  that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
-  fail, branch to B.  This check is allowed to have false negatives, in the
-  case of int-like strings.
-
 | CheckArrayCOW, ND, S(ArrLike), B|LA
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
 
-| ProfileDictAccess, ND, S(DArr,Dict) S(Int,Str), NF
+| ProfileDictAccess, ND, S(Dict) S(Int,Str), NF
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
-| CheckDictOffset<pos>, ND, S(DArr,Dict) S(Int,Str), B
+| CheckDictOffset<pos>, ND, S(Dict) S(Int,Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2851,26 +2809,22 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemMixedArrayK, D(LvalToElemInitCell), S(DArr) S(Int,Str) S(Int), NF
+| ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
 
-  Returns an lval to the element of MixedArray S0 at the known position S2 in S1.
-
-| ElemVecD, D(LvalToElemInitCell), S(LvalToVArr,LvalToVec) S(Int), MElem
-
-| ElemVecU, D(LvalToMembInitCell), S(LvalToVArr,LvalToVec) S(Int), MElem
+| ElemVecU, D(LvalToMembInitCell), S(LvalToVec) S(Int), MElem
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictD, D(LvalToElemInitCell), S(LvalToDArr,LvalToDict) S(Int,Str), MElem
+| ElemDictD, D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
 
-| ElemDictU, D(LvalToMembInitCell), S(LvalToDArr,LvalToDict) S(Int,Str), MElem
+| ElemDictU, D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, D(LvalToElemInitCell), S(DArr,Dict) S(Int,Str) S(Int), NF
+| ElemDictK, D(LvalToElemInitCell), S(Dict) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of dict S0 at the known position S2 in S1.
 
@@ -2893,16 +2847,16 @@ fields of that struct for holding intermediate values.
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| DictGet, DDictElem, S(DArr,Dict) S(Int,Str), NF
+| DictGet, DDictElem, S(Dict) S(Int,Str), NF
 
   Get element with key S1 from base S0, throwing if the element is not present.
 
-| DictGetQuiet, DDictElem, S(DArr,Dict) S(Int,Str), NF
+| DictGetQuiet, DDictElem, S(Dict) S(Int,Str), NF
 
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| DictGetK, DDictElem, S(DArr,Dict) S(Int,Str) S(Int), NF
+| DictGetK, DDictElem, S(Dict) S(Int,Str) S(Int), NF
 
   Like DictGet, but the element for S1 is at a known position S2 in S0.
 
@@ -3018,22 +2972,22 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| VecSet, DModified(0), S(VArr,Vec) S(Int) S(Cell), PRc|CRc
+| VecSet, DModified(0), S(Vec) S(Int) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
-  replace S0.
+  replace S0; this op produces a ref on the test and consumes one on S0.
 
-| DictSet, DModified(0), S(DArr,Dict) S(Int,Str) S(Cell), PRc|CRc
+| DictSet, DModified(0), S(Dict) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
 
-| BespokeGet, DBespokeElemUninit, SKnownArrLike S(Int,Str), LA
+| BespokeGet, DBespokeElemUninit, S(Vec,Dict,Keyset) S(Int,Str), LA
 
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op returns TUninit if the key is not in the array.
 
-| BespokeGetThrow, DBespokeElem, SKnownArrLike S(Int,Str), LA
+| BespokeGetThrow, DBespokeElem, S(Vec,Dict,Keyset) S(Int,Str), LA
 
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
@@ -3047,13 +3001,13 @@ fields of that struct for holding intermediate values.
   If the key is missing in the array, we'll use S2 to determine what to do.
   If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-| BespokeSet, DArrLikeSet, SKnownArrLike S(Int,Str) S(Cell), LA|PRc|CRc
+| BespokeSet, DArrLikeSet, S(Vec,Dict,Keyset) S(Int,Str) S(Cell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
-| BespokeAppend, DArrLikeAppend, SKnownArrLike S(Cell), LA|PRc|CRc
+| BespokeAppend, DArrLikeAppend, S(Vec,Dict,Keyset) S(Cell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has AppendMove semantics; it consumes a refcount on the input array
@@ -3147,15 +3101,15 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-| SetNewElemDict,   ND, S(LvalToDArr,LvalToDict) S(Cell),      MElem
+| SetNewElemDict,   ND, S(LvalToDict) S(Cell),      MElem
 
-| SetNewElemVec,    ND, S(LvalToVArr,LvalToVec)  S(Cell),       MElem
+| SetNewElemVec,    ND, S(LvalToVec)  S(Cell),      MElem
 
 | SetNewElemKeyset, ND, S(LvalToKeyset) S(Int,Str), MElem
 
   Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 
-| DictIsset, D(Bool), S(DArr,Dict) S(Int,Str), NF
+| DictIsset, D(Bool), S(Dict) S(Int,Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
@@ -3191,7 +3145,7 @@ fields of that struct for holding intermediate values.
 
   Throws an OutOfBoundsException if S0 is an undefined index for an array.
 
-| ThrowArrayKeyException, ND, S(DArr,Dict) S(Str), T|LA
+| ThrowArrayKeyException, ND, S(Dict) S(Str), T|LA
 
   Throws an OutOfBoundsException if S0 is an undefined key for a darray or dict.
 
@@ -3240,24 +3194,24 @@ fields of that struct for holding intermediate values.
 
   Profile the access to property S(1) with base class S(0).
 
-| CheckVecBounds, ND, S(VArr,Vec) S(Int), B|LA
+| CheckVecBounds, ND, S(Vec) S(Int), B|LA
 
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.
 
-| LdVecElemAddr<T>, DParam(LvalToElemCell), S(VArr,Vec) S(Int), NF
+| LdVecElemAddr<T>, DParam(LvalToElemCell), S(Vec) S(Int), NF
 
   Loads the address of the element at index S1 of the packed array or vec array
   in S0. This instruction assumes the array actually contains an element at
   that offset (IE, the array has the proper length).
 
-| ReserveVecNewElem, D(Int), S(VArr,Vec), B
+| ReserveVecNewElem, D(Int), S(Vec), B
 
   If there is room in the packed or vec array (which is assumed to be mutable),
   increments the array size and returns the index of the new last element
   (which you must initialize); else jumps to the taken branch.
 
-| LdVecElem, DVecElem, S(VArr,Vec) S(Int), NF
+| LdVecElem, DVecElem, S(Vec) S(Int), NF
 
   Loads the element of the vec array in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (IE, the vec
@@ -3274,32 +3228,32 @@ fields of that struct for holding intermediate values.
   Returns whether a collection instance is empty or not.  S0 must be known to
   be an instance of a collection class at compile time.
 
-| VecFirst, DFirstElem, S(VArr,Vec), NF
+| VecFirst, DFirstElem, S(Vec), NF
 
   Returns the first value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| VecLast, DLastElem, S(VArr,Vec), NF
+| VecLast, DLastElem, S(Vec), NF
 
   Returns the last value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirst, DFirstElem, S(DArr,Dict), NF
+| DictFirst, DFirstElem, S(Dict), NF
 
   Returns the first value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLast, DLastElem, S(DArr,Dict), NF
+| DictLast, DLastElem, S(Dict), NF
 
   Returns the last value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirstKey, DFirstKey, S(DArr,Dict), NF
+| DictFirstKey, DFirstKey, S(Dict), NF
 
   Returns the first key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLastKey, DLastKey, S(DArr,Dict), NF
+| DictLastKey, DLastKey, S(Dict), NF
 
   Returns the last key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
@@ -3314,27 +3268,21 @@ fields of that struct for holding intermediate values.
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
-| IsLegacyArrLike, D(Bool), S(Vec|Dict,VArr|DArr), LA
+| IsLegacyArrLike, D(Bool), S(Vec|Dict), LA
 
   Returns true iff the given array has the legacy bit set.
 
-| ArrayMarkLegacyShallow,     DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
+| ArrayMarkLegacyShallow,     DModified(0), S(Vec,Dict), CRc|PRc|LA
 
-| ArrayMarkLegacyRecursive,   DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
+| ArrayMarkLegacyRecursive,   DModified(0), S(Vec,Dict), CRc|PRc|LA
 
-| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
+| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec,Dict), CRc|PRc|LA
 
-| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
+| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec,Dict), CRc|PRc|LA
 
   Set or unset the legacy bit on the array-like in S0, copying it if needed.
   The recursive variants traverse through the array-like's transitive elements
   but stop traversal at any non-array-like.
-
-| TagProvenanceHere, DModified(0), S(Obj,Vec,Dict,VArr,DArr) S(Int), CRc|PRc|LA
-
-  Recursively tag any dvarrays contained within the array or collection rooted
-  at S0 with provenance information, using flags S1. When computing a tag, we
-  skip over any stack frames with ProvenanceSkipFrame annotations.
 
 
 18. Exception/unwinding support

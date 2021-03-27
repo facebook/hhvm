@@ -203,7 +203,6 @@ bool canDCE(IRInstruction* inst) {
   case LdVecElemAddr:
   case NewInstanceRaw:
   case NewLoggingArray:
-  case NewDArray:
   case NewDictArray:
   case NewCol:
   case NewPair:
@@ -276,9 +275,7 @@ bool canDCE(IRInstruction* inst) {
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:
-  case AllocStructDArray:
   case AllocStructDict:
-  case AllocVArray:
   case AllocVec:
   case GetDictPtrIter:
   case AdvanceDictPtrIter:
@@ -322,18 +319,12 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToDict:
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
-  case ConvArrLikeToVArr:
-  case ConvObjToVArr:
-  case ConvArrLikeToDArr:
-  case ConvObjToDArr:
   case LdOutAddr:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
 
-  case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
-  case ConvClsMethToVArr:
   case ConvClsMethToVec: {
     bool consumeRef = use_lowptr ? false : inst->consumesReferences();
     return !opcodeMayRaise(inst->op()) &&
@@ -452,9 +443,7 @@ bool canDCE(IRInstruction* inst) {
   case InitVecElemLoop:
   case NewKeysetArray:
   case NewRecord:
-  case NewStructDArray:
   case NewStructDict:
-  case NewBespokeStructDArray:
   case NewBespokeStructDict:
   case Clone:
   case InlineReturn:
@@ -594,14 +583,12 @@ bool canDCE(IRInstruction* inst) {
   case IncDecProp:
   case IssetProp:
   case ElemX:
-  case CheckMixedArrayOffset:
   case CheckMissingKeyInArrLike:
   case CheckArrayCOW:
   case ProfileDictAccess:
   case CheckDictOffset:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:
-  case ElemMixedArrayK:
   case ElemVecD:
   case ElemVecU:
   case ElemDictD:
@@ -710,7 +697,6 @@ bool canDCE(IRInstruction* inst) {
   case ArrayMarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
-  case TagProvenanceHere:
   case ProfileArrLikeProps:
     return false;
 

@@ -203,11 +203,9 @@ int32_t iteratorType(const IterTypeData& data) {
     // TODO(kshaunak): Add specialized native helpers for some bespoke arrays.
     if (data.type.bespoke) return IterNextIndex::Array;
     switch (data.type.base_type) {
-      case S::Packed:
       case S::Vec: {
         return IterNextIndex::ArrayPacked;
       }
-      case S::Mixed:
       case S::Dict: {
         return data.type.base_const
           ? IterNextIndex::ArrayMixedPointer

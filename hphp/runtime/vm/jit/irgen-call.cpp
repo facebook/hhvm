@@ -151,11 +151,10 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   // stack value per generic argument and extend hhbc with their count
   auto const genericsBitmap = [&] {
     if (!fca.hasGenerics()) return uint16_t{0};
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
     auto const generics = topC(env);
     // Do not bother calculating the bitmap using a C++ helper if generics are
     // not statically known, as the prologue already has the same logic.
-    if (!generics->hasConstVal(type)) return uint16_t{0};
+    if (!generics->hasConstVal(TVec)) return uint16_t{0};
     auto const genericsArr = generics->arrLikeVal();
     return getGenericsBitmap(genericsArr);
   }();
@@ -356,13 +355,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       auto const doConvertAndCall = [&](Opcode op) {
         doConvertAndCallImpl(gen(env, op, unpack));
       };
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        if (unpack->isA(TVec)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVec);
-      } else {
-        if (unpack->isA(TVArr)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVArr);
-      }
+      if (unpack->isA(TVec)) return doCall(fca, true /* skipRepack */);
+      if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVec);
     }
 
     // Slow path. Uses funcPrologueRedispatchUnpack to repack the arguments.
@@ -381,7 +375,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   for (auto i = 0; i < numToPack; ++i) {
     assertTypeStack(env, BCSPRelOffset{i}, TInitCell);
   }
-  emitNewVArray(env, numToPack);
+  emitNewVec(env, numToPack);
 
   if (generics) push(env, generics);
 
@@ -1038,7 +1032,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
 }
 
 void emitResolveRFunc(IRGS& env, const StringData* name) {
-  if (!topC(env)->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (!topC(env)->isA(TVec)) {
     return interpOne(env);
   }
   auto const tsList = popC(env);
@@ -1153,7 +1147,7 @@ void emitNewObjR(IRGS& env) {
 
   emitDynamicConstructChecks(env, cls);
   auto const obj = [&] {
-    if (generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+    if (generics->isA(TVec)) {
       return gen(env, AllocObjReified, cls, generics);
     } else if (generics->isA(TInitNull)) {
       return gen(env, AllocObj, cls);
@@ -1205,7 +1199,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
 void emitNewObjRD(IRGS& env, const StringData* className) {
   auto const cell = popC(env);
   auto const tsList = [&] () -> SSATmp* {
-    if (cell->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+    if (cell->isA(TVec)) {
       return cell;
     } else if (cell->isA(TInitNull)) {
       return nullptr;
@@ -1227,15 +1221,14 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   }
 
   auto const this_ = checkAndLoadThis(env);
-  auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
   auto const addr = gen(
     env,
     LdPropAddr,
     IndexData { curClass(env)->propSlotToIndex(*slot) },
-    ty.lval(Ptr::Prop),
+    TLvalToPropVec,
     this_
   );
-  auto const reified_generic = gen(env, LdMem, ty, addr);
+  auto const reified_generic = gen(env, LdMem, TVec, addr);
   push(env, gen(env, AllocObjReified, cls, reified_generic));
 }
 
@@ -1416,7 +1409,7 @@ void emitResolveObjMethod(IRGS& env) {
   }
 
   assertx(func);
-  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+  auto methPair = gen(env, AllocVec, PackedArrayData { 2 });
   gen(env, InitVecElem, IndexData { 0 }, methPair, obj);
   gen(env, InitVecElem, IndexData { 1 }, methPair, func);
   decRef(env, name);
@@ -1573,7 +1566,7 @@ void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
 
 void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (!generics->isA(TVec)) {
     return interpOne(env);
   }
   auto const cls = topC(env, BCSPRelOffset { 1 });
@@ -1584,7 +1577,7 @@ void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
 void emitResolveRClsMethodD(IRGS& env, const StringData* className,
                             const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (!generics->isA(TVec)) {
     return interpOne(env);
   }
 
@@ -1610,7 +1603,7 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
 void emitResolveRClsMethodS(IRGS& env, SpecialClsRef ref,
                             const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (!generics->isA(TVec)) {
     return interpOne(env);
   }
   auto const cls = specialClsRefToCls(env, ref);

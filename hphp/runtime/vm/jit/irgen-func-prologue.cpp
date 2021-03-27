@@ -120,13 +120,12 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
     },
     [&] {
       // Generics were passed. Make them visible on the stack.
-      auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-      auto const generics = pushed ? topC(env) : apparate(env, type);
+      auto const generics = pushed ? topC(env) : apparate(env, TVec);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
 
       // Generics may be known if we are inlining.
-      if (generics->hasConstVal(type)) {
+      if (generics->hasConstVal(TVec)) {
         auto const genericsArr = generics->arrLikeVal();
         auto const& genericsDef =
           callee->getReifiedGenericsInfo().m_typeParamInfo;
@@ -186,7 +185,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
       // Push an empty array, as the remainder of the prologue assumes generics
       // are on the stack.
       arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
-      push(env, cns(env, ArrayData::CreateVArray()));
+      push(env, cns(env, ArrayData::CreateVec()));
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }
@@ -220,8 +219,7 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
 
     // Pass unpack args to the raiseTooManyArgumentsPrologue() helper, which
     // will use them to report the correct number and also take care of decref.
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-    auto const unpackArgsArr = gen(env, AssertType, type, unpackArgs);
+    auto const unpackArgsArr = gen(env, AssertType, TVec, unpackArgs);
     gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsArr);
   }
 }
@@ -412,7 +410,7 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
       ? arrprov::Tag::Param(callee, numParams)
       : arrprov::Tag{});
     assertx(callee->hasVariadicCaptureParam());
-    push(env, cns(env, ArrayData::CreateVArray()));
+    push(env, cns(env, ArrayData::CreateVec()));
     ++argc;
   } else if (argc > callee->numParams()) {
     // Extra arguments already popped by emitCalleeArgumentArityChecks().

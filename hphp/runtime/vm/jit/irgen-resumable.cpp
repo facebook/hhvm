@@ -316,7 +316,7 @@ SSATmp* implYieldAGen(IRGS& env, SSATmp* key, SSATmp* value) {
   key = key ? key : cns(env, TInitNull);
 
   // Wrap the key and value into a tuple.
-  auto const keyValueTuple = gen(env, AllocVArray, PackedArrayData { 2 });
+  auto const keyValueTuple = gen(env, AllocVec, PackedArrayData { 2 });
   gen(env, InitVecElem, IndexData { 0 }, keyValueTuple, key);
   gen(env, InitVecElem, IndexData { 1 }, keyValueTuple, value);
 

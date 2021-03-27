@@ -60,7 +60,7 @@ enum class IterNextIndex : uint8_t {
 // This byte should be 0 for unspecialized iterators, as created by calling the
 // normal IterImpl constructor instead of using a specialized initializer.
 struct IterSpecialization {
-  enum BaseType : uint8_t { Packed = 0, Mixed, Vec, Dict, kNumBaseTypes };
+  enum BaseType : uint8_t { Vec = 0, Dict, kNumBaseTypes };
   enum KeyTypes : uint8_t { ArrayKey = 0, Int, Str, StaticStr, kNumKeyTypes };
 
   // Returns a generic (unspecialized) IterSpecialization value.
@@ -74,8 +74,8 @@ struct IterSpecialization {
   union {
     uint8_t as_byte;
     struct {
-      // `base_type` and `key_types` are 2-bit encodings of the enums above.
-      uint8_t base_type: 2;
+      // `base_type` and `key_types` are bit encodings of the enums above.
+      uint8_t base_type: 1;
       uint8_t key_types: 2;
 
       // When we JIT a specialized iterator, we set `specialized` to true,
@@ -85,6 +85,9 @@ struct IterSpecialization {
       bool output_key: 1;
       bool base_const: 1;
       bool bespoke: 1;
+
+      // A free bit. Maybe we'll need a 2-bit enum for the layout?
+      bool padding: 1;
     };
   };
 };

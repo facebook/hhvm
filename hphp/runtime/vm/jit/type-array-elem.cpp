@@ -37,7 +37,7 @@ namespace HPHP { namespace jit {
 
 namespace {
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
-  assertx(arr.subtypeOfAny(TVec, TVArr));
+  assertx(arr <= TVec);
   assertx(idx <= TInt);
 
   if (idx.hasConstVal()) {
@@ -101,7 +101,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
 }
 
 std::pair<Type, bool> dictElemType(Type arr, Type idx) {
-  assertx(arr.subtypeOfAny(TDict, TDArr));
+  assertx(arr <= TDict);
   assertx(idx <= (TInt | TStr));
 
   if (arr.hasConstVal()) {
@@ -183,7 +183,7 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
 
 std::pair<Type, bool> vecFirstLastValueType(
     Type arr, bool isFirst, const Class* ctx) {
-  assertx(arr.subtypeOfAny(TVArr, TVec));
+  assertx(arr <= TVec);
 
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
@@ -217,7 +217,7 @@ std::pair<Type, bool> vecFirstLastValueType(
 }
 
 std::pair<Type, bool> vecFirstLastKeyType(Type arr, bool isFirst) {
-  assertx(arr.subtypeOfAny(TVArr, TVec));
+  assertx(arr <= TVec);
 
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
@@ -244,7 +244,7 @@ std::pair<Type, bool> vecFirstLastKeyType(Type arr, bool isFirst) {
 }
 
 std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
-  assertx(arr.subtypeOfAny(TDArr, TDict));
+  assertx(arr <= TDict);
 
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
@@ -295,8 +295,8 @@ std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr.isKnownDataType());
   auto const ratDeducedType = [&] () -> std::pair<Type, bool> {
     if (arr <= TBottom) return {TBottom, false};
-    if (arr <= (TVArr|TVec)) return vecElemType(arr, idx, ctx);
-    if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
+    if (arr <= TVec)    return vecElemType(arr, idx, ctx);
+    if (arr <= TDict)   return dictElemType(arr, idx);
     return keysetElemType(arr, idx);
   }();
   auto const layoutType = arr.arrSpec().layout().elemType(idx);
@@ -309,11 +309,11 @@ std::pair<Type, bool> arrLikeFirstLastType(
   assertx(arr.isKnownDataType());
   auto const ratDeducedType = [&] () -> std::pair<Type, bool> {
     if (arr <= TBottom) return {TBottom, false};
-    if (arr <= (TVArr|TVec)) {
+    if (arr <= TVec) {
       return isKey ? vecFirstLastKeyType(arr, isFirst)
                    : vecFirstLastValueType(arr, isFirst, ctx);
     }
-    if (arr <= (TDArr|TDict)) return dictFirstLastType(arr, isFirst, isKey);
+    if (arr <= TDict) return dictFirstLastType(arr, isFirst, isKey);
     return keysetFirstLastType(arr, isFirst);
   }();
   auto const layoutType = arr.arrSpec().layout().firstLastType(isFirst, isKey);
@@ -324,10 +324,8 @@ std::pair<Type, bool> arrLikeFirstLastType(
 Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
   assertx(arr.isKnownDataType());
   auto const deducedType = [&] {
-    if (arr <= (TVArr|TVec)) {
-      return isKey ? TInt : vecElemType(arr, pos, ctx).first;
-    }
-    if (arr <= (TDArr|TDict)) return isKey ? (TInt | TStr) : TInitCell;
+    if (arr <= TVec)  return isKey ? TInt : vecElemType(arr, pos, ctx).first;
+    if (arr <= TDict) return isKey ? (TInt | TStr) : TInitCell;
     return TInt | TStr;
   }();
   auto const layoutType = arr.arrSpec().layout().iterPosType(pos, isKey);
@@ -337,7 +335,7 @@ Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 
 VecBounds vecBoundsStaticCheck(Type arrayType, folly::Optional<int64_t> idx) {
-  assertx(arrayType.subtypeOfAny(TArr, TVec));
+  assertx(arrayType <= TVec);
   if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
 
   if (arrayType.hasConstVal()) {

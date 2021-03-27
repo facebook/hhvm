@@ -322,7 +322,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case KeysetIsset:
   case CheckDictOffset:
   case CheckKeysetOffset:
-  case CheckMixedArrayOffset:
   case CheckDictKeys:
   case CheckArrayCOW:
   case CheckMissingKeyInArrLike:

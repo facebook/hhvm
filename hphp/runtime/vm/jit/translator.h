@@ -238,8 +238,6 @@ enum OutTypeConstraints {
   OutBooleanImm,
   OutInt64,
   OutArrayImm,
-  OutVArray,
-  OutDArray,
   OutVec,
   OutVecImm,
   OutDict,

@@ -621,7 +621,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
     // There's no DV init funclet for the case where all non-variadic params
     // have already been passed, so the caller must handle it instead.
     ARRPROV_USE_RUNTIME_LOCATION();
-    auto const vargs = Type::cns(ArrayData::CreateVArray());
+    auto const vargs = Type::cns(ArrayData::CreateVec());
     ctx.liveTypes.push_back({Location::Local{numParams}, vargs});
   }
 
@@ -793,7 +793,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   if (fca.hasUnpack()) {
     const int32_t ix = fca.numArgs;
     auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
-    if (!(ty <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr))) {
+    if (!(ty <= TVec)) {
       traceRefusal(
         sk,
         callee,

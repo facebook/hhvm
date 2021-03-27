@@ -392,8 +392,19 @@ void implProfileHackArrayAccess(IRLS& env, const IRInstruction* inst,
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
-void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
-                                   KeyType key_type) {
+}
+
+void cgProfileDictAccess(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(PROFILE_DICT_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayAccess(env, inst, target);
+}
+
+void cgProfileKeysetAccess(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(PROFILE_KEYSET_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayAccess(env, inst, target);
+}
+
+void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const key = srcLoc(env, inst, 1).reg();
   auto const branch = label(env, inst->taken());
@@ -402,6 +413,10 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
 
   auto const elmOff = MixedArray::elmOff(pos);
   using Elm = MixedArray::Elm;
+
+  auto const key_type = getKeyType(inst->src(1));
+  auto const is_str_key = key_type == KeyType::Str;
+  assertx(key_type != KeyType::Any);
 
   { // Also fail if our predicted position exceeds bounds. The layout-agnostic
     // variant does a test on the (m_size, m_extra) quadword here; for vanilla
@@ -416,16 +431,10 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
     v << cmpqm{key, arr[elmOff + Elm::keyOff()], sf};
     ifThen(v, CC_NE, sf, branch);
   }
-  auto const is_str_key = key_type == KeyType::Str;
   { // Fail if the Elm key type doesn't match.
     auto const sf = v.makeReg();
     v << cmplim{0, arr[elmOff + Elm::dataOff() + TVOFF(m_aux)], sf};
 
-    assertx(key_type != KeyType::Any);
-
-    // Note that if `key' actually is an integer-ish string, we'd fail this
-    // check (and most likely would have failed the previous check also), but
-    // this false negative is allowed.
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }
   { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
@@ -439,26 +448,6 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
       ifThen(v, CC_E, sf, branch);
     }
   }
-}
-
-}
-
-void cgProfileDictAccess(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(PROFILE_DICT_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
-  implProfileHackArrayAccess(env, inst, target);
-}
-
-void cgProfileKeysetAccess(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(PROFILE_KEYSET_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
-  implProfileHackArrayAccess(env, inst, target);
-}
-
-void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
-  implCheckMixedArrayLikeOffset(env, inst, getKeyType(inst->src(1)));
-}
-
-void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
-  implCheckMixedArrayLikeOffset(env, inst, getKeyType(inst->src(1)));
 }
 
 void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
@@ -599,7 +588,7 @@ void cgCheckMissingKeyInArrLike(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-VscaledDisp getMixedLayoutOffset(IRLS& env, const IRInstruction* inst) {
+VscaledDisp getDictLayoutOffset(IRLS& env, const IRInstruction* inst) {
   auto const pos = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
   // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 24
@@ -622,20 +611,6 @@ VscaledDisp getSetArrayLayoutOffset(IRLS& env, const IRInstruction* inst) {
 }
 
 } // namespace
-
-void cgElemMixedArrayK(IRLS& env, const IRInstruction* inst) {
-  auto const arr = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0);
-
-  auto& v = vmain(env);
-  auto const off = getMixedLayoutOffset(env, inst);
-
-  v << lea{arr[off], dst.reg(tv_lval::val_idx)};
-  static_assert(TVOFF(m_data) == 0, "");
-  v << lea{arr[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const pos_tmp = inst->src(1);
@@ -945,7 +920,7 @@ void cgElemDictK(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0);
 
   auto& v = vmain(env);
-  auto const off = getMixedLayoutOffset(env, inst);
+  auto const off = getDictLayoutOffset(env, inst);
 
   v << lea{dict[off], dst.reg(tv_lval::val_idx)};
   static_assert(TVOFF(m_data) == 0, "");
@@ -961,7 +936,7 @@ void cgDictGetQuiet(IRLS& env, const IRInstruction* inst) {
 
 void cgDictGetK(IRLS& env, const IRInstruction* inst) {
   auto const dict = srcLoc(env, inst, 0).reg();
-  auto const off = getMixedLayoutOffset(env, inst);
+  auto const off = getDictLayoutOffset(env, inst);
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), dict[off]);
 }
 

@@ -77,8 +77,6 @@ std::string show(IterSpecialization type) {
 
 std::string show(IterSpecialization::BaseType type) {
   switch (type) {
-    case IterSpecialization::Packed:        return "Packed";
-    case IterSpecialization::Mixed:         return "Mixed";
     case IterSpecialization::Vec:           return "Vec";
     case IterSpecialization::Dict:          return "Dict";
     case IterSpecialization::kNumBaseTypes: always_assert(false);

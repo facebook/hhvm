@@ -478,41 +478,10 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
-// Logs a serialization notice for a dvarray if these notices are enabled.
-void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
-  assertx(arr->isA(TVArr|TDArr));
-  if (raiseArraySerializationNotices()) {
-    gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
-  }
-}
-
 SSATmp* isClassImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
   mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) { return cns(env, true); });
   mc.ifTypeThen(src, TCls, [&](SSATmp*) { return cns(env, true); });
-  return mc.elseDo([&]{ return cns(env, false); });
-}
-
-SSATmp* isPHPArrayImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
-
-  if (!RO::EvalHackArrDVArrs) {
-    mc.ifTypeThen(src, TVArr|TDArr, [&](SSATmp* src) {
-      maybeLogSerialization(env, src, SerializationSite::IsArray);
-      return cns(env, true);
-    });
-  }
-
-  if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
-      if (RO::EvalIsVecNotices) {
-        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR);
-        gen(env, RaiseNotice, cns(env, msg));
-      }
-      return cns(env, true);
-    });
-  }
-
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
@@ -523,35 +492,13 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     return cns(env, true);
   });
 
-  auto const hacLogging = [&](const char* msg) {
-    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
-    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
-  };
-
   if (RO::EvalIsCompatibleClsMethType) {
-    if (RO::EvalHackArrDVArrs) {
-      mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-        if (RO::EvalIsVecNotices) {
-          gen(env, RaiseNotice,
-              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-        }
-        return cns(env, true);
-      });
-    } else {
-      mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-        hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-        return cns(env, false);
-      });
-    }
-  }
-
-  if (!RO::EvalHackArrDVArrs &&
-      (raiseArraySerializationNotices() ||
-       RO::EvalHackArrCompatIsVecDictNotices)) {
-    mc.ifTypeThen(src, TVArr, [&](SSATmp* src) {
-      hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-      maybeLogSerialization(env, src, SerializationSite::IsVec);
-      return cns(env, false);
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+      if (RO::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+      }
+      return cns(env, true);
     });
   }
 
@@ -564,44 +511,6 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
   mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
     return cns(env, true);
   });
-
-  auto const hacLogging = [&](const char* msg) {
-    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
-    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
-  };
-
-  if (!RO::EvalHackArrDVArrs &&
-      (raiseArraySerializationNotices() ||
-       RO::EvalHackArrCompatIsVecDictNotices)) {
-    mc.ifTypeThen(src, TDArr, [&](SSATmp* src) {
-      hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
-      maybeLogSerialization(env, src, SerializationSite::IsDict);
-      return cns(env, false);
-    });
-  }
-
-  return mc.elseDo([&]{ return cns(env, false); });
-}
-
-SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
-  MultiCond mc{env};
-
-  assertx(subop == IsTypeOp::VArray || subop == IsTypeOp::DArray);
-  auto const varray = subop == IsTypeOp::VArray;
-
-  mc.ifTypeThen(src, varray ? TVArr : TDArr, [&](SSATmp* src) {
-    return cns(env, true);
-  });
-
-  if (varray && RO::EvalIsCompatibleClsMethType) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
-      if (RO::EvalIsVecNotices) {
-        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VARR);
-        gen(env, RaiseNotice, cns(env, msg));
-      }
-      return cns(env, true);
-    });
-  }
 
   return mc.elseDo([&]{ return cns(env, false); });
 }
@@ -626,15 +535,9 @@ SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
 SSATmp* isLegacyArrLikeImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
 
-  if (RO::EvalHackArrDVArrs) {
-    mc.ifTypeThen(src, TVec|TDict, [&](SSATmp* src) {
-      return gen(env, IsLegacyArrLike, src);
-    });
-  } else {
-    mc.ifTypeThen(src, TVArr|TDArr, [&](SSATmp* src) {
-      return gen(env, IsLegacyArrLike, src);
-    });
-  }
+  mc.ifTypeThen(src, TVec|TDict, [&](SSATmp* src) {
+    return gen(env, IsLegacyArrLike, src);
+  });
 
   return mc.elseDo([&]{ return cns(env, false); });
 }
@@ -757,8 +660,7 @@ void emitInstanceOf(IRGS& env) {
         [&] { return cns(env, false); }
       );
     }
-    if (!t2->type().maybe(TObj|TArr|TVec|TDict|TKeyset|
-                          TInt|TStr|TDbl)) return cns(env, false);
+    if (!t2->type().maybe(TObj|TArrLike|TInt|TStr|TDbl)) return cns(env, false);
     return nullptr;
   }();
 
@@ -796,7 +698,7 @@ SSATmp* resolveTypeStructureAndCacheInRDS(
 ) {
   if (typeStructureCouldBeNonStatic) return resolveTypeStruct();
   auto const handle = RDSHandleData { rds::alloc<ArrayData*>().handle() };
-  auto const type = RO::EvalHackArrDVArrs ? TPtrToOtherDict : TPtrToOtherDArr;
+  auto const type = TPtrToOtherDict;
   auto const addr = gen(env, LdRDSAddr, handle, type);
   ifThen(
     env,
@@ -809,7 +711,7 @@ SSATmp* resolveTypeStructureAndCacheInRDS(
       gen(env, MarkRDSInitialized, handle);
     }
   );
-  return gen(env, LdMem, RO::EvalHackArrDVArrs ? TDict : TDArr, addr);
+  return gen(env, LdMem, TDict, addr);
 }
 
 SSATmp* resolveTypeStructImpl(
@@ -1039,19 +941,15 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
           PUNT(TypeStructC-MaybeClsMeth);
         }
       }
-      return unionOf(TArr, TVec, TDict, TKeyset);
+      return unionOf(TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_vec_or_dict:
       if (RO::EvalIsCompatibleClsMethType && t->type().maybe(TClsMeth)) {
         if (t->isA(TClsMeth)) {
-          if (RuntimeOption::EvalHackArrDVArrs) {
-            if (RuntimeOption::EvalIsVecNotices) {
-              gen(env, RaiseNotice,
-                cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-            }
-            return success();
-          } else {
-            return fail();
+          if (RuntimeOption::EvalIsVecNotices) {
+            gen(env, RaiseNotice,
+              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
           }
+          return success();
         } else {
           PUNT(TypeStructC-MaybeClsMeth);
         }
@@ -1144,9 +1042,8 @@ SSATmp* handleIsResolutionAndCommonOpts(
   bool& checkValid
 ) {
   auto const a = topC(env);
-  auto const required_ts_type = RO::EvalHackArrDVArrs ? TDict : TDArr;
-  if (!a->isA(required_ts_type)) PUNT(IsTypeStructC-NotArrayTypeStruct);
-  if (!a->hasConstVal(required_ts_type)) {
+  if (!a->isA(TDict)) PUNT(IsTypeStructC-NotArrayTypeStruct);
+  if (!a->hasConstVal(TDict)) {
     if (op == TypeStructResolveOp::Resolve) {
       return resolveTypeStructImpl(env, true, true, 1, true);
     }
@@ -1244,7 +1141,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
   auto const arr = topC(env);
   auto const c = topC(env, BCSPRelOffset { 1 });
   auto const tsAndBlock = [&]() -> std::pair<SSATmp*, Block*> {
-    if (arr->hasConstVal(RO::EvalHackArrDVArrs ? TDict : TDArr)) {
+    if (arr->hasConstVal(TDict)) {
       auto const ts = arr->arrLikeVal();
       auto maybe_resolved = ts;
       bool partial = true, invalidType = true;
@@ -1264,7 +1161,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
 
 void emitRecordReifiedGeneric(IRGS& env) {
   auto const ts = popC(env);
-  if (!ts->isA(RO::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (!ts->isA(TVec)) {
     PUNT(RecordReifiedGeneric-InvalidTS);
   }
   // RecordReifiedGenericsAndGetTSList decrefs the ts
@@ -1694,11 +1591,7 @@ void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
     cond(
       env,
       [&] (Block* taken) {
-        return
-        gen(env,
-            CheckType,
-            RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr,
-            taken, ts);
+        return gen(env, CheckType, TDict, taken, ts);
       },
       [&] (SSATmp* dts) {
         gen(env, VerifyReifiedLocalType, ParamData { paramId }, dts);
@@ -1754,9 +1647,6 @@ void emitIsUnsetL(IRGS& env, int32_t id) {
 
 SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   switch (subop) {
-    case IsTypeOp::VArray:        /* intentional fallthrough */
-    case IsTypeOp::DArray:        return isDVArrayImpl(env, val, subop);
-    case IsTypeOp::PHPArr:        return isPHPArrayImpl(env, val);
     case IsTypeOp::Vec:           return isVecImpl(env, val);
     case IsTypeOp::Dict:          return isDictImpl(env, val);
     case IsTypeOp::Scalar:        return isScalarImpl(env, val);
@@ -1764,6 +1654,12 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::ArrLike:       return isArrLikeImpl(env, val);
     case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
     case IsTypeOp::Class:         return isClassImpl(env, val);
+
+    case IsTypeOp::VArray:
+    case IsTypeOp::DArray:
+    case IsTypeOp::PHPArr:
+      always_assert(false);
+
     default: break;
   }
 

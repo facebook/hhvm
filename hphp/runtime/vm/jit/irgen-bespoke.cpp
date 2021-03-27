@@ -53,7 +53,7 @@ SSATmp* emitProfiledGet(
     IRGS& env, SSATmp* arr, SSATmp* key, Block* taken, Finish finish,
     bool profiled = true) {
   auto const result = [&]{
-    if (arr->isA(TVArr|TVec)) {
+    if (arr->isA(TVec)) {
       gen(env, CheckVecBounds, taken, arr, key);
       auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
       auto const val = gen(env, BespokeGet, data, arr, key);
@@ -100,7 +100,7 @@ Block* makeCatchBlock(IRGS& env, T genBody) {
 template <typename Finish>
 SSATmp* emitProfiledGetThrow(
     IRGS& env, SSATmp* arr, SSATmp* key, Finish finish, bool profiled = true) {
-  if (arr->isA(TVArr|TVec)) {
+  if (arr->isA(TVec)) {
     return cond(
       env,
       [&](Block* taken) {
@@ -254,15 +254,13 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
 SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
-  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
-  auto const isDict = baseType.subtypeOfAny(TDict, TDArr);
-  if ((isVec && !key->isA(TInt)) ||
-      (isDict && !key->isA(TInt | TStr))) {
+  if (((baseType <= TVec) && !key->isA(TInt)) ||
+      ((baseType <= TDict) && !key->isA(TInt | TStr))) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   } else if (baseType <= TKeyset) {
-    gen(env, ThrowInvalidOperation,
-        cns(env, s_InvalidKeysetOperationMsg.get()));
+    auto const message = cns(env, s_InvalidKeysetOperationMsg.get());
+    gen(env, ThrowInvalidOperation, message);
     return cns(env, TBottom);
   }
 
@@ -304,7 +302,7 @@ SSATmp* emitIsset(IRGS& env, SSATmp* key) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  if (baseType.subtypeOfAny(TVec, TVArr) && !key->isA(TInt)) {
+  if ((baseType <= TVec) && !key->isA(TInt)) {
     return cns(env, false);
   }
 
@@ -324,7 +322,7 @@ SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet, uint32_t nDiscard) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  if (baseType.subtypeOfAny(TVec, TVArr) && !key->isA(TInt)) {
+  if ((baseType <= TVec) && !key->isA(TInt)) {
     if (quiet) return cns(env, TInitNull);
 
     gen(env, ThrowInvalidArrayKey, base, key);
@@ -393,8 +391,7 @@ void emitBespokeIdx(IRGS& env) {
   };
 
   auto const baseType = base->type();
-  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
-  if (key->isA(TNull) || (isVec && key->isA(TNull | TStr))) {
+  if (key->isA(TNull) || ((baseType <= TVec) && key->isA(TNull | TStr))) {
     finish(def);
     return;
   }
@@ -439,8 +436,7 @@ void emitBespokeAKExists(IRGS& env) {
   };
 
   auto const baseType = base->type();
-  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
-  if (isVec && key->isA(TStr)) {
+  if ((baseType <= TVec) && key->isA(TStr)) {
     finish(false);
     return;
   } else if (!key->type().subtypeOfAny(TInt, TStr)) {
@@ -482,7 +478,7 @@ SSATmp* bespokeElemImpl(
     return cns(env, TBottom);
   };
 
-  if (baseType.subtypeOfAny(TVec, TVArr) && key->isA(TStr)) {
+  if ((baseType <= TVec) && key->isA(TStr)) {
     return shouldThrow ? invalid_key() : ptrToInitNull(env);
   }
   if (!key->isA(TInt | TStr)) return invalid_key();
@@ -528,7 +524,7 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
 void emitBespokeAddElemC(IRGS& env) {
   auto const keyType = topC(env, BCSPRelOffset{1})->type();
   auto const arrType = topC(env, BCSPRelOffset{2})->type();
-  if (!arrType.subtypeOfAny(TDict, TDArr)) {
+  if (!(arrType <= TDict)) {
     PUNT(AddElemC-Bespoke-WrongType);
   } else if (!keyType.subtypeOfAny(TInt, TStr, TCls, TLazyCls)) {
     interpOne(env, arrType.unspecialize(), 3);
@@ -545,7 +541,7 @@ void emitBespokeAddElemC(IRGS& env) {
 
 void emitBespokeAddNewElemC(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{1})->type();
-  if (!arrType.subtypeOfAny(TKeyset, TVec, TVArr)) {
+  if (!arrType.subtypeOfAny(TKeyset, TVec)) {
     PUNT(AddNewElemC-Bespoke-WrongType);
   }
 
@@ -575,11 +571,10 @@ void emitBespokeColFromArray(IRGS& env,
 }
 
 void emitBespokeClassGetTS(IRGS& env) {
-  auto const reqType = RO::EvalHackArrDVArrs ? TDict : TDArr;
   auto const arr = topC(env);
   auto const arrType = arr->type();
-  if (!(arrType <= reqType)) {
-    if (arrType.maybe(reqType)) {
+  if (!(arrType <= TDict)) {
+    if (arrType.maybe(TDict)) {
       PUNT(Bespoke-ClassGetTS-UnguardedTS);
     } else {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
@@ -630,7 +625,7 @@ void emitBespokeShapesAt(IRGS& env, int32_t numArgs) {
   assertx(numArgs == 2);
   auto const arr = topC(env, BCSPRelOffset{1});
   auto const key = topC(env, BCSPRelOffset{0});
-  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(arr->isA(TDict));
   assertx(key->type().subtypeOfAny(TInt, TStr));
 
   auto const finish = [&](SSATmp* val) {
@@ -649,7 +644,7 @@ void emitBespokeShapesIdx(IRGS& env, int32_t numArgs) {
   auto const arr = topC(env, BCSPRelOffset{numArgs - 1});
   auto const key = topC(env, BCSPRelOffset{numArgs - 2});
   auto const def = numArgs == 3 ? topC(env) : cns(env, TInitNull);
-  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(arr->isA(TDict));
   assertx(key->type().subtypeOfAny(TInt, TStr));
 
   auto const finish = [&](SSATmp* val) {
@@ -673,7 +668,7 @@ void emitBespokeShapesExists(IRGS& env, int32_t numArgs) {
   assertx(numArgs == 2);
   auto const arr = topC(env, BCSPRelOffset{1});
   auto const key = topC(env, BCSPRelOffset{0});
-  assertx(arr->type().subtypeOfAny(TDict, TDArr));
+  assertx(arr->isA(TDict));
   assertx(key->type().subtypeOfAny(TInt, TStr));
 
   auto const val = cond(
@@ -752,8 +747,7 @@ bool canSpecializeCall(const IRGS& env, SrcKey sk, LayoutSensitiveCall call) {
   FTRACE_MOD(Trace::hhir, 3, "Guarded arguments of layout-sensitive call:\n"
              "  arr: {} @ {}\n  key: {} @ {}\n", arr, show(al), key, show(kl));
 
-  auto const darray = RO::EvalHackArrDVArrs ? TDict : TDArr;
-  auto const specialize = (arr <= darray) && key.subtypeOfAny(TInt, TStr);
+  auto const specialize = (arr <= TDict) && key.subtypeOfAny(TInt, TStr);
   FTRACE_MOD(Trace::hhir, 3, "Types {}pecializing call on layout.\n",
              specialize ? "match. S" : "do not match. Not s");
   return specialize;
@@ -1065,12 +1059,9 @@ void emitProfileArrLikeProps(IRGS& env) {
 
 bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
   auto const op = sk.op();
-  assertx(op == Op::NewDictArray || op == Op::NewStructDict ||
-          op == Op::NewDArray || op == Op::NewStructDArray);
+  assertx(op == Op::NewDictArray || op == Op::NewStructDict);
 
-  auto const is_dict = op == Op::NewDictArray || op == Op::NewStructDict;
-  auto const is_struct = op == Op::NewStructDict || op == Op::NewStructDArray;
-  auto const ir_op = is_dict ? NewBespokeStructDict : NewBespokeStructDArray;
+  auto const is_struct = op == Op::NewStructDict;
   auto const imms = is_struct ? getImmVector(sk.pc()) : ImmVector{};
 
   auto const data = [&]() -> NewBespokeStructData {
@@ -1085,7 +1076,7 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     return {layout, spOffBCFromIRSP(env), numSlots, slots};
   }();
 
-  auto const arr = gen(env, ir_op, data, sp(env));
+  auto const arr = gen(env, NewBespokeStructDict, data, sp(env));
   discard(env, imms.size());
   push(env, arr);
   return true;

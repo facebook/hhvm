@@ -116,9 +116,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   // These locals should be const, but we need to work around a bug in older
   // versions of GCC that cause the hhvm-cmake build to fail. See the issue:
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
-  bool is_dict = arr->type().subtypeOfAny(TDict, TDArr);
-  bool is_define = mode == MOpMode::Define;
-  bool cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
+  auto const is_dict = arr->isA(TDict);
+  auto const is_define = mode == MOpMode::Define;
+  auto const cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || arr->isA(TKeyset));
 
   // If the base and key are static, the access will likely get simplified away.
@@ -177,11 +177,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
     return missingCond(result.missing, [&] (Block* taken) {
       // According to the profiling, the key is mostly a TStaticStr.
       // If if the JIT doesn't know that statically, lets check for it.
-      auto const skey = key->isA(TStaticStr) ? key :
-        gen(env, CheckType, TStaticStr, taken, key);
+      auto const skey = gen(env, CheckType, TStaticStr, taken, key);
       gen(env, CheckMissingKeyInArrLike, taken, arr, skey);
-      auto const t = arr->isA(TDict) ? TStaticDict : TStaticDArr;
-      gen(env, AssertType, t, arr);
+      gen(env, AssertType, TStaticDict, arr);
     });
   }
   auto const offset_action = result.offset.first;

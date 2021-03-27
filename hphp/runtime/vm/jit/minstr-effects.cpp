@@ -68,15 +68,12 @@ void getBaseType(Opcode rawOp, bool predict,
      * to CountedArr/CountedStr. */
     baseValChanged = true;
 
-    if (baseType.maybe(TVArr)) baseType |= TCountedVArr;
-    if (baseType.maybe(TDArr)) baseType |= TCountedDArr;
     if (baseType.maybe(TVec)) baseType |= TCountedVec;
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
-    if (baseType.maybe(TClsMeth)) {
-      baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedVArr;
-    }
+    if (baseType.maybe(TClsMeth)) baseType |= TCountedVec;
+
     if (vanilla) baseType = baseType.narrowToVanilla();
   }
 }

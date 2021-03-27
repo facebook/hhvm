@@ -542,7 +542,7 @@ Flags handle_general_effects(Local& env,
   }
 
   case CheckVecBounds: {
-    assertx(inst.src(0)->type().subtypeOfAny(TVArr, TVec));
+    assertx(inst.src(0)->isA(TVec));
     if (!inst.src(1)->hasConstVal(TInt)) break;
 
     auto const idx = inst.src(1)->intVal();

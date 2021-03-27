@@ -55,10 +55,6 @@ struct SSATmp;
  *                    which must be a subtype of t
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
- *     DVArr        single dst is either a packed array type or vec, depending
-                      on configuration
- *     DDArr        single dst is either a mixed array type or dict, depending
-                      on configuration
  *     DVecElem    single dst has type based on reading a vec element,
  *                    intersected with an optional type parameter
  *     DDictElem   single dst has type based on reading a dict element,
@@ -92,12 +88,6 @@ struct SSATmp;
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
- *     SVArr            source must be a packed array type or vec, depending
- *                      on configuration
- *     SDArr            source must be a mixed array type or dict, depending
- *                      on configuration
- *     CDArr            source must be a constant mixed array type or dict,
- *                      depending on configuration
  *
  * flags:
  *

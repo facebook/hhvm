@@ -68,10 +68,7 @@ TRACE_SET_MOD(hhir);
 #define DFirstKey         HasDest
 #define DLastKey          HasDest
 #define DLoggingArrLike   HasDest
-#define DVArr          HasDest
-#define DDArr          HasDest
-#define DStaticDArr    HasDest
-#define DStructArr     HasDest
+#define DStructDict    HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -147,10 +144,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
 #undef DLoggingArrLike
-#undef DVArr
-#undef DDArr
-#undef DStaticDArr
-#undef DStructArr
+#undef DStructDict
 #undef DCol
 #undef DAllocObj
 #undef DMulti
@@ -323,19 +317,15 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvTVToDbl:
   case ConvTVToInt:
   case ConvTVToStr:
-  case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
-  case ConvClsMethToVArr:
   case ConvClsMethToVec:
   case ConvObjToBool:
-  case ConvObjToDArr:
   case ConvObjToDbl:
   case ConvObjToDict:
   case ConvObjToInt:
   case ConvObjToKeyset:
   case ConvObjToStr:
-  case ConvObjToVArr:
   case ConvObjToVec:
   case Count:
   case CreateAAWH:
@@ -452,7 +442,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-  case TagProvenanceHere:
   case ThrowAsTypeStructException:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
@@ -504,9 +493,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPushTailFrame:
   case AKExistsDict:
   case AKExistsKeyset:
-  case AllocStructDArray:
   case AllocStructDict:
-  case AllocVArray:
   case AllocVec:
   case AndInt:
   case AssertLoc:
@@ -540,7 +527,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckLoc:
   case CheckMBase:
   case CheckMissingKeyInArrLike:
-  case CheckMixedArrayOffset:
   case CheckNonNull:
   case CheckNullptr:
   case CheckRange:
@@ -572,8 +558,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ContStarted:
   case ContStartedCheck:
   case ContValid:
-  case ConvArrLikeToDArr:
-  case ConvArrLikeToVArr:
   case ConvBoolToDbl:
   case ConvBoolToInt:
   case ConvDblToBool:
@@ -634,7 +618,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EagerSyncVMRegs:
   case ElemDictK:
   case ElemKeysetK:
-  case ElemMixedArrayK:
   case EndBlock:
   case EndCatch:
   case EndGuards:
@@ -859,15 +842,12 @@ bool opcodeMayRaise(Opcode opc) {
   case NewRClsMeth:
   case NewCol:
   case NewColFromArray:
-  case NewDArray:
   case NewDictArray:
   case NewInstanceRaw:
   case NewLoggingArray:
   case NewPair:
   case NewRFunc:
-  case NewStructDArray:
   case NewStructDict:
-  case NewBespokeStructDArray:
   case NewBespokeStructDict:
   case NInstanceOfBitmask:
   case Nop:

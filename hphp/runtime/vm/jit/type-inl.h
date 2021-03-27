@@ -67,7 +67,6 @@ IRT_RUNTIME
 #undef IRT
 
 // Vanilla types that appear in irgen.
-static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();
 static auto const TVanillaDict    = TDict.narrowToVanilla();
 static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
@@ -133,8 +132,6 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  if (ad->isVArray()) return TStaticVArr;
-  if (ad->isDArray()) return TStaticDArr;
   if (ad->isVecType()) return TStaticVec;
   if (ad->isDictType()) return TStaticDict;
   if (ad->isKeysetType()) return TStaticKeyset;
@@ -248,7 +245,7 @@ inline bool Type::isKnownDataType() const {
 
   // Some unions correspond to single KindOfs.
   if (!isUnion()) return true;
-  return subtypeOfAny(TStr, TVArr, TDArr, TVec, TDict, TKeyset);
+  return subtypeOfAny(TStr, TVec, TDict, TKeyset);
 }
 
 inline bool Type::needsReg() const {
@@ -326,11 +323,13 @@ inline folly::Optional<Type> Type::tryCns(TypedValue tv) {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-        return type_detail::for_const(tv.m_data.parr);
+        always_assert(false);
 
       case KindOfLazyClass:
         return type_detail::for_const(tv.m_data.plazyclass);
@@ -404,7 +403,6 @@ IMPLEMENT_CNS_VAL(TBool,       bool, bool)
 IMPLEMENT_CNS_VAL(TInt,        int,  int64_t)
 IMPLEMENT_CNS_VAL(TDbl,        dbl,  double)
 IMPLEMENT_CNS_VAL(TStaticStr,  str,  const StringData*)
-IMPLEMENT_CNS_VAL(TStaticArr,  arr,  const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticVec,  vec,  const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticDict, dict, const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
@@ -422,18 +420,6 @@ IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
 ///////////////////////////////////////////////////////////////////////////////
 // Specialized type creation.
 
-inline Type Type::Array(const RepoAuthType::Array* rat) {
-  return Type(TArr, ArraySpec(rat));
-}
-
-inline Type Type::VArr(const RepoAuthType::Array* rat) {
-  return Type(TVArr, ArraySpec(rat));
-}
-
-inline Type Type::DArr(const RepoAuthType::Array* rat) {
-  return Type(TDArr, ArraySpec(rat));
-}
-
 inline Type Type::Vec(const RepoAuthType::Array* rat) {
   return Type(TVec, ArraySpec(rat));
 }
@@ -446,18 +432,6 @@ inline Type Type::Keyset(const RepoAuthType::Array* rat) {
   return Type(TKeyset, ArraySpec(rat));
 }
 
-inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
-  return Type(TStaticArr, ArraySpec(rat));
-}
-
-inline Type Type::StaticVArr(const RepoAuthType::Array* rat) {
-  return Type(TStaticVArr, ArraySpec(rat));
-}
-
-inline Type Type::StaticDArr(const RepoAuthType::Array* rat) {
-  return Type(TStaticDArr, ArraySpec(rat));
-}
-
 inline Type Type::StaticVec(const RepoAuthType::Array* rat) {
   return Type(TStaticVec, ArraySpec(rat));
 }
@@ -468,18 +442,6 @@ inline Type Type::StaticDict(const RepoAuthType::Array* rat) {
 
 inline Type Type::StaticKeyset(const RepoAuthType::Array* rat) {
   return Type(TStaticKeyset, ArraySpec(rat));
-}
-
-inline Type Type::CountedArray(const RepoAuthType::Array* rat) {
-  return Type(TCountedArr, ArraySpec(rat));
-}
-
-inline Type Type::CountedVArr(const RepoAuthType::Array* rat) {
-  return Type(TCountedVArr, ArraySpec(rat));
-}
-
-inline Type Type::CountedDArr(const RepoAuthType::Array* rat) {
-  return Type(TCountedDArr, ArraySpec(rat));
 }
 
 inline Type Type::CountedVec(const RepoAuthType::Array* rat) {

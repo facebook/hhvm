@@ -131,16 +131,6 @@ using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {ConvArrLikeToVArr,  convArrLikeToVArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    {ConvClsMethToVArr,  convClsMethToVArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-
-    {ConvArrLikeToDArr,  convArrLikeToDArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    {ConvClsMethToDArr,  convClsMethToDArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-
     {ConvArrLikeToVec,   convArrLikeToVecHelper, DSSA, SSync,
                            {{SSA, 0}}},
     {ConvClsMethToVec,   convClsMethToVecHelper, DSSA, SSync,

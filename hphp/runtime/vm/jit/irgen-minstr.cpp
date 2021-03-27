@@ -543,7 +543,7 @@ void checkCollectionBounds(IRGS& env, SSATmp* base,
 }
 
 void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
-  assertx(base->type().subtypeOfAny(TVec, TVArr));
+  assertx(base->isA(TVec));
 
   ifThen(
     env,
@@ -559,7 +559,7 @@ void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
 
 template<class Finish>
 SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
-  assertx(base->type().subtypeOfAny(TVec, TVArr));
+  assertx(base->isA(TVec));
 
   if (!key->isA(TInt)) {
     gen(env, ThrowInvalidArrayKey, base, key);
@@ -580,7 +580,7 @@ SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 
 template<class Finish>
 SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
-  assertx(base->type().subtypeOfAny(TVec, TVArr));
+  assertx(base->isA(TVec));
 
   if (key->isA(TStr)) return cns(env, TInitNull);
   if (!key->isA(TInt)) {
@@ -609,8 +609,7 @@ SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 template<class Finish>
 SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
                           bool quiet, bool is_dict, Finish finish) {
-  assertx(is_dict ? base->type().subtypeOfAny(TDict, TDArr)
-                  : base->isA(TKeyset));
+  assertx(is_dict ? base->isA(TDict) : base->isA(TKeyset));
 
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
@@ -688,7 +687,7 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 }
 
 SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->type().subtypeOfAny(TVec, TVArr));
+  assertx(base->isA(TVec));
 
   if (key->isA(TStr)) return cns(env, false);
   if (!key->isA(TInt)) {
@@ -710,7 +709,7 @@ SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
 }
 
 SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->type().subtypeOfAny(TDict, TDArr));
+  assertx(base->isA(TDict));
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
@@ -834,13 +833,11 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
                             bool inOut) {
   if (inOut && !(baseType <= TArrLike)) return SimpleOp::None;
 
-  if (baseType.subtypeOfAny(TDict, TDArr)) {
-    return SimpleOp::Dict;
-  } else if (baseType.subtypeOfAny(TVec, TVArr)) {
-    return SimpleOp::Vec;
-  } else if (baseType <= TKeyset) {
-    return SimpleOp::Keyset;
-  } else if (baseType <= TStr) {
+  if (baseType <= TVec)    return SimpleOp::Vec;
+  if (baseType <= TDict)   return SimpleOp::Dict;
+  if (baseType <= TKeyset) return SimpleOp::Keyset;
+
+  if (baseType <= TStr) {
     if (keyType <= TInt) {
       // Don't bother with SetM on strings, because profile data shows it
       // basically never happens.
@@ -982,7 +979,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 }
 
 SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType.subtypeOfAny(TVec, TVArr));
+  assertx(baseType <= TVec);
   assertx(key->isA(TInt) || key->isA(TStr) ||
           !key->type().maybe(TInt | TStr));
 
@@ -1046,7 +1043,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 }
 
 SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType.subtypeOfAny(TDict, TDArr));
+  assertx(baseType <= TDict);
 
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
@@ -1142,12 +1139,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   assertx(!define || !unset);
   assertx(!define || !warn);
 
-  if (baseType.subtypeOfAny(TVec, TVArr)) {
-    return vecElemImpl(env, mode, baseType, key);
-  }
-  if (baseType.subtypeOfAny(TDict, TDArr)) {
-    return dictElemImpl(env, mode, baseType, key);
-  }
+  if (baseType <= TVec)    return vecElemImpl(env, mode, baseType, key);
+  if (baseType <= TDict)   return dictElemImpl(env, mode, baseType, key);
   if (baseType <= TKeyset) return keysetElemImpl(env, mode, baseType, key);
 
   if (unset) {
@@ -1317,8 +1310,8 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const base = extractBase(env);
   assertx(baseType <= TArrLike);
 
-  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
-  auto const isDict = baseType.subtypeOfAny(TDict, TDArr);
+  auto const isVec = baseType <= TVec;
+  auto const isDict = baseType <= TDict;
   auto const isKeyset = baseType <= TKeyset;
   assertx(isVec || isDict || isKeyset);
 
@@ -1351,7 +1344,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
 
 void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
                        Type baseType, SSATmp* value) {
-  assertx(baseType.subtypeOfAny(TVArr, TVec));
+  assertx(baseType <= TVec);
   auto const maybeCyclic = value->type().maybe(baseType);
 
   if (maybeCyclic) gen(env, IncRef, value);
@@ -1388,9 +1381,9 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   // mismatched in-states for any catch block edges we emit later on.
   auto const basePtr = ldMBase(env);
 
-  if (baseType.subtypeOfAny(TVArr, TVec)) {
+  if (baseType <= TVec) {
     setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
-  } else if (baseType.subtypeOfAny(TDArr, TDict)) {
+  } else if (baseType <= TDict) {
     constrainBase(env);
     gen(env, IncRef, value);
     gen(env, SetNewElemDict, basePtr, value);
@@ -1593,7 +1586,7 @@ void emitBaseSC(IRGS& env,
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
   auto const readonlyCheck = writeMode || op != ReadOnlyOp::ReadOnly ?
     ReadOnlyCheck::mustBeMutable : ReadOnlyCheck::Any;
-    
+
   const LdClsPropOptions opts { readonlyCheck, true, false, writeMode };
   auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);

@@ -697,9 +697,6 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              toBoolCmpOpcode(op),
              gen(env, ConvIntToBool, left),
              gen(env, ConvTVToBool, right)));
-  } else if (rightTy <= TArr) {
-    // All ints are implicity less than arrays.
-    push(env, emitConstCmp(env, op, false, true));
   } else if (rightTy <= TVec) {
     push(env, emitMixedVecCmp(env, op));
   } else if (rightTy <= TDict) {
@@ -762,9 +759,6 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              toBoolCmpOpcode(op),
              gen(env, ConvDblToBool, left),
              gen(env, ConvTVToBool, right)));
-  } else if (rightTy <= TArr) {
-    // All doubles are implicitly less than arrays.
-    push(env, emitConstCmp(env, op, false, true));
   } else if (rightTy <= TVec) {
     push(env, emitMixedVecCmp(env, op));
   } else if (rightTy <= TDict) {
@@ -864,54 +858,6 @@ void raiseHACCompareWarningHelper(IRGS& env) {
   }
 }
 
-}
-
-void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assertx(left->type() <= TArr);
-  auto const rightTy = right->type();
-
-  // Left operand is an array.
-
-  if (rightTy <= TArr) {
-    // No conversion needed.
-    push(env, gen(env, toArrLikeCmpOpcode(op), left, right));
-  } else if (rightTy.subtypeOfAny(TNull, TBool)) {
-    // If compared against null or bool, convert both sides to bools.
-    push(env,
-         gen(env,
-             toBoolCmpOpcode(op),
-             gen(env, ConvTVToBool, left),
-             gen(env, ConvTVToBool, right)));
-  } else if (rightTy <= TObj) {
-    // Objects are always greater than arrays. Emit a collection check first.
-    push(
-      env,
-      emitCollectionCheck(
-        env,
-        op,
-        right,
-        [&]{ return emitConstCmp(env, op, false, true); }
-      )
-    );
-  } else if (rightTy <= TVec) {
-    push(env, emitMixedVecCmp(env, op));
-  } else if (rightTy <= TDict) {
-    push(env, emitMixedDictCmp(env, op));
-  } else if (rightTy <= TKeyset) {
-    push(env, emitMixedKeysetCmp(env, op));
-  } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      push(env, emitMixedClsMethCmp(env, op));
-    } else {
-      raiseClsMethToVecWarningHelper(env);
-      auto const arr = convertClsMethToVec(env, right);
-      push(env, gen(env, toArrLikeCmpOpcode(op), left, arr));
-      decRef(env, arr);
-    }
-  } else {
-    // Array is always greater than everything else.
-    push(env, emitConstCmp(env, op, true, false));
-  }
 }
 
 void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
@@ -1218,18 +1164,6 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       )
     );
-  } else if (rightTy <= TArr) {
-    // Object is always greater than array, but we need a collection check
-    // first.
-    push(
-      env,
-      emitCollectionCheck(
-        env,
-        op,
-        left,
-        [&]{ return emitConstCmp(env, op, true, false); }
-      )
-    );
   } else if (rightTy <= TVec) {
     push(env, emitMixedVecCmp(env, op));
   } else if (rightTy <= TDict) {
@@ -1484,11 +1418,6 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
           [&]{ return emitConstCmp(env, op, false, true); }
         )
       );
-    } else if (rightTy <= TArr) {
-      raiseClsMethToVecWarningHelper(env);
-      auto const arr = convertClsMethToVec(env, left);
-      implArrCmp(env, op, arr, right);
-      decRef(env, arr);
     } else if (rightTy <= TVec) {
       raiseHACCompareWarningHelper(env);
       if (RuntimeOption::EvalRaiseClsMethComparisonWarning) {
@@ -1541,66 +1470,11 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
-  // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
-  // ==, or != between a PHP array and a Hack array. On relational compares,
-  // we'll throw between a PHP array and any other type.
-  auto const is_php_arr_hack_arr_cmp =
-    (leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
-    (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr);
-  switch (op) {
-    case Op::Same:
-    case Op::NSame:
-    case Op::Eq:
-    case Op::Neq:
-      if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
-      break;
-    case Op::Lt:
-    case Op::Lte:
-    case Op::Gt:
-    case Op::Gte:
-    case Op::Cmp:
-      if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
-      else {
-        auto const arrLike = RO::EvalIsCompatibleClsMethType
-          ? TArr | TClsMeth
-          : TArr;
-        auto const is_php_arr_non_arr_cmp =
-          ((leftTy <= TArr) != (rightTy <= arrLike)) &&
-          ((leftTy <= arrLike) != (rightTy <= TArr));
-        if (is_php_arr_non_arr_cmp) {
-          auto const nonArr = [&]{
-            gen(
-              env,
-              ThrowInvalidOperation,
-              cns(env, s_cmpWithNonArr.get())
-            );
-            return cns(env, false);
-          };
-          if (leftTy <= TObj || rightTy <= TObj) {
-            emitCollectionCheck(env, op, leftTy <= TObj ? left : right, nonArr);
-          } else {
-            if (rightTy <= TFunc) {
-              gen(
-                env,
-                ThrowInvalidOperation,
-                cns(env, s_cmpWithFunc.get())
-              );
-            } else {
-              nonArr();
-            }
-          }
-        }
-      }
-      break;
-    default:
-      always_assert(false);
-  }
-
   auto equiv = [&] {
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
-      (isArrayType(leftTy.toDataType()) && isArrayType(rightTy.toDataType())) ||
-      (isClassType(leftTy.toDataType()) && isStringType(rightTy.toDataType()))||
+      (isClassType(leftTy.toDataType()) &&
+       isStringType(rightTy.toDataType()))||
       (isClassType(leftTy.toDataType()) &&
        isLazyClassType(rightTy.toDataType()))||
       (isLazyClassType(leftTy.toDataType()) &&
@@ -1629,7 +1503,6 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TBool) implBoolCmp(env, op, left, right);
   else if (leftTy <= TInt) implIntCmp(env, op, left, right);
   else if (leftTy <= TDbl) implDblCmp(env, op, left, right);
-  else if (leftTy <= TArr) implArrCmp(env, op, left, right);
   else if (leftTy <= TVec) implVecCmp(env, op, left, right);
   else if (leftTy <= TDict) implDictCmp(env, op, left, right);
   else if (leftTy <= TKeyset) implKeysetCmp(env, op, left, right);

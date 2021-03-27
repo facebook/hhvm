@@ -1,0 +1,43 @@
+DateTimeZone
+object(DateTimeZone) (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
+}
+
+Warning: Attempted to serialize unserializable builtin class DateTimeZone in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(8) {
+  string(11) "__construct"
+  string(11) "getLocation"
+  string(7) "getName"
+  string(9) "getOffset"
+  string(14) "getTransitions"
+  string(17) "listAbbreviations"
+  string(15) "listIdentifiers"
+  string(11) "__debugInfo"
+}
+================
+A_DateTimeZone
+object(A_DateTimeZone) (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
+}
+
+Warning: Attempted to serialize unserializable builtin class A_DateTimeZone in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(8) {
+  string(11) "__construct"
+  string(11) "getLocation"
+  string(7) "getName"
+  string(9) "getOffset"
+  string(14) "getTransitions"
+  string(17) "listAbbreviations"
+  string(15) "listIdentifiers"
+  string(11) "__debugInfo"
+}

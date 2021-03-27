@@ -1,0 +1,61 @@
+SimpleXMLElement
+object(SimpleXMLElement) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(19) {
+  string(11) "__construct"
+  string(12) "offsetExists"
+  string(9) "offsetGet"
+  string(9) "offsetSet"
+  string(11) "offsetUnset"
+  string(11) "getIterator"
+  string(5) "count"
+  string(5) "xpath"
+  string(22) "registerXPathNamespace"
+  string(5) "asXML"
+  string(7) "saveXML"
+  string(13) "getNamespaces"
+  string(16) "getDocNamespaces"
+  string(8) "children"
+  string(7) "getName"
+  string(10) "attributes"
+  string(8) "addChild"
+  string(12) "addAttribute"
+  string(10) "__toString"
+}
+================
+A_SimpleXMLElement
+object(A_SimpleXMLElement) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(19) {
+  string(11) "__construct"
+  string(12) "offsetExists"
+  string(9) "offsetGet"
+  string(9) "offsetSet"
+  string(11) "offsetUnset"
+  string(11) "getIterator"
+  string(5) "count"
+  string(5) "xpath"
+  string(22) "registerXPathNamespace"
+  string(5) "asXML"
+  string(7) "saveXML"
+  string(13) "getNamespaces"
+  string(16) "getDocNamespaces"
+  string(8) "children"
+  string(7) "getName"
+  string(10) "attributes"
+  string(8) "addChild"
+  string(12) "addAttribute"
+  string(10) "__toString"
+}
+Of basic XML structure the 1th nodes contents is: 
+Of basic XML structure the 2th nodes contents is: b
+Of basic XML structure the 3th nodes contents is: c1
+Basic XML has 3 root children

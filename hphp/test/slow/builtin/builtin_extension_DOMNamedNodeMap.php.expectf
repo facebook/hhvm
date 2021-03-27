@@ -1,0 +1,31 @@
+DOMNamedNodeMap
+object(DOMNamedNodeMap) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class DOMNamedNodeMap in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(5) {
+  string(11) "__construct"
+  string(12) "getNamedItem"
+  string(14) "getNamedItemNS"
+  string(4) "item"
+  string(11) "getIterator"
+}
+================
+A_DOMNamedNodeMap
+object(A_DOMNamedNodeMap) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMNamedNodeMap in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(5) {
+  string(11) "__construct"
+  string(12) "getNamedItem"
+  string(14) "getNamedItemNS"
+  string(4) "item"
+  string(11) "getIterator"
+}

@@ -1,0 +1,33 @@
+SimpleXMLElementIterator
+object(SimpleXMLElementIterator) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SimpleXMLElementIterator in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(6) {
+  string(11) "__construct"
+  string(7) "current"
+  string(3) "key"
+  string(4) "next"
+  string(6) "rewind"
+  string(5) "valid"
+}
+================
+A_SimpleXMLElementIterator
+object(A_SimpleXMLElementIterator) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElementIterator in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(6) {
+  string(11) "__construct"
+  string(7) "current"
+  string(3) "key"
+  string(4) "next"
+  string(6) "rewind"
+  string(5) "valid"
+}

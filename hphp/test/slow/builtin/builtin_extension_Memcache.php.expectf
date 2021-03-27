@@ -1,0 +1,61 @@
+Memcache
+object(Memcache) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class Memcache in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(20) {
+  string(11) "__construct"
+  string(7) "connect"
+  string(8) "pconnect"
+  string(3) "add"
+  string(3) "set"
+  string(7) "replace"
+  string(3) "get"
+  string(6) "delete"
+  string(9) "increment"
+  string(9) "decrement"
+  string(10) "getversion"
+  string(5) "flush"
+  string(12) "setoptimeout"
+  string(5) "close"
+  string(15) "getserverstatus"
+  string(20) "setcompressthreshold"
+  string(8) "getstats"
+  string(16) "getextendedstats"
+  string(15) "setserverparams"
+  string(9) "addserver"
+}
+================
+A_Memcache
+object(A_Memcache) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_Memcache in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(20) {
+  string(11) "__construct"
+  string(7) "connect"
+  string(8) "pconnect"
+  string(3) "add"
+  string(3) "set"
+  string(7) "replace"
+  string(3) "get"
+  string(6) "delete"
+  string(9) "increment"
+  string(9) "decrement"
+  string(10) "getversion"
+  string(5) "flush"
+  string(12) "setoptimeout"
+  string(5) "close"
+  string(15) "getserverstatus"
+  string(20) "setcompressthreshold"
+  string(8) "getstats"
+  string(16) "getextendedstats"
+  string(15) "setserverparams"
+  string(9) "addserver"
+}

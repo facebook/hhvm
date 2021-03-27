@@ -1,0 +1,57 @@
+SQLite3
+object(SQLite3) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SQLite3 in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(18) {
+  string(11) "__construct"
+  string(4) "open"
+  string(11) "busytimeout"
+  string(5) "close"
+  string(4) "exec"
+  string(7) "version"
+  string(15) "lastinsertrowid"
+  string(13) "lasterrorcode"
+  string(12) "lasterrormsg"
+  string(13) "loadExtension"
+  string(7) "changes"
+  string(12) "escapestring"
+  string(7) "prepare"
+  string(5) "query"
+  string(11) "querysingle"
+  string(14) "createfunction"
+  string(15) "createaggregate"
+  string(8) "openblob"
+}
+================
+A_SQLite3
+object(A_SQLite3) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SQLite3 in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(18) {
+  string(11) "__construct"
+  string(4) "open"
+  string(11) "busytimeout"
+  string(5) "close"
+  string(4) "exec"
+  string(7) "version"
+  string(15) "lastinsertrowid"
+  string(13) "lasterrorcode"
+  string(12) "lasterrormsg"
+  string(13) "loadExtension"
+  string(7) "changes"
+  string(12) "escapestring"
+  string(7) "prepare"
+  string(5) "query"
+  string(11) "querysingle"
+  string(14) "createfunction"
+  string(15) "createaggregate"
+  string(8) "openblob"
+}

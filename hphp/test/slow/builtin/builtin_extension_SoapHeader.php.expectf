@@ -1,0 +1,39 @@
+SoapHeader
+object(SoapHeader) (4) {
+  ["namespace"]=>
+  string(3) "Foo"
+  ["name"]=>
+  string(3) "Bar"
+  ["data"]=>
+  NULL
+  ["mustUnderstand"]=>
+  bool(false)
+}
+
+Warning: Attempted to serialize unserializable builtin class SoapHeader in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(1) {
+  string(11) "__construct"
+}
+================
+A_SoapHeader
+object(A_SoapHeader) (5) {
+  ["___x"]=>
+  NULL
+  ["namespace"]=>
+  string(3) "Foo"
+  ["name"]=>
+  string(3) "Bar"
+  ["data"]=>
+  NULL
+  ["mustUnderstand"]=>
+  bool(false)
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SoapHeader in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(1) {
+  string(11) "__construct"
+}

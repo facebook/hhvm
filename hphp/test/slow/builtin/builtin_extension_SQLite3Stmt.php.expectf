@@ -1,0 +1,35 @@
+SQLite3Stmt
+object(SQLite3Stmt) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(7) {
+  string(11) "__construct"
+  string(10) "paramcount"
+  string(5) "close"
+  string(5) "reset"
+  string(5) "clear"
+  string(9) "bindvalue"
+  string(7) "execute"
+}
+================
+A_SQLite3Stmt
+object(A_SQLite3Stmt) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SQLite3Stmt in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(7) {
+  string(11) "__construct"
+  string(10) "paramcount"
+  string(5) "close"
+  string(5) "reset"
+  string(5) "clear"
+  string(9) "bindvalue"
+  string(7) "execute"
+}

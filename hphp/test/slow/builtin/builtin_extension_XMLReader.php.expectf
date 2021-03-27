@@ -1,0 +1,73 @@
+XMLReader
+object(XMLReader) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class XMLReader in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(26) {
+  string(11) "__construct"
+  string(4) "open"
+  string(3) "XML"
+  string(5) "close"
+  string(4) "read"
+  string(4) "next"
+  string(10) "readString"
+  string(12) "readInnerXML"
+  string(12) "readOuterXML"
+  string(19) "moveToNextAttribute"
+  string(12) "getAttribute"
+  string(14) "getAttributeNo"
+  string(14) "getAttributeNs"
+  string(15) "moveToAttribute"
+  string(17) "moveToAttributeNo"
+  string(17) "moveToAttributeNs"
+  string(13) "moveToElement"
+  string(20) "moveToFirstAttribute"
+  string(7) "isValid"
+  string(17) "getParserProperty"
+  string(15) "lookupNamespace"
+  string(9) "setSchema"
+  string(17) "setParserProperty"
+  string(16) "setRelaxNGSchema"
+  string(22) "setRelaxNGSchemaSource"
+  string(6) "expand"
+}
+================
+A_XMLReader
+object(A_XMLReader) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_XMLReader in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(26) {
+  string(11) "__construct"
+  string(4) "open"
+  string(3) "XML"
+  string(5) "close"
+  string(4) "read"
+  string(4) "next"
+  string(10) "readString"
+  string(12) "readInnerXML"
+  string(12) "readOuterXML"
+  string(19) "moveToNextAttribute"
+  string(12) "getAttribute"
+  string(14) "getAttributeNo"
+  string(14) "getAttributeNs"
+  string(15) "moveToAttribute"
+  string(17) "moveToAttributeNo"
+  string(17) "moveToAttributeNs"
+  string(13) "moveToElement"
+  string(20) "moveToFirstAttribute"
+  string(7) "isValid"
+  string(17) "getParserProperty"
+  string(15) "lookupNamespace"
+  string(9) "setSchema"
+  string(17) "setParserProperty"
+  string(16) "setRelaxNGSchema"
+  string(22) "setRelaxNGSchemaSource"
+  string(6) "expand"
+}

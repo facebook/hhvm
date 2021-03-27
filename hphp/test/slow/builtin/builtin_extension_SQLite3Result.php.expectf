@@ -1,0 +1,35 @@
+SQLite3Result
+object(SQLite3Result) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SQLite3Result in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(7) {
+  string(11) "__construct"
+  string(10) "numcolumns"
+  string(10) "columnname"
+  string(10) "columntype"
+  string(10) "fetcharray"
+  string(5) "reset"
+  string(8) "finalize"
+}
+================
+A_SQLite3Result
+object(A_SQLite3Result) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SQLite3Result in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(7) {
+  string(11) "__construct"
+  string(10) "numcolumns"
+  string(10) "columnname"
+  string(10) "columntype"
+  string(10) "fetcharray"
+  string(5) "reset"
+  string(8) "finalize"
+}

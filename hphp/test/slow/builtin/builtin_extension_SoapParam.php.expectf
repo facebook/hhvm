@@ -1,0 +1,23 @@
+SoapParam
+object(SoapParam) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class SoapParam in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(1) {
+  string(11) "__construct"
+}
+================
+A_SoapParam
+object(A_SoapParam) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_SoapParam in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(1) {
+  string(11) "__construct"
+}

@@ -1,0 +1,27 @@
+DateInterval
+object(DateInterval) (0) {
+}
+
+Warning: Attempted to serialize unserializable builtin class DateInterval in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
+vec(3) {
+  string(11) "__construct"
+  string(20) "createFromDateString"
+  string(6) "format"
+}
+================
+A_DateInterval
+object(A_DateInterval) (1) {
+  ["___x"]=>
+  NULL
+}
+
+Warning: Attempted to serialize unserializable builtin class A_DateInterval in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
+vec(3) {
+  string(11) "__construct"
+  string(20) "createFromDateString"
+  string(6) "format"
+}

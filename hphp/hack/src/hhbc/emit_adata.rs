@@ -6,7 +6,7 @@
 use adata_state::AdataState;
 use env::emitter::Emitter;
 use hhas_adata_rust::{
-    HhasAdata, ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
+    HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
 };
 use hhbc_ast_rust::*;
 use hhbc_string_utils_rust as string_utils;
@@ -20,7 +20,6 @@ pub fn rewrite_typed_values(emitter: &mut Emitter, instrseq: &mut InstrSeq) -> R
 
 fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
     use InstructLitConst::*;
-    let hack_arr_dv_arrs = e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS);
     if let Instruct::ILitConst(TypedValue(tv)) = instr {
         *instr = Instruct::ILitConst(match &tv {
             TV::Uninit => return Err(Error::Unrecoverable("rewrite_typed_value: uninit".into())),
@@ -32,22 +31,16 @@ fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
             TV::LazyClass(s) => LazyClass(hhbc_id_rust::class::Type::from_ast_name_and_mangle(s)),
             TV::Float(f) => Double(string_utils::float::to_string(*f)),
             TV::Keyset(_) => Keyset(get_array_identifier(e, tv)),
-            TV::VArray(_) | TV::DArray(_) if !hack_arr_dv_arrs => {
-                Array(get_array_identifier(e, tv))
-            }
-            TV::Vec(_) | TV::VArray(_) => Vec(get_array_identifier(e, tv)),
-            TV::Dict(_) | TV::DArray(_) => Dict(get_array_identifier(e, tv)),
+            TV::Vec(_) => Vec(get_array_identifier(e, tv)),
+            TV::Dict(_) => Dict(get_array_identifier(e, tv)),
             TV::HhasAdata(d) if d.is_empty() => {
                 return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
             }
             TV::HhasAdata(d) => {
                 let identifier = get_array_identifier(e, tv);
                 match &d[..1] {
-                    VARRAY_PREFIX if hack_arr_dv_arrs => Vec(identifier),
-                    DARRAY_PREFIX if hack_arr_dv_arrs => Dict(identifier),
-                    VARRAY_PREFIX | DARRAY_PREFIX | ARRAY_PREFIX => Array(identifier),
-                    VEC_PREFIX => Vec(identifier),
-                    DICT_PREFIX => Dict(identifier),
+                    VARRAY_PREFIX | VEC_PREFIX => Vec(identifier),
+                    DARRAY_PREFIX | DICT_PREFIX => Dict(identifier),
                     KEYSET_PREFIX => Keyset(identifier),
                     _ => {
                         return Err(Error::Unrecoverable(format!(

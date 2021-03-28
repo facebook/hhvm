@@ -311,11 +311,7 @@ pub fn get_type_structure_for_hint<'arena>(
         false,
     )?;
     let i: &'arena str = emit_adata::get_array_identifier(alloc, e, &tv);
-    Ok(if hack_arr_dv_arrs(e.options()) {
-        instr::lit_const(alloc, InstructLitConst::Dict(i))
-    } else {
-        instr::lit_const(alloc, InstructLitConst::Array(i))
-    })
+    Ok(instr::lit_const(alloc, InstructLitConst::Dict(i)))
 }
 
 pub struct Setrange {
@@ -939,10 +935,6 @@ pub fn emit_await<'a, 'arena>(
     }
 }
 
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
-
 fn inline_gena_call<'a, 'arena>(
     emitter: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
@@ -951,18 +943,13 @@ fn inline_gena_call<'a, 'arena>(
     let alloc = env.arena;
     let load_arr = emit_expr(emitter, env, arg)?;
     let async_eager_label = emitter.label_gen_mut().next_regular(alloc);
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(emitter.options());
 
     scope::with_unnamed_local(alloc, emitter, |alloc, e, arr_local| {
         let before = InstrSeq::gather(
             alloc,
             vec![
                 load_arr,
-                if hack_arr_dv_arrs {
-                    instr::cast_dict(alloc)
-                } else {
-                    instr::cast_darray(alloc)
-                },
+                instr::cast_dict(alloc),
                 instr::popl(alloc, arr_local.clone()),
             ],
         );
@@ -984,14 +971,7 @@ fn inline_gena_call<'a, 'arena>(
                         1,
                         None,
                     ),
-                    method::from_raw_string(
-                        alloc,
-                        if hack_arr_dv_arrs {
-                            "fromDict"
-                        } else {
-                            "fromDArray"
-                        },
-                    ),
+                    method::from_raw_string(alloc, "fromDict"),
                     class::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
                 ),
                 instr::await_(alloc),
@@ -1131,8 +1111,8 @@ fn emit_vec_collection<'a, 'arena>(
     fields: &[tast::Afield],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    match ast_constant_folder::vec_to_typed_value(alloc, e, &env.namespace, pos, fields) {
-        Ok(tv) => emit_static_collection(e, env, None, pos, tv),
+    match ast_constant_folder::vec_to_typed_value(alloc, e, &env.namespace, fields) {
+        Ok(tv) => emit_static_collection(env, None, pos, tv),
         Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
     }
 }
@@ -1263,47 +1243,30 @@ fn emit_collection<'a, 'arena>(
         true,  /*allow_map*/
         false, /*force_class_const*/
     ) {
-        Ok(tv) => emit_static_collection(e, env, transform_to_collection, pos, tv),
+        Ok(tv) => emit_static_collection(env, transform_to_collection, pos, tv),
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
     }
 }
 
 fn emit_static_collection<'a, 'arena>(
-    e: &mut Emitter<'arena>,
     env: &Env<'a, 'arena>,
     transform_to_collection: Option<CollectionType>,
     pos: &Pos,
     tv: TypedValue<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let arrprov_enabled = e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE);
     let transform_instr = match transform_to_collection {
         Some(collection_type) => instr::colfromarray(alloc, collection_type),
         _ => instr::empty(alloc),
     };
-    Ok(
-        if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, pos),
-                    instr::typedvalue(alloc, tv),
-                    instr::int(alloc, 0),
-                    instr::instr(alloc, Instruct::IMisc(InstructMisc::TagProvenanceHere)),
-                    transform_instr,
-                ],
-            )
-        } else {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, pos),
-                    instr::typedvalue(alloc, tv),
-                    transform_instr,
-                ],
-            )
-        },
-    )
+    Ok(InstrSeq::gather(
+        alloc,
+        vec![
+            emit_pos(alloc, pos),
+            instr::typedvalue(alloc, tv),
+            transform_instr,
+        ],
+    ))
 }
 
 fn expr_and_new<'a, 'arena>(
@@ -1626,34 +1589,18 @@ fn emit_dynamic_collection<'a, 'arena>(
             emit_collection_helper(e, CollectionType::ImmMap)
         }
         E_::Varray(_) => {
-            let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
-            let instrs = emit_value_only_collection(e, env, pos, fields, |n| {
-                if hack_arr_dv_arrs {
-                    InstructLitConst::NewVec(n)
-                } else {
-                    InstructLitConst::NewVArray(n)
-                }
-            });
+            let instrs = emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec);
             Ok(instrs?)
         }
         E_::Darray(_) => {
             if is_struct_init(e, env, fields, false /* allow_numerics */)? {
-                let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
                 let instrs = emit_struct_array(e, env, pos, fields, |alloc, _, arg| {
-                    let instr = if hack_arr_dv_arrs {
-                        instr::newstructdict(alloc, arg)
-                    } else {
-                        instr::newstructdarray(alloc, arg)
-                    };
+                    let instr = instr::newstructdict(alloc, arg);
                     Ok(emit_pos_then(alloc, pos, instr))
                 });
                 Ok(instrs?)
             } else {
-                let constr = if hack_arr_dv_arrs(e.options()) {
-                    InstructLitConst::NewDictArray(count as isize)
-                } else {
-                    InstructLitConst::NewDArray(count as isize)
-                };
+                let constr = InstructLitConst::NewDictArray(count as isize);
                 let instrs =
                     emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
                 Ok(instrs?)
@@ -1867,15 +1814,14 @@ fn emit_tag_provenance_here<'a, 'arena>(
     es: &[tast::Expr],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let default = if es.len() == 1 {
-        instr::int(alloc, 0)
-    } else {
+    let pop = if es.len() == 1 {
         instr::empty(alloc)
+    } else {
+        instr::popc(alloc)
     };
-    let tag = instr::instr(alloc, Instruct::IMisc(InstructMisc::TagProvenanceHere));
     Ok(InstrSeq::gather(
         alloc,
-        vec![emit_exprs(e, env, es)?, emit_pos(alloc, pos), default, tag],
+        vec![emit_exprs(e, env, es)?, emit_pos(alloc, pos), pop],
     ))
 }
 
@@ -2066,11 +2012,7 @@ pub fn emit_reified_targs<'a, 'arena>(
                         .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
                         .collect::<Result<Vec<_>>>()?,
                 ),
-                if hack_arr_dv_arrs(e.options()) {
-                    instr::new_vec_array(alloc, targs.len() as isize)
-                } else {
-                    instr::new_varray(alloc, targs.len() as isize)
-                },
+                instr::new_vec_array(alloc, targs.len() as isize),
             ],
         )
     })
@@ -3167,11 +3109,7 @@ fn emit_special_function<'a, 'arena>(
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
         _ => Ok(
-            match (
-                args,
-                istype_op(e.options(), lower_fq_name),
-                is_isexp_op(lower_fq_name),
-            ) {
+            match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
                 (&[ref arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, &h)?;
                     Some(InstrSeq::gather(
@@ -3206,7 +3144,7 @@ fn emit_special_function<'a, 'arena>(
                         instr::istypec(alloc, i),
                     ],
                 )),
-                _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
+                _ => match get_call_builtin_func_info(lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(
                         alloc,
                         vec![
@@ -3240,10 +3178,8 @@ fn emit_inst_meth<'a, 'arena>(
                 .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
             {
                 instr::resolve_obj_method(alloc)
-            } else if hack_arr_dv_arrs(e.options()) {
-                instr::new_vec_array(alloc, 2)
             } else {
-                instr::new_varray(alloc, 2)
+                instr::new_vec_array(alloc, 2)
             },
         ],
     );
@@ -3312,11 +3248,7 @@ fn emit_class_meth<'a, 'arena>(
             vec![
                 emit_expr(e, env, cls)?,
                 emit_expr(e, env, meth)?,
-                if hack_arr_dv_arrs(e.options()) {
-                    instr::new_vec_array(alloc, 2)
-                } else {
-                    instr::new_varray(alloc, 2)
-                },
+                instr::new_vec_array(alloc, 2),
             ],
         );
         Ok(instrs)
@@ -3399,12 +3331,8 @@ fn emit_class_meth_native<'a, 'arena>(
     })
 }
 
-fn get_call_builtin_func_info<'arena>(
-    opts: &Options,
-    id: impl AsRef<str>,
-) -> Option<(usize, Instruct<'arena>)> {
+fn get_call_builtin_func_info<'arena>(id: impl AsRef<str>) -> Option<(usize, Instruct<'arena>)> {
     use {Instruct::*, InstructGet::*, InstructIsset::*, InstructMisc::*, InstructOperator::*};
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
     match id.as_ref() {
         "array_key_exists" => Some((2, IMisc(AKExists))),
         "hphp_array_idx" => Some((3, IMisc(ArrayIdx))),
@@ -3415,22 +3343,8 @@ fn get_call_builtin_func_info<'arena>(
         "HH\\vec" => Some((1, IOp(CastVec))),
         "HH\\keyset" => Some((1, IOp(CastKeyset))),
         "HH\\dict" => Some((1, IOp(CastDict))),
-        "HH\\varray" => Some((
-            1,
-            IOp(if hack_arr_dv_arrs {
-                CastVec
-            } else {
-                CastVArray
-            }),
-        )),
-        "HH\\darray" => Some((
-            1,
-            IOp(if hack_arr_dv_arrs {
-                CastDict
-            } else {
-                CastDArray
-            }),
-        )),
+        "HH\\varray" => Some((1, IOp(CastVec))),
+        "HH\\darray" => Some((1, IOp(CastDict))),
         "HH\\global_get" => Some((1, IGet(CGetG))),
         "HH\\global_isset" => Some((1, IIsset(IssetG))),
         _ => None,
@@ -3528,8 +3442,7 @@ fn emit_is<'a, 'arena>(
     })
 }
 
-fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
+fn istype_op(id: impl AsRef<str>) -> Option<IstypeOp> {
     use IstypeOp::*;
     match id.as_ref() {
         "is_int" | "is_integer" | "is_long" => Some(OpInt),
@@ -3542,16 +3455,12 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "HH\\is_keyset" => Some(OpKeyset),
         "HH\\is_dict" => Some(OpDict),
         "HH\\is_vec" => Some(OpVec),
-        "HH\\is_varray" => Some(if hack_arr_dv_arrs { OpVec } else { OpVArray }),
-        "HH\\is_darray" => Some(if hack_arr_dv_arrs { OpDict } else { OpDArray }),
+        "HH\\is_varray" => Some(OpVec),
+        "HH\\is_darray" => Some(OpDict),
         "HH\\is_any_array" => Some(OpArrLike),
         "HH\\is_class_meth" => Some(OpClsMeth),
         "HH\\is_fun" => Some(OpFunc),
-        "HH\\is_php_array" => Some(if hack_arr_dv_arrs {
-            OpLegacyArrLike
-        } else {
-            OpPHPArr
-        }),
+        "HH\\is_php_array" => Some(OpLegacyArrLike),
         "HH\\is_array_marked_legacy" => Some(OpLegacyArrLike),
         "HH\\is_class" => Some(OpClass),
         _ => None,

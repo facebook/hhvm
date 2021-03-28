@@ -2,12 +2,12 @@
 
 .filepath "test.php";
 
-.adata A_0 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_1 = """Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}""";
-.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:11:\"HH\\MemberOf\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
-.adata A_3 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
+.adata A_0 = """D:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";v:1:{D:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """D:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}""";
+.adata A_2 = """D:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:11:\"HH\\MemberOf\";s:13:\"generic_types\";v:2:{D:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";v:1:{s:5:\"TEnum\";}}D:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";v:1:{D:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
+.adata A_3 = """D:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";v:1:{s:5:\"TEnum\";}}""";
 
-.function {} ["__EntryPoint"("""y:0:{}""")] (60,68) <"HH\\void" N > main() {
+.function {} ["__EntryPoint"("""v:0:{}""")] (60,68) <"HH\\void" N > main() {
   .srcloc 61:3,61:16;
   NullUninit
   NullUninit
@@ -110,13 +110,13 @@
     PopC
     LockObj
     .srcloc 12:5,12:27;
-    Array @A_0
+    Dict @A_0
     VerifyRetTypeTS
     RetC
   }
 }
 
-.class {} [enum enum_class "__EnumClass"("""y:0:{}""")] E (16,19) extends HH\BuiltinEnumClass {
+.class {} [enum enum_class "__EnumClass"("""v:0:{}""")] E (16,19) extends HH\BuiltinEnumClass {
   .enum_ty <"I" extended_hint>;
   .const A = uninit;
   .const B = uninit;
@@ -170,9 +170,9 @@
     .srcloc 21:1,23:85;
     NullUninit
     NullUninit
-    Array @A_1
+    Dict @A_1
     CombineAndResolveTypeStruct 1
-    NewVArray 1
+    NewVec 1
     RecordReifiedGeneric
     FCallClsMethodSD <> 1 1 "" - "" "" Parent "86reifiedinit"
     PopC
@@ -181,7 +181,7 @@
   }
 }
 
-.class {} [enum enum_class "__EnumClass"("""y:0:{}""")] F (25,27) extends HH\BuiltinEnumClass enum_includes (E) {
+.class {} [enum enum_class "__EnumClass"("""v:0:{}""")] F (25,27) extends HH\BuiltinEnumClass enum_includes (E) {
   .enum_ty <"I" extended_hint>;
   .const C = uninit;
   .method {}{} [private static no_injection] (25,27) 86cinit($constName) {
@@ -215,7 +215,7 @@
   .const TEnum isType isAbstract;
   .method {}{} [public static] (33,35) <"T" "T" extended_hint type_var> get(<"HH\\MemberOf<HH\\this::TEnum, Box<T>>" "HH\\MemberOf" > $enum) {
     .srcloc 33:5,35:93;
-    Array @A_2
+    Dict @A_2
     VerifyParamTypeTS $enum
     .srcloc 34:12,34:22;
     BaseL $enum Warn
@@ -226,7 +226,7 @@
   }
   .method {}{} [public static] (38,41) <"HH\\void" N > show(<"HH\\MemberOf<HH\\this::TEnum, Box<T>>" "HH\\MemberOf" > $enum) {
     .srcloc 38:5,41:117;
-    Array @A_2
+    Dict @A_2
     VerifyParamTypeTS $enum
     .srcloc 39:10,39:27;
     NullUninit
@@ -249,11 +249,11 @@
     Null
     RetC
   }
-  .method {}{} [public static] (44,49) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
+  .method {}{} [public static] (44,49) <"HH\\void" N > show_atom(["__Atom"("""v:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
     .srcloc 44:5,49:144;
-    Array @A_2
+    Dict @A_2
     VerifyParamTypeTS $enum
-    Array @A_3
+    Dict @A_3
     CombineAndResolveTypeStruct 1
     BaseC 0 None
     QueryM 1 CGetQuiet ET:"classname" Mutable
@@ -293,13 +293,13 @@
 }
 
 .class {} [final] CE (52,54) extends Controller {
-  .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"E\";}""";
+  .const TEnum isType = """D:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"E\";}""";
 }
 
 .class {} [final] CF (56,58) extends Controller {
-  .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"F\";}""";
+  .const TEnum isType = """D:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"F\";}""";
 }
 
-.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:9:\"enum_atom\";}""")] ;
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:9:\"enum_atom\";}""")] ;
 
 # test.php ends here

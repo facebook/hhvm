@@ -6,7 +6,7 @@
 use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
-use hhbc_by_ref_options::{HhvmFlags, Options};
+use hhbc_by_ref_options::Options;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::classes;
 use oxidized::{
@@ -16,29 +16,6 @@ use oxidized::{
     ast_defs::ShapeFieldName,
 };
 use std::collections::BTreeMap;
-
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
-
-fn vec_or_varray<'arena>(opts: &Options, l: &'arena [TypedValue<'arena>]) -> TypedValue<'arena> {
-    if hack_arr_dv_arrs(opts) {
-        TypedValue::Vec((l, None, false))
-    } else {
-        TypedValue::VArray((l, None))
-    }
-}
-
-fn dict_or_darray<'arena>(
-    opts: &Options,
-    kv: &'arena [(TypedValue<'arena>, TypedValue<'arena>)],
-) -> TypedValue<'arena> {
-    if hack_arr_dv_arrs(opts) {
-        TypedValue::Dict((kv, None, false))
-    } else {
-        TypedValue::DArray((kv, None))
-    }
-}
 
 fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
     if tparams.contains(&p) {
@@ -161,7 +138,7 @@ fn shape_field_to_pair<'arena>(
     ));
     Ok((
         TypedValue::string(name.as_str(), alloc),
-        dict_or_darray(opts, r.into_bump_slice()),
+        TypedValue::Dict(r.into_bump_slice()),
     ))
 }
 
@@ -177,8 +154,7 @@ fn shape_info_to_typed_value<'arena>(
         .iter()
         .map(|sfi| shape_field_to_pair(alloc, opts, tparams, targ_map, &sfi))
         .collect::<Result<Vec<_>>>()?;
-    Ok(dict_or_darray(
-        opts,
+    Ok(TypedValue::Dict(
         bumpalo::collections::Vec::from_iter_in(info.into_iter(), alloc).into_bump_slice(),
     ))
 }
@@ -199,7 +175,6 @@ fn shape_allows_unknown_fields<'arena>(
 
 fn type_constant_access_list<'arena>(
     alloc: &'arena bumpalo::Bump,
-    opts: &Options,
     sl: &[aast::Sid],
 ) -> TypedValue<'arena> {
     let sl_ = bumpalo::collections::Vec::from_iter_in(
@@ -208,7 +183,7 @@ fn type_constant_access_list<'arena>(
         alloc,
     )
     .into_bump_slice();
-    vec_or_varray(opts, sl_)
+    TypedValue::Vec(sl_)
 }
 
 fn resolve_classname<'arena>(
@@ -350,7 +325,7 @@ fn hint_to_type_constant_list<'arena>(
                 ));
                 r.push((
                     TypedValue::string("access_list", alloc),
-                    type_constant_access_list(alloc, opts, ids),
+                    type_constant_access_list(alloc, ids),
                 ));
                 r
             }
@@ -435,7 +410,7 @@ pub fn hint_to_type_constant<'arena>(
     if is_opaque {
         tconsts.extend_from_slice(&[(TypedValue::string("opaque", alloc), TypedValue::Bool(true))])
     };
-    Ok(dict_or_darray(opts, tconsts.into_bump_slice()))
+    Ok(TypedValue::Dict(tconsts.into_bump_slice()))
 }
 
 fn hints_to_type_constant<'arena>(
@@ -450,8 +425,7 @@ fn hints_to_type_constant<'arena>(
         .map(|h| hint_to_type_constant(alloc, opts, tparams, targ_map, h, false, false))
         .collect::<Result<Vec<_>>>();
     hints.map(|hs| {
-        vec_or_varray(
-            opts,
+        TypedValue::Vec(
             bumpalo::collections::vec::Vec::from_iter_in(hs.into_iter(), alloc).into_bump_slice(),
         )
     })

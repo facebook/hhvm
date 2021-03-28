@@ -6,7 +6,7 @@
 use hhbc_by_ref_adata_state::AdataState;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_adata::{
-    HhasAdata, ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
+    HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
 };
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -28,7 +28,6 @@ fn rewrite_typed_value<'arena>(
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), hhbc_by_ref_instruction_sequence::Error> {
     //use InstructLitConst::*;
-    let hack_arr_dv_arrs = e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS);
     if let Instruct::ILitConst(InstructLitConst::TypedValue(tv)) = instr {
         *instr = Instruct::ILitConst(match &tv {
             TypedValue::Uninit => {
@@ -56,15 +55,11 @@ fn rewrite_typed_value<'arena>(
                 let arrayid = get_array_identifier(alloc, e, tv);
                 InstructLitConst::Keyset(arrayid)
             }
-            TypedValue::VArray(_) | TypedValue::DArray(_) if !hack_arr_dv_arrs => {
-                let arrayid = get_array_identifier(alloc, e, tv);
-                InstructLitConst::Array(arrayid)
-            }
-            TypedValue::Vec(_) | TypedValue::VArray(_) => {
+            TypedValue::Vec(_) => {
                 let arrayid = get_array_identifier(alloc, e, tv);
                 InstructLitConst::Vec(arrayid)
             }
-            TypedValue::Dict(_) | TypedValue::DArray(_) => {
+            TypedValue::Dict(_) => {
                 let arrayid = get_array_identifier(alloc, e, tv);
                 InstructLitConst::Dict(arrayid)
             }
@@ -74,13 +69,8 @@ fn rewrite_typed_value<'arena>(
             TypedValue::HhasAdata(d) => {
                 let arrayid = get_array_identifier(alloc, e, tv);
                 match &d[..1] {
-                    VARRAY_PREFIX if hack_arr_dv_arrs => InstructLitConst::Vec(arrayid),
-                    DARRAY_PREFIX if hack_arr_dv_arrs => InstructLitConst::Dict(arrayid),
-                    VARRAY_PREFIX | DARRAY_PREFIX | ARRAY_PREFIX => {
-                        InstructLitConst::Array(arrayid)
-                    }
-                    VEC_PREFIX => InstructLitConst::Vec(arrayid),
-                    DICT_PREFIX => InstructLitConst::Dict(arrayid),
+                    VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),
+                    DARRAY_PREFIX | DICT_PREFIX => InstructLitConst::Dict(arrayid),
                     KEYSET_PREFIX => InstructLitConst::Keyset(arrayid),
                     _ => {
                         return Err(Error::Unrecoverable(format!(

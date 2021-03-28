@@ -15,10 +15,7 @@ use core_utils_rust::add_ns;
 use emit_type_hint_rust as emit_type_hint;
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::HhasAdata;
-use hhas_adata_rust::{
-    DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, LEGACY_DICT_PREFIX, LEGACY_VEC_PREFIX,
-    VARRAY_PREFIX, VEC_PREFIX,
-};
+use hhas_adata_rust::{DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_body_rust::HhasBodyEnv;
@@ -1064,30 +1061,14 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write("b:0;"),
         TypedValue::Bool(true) => w.write("b:1;"),
-        TypedValue::Dict((pairs, loc, is_legacy)) => {
-            let prefix = if *is_legacy {
-                LEGACY_DICT_PREFIX
-            } else {
-                DICT_PREFIX
-            };
-            print_adata_dict_collection_argument(ctx, w, prefix, loc, pairs)
+        TypedValue::Vec(values) => {
+            print_adata_collection_argument(ctx, w, VEC_PREFIX, &None, values)
         }
-        TypedValue::Vec((values, loc, is_legacy)) => {
-            let prefix = if *is_legacy {
-                LEGACY_VEC_PREFIX
-            } else {
-                VEC_PREFIX
-            };
-            print_adata_collection_argument(ctx, w, prefix, loc, values)
-        }
-        TypedValue::DArray((pairs, loc)) => {
-            print_adata_dict_collection_argument(ctx, w, DARRAY_PREFIX, loc, pairs)
+        TypedValue::Dict(pairs) => {
+            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, &None, pairs)
         }
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values)
-        }
-        TypedValue::VArray((values, loc)) => {
-            print_adata_collection_argument(ctx, w, VARRAY_PREFIX, loc, values)
         }
         TypedValue::HhasAdata(s) => w.write(escaped(s)),
     }
@@ -1102,7 +1083,7 @@ fn print_attribute<W: Write>(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
         a.name,
-        VARRAY_PREFIX,
+        VEC_PREFIX,
         a.arguments.len()
     )?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
@@ -1706,11 +1687,8 @@ fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
         Op::OpVec => w.write("Vec"),
         Op::OpArrLike => w.write("ArrLike"),
         Op::OpLegacyArrLike => w.write("LegacyArrLike"),
-        Op::OpVArray => w.write("VArray"),
-        Op::OpDArray => w.write("DArray"),
         Op::OpClsMeth => w.write("ClsMeth"),
         Op::OpFunc => w.write("Func"),
-        Op::OpPHPArr => w.write("PHPArr"),
         Op::OpClass => w.write("Class"),
     }
 }
@@ -1877,7 +1855,6 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::ArrayIdx => w.write("ArrayIdx"),
         M::ArrayMarkLegacy => w.write("ArrayMarkLegacy"),
         M::ArrayUnmarkLegacy => w.write("ArrayUnmarkLegacy"),
-        M::TagProvenanceHere => w.write("TagProvenanceHere"),
         M::BreakTraceHint => w.write("BreakTraceHint"),
         M::CGetCUNop => w.write("CGetCUNop"),
         M::UGetCUNop => w.write("UGetCUNop"),
@@ -2086,10 +2063,6 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::Dir => w.write("Dir"),
         LC::Method => w.write("Method"),
         LC::FuncCred => w.write("FuncCred"),
-        LC::Array(id) => {
-            w.write("Array ")?;
-            print_adata_id(w, id)
-        }
         LC::Dict(id) => {
             w.write("Dict ")?;
             print_adata_id(w, id)
@@ -2103,14 +2076,8 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             print_adata_id(w, id)
         }
         LC::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
-        LC::NewDArray(i) => concat_str_by(w, " ", ["NewDArray", i.to_string().as_str()]),
-        LC::NewVArray(i) => concat_str_by(w, " ", ["NewVArray", i.to_string().as_str()]),
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
-        LC::NewStructDArray(l) => {
-            w.write("NewStructDArray ")?;
-            angle(w, |w| print_shape_fields(w, l))
-        }
         LC::NewStructDict(l) => {
             w.write("NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, l))
@@ -2210,8 +2177,6 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
         I::CastVec => w.write("CastVec"),
         I::CastDict => w.write("CastDict"),
         I::CastKeyset => w.write("CastKeyset"),
-        I::CastVArray => w.write("CastVArray"),
-        I::CastDArray => w.write("CastDArray"),
         I::InstanceOf => w.write("InstanceOf"),
         I::InstanceOfD(id) => {
             w.write("InstanceOfD ")?;

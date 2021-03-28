@@ -293,11 +293,7 @@ pub fn get_type_structure_for_hint(
         false,
     )?;
     let i = emit_adata::get_array_identifier(e, &tv);
-    Ok(if hack_arr_dv_arrs(e.options()) {
-        instr::lit_const(InstructLitConst::Dict(i))
-    } else {
-        instr::lit_const(InstructLitConst::Array(i))
-    })
+    Ok(instr::lit_const(InstructLitConst::Dict(i)))
 }
 
 pub struct Setrange {
@@ -809,23 +805,14 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
     }
 }
 
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
-
 fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Result {
     let load_arr = emit_expr(emitter, env, arg)?;
     let async_eager_label = emitter.label_gen_mut().next_regular();
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(emitter.options());
 
     scope::with_unnamed_local(emitter, |e, arr_local| {
         let before = InstrSeq::gather(vec![
             load_arr,
-            if hack_arr_dv_arrs {
-                instr::cast_dict()
-            } else {
-                instr::cast_darray()
-            },
+            instr::cast_dict(),
             instr::popl(arr_local.clone()),
         ]);
 
@@ -842,11 +829,7 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
                     1,
                     None,
                 ),
-                method::from_raw_string(if hack_arr_dv_arrs {
-                    "fromDict"
-                } else {
-                    "fromDArray"
-                }),
+                method::from_raw_string("fromDict"),
                 class::from_raw_string("HH\\AwaitAllWaitHandle"),
             ),
             instr::await_(),
@@ -963,8 +946,8 @@ fn emit_vec_collection(
     pos: &Pos,
     fields: &Vec<tast::Afield>,
 ) -> Result {
-    match ast_constant_folder::vec_to_typed_value(e, &env.namespace, pos, fields) {
-        Ok(tv) => emit_static_collection(e, env, None, pos, tv),
+    match ast_constant_folder::vec_to_typed_value(e, &env.namespace, fields) {
+        Ok(tv) => emit_static_collection(None, pos, tv),
         Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
     }
 }
@@ -1081,36 +1064,25 @@ fn emit_collection(
         true,  /*allow_map*/
         false, /*force_class_const*/
     ) {
-        Ok(tv) => emit_static_collection(e, env, transform_to_collection, pos, tv),
+        Ok(tv) => emit_static_collection(transform_to_collection, pos, tv),
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
     }
 }
 
 fn emit_static_collection(
-    e: &mut Emitter,
-    env: &Env,
     transform_to_collection: Option<CollectionType>,
     pos: &Pos,
     tv: TypedValue,
 ) -> Result {
-    let arrprov_enabled = e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE);
     let transform_instr = match transform_to_collection {
         Some(collection_type) => instr::colfromarray(collection_type),
         _ => instr::empty(),
     };
-    Ok(
-        if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
-            InstrSeq::gather(vec![
-                emit_pos(pos),
-                instr::typedvalue(tv),
-                instr::int(0),
-                instr::instr(Instruct::IMisc(InstructMisc::TagProvenanceHere)),
-                transform_instr,
-            ])
-        } else {
-            InstrSeq::gather(vec![emit_pos(pos), instr::typedvalue(tv), transform_instr])
-        },
-    )
+    Ok(InstrSeq::gather(vec![
+        emit_pos(pos),
+        instr::typedvalue(tv),
+        transform_instr,
+    ]))
 }
 
 fn expr_and_new(
@@ -1387,34 +1359,18 @@ fn emit_dynamic_collection(
             emit_collection_helper(e, CollectionType::ImmMap)
         }
         E_::Varray(_) => {
-            let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
-            let instrs = emit_value_only_collection(e, env, pos, fields, |n| {
-                if hack_arr_dv_arrs {
-                    InstructLitConst::NewVec(n)
-                } else {
-                    InstructLitConst::NewVArray(n)
-                }
-            });
+            let instrs = emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec);
             Ok(instrs?)
         }
         E_::Darray(_) => {
             if is_struct_init(e, env, fields, false /* allow_numerics */)? {
-                let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
                 let instrs = emit_struct_array(e, env, pos, fields, |_, arg| {
-                    let instr = if hack_arr_dv_arrs {
-                        instr::newstructdict(arg)
-                    } else {
-                        instr::newstructdarray(arg)
-                    };
+                    let instr = instr::newstructdict(arg);
                     Ok(emit_pos_then(pos, instr))
                 });
                 Ok(instrs?)
             } else {
-                let constr = if hack_arr_dv_arrs(e.options()) {
-                    InstructLitConst::NewDictArray(count as isize)
-                } else {
-                    InstructLitConst::NewDArray(count as isize)
-                };
+                let constr = InstructLitConst::NewDictArray(count as isize);
                 let instrs =
                     emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
                 Ok(instrs?)
@@ -1568,17 +1524,15 @@ fn emit_call_isset_exprs(e: &mut Emitter, env: &Env, pos: &Pos, exprs: &[tast::E
 }
 
 fn emit_tag_provenance_here(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {
-    let default = if es.len() == 1 {
-        instr::int(0)
-    } else {
+    let pop = if es.len() == 1 {
         instr::empty()
+    } else {
+        instr::popc()
     };
-    let tag = instr::instr(Instruct::IMisc(InstructMisc::TagProvenanceHere));
     Ok(InstrSeq::gather(vec![
         emit_exprs(e, env, es)?,
         emit_pos(pos),
-        default,
-        tag,
+        pop,
     ]))
 }
 
@@ -1734,11 +1688,7 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
                     .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
                     .collect::<Result<Vec<_>>>()?,
             ),
-            if hack_arr_dv_arrs(e.options()) {
-                instr::new_vec_array(targs.len() as isize)
-            } else {
-                instr::new_varray(targs.len() as isize)
-            },
+            instr::new_vec_array(targs.len() as isize),
         ]);
         instrs
     })
@@ -2620,11 +2570,7 @@ fn emit_special_function(
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
         _ => Ok(
-            match (
-                args,
-                istype_op(e.options(), lower_fq_name),
-                is_isexp_op(lower_fq_name),
-            ) {
+            match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
                 (&[ref arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, &h)?;
                     Some(InstrSeq::gather(vec![
@@ -2652,7 +2598,7 @@ fn emit_special_function(
                     emit_pos(pos),
                     instr::istypec(i),
                 ])),
-                _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
+                _ => match get_call_builtin_func_info(lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => {
                         let inner = emit_exprs(e, env, args)?;
                         Some(InstrSeq::gather(vec![
@@ -2683,10 +2629,8 @@ fn emit_inst_meth(
             .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
         {
             instr::resolve_obj_method()
-        } else if hack_arr_dv_arrs(e.options()) {
-            instr::new_vec_array(2)
         } else {
-            instr::new_varray(2)
+            instr::new_vec_array(2)
         },
     ]);
     Ok(instrs)
@@ -2738,11 +2682,7 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
         let instrs = InstrSeq::gather(vec![
             emit_expr(e, env, cls)?,
             emit_expr(e, env, meth)?,
-            if hack_arr_dv_arrs(e.options()) {
-                instr::new_vec_array(2)
-            } else {
-                instr::new_varray(2)
-            },
+            instr::new_vec_array(2),
         ]);
         Ok(instrs)
     }
@@ -2803,9 +2743,8 @@ fn emit_class_meth_native(
     })
 }
 
-fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(usize, Instruct)> {
+fn get_call_builtin_func_info(id: impl AsRef<str>) -> Option<(usize, Instruct)> {
     use {Instruct::*, InstructGet::*, InstructIsset::*, InstructMisc::*, InstructOperator::*};
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
     match id.as_ref() {
         "array_key_exists" => Some((2, IMisc(AKExists))),
         "hphp_array_idx" => Some((3, IMisc(ArrayIdx))),
@@ -2816,22 +2755,8 @@ fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(us
         "HH\\vec" => Some((1, IOp(CastVec))),
         "HH\\keyset" => Some((1, IOp(CastKeyset))),
         "HH\\dict" => Some((1, IOp(CastDict))),
-        "HH\\varray" => Some((
-            1,
-            IOp(if hack_arr_dv_arrs {
-                CastVec
-            } else {
-                CastVArray
-            }),
-        )),
-        "HH\\darray" => Some((
-            1,
-            IOp(if hack_arr_dv_arrs {
-                CastDict
-            } else {
-                CastDArray
-            }),
-        )),
+        "HH\\varray" => Some((1, IOp(CastVec))),
+        "HH\\darray" => Some((1, IOp(CastDict))),
         "HH\\global_get" => Some((1, IGet(CGetG))),
         "HH\\global_isset" => Some((1, IIsset(IssetG))),
         _ => None,
@@ -2907,8 +2832,7 @@ fn emit_is(e: &mut Emitter, env: &Env, pos: &Pos, h: &tast::Hint) -> Result {
     })
 }
 
-fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
-    let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
+fn istype_op(id: impl AsRef<str>) -> Option<IstypeOp> {
     use IstypeOp::*;
     match id.as_ref() {
         "is_int" | "is_integer" | "is_long" => Some(OpInt),
@@ -2921,16 +2845,12 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "HH\\is_keyset" => Some(OpKeyset),
         "HH\\is_dict" => Some(OpDict),
         "HH\\is_vec" => Some(OpVec),
-        "HH\\is_varray" => Some(if hack_arr_dv_arrs { OpVec } else { OpVArray }),
-        "HH\\is_darray" => Some(if hack_arr_dv_arrs { OpDict } else { OpDArray }),
+        "HH\\is_varray" => Some(OpVec),
+        "HH\\is_darray" => Some(OpDict),
         "HH\\is_any_array" => Some(OpArrLike),
         "HH\\is_class_meth" => Some(OpClsMeth),
         "HH\\is_fun" => Some(OpFunc),
-        "HH\\is_php_array" => Some(if hack_arr_dv_arrs {
-            OpLegacyArrLike
-        } else {
-            OpPHPArr
-        }),
+        "HH\\is_php_array" => Some(OpLegacyArrLike),
         "HH\\is_array_marked_legacy" => Some(OpLegacyArrLike),
         "HH\\is_class" => Some(OpClass),
         _ => None,

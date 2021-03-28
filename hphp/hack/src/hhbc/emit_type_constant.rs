@@ -7,7 +7,7 @@ use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence::{unrecoverable, Result};
 use naming_special_names_rust::classes;
-use options::{HhvmFlags, Options};
+use options::Options;
 use oxidized::{
     aast, aast_defs,
     aast_defs::{Hint, NastShapeInfo, ShapeFieldInfo},
@@ -16,26 +16,6 @@ use oxidized::{
 };
 use runtime::TypedValue;
 use std::collections::BTreeMap;
-
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
-
-fn vec_or_varray(opts: &Options, l: Vec<TypedValue>) -> TypedValue {
-    if hack_arr_dv_arrs(opts) {
-        TypedValue::Vec((l, None, false))
-    } else {
-        TypedValue::VArray((l, None))
-    }
-}
-
-fn dict_or_darray(opts: &Options, kv: Vec<(TypedValue, TypedValue)>) -> TypedValue {
-    if hack_arr_dv_arrs(opts) {
-        TypedValue::Dict((kv, None, false))
-    } else {
-        TypedValue::DArray((kv, None))
-    }
-}
 
 fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
     if tparams.contains(&p) {
@@ -148,7 +128,7 @@ fn shape_field_to_pair(
         TypedValue::string("value"),
         hint_to_type_constant(opts, tparams, targ_map, &sfi.hint, false, false)?,
     ));
-    Ok((TypedValue::String(name), dict_or_darray(opts, r)))
+    Ok((TypedValue::String(name), TypedValue::Dict(r)))
 }
 
 fn shape_info_to_typed_value(
@@ -162,7 +142,7 @@ fn shape_info_to_typed_value(
         .iter()
         .map(|sfi| shape_field_to_pair(opts, tparams, targ_map, &sfi))
         .collect::<Result<_>>()?;
-    Ok(dict_or_darray(opts, info))
+    Ok(TypedValue::Dict(info))
 }
 
 fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<(TypedValue, TypedValue)> {
@@ -176,9 +156,8 @@ fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<(TypedValue, TypedV
     }
 }
 
-fn type_constant_access_list(opts: &Options, sl: &[aast::Sid]) -> TypedValue {
-    vec_or_varray(
-        opts,
+fn type_constant_access_list(sl: &[aast::Sid]) -> TypedValue {
+    TypedValue::Vec(
         sl.iter()
             .map(|ast_defs::Id(_, s)| TypedValue::string(s))
             .collect(),
@@ -302,7 +281,7 @@ fn hint_to_type_constant_list(
                 ));
                 r.push((
                     TypedValue::string("access_list"),
-                    type_constant_access_list(opts, ids),
+                    type_constant_access_list(ids),
                 ));
                 r
             }
@@ -376,7 +355,7 @@ pub fn hint_to_type_constant(
     if is_opaque {
         tconsts.extend_from_slice(&[(TypedValue::String("opaque".into()), TypedValue::Bool(true))])
     };
-    Ok(dict_or_darray(opts, tconsts))
+    Ok(TypedValue::Dict(tconsts))
 }
 
 fn hints_to_type_constant(
@@ -389,5 +368,5 @@ fn hints_to_type_constant(
         .into_iter()
         .map(|h| hint_to_type_constant(opts, tparams, targ_map, h, false, false))
         .collect::<Result<Vec<_>>>();
-    hints.map(|hs| vec_or_varray(opts, hs))
+    hints.map(TypedValue::Vec)
 }

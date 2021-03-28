@@ -269,11 +269,6 @@ pub mod instr {
         instr(Instruct::ILitConst(l))
     }
 
-    /* TODO(hrust): re-enable it with arg
-     pub fn lit_empty_varray() -> InstrSeq {
-        InstrSeq::lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
-    } */
-
     pub fn iterinit(args: IterArgs, label: Label) -> InstrSeq {
         instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
     }
@@ -392,10 +387,6 @@ pub mod instr {
 
     pub fn print() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::Print))
-    }
-
-    pub fn cast_darray() -> InstrSeq {
-        instr(Instruct::IOp(InstructOperator::CastDArray))
     }
 
     pub fn cast_dict() -> InstrSeq {
@@ -748,10 +739,6 @@ pub mod instr {
         instr(Instruct::ILitConst(InstructLitConst::NewVec(i)))
     }
 
-    pub fn new_varray(i: isize) -> InstrSeq {
-        instr(Instruct::ILitConst(InstructLitConst::NewVArray(i)))
-    }
-
     pub fn new_pair() -> InstrSeq {
         instr(Instruct::ILitConst(InstructLitConst::NewPair))
     }
@@ -806,10 +793,6 @@ pub mod instr {
 
     pub fn new_record(id: ClassId, keys: Vec<String>) -> InstrSeq {
         instr(Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)))
-    }
-
-    pub fn newstructdarray(keys: Vec<String>) -> InstrSeq {
-        instr(Instruct::ILitConst(InstructLitConst::NewStructDArray(keys)))
     }
 
     pub fn newstructdict(keys: Vec<String>) -> InstrSeq {

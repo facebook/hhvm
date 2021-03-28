@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 extern crate lazy_static;
 
-use oxidized::ast_defs;
 use std::{
     convert::{Into, TryFrom, TryInto},
     num::{FpCategory, Wrapping},
@@ -58,16 +57,11 @@ pub enum TypedValue {
     Null,
     // Classic PHP arrays with explicit (key,value) entries
     HhasAdata(String),
-    VArray((Vec<Self>, ProvTag)),
-    DArray((Vec<(TypedValue, TypedValue)>, ProvTag)),
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec((Vec<TypedValue>, ProvTag, LegacyFlag)),
+    Vec(Vec<TypedValue>),
     Keyset(Vec<TypedValue>),
-    Dict((Vec<(TypedValue, TypedValue)>, ProvTag, LegacyFlag)),
+    Dict(Vec<(TypedValue, TypedValue)>),
 }
-
-type ProvTag = Option<ast_defs::Pos>;
-type LegacyFlag = bool;
 
 mod string_ops {
     pub fn bitwise_not(s: &str) -> String {
@@ -95,11 +89,9 @@ impl From<TypedValue> for bool {
             TypedValue::Int(i) => i != 0,
             TypedValue::Float(f) => f.to_f64() != 0.0,
             // Empty collections cast to false if empty, otherwise true
-            TypedValue::VArray((v, _)) => !v.is_empty(),
-            TypedValue::DArray((v, _)) => !v.is_empty(),
-            TypedValue::Vec((v, _, _)) => !v.is_empty(),
+            TypedValue::Vec(v) => !v.is_empty(),
             TypedValue::Keyset(v) => !v.is_empty(),
-            TypedValue::Dict((v, _, _)) => !v.is_empty(),
+            TypedValue::Dict(v) => !v.is_empty(),
             // Non-empty collections cast to true
             TypedValue::HhasAdata(_) => true,
         }
@@ -324,8 +316,6 @@ impl TypedValue {
             TypedValue::String(s) => Some(Self::String(s)),
             TypedValue::Null => Some(Self::String("".into())),
             TypedValue::Uninit
-            | TypedValue::VArray(_)
-            | TypedValue::DArray(_)
             | TypedValue::Vec(_)
             | TypedValue::Keyset(_)
             | TypedValue::Dict(_) => None,

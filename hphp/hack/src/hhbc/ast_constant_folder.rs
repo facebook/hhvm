@@ -11,7 +11,7 @@ use env::emitter::Emitter;
 use hhbc_id_rust::Id;
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
-use options::{HhvmFlags, Options};
+use options::HhvmFlags;
 use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -22,10 +22,6 @@ use oxidized::{
 use runtime::TypedValue;
 
 use itertools::Itertools;
-
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -126,24 +122,18 @@ fn varray_to_typed_value(
     emitter: &Emitter,
     ns: &Namespace,
     fields: &Vec<tast::Expr>,
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue, Error> {
-    let tv_fields: Result<Vec<TypedValue>, Error> = fields
+    let tv_fields: Vec<TypedValue> = fields
         .iter()
         .map(|x| expr_to_typed_value(emitter, ns, x))
-        .collect();
-    if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Vec((tv_fields?, Some(pos.clone()), false)))
-    } else {
-        Ok(TypedValue::VArray((tv_fields?, Some(pos.clone()))))
-    }
+        .collect::<Result<_, Error>>()?;
+    Ok(TypedValue::Vec(tv_fields))
 }
 
 fn darray_to_typed_value(
     emitter: &Emitter,
     ns: &Namespace,
     fields: &Vec<(tast::Expr, tast::Expr)>,
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue, Error> {
     let tv_fields: Vec<(TypedValue, TypedValue)> = fields
         .iter()
@@ -154,18 +144,7 @@ fn darray_to_typed_value(
             ))
         })
         .collect::<Result<_, Error>>()?;
-    if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Dict((
-            update_duplicates_in_map(tv_fields),
-            Some(pos.clone()),
-            false,
-        )))
-    } else {
-        Ok(TypedValue::DArray((
-            update_duplicates_in_map(tv_fields),
-            Some(pos.clone()),
-        )))
-    }
+    Ok(TypedValue::Dict(update_duplicates_in_map(tv_fields)))
 }
 
 fn set_afield_to_typed_value_pair(
@@ -268,7 +247,6 @@ fn shape_to_typed_value(
     emitter: &Emitter,
     ns: &Namespace,
     fields: &Vec<(tast::ShapeFieldName, tast::Expr)>,
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue, Error> {
     let a = fields
         .iter()
@@ -300,23 +278,20 @@ fn shape_to_typed_value(
             Ok((key, expr_to_typed_value(emitter, ns, expr)?))
         })
         .collect::<Result<_, _>>()?;
-    Ok(TypedValue::DArray((a, Some(pos.clone()))))
+    Ok(TypedValue::Dict(a))
 }
 
 pub fn vec_to_typed_value(
     e: &Emitter,
     ns: &Namespace,
-    pos: &Pos,
     fields: &[tast::Afield],
 ) -> Result<TypedValue, Error> {
-    Ok(TypedValue::Vec((
+    Ok(TypedValue::Vec(
         fields
             .iter()
             .map(|f| value_afield_to_typed_value(e, ns, f))
             .collect::<Result<_, _>>()?,
-        Some(pos.clone()),
-        false, // LegacyFlag
-    )))
+    ))
 }
 
 pub fn expr_to_typed_value(
@@ -339,7 +314,6 @@ pub fn expr_to_typed_value_(
 ) -> Result<TypedValue, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    let pos = &expr.0;
     match &expr.1 {
         Int(s) => int_expr_to_typed_value(s),
         tast::Expr_::True => Ok(TypedValue::Bool(true)),
@@ -386,14 +360,14 @@ pub fn expr_to_typed_value_(
             }
         }
 
-        Varray(fields) => varray_to_typed_value(emitter, ns, &fields.1, pos),
-        Darray(fields) => darray_to_typed_value(emitter, ns, &fields.1, pos),
+        Varray(fields) => varray_to_typed_value(emitter, ns, &fields.1),
+        Darray(fields) => darray_to_typed_value(emitter, ns, &fields.1),
 
         Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
         Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
         Id(_) => Err(Error::UserDefinedConstant),
 
-        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, ns, pos, &x.2),
+        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, ns, &x.2),
         Collection(x) if x.0.name().eq("keyset") => Ok(TypedValue::Keyset(
             x.2.iter()
                 .map(|x| keyset_value_afield_to_typed_value(emitter, ns, x))
@@ -412,11 +386,7 @@ pub fn expr_to_typed_value_(
                 x.2.iter()
                     .map(|x| afield_to_typed_value_pair(emitter, ns, x))
                     .collect::<Result<_, _>>()?;
-            Ok(TypedValue::Dict((
-                update_duplicates_in_map(values),
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(update_duplicates_in_map(values)))
         }
         Collection(x)
             if allow_maps
@@ -427,20 +397,14 @@ pub fn expr_to_typed_value_(
                 x.2.iter()
                     .map(|x| set_afield_to_typed_value_pair(emitter, ns, x))
                     .collect::<Result<_, _>>()?;
-            Ok(TypedValue::Dict((
-                update_duplicates_in_map(values),
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(update_duplicates_in_map(values)))
         }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
-            Ok(TypedValue::Vec((
+            Ok(TypedValue::Vec(
                 x.2.iter()
                     .map(|e| expr_to_typed_value(emitter, ns, e))
                     .collect::<Result<_, _>>()?,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            ))
         }
         ValCollection(x) if x.0 == tast::VcKind::Keyset => Ok(TypedValue::Keyset(
             x.2.iter()
@@ -469,11 +433,7 @@ pub fn expr_to_typed_value_(
                 x.2.iter()
                     .map(|e| set_afield_value_to_typed_value_pair(emitter, ns, e))
                     .collect::<Result<_, _>>()?;
-            Ok(TypedValue::Dict((
-                update_duplicates_in_map(values),
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(update_duplicates_in_map(values)))
         }
 
         KeyValCollection(x) => {
@@ -481,14 +441,10 @@ pub fn expr_to_typed_value_(
                 x.2.iter()
                     .map(|e| kv_to_typed_value_pair(emitter, ns, &e.0, &e.1))
                     .collect::<Result<_, _>>()?;
-            Ok(TypedValue::Dict((
-                update_duplicates_in_map(values),
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(update_duplicates_in_map(values)))
         }
 
-        Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
+        Shape(fields) => shape_to_typed_value(emitter, ns, fields),
         ClassConst(x) => {
             if emitter.options().emit_class_pointers() == 1 && !force_class_const {
                 Err(Error::NotLiteral)
@@ -579,26 +535,8 @@ fn value_to_expr_(v: TypedValue) -> Result<tast::Expr_, Error> {
         Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),
         Keyset(_) => return Err(Error::unrecoverable("value_to_expr: keyset NYI")),
         HhasAdata(_) => return Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
-        VArray((values, _)) => Expr_::mk_varray(
-            None,
-            values
-                .into_iter()
-                .map(value_to_expr)
-                .collect::<Result<std::vec::Vec<_>, Error>>()?,
-        ),
-        DArray((pairs, _)) => Expr_::mk_darray(
-            None,
-            pairs
-                .into_iter()
-                .map(|(v1, v2)| Ok((value_to_expr(v1)?, value_to_expr(v2)?)))
-                .collect::<Result<std::vec::Vec<_>, Error>>()?,
-        ),
         Dict(_) => return Err(Error::unrecoverable("value_to_expr: dict NYI")),
     })
-}
-
-fn value_to_expr(v: TypedValue) -> Result<tast::Expr, Error> {
-    Ok(tast::Expr(Pos::make_none(), value_to_expr_(v)?))
 }
 
 struct FolderVisitor<'a> {

@@ -10,7 +10,7 @@ use hhbc_by_ref_ast_scope as ast_scope;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_id::Id;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
-use hhbc_by_ref_options::{HhvmFlags, Options};
+use hhbc_by_ref_options::HhvmFlags;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use oxidized::{
@@ -22,10 +22,6 @@ use oxidized::{
 };
 
 use itertools::Itertools;
-
-fn hack_arr_dv_arrs(opts: &Options) -> bool {
-    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
-}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -131,7 +127,6 @@ fn varray_to_typed_value<'local_arena, 'arena>(
     emitter: &Emitter<'arena>,
     ns: &Namespace,
     fields: &[tast::Expr],
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue<'local_arena>, Error> {
     let tv_fields = bumpalo::collections::vec::Vec::from_iter_in(
         fields
@@ -142,11 +137,7 @@ fn varray_to_typed_value<'local_arena, 'arena>(
         alloc,
     )
     .into_bump_slice();
-    if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Vec((tv_fields, Some(pos.clone()), false)))
-    } else {
-        Ok(TypedValue::VArray((tv_fields, Some(pos.clone()))))
-    }
+    Ok(TypedValue::Vec(tv_fields))
 }
 
 fn darray_to_typed_value<'local_arena, 'arena>(
@@ -154,7 +145,6 @@ fn darray_to_typed_value<'local_arena, 'arena>(
     emitter: &Emitter<'arena>,
     ns: &Namespace,
     fields: &[(tast::Expr, tast::Expr)],
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue<'local_arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
     // here.
@@ -170,11 +160,7 @@ fn darray_to_typed_value<'local_arena, 'arena>(
     let tv_fields_ = update_duplicates_in_map(tv_fields);
     let fields =
         bumpalo::collections::Vec::from_iter_in(tv_fields_.into_iter(), alloc).into_bump_slice();
-    if hack_arr_dv_arrs(emitter.options()) {
-        Ok(TypedValue::Dict((fields, Some(pos.clone()), false)))
-    } else {
-        Ok(TypedValue::DArray((fields, Some(pos.clone()))))
-    }
+    Ok(TypedValue::Dict(fields))
 }
 
 fn set_afield_to_typed_value_pair<'local_arena, 'arena>(
@@ -287,7 +273,6 @@ fn shape_to_typed_value<'local_arena, 'arena>(
     emitter: &Emitter<'arena>,
     ns: &Namespace,
     fields: &[(tast::ShapeFieldName, tast::Expr)],
-    pos: &ast_defs::Pos,
 ) -> Result<TypedValue<'local_arena>, Error> {
     let a = bumpalo::collections::vec::Vec::from_iter_in(
         fields
@@ -333,14 +318,13 @@ fn shape_to_typed_value<'local_arena, 'arena>(
         alloc,
     )
     .into_bump_slice();
-    Ok(TypedValue::DArray((a, Some(pos.clone()))))
+    Ok(TypedValue::Dict(a))
 }
 
 pub fn vec_to_typed_value<'local_arena, 'arena>(
     alloc: &'local_arena bumpalo::Bump,
     e: &Emitter<'arena>,
     ns: &Namespace,
-    pos: &Pos,
     fields: &[tast::Afield],
 ) -> Result<TypedValue<'local_arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
@@ -351,11 +335,7 @@ pub fn vec_to_typed_value<'local_arena, 'arena>(
         .collect();
     let fields =
         bumpalo::collections::Vec::from_iter_in(tv_fields?.into_iter(), alloc).into_bump_slice();
-    Ok(TypedValue::Vec((
-        fields,
-        Some(pos.clone()),
-        false, // LegacyFlag
-    )))
+    Ok(TypedValue::Vec(fields))
 }
 
 pub fn expr_to_typed_value<'local_arena, 'arena>(
@@ -380,7 +360,6 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
 ) -> Result<TypedValue<'local_arena>, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    let pos = &expr.0;
     match &expr.1 {
         Int(s) => int_expr_to_typed_value(s),
         tast::Expr_::True => Ok(TypedValue::Bool(true)),
@@ -435,14 +414,14 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
             }
         }
 
-        Varray(fields) => varray_to_typed_value(alloc, emitter, ns, &fields.1, pos),
-        Darray(fields) => darray_to_typed_value(alloc, emitter, ns, &fields.1, pos),
+        Varray(fields) => varray_to_typed_value(alloc, emitter, ns, &fields.1),
+        Darray(fields) => darray_to_typed_value(alloc, emitter, ns, &fields.1),
 
         Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
         Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
         Id(_) => Err(Error::UserDefinedConstant),
 
-        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(alloc, emitter, ns, pos, &x.2),
+        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(alloc, emitter, ns, &x.2),
         Collection(x) if x.0.name().eq("keyset") => {
             let keys = bumpalo::collections::Vec::from_iter_in(
                 x.2.iter()
@@ -471,11 +450,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                 alloc,
             )
             .into_bump_slice();
-            Ok(TypedValue::Dict((
-                values,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(values))
         }
         Collection(x)
             if allow_maps
@@ -492,11 +467,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                 alloc,
             )
             .into_bump_slice();
-            Ok(TypedValue::Dict((
-                values,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(values))
         }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
             let v: Vec<_> =
@@ -505,11 +476,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                     .collect::<Result<_, _>>()?;
             let values =
                 bumpalo::collections::Vec::from_iter_in(v.into_iter(), alloc).into_bump_slice();
-            Ok(TypedValue::Vec((
-                values,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Vec(values))
         }
         ValCollection(x) if x.0 == tast::VcKind::Keyset => {
             let keys = bumpalo::collections::Vec::from_iter_in(
@@ -548,11 +515,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                 alloc,
             )
             .into_bump_slice();
-            Ok(TypedValue::Dict((
-                values,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(values))
         }
         KeyValCollection(x) => {
             let values = bumpalo::collections::vec::Vec::from_iter_in(
@@ -565,13 +528,9 @@ pub fn expr_to_typed_value_<'local_arena, 'arena>(
                 alloc,
             )
             .into_bump_slice();
-            Ok(TypedValue::Dict((
-                values,
-                Some(pos.clone()),
-                false, // LegacyFlag
-            )))
+            Ok(TypedValue::Dict(values))
         }
-        Shape(fields) => shape_to_typed_value(alloc, emitter, ns, fields, pos),
+        Shape(fields) => shape_to_typed_value(alloc, emitter, ns, fields),
         ClassConst(x) => {
             if emitter.options().emit_class_pointers() == 1 && !force_class_const {
                 Err(Error::NotLiteral)
@@ -677,27 +636,8 @@ fn value_to_expr_<'local_arena>(v: TypedValue<'local_arena>) -> Result<tast::Exp
         Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),
         Keyset(_) => return Err(Error::unrecoverable("value_to_expr: keyset NYI")),
         HhasAdata(_) => return Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
-        VArray((values, _)) => Expr_::mk_varray(
-            None,
-            values
-                .iter()
-                .map(|v| value_to_expr(v.clone()))
-                .collect::<Result<std::vec::Vec<_>, Error>>()?,
-        ),
-        DArray((pairs, _)) => Expr_::mk_darray(
-            None,
-            pairs
-                .iter()
-                .map(|(v1, v2)| Ok((value_to_expr(v1.clone())?, value_to_expr(v2.clone())?)))
-                .collect::<Result<std::vec::Vec<_>, Error>>()?,
-        ),
         Dict(_) => return Err(Error::unrecoverable("value_to_expr: dict NYI")),
     })
-}
-
-#[allow(clippy::needless_lifetimes)]
-fn value_to_expr<'local_arena>(v: TypedValue<'local_arena>) -> Result<tast::Expr, Error> {
-    Ok(tast::Expr(Pos::make_none(), value_to_expr_(v)?))
 }
 
 struct FolderVisitor<'a, 'local_arena, 'arena> {

@@ -228,17 +228,12 @@ pub enum InstructLitConst {
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(TypedValue),
-    Array(AdataId),
     Vec(AdataId),
     Dict(AdataId),
     Keyset(AdataId),
     /// capacity hint
     NewDictArray(isize),
-    /// capacity hint
-    NewDArray(isize),
-    NewStructDArray(Vec<String>),
     NewStructDict(Vec<String>),
-    NewVArray(isize),
     NewVec(isize),
     NewKeysetArray(isize),
     NewPair,
@@ -293,8 +288,6 @@ pub enum InstructOperator {
     CastVec,
     CastDict,
     CastKeyset,
-    CastVArray,
-    CastDArray,
     InstanceOf,
     InstanceOfD(ClassId),
     IsLateBoundCls,
@@ -376,11 +369,8 @@ pub enum IstypeOp {
     OpVec,
     OpArrLike,
     /// Arr or Vec or Dict or Keyset *)
-    OpVArray,
-    OpDArray,
     OpClsMeth,
     OpFunc,
-    OpPHPArr,
     OpLegacyArrLike,
     OpClass,
 }
@@ -567,7 +557,6 @@ pub enum InstructMisc {
     ArrayIdx,
     ArrayMarkLegacy,
     ArrayUnmarkLegacy,
-    TagProvenanceHere,
     AssertRATL(local::Type, RepoAuthType),
     AssertRATStk(StackIndex, RepoAuthType),
     BreakTraceHint,

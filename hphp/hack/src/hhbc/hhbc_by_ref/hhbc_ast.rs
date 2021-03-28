@@ -208,17 +208,12 @@ pub enum InstructLitConst<'arena> {
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(hhbc_by_ref_runtime::TypedValue<'arena>),
-    Array(AdataId<'arena>),
     Vec(AdataId<'arena>),
     Dict(AdataId<'arena>),
     Keyset(AdataId<'arena>),
     /// capacity hint
     NewDictArray(isize),
-    /// capacity hint
-    NewDArray(isize),
-    NewStructDArray(&'arena [&'arena str]),
     NewStructDict(&'arena [&'arena str]),
-    NewVArray(isize),
     NewVec(isize),
     NewKeysetArray(isize),
     NewPair,
@@ -273,8 +268,6 @@ pub enum InstructOperator<'arena> {
     CastVec,
     CastDict,
     CastKeyset,
-    CastVArray,
-    CastDArray,
     InstanceOf,
     InstanceOfD(ClassId<'arena>),
     IsLateBoundCls,
@@ -360,11 +353,8 @@ pub enum IstypeOp {
     OpVec,
     OpArrLike,
     /// Arr or Vec or Dict or Keyset *)
-    OpVArray,
-    OpDArray,
     OpClsMeth,
     OpFunc,
-    OpPHPArr,
     OpLegacyArrLike,
     OpClass,
 }
@@ -551,7 +541,6 @@ pub enum InstructMisc<'arena> {
     ArrayIdx,
     ArrayMarkLegacy,
     ArrayUnmarkLegacy,
-    TagProvenanceHere,
     AssertRATL(local::Type<'arena>, RepoAuthType<'arena>),
     AssertRATStk(StackIndex, RepoAuthType<'arena>),
     BreakTraceHint,

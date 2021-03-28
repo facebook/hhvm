@@ -32,7 +32,6 @@ use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_label as label;
-use hhbc_by_ref_options::HhvmFlags;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust as special_names;
 use oxidized::{
@@ -379,11 +378,7 @@ fn emit_reified_extends_params<'a, 'arena>(
         },
         _ => {}
     }
-    let tv = if e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS) {
-        TypedValue::Vec((&[], None, false))
-    } else {
-        TypedValue::VArray((&[], None))
-    };
+    let tv = TypedValue::Vec(&[]);
     Ok(instr::typedvalue(alloc, tv))
 }
 

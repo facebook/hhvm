@@ -33,7 +33,6 @@ use hhbc_string_utils_rust as string_utils;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label_rust as label;
 use naming_special_names_rust as special_names;
-use options::HhvmFlags;
 use oxidized::{
     ast::{self as tast, Hint, ReifyKind, Visibility},
     namespace_env,
@@ -354,11 +353,7 @@ fn emit_reified_extends_params<'a>(
         },
         _ => {}
     }
-    let tv = if e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS) {
-        TypedValue::Vec((vec![], None, false))
-    } else {
-        TypedValue::VArray((vec![], None))
-    };
+    let tv = TypedValue::Vec(vec![]);
     Ok(instr::typedvalue(tv))
 }
 

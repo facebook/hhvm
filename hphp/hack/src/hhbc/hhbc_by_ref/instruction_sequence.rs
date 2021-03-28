@@ -200,11 +200,6 @@ pub mod instr {
         instr(alloc, Instruct::ILitConst(l))
     }
 
-    /* TODO(hrust): re-enable it with arg
-     pub fn lit_empty_varray() -> InstrSeq {
-        InstrSeq::lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
-    } */
-
     pub fn iterinit<'a>(
         alloc: &'a bumpalo::Bump,
         args: IterArgs<'a>,
@@ -376,10 +371,6 @@ pub mod instr {
 
     pub fn print<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(alloc, Instruct::IOp(InstructOperator::Print))
-    }
-
-    pub fn cast_darray<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastDArray))
     }
 
     pub fn cast_dict<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
@@ -793,10 +784,6 @@ pub mod instr {
         instr(alloc, Instruct::ILitConst(InstructLitConst::NewVec(i)))
     }
 
-    pub fn new_varray<'a>(alloc: &'a bumpalo::Bump, i: isize) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::NewVArray(i)))
-    }
-
     pub fn new_pair<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(alloc, Instruct::ILitConst(InstructLitConst::NewPair))
     }
@@ -869,13 +856,6 @@ pub mod instr {
         instr(
             alloc,
             Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)),
-        )
-    }
-
-    pub fn newstructdarray<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDArray(keys)),
         )
     }
 

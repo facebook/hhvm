@@ -2474,6 +2474,19 @@ fn emit_special_function(
                 }
             }
         }
+        ("__SystemLib\\get_enum_member_by_label", _) if e.systemlib() => {
+            let local = match args {
+                [E(_, E_::Lvar(id))] => get_local(e, env, pos, id.name()),
+                _ => Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    "Argument must be the label argument",
+                )),
+            }?;
+            Ok(Some(InstrSeq::gather(vec![
+                instr::lateboundcls(),
+                instr::clscnsl(local),
+            ])))
+        }
         ("HH\\inst_meth", _) => match args {
             [obj_expr, method_name] => Ok(Some(emit_inst_meth(e, env, obj_expr, method_name)?)),
             _ => Err(emit_fatal::raise_fatal_runtime(

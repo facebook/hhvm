@@ -103,7 +103,7 @@ abstract class BuiltinEnumClass<+T> {
   }
 
   final public static function valueOf<TEnum super this, TType>(Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
-    return static::getValues()[$atom];
+    return \__SystemLib\get_enum_member_by_label($atom);
   }
 }
 

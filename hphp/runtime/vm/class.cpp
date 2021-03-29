@@ -1524,6 +1524,18 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   if (!cnsVal) return make_tv<KindOfUninit>();
 
   auto& cns = m_constants[clsCnsInd];
+  // When a child extends a parent, rather than the child having
+  // distinct copies of the constants defined by their parent we prefer
+  // those constants be shared. Aside from saving memeory and avoiding
+  // multiple initializations of the same logical constant, this
+  // establishes the property that a constant accessed through a child
+  // class will compare equal to the same constant accessed through the
+  // child's parent class.
+  if (cns.cls != this
+      && what == ConstModifiers::Kind::Value) {
+    return cns.cls->clsCnsGet(clsCnsName, what, resolve);
+  }
+
   ArrayData* typeCns = nullptr;
 
   if (cnsVal->m_type != KindOfUninit) {

@@ -69,7 +69,7 @@ impl<'a> Reason<'a> {
             | Rtypeconst((Rnone, (p, _), _, _))
             | RarrayFilter((p, _))
             | RnullsafeOp(p)
-            | RtconstNoCstr(PosId(p, _))
+            | RtconstNoCstr((p, _))
             | Rpredicated((p, _))
             | Ris(p)
             | Ras(p)

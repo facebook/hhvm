@@ -10,7 +10,7 @@ use serde::Serialize;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
-use crate::typing_defs_core::{PosByteString, PosId, PosString, TshapeFieldName};
+use crate::typing_defs_core::{PosByteString, PosString, TshapeFieldName};
 
 #[derive(
     Copy,
@@ -33,8 +33,8 @@ impl<'a> Ord for TShapeField<'a> {
             (TSFlitInt(PosString(_, s1)), TSFlitInt(PosString(_, s2))) => s1.cmp(&s2),
             (TSFlitStr(PosByteString(_, s1)), TSFlitStr(PosByteString(_, s2))) => s1.cmp(&s2),
             (
-                TSFclassConst((PosId(_, c1), PosString(_, m1))),
-                TSFclassConst((PosId(_, c2), PosString(_, m2))),
+                TSFclassConst(((_, c1), PosString(_, m1))),
+                TSFclassConst(((_, c2), PosString(_, m2))),
             ) => (c1, m1).cmp(&(c2, m2)),
             (TSFlitInt(_), _) => Ordering::Less,
             (TSFlitStr(_), TSFlitInt(_)) => Ordering::Greater,

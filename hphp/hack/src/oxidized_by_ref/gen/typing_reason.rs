@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48fd17005ea503aff3350959d01cf7b7>>
+// @generated SignedSource<<0b523e683a481a47a9d2ce54dd8df7d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,25 +18,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PosId<'a>(
-    pub &'a pos_or_decl::PosOrDecl<'a>,
-    pub &'a ast_defs::Id_<'a>,
-);
-impl<'a> TrivialDrop for PosId<'a> {}
+pub type PosId<'a> = (&'a pos_or_decl::PosOrDecl<'a>, &'a ast_defs::Id_<'a>);
 
 #[derive(
     Clone,

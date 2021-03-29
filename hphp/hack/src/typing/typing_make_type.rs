@@ -71,7 +71,7 @@ impl<'a> Arena for TypeBuilder<'a> {
 // as though they appear in the source, so we get the position
 // from the definition e.g. in hhi file.
 fn mk_special_id(name: &'static str) -> PosId<'static> {
-    PosId(Pos::none(), name)
+    (Pos::none(), name)
 }
 
 impl<'a> TypeBuilder<'a> {

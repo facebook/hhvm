@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b065fbac78ffabac2b589d3d4f5f2f76>>
+// @generated SignedSource<<5661820e1a8ed026f9259ad1b602cc24>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -394,21 +394,6 @@ impl<'a> Node<'a> for PosByteString<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             PosByteString(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for PosId<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_pos_id(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PosId(ref __binding_0, ref __binding_1) => {
                 {
                     __binding_0.accept(v)
                 }

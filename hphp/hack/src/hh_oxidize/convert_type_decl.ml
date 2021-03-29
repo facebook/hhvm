@@ -136,6 +136,8 @@ let tuple_aliases =
     ("ast_defs", "Pstring");
     ("ast_defs", "PositionedByteString");
     ("errors", "Message");
+    ("file_info", "Id");
+    ("typing_reason", "PosId");
   ]
 
 (*

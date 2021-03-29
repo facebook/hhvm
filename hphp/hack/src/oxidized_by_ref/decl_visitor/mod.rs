@@ -23,25 +23,23 @@ mod test {
         };
         use Ty_::*;
 
-        struct PrintEveryPosIdVisitor<'a>(Vec<&'a Pos<'a>>, Vec<String>);
+        struct PrintEveryTapplyVisitor<'a>(Vec<&'a Pos<'a>>, Vec<String>);
 
-        impl<'a> Visitor<'a> for PrintEveryPosIdVisitor<'a> {
+        impl<'a> Visitor<'a> for PrintEveryTapplyVisitor<'a> {
             fn object(&mut self) -> &mut dyn Visitor<'a> {
                 self
             }
 
             fn visit_ty(&mut self, ty: &'a Ty) {
                 self.0.push(ty.get_pos().unwrap());
+                if let Ty_::Tapply(&((pos, id), _)) = ty.1 {
+                    self.1.push(format!("Found {} on line {}", id, pos.line()));
+                    for pos in self.0.iter().rev() {
+                        self.1.push(format!("  in a ty on line {}", pos.line()));
+                    }
+                }
                 ty.recurse(self.object());
                 self.0.pop();
-            }
-
-            fn visit_pos_id(&mut self, id: &'a PosId) {
-                let PosId(pos, id) = id;
-                self.1.push(format!("Found {} on line {}", id, pos.line()));
-                for pos in self.0.iter().rev() {
-                    self.1.push(format!("  in a ty on line {}", pos.line()));
-                }
             }
         }
 
@@ -57,16 +55,16 @@ mod test {
             Ttuple(a!([
                 a!(Ty(
                     a!(Reason::hint(pos(2))),
-                    Tapply(a!((PosId(pos(3), "foo"), &[][..]))),
+                    Tapply(a!(((pos(3), "foo"), &[][..]))),
                 )),
                 a!(Ty(
                     a!(Reason::hint(pos(4))),
-                    Tapply(a!((PosId(pos(5), "bar"), &[][..]))),
+                    Tapply(a!(((pos(5), "bar"), &[][..]))),
                 )),
             ])),
         ));
 
-        let mut visitor = PrintEveryPosIdVisitor(vec![], vec![]);
+        let mut visitor = PrintEveryTapplyVisitor(vec![], vec![]);
 
         visitor.visit_ty(ty);
 

@@ -14,7 +14,7 @@ use crate::typing_reason::Reason;
 
 impl<'a> From<Id<'a>> for PosId<'a> {
     fn from(Id(pos, id): Id<'a>) -> Self {
-        PosId(pos, id)
+        (pos, id)
     }
 }
 

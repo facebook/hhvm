@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e401af120ff60ba2fce97ec5072d79b1>>
+// @generated SignedSource<<ecfb8c707b685019119c42c0c9f524fd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,21 +52,7 @@ pub enum Pos<'a> {
 }
 impl<'a> TrivialDrop for Pos<'a> {}
 
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct Id<'a>(pub Pos<'a>, pub &'a str);
-impl<'a> TrivialDrop for Id<'a> {}
+pub type Id<'a> = (Pos<'a>, &'a str);
 
 pub type HashType<'a> = Option<isize>;
 

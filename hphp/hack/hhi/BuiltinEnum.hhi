@@ -105,6 +105,10 @@ abstract class BuiltinEnumClass<+T> {
    * @return array ('CONST_NAME' => $value, ....)
    */
   final public static function getValues()[write_props]: darray<string, T>;
+
+  final public static function nameOf(\HH\Label<this, mixed> $atom): string;
+
+  final public static function valueOf<TEnum super this, TType>(\HH\Label<TEnum, TType> $atom): MemberOf<TEnum, TType>;
 }
 
 }

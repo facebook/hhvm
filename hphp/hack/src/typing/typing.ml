@@ -6217,13 +6217,22 @@ and call
         | param :: paraml -> (false, Some param, paraml)
         | [] -> (true, var_param, paraml)
       in
-      let expand_atom_in_enum pos env enum_name atom_name =
+      let expand_atom_in_enum pos env ~ctor enum_name atom_name =
         let cls = Env.get_class env enum_name in
         match cls with
         | Some cls ->
           (match Env.get_const env cls atom_name with
           | Some const_def ->
             let dty = const_def.cc_type in
+            (* the enum constant has type MemberOf<X, Y>. If we are
+             * processing a Label argument, we just switch MemberOf for
+             * Label.
+             *)
+            let dty =
+              match deref dty with
+              | (r, Tapply ((p, _), args)) -> mk (r, Tapply ((p, ctor), args))
+              | _ -> dty
+            in
             let (env, lty) =
               Phase.localize_with_self env ~ignore_errors:true dty
             in
@@ -6238,40 +6247,75 @@ and call
             (env, Some (te, ty)))
         | None -> (env, None)
       in
+      let compute_enum_name env lty =
+        match get_node lty with
+        | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name ->
+          Some enum_name
+        | Tgeneric (name, _) ->
+          let upper_bounds =
+            Typing_utils.collect_enum_class_upper_bounds env name
+          in
+          (* To avoid ambiguity, we only support the case where
+           * there is a single upper bound that is an EnumClass.
+           * We might want to relax that later (e.g. with  the
+           * support for intersections.
+           * See Typing_check_decls.check_atom_on_param.
+           *)
+          if SSet.cardinal upper_bounds = 1 then
+            let enum_name = SSet.choose upper_bounds in
+            Some enum_name
+          else
+            None
+        | Tvar var ->
+          (* minimal support to only deal with Tvar when it is the
+           * valueOf from BuiltinEnumClass. In this case, we know the
+           * the tvar as a single lowerbound, `this` which must be
+           * an enum class. We could relax this in the future but
+           * I want to avoid complex constraints for now.
+           *)
+          let lower_bounds = Env.get_tyvar_lower_bounds env var in
+          if ITySet.cardinal lower_bounds <> 1 then
+            None
+          else (
+            match ITySet.choose lower_bounds with
+            | ConstraintType _ -> None
+            | LoclType lower ->
+              (match get_node lower with
+              | Tclass ((_, enum_name), _, _)
+                when Env.is_enum_class env enum_name ->
+                Some enum_name
+              | _ -> None)
+          )
+        | _ ->
+          (* Already reported, see Typing_check_decls *)
+          None
+      in
       let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
         match opt_param with
         | Some param ->
-          (* First check if __Atom is used *)
+          (* First check if __Atom is used or if the parameter is
+           * a HH\Label.
+           * TODO: make sure we do these checks only for the first argument
+           *)
           let (env, atom_type) =
             let is_atom = get_fp_is_atom param in
             let ety = param.fp_type.et_type in
+            let is_label =
+              match get_node ety with
+              | Tnewtype (name, _, _) -> String.equal SN.Classes.cLabel name
+              | _ -> false
+            in
             match arg with
-            | EnumAtom atom_name when is_atom ->
+            | EnumAtom atom_name when is_atom || is_label ->
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
-                when String.equal name SN.Classes.cMemberOf ->
-                (match get_node ty_enum with
-                | Tclass ((_, enum_name), _, _)
-                  when Env.is_enum_class env enum_name ->
-                  expand_atom_in_enum pos env enum_name atom_name
-                | Tgeneric (name, _) ->
-                  let upper_bounds =
-                    Typing_utils.collect_enum_class_upper_bounds env name
-                  in
-                  (* To avoid ambiguity, we only support the case where
-                   * there is a single upper bound that is an EnumClass.
-                   * We might want to relax that later (e.g. with  the
-                   * support for intersections.
-                   * See Typing_check_decls.check_atom_on_param.
-                   *)
-                  if SSet.cardinal upper_bounds = 1 then
-                    let enum_name = SSet.choose upper_bounds in
-                    expand_atom_in_enum pos env enum_name atom_name
-                  else
-                    (env, None)
-                | _ ->
-                  (* Already reported, see Typing_check_decls *)
-                  (env, None))
+                when String.equal name SN.Classes.cMemberOf
+                     || String.equal name SN.Classes.cLabel ->
+                let ctor = name in
+                (match compute_enum_name env ty_enum with
+                | None -> (env, None)
+                | Some enum_name ->
+                  expand_atom_in_enum pos env ~ctor enum_name atom_name)
               | _ ->
                 (* Already reported, see Typing_check_decls *)
                 (env, None))

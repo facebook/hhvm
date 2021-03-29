@@ -72,6 +72,11 @@ abstract class BuiltinEnum<+T> {
 }
 
 type enumname<T> = classname<BuiltinEnum<T>>;
+/**
+ * Type of atoms
+ */
+newtype Label<-TEnumClass, +TType> = string;
+
 
 /**
  * BuiltinEnumClass contains the utility methods provided by enum classes.
@@ -92,6 +97,14 @@ abstract class BuiltinEnumClass<+T> {
    */
   <<__Native>>
   final public static function getValues()[write_props]: darray<string, T>;
+
+  final public static function nameOf(Label<this, mixed> $atom): string {
+    return $atom;
+  }
+
+  final public static function valueOf<TEnum super this, TType>(Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
+    return static::getValues()[$atom];
+  }
 }
 
 

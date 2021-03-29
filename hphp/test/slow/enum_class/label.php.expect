@@ -1,0 +1,14 @@
+Testing labels
+[E] Name = Name
+[E] AGE = AGE
+[E] 42 = 42
+[E] 42 = 42
+[E] Age = Age
+Testing indirect calls
+Name
+zuck
+Name
+zuck
+[F] NAME = NAME
+[F] FOO = FOO
+[F] Foo = Foo

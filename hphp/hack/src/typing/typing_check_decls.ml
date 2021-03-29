@@ -46,7 +46,7 @@ let check_atom_on_param env pos dty lty =
    * in both cases, it must be bounded by an enum class
    *
    * In all cases, we check that the requested atom is part of the
-   * detected enum class
+   * detected enum class.
    *)
   let check_tgeneric name =
     let is_taccess_this =
@@ -270,11 +270,7 @@ and hint_ ~is_atom env p h_ =
 
 and fun_param env param =
   let is_atom =
-    List.exists
-      ~f:(fun { ua_name; ua_params } ->
-        String.equal (snd ua_name) SN.UserAttributes.uaAtom
-        && List.is_empty ua_params)
-      param.param_user_attributes
+    Naming_attributes.mem SN.UserAttributes.uaAtom param.param_user_attributes
   in
   maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
 

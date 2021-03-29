@@ -586,12 +586,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
     case KindOfRecord           : return kRecord;
-
-    case KindOfPersistentDArray:
-    case KindOfPersistentVArray:
-    case KindOfDArray:
-    case KindOfVArray:
-      always_assert(false);
   }
   not_reached();
 }
@@ -1211,9 +1205,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Self:
       case A::Parent:
       case A::Callable:
-      case A::VArray:
-      case A::DArray:
-      case A::VArrOrDArr:
         break;
     }
     always_assert(false);

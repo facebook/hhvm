@@ -491,7 +491,7 @@ struct VArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
-    assertx(!m_arr || m_arr->isHAMSafeVArray());
+    assertx(!m_arr || m_arr->isVecType());
     other.m_arr = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -503,8 +503,7 @@ struct VArrayInit {
 
   ~VArrayInit() {
     // In case an exception interrupts the initialization.
-    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
-                       m_arr->isHAMSafeVArray()));
+    assertx(!m_arr || (m_arr->hasExactlyOneRef() && m_arr->isVecType()));
     if (m_arr) m_arr->release();
   }
 
@@ -523,7 +522,7 @@ struct VArrayInit {
 
   Variant toVariant() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeVArray());
+    assertx(m_arr->isVecType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -534,7 +533,7 @@ struct VArrayInit {
 
   Array toArray() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeVArray());
+    assertx(m_arr->isVecType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -545,7 +544,7 @@ struct VArrayInit {
 
   ArrayData* create() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeVArray());
+    assertx(m_arr->isVecType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -592,7 +591,7 @@ struct DArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
-    assertx(!m_arr || m_arr->isHAMSafeDArray());
+    assertx(!m_arr || m_arr->isDictType());
     other.m_arr = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -604,8 +603,7 @@ struct DArrayInit {
 
   ~DArrayInit() {
     // In case an exception interrupts the initialization.
-    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
-                      m_arr->isHAMSafeDArray()));
+    assertx(!m_arr || (m_arr->hasExactlyOneRef() && m_arr->isDictType()));
     if (m_arr) m_arr->release();
   }
 
@@ -723,7 +721,7 @@ struct DArrayInit {
 
   Variant toVariant() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeDArray());
+    assertx(m_arr->isDictType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -734,7 +732,7 @@ struct DArrayInit {
 
   Array toArray() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeDArray());
+    assertx(m_arr->isDictType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -745,7 +743,7 @@ struct DArrayInit {
 
   ArrayData* create() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isHAMSafeDArray());
+    assertx(m_arr->isDictType());
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG

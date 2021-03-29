@@ -96,9 +96,9 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   if (UNLIKELY(m_forcePHPArrays)) {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
-    if (arr->isDArray() || arr->isDictType()) {
+    if (arr->isDictType()) {
       return VariableSerializer::ArrayKind::Dict;
-    } else if (arr->isVArray() || arr->isVecType()) {
+    } else if (arr->isVecType()) {
       return VariableSerializer::ArrayKind::Vec;
     }
     assertx(arr->isKeysetType());
@@ -130,37 +130,25 @@ VariableSerializer::getKind(const ArrayData* arr) const {
 
   if (serializesLegacyBit && arr->isLegacyArray()) {
     assertx(!arr->isKeysetType());
-    if (m_keepDVArrays) {
-      if (arr->isDictType() || arr->isDArray()) {
-        return VariableSerializer::ArrayKind::MarkedDArray;
-      }
-      if (arr->isVecType() || arr->isVArray()) {
-        return VariableSerializer::ArrayKind::MarkedVArray;
-      }
+    if (m_keepDVArrays && arr->isVecType()) {
+      return VariableSerializer::ArrayKind::MarkedVArray;
     }
     return VariableSerializer::ArrayKind::MarkedDArray;
   }
 
-  if (RuntimeOption::EvalHackArrDVArrs &&
-      respectsLegacyBit &&
-      arr->isLegacyArray()) {
+  if (respectsLegacyBit && arr->isLegacyArray()) {
     assertx(!arr->isKeysetType());
     if (m_keepDVArrays) {
-      if (arr->isVecType()) return VariableSerializer::ArrayKind::VArray;
-      if (arr->isDictType()) return VariableSerializer::ArrayKind::DArray;
+      return arr->isVecType() ? VariableSerializer::ArrayKind::VArray
+                              : VariableSerializer::ArrayKind::DArray;
     }
     return VariableSerializer::ArrayKind::PHP;
   }
 
   if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;
-  if (arr->isVecType()) return VariableSerializer::ArrayKind::Vec;
-  if (arr->isKeysetType())   return VariableSerializer::ArrayKind::Keyset;
-  assertx(arr->isPHPArrayType());
-  if (m_keepDVArrays) {
-    if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
-    if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
-  }
-  return VariableSerializer::ArrayKind::PHP;
+  if (arr->isVecType())  return VariableSerializer::ArrayKind::Vec;
+  assertx(arr->isKeysetType());
+  return VariableSerializer::ArrayKind::Keyset;
 }
 
 void VariableSerializer::pushObjectInfo(const String& objClass, char objCode) {
@@ -1791,31 +1779,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
 
     case KindOfPersistentVec:
     case KindOfVec:
-      assertx(!isArrayKey);
-      assertx(val(tv).parr->isVecType());
-      serializeArray(val(tv).parr, skipNestCheck);
-      return;
-
     case KindOfPersistentDict:
     case KindOfDict:
-      assertx(!isArrayKey);
-      assertx(val(tv).parr->isDictType());
-      serializeArray(val(tv).parr, skipNestCheck);
-      return;
-
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isKeysetType());
-      serializeArray(val(tv).parr, skipNestCheck);
-      return;
-
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      assertx(!isArrayKey);
-      assertx(val(tv).parr->isPHPArrayType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
@@ -1968,7 +1936,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
 void VariableSerializer::serializeArray(const ArrayData* arr,
                                         bool skipNestCheck /* = false */) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices)) {
-    if (UNLIKELY(m_hackWarn && !m_hasHackWarned && arr->isHackArrayType())) {
+    if (UNLIKELY(m_hackWarn && !m_hasHackWarned)) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
     }
@@ -1979,10 +1947,6 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (UNLIKELY(m_keysetWarn && !m_hasKeysetWarned && arr->isKeysetType())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasKeysetWarned = true;
-    }
-    if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArrayType())) {
-      raise_hack_arr_compat_serialize_notice(arr);
-      m_hasPHPWarned = true;
     }
   }
 

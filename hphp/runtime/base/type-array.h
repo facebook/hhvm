@@ -219,13 +219,6 @@ public:
   bool isVec() const { return m_arr && m_arr->isVecType(); }
   bool isDict() const { return m_arr && m_arr->isDictType(); }
   bool isKeyset() const { return m_arr && m_arr->isKeysetType(); }
-  bool isHackArray() const { return m_arr && m_arr->isHackArrayType(); }
-  bool isPHPArray() const { return !m_arr || m_arr->isPHPArrayType(); }
-  bool isVArray() const { return m_arr && m_arr->isVArray(); }
-  bool isDArray() const { return m_arr && m_arr->isDArray(); }
-  bool isHAMSafeVArray() const { return m_arr && m_arr->isHAMSafeVArray(); }
-  bool isHAMSafeDArray() const { return m_arr && m_arr->isHAMSafeDArray(); }
-  bool isHAMSafeDVArray() const { return m_arr && m_arr->isHAMSafeDVArray(); }
 
   /////////////////////////////////////////////////////////////////////////////
 

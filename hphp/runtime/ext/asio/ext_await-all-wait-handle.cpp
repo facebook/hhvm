@@ -169,46 +169,6 @@ Object c_AwaitAllWaitHandle::fromArrLike(const ArrayData* ad) {
   return c_AwaitAllWaitHandle::Create([=](auto fn) { IterateV(ad, fn); });
 }
 
-Object AwaitAllWaitHandleFromPHPArray(
-    const Class *self_,
-    const Array& dependencies
-) {
-  auto ad = dependencies.get();
-  assertx(ad);
-  assertx(ad->isPHPArrayType());
-  if (!ad->size()) return Object{returnEmpty()};
-
-  switch (ad->kind()) {
-    case ArrayData::kPackedKind:
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        PackedArray::IterateV(ad, fn);
-      });
-
-    case ArrayData::kMixedKind:
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        MixedArray::IterateV(MixedArray::asMixed(ad), fn);
-      });
-
-    case ArrayData::kVecKind:
-    case ArrayData::kDictKind:
-    case ArrayData::kKeysetKind:
-    case ArrayData::kBespokeVecKind:
-    case ArrayData::kBespokeDictKind:
-    case ArrayData::kBespokeKeysetKind:
-      // Shouldn't get Hack arrays
-      not_reached();
-
-    case ArrayData::kBespokeVArrayKind:
-    case ArrayData::kBespokeDArrayKind:
-      return c_AwaitAllWaitHandle::fromArrLike(ad);
-
-    case ArrayData::kNumKinds:
-      not_reached();
-  }
-
-  not_reached();
-}
-
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies) {
   auto ad = dependencies.get();
@@ -273,11 +233,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfPersistentDict:
     case KindOfDict:
       return c_AwaitAllWaitHandle_ns_fromDict(self_, dependencies.asCArrRef());
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      return AwaitAllWaitHandleFromPHPArray(self_, dependencies.asCArrRef());
     case KindOfObject: {
       auto obj = dependencies.getObjectData();
       if (LIKELY(obj->isCollection())) {
@@ -403,21 +358,8 @@ void AsioExtension::initAwaitAllWaitHandle() {
   AAWH_SME(setOnCreateCallback);
   AAWH_SME(fromContainer);
 #undef AAWH_SME
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromDict);
-    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromVec);
-  } else {
-    HHVM_NAMED_STATIC_ME(
-        HH\\AwaitAllWaitHandle,
-        fromDArray,
-        AwaitAllWaitHandleFromPHPArray
-    );
-    HHVM_NAMED_STATIC_ME(
-        HH\\AwaitAllWaitHandle,
-        fromVArray,
-        AwaitAllWaitHandleFromPHPArray
-    );
-  }
+  HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromDict);
+  HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromVec);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

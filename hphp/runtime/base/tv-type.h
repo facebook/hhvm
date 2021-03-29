@@ -31,23 +31,6 @@ ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
   return tvIsNull(*tv);
 }
 
-// We don't expose isVArrayType or isDArrayType. They shouldn't be used.
-ALWAYS_INLINE bool isHAMSafeDArrayType(DataType t) {
-  return RO::EvalHackArrDVArrs
-    ? isDictType(t)
-    : t == KindOfPersistentDArray || t == KindOfDArray;
-}
-ALWAYS_INLINE bool isHAMSafeVArrayType(DataType t) {
-  return RO::EvalHackArrDVArrs
-    ? isVecType(t)
-    : t == KindOfPersistentVArray || t == KindOfVArray;
-}
-ALWAYS_INLINE bool isHAMSafeDVArrayType(DataType t) {
-  if (RO::EvalHackArrDVArrs) return isVecType(t) || isDictType(t);
-  return t == KindOfPersistentVArray || t == KindOfVArray ||
-         t == KindOfPersistentDArray || t == KindOfDArray;
-}
-
 #define CASE(ty)                                                        \
   template<typename T>                                                  \
   ALWAYS_INLINE enable_if_tv_val_t<T&&, bool> tvIs##ty(T&& tv) {        \
@@ -59,14 +42,7 @@ CASE(Bool)
 CASE(Int)
 CASE(Double)
 CASE(String)
-CASE(Array)
-CASE(VecOrVArray)
-CASE(DictOrDArray)
-CASE(HAMSafeVArray)
-CASE(HAMSafeDArray)
-CASE(HAMSafeDVArray)
 CASE(ArrayLike)
-CASE(HackArray)
 CASE(Vec)
 CASE(Dict)
 CASE(Keyset)

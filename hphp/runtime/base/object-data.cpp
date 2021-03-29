@@ -148,7 +148,7 @@ static void freeDynPropArray(ObjectData* inst) {
   auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
   assertx(it != end(table));
-  assertx(it->second.arr().isHAMSafeDArray());
+  assertx(it->second.arr().isDict());
   it->second.destroy();
   table.erase(it);
 }
@@ -323,7 +323,7 @@ Object ObjectData::iterableObject(bool& isIterable,
 Array& ObjectData::dynPropArray() const {
   assertx(getAttribute(HasDynPropArr));
   assertx(g_context->dynPropTable.count(this));
-  assertx(g_context->dynPropTable[this].arr().isHAMSafeDArray());
+  assertx(g_context->dynPropTable[this].arr().isDict());
   return g_context->dynPropTable[this].arr();
 }
 
@@ -354,7 +354,7 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 Array& ObjectData::setDynPropArray(const Array& newArr) {
   assertx(!g_context->dynPropTable.count(this));
   assertx(!getAttribute(HasDynPropArr));
-  assertx(newArr.isHAMSafeDArray());
+  assertx(newArr.isDict());
 
   if (m_cls->forbidsDynamicProps()) {
     throw_object_forbids_dynamic_props(getClassName().data());

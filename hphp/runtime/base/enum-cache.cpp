@@ -87,8 +87,8 @@ const EnumValues* EnumCache::cachePersistentEnumValues(
   bool recurse,
   Array&& names,
   Array&& values) {
-  assertx(names.isHAMSafeDArray());
-  assertx(values.isHAMSafeDArray());
+  assertx(names.isDict());
+  assertx(values.isDict());
 
   std::unique_ptr<EnumValues> enums(new EnumValues());
   enums->values = ArrayData::GetScalarArray(std::move(values));
@@ -112,8 +112,8 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   Array&& names,
   Array&& values) {
 
-  assertx(names.isHAMSafeDArray());
-  assertx(values.isHAMSafeDArray());
+  assertx(names.isDict());
+  assertx(values.isDict());
 
   m_nonScalarEnumValuesMap.bind(rds::Mode::Normal, rds::LinkID{"EnumCache"});
   if (!m_nonScalarEnumValuesMap.isInit()) {
@@ -197,8 +197,8 @@ const EnumValues* EnumCache::loadEnumValues(
     }
   }
 
-  assertx(names.isHAMSafeDArray());
-  assertx(values.isHAMSafeDArray());
+  assertx(names.isDict());
+  assertx(values.isDict());
 
   // Tag all enums with the large enum tag. Small enums will be tagged again
   // based on the actual PC by the reflection methods that access this cache.

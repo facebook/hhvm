@@ -149,41 +149,10 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   return a;
 }
 
-ArrayData* convArrLikeToVArrHelper(ArrayData* adIn) {
-  auto a = adIn->toVArray(adIn->cowCheck());
-  assertx(a->isVArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convArrLikeToDArrHelper(ArrayData* adIn) {
-  auto a = adIn->toDArray(adIn->cowCheck());
-  assertx(a->isDArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethConvertWarningHelper("varray");
-  auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
-  return a;
-}
-
 ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
   assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("vec");
   auto a = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
-  return a;
-}
-
-ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethConvertWarningHelper("darray");
-  auto a = make_darray(
-    0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }
@@ -587,10 +556,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
@@ -801,7 +766,7 @@ ArrayData* loadClsTypeCnsHelper(
   }
 
   assertx(isArrayLikeType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isHAMSafeDArray());
+  assertx(typeCns.m_data.parr->isDictType());
   assertx(typeCns.m_data.parr->isStatic());
   return typeCns.m_data.parr;
 }
@@ -862,7 +827,7 @@ TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op) {
 }
 
 tv_lval elemVecIU(tv_lval base, int64_t key) {
-  assertx(tvIsVecOrVArray(base));
+  assertx(tvIsVec(base));
   return ElemUVec<KeyType::Int>(base, key);
 }
 

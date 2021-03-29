@@ -373,16 +373,6 @@ public:
     *m_top = make_tv<KindOfLazyClass>(l);
   }
 
-  // These should only be called directly when the caller has
-  // already adjusted the refcount appropriately
-  ALWAYS_INLINE
-  void pushArrayNoRc(ArrayData* a) {
-    assertx(a->isPHPArrayType());
-    assertx(m_top != m_elms);
-    m_top--;
-    *m_top = make_array_like_tv(a);
-  }
-
   ALWAYS_INLINE
   void pushArrayLikeNoRc(ArrayData* a) {
     assertx(m_top != m_elms);
@@ -415,13 +405,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void pushArray(ArrayData* a) {
-    assertx(a);
-    pushArrayNoRc(a);
-    a->incRefCount();
-  }
-
-  ALWAYS_INLINE
   void pushArrayLike(ArrayData* a) {
     assertx(a);
     pushArrayLikeNoRc(a);
@@ -447,15 +430,6 @@ public:
     assertx(a);
     pushKeysetNoRc(a);
     a->incRefCount();
-  }
-
-  ALWAYS_INLINE
-  void pushStaticArray(const ArrayData* a) {
-    assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isPHPArrayType());
-    assertx(m_top != m_elms);
-    m_top--;
-    *m_top = make_persistent_array_like_tv(const_cast<ArrayData*>(a));
   }
 
   ALWAYS_INLINE

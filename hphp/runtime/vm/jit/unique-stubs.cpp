@@ -314,7 +314,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
       arrprov::TagOverride _(RO::EvalArrayProvenance
         ? arrprov::Tag::Param(func, func->numNonVariadicParams())
         : arrprov::Tag{});
-      return PackedArray::MakeVArray(count, values);
+      return PackedArray::MakeVec(count, values);
     };
     auto const packedArr = v.makeReg();
     {
@@ -344,9 +344,8 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << subq{unpackCellOff, rvmsp(), unpackCellPtr, v.makeReg()};
 
     // Store it.
-    auto const type = RO::EvalHackArrDVArrs ? DataType::Vec : DataType::VArray;
     v << store{packedArr, unpackCellPtr + TVOFF(m_data)};
-    v << storeb{v.cns(type), unpackCellPtr + TVOFF(m_type)};
+    v << storeb{v.cns(KindOfVec), unpackCellPtr + TVOFF(m_type)};
 
     // Move generics to the correct place.
     auto const generics = v.makeReg();

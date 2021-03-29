@@ -564,24 +564,6 @@ static std::string toStringElm(TypedValue tv) {
       print_count();
       os << ":Keyset";
       continue;
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-      assertx(tv.m_data.parr->isDArray());
-      assertx(tv.m_data.parr->isPHPArrayType());
-      assertx(tv.m_data.parr->checkCount());
-      os << tv.m_data.parr;
-      print_count();
-      os << ":darray";
-      continue;
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      assertx(tv.m_data.parr->isVArray());
-      assertx(tv.m_data.parr->isPHPArrayType());
-      assertx(tv.m_data.parr->checkCount());
-      os << tv.m_data.parr;
-      print_count();
-      os << ":varray";
-      continue;
     case KindOfObject:
       assertx(tv.m_data.pobj->checkCount());
       os << tv.m_data.pobj;
@@ -845,13 +827,8 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   auto const numParams = func->numNonVariadicParams();
   if (LIKELY(numArgs == numParams)) {
     // Convert unpack args to the proper type.
-    if (RO::EvalHackArrDVArrs) {
-      tvCastToVecInPlace(&unpackArgs);
-      stack.pushVec(unpackArgs.m_data.parr);
-    } else {
-      tvCastToVArrayInPlace(&unpackArgs);
-      stack.pushArray(unpackArgs.m_data.parr);
-    }
+    tvCastToVecInPlace(&unpackArgs);
+    stack.pushVec(unpackArgs.m_data.parr);
     return numParams + 1;
   }
 
@@ -1287,7 +1264,7 @@ OPTBLD_INLINE void iopAddElemC() {
   TypedValue* c1 = vmStack().topC();
   auto key = tvClassToString(*vmStack().indC(1));
   TypedValue* c3 = vmStack().indC(2);
-  if (!tvIsArray(c3) && !tvIsDict(c3)) {
+  if (!tvIsDict(c3)) {
     raise_error("AddElemC: $3 must be an array or dict");
   }
   tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(key), tvAsCVarRef(c1));
@@ -1299,7 +1276,7 @@ OPTBLD_INLINE void iopAddElemC() {
 OPTBLD_INLINE void iopAddNewElemC() {
   TypedValue* c1 = vmStack().topC();
   TypedValue* c2 = vmStack().indC(1);
-  if (!tvIsVecOrVArray(c2) && !tvIsKeyset(c2)) {
+  if (!tvIsVec(c2) && !tvIsKeyset(c2)) {
     raise_error("AddNewElemC: $2 must be an varray, vec, or keyset");
   }
   tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
@@ -1779,7 +1756,7 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
 
 OPTBLD_INLINE void iopRecordReifiedGeneric() {
   auto const tsList = vmStack().topC();
-  if (!tvIsHAMSafeVArray(tsList)) {
+  if (!tvIsVec(tsList)) {
     raise_error("Invalid type-structure list in RecordReifiedGeneric");
   }
   // recordReifiedGenericsAndGetTSList decrefs the tsList
@@ -1793,7 +1770,7 @@ OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");
   auto const c = vmStack().topC();
-  if (!tvIsHAMSafeVArray(c)) {
+  if (!tvIsVec(c)) {
     raise_error("Invalid type-structure list in CheckReifiedGenericMismatch");
   }
   checkClassReifiedGenericMismatch(cls, c->m_data.parr);
@@ -2012,10 +1989,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDict:
             case KindOfPersistentKeyset:
             case KindOfKeyset:
-            case KindOfPersistentDArray:
-            case KindOfDArray:
-            case KindOfPersistentVArray:
-            case KindOfVArray:
             case KindOfObject:
             case KindOfResource:
             case KindOfRFunc:
@@ -2034,14 +2007,10 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfVec:
         case KindOfDict:
         case KindOfKeyset:
-        case KindOfDArray:
-        case KindOfVArray:
           tvDecRefArr(val);
         case KindOfPersistentVec:
         case KindOfPersistentDict:
         case KindOfPersistentKeyset:
-        case KindOfPersistentDArray:
-        case KindOfPersistentVArray:
           match = SwitchMatch::DEFAULT;
           return;
 
@@ -2416,7 +2385,7 @@ OPTBLD_INLINE void iopClassGetC() {
 
 OPTBLD_INLINE void iopClassGetTS() {
   auto const cell = vmStack().topC();
-  if (!tvIsHAMSafeDArray(cell)) {
+  if (!tvIsDict(cell)) {
     raise_error("Reified type must be a type structure");
   }
   auto const ts = cell->m_data.parr;
@@ -3358,11 +3327,7 @@ OPTBLD_INLINE void iopArrayIdx() {
   auto const  key = tvClassToString(*vmStack().indTV(1));
   TypedValue* arr = vmStack().indTV(2);
   if (isClsMethType(type(arr))) {
-    if (RO::EvalHackArrDVArrs) {
-      tvCastToVecInPlace(arr);
-    } else {
-      tvCastToVArrayInPlace(arr);
-    }
+    tvCastToVecInPlace(arr);
   }
   auto const result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
                                               tvAsCVarRef(&key),
@@ -3901,11 +3866,11 @@ OPTBLD_INLINE void iopResolveRFunc(Id id) {
 
   // Should I refactor this out with iopNewObj*?
   auto const reified = [&] () -> ArrayData* {
-      if (!tvIsHAMSafeVArray(tsList)) {
-        raise_error("Attempting ResolveRFunc with invalid reified generics");
-      }
-      return tsList->m_data.parr;
-    }();
+    if (!tvIsVec(tsList)) {
+      raise_error("Attempting ResolveRFunc with invalid reified generics");
+    }
+    return tsList->m_data.parr;
+  }();
 
   auto func = resolveFuncImpl(id);
   if (!func->hasReifiedGenerics()) {
@@ -4189,11 +4154,11 @@ void resolveRClsMethodImpl(Class* cls, const StringData* methName) {
 
   auto const tsList = vmStack().topC();
   auto const reified = [&] () -> ArrayData* {
-      if (!tvIsHAMSafeVArray(tsList)) {
-        raise_error("Invalid reified generics when resolving class method");
-      }
-      return tsList->m_data.parr;
-    }();
+    if (!tvIsVec(tsList)) {
+      raise_error("Invalid reified generics when resolving class method");
+    }
+    return tsList->m_data.parr;
+  }();
 
   if (func->hasReifiedGenerics()) {
     checkFunReifiedGenericMismatch(func, reified);
@@ -4405,7 +4370,7 @@ OPTBLD_INLINE void iopNewObjR() {
 
   auto const reified = [&] () -> ArrayData* {
     if (reifiedCell->m_type == KindOfNull) return nullptr;
-    if (!tvIsHAMSafeVArray(reifiedCell)) {
+    if (!tvIsVec(reifiedCell)) {
       raise_error("Attempting NewObjR with invalid reified generics");
     }
     return reifiedCell->m_data.parr;
@@ -4427,7 +4392,7 @@ OPTBLD_INLINE void iopNewObjRD(Id id) {
 
   auto const reified = [&] () -> ArrayData* {
     if (tsList->m_type == KindOfNull) return nullptr;
-    if (!tvIsHAMSafeVArray(tsList)) {
+    if (!tvIsVec(tsList)) {
       raise_error("Attempting NewObjRD with invalid reified generics");
     }
     return tsList->m_data.parr;
@@ -4761,7 +4726,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
   auto const cell = vmStack().topC();
-  assertx(tvIsHAMSafeDArray(cell));
+  assertx(tvIsDict(cell));
   auto isTypeVar = tcCouldBeReified(vmfp()->func(), param.index);
   bool warn = false;
   if ((isTypeVar || tvIsObject(param.lval)) &&
@@ -4824,7 +4789,7 @@ OPTBLD_INLINE void iopVerifyRetTypeC() {
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
   verifyRetTypeImpl(1); // TypedValue is the second element on the stack
   auto const ts = vmStack().topC();
-  assertx(tvIsHAMSafeDArray(ts));
+  assertx(tvIsDict(ts));
   auto const cell = vmStack().indC(1);
   bool isTypeVar = tcCouldBeReified(vmfp()->func(), TypeConstraint::ReturnId);
   bool warn = false;

@@ -29,9 +29,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct APCArray {
-  static APCHandle::Pair MakeSharedArray(ArrayData* data,
-                                         APCHandleLevel level,
-                                         bool unserializeObj);
   static APCHandle::Pair MakeSharedVec(ArrayData* data,
                                        APCHandleLevel level,
                                        bool unserializeObj);
@@ -42,8 +39,6 @@ struct APCArray {
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
-  static APCHandle* MakeUncountedArray(
-      ArrayData* array, DataWalker::PointerMap* m);
   static APCHandle* MakeUncountedVec(
       ArrayData* vec, DataWalker::PointerMap* m);
   static APCHandle* MakeUncountedDict(
@@ -56,11 +51,7 @@ struct APCArray {
 
   static APCArray* fromHandle(APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedVArray ||
-            handle->kind() == APCKind::SharedMarkedVArray ||
-            handle->kind() == APCKind::SharedDArray ||
-            handle->kind() == APCKind::SharedMarkedDArray ||
-            handle->kind() == APCKind::SharedVec ||
+    assertx(handle->kind() == APCKind::SharedVec ||
             handle->kind() == APCKind::SharedLegacyVec ||
             handle->kind() == APCKind::SharedDict ||
             handle->kind() == APCKind::SharedLegacyDict ||
@@ -71,11 +62,7 @@ struct APCArray {
 
   static const APCArray* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedVArray ||
-            handle->kind() == APCKind::SharedMarkedVArray ||
-            handle->kind() == APCKind::SharedDArray ||
-            handle->kind() == APCKind::SharedMarkedDArray ||
-            handle->kind() == APCKind::SharedVec ||
+    assertx(handle->kind() == APCKind::SharedVec ||
             handle->kind() == APCKind::SharedLegacyVec ||
             handle->kind() == APCKind::SharedDict ||
             handle->kind() == APCKind::SharedLegacyDict ||
@@ -84,22 +71,6 @@ struct APCArray {
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  ArrayData* toLocalVArray() const {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return PackedArray::MakeVArrayFromAPC(this);
-  }
-  ArrayData* toLocalMarkedVArray() const {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return PackedArray::MakeVArrayFromAPC(this, /*isMarked=*/true);
-  }
-  ArrayData* toLocalDArray() const {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return MixedArray::MakeDArrayFromAPC(this);
-  }
-  ArrayData* toLocalMarkedDArray() const {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return MixedArray::MakeDArrayFromAPC(this, /*isMarked=*/true);
-  }
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
   ArrayData* toLocalLegacyVec() const {
     return PackedArray::MakeVecFromAPC(this, /*isLegacy=*/true);
@@ -149,45 +120,14 @@ struct APCArray {
 
   bool isPacked() const {
     auto const k = m_handle.kind();
-    return
-      k == APCKind::SharedVArray ||
-      k == APCKind::SharedMarkedVArray ||
-      k == APCKind::SharedVec ||
-      k == APCKind::SharedLegacyVec ||
-      k == APCKind::SharedKeyset;
+    return k == APCKind::SharedVec ||
+           k == APCKind::SharedLegacyVec ||
+           k == APCKind::SharedKeyset;
   }
 
   bool isHashed() const {
     auto const k = m_handle.kind();
-    return
-      k == APCKind::SharedDArray ||
-      k == APCKind::SharedMarkedDArray ||
-      k == APCKind::SharedDict ||
-      k == APCKind::SharedLegacyDict;
-  }
-
-  bool isPHPArray() const {
-    auto const k = m_handle.kind();
-    return
-      k == APCKind::SharedVArray ||
-      k == APCKind::SharedMarkedVArray ||
-      k == APCKind::SharedDArray ||
-      k == APCKind::SharedMarkedDArray;
-  }
-
-  bool isUnmarkedDVArray() const {
-    return m_handle.kind() == APCKind::SharedDArray ||
-           m_handle.kind() == APCKind::SharedVArray;
-  }
-
-  bool isVArray() const {
-    return m_handle.kind() == APCKind::SharedVArray ||
-           m_handle.kind() == APCKind::SharedMarkedVArray;
-  }
-
-  bool isDArray() const {
-    return m_handle.kind() == APCKind::SharedDArray ||
-           m_handle.kind() == APCKind::SharedMarkedDArray;
+    return k == APCKind::SharedDict || k == APCKind::SharedLegacyDict;
   }
 
   bool isVec() const {

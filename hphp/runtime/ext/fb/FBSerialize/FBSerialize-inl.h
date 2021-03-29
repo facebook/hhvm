@@ -196,8 +196,6 @@ void FBSerializer<V>::serializeThing(const Variant& thing, size_t depth) {
     throw SerializeError("link depth > 256");
   }
 
-  V::traceSerialization(thing);
-
   switch (V::type(thing)) {
     case Type::NULLT:
       writeCode(FB_SERIALIZE_NULL);

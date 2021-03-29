@@ -285,10 +285,6 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
@@ -316,11 +312,8 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
 
   auto HandleArrayConvNotice = [&](const Variant& v) {
     const auto type = v.getType();
-    const auto from = isDictOrDArrayType(type)
-                      ? "darray/dict"
-                      : isVecOrVArrayType(type)
-                          ? "varray/vec"
-                          : "keyset";
+    const auto from = isDictType(type) ? "darray/dict" :
+                      isVecType(type) ? "varray/vec" : "keyset";
     handleConvNotice(from, "int");
   };
 

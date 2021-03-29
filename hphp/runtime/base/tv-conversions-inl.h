@@ -48,10 +48,6 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfDouble:        return cell.m_data.dbl != 0;
     case KindOfPersistentString:
     case KindOfString:        return cell.m_data.pstr->toBoolean();
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -94,14 +90,10 @@ inline int64_t tvToInt(
     case KindOfString:
       handleConvNoticeLevel(level, "string", "int", notice_reason);
       return cell.m_data.pstr->toInt64(10);
-    case KindOfPersistentDArray:
-    case KindOfDArray:
     case KindOfPersistentDict:
     case KindOfDict:
       handleConvNoticeLevel(level, "darray/dict", "int", notice_reason);
       return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
       handleConvNoticeLevel(level, "varray/vec", "int", notice_reason);

@@ -5130,13 +5130,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfDict:         return TDict;
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return TKeyset;
-
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
-        always_assert(false);
-
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
       case KindOfRecord:       // fallthrough
@@ -5183,8 +5176,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(BInt)) return TInt;
       if (candidate.subtypeOf(BStr)) return TStr;
       return TArrKey;
-    case AnnotMetaType::VArrOrDArr:
-      always_assert(false);
     case AnnotMetaType::VecOrDict:
       if (candidate.subtypeOf(BVec)) return TVec;
       if (candidate.subtypeOf(BDict)) return TDict;

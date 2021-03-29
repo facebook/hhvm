@@ -45,8 +45,7 @@ void throw_bad_array_operand(const ArrayData* ad) {
     if (ad->isVecType()) return "vecs";
     if (ad->isDictType()) return "dicts";
     if (ad->isKeysetType()) return "keysets";
-    assertx(ad->isPHPArrayType());
-    return "arrays";
+    always_assert(false);
   }();
   SystemLib::throwInvalidOperationExceptionObject(
     folly::sformat(
@@ -138,10 +137,6 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfPersistentString:
       return stringToNumeric_(cell.m_data.pstr);
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -552,10 +547,6 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
@@ -895,10 +886,6 @@ void tvBitNot(TypedValue& cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:

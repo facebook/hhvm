@@ -36,7 +36,7 @@ inline bool shouldTestBespokeArrayLikes() {
 
 inline bool arrayTypeCouldBeBespoke(DataType t) {
   assertx(allowBespokeArrayLikes());
-  return shouldTestBespokeArrayLikes() || isDictOrDArrayType(t);
+  return shouldTestBespokeArrayLikes() || isDictType(t);
 }
 
 /**

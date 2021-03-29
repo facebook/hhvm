@@ -323,7 +323,7 @@ void appendToContainer(JSONContainerType container_type,
     collections::append(base.getObjectData(), value.asTypedValue());
   } else {
     auto& arr = base.asArrRef();
-    if (arr.isDict() || arr.isDArray()) {
+    if (arr.isDict()) {
       arr.set(safe_cast<int64_t>(arr.size()), value);
     } else {
       arr.append(value);
@@ -971,10 +971,6 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfUninit:
     case KindOfNull:
     case KindOfPersistentString:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

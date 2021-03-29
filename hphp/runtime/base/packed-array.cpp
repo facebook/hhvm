@@ -114,14 +114,11 @@ inline ArrayData* alloc_packed_static(const ArrayData* ad) {
 }
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
+  assertx(arr->isVecKind());
   assertx(arr->hasVanillaPackedLayout());
   assertx(arr->checkCountZ());
   assertx(arr->m_size <= MixedArray::MaxSize);
   assertx(arr->m_size <= capacity(arr));
-  assertx(IMPLIES(arr->isVArray(), arr->isPackedKind()));
-  assertx(IMPLIES(arr->isNotDVArray(), arr->isVecKind()));
-  assertx(IMPLIES(arr->isLegacyArray(), arr->isHAMSafeVArray()));
-  assertx(!RO::EvalHackArrDVArrs || arr->isVecKind());
   assertx(IMPLIES(!arrprov::arrayWantsTag(arr),
                   arr->m_extra == kDefaultVanillaArrayExtra &&
                   IMPLIES(RO::EvalArrayProvenance,
@@ -509,19 +506,6 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);
   return ad;
-}
-
-ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc, bool isMarked) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(apc->isVArray());
-  auto const apcSize = apc->size();
-  VArrayInit init{apcSize};
-  for (uint32_t i = 0; i < apcSize; ++i) {
-    init.append(apc->getValue(i)->toLocal());
-  }
-  auto const ad = init.create();
-  ad->setLegacyArrayInPlace(isMarked);
-  return tagArrProv(ad, apc);
 }
 
 void PackedArray::Release(ArrayData* ad) {

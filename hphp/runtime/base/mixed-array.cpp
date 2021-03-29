@@ -616,19 +616,6 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc, bool isMarked) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(apc->isDArray());
-  auto const apcSize = apc->size();
-  DArrayInit init{apcSize};
-  for (uint32_t i = 0; i < apcSize; ++i) {
-    init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
-  }
-  auto const ad = init.create();
-  ad->setLegacyArrayInPlace(isMarked);
-  return tagArrProv(ad, apc);
-}
-
 //=============================================================================
 // Destruction
 
@@ -755,11 +742,8 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
+  assertx(isDictKind());
   assertx(hasVanillaMixedLayout());
-  assertx(IMPLIES(isDArray(), isMixedKind()));
-  assertx(IMPLIES(isNotDVArray(), isDictKind()));
-  assertx(IMPLIES(isLegacyArray(), isHAMSafeDArray()));
-  assertx(!RuntimeOption::EvalHackArrDVArrs || isNotDVArray());
   assertx(checkCount());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(MixedArray::HashSize(m_scale) ==
@@ -1317,7 +1301,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
-  assertx(ret->isHAMSafeDArray());
+  assertx(ret->isDictKind());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();

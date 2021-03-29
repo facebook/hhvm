@@ -17,4 +17,4 @@
 #pragma once
 
 // We use this value in hash-table-x64.S, where we cannot include datatype.h.
-#define UNINIT_DT_VALUE 104
+#define UNINIT_DT_VALUE 98

@@ -442,7 +442,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // First local is always $0ReifiedGenerics which comes right after params
       auto const generics = frame_local(fp, fp->func()->numParams());
       if (type(generics) != KindOfUninit) {
-        assertx(tvIsHAMSafeVArray(generics));
+        assertx(tvIsVec(generics));
         auto const reified_generics = val(generics).parr;
         funcname += mangleReifiedGenericsName(reified_generics);
       }

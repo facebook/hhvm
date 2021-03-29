@@ -328,8 +328,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
     if (pi.isVariadic()) {
-      pi.builtinType = RuntimeOption::EvalHackArrDVArrs
-        ? KindOfVec : KindOfVArray;
+      pi.builtinType = KindOfVec;
     }
     f->appendParam(params[i].isInOut(), pi, fParams);
     auto const& fromUBs = params[i].upperBounds;
@@ -381,8 +380,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */, bool save
   }
 
   if (hasReifiedGenerics) {
-    auto tv = uait->second;
-    assertx(tvIsHAMSafeVArray(tv));
+    auto const tv = uait->second;
+    assertx(tvIsVec(tv));
     f->extShared()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   }

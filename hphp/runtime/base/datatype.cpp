@@ -39,10 +39,6 @@ static_assert(!isStringType(KindOfNull),            "");
 static_assert(!isStringType(KindOfBoolean),         "");
 static_assert(!isStringType(KindOfInt64),           "");
 static_assert(!isStringType(KindOfDouble),          "");
-static_assert(!isStringType(KindOfPersistentVArray),"");
-static_assert(!isStringType(KindOfVArray),          "");
-static_assert(!isStringType(KindOfPersistentVArray),"");
-static_assert(!isStringType(KindOfDArray),          "");
 static_assert(!isStringType(KindOfPersistentVec),   "");
 static_assert(!isStringType(KindOfVec),             "");
 static_assert(!isStringType(KindOfPersistentDict),  "");
@@ -52,32 +48,8 @@ static_assert(!isStringType(KindOfKeyset),          "");
 static_assert(!isStringType(KindOfObject),          "");
 static_assert(!isStringType(KindOfResource),        "");
 
-static_assert(isArrayType(KindOfVArray),            "");
-static_assert(isArrayType(KindOfPersistentVArray),  "");
-static_assert(isArrayType(KindOfDArray),            "");
-static_assert(isArrayType(KindOfPersistentDArray),  "");
-static_assert(!isArrayType(KindOfVec),              "");
-static_assert(!isArrayType(KindOfPersistentVec),    "");
-static_assert(!isArrayType(KindOfDict),             "");
-static_assert(!isArrayType(KindOfPersistentDict),   "");
-static_assert(!isArrayType(KindOfKeyset),           "");
-static_assert(!isArrayType(KindOfPersistentKeyset), "");
-static_assert(!isArrayType(KindOfUninit),           "");
-static_assert(!isArrayType(KindOfNull),             "");
-static_assert(!isArrayType(KindOfBoolean),          "");
-static_assert(!isArrayType(KindOfInt64),            "");
-static_assert(!isArrayType(KindOfDouble),           "");
-static_assert(!isArrayType(KindOfPersistentString), "");
-static_assert(!isArrayType(KindOfString),           "");
-static_assert(!isArrayType(KindOfObject),           "");
-static_assert(!isArrayType(KindOfResource),         "");
-
 static_assert(isVecType(KindOfVec),                 "");
 static_assert(isVecType(KindOfPersistentVec),       "");
-static_assert(!isVecType(KindOfVArray),             "");
-static_assert(!isVecType(KindOfPersistentVArray),   "");
-static_assert(!isVecType(KindOfDArray),             "");
-static_assert(!isVecType(KindOfPersistentDArray),   "");
 static_assert(!isVecType(KindOfDict),               "");
 static_assert(!isVecType(KindOfPersistentDict),     "");
 static_assert(!isVecType(KindOfKeyset),             "");
@@ -94,10 +66,6 @@ static_assert(!isVecType(KindOfResource),           "");
 
 static_assert(isDictType(KindOfDict),               "");
 static_assert(isDictType(KindOfPersistentDict),     "");
-static_assert(!isDictType(KindOfVArray),            "");
-static_assert(!isDictType(KindOfPersistentVArray),  "");
-static_assert(!isDictType(KindOfDArray),            "");
-static_assert(!isDictType(KindOfPersistentDArray),  "");
 static_assert(!isDictType(KindOfVec),               "");
 static_assert(!isDictType(KindOfPersistentVec),     "");
 static_assert(!isDictType(KindOfKeyset),            "");
@@ -114,10 +82,6 @@ static_assert(!isDictType(KindOfResource),          "");
 
 static_assert(isKeysetType(KindOfKeyset),           "");
 static_assert(isKeysetType(KindOfPersistentKeyset), "");
-static_assert(!isKeysetType(KindOfVArray),          "");
-static_assert(!isKeysetType(KindOfPersistentVArray),"");
-static_assert(!isKeysetType(KindOfDArray),          "");
-static_assert(!isKeysetType(KindOfPersistentDArray),"");
 static_assert(!isKeysetType(KindOfVec),             "");
 static_assert(!isKeysetType(KindOfPersistentVec),   "");
 static_assert(!isKeysetType(KindOfDict),            "");
@@ -132,10 +96,6 @@ static_assert(!isKeysetType(KindOfString),          "");
 static_assert(!isKeysetType(KindOfObject),          "");
 static_assert(!isKeysetType(KindOfResource),        "");
 
-static_assert(isArrayLikeType(KindOfVArray),            "");
-static_assert(isArrayLikeType(KindOfPersistentVArray),  "");
-static_assert(isArrayLikeType(KindOfDArray),            "");
-static_assert(isArrayLikeType(KindOfPersistentDArray),  "");
 static_assert(isArrayLikeType(KindOfVec),               "");
 static_assert(isArrayLikeType(KindOfPersistentVec),     "");
 static_assert(isArrayLikeType(KindOfDict),              "");
@@ -154,10 +114,6 @@ static_assert(!isArrayLikeType(KindOfResource),         "");
 
 static_assert(isNullType(KindOfUninit),            "");
 static_assert(isNullType(KindOfNull),              "");
-static_assert(!isNullType(KindOfVArray),           "");
-static_assert(!isNullType(KindOfPersistentVArray), "");
-static_assert(!isNullType(KindOfDArray),           "");
-static_assert(!isNullType(KindOfPersistentDArray), "");
 static_assert(!isNullType(KindOfVec),              "");
 static_assert(!isNullType(KindOfPersistentVec),    "");
 static_assert(!isNullType(KindOfDict),             "");
@@ -174,10 +130,6 @@ static_assert(!isNullType(KindOfResource),         "");
 
 static_assert(isRealType(KindOfUninit), "");
 static_assert(isRealType(KindOfNull), "");
-static_assert(isRealType(KindOfVArray), "");
-static_assert(isRealType(KindOfPersistentVArray), "");
-static_assert(isRealType(KindOfDArray), "");
-static_assert(isRealType(KindOfPersistentDArray), "");
 static_assert(isRealType(KindOfVec), "");
 static_assert(isRealType(KindOfPersistentVec), "");
 static_assert(isRealType(KindOfDict), "");
@@ -192,10 +144,6 @@ static_assert(isRealType(KindOfString), "");
 static_assert(isRealType(KindOfObject), "");
 static_assert(isRealType(KindOfResource), "");
 
-static_assert(dt_with_rc(KindOfVArray) == KindOfVArray, "");
-static_assert(dt_with_rc(KindOfPersistentVArray) == KindOfVArray, "");
-static_assert(dt_with_rc(KindOfDArray) == KindOfDArray, "");
-static_assert(dt_with_rc(KindOfPersistentDArray) == KindOfDArray, "");
 static_assert(dt_with_rc(KindOfString) == KindOfString, "");
 static_assert(dt_with_rc(KindOfPersistentString) == KindOfString, "");
 static_assert(dt_with_rc(KindOfVec) == KindOfVec, "");
@@ -205,10 +153,6 @@ static_assert(dt_with_rc(KindOfPersistentDict) == KindOfDict, "");
 static_assert(dt_with_rc(KindOfKeyset) == KindOfKeyset, "");
 static_assert(dt_with_rc(KindOfPersistentKeyset) == KindOfKeyset, "");
 
-static_assert(dt_modulo_persistence(KindOfPersistentVArray) == KindOfVArray, "");
-static_assert(dt_modulo_persistence(KindOfVArray) == KindOfVArray, "");
-static_assert(dt_modulo_persistence(KindOfPersistentDArray) == KindOfDArray, "");
-static_assert(dt_modulo_persistence(KindOfDArray) == KindOfDArray, "");
 static_assert(dt_modulo_persistence(KindOfPersistentString) == KindOfString, "");
 static_assert(dt_modulo_persistence(KindOfString) == KindOfString, "");
 static_assert(dt_modulo_persistence(KindOfPersistentVec) == KindOfVec, "");
@@ -218,12 +162,6 @@ static_assert(dt_modulo_persistence(KindOfDict) == KindOfDict, "");
 static_assert(dt_modulo_persistence(KindOfPersistentKeyset) == KindOfKeyset, "");
 static_assert(dt_modulo_persistence(KindOfKeyset) == KindOfKeyset, "");
 
-static_assert(dt_with_persistence(KindOfVArray) == KindOfPersistentVArray, "");
-static_assert(dt_with_persistence(KindOfPersistentVArray) ==
-              KindOfPersistentVArray, "");
-static_assert(dt_with_persistence(KindOfDArray) == KindOfPersistentDArray, "");
-static_assert(dt_with_persistence(KindOfPersistentDArray) ==
-              KindOfPersistentDArray, "");
 static_assert(dt_with_persistence(KindOfString) == KindOfPersistentString, "");
 static_assert(dt_with_persistence(KindOfPersistentString) ==
               KindOfPersistentString, "");
@@ -239,8 +177,6 @@ static_assert(dt_with_persistence(KindOfPersistentKeyset) ==
 static_assert(isRefcountedType(KindOfString),            "");
 static_assert(isRefcountedType(KindOfObject),            "");
 static_assert(isRefcountedType(KindOfResource),          "");
-static_assert(isRefcountedType(KindOfVArray),            "");
-static_assert(isRefcountedType(KindOfDArray),            "");
 static_assert(isRefcountedType(KindOfVec),               "");
 static_assert(isRefcountedType(KindOfDict),              "");
 static_assert(isRefcountedType(KindOfKeyset),            "");
@@ -250,16 +186,12 @@ static_assert(!isRefcountedType(KindOfBoolean),          "");
 static_assert(!isRefcountedType(KindOfInt64),            "");
 static_assert(!isRefcountedType(KindOfDouble),           "");
 static_assert(!isRefcountedType(KindOfPersistentString), "");
-static_assert(!isRefcountedType(KindOfPersistentVArray), "");
-static_assert(!isRefcountedType(KindOfPersistentDArray), "");
 static_assert(!isRefcountedType(KindOfPersistentVec),    "");
 static_assert(!isRefcountedType(KindOfPersistentDict),   "");
 static_assert(!isRefcountedType(KindOfPersistentKeyset), "");
 
 /* Too many cases to test exhaustively, so try to capture most scenarios */
 static_assert(!equivDataTypes(KindOfNull, KindOfUninit),             "");
-static_assert(equivDataTypes(KindOfVArray, KindOfPersistentVArray), "");
-static_assert(equivDataTypes(KindOfDArray, KindOfPersistentDArray), "");
 static_assert(equivDataTypes(KindOfVec, KindOfPersistentVec),       "");
 static_assert(equivDataTypes(KindOfDict, KindOfPersistentDict),     "");
 static_assert(equivDataTypes(KindOfKeyset, KindOfPersistentKeyset), "");
@@ -281,9 +213,6 @@ static_assert(!equivDataTypes(KindOfString, KindOfKeyset),          "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentVec),   "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentDict),  "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
-// No more compatibility between darrays and varrays.
-static_assert(!equivDataTypes(KindOfVArray, KindOfPersistentDArray), "");
-static_assert(!equivDataTypes(KindOfDArray, KindOfPersistentVArray), "");
 
 } // namespace
 
@@ -299,12 +228,8 @@ MaybeDataType get_datatype(
     if (!strcasecmp(name.c_str(), "HH\\vec"))    return KindOfVec;
     if (!strcasecmp(name.c_str(), "HH\\dict"))   return KindOfDict;
     if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
-    if (!strcasecmp(name.c_str(), "HH\\varray")) {
-      return RO::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
-    }
-    if (!strcasecmp(name.c_str(), "HH\\darray")) {
-      return RO::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
-    }
+    if (!strcasecmp(name.c_str(), "HH\\varray")) return KindOfVec;
+    if (!strcasecmp(name.c_str(), "HH\\darray")) return KindOfDict;
     if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
     if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
     if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;
@@ -327,12 +252,8 @@ MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
   if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
   if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(name.c_str(), "HH\\varray")) {
-    return RO::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
-  }
-  if (!strcasecmp(name.c_str(), "HH\\darray")) {
-    return RO::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
-  }
+  if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfVec;
+  if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfDict;
   if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;

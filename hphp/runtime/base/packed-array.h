@@ -174,8 +174,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc, bool isLegacy = false);
-  static ArrayData* MakeVArrayFromAPC(const APCArray* apc,
-                                      bool isMarked = false);
 
   static bool VecEqual(const ArrayData* ad1, const ArrayData* ad2);
   static bool VecNotEqual(const ArrayData* ad1, const ArrayData* ad2);

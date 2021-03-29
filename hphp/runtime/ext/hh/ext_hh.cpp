@@ -415,10 +415,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_set(sb, tv.m_data.parr);
       break;
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -1165,10 +1161,6 @@ Class* getClass(TypedValue cls) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfDArray:
-    case KindOfPersistentDArray:
-    case KindOfVArray:
-    case KindOfPersistentVArray:
     case KindOfVec:
     case KindOfPersistentVec:
     case KindOfDict:

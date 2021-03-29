@@ -324,16 +324,8 @@ inline folly::Optional<Type> Type::tryCns(TypedValue tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset:
         return type_detail::for_const(tv.m_data.parr);
-
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
-        always_assert(false);
-
       case KindOfLazyClass:
         return type_detail::for_const(tv.m_data.plazyclass);
-
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:

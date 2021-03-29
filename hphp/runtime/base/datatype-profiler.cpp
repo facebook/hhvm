@@ -28,10 +28,6 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_double(name + "=KindOfDouble")
   , m_persistent_string(name + "=KindOfPersistentString")
   , m_string(name + "=KindOfString")
-  , m_persistent_darray(name + "=KindOfPersistentDArray")
-  , m_darray(name + "=KindOfDArray")
-  , m_persistent_varray(name + "=KindOfPersistentVArray")
-  , m_varray(name + "=KindOfVArray")
   , m_persistent_vec(name + "=KindOfPersistentVec")
   , m_vec(name + "=KindOfVec")
   , m_persistent_dict(name + "=KindOfPersistentDict")
@@ -64,10 +60,6 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDict:          m_dict.count(); break;
     case KindOfPersistentKeyset: m_persistent_keyset.count(); break;
     case KindOfKeyset:        m_keyset.count(); break;
-    case KindOfPersistentDArray: m_persistent_darray.count(); break;
-    case KindOfDArray:        m_darray.count(); break;
-    case KindOfPersistentVArray: m_persistent_varray.count(); break;
-    case KindOfVArray:        m_varray.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
     case KindOfRFunc:         m_rfunc.count(); break;
@@ -96,10 +88,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_dict.hits() +
                m_persistent_keyset.hits() +
                m_keyset.hits() +
-               m_persistent_darray.hits() +
-               m_darray.hits() +
-               m_persistent_varray.hits() +
-               m_varray.hits() +
                m_object.hits() +
                m_resource.hits() +
                m_func.hits() +
@@ -117,10 +105,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfDouble=%.1f%% "
                   "KindOfPersistentString=%.1f%% "
                   "KindOfString=%.1f%% "
-                  "KindOfPersistentDArray=%.1f%% "
-                  "KindOfDArray=%.1f%% "
-                  "KindOfPersistentVArray=%.1f%% "
-                  "KindOfVArray=%.1f%% "
                   "KindOfPersistentVec=%.1f%% "
                   "KindOfVec=%.1f%% "
                   "KindOfPersistentDict=%.1f%% "
@@ -144,10 +128,6 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_double.hits() / total,
           100.0 * m_persistent_string.hits() / total,
           100.0 * m_string.hits() / total,
-          100.0 * m_persistent_darray.hits() / total,
-          100.0 * m_darray.hits() / total,
-          100.0 * m_persistent_varray.hits() / total,
-          100.0 * m_varray.hits() / total,
           100.0 * m_persistent_vec.hits() / total,
           100.0 * m_vec.hits() / total,
           100.0 * m_persistent_dict.hits() / total,

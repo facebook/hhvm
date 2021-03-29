@@ -635,7 +635,7 @@ SSATmp* opt_is_vec_or_varray(IRGS& env, const ParamPrep& params) {
 
   if (type <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
     if (RO::EvalIsVecNotices) {
-      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC_OR_VARR);
+      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC);
       gen(env, RaiseNotice, make_opt_catch(env, params), cns(env, msg));
     }
     return cns(env, true);
@@ -776,13 +776,6 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfPersistentKeyset:
       case KindOfKeyset:
         return cns(env, make_tv<KindOfPersistentKeyset>(scalar_array()));
-
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
-        always_assert(false);
-
       case KindOfLazyClass:
         return cns(env, retVal.m_data.plazyclass.name());
       case KindOfUninit:
@@ -2105,8 +2098,6 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
       return TInt | TStr;
     case AnnotMetaType::This:
       return TObj;
-    case AnnotMetaType::VArrOrDArr:
-      always_assert(false);
     case AnnotMetaType::VecOrDict:
       return TVec|TDict;
     case AnnotMetaType::ArrayLike:

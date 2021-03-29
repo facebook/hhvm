@@ -285,7 +285,6 @@ private:
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasKeysetWarned{false};   // have we already warned on dicts?
-  bool m_hasPHPWarned{false};    // have we already warned on PHP arrays?
   bool m_hasEDWarned{false};     // have we already warned on empty darrays?
   bool m_hasVDWarned{false};     // have we already warned on vec-like darrays?
   bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?

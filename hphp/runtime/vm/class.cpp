@@ -1534,15 +1534,15 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         // Type constants with the low bit set are already resolved and can be
         // returned after masking out that bit.
         //
-        // We can't check isHAMSafeDArray here because we're using that low bit as
-        // a marker; instead, check isArrayLike and do the stricter check below.
+        // We can't check isDict here because we're using that low bit as a
+        // marker; instead, check isArrayLike and do the stricter check below.
         assertx(isArrayLikeType(type(cnsVal)));
         assertx(!isRefcountedType(type(cnsVal)));
         typeCns = val(cnsVal).parr;
         auto const rawData = reinterpret_cast<intptr_t>(typeCns);
         if (rawData & 0x1) {
           auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
-          assertx(resolved->isHAMSafeDArray());
+          assertx(resolved->isDictType());
           return make_persistent_array_like_tv(resolved);
         }
         break;
@@ -1631,7 +1631,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
     } catch (const Exception& e) {
       raise_error(e.getMessage());
     }
-    assertx(resolvedTS.isHAMSafeDArray());
+    assertx(resolvedTS.isDict());
 
     auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {
@@ -3176,10 +3176,6 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:
@@ -3499,8 +3495,8 @@ void Class::setReifiedData() {
       m_parent->m_hasReifiedGenerics || m_parent->m_hasReifiedParent;
   }
   if (m_hasReifiedGenerics) {
-    auto tv = it->second;
-    assertx(tvIsHAMSafeVArray(tv));
+    auto const tv = it->second;
+    assertx(tvIsVec(tv));
     allocExtraData();
     m_extra.raw()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);

@@ -282,10 +282,6 @@ void callFunc(const Func* const func,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
@@ -346,7 +342,6 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
 
     auto const raise_type_error = [&]{
       auto const expected_type = [&]{
-        if (tc.isVArrayOrDArray()) return "varray_or_darray";
         if (tc.isVecOrDict()) return "vec_or_dict";
         return getDataTypeString(*targetType).data();
       }();
@@ -362,12 +357,8 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
     // Precondition: the DataType of the TypedValue is correct.
     auto const check_dvarray = [&]{
       assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (tc.isVArrayOrDArray()) {
-        assertx(!RO::EvalHackArrDVArrs);
-        if (!tvIsArray(tv)) raise_type_error();
-      } else if (tc.isVecOrDict()) {
-        assertx(RO::EvalHackArrDVArrs);
-        if (!tvIsVec(tv) && !tvIsDict(tv)) raise_type_error();
+      if (tc.isVecOrDict() && !tvIsVec(tv) && !tvIsDict(tv)) {
+        raise_type_error();
       }
     };
 
@@ -389,15 +380,10 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
     }
     if (tvIsClsMeth(tv) && tc.convertClsMethToArrLike()) {
       assertx(RO::EvalIsCompatibleClsMethType);
-      if (RuntimeOption::EvalVecHintNotices) {
+      if (RO::EvalVecHintNotices) {
         raise_clsmeth_compat_type_hint(func, tc.displayName(func->cls()), i);
       };
-      if (RO::EvalHackArrDVArrs) {
-        tvCastToVecInPlace(tv);
-      } else {
-        tvCastToVArrayInPlace(tv);
-        check_dvarray();
-      }
+      tvCastToVecInPlace(tv);
       continue;
     }
 
@@ -532,12 +518,8 @@ static MaybeDataType typeForOutParam(TypedValue attr) {
   if (!isStringType(type.m_type)) return {};
 
   auto const str = type.m_data.pstr->data();
-  if (strcmp(str, "varray") == 0) {
-    return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
-  }
-  if (strcmp(str, "darray") == 0) {
-    return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
-  }
+  if (strcmp(str, "varray") == 0) return KindOfVec;
+  if (strcmp(str, "darray") == 0) return KindOfDict;
 
 #define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;
   DATATYPES
@@ -583,10 +565,6 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
   case KindOfPersistentKeyset:
   case KindOfKeyset:  return make_tv<KindOfNull>();
-  case KindOfPersistentDArray:
-  case KindOfDArray:  return make_array_like_tv(ArrayData::CreateDArray());
-  case KindOfPersistentVArray:
-  case KindOfVArray:  return make_array_like_tv(ArrayData::CreateVArray());
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:
@@ -613,7 +591,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isVArrayOrDArray() || tc.isArrayLike() || tc.isClassname()) {
+      tc.isArrayLike() || tc.isClassname()) {
     return ty == T::Mixed || ty == T::MixedTV;
   }
 
@@ -632,11 +610,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:       return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
@@ -670,10 +644,6 @@ static bool tcCheckNativeIO(
       case KindOfDict:         return ty == T::ArrayIO;
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return ty == T::ArrayIO;
-      case KindOfPersistentDArray:
-      case KindOfDArray:       return ty == T::ArrayIO;
-      case KindOfPersistentVArray:
-      case KindOfVArray:       return ty == T::ArrayIO;
       case KindOfResource:     return ty == T::ResourceIO;
       case KindOfUninit:
       case KindOfNull:         return false;
@@ -698,7 +668,7 @@ static bool tcCheckNativeIO(
   auto const& tc = pinfo.typeConstraint;
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isVArrayOrDArray() || tc.isArrayLike() || tc.isClassname()) {
+      tc.isArrayLike() || tc.isClassname()) {
     return ty == T::MixedIO;
   }
 

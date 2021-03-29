@@ -525,9 +525,7 @@ folly::Optional<Type> const_fold(ISS& env,
   // invokeFuncFew expects them to be unpacked.
   if (func->hasVariadicCaptureParam() && variadicsPacked) {
     if (args.empty()) return folly::none;
-    if (!isArrayType(args.back().m_type) && !isVecType(args.back().m_type)) {
-      return folly::none;
-    }
+    if (!isVecType(args.back().m_type)) return folly::none;
     auto const variadic = args.back();
     args.pop_back();
     IterateV(

@@ -252,45 +252,16 @@ struct TypeConstraint {
   bool isNothing()  const { return m_type == Type::Nothing; }
   bool isNoReturn() const { return m_type == Type::NoReturn; }
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
-  bool isArrayLike() const { return m_type == Type::ArrayLike; }
-
-  bool isPHPArray() const {
-    return isVArray() || isDArray() || isVArrayOrDArray();
-  }
-  bool isDict() const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
-    return m_type == Type::Dict;
-  }
-  bool isVec() const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
-    return m_type == Type::Vec;
-  }
-  bool isVecOrDict() const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
-    return m_type == Type::VecOrDict;
-  }
-
+  bool isDict()     const { return m_type == Type::Dict; }
+  bool isVec()      const { return m_type == Type::Vec; }
   bool isKeyset()   const { return m_type == Type::Keyset; }
   bool isObject()   const { return m_type == Type::Object; }
   bool isInt()      const { return m_type == Type::Int; }
   bool isString()   const { return m_type == Type::String; }
   bool isRecord()   const { return m_type == Type::Record; }
-
-  bool isVArray() const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
-    return m_type == Type::VArray;
-  }
-  bool isDArray()   const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
-    return m_type == Type::DArray;
-  }
-  bool isVArrayOrDArray() const {
-    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
-    return m_type == Type::VArrOrDArr;
-  }
-  bool isClassname() const {
-    return m_type == Type::Classname;
-  }
+  bool isArrayLike() const { return m_type == Type::ArrayLike; }
+  bool isVecOrDict() const { return m_type == Type::VecOrDict; }
+  bool isClassname() const { return m_type == Type::Classname; }
 
   // Returns true if we should convert a ClsMeth to a varray for this typehint.
   bool convertClsMethToArrLike() const;

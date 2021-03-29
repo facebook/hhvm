@@ -82,63 +82,39 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
         if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
-          return obj.asCArrRef().isHAMSafeVArray()
+          return obj.asCArrRef().isVec()
             ? HPHP::serialize::Type::LIST
             : HPHP::serialize::Type::MAP;
         }
         return HPHP::serialize::Type::MAP;
+
       case KindOfPersistentDict:
       case KindOfDict: {
-        if (RO::EvalHackArrDVArrs) return HPHP::serialize::Type::MAP;
-        if (HackArraysMode == VariantControllerHackArraysMode::ON ||
-            HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
-          return HPHP::serialize::Type::MAP;
-        }
-        if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
-          raise_hackarr_compat_notice(
-              "attempted to fb_serialize dict without "
-              "FB_SERIALIZE_HACK_ARRAYS flag");
-        }
-        throw HPHP::serialize::HackArraySerializeError{};
+        return HPHP::serialize::Type::MAP;
       }
+
       case KindOfPersistentVec:
       case KindOfVec: {
-        if (RO::EvalHackArrDVArrs) {
-          switch (HackArraysMode) {
-            case VariantControllerHackArraysMode::OFF:
-              return HPHP::serialize::Type::MAP;
-            case VariantControllerHackArraysMode::MIGRATORY:
-              return HPHP::serialize::Type::LIST;
-            case VariantControllerHackArraysMode::ON:
-            case VariantControllerHackArraysMode::ON_AND_KEYSET: {
-              auto const legacy = obj.rval().val().parr->isLegacyArray();
-              return legacy ? HPHP::serialize::Type::MAP
-                            : HPHP::serialize::Type::LIST;
-            }
+        switch (HackArraysMode) {
+          case VariantControllerHackArraysMode::OFF:
+            return HPHP::serialize::Type::MAP;
+          case VariantControllerHackArraysMode::MIGRATORY:
+            return HPHP::serialize::Type::LIST;
+          case VariantControllerHackArraysMode::ON:
+          case VariantControllerHackArraysMode::ON_AND_KEYSET: {
+            auto const legacy = obj.rval().val().parr->isLegacyArray();
+            return legacy ? HPHP::serialize::Type::MAP
+                          : HPHP::serialize::Type::LIST;
           }
         }
-        if (HackArraysMode == VariantControllerHackArraysMode::ON ||
-            HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
-          return HPHP::serialize::Type::LIST;
-        }
-        if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
-          raise_hackarr_compat_notice(
-              "attempted to fb_serialize vec without "
-              "FB_SERIALIZE_HACK_ARRAYS flag");
-        }
-        throw HPHP::serialize::HackArraySerializeError{};
       }
+
       case KindOfPersistentKeyset:
       case KindOfKeyset:
         if (HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
           return HPHP::serialize::Type::SET;
         }
-
         throw HPHP::serialize::KeysetSerializeError{};
 
       case KindOfClsMeth:
@@ -351,22 +327,6 @@ struct VariantControllerImpl {
   static size_t stringLen(const StringType& str) { return str.size(); }
   static const char* stringData(const StringType& str) {
     return str.data();
-  }
-
-  /* called by FBSerializer before serializing each item,
-     useful to instrument the serialization process if needed */
-  ALWAYS_INLINE
-  static void traceSerialization(const_variant_ref thing) {
-    if constexpr (
-        HackArraysMode != VariantControllerHackArraysMode::ON &&
-        HackArraysMode != VariantControllerHackArraysMode::ON_AND_KEYSET) {
-      return;
-    }
-
-    if (thing.isArray() && thing.getArrayData()->isVArray()) {
-      maybe_raise_array_serialization_notice(SerializationSite::FBSerialize,
-                                             thing.getArrayData());
-    }
   }
 };
 

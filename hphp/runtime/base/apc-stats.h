@@ -102,25 +102,18 @@ private:
   // Number of uncounted strings. Uncounted strings are kind of
   // static strings whose lifetime is controlled by the treadmill
   ServiceData::ExportedCounter* m_uncString;
-  // Number of serialized arrays
-  ServiceData::ExportedCounter* m_serArray;
   // Number of serialized vecs
   ServiceData::ExportedCounter* m_serVec;
   // Number of serialized dicts
   ServiceData::ExportedCounter* m_serDict;
   // Number of serialized keysets
   ServiceData::ExportedCounter* m_serKeyset;
-  // Number of APC arrays
-  ServiceData::ExportedCounter* m_apcArray;
   // Number of APC vecs
   ServiceData::ExportedCounter* m_apcVec;
   // Number of APC dicts
   ServiceData::ExportedCounter* m_apcDict;
   // Number of APC keysets
   ServiceData::ExportedCounter* m_apcKeyset;
-  // Number of uncounted arrays. Uncounted arrays are kind of
-  // static arrays whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncArray;
   // Number of uncounted vecs. Uncounted vecs are kind of
   // static vecs whose lifetime is controlled by the treadmill
   ServiceData::ExportedCounter* m_uncVec;

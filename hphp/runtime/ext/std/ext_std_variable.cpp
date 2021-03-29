@@ -66,14 +66,6 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isNull()) {
     return s_NULL;
   }
-
-  // OH NO. This string could be used by logic in Hack, so we can't do the
-  // sensible thing here and return "varray" or "darray" for dvarrays.
-  if (isArrayType(v.getType())) {
-    maybe_raise_array_serialization_notice(SerializationSite::Gettype,
-                                           v.getArrayData());
-    return s_array;
-  }
   if (isArrayLikeType(v.getType()) && v.getArrayData()->isLegacyArray()) {
     return s_array;
   }
@@ -133,13 +125,11 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_php_array, const Variant& v) {
-  // We want this set to false as this is meant to be the "this can receive
-  // both PHP and Hack arrays" version of `is_array`.
-  return is_php_array(v.asTypedValue());
+  return isArrayLikeType(v.getType()) && v.getArrayData()->isLegacyArray();
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  if (RuntimeOption::EvalLogOnIsArrayFunction) {
+  if (RO::EvalLogOnIsArrayFunction) {
     raise_notice("call to deprecated builtin is_array()");
   }
   return is_any_array(v.asTypedValue());
@@ -158,33 +148,23 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
-  return is_varray(val.asTypedValue());
+  return is_vec(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
-  return is_darray(val.asTypedValue());
-}
-
-bool HHVM_FUNCTION(HH_is_dict_or_darray, const Variant& val) {
-  return is_dict_or_darray(val.asTypedValue());
+  return is_dict(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_vec_or_varray, const Variant& val) {
-  return is_vec_or_varray(val.asTypedValue());
+  return is_vec(val.asTypedValue());
+}
+
+bool HHVM_FUNCTION(HH_is_dict_or_darray, const Variant& val) {
+  return is_dict(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
-  if (tvIsClsMeth(val.asTypedValue())) {
-    if (RuntimeOption::EvalIsCompatibleClsMethType) {
-      if (RuntimeOption::EvalIsVecNotices) {
-        raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-      }
-      return true;
-    }
-    return false;
-  }
-
-  return tvIsArrayLike(val.asTypedValue()) || tvIsClsMeth(val.asTypedValue());
+  return is_any_array(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
@@ -478,10 +458,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfDouble:
     case KindOfObject:
     case KindOfClsMeth:

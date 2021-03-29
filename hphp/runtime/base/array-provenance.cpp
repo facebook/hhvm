@@ -262,15 +262,15 @@ InitFiniNode flushTable([]{
 ///////////////////////////////////////////////////////////////////////////////
 
 bool arrayWantsTag(const ArrayData* ad) {
-  return RO::EvalArrayProvenance && ad->isDVArray() && !ad->isLegacyArray();
+  return false;
 }
 
 bool arrayWantsTag(const APCArray* a) {
-  return RO::EvalArrayProvenance && a->isUnmarkedDVArray();
+  return false;
 }
 
 bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
-  return true;
+  return false;
 }
 
 /*
@@ -605,7 +605,7 @@ ArrayData* apply_mutation_ignore_collections(TypedValue tv, State& state,
   if (!tvIsArrayLike(tv) || tvIsKeyset(tv)) {
     return nullptr;
   }
-  assertx(tvIsArray(tv) || tvIsVec(tv) || tvIsDict(tv));
+  assertx(tvIsVec(tv) || tvIsDict(tv));
   auto const arr = val(tv).parr;
   return apply_mutation_to_array(arr, state, cow, depth);
 }
@@ -625,10 +625,9 @@ ArrayData* apply_mutation_mutate_collections(TypedValue tv, State& state,
     return nullptr;
   }
 
-  if (!tvIsArrayLike(tv) || tvIsKeyset(tv)) {
+  if (!tvIsVec(tv) && !tvIsDict(tv)) {
     return nullptr;
   }
-  assertx(tvIsArray(tv) || tvIsVec(tv) || tvIsDict(tv));
   auto const arr = val(tv).parr;
 
   // We may revisit arrays. We store a cached value of nullptr the first time

@@ -1012,7 +1012,7 @@ void VariableUnserializer::unserializeVariant(
             if (!TypeStructure::coerceToTypeStructureList_SERDE_ONLY(t)) {
               throwInvalidOFormat(clsName);
             }
-            assertx(tvIsHAMSafeVArray(t));
+            assertx(tvIsVec(t));
             obj = Object{cls, t.val().parr};
           } else {
             obj = Object{cls};

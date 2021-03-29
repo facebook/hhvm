@@ -703,9 +703,6 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
   if (interface_supports_non_objects(tc.typeName())) return;
   auto const resolved = index.resolve_type_name(tc.typeName());
 
-  assertx(resolved.type != AnnotType::VArray &&
-          resolved.type != AnnotType::DArray);
-
   if (resolved.type == AnnotType::Object) {
     auto const resolvedValue = match<folly::Optional<res::Class>>(
       resolved.value,
@@ -852,12 +849,6 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfPersistentKeyset:
       assertx(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
-
-    case KindOfDArray:
-    case KindOfVArray:
-    case KindOfPersistentDArray:
-    case KindOfPersistentVArray:
-      always_assert(false);
 
     case KindOfResource:
     case KindOfObject:

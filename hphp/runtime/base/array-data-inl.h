@@ -152,13 +152,6 @@ inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 
-inline bool ArrayData::isPHPArrayType() const {
-  return kind() < kDictKind;
-}
-inline bool ArrayData::isHackArrayType() const {
-  return kind() >= kDictKind;
-}
-
 inline bool ArrayData::isVecType() const {
   return (kind() & ~kBespokeKindMask) == kVecKind;
 }
@@ -204,17 +197,6 @@ inline bool ArrayData::isDVArray() const {
 
 inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
 
-inline bool ArrayData::isHAMSafeVArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isVecType() : isVArray();
-}
-inline bool ArrayData::isHAMSafeDArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
-}
-inline bool ArrayData::isHAMSafeDVArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isDictType() || isVecType()
-                                          : isDVArray();
-}
-
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
   static_assert(kMixedKind == 0);
   static_assert(kBespokeDArrayKind == 1);
@@ -257,13 +239,12 @@ inline ArrayData* ArrayData::makeSampledStaticArray() const {
 ALWAYS_INLINE
 DataType ArrayData::toDataType() const {
   switch (kind()) {
+    // TODO(kshaunak): Clean these enum values up next.
     case kPackedKind:
     case kBespokeVArrayKind:
-      return KindOfVArray;
-
     case kMixedKind:
     case kBespokeDArrayKind:
-      return KindOfDArray;
+      return kInvalidDataType;
 
     case kVecKind:
     case kBespokeVecKind:
@@ -285,13 +266,12 @@ DataType ArrayData::toDataType() const {
 ALWAYS_INLINE
 DataType ArrayData::toPersistentDataType() const {
   switch (kind()) {
+    // TODO(kshaunak): Clean these enum values up next.
     case kPackedKind:
     case kBespokeVArrayKind:
-      return KindOfPersistentVArray;
-
     case kMixedKind:
     case kBespokeDArrayKind:
-      return KindOfPersistentDArray;
+      return kInvalidDataType;
 
     case kVecKind:
     case kBespokeVecKind:

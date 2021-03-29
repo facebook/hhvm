@@ -59,10 +59,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::LazyClass: assertx(m_data.str->isStatic()); break;
-    case APCKind::StaticArray:
-      assertx(m_data.arr->isPHPArrayType());
-      assertx(m_data.arr->isStatic());
-      break;
     case APCKind::StaticVec:
       assertx(m_data.arr->isVecType());
       assertx(m_data.arr->isStatic());
@@ -74,10 +70,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::StaticKeyset:
       assertx(m_data.arr->isKeysetType());
       assertx(m_data.arr->isStatic());
-      break;
-    case APCKind::UncountedArray:
-      assertx(m_data.arr->isPHPArrayType());
-      assertx(m_data.arr->isUncounted());
       break;
     case APCKind::UncountedVec:
       assertx(m_data.arr->isVecType());
@@ -104,11 +96,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::SharedDict:
     case APCKind::SharedLegacyDict:
     case APCKind::SharedKeyset:
-    case APCKind::SharedVArray:
-    case APCKind::SharedMarkedVArray:
-    case APCKind::SharedDArray:
-    case APCKind::SharedMarkedDArray:
-    case APCKind::SerializedArray:
     case APCKind::SerializedObject:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
@@ -125,10 +112,9 @@ void APCTypedValue::deleteUncounted() {
   assertx(m_handle.isUncounted());
   auto kind = m_handle.kind();
   assertx(kind == APCKind::UncountedString ||
-         kind == APCKind::UncountedArray ||
-         kind == APCKind::UncountedVec ||
-         kind == APCKind::UncountedDict ||
-         kind == APCKind::UncountedKeyset);
+          kind == APCKind::UncountedVec ||
+          kind == APCKind::UncountedDict ||
+          kind == APCKind::UncountedKeyset);
 
   static_assert(std::is_trivially_destructible<APCTypedValue>::value,
                 "APCTypedValue must be trivially destructible - "

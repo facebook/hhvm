@@ -451,7 +451,7 @@ static Variant call_intercept_handler_callback(
     if (!origCallee->hasReifiedGenerics()) return Array();
     // Reified generics is the first non param local
     auto const generics = frame_local(ar, origCallee->numParams());
-    assertx(tvIsHAMSafeVArray(generics));
+    assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
   auto ret = Variant::attach(

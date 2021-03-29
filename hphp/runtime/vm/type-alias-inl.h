@@ -44,7 +44,7 @@ inline TypeAlias TypeAlias::From(const PreTypeAlias& alias) {
   req.nullable = alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isHAMSafeDArray());
+  assertx(req.typeStructure.isDict());
   return req;
 }
 
@@ -59,7 +59,7 @@ inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias& alias) {
   req.nullable |= alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isHAMSafeDArray());
+  assertx(req.typeStructure.isDict());
   return req;
 }
 

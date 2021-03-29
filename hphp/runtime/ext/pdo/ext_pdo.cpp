@@ -2508,10 +2508,6 @@ safe:
               case KindOfDict:
               case KindOfPersistentKeyset:
               case KindOfKeyset:
-              case KindOfPersistentDArray:
-              case KindOfDArray:
-              case KindOfPersistentVArray:
-              case KindOfVArray:
               case KindOfObject:
               case KindOfResource:
               case KindOfRFunc:

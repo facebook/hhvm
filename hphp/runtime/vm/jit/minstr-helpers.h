@@ -404,7 +404,7 @@ ELEMU_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                   \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  assertx(tvIsDictOrDArray(base));                       \
+  assertx(tvIsDict(base));                               \
   return ElemDDict<keyType>(base, key);                  \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
@@ -417,7 +417,7 @@ ELEM_DICT_D_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                   \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  assertx(tvIsDictOrDArray(base));                       \
+  assertx(tvIsDict(base));                               \
   return ElemUDict<keyType>(base, key);                  \
 }
 ELEM_DICT_U_HELPER_TABLE(X)

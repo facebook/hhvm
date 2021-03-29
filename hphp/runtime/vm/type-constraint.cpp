@@ -154,9 +154,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::Keyset:   str = "keyset"; break;
       case AnnotType::Number:   str = "num"; break;
       case AnnotType::ArrayKey: str = "arraykey"; break;
-      case AnnotType::VArray:   str = "varray"; break;
-      case AnnotType::DArray:   str = "darray"; break;
-      case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
       case AnnotType::VecOrDict: str = "vec_or_dict"; break;
       case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
@@ -365,7 +362,6 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::ArrayKey:
       case MetaType::Nonnull:
       case MetaType::VecOrDict:
-      case MetaType::VArrOrDArr:
       case MetaType::ArrayLike:
       case MetaType::Classname:
       case MetaType::Precise:
@@ -582,7 +578,6 @@ bool TypeConstraint::checkTypeAliasImpl(const T* type) const {
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
     case AnnotMetaType::This:
-    case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Classname:  // TODO: T83332251
@@ -673,7 +668,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
         case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
-        case MetaType::VArrOrDArr:
         case MetaType::VecOrDict:
         case MetaType::ArrayLike:
         case MetaType::Classname:
@@ -792,7 +786,6 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
     case MetaType::NoReturn:
     case MetaType::Number:
     case MetaType::ArrayKey:
-    case MetaType::VArrOrDArr:
     case MetaType::VecOrDict:
     case MetaType::ArrayLike:
     case MetaType::Classname:
@@ -928,10 +921,6 @@ std::string describe_actual_type(tv_rval val) {
     }
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
-    case KindOfPersistentDArray:
-    case KindOfDArray:        return "darray";
-    case KindOfPersistentVArray:
-    case KindOfVArray:        return "varray";
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfRFunc:         return "reified function";
@@ -1278,10 +1267,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
-        case KindOfPersistentDArray:
-        case KindOfDArray:
-        case KindOfPersistentVArray:
-        case KindOfVArray:
         case KindOfClsMeth:
         case KindOfResource:
         case KindOfRecord:
@@ -1307,7 +1292,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
-    case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Classname:

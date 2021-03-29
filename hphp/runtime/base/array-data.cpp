@@ -81,8 +81,6 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfInt64:
         case KindOfDouble:
         case KindOfPersistentString:
-        case KindOfPersistentDArray:
-        case KindOfPersistentVArray:
         case KindOfPersistentVec:
         case KindOfPersistentDict:
         case KindOfPersistentKeyset:
@@ -97,8 +95,6 @@ size_t hashArrayPortion(const ArrayData* arr) {
           break;
         case KindOfUninit:
         case KindOfString:
-        case KindOfDArray:
-        case KindOfVArray:
         case KindOfVec:
         case KindOfDict:
         case KindOfKeyset:
@@ -252,10 +248,6 @@ void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
       [&]{
         auto const legacy = arr->isLegacyArray();
         switch (arr->toDataType()) {
-        case KindOfVArray:
-          return legacy ? staticEmptyMarkedVArray() : staticEmptyVArray();
-        case KindOfDArray:
-          return legacy ? staticEmptyMarkedDArray() : staticEmptyDArray();
         case KindOfVec:
           return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
         case KindOfDict:
@@ -754,16 +746,6 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
 ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  if (!ArrayData::dvArrayEqual(ad1, ad2)) {
-    if (ad1->isVArray()) throw_varray_compare_exception();
-    if (ad1->isDArray()) throw_darray_compare_exception();
-    if (ad2->isVArray()) throw_varray_compare_exception();
-    if (ad2->isDArray()) throw_darray_compare_exception();
-    always_assert(false);
-  } else if (ad1->isDArray()) {
-    throw_darray_compare_exception();
-  }
-
   auto const size1 = ad1->size();
   auto const size2 = ad2->size();
   if (size1 < size2) return -1;
@@ -833,16 +815,13 @@ bool ArrayData::same(const ArrayData* v2) const {
   assertx(v2);
 
   if (toDataType() != v2->toDataType()) {
-    if (UNLIKELY(checkHACCompare() && v2->isHackArrayType())) {
+    if (UNLIKELY(checkHACCompare())) {
       raiseHackArrCompatArrHackArrCmp();
     }
     return false;
   }
 
-  if (isPHPArrayType() || !bothVanilla(this, v2)) {
-    return Same(this, v2);
-  }
-
+  if (!bothVanilla(this, v2)) return Same(this, v2);
   if (isVecKind())  return PackedArray::VecSame(this, v2);
   if (isDictKind()) return MixedArray::DictSame(this, v2);
   return SetArray::Same(this, v2);
@@ -900,12 +879,6 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
 
-  // TODO(kshaunak): Fix the messages for dvarrays here.
-  case KindOfPersistentDArray:
-  case KindOfDArray:           return "array";
-  case KindOfPersistentVArray:
-  case KindOfVArray:           return "array";
-
   case KindOfResource:
     return tv->m_data.pres->data()->o_getClassName().toCppString();
 
@@ -942,10 +915,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentDArray:
-  case KindOfDArray:
-  case KindOfPersistentVArray:
-  case KindOfVArray:
   case KindOfResource:
   case KindOfObject:
   case KindOfRFunc:
@@ -968,11 +937,8 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
   std::pair<const char*, const char*> kind_type = [&]{
     if (ad->isVecType()) return std::make_pair("vec", "int");
     if (ad->isDictType()) return std::make_pair("dict", "int or string");
-    if (ad->isKeysetType()) return std::make_pair("keyset", "int or string");
-    assertx(ad->isPHPArrayType());
-    if (ad->isVArray()) return std::make_pair("varray", "int");
-    if (ad->isDArray()) return std::make_pair("darray", "int or string");
-    return std::make_pair("array", "int or string");
+    assertx(ad->isKeysetType());
+    return std::make_pair("keyset", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
     folly::sformat(

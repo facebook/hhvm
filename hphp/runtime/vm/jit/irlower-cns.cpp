@@ -99,14 +99,10 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentDArray:
-      case KindOfPersistentVArray:
       case KindOfString:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfDArray:
-      case KindOfVArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:

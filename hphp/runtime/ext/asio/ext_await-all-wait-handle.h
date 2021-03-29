@@ -128,10 +128,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                           const Variant& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
-  friend Object AwaitAllWaitHandleFromPHPArray(
-      const Class *self_,
-      const Array& dependencies
-  );
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child

@@ -34,10 +34,6 @@ struct APCString {
     return MakeSharedString(APCKind::SharedString, str);
   }
 
-  static APCHandle::Pair MakeSerializedArray(StringData* str) {
-    return MakeSharedString(APCKind::SerializedArray, str);
-  }
-
   static APCHandle::Pair MakeSerializedVec(StringData* str) {
     return MakeSharedString(APCKind::SerializedVec, str);
   }
@@ -63,7 +59,6 @@ struct APCString {
   static APCString* fromHandle(APCHandle* handle) {
     assertx(handle->checkInvariants());
     assertx(handle->kind() == APCKind::SharedString ||
-           handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
            handle->kind() == APCKind::SerializedKeyset ||
@@ -78,7 +73,6 @@ struct APCString {
   static const APCString* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
     assertx(handle->kind() == APCKind::SharedString ||
-           handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
            handle->kind() == APCKind::SerializedKeyset ||

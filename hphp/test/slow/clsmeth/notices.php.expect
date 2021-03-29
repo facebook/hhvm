@@ -2,7 +2,7 @@ HH\is_php_array($m): False
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_vec() called on clsmeth) True
 HH\is_darray($m): False
-HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True
+HH\is_vec_or_varray($m): (error: is_vec() called on clsmeth) True
 HH\is_dict_or_darray($m): False
 $m is AnyArray: (error: is_any_array() called on clsmeth) True
 $m is shape(...): False
@@ -25,7 +25,7 @@ HH\is_php_array($m): False
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_vec() called on clsmeth) True
 HH\is_darray($m): False
-HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True
+HH\is_vec_or_varray($m): (error: is_vec() called on clsmeth) True
 HH\is_dict_or_darray($m): False
 $m is AnyArray: (error: is_any_array() called on clsmeth) True
 $m is shape(...): False
@@ -47,4 +47,4 @@ is_a($m, KeyedContainer): False
 HH\is_php_array($m): False
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_vec() called on clsmeth) True
-HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True
+HH\is_vec_or_varray($m): (error: is_vec() called on clsmeth) True

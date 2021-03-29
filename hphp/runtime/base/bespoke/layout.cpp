@@ -607,10 +607,8 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
 
   if (et.valueTypes == ValueTypes::Empty) {
     switch (ad->toDataType()) {
-      case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
-      case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
-      case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
-      case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
+      case KindOfVec:  return EmptyMonotypeVec::GetVec(legacy);
+      case KindOfDict: return EmptyMonotypeDict::GetDict(legacy);
       default: always_assert(false);
     }
   }

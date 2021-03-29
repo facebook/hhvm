@@ -4002,12 +4002,6 @@ Type from_cell(TypedValue cell) {
     always_assert(cell.m_data.parr->isKeysetType());
     return keyset_val(cell.m_data.parr);
 
-  case KindOfPersistentDArray:
-  case KindOfDArray:
-  case KindOfPersistentVArray:
-  case KindOfVArray:
-    always_assert(false);
-
   case KindOfLazyClass: return TLazyCls;
 
   case KindOfObject:
@@ -4040,13 +4034,6 @@ Type from_DataType(DataType dt) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
   case KindOfRecord:   return TRecord;
-
-  case KindOfPersistentDArray:
-  case KindOfDArray:
-  case KindOfPersistentVArray:
-  case KindOfVArray:
-    always_assert(false);
-
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfRFunc:    return TRFunc;

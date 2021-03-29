@@ -127,8 +127,6 @@ struct EntryInfo {
     Uncounted,
     UncountedString,
     APCString,
-    UncountedArray,
-    SerializedArray,
     APCArray,
     APCObject,
     SerializedObject,

@@ -68,9 +68,7 @@ Array makeReserveLike(DataType type, size_t size) {
   auto const ad = [&]{
     switch (dt_with_rc(type)) {
       case KindOfVec:    return PackedArray::MakeReserveVec(size);
-      case KindOfVArray: return PackedArray::MakeReserveVArray(size);
       case KindOfDict:   return MixedArray::MakeReserveDict(size);
-      case KindOfDArray: return MixedArray::MakeReserveDArray(size);
       case KindOfKeyset: return SetArray::MakeReserveSet(size);
       default:           always_assert(false);
     }
@@ -87,7 +85,7 @@ Array makeReserveLike(DataType type, size_t size) {
 // for optimizations in the loops below.
 void appendKeysAndVals(Array& array, ArrayIter& it) {
   assertx(array->toDataType() == it.getArrayData()->toDataType());
-  if (array.isVArray() || array.isVec() || array.isKeyset()) {
+  if (array.isVec() || array.isKeyset()) {
     for (; it; ++it) {
       array.append(it.secondVal());
     }
@@ -425,10 +423,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord:
@@ -731,16 +725,8 @@ TypedValue HHVM_FUNCTION(array_pad,
                          int pad_size,
                          const Variant& pad_value) {
   getCheckedArray(input);
-  auto arr = [&](){
-    if (UNLIKELY(arr_input.isDict() || arr_input.isKeyset())) {
-      return arr_input.toDArray();
-    } else if (UNLIKELY(arr_input.isVec())) {
-      return arr_input.toVArray();
-    } else {
-      return arr_input;
-    }
-  }();
-  assertx(arr->isHAMSafeDVArray());
+  auto arr = arr_input.isKeyset() ? arr_input.toDict() : arr_input;
+  assertx(arr->isVecType() || arr->isDictType());
   if (pad_size > 0) {
     return tvReturn(ArrayUtil::PadRight(arr, pad_value, pad_size));
   } else {
@@ -809,10 +795,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
@@ -840,8 +822,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfDArray:
-      case KindOfVArray:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
@@ -1100,10 +1080,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
@@ -1131,8 +1107,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfDArray:
-      case KindOfVArray:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
@@ -1162,7 +1136,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
     auto const size = ad->size() + args.size() + 1;
     auto newArray = makeReserveLike(dt, size);
     if (ad->isLegacyArray()) newArray->setLegacyArrayInPlace(true);
-    if (isDictOrDArrayType(dt)) {
+    if (isDictType(dt)) {
       int64_t i = 0;
       newArray.set(i++, var);
       if (!args.empty()) {
@@ -1306,10 +1280,6 @@ int64_t HHVM_FUNCTION(count,
     case KindOfLazyClass:
       return 1;
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -3098,13 +3068,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfKeyset:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Keysets cannot be cast to an array-key"
-      );
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Arrays cannot be cast to an array-key"
       );
     case KindOfClsMeth:
       SystemLib::throwInvalidArgumentExceptionObject(

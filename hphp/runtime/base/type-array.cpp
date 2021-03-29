@@ -269,12 +269,6 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 
 String Array::toString() const {
   if (m_arr == nullptr) return empty_string();
-  if (m_arr->isPHPArrayType()) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Array to string conversion"
-    );
-  }
-  assertx(m_arr->isHackArrayType());
   if (m_arr->isVecType()) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Vec to string conversion"

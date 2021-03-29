@@ -61,10 +61,6 @@ X(Resource)
 #undef X
 
 template<typename T>
-enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
-template<typename T>
-enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
-template<typename T>
 enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 

@@ -57,19 +57,21 @@ constexpr int8_t udt(size_t index, bool counted) {
 /*
  * DataType is the type tag for a TypedValue (see typed-value.h).
  *
- * If you want to add a new type, beware of the following restrictions:
- * - KindOfUninit must be 0. Many places rely on zero-initialized memory
- *   being a valid, KindOfUninit TypedValue.
- * - KindOfNull must be 2, and 1 must not be a valid type. This allows for
- *   a fast implementation of isNullType().
- * - The Array and String types are positioned to allow for fast array/string
- *   checks, ignoring persistence (see isArrayType and isStringType).
- * - Refcounted types are odd, and uncounted types are even, to allow fast
- *   countness checks.
- * - Types with persistent and non-persistent versions must be negative, for
- *   equivDataTypes(). Other types may be negative, as long as dropping the low
- *   bit does not give another valid type.
- * - -128 and -127 are used as invalid types and can't be real DataTypes.
+ * If you want to add a new type, make sure you understand how the current
+ * encoding works. A DataType is a uint8_t. Its low bit indicates countedness;
+ * if this bit is unset, the value is definitely not refcounted. (If the bit
+ * is set, the value may or may not be counted.)
+ *
+ * We encode different types with a 3-of-7 unordered code on the upper 7 bits
+ * of a DataType. This encoding allows us to efficiently test ANY type by
+ * checking that the other 4 bits are unset. We can include or exclude the
+ * counted value by including the low bit in this test, too.
+ *
+ * In addition, we support a few efficient tests by doing unsigned LT or GT
+ * comparisons on the type byte:
+ *  - To check for "vec or dict", check that dt is <= KindOfVec.
+ *  - To check for "has persistent flavor", check that dt is <= KindOfString.
+ *  - To check for "null or uninit", check that the dt is >= KindOfUninit.
  *
  * If you think you need to change any of these restrictions, be prepared to
  * deal with subtle bugs and/or performance regressions while you sort out the
@@ -78,32 +80,28 @@ constexpr int8_t udt(size_t index, bool counted) {
  * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
-  DT(PersistentDArray, udt(0,  false)) \
-  DT(DArray,           udt(0,  true))  \
-  DT(PersistentVArray, udt(1,  false)) \
-  DT(VArray,           udt(1,  true))  \
-  DT(PersistentDict,   udt(2,  false)) \
-  DT(Dict,             udt(2,  true))  \
-  DT(PersistentVec,    udt(3,  false)) \
-  DT(Vec,              udt(3,  true))  \
-  DT(PersistentKeyset, udt(4,  false)) \
-  DT(Keyset,           udt(4,  true))  \
-  DT(Record,           udt(5,  true))  \
-  DT(PersistentString, udt(6,  false)) \
-  DT(String,           udt(6,  true))  \
-  DT(Object,           udt(7,  true))  \
-  DT(Resource,         udt(8,  true))  \
-  DT(RFunc,            udt(9,  true))  \
-  DT(RClsMeth,         udt(10, true))  \
-  DT(ClsMeth,          udt(11, !use_lowptr)) \
-  DT(Boolean,          udt(12, false)) \
-  DT(Int64,            udt(13, false)) \
-  DT(Double,           udt(14, false)) \
-  DT(Func,             udt(15, false)) \
-  DT(Class,            udt(16, false)) \
-  DT(LazyClass,        udt(17, false)) \
-  DT(Uninit,           udt(18, false)) \
-  DT(Null,             udt(19, false))
+  DT(PersistentDict,   udt(0,  false)) \
+  DT(Dict,             udt(0,  true))  \
+  DT(PersistentVec,    udt(1,  false)) \
+  DT(Vec,              udt(1,  true))  \
+  DT(PersistentKeyset, udt(2,  false)) \
+  DT(Keyset,           udt(2,  true))  \
+  DT(Record,           udt(3,  true))  \
+  DT(PersistentString, udt(4,  false)) \
+  DT(String,           udt(4,  true))  \
+  DT(Object,           udt(5,  true))  \
+  DT(Resource,         udt(6,  true))  \
+  DT(RFunc,            udt(7,  true))  \
+  DT(RClsMeth,         udt(8,  true))  \
+  DT(ClsMeth,          udt(9,  !use_lowptr)) \
+  DT(Boolean,          udt(10, false)) \
+  DT(Int64,            udt(11, false)) \
+  DT(Double,           udt(12, false)) \
+  DT(Func,             udt(13, false)) \
+  DT(Class,            udt(14, false)) \
+  DT(LazyClass,        udt(15, false)) \
+  DT(Uninit,           udt(16, false)) \
+  DT(Null,             udt(17, false))
 
 enum class DataType : int8_t {
 #define DT(name, value) name = value,
@@ -142,9 +140,9 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(0);
 /*
  * DataType limits.
  */
-auto constexpr kMinDataType = ut_t(KindOfPersistentDArray);
+auto constexpr kMinDataType = ut_t(KindOfPersistentDict);
 auto constexpr kMaxDataType = ut_t(KindOfNull);
-auto constexpr kMinRefCountedDataType = ut_t(KindOfDArray);
+auto constexpr kMinRefCountedDataType = ut_t(KindOfDict);
 auto constexpr kMaxRefCountedDataType =
   use_lowptr ? ut_t(KindOfRClsMeth) : ut_t(KindOfClsMeth);
 
@@ -319,49 +317,6 @@ inline bool isArrayLikeType(MaybeDataType t) {
   return t && isArrayLikeType(*t);
 }
 
-/*
- * When any dvarray will do.
- */
-constexpr bool isPHPArrayType(DataType t) {
-  return ut_t(t) <= ut_t(KindOfVArray);
-}
-inline bool isPHPArrayType(MaybeDataType t) {
-  return t && isPHPArrayType(*t);
-}
-
-constexpr bool isVecOrVArrayType(DataType t) {
-  auto const dt = static_cast<DataType>(dt_t(t) & ~kRefCountedBit);
-  return dt == KindOfPersistentVArray || dt == KindOfPersistentVec;
-}
-inline bool isVecOrVArrayType(MaybeDataType t) {
-  return t && isVecOrVArrayType(*t);
-}
-
-constexpr bool isDictOrDArrayType(DataType t) {
-  auto const dt = static_cast<DataType>(dt_t(t) & ~kRefCountedBit);
-  return dt == KindOfPersistentDArray || dt == KindOfPersistentDict;
-}
-inline bool isDictOrDArrayType(MaybeDataType t) {
-  return t && isDictOrDArrayType(*t);
-}
-
-/*
- * Currently matches any PHP dvarray. This method will go away.
- */
-constexpr bool isArrayType(DataType t) {
-  return isPHPArrayType(t);
-}
-inline bool isArrayType(MaybeDataType t) {
-  return t && isArrayType(*t);
-}
-
-constexpr bool isHackArrayType(DataType t) {
-  return ut_t(t) >= ut_t(KindOfPersistentDict) && ut_t(t) <= ut_t(KindOfKeyset);
-}
-inline bool isHackArrayType(MaybeDataType t) {
-  return t && isHackArrayType(*t);
-}
-
 constexpr bool isVecType(DataType t) {
   return !(ut_t(t) & ~ut_t(KindOfVec));
 }
@@ -434,8 +389,6 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfInt64:         \
   case KindOfDouble:        \
   case KindOfPersistentString:  \
-  case KindOfPersistentVArray:  \
-  case KindOfPersistentDArray:  \
   case KindOfPersistentVec: \
   case KindOfPersistentDict: \
   case KindOfPersistentKeyset: \

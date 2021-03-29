@@ -391,8 +391,7 @@ static bool fb_compact_serialize_is_list(
     const Array& arr, int64_t& index_limit, int64_t options) {
   index_limit = arr->size();
   auto const dt = arr->toDataType();
-  assertx(isVecOrVArrayType(dt) || isDictOrDArrayType(dt));
-  auto const is_php_array = isPHPArrayType(dt);
+  assertx(isVecType(dt) || isDictType(dt));
 
   // fb_compact_serialize has slightly different formats for dicts and darrays,
   // and for vecs and varrays. We can address these format differences either
@@ -400,15 +399,11 @@ static bool fb_compact_serialize_is_list(
   auto const force_legacy_format =
     (options & FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS) ||
     arr->isLegacyArray();
-  if (!force_legacy_format && is_php_array) {
-    maybe_raise_array_serialization_notice(
-      SerializationSite::FBCompactSerialize, arr.get());
-  }
 
-  if (isVecOrVArrayType(dt)) {
+  if (isVecType(dt)) {
     // Encode empty vecs as lists and empty varrays as maps. It doesn't affect
     // the encoding size or the decoding result so it doesn't matter too much.
-    return !arr->empty() || !(force_legacy_format || is_php_array);
+    return !arr->empty() || !force_legacy_format;
   }
 
   int64_t max_index = 0;
@@ -432,7 +427,7 @@ static bool fb_compact_serialize_is_list(
   }
 
   index_limit = max_index + 1;
-  return force_legacy_format || is_php_array;
+  return force_legacy_format;
 }
 
 static int fb_compact_serialize_variant(
@@ -536,10 +531,6 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentVec:

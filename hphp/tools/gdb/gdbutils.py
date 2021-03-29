@@ -455,11 +455,7 @@ def pretty_tv(t, data):
           or t == DT('HPHP::KindOfPersistentString')):
         val = '"%s"' % string_data_val(data['pstr'])
 
-    elif (t == V('HPHP::KindOfDArray')
-          or t == V('HPHP::KindOfPersistentDArray')
-          or t == V('HPHP::KindOfVArray')
-          or t == V('HPHP::KindOfPersistentVArray')
-          or t == V('HPHP::KindOfDict')
+    elif (t == V('HPHP::KindOfDict')
           or t == V('HPHP::KindOfPersistentDict')
           or t == V('HPHP::KindOfVec')
           or t == V('HPHP::KindOfPersistentVec')

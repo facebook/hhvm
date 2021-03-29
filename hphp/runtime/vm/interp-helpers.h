@@ -46,7 +46,7 @@ struct GenericsSaver {
 
   static Array pop(bool hasGenerics) {
     if (LIKELY(!hasGenerics)) return Array();
-    assertx(tvIsHAMSafeVArray(vmStack().topC()));
+    assertx(tvIsVec(vmStack().topC()));
     auto const generics = vmStack().topC()->m_data.parr;
     vmStack().discard();
     return Array::attach(generics);
@@ -220,7 +220,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   }
 
   auto const generics = vmStack().topC();
-  assertx(tvIsHAMSafeVArray(generics));
+  assertx(tvIsVec(generics));
   checkFunReifiedGenericMismatch(callee, val(generics).parr);
 }
 
@@ -239,7 +239,7 @@ inline void calleeArgumentArityChecks(const Func* callee,
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
 
-    assertx(tvIsHAMSafeVArray(vmStack().topC()));
+    assertx(tvIsVec(vmStack().topC()));
     auto const numUnpackArgs = vmStack().topC()->m_data.parr->size();
     vmStack().popC();
 

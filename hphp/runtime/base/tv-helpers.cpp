@@ -60,65 +60,31 @@ bool tvIsPlausible(const TypedValue cell) {
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
         assertx(cell.m_data.parr->isVecType());
-        assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfVec:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isVecType());
-        assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDict:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
         assertx(cell.m_data.parr->isDictType());
-        assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfDict:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isDictType());
-        assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentKeyset:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
         assertx(cell.m_data.parr->isKeysetType());
-        assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfKeyset:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isKeysetType());
-        assertx(cell.m_data.parr->isNotDVArray());
-        return;
-      case KindOfPersistentDArray:
-        assertPtr(val(cell).parr);
-        assertx(val(cell).parr->kindIsValid());
-        assertx(!val(cell).parr->isRefCounted());
-        assertx(val(cell).parr->isDArray());
-        assertx(val(cell).parr->isPHPArrayType());
-        return;
-      case KindOfPersistentVArray:
-        assertPtr(val(cell).parr);
-        assertx(val(cell).parr->kindIsValid());
-        assertx(!val(cell).parr->isRefCounted());
-        assertx(val(cell).parr->isVArray());
-        assertx(val(cell).parr->isPHPArrayType());
-        return;
-      case KindOfDArray:
-        assertPtr(val(cell).parr);
-        assertx(val(cell).parr->kindIsValid());
-        assertx(val(cell).parr->checkCountZ());
-        assertx(val(cell).parr->isDArray());
-        assertx(val(cell).parr->isPHPArrayType());
-        return;
-      case KindOfVArray:
-        assertPtr(val(cell).parr);
-        assertx(val(cell).parr->kindIsValid());
-        assertx(val(cell).parr->checkCountZ());
-        assertx(val(cell).parr->isVArray());
-        assertx(val(cell).parr->isPHPArrayType());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
@@ -140,12 +106,7 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.prfunc->m_func->validate());
         assertPtr(cell.m_data.prfunc->m_arr);
         assertx(cell.m_data.prfunc->m_arr->checkCountZ());
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          assertx(cell.m_data.prfunc->m_arr->isVecType());
-          assertx(cell.m_data.prfunc->m_arr->isNotDVArray());
-        } else {
-          assertx(cell.m_data.prfunc->m_arr->isPHPArrayType());
-        }
+        assertx(cell.m_data.prfunc->m_arr->isVecType());
         return;
       case KindOfFunc:
         assertPtr(cell.m_data.pfunc);
@@ -167,12 +128,7 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.prclsmeth->m_cls->validate());
         assertPtr(cell.m_data.prclsmeth->m_arr);
         assertx(cell.m_data.prclsmeth->m_arr->checkCountZ());
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          assertx(cell.m_data.prclsmeth->m_arr->isVecType());
-          assertx(cell.m_data.prclsmeth->m_arr->isNotDVArray());
-        } else {
-          assertx(cell.m_data.prclsmeth->m_arr->isPHPArrayType());
-        }
+        assertx(cell.m_data.prclsmeth->m_arr->isVecType());
         return;
       }
     }

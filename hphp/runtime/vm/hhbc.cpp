@@ -581,15 +581,10 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->isLegacyArray()) out += "legacy_";
 
+  assertx(ad->isVecType() || ad->isDictType() || ad->isKeysetType());
   if (ad->isVecType()) out += "vec(";
-  else if (ad->isDictType()) out += "dict(";
-  else if (ad->isKeysetType()) out += "keyset(";
-  else {
-    assertx(ad->isPHPArrayType());
-    if (ad->isVArray()) out += "varray(";
-    else if (ad->isDArray()) out += "darray(";
-    else out += "array(";
-  }
+  if (ad->isDictType()) out += "dict(";
+  if (ad->isKeysetType()) out += "keyset(";
 
   if (!ad->empty()) {
     bool comma = false;
@@ -647,10 +642,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfLazyClass:
       out += tv->m_data.plazyclass.name()->data();
       return;
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

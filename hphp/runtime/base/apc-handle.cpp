@@ -145,15 +145,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray: {
-      auto const ad = val(cell).parr;
-      assertx(ad->isPHPArrayType());
-      return APCArray::MakeSharedArray(ad, level, unserializeObj);
-    }
-
     case KindOfObject:
       if (val(cell).pobj->isCollection()) {
         return APCCollection::Make(val(cell).pobj,
@@ -178,13 +169,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       }
       raiseClsMethToVecWarningHelper();
       auto arr = clsMethToVecHelper(val(cell).pclsmeth);
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecType());
-        return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
-      } else {
-        assertx(arr->isPHPArrayType());
-        return APCArray::MakeSharedArray(arr.detach(), level, unserializeObj);
-      }
+      assertx(arr->isVecType());
+      return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
     }
 
     case KindOfRClsMeth:
@@ -210,8 +196,6 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::PersistentClsMeth:
     case APCKind::StaticString:
     case APCKind::UncountedString:
-    case APCKind::StaticArray:
-    case APCKind::UncountedArray:
     case APCKind::StaticVec:
     case APCKind::UncountedVec:
     case APCKind::StaticDict:
@@ -233,12 +217,6 @@ Variant APCHandle::toLocalHelper() const {
       return Variant::attach(
         StringData::MakeProxy(APCString::fromHandle(this))
       );
-    case APCKind::SerializedArray: {
-      auto const serArr = APCString::fromHandle(this)->getStringData();
-      auto const v = apc_unserialize(serArr->data(), serArr->size());
-      assertx(v.isPHPArray());
-      return v;
-    }
     case APCKind::SerializedVec: {
       auto const serVec = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serVec->data(), serVec->size());
@@ -257,26 +235,6 @@ Variant APCHandle::toLocalHelper() const {
       assertx(v.isKeyset());
       return v;
     }
-    case APCKind::SharedVArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalVArray()
-      );
-    case APCKind::SharedMarkedVArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalMarkedVArray()
-      );
-    case APCKind::SharedDArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalDArray()
-      );
-    case APCKind::SharedMarkedDArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalMarkedDArray()
-      );
     case APCKind::SharedVec:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVec()
@@ -323,7 +281,6 @@ void APCHandle::deleteShared() {
     case APCKind::Int:
     case APCKind::Double:
     case APCKind::StaticString:
-    case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
     case APCKind::StaticKeyset:
@@ -347,7 +304,6 @@ void APCHandle::deleteShared() {
       return;
 
     case APCKind::SharedString:
-    case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:
@@ -355,11 +311,6 @@ void APCHandle::deleteShared() {
       APCString::Delete(APCString::fromHandle(this));
       return;
 
-    case APCKind::SharedVArray:
-    case APCKind::SharedMarkedVArray:
-    case APCKind::SharedDArray:
-    case APCKind::SharedMarkedDArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
@@ -384,7 +335,6 @@ void APCHandle::deleteShared() {
       APCRClsMeth::Delete(this);
       return;
 
-    case APCKind::UncountedArray:
     case APCKind::UncountedVec:
     case APCKind::UncountedDict:
     case APCKind::UncountedKeyset:
@@ -429,11 +379,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedString:
       assertx(m_type == KindOfPersistentString);
       return true;
-    case APCKind::StaticArray:
-    case APCKind::UncountedArray:
-      assertx(isArrayType(m_type));
-      assertx(!isRefcountedType(m_type));
-      return true;
     case APCKind::StaticVec:
     case APCKind::UncountedVec:
       assertx(m_type == KindOfPersistentVec);
@@ -446,11 +391,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedKeyset:
       assertx(m_type == KindOfPersistentKeyset);
       return true;
-    case APCKind::SharedVArray:
-    case APCKind::SharedMarkedVArray:
-    case APCKind::SharedDArray:
-    case APCKind::SharedMarkedDArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::FuncEntity:
     case APCKind::ClassEntity:
     case APCKind::ClsMeth:
@@ -464,7 +404,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedKeyset:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
-    case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:

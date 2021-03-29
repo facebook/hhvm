@@ -119,7 +119,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   if (!ar->func()->hasVariadicCaptureParam()) return ret;
   assertx(numNonVariadic == ret.size());
   auto const arr = frame_local(ar, numNonVariadic);
-  if (tvIsHAMSafeVArray(arr)) {
+  if (tvIsVec(arr)) {
     // If there are still args that haven't been accounted for, they have
     // been shuffled into a packed array stored in the variadic capture param.
     IterateVNoInc(val(arr).parr, [&](TypedValue v) { ret.append(v); });

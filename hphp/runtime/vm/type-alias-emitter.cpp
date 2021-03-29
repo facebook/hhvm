@@ -61,12 +61,8 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
   if constexpr (SerDe::deserializing) {
     TypedValue tv;
     sd(tv);
+    assertx(tvIsDict(tv));
     assertx(tvIsPlausible(tv));
-    assertx(
-      RuntimeOption::EvalHackArrDVArrs
-        ? isDictType(tv.m_type)
-        : isArrayType(tv.m_type)
-    );
     m_typeStructure = tv.m_data.parr;
   } else {
     auto tv = make_array_like_tv(m_typeStructure.get());

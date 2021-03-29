@@ -273,33 +273,6 @@ void ConvertTvToUncounted(
       break;
     }
 
-    case KindOfDArray:
-    case KindOfVArray:
-      type = dt_with_persistence(type);
-      // Fall-through.
-    case KindOfPersistentDArray:
-    case KindOfPersistentVArray: {
-      auto& ad = data.parr;
-      assertx(ad->isPHPArrayType());
-      assertx(!RuntimeOption::EvalHackArrDVArrs || ad->isNotDVArray());
-      if (handlePersistent(ad)) break;
-      if (ad->empty()) {
-        auto const tag = RO::EvalArrayProvenance ? arrprov::getTag(ad) : arrprov::Tag{};
-        assertx(ad->isDVArray());
-        if (ad->isVArray()) {
-          ad = ArrayData::CreateVArray(tag, ad->isLegacyArray());
-        } else {
-          ad = ArrayData::CreateDArray(tag, ad->isLegacyArray());
-        }
-      } else if (ad->hasVanillaPackedLayout()) {
-        ad = PackedArray::MakeUncounted(ad, false, seen);
-      } else if (ad->hasVanillaMixedLayout()) {
-        ad = MixedArray::MakeUncounted(ad, false, seen);
-      } else {
-        ad = BespokeArray::MakeUncounted(ad, false, seen);
-      }
-      break;
-    }
     case KindOfUninit: {
       type = KindOfNull;
       break;
@@ -310,25 +283,14 @@ void ConvertTvToUncounted(
         assertx(data.pclsmeth->getCls()->isPersistent());
         break;
       }
-      if (RO::EvalHackArrDVArrs) {
-        tvCastToVecInPlace(source);
-        type = KindOfPersistentVec;
-        auto& ad = data.parr;
-        if (handlePersistent(ad)) break;
-        assertx(!ad->empty());
-        assertx(ad->hasVanillaPackedLayout());
-        ad = PackedArray::MakeUncounted(ad, false, seen);
-        break;
-      } else {
-        tvCastToVArrayInPlace(source);
-        type = KindOfPersistentVArray;
-        auto& ad = data.parr;
-        if (handlePersistent(ad)) break;
-        assertx(!ad->empty());
-        assertx(ad->hasVanillaPackedLayout());
-        ad = PackedArray::MakeUncounted(ad, false, seen);
-        break;
-      }
+      tvCastToVecInPlace(source);
+      type = KindOfPersistentVec;
+      auto& ad = data.parr;
+      if (handlePersistent(ad)) break;
+      assertx(!ad->empty());
+      assertx(ad->hasVanillaPackedLayout());
+      ad = PackedArray::MakeUncounted(ad, false, seen);
+      break;
     }
     case KindOfLazyClass:
     case KindOfNull:

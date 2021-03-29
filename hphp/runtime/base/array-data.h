@@ -256,8 +256,6 @@ public:
   /*
    * Whether the array has a particular Hack type
    */
-  bool isPHPArrayType() const;
-  bool isHackArrayType() const;
   bool isVecType() const;
   bool isDictType() const;
   bool isKeysetType() const;
@@ -316,9 +314,6 @@ public:
   bool isDArray() const;
   bool isDVArray() const;
   bool isNotDVArray() const;
-  bool isHAMSafeVArray() const;
-  bool isHAMSafeDArray() const;
-  bool isHAMSafeDVArray() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 

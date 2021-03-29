@@ -101,11 +101,7 @@ inline size_t getClsMethCompactContainerSize(const Variant& v) {
 
 inline TypedValue* castClsmethToContainerInplace(TypedValue* c) {
   if (RO::EvalIsCompatibleClsMethType && isClsMethType(c->m_type)) {
-    if (RO::EvalHackArrDVArrs) {
-      tvCastToVecInPlace(c);
-    } else {
-      tvCastToVArrayInPlace(c);
-    }
+    tvCastToVecInPlace(c);
   }
   return c;
 }

@@ -127,7 +127,7 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
   }
 
   ArrayData* data;
-  if (input->isVecType() || input->isVArray()) {
+  if (input->isVecType()) {
     data = PackedArray::MakeReserveVArray(pad_size);
   } else {
     data = MixedArray::MakeReserveDArray(pad_size);
@@ -362,21 +362,8 @@ Variant ArrayUtil::Shuffle(const Array& input) {
       ret.add(input->nvGetVal(pos));
     }
     return ret.toVariant();
-  } else if (input.isVArray()) {
-    VArrayInit ret(count);
-    for (int i = 0; i < count; i++) {
-      ssize_t pos = indices[i];
-      ret.append(input->nvGetVal(pos));
-    }
-    return ret.toVariant();
-  } else {
-    DArrayInit ret(count);
-    for (int i = 0; i < count; i++) {
-      ssize_t pos = indices[i];
-      ret.append(input->nvGetVal(pos));
-    }
-    return ret.toVariant();
   }
+  always_assert(false);
 }
 
 Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {

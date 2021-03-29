@@ -116,7 +116,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::FuncEntity:
     case APCKind::ClsMeth:
     case APCKind::StaticString:
-    case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
     case APCKind::StaticKeyset:
@@ -125,16 +124,12 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::UncountedString;
     case APCKind::SharedString:
       return EntryInfo::Type::APCString;
-    case APCKind::UncountedArray:
-      return EntryInfo::Type::UncountedArray;
     case APCKind::UncountedVec:
       return EntryInfo::Type::UncountedVec;
     case APCKind::UncountedDict:
       return EntryInfo::Type::UncountedDict;
     case APCKind::UncountedKeyset:
       return EntryInfo::Type::UncountedKeyset;
-    case APCKind::SerializedArray:
-      return EntryInfo::Type::SerializedArray;
     case APCKind::SerializedVec:
       return EntryInfo::Type::SerializedVec;
     case APCKind::SerializedDict:
@@ -149,11 +144,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::APCDict;
     case APCKind::SharedKeyset:
       return EntryInfo::Type::APCKeyset;
-    case APCKind::SharedVArray:
-    case APCKind::SharedMarkedVArray:
-    case APCKind::SharedDArray:
-    case APCKind::SharedMarkedDArray:
-      return EntryInfo::Type::APCArray;
     case APCKind::SerializedObject:
       return EntryInfo::Type::SerializedObject;
     case APCKind::SharedObject:
@@ -268,8 +258,6 @@ struct HotCache {
     assertx(h != nullptr && supportedKind(h));
     HotValue v = [&] {
       switch (h->kind()) {
-        case APCKind::UncountedArray:
-          return HotValue{APCTypedValue::fromHandle(h)->getArrayData()};
         case APCKind::UncountedVec:
           return HotValue{APCTypedValue::fromHandle(h)->getVecData()};
         case APCKind::UncountedDict:

@@ -206,8 +206,8 @@ std::pair<int, double> sizeOfArray(
 
   int size = 0;
   double sized = 0;
-  if (ad->isVecType() || ad->isVArray()) {
-    FTRACE(2, "Iterating packed array\n");
+  if (ad->isVecType()) {
+    FTRACE(2, "Iterating vec\n");
     if (stack) stack->push_back("ArrayIndex");
 
     IterateV(ad, [&] (TypedValue v) {
@@ -289,10 +289,6 @@ std::pair<int, double> sizeOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
-        case KindOfPersistentDArray:
-        case KindOfDArray:
-        case KindOfPersistentVArray:
-        case KindOfVArray:
         case KindOfKeyset:
         case KindOfRFunc:
         case KindOfFunc:
@@ -392,10 +388,6 @@ void stringsOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
-        case KindOfPersistentDArray:
-        case KindOfDArray:
-        case KindOfPersistentVArray:
-        case KindOfVArray:
         case KindOfKeyset:
         case KindOfRFunc:
         case KindOfFunc:
@@ -529,10 +521,6 @@ std::pair<int, double> tvGetSize(
       break;
     }
 
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -644,10 +632,6 @@ void tvGetStrings(
       // This is a shallow size function, not a recursive one
       break;
     }
-    case HPHP::KindOfPersistentDArray:
-    case HPHP::KindOfDArray:
-    case HPHP::KindOfPersistentVArray:
-    case HPHP::KindOfVArray:
     case HPHP::KindOfPersistentVec:
     case HPHP::KindOfVec:
     case HPHP::KindOfPersistentDict:

@@ -84,21 +84,12 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "self",         AnnotType::Self },
       { "parent",       AnnotType::Parent },
       { "callable",     AnnotType::Callable },
-      { "HH\\dict",     AnnotType::Dict },
       { "HH\\vec",      AnnotType::Vec },
+      { "HH\\dict",     AnnotType::Dict },
       { "HH\\keyset",   AnnotType::Keyset },
-      {
-        "HH\\varray",
-        RO::EvalHackArrDVArrs ? AnnotType::Vec : AnnotType::VArray
-      },
-      {
-        "HH\\darray",
-        RO::EvalHackArrDVArrs ? AnnotType::Dict : AnnotType::DArray
-      },
-      {
-        "HH\\varray_or_darray",
-        RO::EvalHackArrDVArrs ? AnnotType::VecOrDict : AnnotType::VArrOrDArr
-      },
+      { "HH\\varray",   AnnotType::Vec },
+      { "HH\\darray",   AnnotType::Dict },
+      { "HH\\varray_or_darray", AnnotType::VecOrDict },
       { "HH\\vec_or_dict", AnnotType::VecOrDict },
       { "HH\\AnyArray", AnnotType::ArrayLike },
     };
@@ -205,11 +196,6 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Int:      return make_tv<KindOfInt64>(0);
     case AnnotType::Bool:     return make_tv<KindOfBoolean>(false);
     case AnnotType::Float:    return make_tv<KindOfDouble>(0);
-    case AnnotType::DArray:
-      return make_persistent_array_like_tv(staticEmptyDArray());
-    case AnnotType::VArray:
-    case AnnotType::VArrOrDArr:
-      return make_persistent_array_like_tv(staticEmptyVArray());
     case AnnotType::ArrayLike:
     case AnnotType::VecOrDict:
     case AnnotType::Vec:
@@ -261,21 +247,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object/func we know
       // it's not compatible, otherwise more checks are required
-      return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
+      return (isStringType(dt) || isVecType(dt) || isDictType(dt) ||
               isFuncType(dt) || dt == KindOfObject || isClsMethType(dt) ||
-              isRFuncType(dt) || isRClsMethType(dt) || isDictType(dt))
+              isRFuncType(dt) || isRClsMethType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
-    case AnnotMetaType::VArrOrDArr:
-      assertx(!RO::EvalHackArrDVArrs);
-      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
-        return AnnotAction::ClsMethCheck;
-      }
-      return isHAMSafeDVArrayType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::VecOrDict:
       if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
-        return RO::EvalHackArrDVArrs
-          ? AnnotAction::ClsMethCheck
-          : AnnotAction::Fail;
+        return AnnotAction::ClsMethCheck;
       }
       return (isVecType(dt) || isDictType(dt))
         ? AnnotAction::Pass
@@ -312,8 +290,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     auto const resolve = [] (bool okay) {
       return okay ? AnnotAction::ClsMethCheck : AnnotAction::Fail;
     };
-    if (at == AnnotType::Vec)       return resolve(RO::EvalHackArrDVArrs);
-    if (at == AnnotType::VArray)    return resolve(!RO::EvalHackArrDVArrs);
+    if (at == AnnotType::Vec)       return resolve(true);
     if (at == AnnotType::ArrayLike) return resolve(true);
   }
 
@@ -343,10 +320,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
-      case KindOfPersistentDArray:
-      case KindOfDArray:
-      case KindOfPersistentVArray:
-      case KindOfVArray:
       case KindOfPersistentVec:
       case KindOfVec:
       case KindOfPersistentDict:

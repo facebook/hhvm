@@ -85,24 +85,6 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
-  enum class StaticArr {};
-  APCTypedValue(StaticArr, ArrayData* data)
-    : m_handle(APCKind::StaticArray, data->toPersistentDataType()) {
-    assertx(data->isPHPArrayType());
-    assertx(data->isStatic());
-    m_data.arr = data;
-    assertx(checkInvariants());
-  }
-
-  enum class UncountedArr {};
-  APCTypedValue(UncountedArr, ArrayData* data)
-    : m_handle(APCKind::UncountedArray, data->toPersistentDataType()) {
-    assertx(data->isPHPArrayType());
-    assertx(data->isUncounted());
-    m_data.arr = data;
-    assertx(checkInvariants());
-  }
-
   enum class StaticVec {};
   APCTypedValue(StaticVec, ArrayData* data)
     : m_handle(APCKind::StaticVec, KindOfPersistentVec) {
@@ -199,13 +181,6 @@ struct APCTypedValue {
     assertx(m_handle.kind() == APCKind::StaticString ||
            m_handle.kind() == APCKind::UncountedString);
     return m_data.str;
-  }
-
-  ArrayData* getArrayData() const {
-    assertx(checkInvariants());
-    assertx(m_handle.kind() == APCKind::StaticArray ||
-           m_handle.kind() == APCKind::UncountedArray);
-    return m_data.arr;
   }
 
   ArrayData* getVecData() const {

@@ -1,0 +1,2 @@
+File "duplicate_use.php", line 10, characters 16-20:
+Cannot use function `B\foo` as `foo` because the name is already in use (Parsing[1002])

@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use function `bar\test` as `test` because the name is already in use in %s/no_global_fallback2.php on line 9
+Fatal error: Call to undefined function bar\test() in %s/no_global_fallback2.php on line 11

@@ -1,0 +1,1 @@
+Fatal error: Cannot use function `B\foo` as `foo` because the name is already in use in %s/override_use.php on line 18

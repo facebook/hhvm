@@ -5273,7 +5273,7 @@ where
                 }
 
                 let old_namespace_name = self.namespace_name.clone();
-                let mut old_names = self.names.clone();
+                let old_names = self.names.clone();
                 // reset names before diving into namespace body,
                 // keeping global function names
                 self.namespace_name = self.get_namespace_name();
@@ -5281,11 +5281,6 @@ where
                 self.names.functions = names_copy.functions.filter(|x| x.global);
                 self.fold_child_nodes(node);
 
-                // add newly declared global functions to the old set of names
-                let names_copy = std::mem::replace(&mut self.names, UsedNames::empty());
-                for (k, v) in names_copy.functions.into_iter().filter(|(_, x)| x.global) {
-                    old_names.functions.add(&k, v)
-                }
                 // resume with old set of names and pull back
                 // accumulated errors/last seen namespace type
                 self.names = old_names;

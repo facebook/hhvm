@@ -1,0 +1,2 @@
+File "fun_decl_after_use.php", line 4, characters 10-12:
+Cannot declare `foo` because the name was explicitly used earlier via a `use` statement on line 2 (Parsing[1002])

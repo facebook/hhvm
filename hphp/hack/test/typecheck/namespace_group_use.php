@@ -1,7 +1,5 @@
 <?hh // strict
 
-// TODO(T30806984): this test is broken
-
 namespace Foo\Bar\Baz {
   function f1(): void {}
   function f2(): void {}

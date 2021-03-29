@@ -13,6 +13,8 @@
     will change in the future. *)
 type t = Pos.t [@@deriving eq, ord, show]
 
+module Map : WrappedMap.S with type key = t
+
 val none : t
 
 (** Fill in the gap "between" first position and second position.
@@ -27,4 +29,27 @@ val set_from_reason : t -> t
 (** Compress a position to be stored in the decl heap. *)
 val make_decl_pos : Pos.t -> Decl_reference.t -> t
 
+(** Compress a position to be stored in the decl heap.
+    If no decl reference is given, the position is not compressed but
+    simply converted. *)
+val make_decl_pos_of_option : Pos.t -> Decl_reference.t option -> t
+
 val is_hhi : t -> bool
+
+(** This may become unsafe in the future as we change the implementation
+    of positions in the decl heap. Avoid using in new code.
+    Use a position from an AST instead of from a decl or type,
+    or resolve decl position to a raw position using a provider context. *)
+val unsafe_to_raw_pos : t -> Pos.t
+
+(** For spans over just one line, return the line number, start column and end column.
+    This returns a closed interval.
+    Undefined for multi-line spans. *)
+val line_start_end_columns : t -> int * int * int
+
+val json : t -> Hh_json.json
+
+val show_as_absolute_file_line_characters : t -> string
+
+(** Replace the decl reference part of the position with a filename. *)
+val resolve : Relative_path.t -> t -> Pos.t

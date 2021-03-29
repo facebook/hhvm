@@ -8,6 +8,8 @@
 
 type t = Pos.t [@@deriving eq, ord, show]
 
+module Map = Pos.Map
+
 let none : t = Pos.none
 
 let btw = Pos.btw
@@ -19,6 +21,9 @@ let of_raw_pos : Pos.t -> t = (fun p -> p)
 let make_decl_pos : Pos.t -> Decl_reference.t -> t =
  (fun p _decl -> (* TODO *) of_raw_pos p)
 
+let make_decl_pos_of_option : Pos.t -> Decl_reference.t option -> t =
+ (fun p _decl -> (* TODO *) of_raw_pos p)
+
 let is_hhi : t -> bool =
  fun p ->
   match get_raw_pos p with
@@ -26,3 +31,14 @@ let is_hhi : t -> bool =
   | Some p -> Pos.is_hhi p
 
 let set_from_reason : t -> t = Pos.set_from_reason
+
+let unsafe_to_raw_pos : t -> Pos.t = (fun p -> p)
+
+let line_start_end_columns : t -> int * int * int = Pos.info_pos
+
+let json : t -> Hh_json.json = (fun p -> p |> Pos.to_absolute |> Pos.json)
+
+let show_as_absolute_file_line_characters : t -> string =
+ (fun p -> p |> Pos.to_absolute |> Pos.string)
+
+let resolve : Relative_path.t -> t -> Pos.t = (fun _filename p -> p)

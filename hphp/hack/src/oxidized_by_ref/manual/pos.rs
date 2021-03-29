@@ -449,6 +449,10 @@ impl no_pos_hash::NoPosHash for Pos<'_> {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
 }
 
+pub mod map {
+    pub type Map<'a, T> = arena_collections::map::Map<'a, super::Pos<'a>, T>;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

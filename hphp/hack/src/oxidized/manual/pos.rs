@@ -418,6 +418,10 @@ impl no_pos_hash::NoPosHash for Pos {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
 }
 
+pub mod map {
+    pub type Map<T> = std::collections::BTreeMap<super::Pos, T>;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

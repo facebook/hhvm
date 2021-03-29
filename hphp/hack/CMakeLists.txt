@@ -114,16 +114,28 @@ invoke_dune(hack_dune_debug debug)
 invoke_dune(hack_dune_test test)
 invoke_dune(hack_dune all)
 
+add_custom_target(
+  hack_ffi
+  COMMAND
+   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
+    "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh" hack_parser_ffi rust_parser_ffi
+  COMMENT "Compiling Rust Parser FFI"
+)
+
+add_dependencies(hack_ffi rustc cargo)
+
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)
   add_dependencies(hack_dune_debug lz4)
   add_dependencies(hack_dune_test lz4)
+  add_dependencies(hack_ffi lz4)
 endif()
 
 if (NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_dune sqlite3)
   add_dependencies(hack_dune_debug sqlite3)
   add_dependencies(hack_dune_test sqlite3)
+  add_dependencies(hack_ffi sqlite3)
 endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
@@ -134,9 +146,8 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-# libcompile_ffi_stubs.a, librust_facts_ffi_stubs.a, and
-# librust_parser_ffi_stubs.a are built by dune so we need some magic to expose
-# them as library targets to cmake for other targets (e.g. hhvm) to depend on.
+# libcompile_ffi_stubs.a, librust_facts_ffi_stubs.a, are built by dune so we need some magic
+# to expose them as library targets to cmake for other targets (e.g. hhvm) to depend on.
 set(LIBCOMPILE_PATH "${DUNE_BUILD_DIR}/libcompile_ffi_stubs.a")
 add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(libcompile_ffi_stubs hack_dune)
@@ -147,9 +158,9 @@ add_library(librust_facts_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(librust_facts_ffi_stubs hack_dune)
 set_target_properties(librust_facts_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PATH})
 
-set(LIBRUST_PARSER_PATH "${DUNE_BUILD_DIR}/librust_parser_ffi_stubs.a")
+set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.a")
 add_library(librust_parser_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(librust_parser_ffi_stubs hack_dune)
+add_dependencies(librust_parser_ffi_stubs hack_ffi)
 set_target_properties(librust_parser_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PARSER_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)

@@ -35,18 +35,13 @@ build-hack$(2):
 		src/hh_single_compile.$(1) \
 		src/hh_fanout/hh_fanout.$(1) \
 		src/hhbc/libcompile_ffi_stubs.a \
-		src/facts/librust_facts_ffi_stubs.a \
-		src/parser/librust_parser_ffi_stubs.a
+		src/facts/librust_facts_ffi_stubs.a
 
 build-facts$(2): build-hack$(2)
 	dune build \
 		src/facts/librust_facts_ffi_stubs.a
-		
-build-parser$(2): build-facts$(2)
-	dune build \
-		src/parser/librust_parser_ffi_stubs.a
 
-copy-hack$(2)-files: build-parser$(2)
+copy-hack$(2)-files: build-facts$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
@@ -58,7 +53,6 @@ copy-hack$(2)-files: build-parser$(2)
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"	
 	cp "$(DUNE_BUILD_DIR)/default/src/hhbc/libcompile_ffi_stubs.a" "$(DUNE_BUILD_DIR)/libcompile_ffi_stubs.a$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/facts/librust_facts_ffi_stubs.a" "$(DUNE_BUILD_DIR)/librust_facts_ffi_stubs.a$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/parser/librust_parser_ffi_stubs.a" "$(DUNE_BUILD_DIR)/librust_parser_ffi_stubs.a$(ext)"
 endef
 
 # Define rules for normal build / debug build

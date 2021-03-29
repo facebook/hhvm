@@ -86,8 +86,6 @@ module type ReverseNamingTable = sig
 
   val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
-  val heap_string_of_key : string -> string
-
   module Position : Value.Type with type t = pos
 end
 
@@ -250,8 +248,6 @@ module Types = struct
       SSet.iter
         (fun id -> BlockedEntries.add id Blocked)
         (SSet.union types canon_key_types)
-
-  let heap_string_of_key = TypePosHeap.string_of_key
 end
 
 module Funs = struct
@@ -353,8 +349,6 @@ module Funs = struct
       SSet.iter
         (fun id -> BlockedEntries.add id Blocked)
         (SSet.union funs canon_key_funs)
-
-  let heap_string_of_key = FunPosHeap.string_of_key
 end
 
 module Consts = struct
@@ -413,8 +407,6 @@ module Consts = struct
     match db_path_opt with
     | None -> ()
     | Some _ -> SSet.iter (fun id -> BlockedEntries.add id Blocked) consts
-
-  let heap_string_of_key = ConstPosHeap.string_of_key
 end
 
 let push_local_changes () =

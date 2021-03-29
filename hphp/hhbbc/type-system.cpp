@@ -3802,12 +3802,6 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
-
-  case IsTypeOp::VArray:
-  case IsTypeOp::DArray:
-  case IsTypeOp::PHPArr:
-    always_assert(false);
-
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Class: return union_of(TCls, TLazyCls);
   case IsTypeOp::Func: return TFunc;

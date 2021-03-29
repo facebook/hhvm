@@ -87,8 +87,7 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
     return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
   }
   auto const op = key.sk.op();
-  if (op != Op::Array && op != Op::Vec &&
-      op != Op::Dict && op != Op::Keyset) {
+  if (op != Op::Vec && op != Op::Dict && op != Op::Keyset) {
     return nullptr;
   }
   auto const unit = key.sk.func()->unit();
@@ -972,10 +971,9 @@ bool shouldLogAtSrcKey(SrcKey sk) {
     return false;
   }
 
-  // Don't profile static arrays used for TypeStruct tests. Rather than using
-  // these arrays, we almost always just do a DataType check on the value.
-  if ((sk.op() == Op::Array || sk.op() == Op::Dict) &&
-      sk.advanced().op() == Op::IsTypeStructC) {
+  // Don't profile static dicts used for TypeStruct tests. Rather than using
+  // these dicts, we almost always just do a DataType check on the value.
+  if (sk.op() == Op::Dict && sk.advanced().op() == Op::IsTypeStructC) {
     FTRACE(5, "Skipping static array used for TypeStruct test.\n");
     return false;
   }

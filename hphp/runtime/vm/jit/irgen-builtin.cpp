@@ -2339,12 +2339,6 @@ void emitArrayUnmarkLegacy(IRGS& env) {
   implArrayMarkLegacy(env, false);
 }
 
-void emitTagProvenanceHere(IRGS& env) {
-  auto const flags = topC(env, BCSPRelOffset{0});
-  if (!flags->isA(TInt)) PUNT(TagProvenanceHere-FlagsMustBeInt);
-  discard(env);
-}
-
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
   if (arrType <= TVec) return implVecIdx(env, nullptr);

@@ -397,10 +397,6 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   push(env, closure);
 }
 
-void emitNewDArray(IRGS& env, uint32_t capacity) {
-  always_assert(false);
-}
-
 void emitNewDictArray(IRGS& env, uint32_t capacity) {
   push(env, gen(env, NewDictArray, cns(env, capacity)));
 }
@@ -447,14 +443,6 @@ void emitNewVec(IRGS& env, uint32_t numArgs) {
     );
   }
   push(env, array);
-}
-
-void emitNewVArray(IRGS& env, uint32_t numArgs) {
-  always_assert(false);
-}
-
-void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {
-  always_assert(false);
 }
 
 void emitNewStructDict(IRGS& env, const ImmVector& immVec) {

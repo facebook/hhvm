@@ -2064,12 +2064,12 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     // then immediately use it to set the parameter local and pop it from the
     // stack. Currently the following relatively limited sequences are accepted:
     //
-    // Int | String | Double | Null | True | False | Array | Dict | Keyset | Vec
+    // Int | String | Double | Null | True | False | Vec | Dict | Keyset
     // SetL loc, PopC | PopL loc
     auto result = BCPattern {
       Atom::alt(
-        Atom(OpInt), Atom(OpString), Atom(OpDouble), Atom(OpNull), Atom(OpTrue),
-        Atom(OpFalse), Atom(OpArray), Atom(OpDict), Atom(OpVec), Atom(OpKeyset)
+        Atom(OpInt), Atom(OpString), Atom(OpDouble), Atom(OpNull),
+        Atom(OpTrue), Atom(OpFalse), Atom(OpVec), Atom(OpDict), Atom(OpKeyset)
       ).capture(),
       Atom::alt(
         Atom(OpPopL).onlyif(checkloc),
@@ -2103,8 +2103,8 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     assertx(capture);
 
     TypedValue dv = make_tv<KindOfUninit>();
-    auto decode_array = [&] {
-      if (auto arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
+    auto const decode_array = [&] {
+      if (auto const arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
         dv.m_type = arr->toPersistentDataType();
         dv.m_data.parr = const_cast<ArrayData*>(arr);
       }
@@ -2114,7 +2114,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     case OpNull:   dv = make_tv<KindOfNull>();           break;
     case OpTrue:   dv = make_tv<KindOfBoolean>(true);    break;
     case OpFalse:  dv = make_tv<KindOfBoolean>(false);   break;
-    case OpArray:  decode_array(); break;
     case OpVec:    decode_array(); break;
     case OpDict:   decode_array(); break;
     case OpKeyset: decode_array(); break;

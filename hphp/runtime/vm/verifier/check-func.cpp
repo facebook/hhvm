@@ -825,11 +825,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CUV;
     }
     return m_tmp_sig;
-  case Op::NewStructDArray: // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewStructDict:   // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewVec:          // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
-  case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewRecord:       // TWO(SA,VSA),  SMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
   case Op::CombineAndResolveTypeStruct:
@@ -1178,19 +1176,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-    case Op::Array: {
-      auto const id = getImm(pc, 0).u_AA;
-      if (id < 0 || id >= unit()->numArrays()) {
-        ferror("Array references array data that is not an Array\n");
-        return false;
-      }
-      auto const dt = unit()->lookupArray(id)->toDataType();
-      if (!isArrayType(dt)) {
-        ferror("Array references array data that is a {}\n", dt);
-        return false;
-      }
-      break;
-    }
     #define O(name) \
     case Op::name: { \
       auto const id = getImm(pc, 0).u_AA; \
@@ -1350,7 +1335,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       cur->silences.clear();
       break;
 
-    case Op::NewVArray:
     case Op::NewVec:
     case Op::NewKeysetArray: {
       auto new_pc = pc;
@@ -1381,7 +1365,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto const fca = getImm(pc, 0).u_FCA;
       if (prev_pc && fca.hasGenerics()) {
         auto const prev_op = peek_op(prev_pc);
-        if (prev_op == Op::Array || prev_op == Op::Vec) {
+        if (prev_op == Op::Vec) {
           auto const id = getImm(prev_pc, 0).u_AA;
           if (id < 0 || id >= unit()->numArrays()) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
@@ -1499,18 +1483,14 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::Int:
     case Op::Double:
     case Op::String:
-    case Op::Array:
     case Op::Dict:
     case Op::Keyset:
     case Op::Vec:
     case Op::NewDictArray:
     case Op::NewRecord:
-    case Op::NewStructDArray:
     case Op::NewStructDict:
     case Op::NewVec:
     case Op::NewKeysetArray:
-    case Op::NewVArray:
-    case Op::NewDArray:
     case Op::AddElemC:
     case Op::AddNewElemC:
     case Op::NewCol:
@@ -1568,8 +1548,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::CastDict:
     case Op::CastKeyset:
     case Op::CastVec:
-    case Op::CastVArray:
-    case Op::CastDArray:
     case Op::DblAsBits:
     case Op::RaiseClassStringConversionWarning:
 
@@ -1617,7 +1595,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::ArrayIdx:
     case Op::ArrayMarkLegacy:
     case Op::ArrayUnmarkLegacy:
-    case Op::TagProvenanceHere:
       return true;
 
     // this

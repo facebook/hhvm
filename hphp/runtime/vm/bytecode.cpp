@@ -1191,12 +1191,6 @@ OPTBLD_INLINE void iopString(const StringData* s) {
   vmStack().pushStaticString(s);
 }
 
-OPTBLD_INLINE void iopArray(const ArrayData* a) {
-  assertx(a->isPHPArrayType());
-  assertx(!RuntimeOption::EvalHackArrDVArrs || a->isNotDVArray());
-  vmStack().pushStaticArray(bespoke::maybeMakeLoggingArray(a));
-}
-
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
   assertx(a->isVecType());
   vmStack().pushStaticVec(bespoke::maybeMakeLoggingArray(a));
@@ -1240,12 +1234,6 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
 
 }
 
-OPTBLD_INLINE void iopNewStructDArray(imm_array<int32_t> ids) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const ad = newStructArrayImpl(ids, MixedArray::MakeStructDArray);
-  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
-}
-
 OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
   auto const ad = newStructArrayImpl(ids, MixedArray::MakeStructDict);
   vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
@@ -1263,27 +1251,6 @@ OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   auto const ad = SetArray::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
-}
-
-namespace {
-void newVArrayImpl(uint32_t n) {
-  // This constructor moves values, no inc/decref is necessary.
-  auto const ad = PackedArray::MakeVArray(n, vmStack().topC());
-  vmStack().ndiscard(n);
-  vmStack().pushArrayLikeNoRc(bespoke::maybeMakeLoggingArray(ad));
-}
-}
-
-OPTBLD_INLINE void iopNewVArray(uint32_t n) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  newVArrayImpl(n);
-}
-
-OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const ad = capacity ? MixedArray::MakeReserveDArray(capacity)
-                           : ArrayData::CreateDArray();
-  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 namespace {
@@ -1670,20 +1637,6 @@ OPTBLD_INLINE void iopCastKeyset() {
 OPTBLD_INLINE void iopCastVec() {
   TypedValue* c1 = vmStack().topC();
   tvCastToVecInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
-}
-
-OPTBLD_INLINE void iopCastVArray() {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  TypedValue* c1 = vmStack().topC();
-  tvCastToVArrayInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
-}
-
-OPTBLD_INLINE void iopCastDArray() {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  TypedValue* c1 = vmStack().topC();
-  tvCastToDArrayInPlace(c1);
   maybeMakeLoggingArrayAfterCast(c1);
 }
 
@@ -3249,12 +3202,9 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Bool:   return is_bool(&val);
   case IsTypeOp::Int:    return is_int(&val);
   case IsTypeOp::Dbl:    return is_double(&val);
-  case IsTypeOp::PHPArr: return is_php_array(&val);
   case IsTypeOp::Vec:    return is_vec(&val);
   case IsTypeOp::Dict:   return is_dict(&val);
   case IsTypeOp::Keyset: return is_keyset(&val);
-  case IsTypeOp::VArray: return is_varray(&val);
-  case IsTypeOp::DArray: return is_darray(&val);
   case IsTypeOp::Obj:    return is_object(&val);
   case IsTypeOp::Str:    return is_string(&val);
   case IsTypeOp::Res:    return tvIsResource(val);
@@ -3448,21 +3398,6 @@ OPTBLD_INLINE void iopArrayMarkLegacy() {
 
 OPTBLD_INLINE void iopArrayUnmarkLegacy() {
   implArrayMarkLegacy(false);
-}
-
-OPTBLD_INLINE void iopTagProvenanceHere() {
-  auto const flags = *vmStack().topTV();
-  if (!tvIsInt(flags)) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("$flags must be an int; got {}",
-                     getDataTypeString(type(flags))));
-  }
-
-  auto const input = vmStack().indTV(1);
-  auto const output = arrprov::tagTvRecursively(*input, val(flags).num);
-
-  vmStack().popTV();
-  tvMove(output, input);
 }
 
 OPTBLD_INLINE void iopSetL(tv_lval to) {
@@ -3767,7 +3702,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
     if (UNLIKELY(fca.numArgs > func->numNonVariadicParams())) {
       GenericsSaver gs{fca.hasGenerics()};
-      newVArrayImpl(fca.numArgs - func->numNonVariadicParams());
+      iopNewVec(fca.numArgs - func->numNonVariadicParams());
       return func->numNonVariadicParams() + 1;
     }
 

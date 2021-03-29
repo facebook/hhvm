@@ -105,17 +105,13 @@ static const struct {
   { OpInt,         {None,             Stack1,       OutInt64        }},
   { OpDouble,      {None,             Stack1,       OutDouble       }},
   { OpString,      {None,             Stack1,       OutStringImm    }},
-  { OpArray,       {None,             Stack1,       OutArrayImm     }},
   { OpDict,        {None,             Stack1,       OutDictImm      }},
   { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
   { OpVec,         {None,             Stack1,       OutVecImm       }},
   { OpNewDictArray,   {None,          Stack1,       OutDict         }},
-  { OpNewStructDArray,{StackN,        Stack1,       OutDict         }},
   { OpNewStructDict,  {StackN,        Stack1,       OutDict         }},
   { OpNewVec,         {StackN,        Stack1,       OutVec          }},
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
-  { OpNewVArray,   {StackN,           Stack1,       OutVec          }},
-  { OpNewDArray,   {None,             Stack1,       OutDict         }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
@@ -175,8 +171,6 @@ static const struct {
   { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
   { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
-  { OpCastVArray,  {Stack1,           Stack1,       OutVec           }},
-  { OpCastDArray,  {Stack1,           Stack1,       OutDict          }},
   { OpDblAsBits,   {Stack1,           Stack1,       OutInt64        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
@@ -335,7 +329,6 @@ static const struct {
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown      }},
   { OpArrayMarkLegacy,   {StackTop2,  Stack1,       OutUnknown      }},
   { OpArrayUnmarkLegacy, {StackTop2,  Stack1,       OutUnknown      }},
-  { OpTagProvenanceHere, {StackTop2,  Stack1,       OutUnknown      }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean      }},
   { OpInitProp,    {Stack1,           None,         OutNone         }},
   { OpSilence,     {Local|DontGuardAny,
@@ -487,7 +480,6 @@ int64_t getStackPopped(PC pc) {
     case Op::UnsetM:
     case Op::NewVec:
     case Op::NewKeysetArray:
-    case Op::NewVArray:
     case Op::ConcatN:
     case Op::CombineAndResolveTypeStruct:
     case Op::CreateCl:
@@ -501,7 +493,6 @@ int64_t getStackPopped(PC pc) {
       return getImm(pc, 0).u_IVA + 3;
 
     case Op::NewRecord:
-    case Op::NewStructDArray:
     case Op::NewStructDict:
       return getImmVector(pc).size();
 
@@ -715,7 +706,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       switch (ni.op()) {
       case Op::NewVec:
       case Op::NewKeysetArray:
-      case Op::NewVArray:
       case Op::CombineAndResolveTypeStruct:
       case Op::ConcatN:
         return ni.imm[0].u_IVA;
@@ -840,7 +830,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::ClsCnsD:
-  case Op::NewStructDArray:
   case Op::NewStructDict:
   case Op::Switch:
   case Op::SSwitch:
@@ -884,14 +873,12 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AKExists:
   case Op::AddElemC:
   case Op::AddNewElemC:
-  case Op::Array:
   case Op::Dict:
   case Op::Keyset:
   case Op::Vec:
   case Op::ArrayIdx:
   case Op::ArrayMarkLegacy:
   case Op::ArrayUnmarkLegacy:
-  case Op::TagProvenanceHere:
   case Op::BareThis:
   case Op::BitNot:
   case Op::CGetG:
@@ -906,8 +893,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CastDict:
   case Op::CastKeyset:
   case Op::CastVec:
-  case Op::CastVArray:
-  case Op::CastDArray:
   case Op::DblAsBits:
   case Op::CheckProp:
   case Op::CheckThis:
@@ -976,8 +961,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewDictArray:
   case Op::NewVec:
   case Op::NewKeysetArray:
-  case Op::NewVArray:
-  case Op::NewDArray:
   case Op::NewObj:
   case Op::NewObjR:
   case Op::NewObjD:

@@ -317,11 +317,8 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(ArrLike)                           \
   ISTYPE_OP(LegacyArrLike)                     \
   ISTYPE_OP(Res)                               \
-  ISTYPE_OP(VArray)                            \
-  ISTYPE_OP(DArray)                            \
   ISTYPE_OP(ClsMeth)                           \
   ISTYPE_OP(Func)                              \
-  ISTYPE_OP(PHPArr)                            \
   ISTYPE_OP(Class)
 
 enum class IsTypeOp : uint8_t {
@@ -539,17 +536,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Int,             ONE(I64A),        NOV,             ONE(CV),    NF) \
   O(Double,          ONE(DA),          NOV,             ONE(CV),    NF) \
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Dict,            ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Keyset,          ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Vec,             ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewDictArray,    ONE(IVA),         NOV,             ONE(CV),    NF) \
-  O(NewStructDArray, ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewStructDict,   ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewVec,          ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewKeysetArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(NewVArray,       ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(NewDArray,       ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewRecord,       TWO(SA,VSA),      SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -600,8 +593,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CastDict,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastKeyset,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastVec,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CastVArray,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CastDArray,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(DblAsBits,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
@@ -756,7 +747,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayMarkLegacy,    NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(ArrayUnmarkLegacy,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
-  O(TagProvenanceHere,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        THREE(SA, OA(InitPropOp), OA(ReadOnlyOp)),         \
                                        ONE(CV),         NOV,        NF) \
@@ -1031,23 +1021,17 @@ constexpr bool isJmp(Op opcode) {
 
 constexpr bool isArrLikeConstructorOp(Op opcode) {
   return
-    opcode == Op::Array ||
     opcode == Op::Dict ||
     opcode == Op::Keyset ||
     opcode == Op::Vec ||
     opcode == Op::NewDictArray ||
-    opcode == Op::NewStructDArray ||
     opcode == Op::NewStructDict ||
     opcode == Op::NewVec ||
-    opcode == Op::NewKeysetArray ||
-    opcode == Op::NewVArray ||
-    opcode == Op::NewDArray;
+    opcode == Op::NewKeysetArray;
 }
 
 constexpr bool isArrLikeCastOp(Op opcode) {
   return
-    opcode == Op::CastVArray ||
-    opcode == Op::CastDArray ||
     opcode == Op::CastVec ||
     opcode == Op::CastDict ||
     opcode == Op::CastKeyset;

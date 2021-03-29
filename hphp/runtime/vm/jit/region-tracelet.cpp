@@ -267,7 +267,6 @@ bool isLiteral(Op op) {
     case OpInt:
     case OpDouble:
     case OpString:
-    case OpArray:
     case OpDict:
     case OpVec:
     case OpKeyset:

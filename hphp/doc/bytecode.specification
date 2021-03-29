@@ -673,7 +673,6 @@ descriptions:
   Int - denotes the integer type
   Dbl - denotes the double-precision floating-point type
   Str - denotes the string type
-  Arr - denotes the array type
   Vec - denotes the vec type
   Dict - denotes the dict type
   Keyset - denotes the keyset type
@@ -824,7 +823,6 @@ NullUninit                      []  ->  [U]
 Int <signed 64-bit integer value>    []  ->  [C:Int]
 Double <double value>                []  ->  [C:Dbl]
 String <litstr id>                   []  ->  [C:Str]
-Array <scalar array id>              []  ->  [C:Arr]
 Vec <scalar vec id>                  []  ->  [C:Vec]
 Dict <scalar dict id>                []  ->  [C:Dict]
 Keyset <scalar keyset id>            []  ->  [C:Keyset]
@@ -837,17 +835,6 @@ NewDictArray <capacity hint>    []  ->  [C:Dict]
   New dict, with a capacity hint. Creates a new dict and pushes
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
-
-NewStructDArray <litstr id vector>    [C..C]  ->  [C]
-
-  New dict-like array. Creates a new dict-like array from the names given in %1
-  and values from the stack. The vector of litstr ids gives the element names,
-  one value for each name is popped from the stack. Names are in array
-  insertion order, and values were pushed onto the stack in insertion order, so
-  are added to the array in reverse order (the topmost value will become the
-  last element in the array). For example:
-
-    NewStructDArray < "a" "b" >  [ 1 2 ]  ->  [ darray("a"=>1, "b"=>2) ]
 
 NewStructDict <litstr id vector>    [C..C]  ->  [C:Dict]
 
@@ -871,18 +858,6 @@ NewKeysetArray <num elems>    [C..C]  ->  [C:Keyset]
   New keyset. Creates a new keyset from the top %1 cells on the stack, pops
   those cells, then pushes the new keyset onto the stack.  Elements are pushed
   on the stack in keyset insertion order.
-
-NewVArray <num elems>   [C..]  ->  [C:Arr]
-
- New vec-like array. Creates a new vec-like array from the top %1 cells on the
- stack, pops those cells, then pushes the new array onto the stack. Elements
- are pushed on the stack in array insertion order.
-
-NewDArray <capacity hint>    []  ->  [C:Arr]
-
-  New dict-like array with a capacity hint. Creates a new dict-like array and
-  pushes it onto the stack. The implementation may make use of the hint in %1
-  to pre-size the array. The hint %1 must be greater than or equal to 0.
 
 NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
 
@@ -1159,16 +1134,6 @@ CastKeyset    [C]  ->  [C:Keyset]
 
   Cast to keyset. Pushes keyset($1) onto the stack.
 
-CastVArray    [C]  ->  [C:Arr]
-
-  Cast to vec-like array. Performs an array cast, but drops any keys from the
-  input and handles object inputs like CastVec.
-
-CastDArray    [C]  ->  [C:Arr]
-
-  Cast to dict-like array. Performs an array cast, but handles object inputs
-  like CastDict.
-
 InstanceOf    [C C]  ->  [C:Bool]
 
   Instance of (instanceof). If $1 is a string and it matches the name of a
@@ -1409,7 +1374,7 @@ ClassGetC                          [C]  ->  [C:Class]
   class of the object. If $1 is not any of the above cases, this instruction
   throws a fatal error.
 
-ClassGetTS                         [C:DArr]  ->  [C:Class, C:StaticVArr|Null]
+ClassGetTS                         [C:Dict]  ->  [C:Class, C:StaticVec|Null]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid
   type-structure (darray or dict). If not, this instruction throws a fatal
@@ -1472,10 +1437,9 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Dict     | Dict
       Keyset   | Keyset
       Obj      | Obj
-      ArrLike  | Arr or Vec or Dict or Keyset
+      ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
-      PHPArr   | Arr
 
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
@@ -1499,10 +1463,9 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       Dict     | Dict
       Keyset   | Keyset
       Obj      | Obj
-      ArrLike  | Arr or Vec or Dict or Keyset
+      ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
-      PHPArr   | Arr
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
@@ -1661,9 +1624,9 @@ InitProp <propName> <op> [C] -> []
 --------------------
 
 NewObj                                      [C:Class]              ->  [C:Obj]
-NewObjR                                     [C:Class, C:VArr|Null] ->  [C:Obj]
+NewObjR                                     [C:Class, C:Vec|Null]  ->  [C:Obj]
 NewObjD   <litstr id>                       []                     ->  [C:Obj]
-NewObjRD  <litstr id>                       [C:VArr|Null]          ->  [C:Obj]
+NewObjRD  <litstr id>                       [C:Vec|Null]           ->  [C:Obj]
 NewObjS   <mode>                            []                     ->  [C:Obj]
 
   New object. First, these instructions load a class into x as given
@@ -3012,7 +2975,7 @@ LateBoundCls             []  ->  [C:Class]
   Late-bound class. Push a class that refers to the current late-bound
   class.
 
-RecordReifiedGeneric [C:VArr] -> [C:VArr]
+RecordReifiedGeneric [C:Vec] -> [C:Vec]
 
   Takes a varray or vec based on runtime flag of type structures from $1
   and unless the entry already exists adds a mapping from the grouped name of
@@ -3020,7 +2983,7 @@ RecordReifiedGeneric [C:VArr] -> [C:VArr]
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
 
-CheckReifiedGenericMismatch [C:VArr] -> []
+CheckReifiedGenericMismatch [C:Vec] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased
   matches exactly to the expectations of the current class. If there is
@@ -3178,7 +3141,7 @@ ResolveMethCaller <litstr id>   []  ->  [C]
   of the stack. The meth caller must exist in the same unit as the resolving
   function.
 
-ResolveRFunc <litstr id> [C:VArr]  ->  [C]
+ResolveRFunc <litstr id> [C:Vec]  ->  [C]
 
   Similar to ResolveFunc, resolve %1 as a function name to a function pointer
   and raises an error if the resolution fails. $1 contains a list of reified
@@ -3219,9 +3182,9 @@ ResolveClsMethodS <mode>      <litstr id>   []        -> [C]
   used to call that method and pushes the resulting class method pointer onto
   the stack.
 
-ResolveRClsMethod  <litstr id>               [C:VArr C:Class] -> [C]
-ResolveRClsMethodD <litstr id> <litstr id>   [C:VArr]         -> [C]
-ResolveRClsMethodS <mode>      <litstr id>   [C:VArr]         -> [C]
+ResolveRClsMethod  <litstr id>               [C:Vec C:Class] -> [C]
+ResolveRClsMethodD <litstr id> <litstr id>   [C:Vec]         -> [C]
+ResolveRClsMethodS <mode>      <litstr id>   [C:Vec]         -> [C]
 
   Similar to their non-reified counterparts (ResolveClsMethod*), these
   instructions load values into x and y based on the same table and performing

@@ -193,8 +193,7 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
     auto const vad = profile.data->staticSampledArray;
     if (vad != nullptr && (vad->isDictType() || vad->isDArray())) return true;
     auto const op = profile.key.op();
-    return op == OpNewDictArray || op == OpNewStructDict ||
-           op == OpNewDArray || op == OpNewStructDArray;
+    return op == OpNewDictArray || op == OpNewStructDict;
   }();
 
   // Add a node for this source to our union-find table if the type matches

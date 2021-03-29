@@ -81,11 +81,9 @@ bool poppable(Op op) {
     case Op::Int:
     case Op::Double:
     case Op::String:
-    case Op::Array:
     case Op::Vec:
     case Op::Dict:
     case Op::Keyset:
-    case Op::NewDArray:
     case Op::NewDictArray:
     case Op::NewCol:
       return true;
@@ -141,10 +139,9 @@ ArrayData** add_elem_array(ISS& env) {
   auto& bc = env.replacedBcs[idx - env.unchangedBcs];
   auto arr = [&] () -> const ArrayData** {
     switch (bc.op) {
-      case Op::Array:   return &bc.Array.arr1;
+      case Op::Vec:     return &bc.Vec.arr1;
       case Op::Dict:    return &bc.Dict.arr1;
       case Op::Keyset:  return &bc.Keyset.arr1;
-      case Op::Vec:     return &bc.Vec.arr1;
       case Op::Concat:  return nullptr;
       default:          not_reached();
     }
@@ -169,20 +166,10 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
   auto const arr = value->m_data.parr;
   env.replacedBcs.push_back(
     [&] () -> Bytecode {
-      if (arr->isKeysetType()) {
-        return bc::Keyset { arr };
-      }
-      if (arr->isVecType()) {
-        return bc::Vec { arr };
-      }
-      if (arr->isDictType()) {
-        return bc::Dict { arr };
-      }
-      if (arr->isPHPArrayType()) {
-        return bc::Array { arr };
-      }
-
-      not_reached();
+      if (arr->isVecType())    return bc::Vec { arr };
+      if (arr->isDictType())   return bc::Dict { arr };
+      if (arr->isKeysetType()) return bc::Keyset { arr };
+      always_assert(false);
     }()
   );
   env.replacedBcs.back().srcLoc = env.srcLoc;
@@ -859,10 +846,6 @@ void in(ISS& env, const bc::String& op) {
   push(env, sval(op.str1));
 }
 
-void in(ISS& env, const bc::Array& op) {
-  always_assert(false);
-}
-
 void in(ISS& env, const bc::Vec& op) {
   assertx(op.arr1->isVecType());
   effect_free(env);
@@ -886,22 +869,10 @@ void in(ISS& env, const bc::NewDictArray& op) {
   push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
 }
 
-void in(ISS& env, const bc::NewVArray& op) {
-  always_assert(false);
-}
-
-void in(ISS& env, const bc::NewDArray& op) {
-  always_assert(false);
-}
-
 void in(ISS& env, const bc::NewRecord& op) {
   discard(env, op.keys.size());
   auto const rrec = env.index.resolve_record(op.str1);
   push(env, rrec ? exactRecord(*rrec) : TRecord);
-}
-
-void in(ISS& env, const bc::NewStructDArray& op) {
-  always_assert(false);
 }
 
 void in(ISS& env, const bc::NewStructDict& op) {
@@ -1736,14 +1707,6 @@ void in(ISS& env, const bc::CastVec&)    {
 
 void in(ISS& env, const bc::CastKeyset&) {
   castImpl(env, TKeyset, tvCastToKeysetInPlace);
-}
-
-void in(ISS& env, const bc::CastVArray&)  {
-  always_assert(false);
-}
-
-void in(ISS& env, const bc::CastDArray&)  {
-  always_assert(false);
 }
 
 void in(ISS& env, const bc::DblAsBits&) {
@@ -2869,14 +2832,11 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::Vec:
     case IsTypeOp::Dict:
     case IsTypeOp::Keyset:
-    case IsTypeOp::VArray:
-    case IsTypeOp::DArray:
     case IsTypeOp::ArrLike:
     case IsTypeOp::LegacyArrLike:
     case IsTypeOp::Scalar:
     case IsTypeOp::ClsMeth:
     case IsTypeOp::Func:
-    case IsTypeOp::PHPArr:
     case IsTypeOp::Class:
       return false;
   }
@@ -5240,16 +5200,6 @@ void in(ISS& env, const bc::ArrayMarkLegacy&) {
 
 void in(ISS& env, const bc::ArrayUnmarkLegacy&) {
   implArrayMarkLegacy(env, false);
-}
-
-void in(ISS& env, const bc::TagProvenanceHere&) {
-  // TODO(kshaunak): Eliminate this bytecode completely.
-  auto in = topC(env, 1);
-  auto out = loosen_staticness(loosen_values(std::move(in)));
-
-  popC(env);
-  popC(env);
-  push(env, std::move(out));
 }
 
 void in(ISS& env, const bc::CheckProp&) {

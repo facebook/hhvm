@@ -425,11 +425,8 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Class:
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
-  case IsTypeOp::VArray:
-  case IsTypeOp::DArray:
   case IsTypeOp::ArrLike:
   case IsTypeOp::LegacyArrLike:
-  case IsTypeOp::PHPArr:
   case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
@@ -1654,12 +1651,6 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::ArrLike:       return isArrLikeImpl(env, val);
     case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
     case IsTypeOp::Class:         return isClassImpl(env, val);
-
-    case IsTypeOp::VArray:
-    case IsTypeOp::DArray:
-    case IsTypeOp::PHPArr:
-      always_assert(false);
-
     default: break;
   }
 

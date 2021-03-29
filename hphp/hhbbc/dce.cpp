@@ -1271,41 +1271,7 @@ void updateSrcLocForAddElemC(UseInfo& ui, int32_t srcLoc) {
   }
 }
 
-void dce(Env& env, const bc::Array& op) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
-
-      if (ui.usage != Use::AddElemC) return PushFlags::MarkLive;
-
-      assertx(!env.dceState.isLocal);
-
-      updateSrcLocForAddElemC(ui, env.op.srcLoc);
-
-      CompactVector<Bytecode> bcs;
-      IterateV(op.arr1, [&] (TypedValue v) {
-        bcs.push_back(gen_constant(v));
-      });
-      ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
-      env.dceState.didAddOpts  = true;
-      return PushFlags::MarkUnused;
-    });
-}
-
 void dce(Env& env, const bc::NewDictArray&) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (ui.usage == Use::AddElemC || allUnused(ui)) {
-        if (ui.usage == Use::AddElemC) {
-          updateSrcLocForAddElemC(ui, env.op.srcLoc);
-        }
-        env.dceState.didAddOpts  = true;
-        return PushFlags::MarkUnused;
-      }
-
-      return PushFlags::MarkLive;
-    });
-}
-
-void dce(Env& env, const bc::NewDArray&) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
         if (ui.usage == Use::AddElemC) {
@@ -1389,11 +1355,9 @@ void dceNewArrayLike(Env& env, const Op& op) {
   pushRemovableIfNoThrow(env);
 }
 
-void dce(Env& env, const bc::NewStructDArray& op) { always_assert(false); }
 void dce(Env& env, const bc::NewStructDict& op)   { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewVec& op)          { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewKeysetArray& op)  { dceNewArrayLike(env, op); }
-void dce(Env& env, const bc::NewVArray& op)       { always_assert(false); }
 
 void dce(Env& env, const bc::NewPair& op)         { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::ColFromArray& op)    { dceNewArrayLike(env, op); }
@@ -1530,19 +1494,16 @@ void dce(Env& env, const bc::AKExists&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayIdx&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayMarkLegacy&)  { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayUnmarkLegacy&){ pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::TagProvenanceHere&){ pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitAnd&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitNot&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitOr&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitXor&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastBool&)         { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastDArray&)       { always_assert(false); }
 void dce(Env& env, const bc::CastDict&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastDouble&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastInt&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastVArray&)       { always_assert(false); }
 void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CGetS&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Cmp&)              { pushRemovableIfNoThrow(env); }

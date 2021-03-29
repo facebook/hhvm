@@ -272,14 +272,6 @@ void emitClassName(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCastVArray(IRGS& env) {
-  always_assert(false);
-}
-
-void emitCastDArray(IRGS& env) {
-  always_assert(false);
-}
-
 void emitCastVec(IRGS& env) {
   auto const src = popC(env);
 
@@ -485,10 +477,6 @@ void emitFuncCred(IRGS& env) {
   push(env, gen(env, FuncCred, cns(env, curFunc(env))));
 }
 //////////////////////////////////////////////////////////////////////
-
-void emitArray(IRGS& env, const ArrayData* x) {
-  always_assert(false);
-}
 
 void emitVec(IRGS& env, const ArrayData* x) {
   assertx(x->isVecType());

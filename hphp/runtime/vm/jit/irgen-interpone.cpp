@@ -122,7 +122,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutPredBool:
     case OutBooleanImm:  return TBool;
     case OutInt64:       return TInt;
-    case OutArrayImm:    always_assert(false);
     case OutVec:         return TVec;
     case OutVecImm:      return TVec;
     case OutDict:        return TDict;

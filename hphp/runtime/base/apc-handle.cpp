@@ -164,10 +164,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
              APCString::MakeSerializedObject(apc_serialize(source));
 
     case KindOfResource:
-      // TODO Task #2661075: Here and elsewhere in the runtime, we convert
-      // Resources to the empty array during various serialization operations,
-      // which does not match Zend behavior. We should fix this.
-      return APCArray::MakeSharedEmptyVArray();
+      return APCArray::MakeSharedEmptyVec();
+
     case KindOfClsMeth: {
       if (RO::EvalAPCSerializeClsMeth) {
         auto const meth = val(cell).pclsmeth;

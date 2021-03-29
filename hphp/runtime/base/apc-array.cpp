@@ -187,11 +187,9 @@ APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
   );
 }
 
-APCHandle::Pair APCArray::MakeSharedEmptyVArray() {
+APCHandle::Pair APCArray::MakeSharedEmptyVec() {
   void* p = apc_malloc(sizeof(APCArray));
-  APCArray* arr = new (p) APCArray(PackedCtor{},
-                                   APCKind::SharedVArray,
-                                   0);
+  APCArray* arr = new (p) APCArray(PackedCtor{}, APCKind::SharedVec, 0);
   return {arr->getHandle(), sizeof(APCArray)};
 }
 

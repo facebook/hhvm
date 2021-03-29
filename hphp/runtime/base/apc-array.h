@@ -51,7 +51,7 @@ struct APCArray {
   static APCHandle* MakeUncountedKeyset(
       ArrayData* dict, DataWalker::PointerMap* m);
 
-  static APCHandle::Pair MakeSharedEmptyVArray();
+  static APCHandle::Pair MakeSharedEmptyVec();
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {

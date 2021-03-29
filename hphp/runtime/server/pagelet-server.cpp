@@ -226,8 +226,8 @@ String PageletTransport::getResults(
   int &code,
   int64_t timeout_ms
 ) {
-  // Make sure that we only ever return a varray or null.
-  if (!headers.isNull() && !headers.isVArray()) {
+  // Make sure that we only ever return a vec or null.
+  if (!headers.isNull() && !headers.isVec()) {
     headers = Array::CreateVArray();
   }
 

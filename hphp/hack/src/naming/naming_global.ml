@@ -70,10 +70,6 @@ module GEnv = struct
       Some p
     | None -> None
 
-  let type_canon_pos ctx name =
-    let name = Option.value (type_canon_name ctx name) ~default:name in
-    type_pos ctx name
-
   let type_info ctx name =
     match Naming_provider.get_type_pos_and_kind ctx name with
     | Some
@@ -93,10 +89,6 @@ module GEnv = struct
       let (p, _) = get_fun_full_pos ctx (pos, name) in
       Some p
     | None -> None
-
-  let fun_canon_pos ctx name =
-    let name = Option.value (fun_canon_name ctx name) ~default:name in
-    fun_pos ctx name
 
   let typedef_pos ctx name =
     match Naming_provider.get_type_pos_and_kind ctx name with
@@ -343,27 +335,25 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
      * of adding all the declarations in the file, why not just add those that
      * were actually duplicates?
      *)
+    let type_canon_pos name =
+      GEnv.type_canon_name ctx name |> Option.bind ~f:(GEnv.type_pos ctx)
+    in
+    let fun_canon_pos name =
+      GEnv.fun_canon_name ctx name |> Option.bind ~f:(GEnv.fun_pos ctx)
+    in
+
     let failed = Relative_path.Set.singleton fn in
     let failed =
-      add_files_to_rename failed fileinfo.FileInfo.funs (GEnv.fun_canon_pos ctx)
+      add_files_to_rename failed fileinfo.FileInfo.funs fun_canon_pos
     in
     let failed =
-      add_files_to_rename
-        failed
-        fileinfo.FileInfo.classes
-        (GEnv.type_canon_pos ctx)
+      add_files_to_rename failed fileinfo.FileInfo.classes type_canon_pos
     in
     let failed =
-      add_files_to_rename
-        failed
-        fileinfo.FileInfo.record_defs
-        (GEnv.type_canon_pos ctx)
+      add_files_to_rename failed fileinfo.FileInfo.record_defs type_canon_pos
     in
     let failed =
-      add_files_to_rename
-        failed
-        fileinfo.FileInfo.typedefs
-        (GEnv.type_canon_pos ctx)
+      add_files_to_rename failed fileinfo.FileInfo.typedefs type_canon_pos
     in
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.consts (GEnv.gconst_pos ctx)

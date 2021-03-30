@@ -82,18 +82,8 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   in
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
-  let fast = Naming_table.to_fast naming_table in
-  Relative_path.Map.iter
-    fast
-    ~f:(fun (name : Relative_path.t) (info : FileInfo.names) ->
-      Naming_global.ndecl_file_skip_if_already_bound
-        ctx
-        name
-        ~funs:info.FileInfo.n_funs
-        ~classes:info.FileInfo.n_classes
-        ~record_defs:info.FileInfo.n_record_defs
-        ~typedefs:info.FileInfo.n_types
-        ~consts:info.FileInfo.n_consts);
+  Naming_table.fold naming_table ~init:() ~f:(fun fn fileinfo () ->
+      Naming_global.ndecl_file_skip_if_already_bound ctx fn fileinfo);
 
   let (ctx, naming_table) =
     if sqlite then (

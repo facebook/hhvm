@@ -457,27 +457,9 @@ let use_precomputed_state_exn
  * a clean state.
  *)
 let naming_with_fast
-    (ctx : Provider_context.t)
-    (fast : FileInfo.names Relative_path.Map.t)
-    (t : float) : float =
-  Relative_path.Map.iter fast ~f:(fun k info ->
-      let {
-        FileInfo.n_classes = classes;
-        n_record_defs = record_defs;
-        n_types = typedefs;
-        n_funs = funs;
-        n_consts = consts;
-      } =
-        info
-      in
-      Naming_global.ndecl_file_skip_if_already_bound
-        ctx
-        k
-        ~funs
-        ~classes
-        ~record_defs
-        ~typedefs
-        ~consts);
+    (ctx : Provider_context.t) (fast : Naming_table.t) (t : float) : float =
+  Naming_table.fold fast ~init:() ~f:(fun k info () ->
+      Naming_global.ndecl_file_skip_if_already_bound ctx k info);
   HackEventLogger.fast_naming_end t;
   hh_log_heap ();
   Hh_logger.log_duration "Naming fast" t
@@ -529,7 +511,7 @@ let naming_from_saved_state
       Naming_table.filter old_naming_table (fun k _v ->
           not (Relative_path.Set.mem parsing_files k))
     in
-    naming_with_fast ctx (Naming_table.to_fast old_hack_names) t
+    naming_with_fast ctx old_hack_names t
 
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)

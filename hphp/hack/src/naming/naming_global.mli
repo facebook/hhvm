@@ -63,11 +63,4 @@ insensitivy) then this function just skips them, trusting that
 they're already okay, or that we wouldn't even be called in that
 situation in first place. *)
 val ndecl_file_skip_if_already_bound :
-  Provider_context.t ->
-  Relative_path.t ->
-  funs:SSet.t ->
-  classes:SSet.t ->
-  record_defs:SSet.t ->
-  typedefs:SSet.t ->
-  consts:SSet.t ->
-  unit
+  Provider_context.t -> Relative_path.t -> FileInfo.t -> unit

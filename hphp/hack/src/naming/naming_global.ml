@@ -149,7 +149,7 @@ module Env = struct
     ) else
       true
 
-  let new_fun_skip_if_already_bound ctx fn name =
+  let new_fun_skip_if_already_bound ctx fn (_p, name) =
     let name_key = canon_key name in
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some _ -> ()
@@ -157,7 +157,7 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_cid_skip_if_already_bound ctx fn name cid_kind =
+  let new_cid_skip_if_already_bound ctx fn (_p, name) cid_kind =
     let name_key = canon_key name in
     let mode =
       match cid_kind with
@@ -173,16 +173,17 @@ module Env = struct
       (* Full position, we don't store the kind, so this is necessary *)
       Naming_provider.add_type backend name (FileInfo.File (mode, fn)) cid_kind
 
-  let new_class_skip_if_already_bound ctx fn name =
-    new_cid_skip_if_already_bound ctx fn name Naming_types.TClass
+  let new_class_skip_if_already_bound ctx fn cid =
+    new_cid_skip_if_already_bound ctx fn cid Naming_types.TClass
 
-  let new_record_decl_skip_if_already_bound ctx fn name =
-    new_cid_skip_if_already_bound ctx fn name Naming_types.TRecordDef
+  let new_record_decl_skip_if_already_bound ctx fn cid =
+    new_cid_skip_if_already_bound ctx fn cid Naming_types.TRecordDef
 
-  let new_typedef_skip_if_already_bound ctx fn name =
-    new_cid_skip_if_already_bound ctx fn name Naming_types.TTypedef
+  let new_typedef_skip_if_already_bound ctx fn cid =
+    new_cid_skip_if_already_bound ctx fn cid Naming_types.TTypedef
 
-  let new_global_const_skip_if_already_bound backend fn name =
+  let new_global_const_skip_if_already_bound ctx fn (_p, name) =
+    let backend = Provider_context.get_backend ctx in
     Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun_error_if_already_bound ctx (p, name) =
@@ -249,25 +250,34 @@ let remove_decls ~backend ~funs ~classes ~record_defs ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env_error_if_already_bound
-    ctx ~funs ~classes ~record_defs ~typedefs ~consts =
-  List.iter funs (Env.new_fun_error_if_already_bound ctx);
-  List.iter classes (Env.new_class_error_if_already_bound ctx);
-  List.iter record_defs (Env.new_record_decl_error_if_already_bound ctx);
-  List.iter typedefs (Env.new_typedef_error_if_already_bound ctx);
-  List.iter consts (Env.new_global_const_error_if_already_bound ctx)
+let make_env_error_if_already_bound ctx fileinfo =
+  List.iter fileinfo.FileInfo.funs (Env.new_fun_error_if_already_bound ctx);
+  List.iter fileinfo.FileInfo.classes (Env.new_class_error_if_already_bound ctx);
+  List.iter
+    fileinfo.FileInfo.record_defs
+    (Env.new_record_decl_error_if_already_bound ctx);
+  List.iter
+    fileinfo.FileInfo.typedefs
+    (Env.new_typedef_error_if_already_bound ctx);
+  List.iter
+    fileinfo.FileInfo.consts
+    (Env.new_global_const_error_if_already_bound ctx)
 
-let make_env_skip_if_already_bound
-    ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  SSet.iter (Env.new_fun_skip_if_already_bound ctx fn) funs;
-  SSet.iter (Env.new_class_skip_if_already_bound ctx fn) classes;
-  SSet.iter (Env.new_record_decl_skip_if_already_bound ctx fn) record_defs;
-  SSet.iter (Env.new_typedef_skip_if_already_bound ctx fn) typedefs;
-  SSet.iter
-    (Env.new_global_const_skip_if_already_bound
-       (Provider_context.get_backend ctx)
-       fn)
-    consts
+let make_env_skip_if_already_bound ctx fn fileinfo =
+  List.iter fileinfo.FileInfo.funs (Env.new_fun_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.classes
+    (Env.new_class_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.record_defs
+    (Env.new_record_decl_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.typedefs
+    (Env.new_typedef_skip_if_already_bound ctx fn);
+  List.iter
+    fileinfo.FileInfo.consts
+    (Env.new_global_const_skip_if_already_bound ctx fn);
+  ()
 
 (*****************************************************************************)
 (* Declaring the names in a list of files *)
@@ -287,43 +297,17 @@ let add_files_to_rename failed defl defs_in_env =
     ~init:failed
     defl
 
-let ndecl_file_skip_if_already_bound
-    ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
-  make_env_skip_if_already_bound
-    ctx
-    fn
-    ~funs
-    ~classes
-    ~record_defs
-    ~typedefs
-    ~consts
+let ndecl_file_skip_if_already_bound ctx fn fileinfo =
+  make_env_skip_if_already_bound ctx fn fileinfo
 
-let ndecl_file_error_if_already_bound
-    ctx
-    fn
-    {
-      FileInfo.file_mode = _;
-      funs;
-      classes;
-      record_defs;
-      typedefs;
-      consts;
-      comments = _;
-      hash = _;
-    } =
+let ndecl_file_error_if_already_bound ctx fn fileinfo =
   let (errors, ()) =
     Errors.do_with_context fn Errors.Naming (fun () ->
         Hh_logger.debug
           ~category
           "Naming decl: %s"
           (Relative_path.to_absolute fn);
-        make_env_error_if_already_bound
-          ctx
-          ~funs
-          ~classes
-          ~record_defs
-          ~typedefs
-          ~consts)
+        make_env_error_if_already_bound ctx fileinfo)
   in
   if Errors.is_empty errors then
     (errors, Relative_path.Set.empty)
@@ -360,13 +344,28 @@ let ndecl_file_error_if_already_bound
      * were actually duplicates?
      *)
     let failed = Relative_path.Set.singleton fn in
-    let failed = add_files_to_rename failed funs (GEnv.fun_canon_pos ctx) in
-    let failed = add_files_to_rename failed classes (GEnv.type_canon_pos ctx) in
     let failed =
-      add_files_to_rename failed record_defs (GEnv.type_canon_pos ctx)
+      add_files_to_rename failed fileinfo.FileInfo.funs (GEnv.fun_canon_pos ctx)
     in
     let failed =
-      add_files_to_rename failed typedefs (GEnv.type_canon_pos ctx)
+      add_files_to_rename
+        failed
+        fileinfo.FileInfo.classes
+        (GEnv.type_canon_pos ctx)
     in
-    let failed = add_files_to_rename failed consts (GEnv.gconst_pos ctx) in
+    let failed =
+      add_files_to_rename
+        failed
+        fileinfo.FileInfo.record_defs
+        (GEnv.type_canon_pos ctx)
+    in
+    let failed =
+      add_files_to_rename
+        failed
+        fileinfo.FileInfo.typedefs
+        (GEnv.type_canon_pos ctx)
+    in
+    let failed =
+      add_files_to_rename failed fileinfo.FileInfo.consts (GEnv.gconst_pos ctx)
+    in
     (errors, failed)

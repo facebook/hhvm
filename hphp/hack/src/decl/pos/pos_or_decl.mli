@@ -53,3 +53,11 @@ val show_as_absolute_file_line_characters : t -> string
 
 (** Replace the decl reference part of the position with a filename. *)
 val resolve : Relative_path.t -> t -> Pos.t
+
+(** Check that the position is in the current decl and if it is, resolve
+    it with the current file. *)
+val assert_is_in_current_decl :
+  t ->
+  current_decl:Decl_reference.t option ->
+  current_file:Relative_path.t ->
+  Pos.t option

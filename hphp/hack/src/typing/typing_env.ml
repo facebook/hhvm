@@ -48,6 +48,15 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 
 let get_file env = env.genv.file
 
+let get_current_decl env =
+  Option.map env.decl_env.Decl_env.droot ~f:Typing_deps.Dep.to_decl_reference
+
+let assert_pos_in_current_decl env pos =
+  Pos_or_decl.assert_is_in_current_decl
+    pos
+    ~current_decl:(get_current_decl env)
+    ~current_file:(get_file env)
+
 let get_tracing_info env = env.tracing_info
 
 let set_log_level env key log_level =

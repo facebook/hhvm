@@ -176,6 +176,10 @@ val get_fn_kind : env -> Ast_defs.fun_kind
 
 val get_file : env -> Relative_path.t
 
+(** Check that the position is in the current decl and if it is, resolve
+    it with the current file. *)
+val assert_pos_in_current_decl : env -> Pos_or_decl.t -> Pos.t option
+
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
 val set_self : env -> string -> locl_ty -> env

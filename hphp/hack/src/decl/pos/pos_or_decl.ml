@@ -42,3 +42,15 @@ let show_as_absolute_file_line_characters : t -> string =
  (fun p -> p |> Pos.to_absolute |> Pos.string)
 
 let resolve : Relative_path.t -> t -> Pos.t = (fun _filename p -> p)
+
+let assert_is_in_current_decl :
+    t ->
+    current_decl:Decl_reference.t option ->
+    current_file:Relative_path.t ->
+    Pos.t option =
+ fun p ~current_decl:_ ~current_file ->
+  (* TODO use current_decl *)
+  if Relative_path.equal (Pos.filename p) current_file then
+    Some p
+  else
+    None
